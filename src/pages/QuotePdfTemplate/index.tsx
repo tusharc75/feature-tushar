@@ -231,6 +231,7 @@ const QuotePdfTemplate: FC = () => {
     if (isExport) {
       deepFilter = `?`;
     }
+    
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }

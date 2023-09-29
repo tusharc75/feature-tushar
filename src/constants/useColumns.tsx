@@ -230,7 +230,7 @@ export default function useColumns() {
           },
           rendererName: 'nameRenderer'
         };
-      } else if (field?.primaryField === true && detailScreenRoute) {
+      } else if ((field?.primaryField || field?.stopHideColumn) === true && detailScreenRoute) {
         return {
           columnData: {
             // pivotIndex: 0,

@@ -6,8 +6,8 @@ import { withStyles } from '@material-ui/core/styles';
 import MuiAccordion from '@material-ui/core/Accordion';
 import MuiAccordionSummary from '@material-ui/core/AccordionSummary';
 import MuiAccordionDetails from '@material-ui/core/AccordionDetails';
-
-import _ from 'lodash';
+import moment from 'moment';
+import { dateTimeFormat } from 'src/constants/helpers';
 
 const Accordion = withStyles({
   root: {
@@ -57,98 +57,67 @@ const AccordionDetails = withStyles((theme) => ({
   }
 }))(MuiAccordionDetails);
 
-export default function CustomAccordian({ expended, data, onChange, type, allData = [] }) {
-  const [expandedAccordition, setExpandedAccordition] = useState(null);
-
-  useEffect(() => {
-    if (type === 'parentCategory') {
-      const category = _.uniqBy(
-        allData?.filter((d) => d['category']?.parentCategory === data?.parentCategory?.optionValue),
-        'category.optionValue'
-      )[0]
-
-      setExpandedAccordition((prev) => (
-        {
-          ...prev,
-          [category?.category?.optionValue]: true
-        }
-      ));
-    }
-  }, [type])
+export default function CustomAccordian({ expandedAccordition, setExpandedAccordition, category, currentData }) {
 
   return (
-    <Accordion expanded={expended[data[type]?.optionValue]} className={`omsAccordian w-full`} onChange={onChange}>
+    <Accordion
+      expanded={expandedAccordition[category?._id]}
+      className={`omsAccordian w-full`}
+      onChange={() => {
+        setExpandedAccordition((prev) => (
+          {
+            ...prev,
+            [category?._id]: expandedAccordition[category?._id] ? false : true
+          }
+        ));
+      }}>
       <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
         <Box display="flex">
           <Box>
-            <IconButton size="small"> {expended[data[type]?.optionValue] ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
+            <IconButton size="small"> {expandedAccordition[category?._id] ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
           </Box>
           <Box padding="5px">
             <Typography variant="subtitle2" style={{ fontSize: '14.2056px', fontWeight: 600 }}>
-              {data[type].optionLabel || 'Data'}
+              {category?.iotDataPointsCategoryName}
             </Typography>
           </Box>
         </Box>
       </AccordionSummary>
       <AccordionDetails>
-        {expended[data[type]?.optionValue] &&
-          (type === 'parentCategory' ? (
-            <div className="grid gap-4">
-              {_.uniqBy(
-                allData?.filter((d) => d['category']?.parentCategory === data[type]?.optionValue),
-                'category.optionValue'
-              )?.map((data) => {
+        {expandedAccordition[category?._id] &&
+          <>
+            <Grid container spacing={1}>
+              {currentData?.filter((d) => d?.category?.optionValue === category?._id)?.map((data) => {
                 return (
-                  <>
-                    {
-                      expandedAccordition ?
-                        <CustomAccordian
-                          expended={expandedAccordition}
-                          data={data}
-                          onChange={() => {
-                            setExpandedAccordition((prev) => (
-                              {
-                                ...prev,
-                                [data?.category?.optionValue]: expandedAccordition[data?.category?.optionValue] ? false : true
-                              }
-                            ));
-                          }}
-                          type={'category'}
-                          allData={allData?.filter((d) => d['category']?.optionValue === data?.category?.optionValue)}
-                        />
-                        :
-                        null
-                    }
-                  </>
+                  <Grid item xs={12} sm={6} lg={4} md={4}>
+                    <Box
+                      border="1px solid var(--common-border-color)"
+                      className="p-[10px] rounded-md min-h-full"
+                      title={`${data?.fieldLabel} : ${data?.value} ${data?.unit ? `(${data.unit})` : ''}`}
+                    >
+                      <p className="mb-2 flex flex-wrap justify-between text-[14px] text-[var(--primary-text)]">
+                        <strong className=" line-clamp-1">{data?.fieldLabel} : </strong>
+                        <span className=" font-medium">
+                          {data?.fieldValue}
+                          {data?.unit && `(${data?.unit})`}
+                        </span>
+                      </p>
+                      <span className="text-gray-500 dark:text-gray-300 text-[12px]">{moment(data?.time).format(dateTimeFormat)}</span>
+                    </Box>
+                  </Grid>
                 );
               })}
-            </div>
-          ) : type === 'category' ? (
-            <Grid container spacing={1}>
-              {allData
-                ?.filter((d) => d[type]?.optionValue === data[type]?.optionValue)
-                ?.map((data) => {
-                  return (
-                    <Grid item xs={12} sm={6} lg={4} md={4}>
-                      <Box
-                        border="1px solid var(--common-border-color)"
-                        className="p-[10px] rounded-md min-h-full"
-                        title={`${data?.fieldLabel} : ${data?.value} ${data?.unit ? `(${data.unit})` : ''}`}
-                      >
-                        <p className="mb-2 flex flex-wrap justify-between text-[14px] text-[var(--primary-text)]">
-                          <strong className=" line-clamp-1">{data?.fieldLabel} : </strong>
-                          <span className=" font-medium">
-                            {data?.value}
-                            {data?.unit && `(${data?.unit})`}
-                          </span>
-                        </p>
-                        <span className="text-gray-500 dark:text-gray-300 text-[12px]">{data?.time}</span>
-                      </Box>
-                    </Grid>
-                  );
-                })}
             </Grid>
-          ) : null)}
+            {category?.child?.map((child: any) => (
+              <CustomAccordian
+                expandedAccordition={expandedAccordition}
+                setExpandedAccordition={setExpandedAccordition}
+                category={child}
+                currentData={currentData}
+              />
+            ))}
+          </>
+        }
       </AccordionDetails>
     </Accordion>
   );

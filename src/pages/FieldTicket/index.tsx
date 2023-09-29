@@ -1,5 +1,5 @@
 import { Box, Button, Grid, IconButton, Menu, MenuItem, Tooltip } from '@material-ui/core';
-import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
@@ -11,7 +11,7 @@ import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser }
 import { useData } from 'src/StateProvider/Provider';
 import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import { MdAdd } from 'react-icons/md';
+import { MdAdd, MdOutlineFilterAlt } from 'react-icons/md';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import axiosInstance from 'src/axios/axiosInstance';
 import {
@@ -33,6 +33,9 @@ import ManageFieldTicket from './ManageFieldTicket';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { deleteOne, findAll, findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import MobileFilterDialog, { DisplayFiltersForMobile } from 'src/components/MobileFilterDialog';
+import MobileSortDialog from 'src/components/MobileSortDialog';
+import { TbArrowsSort } from 'react-icons/tb';
 
 const FieldTicket = () => {
   const FieldTicketType = [
@@ -143,18 +146,17 @@ const FieldTicket = () => {
             dispatch({
               type: 'initialize',
               data: [...dataRows, ...rows],
-              count: count,
-              selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
+              count: count
+              // selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
             });
           } else {
             dispatch({
               type: 'initialize',
               data: rows,
-              count: count,
-              selectedRecords: rows.filter((f) => f.isChecked === true)
+              count: count
+              // selectedRecords: rows.filter((f) => f.isChecked === true)
             });
           }
-          dispatch({ type: 'initialize', data: rows, count: count });
           setTimeout(() => {
             dispatch({ type: 'loading', loading: false });
           }, gridLoadingTimeout);
@@ -303,6 +305,7 @@ const FieldTicket = () => {
   };
 
   const onTypeChange = (event, type) => {
+    dispatch({ type: 'setPage', page: 0 });
     const value = FieldTicketType.find((d) => d.key === type).value;
     setSelectedType(value);
     history.push(`?type=${value}`);
@@ -336,6 +339,25 @@ const FieldTicket = () => {
     </ToggleButtonGroup>
   );
 
+  const [isOpenDialog, setisOpenDialog] = useState(false);
+  const [openSort, setOpenSort] = useState(false);
+
+  const handleOpen = () => {
+    setisOpenDialog(true);
+  };
+
+  const handleClose = () => {
+    setisOpenDialog(false);
+  };
+
+  const handleClickOpen = () => {
+    setOpenSort(true);
+  };
+
+  const handleClickClose = () => {
+    setOpenSort(false);
+  };
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -365,11 +387,11 @@ const FieldTicket = () => {
       <CustomContainer>
         <div className="header-panel">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className={'d-flex align-items-center gap-1'}>
+            <div className={'flex justify-between align-items-center gap-1 w-full'}>
               {/* {toggleInner} */}
               <ToggleButtonGroup
                 size="small"
-                className="align-items-center gap-1 layout-for-mobile "
+                className="align-items-center gap-1 "
                 value={FieldTicketType[selectedType - 1].key}
                 exclusive
                 onChange={onTypeChange}
@@ -382,6 +404,53 @@ const FieldTicket = () => {
                   );
                 })}
               </ToggleButtonGroup>
+              {isMobile && !isTablet && (
+                <div className="flex flex-wrap items-center gap-1 justify-end">
+                  <IconButton
+                    size="small"
+                    className={'mobileIconButton secondary'}
+                    onClick={handleClickOpen}
+                    id="demo-customized-button"
+                    aria-controls="demo-customized-menu"
+                    aria-haspopup="true"
+                    aria-expanded={open ? 'true' : undefined}
+                    style={isTablet ? { marginLeft: '50px' } : {}}
+                  >
+                    <TbArrowsSort className="rotate-90" size={16} />
+                  </IconButton>
+
+                  <MobileSortDialog
+                    isOpen={openSort}
+                    handleClose={handleClickClose}
+                    contentPart={''}
+                    secHeading={['Sort Repair Job']}
+                    columns={columns}
+                    dispatch={dispatch}
+                  />
+
+                  <IconButton
+                    size="small"
+                    onClick={handleOpen}
+                    id="demo-customized-button"
+                    aria-controls="demo-customized-menu"
+                    aria-haspopup="true"
+                    aria-expanded={open ? 'true' : undefined}
+                    className={'mobileIconButton secondary'}
+                  >
+                    <MdOutlineFilterAlt size={16} />
+                  </IconButton>
+                  <MobileFilterDialog
+                    isOpen={isOpenDialog}
+                    handleClose={handleClose}
+                    contentPart={''}
+                    columns={columns}
+                    dispatch={dispatch}
+                    title={routes?.repairJob?.title}
+                    filters={filters}
+                    resource={sidebarResource.fieldTicket}
+                  />
+                </div>
+              )}
             </div>
             <div className="flex flex-wrap gap-[8px]  justify-end">
               <SearchBox onChange={handleSearch} className={styles.search_box_input} size="small" value={search} />
@@ -449,6 +518,7 @@ const FieldTicket = () => {
                 )}
               </div>
             </div>
+            <DisplayFiltersForMobile resource={sidebarResource.fieldTicket} />
           </div>
         </div>
         {Object.keys(frameWorkComponent).length > 0 ? (
@@ -459,8 +529,7 @@ const FieldTicket = () => {
               permissions={permissions.fieldTicket}
               primaryField={columns?.find((d) => d.primaryField)}
               onClick={(data) => {
-                setFieldTicketId(data.id);
-                setOpen({ open: true, isClone: false });
+                history.push(`${routes.fieldTicketDetail.path}/${data.id}`);
               }}
               dataRows={dataRows}
               selectedRecords={selectedRecords}

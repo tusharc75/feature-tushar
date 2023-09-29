@@ -83,7 +83,7 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
         let columns = [];
         let rendererNames = [];
         data?.forEach((o) => {
-          if (o.fieldName == 'attachments') {
+          if (o.fieldName === 'attachments') {
             return;
           }
           let currentColumn = getColumnData(renderedFrom, o, routes.serializedAssetDetail.path, true);
@@ -103,6 +103,11 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
           actionsRenderer: ActionsRenderer
         };
         setFrameWorkComponent({ ...tempFrameworkComponent });
+        columns?.forEach((e) => {
+          if (["issueDate", "expiryDate"].includes(e.field)) {
+            e.disabled = true;
+          }
+        })
         setColumns([...columns]);
       });
   };

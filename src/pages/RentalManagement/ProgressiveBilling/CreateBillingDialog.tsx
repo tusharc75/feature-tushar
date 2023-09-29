@@ -578,7 +578,6 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
         let priceFieldName = Object.keys(element).find((d) => d.includes('price_'));
 
         const priceField = allFields?.find((e) => e.fieldName === 'price');
-        console.log(priceField)
 
         let calValues: any;
         let values = JSON.parse(JSON.stringify(tempValues));

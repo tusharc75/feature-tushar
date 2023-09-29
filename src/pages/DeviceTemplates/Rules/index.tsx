@@ -10,19 +10,22 @@ import { gridLoadingTimeout, prepareDataForGrid, removeLocalStorage } from 'src/
 import { gridFilterParser } from 'src/constants/useColumns';
 import { camelCase } from 'lodash';
 import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { ExpandMore } from '@material-ui/icons';
 import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
 import ManageRules from './ManageRules';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
 
 export default function Rules({ deviceTemplate }) {
+  
   const renderedFrom = camelCase('Rules');
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions, selectedEntity }
+    state: { selectedEntity }
   }: any = useData();
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
@@ -31,7 +34,7 @@ export default function Rules({ deviceTemplate }) {
   const [columns, setColumns] = useState([]);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
-  const [open, setOpen] = useState({ open: false, id: null });
+  const [open, setOpen] = useState({ open: false, isClone: false, id: null });
   const [anchorActionEl, setAnchorActionEl] = useState(null);
 
   useEffect(() => {
@@ -52,20 +55,18 @@ export default function Rules({ deviceTemplate }) {
 
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
-    const queryString = getQueryString();
-
     if (gridApi) {
       gridApi.setRowData([]);
     }
     axiosInstance()
-      .get(`${routes?.deviceTemplates?.path}/rule${queryString}`)
+      .get(`${routes?.deviceTemplates?.path}/rule?deviceTemplate=${deviceTemplate}`)
       .then(({ data }) => {
         let count = data?.count;
         let rows = data?.data?.map((u: any) => {
           let finalObject: any = prepareDataForGrid(u);
           finalObject['canDelete'] = true;
+          finalObject['allowedToEdit'] = true;
           finalObject['isChecked'] = selectedRecords?.some((s) => s?._id === u?._id);
-
           return {
             ...finalObject
           };
@@ -92,40 +93,44 @@ export default function Rules({ deviceTemplate }) {
       });
   };
 
-  const getQueryString = (isExport = false) => {
-    let deepFilter = `?page=${page}&limit=${limit}`;
-
-    if (isExport) {
-      deepFilter = `?`;
-    }
-
-    if (selectedEntity) {
-      deepFilter = `${deepFilter}&entity=${selectedEntity}`;
-    }
-
-    const { deepFilters } = gridFilterParser(filters);
-
-    if (deepFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
-    }
-
-    if (sorting.length > 0) {
-      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
-    }
-
-    if (showFilteredRecordsOnly) {
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
-    }
-
-    return deepFilter;
-  };
-
   const ActionsRenderer = (params) => (
     <Fragment>
+      {params?.data?.allowedToEdit ? (
+        <Tooltip title="Edit">
+          <IconButton
+            size="small"
+            aria-label="Edit"
+            onClick={() => {
+              setOpen({ open: true, isClone: false, id: params?.data?._id });
+            }}
+          >
+            <EditIcon fontSize="small" color="primary" />
+          </IconButton>
+        </Tooltip>
+      ) : (
+        <Tooltip className="cursor-stop" title="You do not have permission to edit">
+          <IconButton aria-label="Clone" size="small">
+            <EditIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      )}
+
+      <Tooltip title="Clone">
+        <IconButton
+          size="small"
+          aria-label="Clone"
+          onClick={() => {
+            setOpen({ open: true, isClone: true, id: params?.data?.id });
+          }}
+        >
+          <FileCopyIcon fontSize="small" color="primary" />
+        </IconButton>
+      </Tooltip>
+
       {params?.data?.canDelete ? (
         <Tooltip title="Delete">
           <IconButton
+            size="small"
             aria-label="Delete"
             onClick={() => {
               setDeleteRecord(params.data);
@@ -149,7 +154,7 @@ export default function Rules({ deviceTemplate }) {
     params?.value ? (
       <p
         onClick={() => {
-          setOpen({ open: true, id: params?.data?._id });
+          setOpen({ open: true, isClone: false, id: params?.data?._id });
         }}
         className="link text-truncate"
       >
@@ -210,7 +215,7 @@ export default function Rules({ deviceTemplate }) {
               variant="contained"
               color="primary"
               onClick={() => {
-                setOpen({ open: true, id: null });
+                setOpen({ open: true, isClone: false, id: null });
               }}
             >
               Add
@@ -272,6 +277,7 @@ export default function Rules({ deviceTemplate }) {
           renderedFrom={renderedFrom}
           refreshGrid={fetchData}
           showOnlyShowFilteredRecordSwitch={true}
+          isClientSideGrid={true}
         />
       ) : (
         <Box p={2} height={500}>
@@ -283,10 +289,11 @@ export default function Rules({ deviceTemplate }) {
         <ManageRules
           deviceTemplate={deviceTemplate}
           open={open?.open}
+          isClone={open?.isClone}
           id={open?.id}
-          onClose={() => setOpen({ open: false, id: null })}
+          onClose={() => setOpen({ open: false, isClone: false, id: null })}
           onSuccess={() => {
-            setOpen({ open: false, id: null });
+            setOpen({ open: false, isClone: false, id: null });
             fetchData();
           }}
         />

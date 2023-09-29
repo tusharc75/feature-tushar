@@ -86,7 +86,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
           { field: 'rentalJob', headerName: 'Rental Job', show: true, cellRenderer: 'rentalJobRenderer' },
           { field: 'wellName', headerName: 'Well Name', show: true, cellRenderer: 'wellNameRenderer' },
           { field: 'remainingJobDays', headerName: 'Remaining Job Days', show: true, cellRenderer: 'commonRenderer' }
-        ]
+        ];
 
         columns = [...columns.slice(0, 1), ...extraColoums, ...columns.slice(1), ...getStaticFields()];
         setColumns([...columns]);
@@ -96,7 +96,12 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
 
   const RentalJobRenderer = (params) =>
     params?.value ? (
-      <Link className="link text-truncate" target='_blank' title={params?.value} to={`${routes.rentalManagementDetail.path}/${params?.data?.rentalJobId}`}>
+      <Link
+        className="link text-truncate"
+        target="_blank"
+        title={params?.value}
+        to={`${routes.rentalManagementDetail.path}/${params?.data?.rentalJobId}`}
+      >
         {params?.value}
       </Link>
     ) : (
@@ -105,7 +110,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
 
   const WellNameRenderer = (params) =>
     params?.value ? (
-      <Link className="link text-truncate" target='_blank' title={params?.value} to={`${routes.wellMasterDetail.path}/${params?.data?.wellNameId}`}>
+      <Link className="link text-truncate" target="_blank" title={params?.value} to={`${routes.wellMasterDetail.path}/${params?.data?.wellNameId}`}>
         {params?.value}
       </Link>
     ) : (
@@ -191,7 +196,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
 
   return (
     <>
-      <Box display="flex" justifyContent="flex-end" m={1} gridGap={'8px'} alignItems="center">
+      <Box display="flex" justifyContent="flex-end" my={1} className="px-2" gridGap={'8px'} alignItems="center">
         {allowedToEdit && (
           <Box>
             <ImportExportLinks
@@ -214,7 +219,8 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
           resource={sidebarResource.sublease}
           referenceId={subleaseData?._id}
           hideDetailButton={true}
-          columns={columns?.filter((e) => ['assetNumber', 'product', 'serialNumber', 'supplierSerialNumber']?.includes(e.field))} />
+          columns={columns?.filter((e) => ['assetNumber', 'product', 'serialNumber', 'supplierSerialNumber']?.includes(e.field))}
+        />
         {SUBLEASE_STATUS.completed != subleaseData?.status && (allowedToEdit || isProcessor) && (
           <Fragment>
             {/* {currentStep === 1 && (
@@ -252,9 +258,9 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
               </Fragment>
             )} */}
             {selectedRecords.length > 0 &&
-              selectedRecords.filter((e) => e.currentOwnerType === INVENTORY_OWNER_TYPE.brand).length === selectedRecords.length &&
-              checkUniqWarehouse() &&
-              currentStep === 1 ? (
+            selectedRecords.filter((e) => e.currentOwnerType === INVENTORY_OWNER_TYPE.brand).length === selectedRecords.length &&
+            checkUniqWarehouse() &&
+            currentStep === 1 ? (
               <Fragment>
                 <Tooltip title="Send to Supplier">
                   <Button
@@ -345,7 +351,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={() => { }}
+              onClone={() => {}}
               renderedFrom={renderedFrom}
             />
           ) : (

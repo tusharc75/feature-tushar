@@ -53,8 +53,8 @@ interface ArrangeColumnsProps {
   setHiddenColumns?: any;
   getToggleHideAllColumnsProps?: any;
   setColumnOrder?: any;
-  defaultColumns : any[];
-  refColsOrder : any[];
+  defaultColumns: any[];
+  refColsOrder: any[];
 }
 
 const ItemTypes = {
@@ -146,22 +146,20 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
       setSortedColumns([...columns]);
       console.error(`Error while getting stored data from local storage - ${renderedFrom}`);
     }
-
     // setColumns([...columns]);
     // setOldData(JSON.stringify([...columns]));
     // setNewData(JSON.stringify([...columns]));
   }, [columns]);
 
-  useEffect(()=>{
+  useEffect(() => {
     if (oldData === newData) {
       setHasChanged(false);
     } else {
       setHasChanged(true);
     }
-    const allShow = sortedColumns.filter((f) => f.sticky === undefined).some((s) => s.isVisible === false)
-    setAllChecked(!allShow)
-
-  }, [oldData, newData,sortedColumns])
+    const allShow = sortedColumns.filter((f) => f.sticky === undefined).some((s) => s.isVisible === false);
+    setAllChecked(!allShow);
+  }, [oldData, newData, sortedColumns]);
 
   // React.useEffect(() => {
   //   if (oldData === newData) {
@@ -193,24 +191,23 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
     setNewData(JSON.stringify(newColumns));
     // setSortedColumns(newColumns);
     setAllChecked(event.target.checked);
-
   };
 
-  const handleReset = ()=>{
-    delete localStorage[renderedFrom]
+  const handleReset = () => {
+    delete localStorage[renderedFrom];
 
-    const freshColumns = [...defaultColumns]
+    const freshColumns = [...defaultColumns];
 
     freshColumns?.forEach((e: any) => {
       if (!e.disabled) {
         e.isVisible = true;
       }
     });
-    setSortedColumns(freshColumns)
-    setHiddenColumns([])
-    setColumnOrder(refColsOrder?.map((col) => col?.id || col?.accessor))
+    setSortedColumns(freshColumns);
+    setHiddenColumns([]);
+    setColumnOrder(refColsOrder?.map((col) => col?.id || col?.accessor));
     onClose();
-  }
+  };
 
   const handleSaveChange = () => {
     // const newColumns = [...sortedColumns];
@@ -250,7 +247,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
       dataToStore.push(object);
     });
     const columnState = JSON.stringify([...dataToStore]);
-    
+
     localStorage.setItem(renderedFrom, columnState);
 
     setColumnOrder([...sortedColumns.map((m) => m.id)]);
@@ -367,43 +364,45 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
           ))} */}
           {!searchVal ? (
             <DndProvider backend={HTML5Backend}>
-              {sortedColumns.map((column, index) => (
-                (column?.id!=="selection" && column?.id!=="expander") && (
-
-                  <RenderListItem
-                    key={column.id}
-                    column={column}
-                    handleToggle={handleToggle}
-                    moveItem={moveItem}
-                    index={index}
-                    id={column.id}
-                    columns={sortedColumns}
-                  />
-                )
-              ))}
+              {sortedColumns.map(
+                (column, index) =>
+                  column?.id !== 'selection' &&
+                  column?.id !== 'expander' && (
+                    <RenderListItem
+                      key={column.id}
+                      column={column}
+                      handleToggle={handleToggle}
+                      moveItem={moveItem}
+                      index={index}
+                      id={column.id}
+                      columns={sortedColumns}
+                    />
+                  )
+              )}
             </DndProvider>
           ) : searchedColumns.length > 0 ? (
-            searchedColumns.map((column, index) => (
-              (column?.id!=="selection" && column?.id!=="expander") && (
-
-              <ListItem key={`${column.id}-${index}`} divider disableGutters disabled={column.disabled} className={column.sticky ? 'd-none' : ''}>
-                <ListItemText id="switch-list-column" primary={column.Header} />
-                <ListItemSecondaryAction>
-                  {column.sticky ? (
-                    ''
-                  ) : (
-                    <Switch
-                      size="small"
-                      checked={column.isVisible}
-                      onChange={(e) => {
-                        handleToggle(column, e);
-                      }}
-                    />
-                  )}
-                </ListItemSecondaryAction>
-              </ListItem>
-              )
-            ))
+            searchedColumns.map(
+              (column, index) =>
+                column?.id !== 'selection' &&
+                column?.id !== 'expander' && (
+                  <ListItem key={`${column.id}-${index}`} divider disableGutters disabled={column.disabled} className={column.sticky ? 'd-none' : ''}>
+                    <ListItemText id="switch-list-column" primary={column.Header} />
+                    <ListItemSecondaryAction>
+                      {column.sticky ? (
+                        ''
+                      ) : (
+                        <Switch
+                          size="small"
+                          checked={column.isVisible}
+                          onChange={(e) => {
+                            handleToggle(column, e);
+                          }}
+                        />
+                      )}
+                    </ListItemSecondaryAction>
+                  </ListItem>
+                )
+            )
           ) : (
             <Box my={5}>
               <Typography align="center">No results found!</Typography>
@@ -520,7 +519,7 @@ const RenderListItem = (props: ItemProps) => {
         <ListItemSecondaryAction>
           <Switch
             size="small"
-            disabled = {column.disabled}
+            disabled={column.disabled}
             checked={column.isVisible}
             onChange={(e) => {
               handleToggle(column, e);

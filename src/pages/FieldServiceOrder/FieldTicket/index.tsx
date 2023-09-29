@@ -87,6 +87,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
                 headerName: o?.fieldData?.fieldLabel,
                 show: true,
                 disabled: true,
+                width: 250,
                 cellRenderer: 'fieldTicketNumberRenderer'
               }
             ];
@@ -358,6 +359,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
             customerAccount: serviceOrderData?.customerAccount?.optionValue || '',
             billingAddress: serviceOrderData?.billingAddress?.optionValue || '',
             shippingAddress: serviceOrderData?.shippingAddress?.optionValue || '',
+            taxCode: serviceOrderData?.taxCode?.optionValue || '',
             collaborator: serviceOrderData?.collaborator?.map((m) => m.optionValue) || [],
           }}
           onSuccess={() => {

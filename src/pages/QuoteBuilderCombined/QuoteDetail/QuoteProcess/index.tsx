@@ -248,7 +248,8 @@ export default function QuoteProcess(props) {
   const history = useHistory();
 
   const [quoteCurrency] = useState(quoteData?.currency);
-  const [nextStep, setNextStep] = useState(false);
+  const [nextStep, setNextStep] = useState(true);
+  const [prevStep, setPrevStep] = useState(true)
   const [redCard, setRedCard] = useState(false);
   const [totalProfit, setTotalProfit] = useState({
     shortFormatAmount: '',
@@ -1288,7 +1289,11 @@ export default function QuoteProcess(props) {
           id={quoteData._id}
           version={currentVersion}
           Refresh={fetchQuoteData}
-          nextStep={nextStep}
+          nextStep={
+            ProcessStatus === 'Send To Customer' && (!ifQuoteApproved.approved && !quoteData?.versions[currentVersion]?.offered) ? false :
+              ['Rejected by Customer', 'Sent for DOA', 'Sent to Customer'].includes(versionStatus) ? true : nextStep
+          }
+          isPrevStep={['Rejected by Customer', 'Sent for DOA', 'Sent to Customer'].includes(versionStatus) ? false : prevStep}
           versionStatus={versionStatus}
           loading={loading}
           approvedQuote={ifQuoteApproved}
@@ -1359,6 +1364,7 @@ export default function QuoteProcess(props) {
                       columns={columns}
                       hideDetailButton={true}
                       isSendEmail={true}
+                      isExcelDownload={true}
                       extraQueryParams={{ uniqueId: quoteData.versions[currentVersion]._id }}
                       defaultColumns={['productName',
                         'unit',
@@ -1408,7 +1414,7 @@ export default function QuoteProcess(props) {
                     </>
                   )}
                 </div>
-                {ProcessStatus !== 'New' && ProcessStatus !== 'Price Builder' ? (
+                {ProcessStatus === 'Quote Builder' ? (
                   <span className="d-flex flex-wrap gap-2 align-items-center justify-content-end ml-auto">
                     <Tooltip title="View">
                       <Button
@@ -1443,36 +1449,66 @@ export default function QuoteProcess(props) {
                         {isMobile && !isTablet ? '' : 'Download'}
                       </Button>
                     </Tooltip>
-                    {ProcessStatus === 'Quote Builder' && (
-                      <Tooltip title="PDF Columns">
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          startIcon={<AiOutlineFilePdf />}
-                          color="primary"
-                          onClick={() => {
-                            setShowPDFArrangeColumns(true);
-                          }}
-                        >
-                          {isMobile && !isTablet ? '' : 'PDF Columns'}
-                        </Button>
-                      </Tooltip>
-                    )}
-                    {ProcessStatus === 'Quote Builder' && (
-                      <Tooltip title="Excel Columns">
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          startIcon={<AiOutlineFileExcel />}
-                          color="primary"
-                          onClick={() => {
-                            setShowExcelArrangeColumns(true);
-                          }}
-                        >
-                          {isMobile && !isTablet ? '' : 'Excel Columns'}
-                        </Button>
-                      </Tooltip>
-                    )}
+
+                    <Tooltip title="View">
+                      <Button
+                        onClick={() => {
+                          handleViewPdf(true, false);
+                        }}
+                        variant="outlined"
+                        disabled={viewDownloadLoading || updatingVersion}
+                        size="small"
+                        className="setIconForMobile"
+                        startIcon={isMobile && !isTablet ? '' : <AiOutlineEye />}
+                        color="primary"
+                      >
+                        {isMobile && !isTablet ? <AiOutlineEye size={20} /> : ''}
+                        {isMobile && !isTablet ? '' : 'View'}
+                      </Button>
+                    </Tooltip>
+                    <Tooltip title="Download">
+                      <Button
+                        disabled={viewDownloadLoading || updatingVersion}
+                        onClick={() => {
+                          handleViewPdf(false, true);
+                          exportToCSV();
+                        }}
+                        variant="outlined"
+                        size="small"
+                        className="setIconForMobile"
+                        startIcon={isMobile && !isTablet ? '' : <FiDownloadCloud />}
+                        color="primary"
+                      >
+                        {isMobile && !isTablet ? <FiDownloadCloud size={20} /> : ''}
+                        {isMobile && !isTablet ? '' : 'Download'}
+                      </Button>
+                    </Tooltip>
+                    <Tooltip title="PDF Columns">
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        startIcon={<AiOutlineFilePdf />}
+                        color="primary"
+                        onClick={() => {
+                          setShowPDFArrangeColumns(true);
+                        }}
+                      >
+                        {isMobile && !isTablet ? '' : 'PDF Columns'}
+                      </Button>
+                    </Tooltip>
+                    <Tooltip title="Excel Columns">
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        startIcon={<AiOutlineFileExcel />}
+                        color="primary"
+                        onClick={() => {
+                          setShowExcelArrangeColumns(true);
+                        }}
+                      >
+                        {isMobile && !isTablet ? '' : 'Excel Columns'}
+                      </Button>
+                    </Tooltip>
                   </span>
                 ) : null}
                 {(ProcessStatus === 'DOA Process' && versionStatus === 'Building Quote' && DOAneeded) ||
@@ -1532,6 +1568,7 @@ export default function QuoteProcess(props) {
                     isPriceBuilder={ProcessStatus === 'Price Builder'}
                     Editable={allowedToEdit && (ProcessStatus === 'Price Builder' || ProcessStatus === 'New') ? true : false}
                     fullScreen={stepFullScreen}
+                    setNextStep={setNextStep}
                   />
                 ) : (
                   <Loader style={{ minHeight: 300 }} text="Loading..." />

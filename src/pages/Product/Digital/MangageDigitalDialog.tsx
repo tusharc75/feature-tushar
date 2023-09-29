@@ -117,7 +117,7 @@ const MangageDigitalDialog = ({ open, onClose, digitalId = null, onSuccess, prod
         isDefaultValue: false,
         disableOnEdit: false,
         unique: true,
-        required: true,
+        required: false,
         lookup: false,
         lookupResource: '',
         entityWiseLookup: false,
@@ -143,7 +143,7 @@ const MangageDigitalDialog = ({ open, onClose, digitalId = null, onSuccess, prod
         tooltipMessage: '',
         editAble: true,
         deletAble: true,
-        required: true,
+        required: false,
         order: 4,
         hiddenField: false,
         isDefaultValue: false,
@@ -184,11 +184,7 @@ const MangageDigitalDialog = ({ open, onClose, digitalId = null, onSuccess, prod
             fields: fieldsDataForCreate,
             values: getObjKeysWithValues(data.data, fieldsDataForCreate)
           });
-          setFormsData(
-            setFieldsInAscendingOrder(
-              fieldsDataForCreate.filter((d) => (data?.data['type'] === 'key' ? d.fieldName !== 'file' : d.fieldName !== 'key'))
-            )
-          );
+          setFormsData(setFieldsInAscendingOrder(fieldsDataForCreate));
         })
         .catch((error) => {
           setLoading(false);
@@ -198,21 +194,29 @@ const MangageDigitalDialog = ({ open, onClose, digitalId = null, onSuccess, prod
         fields: fieldsDataForCreate,
         values: getObjKeysWithValues({ type: 'key' }, fieldsDataForCreate)
       });
-      setFormsData(setFieldsInAscendingOrder(fieldsDataForCreate.filter((d) => d.fieldName !== 'file')));
+      setFormsData(setFieldsInAscendingOrder(fieldsDataForCreate));
     }
   }, []);
 
-  const handleSubmit = async (errors, setTouched, values, setValues, setErrors) => {
-    if (Object.keys(errors).length) {
-      initialData.fields.forEach((input) => {
-        if (input.required || values[input.fieldName]) {
-          setTouched(input.fieldName, true);
+  const validate = (values) => {
+    const errors = {};
+
+    initialData.fields
+      ?.filter((field) => field?.fieldData?.required)
+      ?.forEach((input) => {
+        if (!values[input?.fieldName]) {
+          errors[input?.fieldName] = `${input?.fieldLabel} is required`;
         }
       });
-      setErrors({ ...errors });
-    } else {
-      handleSave(values);
+
+    if (values?.type === 'Key' && !values?.key) {
+      errors['key'] = 'Key is required';
     }
+    if (values?.type === 'File' && values?.file?.length <= 0) {
+      errors['file'] = 'File is required';
+    }
+
+    return errors;
   };
 
   const handleSave = (data: any) => {
@@ -257,11 +261,11 @@ const MangageDigitalDialog = ({ open, onClose, digitalId = null, onSuccess, prod
           <Formik
             initialValues={initialData.values}
             validationSchema={yupSchema(initialData.fields)}
+            validate={validate}
             validateOnMount
-            // validate={validate}
-            onSubmit={() => {}}
+            onSubmit={handleSave}
           >
-            {({ values, errors, touched, setFieldValue, setFieldTouched, setErrors, setValues }) => (
+            {({ values, errors, touched, setFieldValue, submitForm }) => (
               <Fragment>
                 <CustomDialogHeader
                   title={digitalId ? 'Edit' : 'Add'}
@@ -349,7 +353,7 @@ const MangageDigitalDialog = ({ open, onClose, digitalId = null, onSuccess, prod
                     disabled={uploadingImageOrFileProgress > 0 || loading}
                     onClick={(e) => {
                       e.preventDefault();
-                      handleSubmit(errors, setFieldTouched, values, setValues, setErrors);
+                      submitForm();
                     }}
                   >
                     Save
@@ -360,8 +364,7 @@ const MangageDigitalDialog = ({ open, onClose, digitalId = null, onSuccess, prod
                     open={showConfirmDialog}
                     onSave={() => {
                       setShowConfirmDialog(false);
-
-                      handleSubmit(errors, setFieldTouched, values, setValues, setErrors);
+                      submitForm();
                     }}
                     close={() => setShowConfirmDialog(false)}
                     onClose={() => {

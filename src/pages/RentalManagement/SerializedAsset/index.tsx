@@ -204,7 +204,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                           && [TRANSFER_ASSET_STATUS.new, TRANSFER_ASSET_STATUS.inProgress]?.includes(row.original?.transferData?.status)) {
                           isTransferAsset = true;
                         }
-                        console.log(row.original)
                         setDeleteData([
                           {
                             _id: row.original.inventory,
@@ -437,7 +436,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
       const transferFilter = transferAssets.filter((e) => e.assetId === _inventory.inventory);
       var isTransferAsset = false;
       var transferData = {};
-      if (transferFilter.length) {
+      if (transferFilter.length && _inventory.inventoryDetail?.manualStatus === ASSET_STATUS.reserved) {
         isTransferAsset = true;
         transferData = transferFilter[0];
       }

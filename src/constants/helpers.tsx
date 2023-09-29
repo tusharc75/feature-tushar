@@ -336,6 +336,7 @@ export const sidebarResource = {
   driverMaster: 'Driver Master',
   trailerMaster: 'Trailer Master',
   iotDataPoints: 'Iot Data Points',
+  iotDataPointsCategory: 'Iot Data Points Category',
   deviceTemplates: 'Device Templates',
   workStations: 'Work Stations',
   deviceTemplateAlert: 'Device Template Alert',
@@ -927,7 +928,7 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
 export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
   const obj = {};
 
-  const filterValues = (data: object | any) => (typeof data === 'string' ? data : typeof data === 'object' ? data.optionValue : '');
+  const filterValues = (data: object | any) => (typeof data === 'string' ? data : typeof data === 'object' ? data?.optionValue : '');
   for (const key of arr) {
     if (key.type === 'switch' || key.type === 'checkBox') {
       obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : false;

@@ -420,7 +420,6 @@ const PurchaseOrderDetailsPage = () => {
             setOpenUpdateDialog(false);
             fetchPurchaseOrderData();
           }}
-          disableEdit={purchaseOrderData?.canDelete ? false : true}
           currency={user.user?.brandCurrency || null}
         />
       )}

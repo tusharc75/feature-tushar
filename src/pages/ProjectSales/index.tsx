@@ -282,12 +282,15 @@ const ProjectSales: FC = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-    if (selectedType === 1) {
-      deepFilter = deepFilter + `&myRecords=1`;
-    }
+
     if (isExport) {
       deepFilter = `?`;
     }
+    
+    if (selectedType === 1) {
+      deepFilter = deepFilter + `&myRecords=1`;
+    }
+
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }

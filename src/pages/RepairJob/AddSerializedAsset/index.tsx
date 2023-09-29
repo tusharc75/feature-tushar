@@ -30,6 +30,7 @@ import { calculateRowsFieldNew } from 'src/components/RentalManagment/helper';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 
 const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repairedAssetStatus, renderedFrom, allowedToEdit, allowUpdateStatus, stepFullScreen }) => {
+
   const [anchorEl, setAnchorEl] = useState(null);
   const [anchorElAction, setAnchorElAction] = useState(null);
   const toastConfig = useContext(CustomToastContext);
@@ -45,16 +46,21 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
   const {
     state: { user, permissions }
   }: any = useData();
-  const [showEditAssetDialog, setShowEditAssetDialog] = useState({ open: false, isBulkedit: false, inventory: null, selectedRecords: [] });
+  const [showEditAssetDialog, setShowEditAssetDialog] = useState({ open: false, isBulkedit: false, data: null, selectedRecords: [], showSaveAndNext: false });
+
   const [showAssetRemoveConfirmationDialog, setShowAssetRemoveConfirmationDialog] = useState({ open: false, id: null, ids: [] });
   const [statusToUpdate, setStatusToUpdate] = useState({ open: false, isUpdating: false, status: '', message: '' });
-
+  const [isRateRequired, setIsRateRequired] = useState(false);
 
   useEffect(() => {
     if (repairJobData) {
       fetchFields();
     }
   }, [repairJobData]);
+
+  useEffect(() => {
+    fetchRecords();
+  }, [columns]);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -76,6 +82,10 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
     setColumns(null)
     const fieldResponce = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.repairJobAsset}`);
     const repairJobAssetFields = fieldResponce?.data?.data;
+
+    const isPriceRequired = repairJobAssetFields?.filter((el) => el.fieldName === 'price' && el.required).length > 0;
+    setIsRateRequired(isPriceRequired);
+
     const {
       data: { data }
     } = await axiosInstance().put(`/field/find-field-labels`, {
@@ -117,14 +127,14 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
           Header: ele?.fieldLabel,
           sticky: 'none',
           width: 200,
-          Cell: ({ row }) => (
+          Cell: ({ row, rows }) => (
             <>
               {row.original.assetNumber ? (
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                   {allowedToEdit ?
                     <p
                       className="link text-truncate"
-                      onClick={() => setShowEditAssetDialog({ open: true, isBulkedit: false, inventory: row?.original?.inventory, selectedRecords: [] })}
+                      onClick={() => setShowEditAssetDialog({ open: true, isBulkedit: false, data: row?.original, selectedRecords: [], showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false })}
                     >{row.original.assetNumber}</p>
                     :
                     <p className="text-truncate">{row.original.assetNumber}</p>
@@ -217,7 +227,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
               color="primary"
               size="small"
               onClick={() => {
-                setShowEditAssetDialog({ open: true, isBulkedit: false, inventory: row?.original?.inventory, selectedRecords: [] })
+                setShowEditAssetDialog({ open: true, isBulkedit: false, data: row?.original, selectedRecords: [], showSaveAndNext: false })
               }
               }
             >
@@ -238,7 +248,6 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
         </div>
     });
     setColumns(coloum)
-    fetchRecords();
   };
 
   const fetchRecords = async () => {
@@ -251,10 +260,14 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
       parent.productName = parent.product?.optionLabel
       parent.productDescription = parent?.productDetail?.productDescription
       parent.productCategory = parent?.productCategory?.optionLabel
-      parent.isValid = parent.status === ASSET_STATUS.scrap || parent.status === ASSET_STATUS.lost ? false : true
+      parent.isValid = parent['finalPrice_' + repairJobData?.currency?.toLowerCase()] ? true : !isRateRequired;
       parent.hideSelection = parent.status === ASSET_STATUS.lost;
     });
-    setNextStep(true);
+    if (data.filter((_rows) => _rows.isValid === false).length > 0 || data.length === 0) {
+      setNextStep(false);
+    } else {
+      setNextStep(true);
+    }
     setRowsData(data);
     setSelectedRecords([]);
   };
@@ -280,19 +293,30 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
       });
   };
 
-  const handleSaveData = async (rows: any) => {
+  const handleSaveData = async (rows: any, saveAndNext = false) => {
     setUpdating(true);
     axiosInstance()
       .put(`${repairJob.api}/${repairJobData?._id}/assets`, rows)
       .then(({ data }) => {
-        setUpdating(false);
+        fetchRecords();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
           message: data.message
         });
-        setShowEditAssetDialog({ open: false, isBulkedit: false, inventory: null, selectedRecords: [] });
-        fetchRecords();
+        if (saveAndNext) {
+          const rowIndex = rowsData.findIndex((d) => d._id === rows[0]?._id);
+          setShowEditAssetDialog({
+            open: true,
+            isBulkedit: false,
+            data: rowsData[rowIndex + 1],
+            selectedRecords: [],
+            showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false
+          });
+        } else {
+          setShowEditAssetDialog({ open: false, isBulkedit: false, data: null, selectedRecords: [], showSaveAndNext: false });
+        }
+        setUpdating(false);
       })
       .catch((error) => {
         setUpdating(false);
@@ -408,7 +432,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
               <MenuItem
                 disabled={selectedRecords.length === 0}
                 onClick={() => {
-                  setShowEditAssetDialog({ open: true, isBulkedit: true, inventory: null, selectedRecords: selectedRecords });
+                  setShowEditAssetDialog({ open: true, isBulkedit: true, data: null, selectedRecords: selectedRecords, showSaveAndNext: false });
                 }}
               >
                 {'Bulk Edit'}
@@ -503,14 +527,15 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
         <ManageAssetDialog
           repairJobData={repairJobData}
           allFields={allFields}
-          isBulkedit={showEditAssetDialog.isBulkedit}
           onClose={() => {
-            setShowEditAssetDialog({ open: false, isBulkedit: false, inventory: null, selectedRecords: [] });
+            setShowEditAssetDialog({ open: false, isBulkedit: false, data: null, selectedRecords: [], showSaveAndNext: false });
           }}
-          inventory={showEditAssetDialog.inventory}
-          selectedRecords={showEditAssetDialog.selectedRecords}
           handleSaveData={handleSaveData}
           loadingEdit={isUpdating}
+          isBulkedit={showEditAssetDialog.isBulkedit}
+          data={showEditAssetDialog.data}
+          selectedRecords={showEditAssetDialog.selectedRecords}
+          showSaveAndNext={showEditAssetDialog.showSaveAndNext}
         />
       )}
       {statusToUpdate.open && (
