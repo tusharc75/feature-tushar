@@ -158,17 +158,14 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [], customDataPoints = [] }
                 {customDataPoints?.length ?
                   <>
                     <div className=" shadow-[0px_4px_20px_rgba(0,_0,_0,_0.06)] my-3 rounded-md ">
-                      <div className={`flex flex-wrap justify-between items-center cursor-pointer py-1 px-3 rounded-md transition-all duration-[300ms] ${open['CustomDataPoints'] ? 'bg-[var(--new-theme-color)] text-white' : 'hover:bg-gray-300 dark:hover:bg-gray-800'}`}
+                      <div className={`flex flex-wrap justify-between items-center cursor-pointer py-1 px-3 rounded-md transition-all ${open['CustomDataPoints'] ? 'bg-[var(--new-theme-color)] text-white' : 'hover:bg-gray-300 dark:hover:bg-gray-800'}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleChange('CustomDataPoints');
+                        }}
                       >
                         <h6 className="line-clamp-1 text-sm">Custom Data Points</h6>
-                        <IconButton
-                          size="small"
-                          className={`${open['CustomDataPoints'] ? 'text-white' : ''}`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleChange('CustomDataPoints');
-                          }}
-                        >
+                        <IconButton size="small" className={`${open['CustomDataPoints'] ? 'text-white' : ''}`}>
                           {open['CustomDataPoints'] ? <ExpandLess style={{ color: 'currentcolor' }} /> : <ExpandMore style={{ color: 'currentcolor' }} />}
                         </IconButton>
                       </div>
