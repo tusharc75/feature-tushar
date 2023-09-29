@@ -37,7 +37,6 @@ const ManagePurchaseOrder = ({
   currency = null,
   rentalManagementId = null,
   warehouseId = null,
-  disableEdit = false,
   refrenceData = null
 }) => {
   const history = useHistory();
@@ -88,9 +87,9 @@ const ManagePurchaseOrder = ({
                 setCloneHeading(purchaseOrderNumber);
                 setLoading(false);
               } else {
-                if (disableEdit) {
+                if (!data?.canDelete) {
                   fieldsDataForUpdate?.forEach((e) => {
-                    if (['warehouse', 'currency']?.includes(e?.fieldName)) {
+                    if (['warehouse', 'currency', 'chartOfAccount', 'expenseItem']?.includes(e?.fieldName)) {
                       e.disableOnEdit = true;
                     }
                   });
