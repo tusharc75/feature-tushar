@@ -62,7 +62,8 @@ const ProductBuilder = (props) => {
     setColumnForPDFExcel,
     setColumnDatas,
     fullScreen = false,
-    quoteData = null
+    quoteData = null,
+    setNextStep,
   } = props;
 
   const toastConfig = useContext(CustomToastContext);
@@ -172,8 +173,18 @@ const ProductBuilder = (props) => {
           res.canDelete = permissions?.isUpdate && fromQuote ? (hasPermission ? true : false) : true;
           res.allowedToEdit = permissions?.isUpdate && fromQuote ? (hasPermission ? true : false) : true;
           res.isSupplierExist = isPriceBuilder && fromQuote && permissions.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice;
+
+          if (isPriceBuilder) {
+            const tsp = res[`totalSalesPrice_${currency}`] || 0;
+            const qty = res?.qty || 0;
+            if (qty === 0 || tsp === 0) {
+              setNextStep(false)
+            }
+          }
           return res;
         });
+
+
         dispatch({ type: 'initialize', data: rows, count: rows.length });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });

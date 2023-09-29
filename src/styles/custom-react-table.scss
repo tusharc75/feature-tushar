@@ -215,6 +215,9 @@ $isAppliedBill: #a8ec9c;
 
         td.isService {
           background: #fffaef;
+          [data-mode='dark'] & {
+            background-color: #575560;
+          }
         }
 
         td.error {

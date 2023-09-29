@@ -384,14 +384,15 @@ const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
             <Box ml={1} />
             <Button
               disabled={selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true}
-              variant={isMobile ? 'text' : 'outlined'}
+              variant={'outlined'}
               color="default"
               size="small"
               onClick={openActions}
+              className={`new-dropdown-v1`}
               aria-controls="action-menu"
               endIcon={<ExpandMore />}
             >
-              {isMobile ? '' : 'Actions'}
+              Actions
             </Button>
             <Menu
               anchorEl={anchorEl}

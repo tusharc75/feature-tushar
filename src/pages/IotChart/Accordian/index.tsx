@@ -98,7 +98,7 @@ export default function CustomAccordian({ expandedAccordition, setExpandedAccord
                       <p className="mb-2 flex flex-wrap justify-between text-[14px] text-[var(--primary-text)]">
                         <strong className=" line-clamp-1">{data?.fieldLabel} : </strong>
                         <span className=" font-medium">
-                          {data?.value}
+                          {data?.fieldValue}
                           {data?.unit && `(${data?.unit})`}
                         </span>
                       </p>
