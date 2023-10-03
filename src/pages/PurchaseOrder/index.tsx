@@ -143,14 +143,14 @@ const PurchaseOrder = () => {
             type: 'initialize',
             data: [...dataRows, ...rows],
             count: count,
-            selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
+            selectedRecords: [...dataRows, ...rows]
           });
         } else {
           dispatch({
             type: 'initialize',
             data: rows,
             count: count,
-            selectedRecords: rows.filter((f) => f.isChecked === true)
+            selectedRecords: rows
           });
         }
         // dispatch({ type: 'initialize', data: rows, count: count });

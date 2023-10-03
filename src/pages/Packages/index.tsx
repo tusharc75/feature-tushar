@@ -233,14 +233,12 @@ const PackageList = () => {
           type: 'initialize',
           data: [...dataRows, ...rows],
           count: count
-          // selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
         });
       } else {
         dispatch({
           type: 'initialize',
           data: rows,
           count: count
-          // selectedRecords: rows.filter((f) => f.isChecked === true)
         });
       }
       // dispatch({ type: 'initialize', data: rows, count: count });
