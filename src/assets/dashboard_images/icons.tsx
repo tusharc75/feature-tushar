@@ -664,6 +664,33 @@ export const IOT = ({ colors = ['#3BE961', '#058D12'] }) => {
   );
 };
 
+export const CUSTOM_FORMS = ({ colors = ['#3BE961', '#058D12'] }) => {
+  return (
+    <>
+      <div
+        className="grid place-items-center"
+        style={{ width: `${IMAGE_WIDTH}px`, height: `${IMAGE_HEIGHT}px`, background: `linear-gradient(129deg, ${colors[0]}, ${colors[1]})` }}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24">
+          <g clipPath="url(#clip0_5327_23021)">
+            <path
+              fill="#fff"
+              stroke="#fff"
+              strokeWidth="0.5"
+              d="M10.778 16.333h7.333v2.556h-7.333v-2.556zM8.333 6.111H5.89v2.556h2.444V6.11zm2.445 7.667h7.333v-2.556h-7.333v2.556zm0-5.111h7.333V6.11h-7.333v2.556zm-2.445 2.555H5.89v2.556h2.444v-2.556zM23 3.556v17.888C23 22.85 21.9 24 20.556 24H3.444C2.1 24 1 22.85 1 21.444V3.556C1 2.15 2.1 1 3.444 1h17.112C21.9 1 23 2.15 23 3.556zm-2.444 0H3.444v17.888h17.112V3.556zM8.333 16.333H5.89v2.556h2.444v-2.556z"
+            ></path>
+          </g>
+          <defs>
+            <clipPath id="clip0_5327_23021">
+              <path fill="#fff" d="M0 0H24V24H0z"></path>
+            </clipPath>
+          </defs>
+        </svg>
+      </div>
+    </>
+  );
+};
+
 const allIcons = {
   HERO,
   CRM,
@@ -689,7 +716,8 @@ const allIcons = {
   PLANNING_FORECASTING,
   FIELD_SERVICE_OPERATION,
   FLEET_MANAGEMENT,
-  IOT
+  IOT,
+  CUSTOM_FORMS
 };
 
 export default allIcons;

@@ -1,7 +1,7 @@
 import { AiFillAccountBook } from 'react-icons/ai';
 import { SVGImages, IMAGE_WIDTH, IMAGE_HEIGHT, IconConst } from '../../assets/dashboard_images';
 import DashboardIcons from 'src/assets/dashboard_images/icons';
-import { CollaborationToolsIcon, FleetManagementIcon, IOT } from 'src/assets/sidebar_assets/icons';
+import { CollaborationToolsIcon, CustomForms, FleetManagementIcon, IOT } from 'src/assets/sidebar_assets/icons';
 
 import {
   ProductSetup,
@@ -147,8 +147,8 @@ export const setDataBySectionName = (secName, index = 0) => {
     sideBarIcon = <IOT size={20} />;
     icon = <DashboardIcons.IOT colors={iconColour} />;
   } else if (compareName(['hiii', 'Custom Forms'], secName)) {
-    sideBarIcon = <FleetManagementIcon size={20} />;
-    icon = <DashboardIcons.FLEET_MANAGEMENT colors={iconColour} />;
+    sideBarIcon = <CustomForms size={18} />;
+    icon = <DashboardIcons.CUSTOM_FORMS colors={iconColour} />;
   }
   return {
     icon: icon,
