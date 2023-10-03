@@ -1,7 +1,7 @@
 import { AiFillAccountBook } from 'react-icons/ai';
 import { SVGImages, IMAGE_WIDTH, IMAGE_HEIGHT, IconConst } from '../../assets/dashboard_images';
 import DashboardIcons from 'src/assets/dashboard_images/icons';
-import { CollaborationToolsIcon } from 'src/assets/sidebar_assets/icons';
+import { CollaborationToolsIcon, FleetManagementIcon } from 'src/assets/sidebar_assets/icons';
 
 import {
   ProductSetup,
@@ -23,7 +23,7 @@ import {
   SiCivicrm,
   AiOutlineDatabase,
   HiOutlineWrenchScrewdriver,
-  MdOutlineEventAvailable,
+  MdOutlineEventAvailable
 } from 'react-icons/all';
 
 // CREATE OBJECT FROM LIST GROUPED BY KEYGETTER
@@ -133,6 +133,9 @@ export const setDataBySectionName = (secName, index = 0) => {
     sideBarIcon = <BiCog size={20} />;
   } else if (['Activities', 'Collaboration Tools'].includes(secName)) {
     sideBarIcon = <CollaborationToolsIcon size={20} />;
+  } else if (['Fleet Management'].includes(secName)) {
+    sideBarIcon = <FleetManagementIcon size={20} />;
+    icon = <DashboardIcons.FLEET_MANAGEMENT colors={iconColour} />;
   }
 
   return {
@@ -199,4 +202,3 @@ export const getColors = (index: number) => {
   const colorAccessor = index % colourCodes.length;
   return colourCodes[colorAccessor];
 };
-

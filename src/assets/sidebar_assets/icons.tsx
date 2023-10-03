@@ -175,3 +175,20 @@ export const FieldServiceOperationIcon: React.FC<svgInterface> = ({ width = null
     </svg>
   );
 };
+
+export const FleetManagementIcon: React.FC<svgInterface> = ({ width = null, height = null, size = 20, color = 'currentcolor', ...others }) => {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" {...others} width={width ? width : size} height={height ? height : size} fill="none" viewBox="0 0 43 43">
+      <path
+        fill="#fff"
+        stroke="#fff"
+        d="M27.337 21.287l-8.16 8.16-4.202-4.205a1.441 1.441 0 00-2.475 1.013 1.437 1.437 0 00.44 1.023l5.22 5.222a1.437 1.437 0 002.036 0l9.177-9.177a1.44 1.44 0 10-2.036-2.036z"
+      ></path>
+      <path
+        fill="#fff"
+        stroke="#fff"
+        d="M34.114 3.822h-2.16V2.44a1.44 1.44 0 10-2.88 0v1.382H13.239V2.44a1.44 1.44 0 00-2.88 0v1.382h-2.16C4.23 3.822 1 7.052 1 11.02v23.093c0 3.97 3.23 7.199 7.199 7.199h25.915c3.97 0 7.199-3.23 7.199-7.2V11.02c0-3.969-3.23-7.198-7.2-7.198zM3.879 11.02A4.324 4.324 0 018.2 6.7h2.16v1.382a1.44 1.44 0 102.879 0V6.701h15.837v1.382a1.44 1.44 0 002.88 0V6.701h2.159a4.324 4.324 0 014.319 4.32v1.454H3.879V11.02zm30.235 27.412H8.199a4.324 4.324 0 01-4.32-4.32V15.355h34.554v18.76a4.324 4.324 0 01-4.32 4.319z"
+      ></path>
+    </svg>
+  );
+};
