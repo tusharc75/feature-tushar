@@ -1,5 +1,23 @@
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { Box, Button, TextField, Grid, Container, DialogContent, IconButton, ButtonGroup, makeStyles, InputAdornment, Chip, Tooltip, FormControlLabel, Switch, Tab, Tabs, Dialog } from '@material-ui/core';
+import {
+  Box,
+  Button,
+  TextField,
+  Grid,
+  Container,
+  DialogContent,
+  IconButton,
+  ButtonGroup,
+  makeStyles,
+  InputAdornment,
+  Chip,
+  Tooltip,
+  FormControlLabel,
+  Switch,
+  Tab,
+  Tabs,
+  Dialog
+} from '@material-ui/core';
 import { Autocomplete, TabPanel, ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { Formik, Form, Field, FieldArray, FormikProps } from 'formik';
 import { Add, Delete, SyncDisabled } from '@material-ui/icons';
@@ -107,7 +125,12 @@ const DoaDialog = ({
   const tempUserList = from === 'EntityDetailPage' ? userList?.filter((v) => v?.id !== selectedEntity[0]) : userList?.filter((v) => v?.id !== 'self');
   const fetchDoa = useCallback(() => {
     doa?.length > 0
-      ? setUsers(doa.map((d) => ({ ...d, user: doaApproveType === 'User' ? d?.user?.map((e) => e?._id)?.toString() : d?.role?.map((e) => e?._id)?.toString() })))
+      ? setUsers(
+          doa.map((d) => ({
+            ...d,
+            user: doaApproveType === 'User' ? d?.user?.map((e) => e?._id)?.toString() : d?.role?.map((e) => e?._id)?.toString()
+          }))
+        )
       : setUsers([{ user: tempUserList ? tempUserList[0]?.name : '', amount: 0, disable: false }]);
   }, []);
 
@@ -123,18 +146,16 @@ const DoaDialog = ({
     axiosInstance()
       .get(`/role`)
       .then(({ data: { data, count } }) => {
-
         const rows = data.length
           ? data.map((role: any) => ({
-            id: role._id,
-            name: role.name,
-          }))
+              id: role._id,
+              name: role.name
+            }))
           : [];
 
         setRoleList(rows);
-      })
-
-  }
+      });
+  };
 
   const handleSubmit = async (values) => {
     let doaArray;
@@ -165,8 +186,7 @@ const DoaDialog = ({
             };
           });
       }
-    }
-    else {
+    } else {
       if (selectedType === 2) {
         doaArray = values
           .sort((a, b) => a.amount - b.amount)
@@ -201,7 +221,7 @@ const DoaDialog = ({
       doa: doaArray,
       doaType: selectedType,
       doaMinLimit: selectedType === 2 ? doaLowerLimit : 0,
-      doaApproveType: DoaApproveType.find(d => d.value === doaApprove)?.key
+      doaApproveType: DoaApproveType.find((d) => d.value === doaApprove)?.key
     };
     setLoading(true);
     axiosInstance()
@@ -226,19 +246,29 @@ const DoaDialog = ({
       setSelectedType(DOAType.find((d) => d.key === newFilter).value);
       if (newFilter === 'Sequence') {
         doa.length > 0
-          ? setUsers(doa.map((d) => ({ ...d, user: doaApproveType === 'User' ? d?.user.map((e) => e?._id).toString() : d?.role.map((e) => e?._id).toString() })))
+          ? setUsers(
+              doa.map((d) => ({
+                ...d,
+                user: doaApproveType === 'User' ? d?.user.map((e) => e?._id).toString() : d?.role.map((e) => e?._id).toString()
+              }))
+            )
           : setUsers([{ user: tempUserList ? tempUserList[0]?.id : '', amount: 0, disable: false }]);
       } else {
         doa.length > 0
-          ? setUsers(doa.map((d) => ({ ...d, user: doaApproveType === 'User' ? d?.user.map((e) => e?._id).toString() : d?.role.map((e) => e?._id).toString() })))
+          ? setUsers(
+              doa.map((d) => ({
+                ...d,
+                user: doaApproveType === 'User' ? d?.user.map((e) => e?._id).toString() : d?.role.map((e) => e?._id).toString()
+              }))
+            )
           : setUsers([{ user: tempUserList ? tempUserList[0]?.id : '', amount: 0, disable: false }]);
       }
       formikRef.current?.resetForm();
     }
   };
 
-  const [doaApprove, setDoaApprove] = useState(doaApproveType ? DoaApproveType.find(d => d.key === doaApproveType)?.value : 0);
-  const [selectedDoaApprove, setSelectedDoaApprove] = useState(doaApproveType ? doaApproveType : "User");
+  const [doaApprove, setDoaApprove] = useState(doaApproveType ? DoaApproveType.find((d) => d.key === doaApproveType)?.value : 0);
+  const [selectedDoaApprove, setSelectedDoaApprove] = useState(doaApproveType ? doaApproveType : 'User');
   const handleDOAAproveTypeFilter = (event, newFilter) => {
     if (newFilter !== null) {
       setSelectedDoaApprove(newFilter);
@@ -273,36 +303,27 @@ const DoaDialog = ({
     return errors;
   };
 
-
-
-
-
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      scroll="body"
-      maxWidth="md"
-      fullWidth
-      fullScreen={fullScreen || (isMobile || isTablet)}
-    >
+    <Dialog open={open} onClose={onClose} scroll="body" maxWidth="md" fullWidth fullScreen={fullScreen || isMobile || isTablet}>
       <>
         {!loading && (
           <>
-            {!isRenderedFromUserSetUp && <CustomDialogHeader
-              title={doa?.length > 0 ? 'Edit DOA' : 'Add DOA'}
-              onClose={onClose}
-              isMinimized={!fullScreen}
-              onMinimizeMaximize={() => {
-                setFullScreen(prevState => !prevState)
-              }}
-              showManimizeMaximize={true}
-            />}
+            {!isRenderedFromUserSetUp && (
+              <CustomDialogHeader
+                title={doa?.length > 0 ? 'Edit DOA' : 'Add DOA'}
+                onClose={onClose}
+                isMinimized={!fullScreen}
+                onMinimizeMaximize={() => {
+                  setFullScreen((prevState) => !prevState);
+                }}
+                showManimizeMaximize={true}
+              />
+            )}
 
             <>
               <Box padding={2} className={classes.contentBox}>
-                <Box padding={1} >
-                  <Grid container spacing={2}  >
+                <Box padding={1}>
+                  <Grid container spacing={2}>
                     <Grid item xs={6} md={3} sm={6}>
                       <ToggleButtonGroup size="small" value={filter} exclusive onChange={handleFilter}>
                         {DOAType.map((k, index) => {
@@ -325,7 +346,7 @@ const DoaDialog = ({
                         })}
                       </ToggleButtonGroup>
                     </Grid>
-                    <Grid item xs={6} md={3} sm={6} >
+                    <Grid item xs={6} md={3} sm={6}>
                       {selectedType === 2 && (
                         <>
                           <TextField
@@ -337,7 +358,7 @@ const DoaDialog = ({
                             size="small"
                             name="amount"
                             placeholder="Enter minimum DOA amount"
-                            label={isMobile && !isTablet ? "DOA amount" : "Enter minimum DOA amount"}
+                            label={isMobile && !isTablet ? 'DOA amount' : 'Enter minimum DOA amount'}
                             value={doaLowerLimit}
                             onChange={(e) => {
                               setDoaLowerLimit(Number(e.target.value.replace(/[^0-9]/g, '')));
@@ -349,7 +370,7 @@ const DoaDialog = ({
                         </>
                       )}
                     </Grid>
-                    <Grid item xs={6} md={3} sm={6} >
+                    <Grid item xs={6} md={3} sm={6}>
                       {selectedType === 2 && (
                         <Autocomplete
                           className={classes.currencyStyle}
@@ -361,7 +382,9 @@ const DoaDialog = ({
                           }
                           style={{ width: 200 }}
                           options={currencyData}
-                          getOptionLabel={(option: any) => (option ? `${option.currencyCode} - ${option.currencyName} - (${option.symbolNative})` : '')}
+                          getOptionLabel={(option: any) =>
+                            option ? `${option.currencyCode} - ${option.currencyName} - (${option.symbolNative})` : ''
+                          }
                           getOptionSelected={(option: any, val) => option?.currencyCode === val}
                           onChange={(e, val) => {
                             setCurrency(val?.currencyCode ? val?.currencyCode : '');
@@ -379,7 +402,7 @@ const DoaDialog = ({
                 </Box>
               </Box>
               <div className={classes.doaUsersStyle}>
-                <Formik initialValues={{ users: users }} enableReinitialize={true} innerRef={formikRef} onSubmit={() => { }}>
+                <Formik initialValues={{ users: users }} enableReinitialize={true} innerRef={formikRef} onSubmit={() => {}}>
                   {({ values }) => (
                     <>
                       <DialogContent className={classes.contentBox}>
@@ -392,11 +415,11 @@ const DoaDialog = ({
                                     <Grid container spacing={2} direction="row" justify="flex-start" alignItems="center">
                                       <Grid item md={1}>
                                         {' '}
-                                        #{' '}
+                                        Index{' '}
                                       </Grid>
                                       <Grid item md={5}>
                                         {' '}
-                                        {doaApprove == 0 ? "User" : "Role"}{' '}
+                                        {doaApprove == 0 ? 'User' : 'Role'}{' '}
                                       </Grid>
                                       {selectedType === 2 && (
                                         <Grid item md={4}>
@@ -426,19 +449,21 @@ const DoaDialog = ({
                                                   style={{ minWidth: 200 }}
                                                   // options={userList}
                                                   options={
-                                                    doaApprove == 0 ?
-                                                      selectedType === 2
+                                                    doaApprove == 0
+                                                      ? selectedType === 2
                                                         ? userList?.filter(
-                                                          (element) => !values?.users?.some((e) => e?.user?.split(',').some((d) => d === element.id))
-                                                        )
+                                                            (element) =>
+                                                              !values?.users?.some((e) => e?.user?.split(',').some((d) => d === element.id))
+                                                          )
                                                         : tempUserList?.filter(
-                                                          (element) => !values?.users?.some((e) => e?.user?.split(',').some((d) => d === element.id))
-                                                        )
+                                                            (element) =>
+                                                              !values?.users?.some((e) => e?.user?.split(',').some((d) => d === element.id))
+                                                          )
                                                       : selectedType === 2
-                                                        ? roleList?.filter(
+                                                      ? roleList?.filter(
                                                           (element) => !values?.users?.some((e) => e?.user?.split(',').some((d) => d === element.id))
                                                         )
-                                                        : roleList?.filter(
+                                                      : roleList?.filter(
                                                           (element) => !values?.users?.some((e) => e?.user?.split(',').some((d) => d === element.id))
                                                         )
                                                   }
@@ -450,9 +475,11 @@ const DoaDialog = ({
                                                     });
                                                   }}
                                                   multiple
-                                                  value={doaApprove == 0 ?
-                                                    userList?.filter((element) => userVal?.user?.split(',')?.some((d) => d === element?.id))
-                                                    : roleList?.filter((element) => userVal?.user?.split(',')?.some((d) => d === element?.id))}
+                                                  value={
+                                                    doaApprove == 0
+                                                      ? userList?.filter((element) => userVal?.user?.split(',')?.some((d) => d === element?.id))
+                                                      : roleList?.filter((element) => userVal?.user?.split(',')?.some((d) => d === element?.id))
+                                                  }
                                                   renderOption={(option) => <React.Fragment>{option?.name}</React.Fragment>}
                                                   renderInput={(params) => (
                                                     <TextField
@@ -460,7 +487,9 @@ const DoaDialog = ({
                                                       variant="outlined"
                                                       name="userField"
                                                       error={userVal?.user?.length <= 0}
-                                                      helperText={userVal?.user?.length <= 0 ? `${doaApprove == 0 ? "User" : "Role"}  is Required` : ''}
+                                                      helperText={
+                                                        userVal?.user?.length <= 0 ? `${doaApprove == 0 ? 'User' : 'Role'}  is Required` : ''
+                                                      }
                                                       required
                                                     />
                                                   )}
@@ -548,9 +577,7 @@ const DoaDialog = ({
                                                   >
                                                     <Delete />
                                                   </IconButton>
-                                                  <Tooltip
-                                                    title={userVal.disable ? "User Disabled" : "User Enabled"}
-                                                  >
+                                                  <Tooltip title={userVal.disable ? 'User Disabled' : 'User Enabled'}>
                                                     <FormControlLabel
                                                       key={1}
                                                       control={
@@ -599,11 +626,7 @@ const DoaDialog = ({
 
                       <CustomDialogFooter>
                         {!isRenderedFromUserSetUp && (
-                          <Button
-                            variant="outlined"
-                            color="primary"
-                            size="small"
-                            onClick={onClose}>
+                          <Button variant="outlined" color="primary" size="small" onClick={onClose}>
                             Cancel
                           </Button>
                         )}
@@ -633,7 +656,6 @@ const DoaDialog = ({
               </div>
               {/* </TabPanel> */}
             </>
-
           </>
         )}
         {/* </Dialog> */}
