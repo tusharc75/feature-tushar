@@ -228,7 +228,22 @@ const PackageList = () => {
           ...finalObject
         };
       });
-      dispatch({ type: 'initialize', data: rows, count: count });
+      if (appendRows) {
+        dispatch({
+          type: 'initialize',
+          data: [...dataRows, ...rows],
+          count: count
+          // selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
+        });
+      } else {
+        dispatch({
+          type: 'initialize',
+          data: rows,
+          count: count
+          // selectedRecords: rows.filter((f) => f.isChecked === true)
+        });
+      }
+      // dispatch({ type: 'initialize', data: rows, count: count });
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
       }, gridLoadingTimeout);
