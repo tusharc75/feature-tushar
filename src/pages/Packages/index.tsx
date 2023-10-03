@@ -243,6 +243,7 @@ const PackageList = () => {
   };
 
   const handlePackageTypeSel = (filterValues) => {
+    dispatch({ type: 'setPage', page: 0 });
     setSelectedType(filterValues);
   };
 
@@ -389,6 +390,7 @@ const PackageList = () => {
           {Object.keys(frameWorkComponent).length > 0 ? (
             isMobile && !isTablet ? (
               <CustomSwipableList
+                key={selectedType}
                 allowSelection={true}
                 allowSwipe={true}
                 permissions={permissions?.packages}
