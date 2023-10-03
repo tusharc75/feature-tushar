@@ -59,6 +59,7 @@ const AddSerializedAsset = ({
   filterByPlant = null,
   handleSuccess = null
 }) => {
+  
   const renderedFrom = `${camelCase(routes?.serializedAsset.title)}_assign`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -488,6 +489,17 @@ const AddSerializedAsset = ({
         toastConfig.setToastConfig(error);
       });
   };
+
+  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
+  if (columnState) {
+    columns?.forEach((item) => {
+      columnState?.forEach((d) => {
+        if (d.colId === item.field) {
+          item.show = !d.hide;
+        }
+      });
+    });
+  }
 
   return (
     <Fragment>
