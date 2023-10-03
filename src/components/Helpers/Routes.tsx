@@ -185,6 +185,13 @@ const routes = {
         : RESOURCE_LABEL.priceTemplate,
     path: '/price-template'
   },
+  priceTemplateDetail: {
+    title:
+      storedRoutes && storedRoutes.priceTemplate && storedRoutes.priceTemplate.title
+        ? storedRoutes.priceTemplate?.title
+        : RESOURCE_LABEL.priceTemplate,
+    path: '/price-template'
+  },
   productBuilder: {
     title:
       storedRoutes && storedRoutes.productBuilder && storedRoutes.productBuilder.title
@@ -218,6 +225,13 @@ const routes = {
     path: '/product-category/detail'
   },
   productTemplate: {
+    title:
+      storedRoutes && storedRoutes.productTemplate && storedRoutes.productTemplate.title
+        ? storedRoutes.productTemplate?.title
+        : RESOURCE_LABEL.productTemplate,
+    path: '/product-template'
+  },
+  productTemplateDetail: {
     title:
       storedRoutes && storedRoutes.productTemplate && storedRoutes.productTemplate.title
         ? storedRoutes.productTemplate?.title

@@ -124,7 +124,7 @@ const AddExistingProduct = (props) => {
   }, []);
 
   const ProductNameRenderer = (params) => (
-    <Link className="link" title={params.value} to={`${routes.productDetail.path}/${params.data._id}`}>
+    <Link className="link" target='_blank' title={params.value} to={`${routes.productDetail.path}/${params.data._id}`}>
       {params.value}
     </Link>
   );
@@ -243,6 +243,9 @@ const AddExistingProduct = (props) => {
               col.headerName = fieldLabel;
               col.width = 180;
               col.show = true;
+              col.filter = false;
+              col.sortable = false;
+              col.fil
               col.cellRenderer = 'commonRenderer';
               col.leval = 'product-template';
               column.push(col);
@@ -259,6 +262,8 @@ const AddExistingProduct = (props) => {
                 col.headerName = fieldLabel;
                 col.width = 180;
                 col.show = true;
+                col.filter = false;
+                col.sortable = false;
                 col.cellRenderer = 'commonRenderer';
                 col.leval = 'product-template';
                 column.push(col);
@@ -275,6 +280,8 @@ const AddExistingProduct = (props) => {
               col.headerName = fieldLabel;
               col.width = 180;
               col.show = true;
+              col.filter = false;
+              col.sortable = false;
               col.cellRenderer = 'commonRenderer';
               col.leval = 'product-template';
               column.push(col);
