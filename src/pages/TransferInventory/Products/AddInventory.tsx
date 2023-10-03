@@ -11,12 +11,11 @@ import { isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData, removeLoca
 import { useData } from 'src/StateProvider/Provider';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import { isMobile } from 'react-device-detect';
-import { CommonRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import { CheckboxRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
 import routes from 'src/components/Helpers/Routes';
+import useColumns, { getFrameworkComponents, getStaticFields } from 'src/constants/useColumns';
 
 const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, renderedFrom, ignoreIds }) => {
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
@@ -25,6 +24,8 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, showFilteredRecordsOnly } = state;
   const [columns, setColumns] = useState(null);
+  const [frameWorkComponent, setFrameWorkComponent] = useState(null);
+  const { getColumnData } = useColumns();
 
   const {
     state: { user }
@@ -40,50 +41,47 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
   }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
 
   const fetchFields = async () => {
-    const column = [];
     const productResult = await axiosInstance().get('/field?resource=Product&view=true');
-    const productFields = productResult?.data?.data?.filter((e) =>
-      ['productName', 'productNumber', 'serializedProduct'].includes(e?.fieldData?.fieldName)
+    const data = productResult?.data?.data;
+    let columns = [];
+    let rendererNames = [];
+    data.forEach((o) => {
+      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path);
+      if (currentColumn !== null) {
+        columns = [...columns, currentColumn?.columnData];
+        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+          rendererNames.push(currentColumn?.rendererName);
+        }
+      }
+    });
+    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
+    tempFrameworkComponent = {
+      ...tempFrameworkComponent
+    };
+    setFrameWorkComponent({ ...tempFrameworkComponent });
+    columns.unshift(
+      {
+        field: 'qty',
+        headerName: 'Quantity',
+        show: true,
+        disabled: false,
+        cellRenderer: 'commonRenderer',
+        cellEditor: 'numericCellEditor',
+        editable: true,
+        filter: false
+      },
+      {
+        field: 'inventory',
+        headerName: 'Inventory',
+        show: true,
+        disabled: false,
+        cellRenderer: 'commonRenderer',
+        cellEditor: 'numericCellEditor',
+        editable: false,
+        filter: false
+      }
     );
-    productFields?.forEach((e) => {
-      if (e?.fieldData?.fieldName === 'productName') {
-        column.push({
-          field: 'productName',
-          primaryField: true,
-          headerName: e?.fieldData?.fieldLabel,
-          show: true,
-          disabled: true,
-          cellRenderer: 'nameRenderer'
-        });
-      }
-      if (e?.fieldData?.fieldName === 'productNumber') {
-        column.push({ field: 'productNumber', headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: 'commonRenderer' });
-      }
-      if (e?.fieldData?.fieldName === 'serializedProduct') {
-        column.push({ field: 'serializedProduct', headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: 'checkboxRenderer' });
-      }
-    });
-    column.push({
-      field: 'qty',
-      headerName: 'Quantity',
-      show: true,
-      disabled: false,
-      cellRenderer: 'commonRenderer',
-      cellEditor: 'numericCellEditor',
-      editable: true,
-      filter: false
-    });
-    column.push({
-      field: 'inventory',
-      headerName: 'Inventory',
-      show: true,
-      disabled: false,
-      cellRenderer: 'commonRenderer',
-      cellEditor: 'numericCellEditor',
-      editable: false,
-      filter: false
-    });
-    setColumns([...column]);
+    setColumns([...columns, ...getStaticFields()]);
   };
 
   const fetchProductInventory = () => {
@@ -177,18 +175,6 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
     submit(_data);
   };
 
-  const NameRenderer = (params) => (
-    <Link className="link" target='_blank' title={params.value} to={`${routes.productDetail.path}/${params.data.productId}`}>
-      {params.value}
-    </Link>
-  );
-
-  const frameworkComponents = {
-    checkboxRenderer: CheckboxRenderer,
-    nameRenderer: NameRenderer,
-    commonRenderer: CommonRenderer
-  };
-
   const onCellValueChanged = ({ data }) => {
     if (Number(data.qty) > Number(data.inventory)) {
       toastConfig.setToastConfig({
@@ -266,7 +252,7 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
             allowAction={false}
             columns={columns}
             dataRows={dataRows}
-            frameworkComponents={frameworkComponents}
+            frameworkComponents={frameWorkComponent}
             setGridApi={setGridApi}
             dispatch={dispatch}
             rowCount={rowCount}
