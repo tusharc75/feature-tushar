@@ -230,12 +230,13 @@ const PurchaseOrder = () => {
   };
 
   const handlePurchaseOrderTypeSel = (filterValues) => {
+    dispatch({ type: 'setPage', page: 0 });
     setSelectedType(filterValues);
-    if(referenceId && referenceType) {
+    if (referenceId && referenceType) {
       history.push(`?type=${filterValues}&referenceType=${referenceType}&referenceId=${referenceId}`);
-      } else {
-        history.push(`?type=${filterValues}`);
-      }
+    } else {
+      history.push(`?type=${filterValues}`);
+    }
   };
 
   const handleFilter = (event, newFilter) => {
@@ -318,16 +319,16 @@ const PurchaseOrder = () => {
   );
 
   const updateQueryParams = () => {
-    const queryParams = new URLSearchParams(history.location.search)
-    queryParams.delete('referenceId')
-    queryParams.delete('referenceType')
+    const queryParams = new URLSearchParams(history.location.search);
+    queryParams.delete('referenceId');
+    queryParams.delete('referenceType');
     referenceId = queryParams.get('referenceId');
     referenceType = queryParams.get('referenceType');
     history.replace({
-      search: queryParams.toString(),
-    })
+      search: queryParams.toString()
+    });
     fetchPurchaseOrder();
-  }
+  };
 
   return (
     <section className="main-container-v1">
@@ -444,14 +445,7 @@ const PurchaseOrder = () => {
                 }}
                 renderInput={(params) => <TextField {...params} margin="none" size="small" name="plant" label="Plant" variant="outlined" fullWidth />}
               />
-              {referenceType && (
-                <Chip
-                  className="ml-3"
-                  color="primary"
-                  label={`Rental Job : ${referenceType}`}
-                  onDelete={updateQueryParams}
-                />
-              )}
+              {referenceType && <Chip className="ml-3" color="primary" label={`Rental Job : ${referenceType}`} onDelete={updateQueryParams} />}
               {fromSalesOrder && (
                 <Chip
                   className="ml-3"
@@ -539,6 +533,7 @@ const PurchaseOrder = () => {
           Object.keys(frameWorkComponent).length > 0 ? (
             isMobile && !isTablet ? (
               <CustomSwipableList
+                key={selectedType}
                 allowSelection={true}
                 allowSwipe={true}
                 permissions={permissions.purchaseOrder}
