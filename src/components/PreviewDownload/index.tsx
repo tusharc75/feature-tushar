@@ -13,7 +13,7 @@ import { CiExport } from 'react-icons/ci';
 
 function PreviewDownload({
   resource,
-  referenceId,
+  referenceId='',
   columns,
   isSendEmail = false,
   defaultColumns = [],
@@ -22,7 +22,9 @@ function PreviewDownload({
   button2Title = 'Detail',
   extraQueryParams = null,
   subject = '',
-  isExcelDownload = false
+  isExcelDownload = false,
+  ids = [],
+  multiple = false
 }) {
   const toastConfig = useContext(CustomToastContext);
 
@@ -112,10 +114,10 @@ function PreviewDownload({
     if (type === 'Export') {
       api = `/excel/${referenceId}/detail?resource=${resource}&columns=${showColumns}`;
     } else if (pdfType === 'Detail') {
-      api = `/pdf/${referenceId}/detail?resource=${resource}&columns=${showColumns}`;
+      api = multiple ?  `pdf/multiple/detail?resource=${resource}&ids=${ids}&columns=${showColumns}`: `/pdf/${referenceId}/detail?resource=${resource}&columns=${showColumns}`;
     }
     else {
-      api = `/pdf/${referenceId}?resource=${resource}&columns=${showColumns}`;
+      api = multiple ?  `pdf/multiple?resource=${resource}&ids=${ids}&columns=${showColumns}`: `/pdf/${referenceId}?resource=${resource}&columns=${showColumns}`;
     }
     if (extraQueryParams) {
       for (const key in extraQueryParams) {

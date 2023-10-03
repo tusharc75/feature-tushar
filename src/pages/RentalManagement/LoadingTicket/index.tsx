@@ -54,6 +54,7 @@ import { useData } from 'src/StateProvider/Provider';
 import DateDialog from './DateDialog';
 import Edit from '@material-ui/icons/Edit';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import PreviewDownload from 'src/components/PreviewDownload';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -821,7 +822,18 @@ const LoadingTicket = ({
     <>
       <Box display="flex" justifyContent="flex-end" m={1}>
         <Box display="flex" alignItems="center" gridGap={'8px'} flexWrap={'wrap'}>
-          {!isMobile && (
+          <PreviewDownload resource={sidebarResource.deliveryTicket}
+           columns={columns?.map(col => {
+            if (col.field === 'description') {
+              return {...col, field: 'productDescription'};
+            } else if (col.field === 'productName') {
+              return {...col, field: 'product'};
+            } else {
+              return col;
+            }
+          }).filter(e => ['assetNumber', 'status', 'productDescription', 'product', 'warehouse'].includes(e.field))}
+           ids={uniqueLoadingTicket} multiple={true} />
+          {/* {!isMobile && (
             <Button
               onClick={() => {
                 setDownlodingFile(true);
@@ -859,7 +871,7 @@ const LoadingTicket = ({
             >
               {downlodingFile ? 'Please wait...' : 'Preview'}
             </Button>
-          )}
+          )} */}
           {allowedToEdit && (
             <Button
               variant={'outlined'}
