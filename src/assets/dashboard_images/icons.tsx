@@ -638,6 +638,32 @@ export const FLEET_MANAGEMENT = ({ colors = ['#3BE961', '#058D12'] }) => {
   );
 };
 
+export const IOT = ({ colors = ['#3BE961', '#058D12'] }) => {
+  return (
+    <>
+      <div
+        className="grid place-items-center"
+        style={{ width: `${IMAGE_WIDTH}px`, height: `${IMAGE_HEIGHT}px`, background: `linear-gradient(129deg, ${colors[0]}, ${colors[1]})` }}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 30 30">
+          <g clipPath="url(#clip0_5327_23011)">
+            <path
+              fill="#fff"
+              stroke="#fff"
+              d="M24.875 7.625v11.531a.5.5 0 01-1 0V7.625c0-.827-.673-1.5-1.5-1.5H7.625c-.827 0-1.5.673-1.5 1.5v14.75c0 .827.673 1.5 1.5 1.5h14.75c.827 0 1.5-.673 1.5-1.5a.5.5 0 011 0c0 1.378-1.122 2.5-2.5 2.5H7.625a2.503 2.503 0 01-2.5-2.5V7.625c0-1.378 1.122-2.5 2.5-2.5h14.75c1.378 0 2.5 1.122 2.5 2.5zm-9.875-4a.5.5 0 00.5-.5V.5a.5.5 0 00-1 0v2.625a.5.5 0 00.5.5zm-5 0a.5.5 0 00.5-.5V.5a.5.5 0 00-1 0v2.625a.5.5 0 00.5.5zm10 0a.5.5 0 00.5-.5V.5a.5.5 0 00-1 0v2.625a.5.5 0 00.5.5zm-5 22.75a.5.5 0 00-.5.5V29.5a.5.5 0 001 0v-2.625a.5.5 0 00-.5-.5zm5 0a.5.5 0 00-.5.5V29.5a.5.5 0 001 0v-2.625a.5.5 0 00-.5-.5zm-10 0a.5.5 0 00-.5.5V29.5a.5.5 0 001 0v-2.625a.5.5 0 00-.5-.5zM29.5 14.5h-2.625a.5.5 0 000 1H29.5a.5.5 0 000-1zm-2.625-4H29.5a.5.5 0 000-1h-2.625a.5.5 0 000 1zm2.625 9h-2.625a.5.5 0 000 1H29.5a.5.5 0 000-1zm-26.375-5H.5a.5.5 0 000 1h2.625a.5.5 0 000-1zm0 5H.5a.5.5 0 000 1h2.625a.5.5 0 000-1zm0-10H.5a.5.5 0 000 1h2.625a.5.5 0 000-1zm12.538 7.306a.937.937 0 11-1.324 1.326.937.937 0 011.324-1.326zm1.635-.928a.5.5 0 000-.707 3.248 3.248 0 00-4.596 0 .5.5 0 10.707.707c.88-.88 2.303-.88 3.182 0a.5.5 0 00.707 0zm1.856-1.856a.5.5 0 000-.707 5.872 5.872 0 00-8.308 0 .5.5 0 10.707.707 4.872 4.872 0 016.894 0 .5.5 0 00.707 0z"
+            ></path>
+          </g>
+          <defs>
+            <clipPath id="clip0_5327_23011">
+              <path fill="#fff" d="M0 0H30V30H0z"></path>
+            </clipPath>
+          </defs>
+        </svg>
+      </div>
+    </>
+  );
+};
+
 const allIcons = {
   HERO,
   CRM,
@@ -662,7 +688,8 @@ const allIcons = {
   PURCHASING_MANAGEMENT,
   PLANNING_FORECASTING,
   FIELD_SERVICE_OPERATION,
-  FLEET_MANAGEMENT
+  FLEET_MANAGEMENT,
+  IOT
 };
 
 export default allIcons;
