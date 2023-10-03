@@ -286,7 +286,7 @@ const ProjectSales: FC = () => {
     if (isExport) {
       deepFilter = `?`;
     }
-    
+
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
     }
@@ -400,6 +400,7 @@ const ProjectSales: FC = () => {
   };
 
   const handleProjectFilter = (filterValues) => {
+    dispatch({ type: 'setPage', page: 0 });
     setselectedType(filterValues);
   };
 
@@ -541,6 +542,7 @@ const ProjectSales: FC = () => {
           {Object.keys(frameWorkComponent).length > 0 ? (
             isMobile && !isTablet ? (
               <CustomSwipableList
+                key={selectedType}
                 allowSelection={true}
                 allowSwipe={true}
                 permissions={permissions?.projectSales}
