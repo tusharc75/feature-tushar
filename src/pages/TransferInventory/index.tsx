@@ -53,7 +53,8 @@ const TransferInventory = () => {
   const [columns, setColumns] = useState([]);
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { dataRows, appendRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } =
+    state;
   const [open, setOpen] = React.useState(false);
   const [isOpenDialog, setisOpenDialog] = useState(false);
   const history = useHistory();
@@ -127,7 +128,20 @@ const TransferInventory = () => {
         data.data = data.data?.map((u, i) => ({
           ...prepareDataForGrid(u, user)
         }));
-        dispatch({ type: 'initialize', data: rows, count: data.count });
+        if (appendRows) {
+          dispatch({
+            type: 'initialize',
+            data: [...dataRows, ...rows],
+            count: data.count
+          });
+        } else {
+          dispatch({
+            type: 'initialize',
+            data: rows,
+            count: data.count
+          });
+        }
+        // dispatch({ type: 'initialize', data: rows, count: data.count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
