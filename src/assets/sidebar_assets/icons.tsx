@@ -175,3 +175,59 @@ export const FieldServiceOperationIcon: React.FC<svgInterface> = ({ width = null
     </svg>
   );
 };
+
+export const FleetManagementIcon: React.FC<svgInterface> = ({ width = null, height = null, size = 20, color = 'currentcolor', ...others }) => {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" {...others} width={width ? width : size} height={height ? height : size} fill="none" viewBox="0 0 43 43">
+      <path
+        fill="#fff"
+        stroke="#fff"
+        d="M27.337 21.287l-8.16 8.16-4.202-4.205a1.441 1.441 0 00-2.475 1.013 1.437 1.437 0 00.44 1.023l5.22 5.222a1.437 1.437 0 002.036 0l9.177-9.177a1.44 1.44 0 10-2.036-2.036z"
+      ></path>
+      <path
+        fill="#fff"
+        stroke="#fff"
+        d="M34.114 3.822h-2.16V2.44a1.44 1.44 0 10-2.88 0v1.382H13.239V2.44a1.44 1.44 0 00-2.88 0v1.382h-2.16C4.23 3.822 1 7.052 1 11.02v23.093c0 3.97 3.23 7.199 7.199 7.199h25.915c3.97 0 7.199-3.23 7.199-7.2V11.02c0-3.969-3.23-7.198-7.2-7.198zM3.879 11.02A4.324 4.324 0 018.2 6.7h2.16v1.382a1.44 1.44 0 102.879 0V6.701h15.837v1.382a1.44 1.44 0 002.88 0V6.701h2.159a4.324 4.324 0 014.319 4.32v1.454H3.879V11.02zm30.235 27.412H8.199a4.324 4.324 0 01-4.32-4.32V15.355h34.554v18.76a4.324 4.324 0 01-4.32 4.319z"
+      ></path>
+    </svg>
+  );
+};
+
+export const IOT: React.FC<svgInterface> = ({ width = null, height = null, size = 20, color = 'currentcolor', ...others }) => {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" {...others} width={width ? width : size} height={height ? height : size} fill="none" viewBox="0 0 30 30">
+      <g clipPath="url(#clip0_5327_23011)">
+        <path
+          fill="#fff"
+          stroke="#fff"
+          d="M24.875 7.625v11.531a.5.5 0 01-1 0V7.625c0-.827-.673-1.5-1.5-1.5H7.625c-.827 0-1.5.673-1.5 1.5v14.75c0 .827.673 1.5 1.5 1.5h14.75c.827 0 1.5-.673 1.5-1.5a.5.5 0 011 0c0 1.378-1.122 2.5-2.5 2.5H7.625a2.503 2.503 0 01-2.5-2.5V7.625c0-1.378 1.122-2.5 2.5-2.5h14.75c1.378 0 2.5 1.122 2.5 2.5zm-9.875-4a.5.5 0 00.5-.5V.5a.5.5 0 00-1 0v2.625a.5.5 0 00.5.5zm-5 0a.5.5 0 00.5-.5V.5a.5.5 0 00-1 0v2.625a.5.5 0 00.5.5zm10 0a.5.5 0 00.5-.5V.5a.5.5 0 00-1 0v2.625a.5.5 0 00.5.5zm-5 22.75a.5.5 0 00-.5.5V29.5a.5.5 0 001 0v-2.625a.5.5 0 00-.5-.5zm5 0a.5.5 0 00-.5.5V29.5a.5.5 0 001 0v-2.625a.5.5 0 00-.5-.5zm-10 0a.5.5 0 00-.5.5V29.5a.5.5 0 001 0v-2.625a.5.5 0 00-.5-.5zM29.5 14.5h-2.625a.5.5 0 000 1H29.5a.5.5 0 000-1zm-2.625-4H29.5a.5.5 0 000-1h-2.625a.5.5 0 000 1zm2.625 9h-2.625a.5.5 0 000 1H29.5a.5.5 0 000-1zm-26.375-5H.5a.5.5 0 000 1h2.625a.5.5 0 000-1zm0 5H.5a.5.5 0 000 1h2.625a.5.5 0 000-1zm0-10H.5a.5.5 0 000 1h2.625a.5.5 0 000-1zm12.538 7.306a.937.937 0 11-1.324 1.326.937.937 0 011.324-1.326zm1.635-.928a.5.5 0 000-.707 3.248 3.248 0 00-4.596 0 .5.5 0 10.707.707c.88-.88 2.303-.88 3.182 0a.5.5 0 00.707 0zm1.856-1.856a.5.5 0 000-.707 5.872 5.872 0 00-8.308 0 .5.5 0 10.707.707 4.872 4.872 0 016.894 0 .5.5 0 00.707 0z"
+        ></path>
+      </g>
+      <defs>
+        <clipPath id="clip0_5327_23011">
+          <path fill="#fff" d="M0 0H30V30H0z"></path>
+        </clipPath>
+      </defs>
+    </svg>
+  );
+};
+
+export const CustomForms: React.FC<svgInterface> = ({ width = null, height = null, size = 20, color = 'currentcolor', ...others }) => {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" {...others} width={width ? width : size} height={height ? height : size} fill="none" viewBox="0 0 24 24">
+      <g clipPath="url(#clip0_5327_23021)">
+        <path
+          fill="#fff"
+          stroke="#fff"
+          strokeWidth="0.5"
+          d="M10.778 16.333h7.333v2.556h-7.333v-2.556zM8.333 6.111H5.89v2.556h2.444V6.11zm2.445 7.667h7.333v-2.556h-7.333v2.556zm0-5.111h7.333V6.11h-7.333v2.556zm-2.445 2.555H5.89v2.556h2.444v-2.556zM23 3.556v17.888C23 22.85 21.9 24 20.556 24H3.444C2.1 24 1 22.85 1 21.444V3.556C1 2.15 2.1 1 3.444 1h17.112C21.9 1 23 2.15 23 3.556zm-2.444 0H3.444v17.888h17.112V3.556zM8.333 16.333H5.89v2.556h2.444v-2.556z"
+        ></path>
+      </g>
+      <defs>
+        <clipPath id="clip0_5327_23021">
+          <path fill="#fff" d="M0 0H24V24H0z"></path>
+        </clipPath>
+      </defs>
+    </svg>
+  );
+};
