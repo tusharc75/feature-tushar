@@ -38,7 +38,14 @@ import SearchBox from '../../components/Helpers/SearchBox';
 import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, removeLocalStorage, sidebarResource, supplierAccount } from '../../constants/helpers';
+import {
+  getLocalStorageArrayData,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  removeLocalStorage,
+  sidebarResource,
+  supplierAccount
+} from '../../constants/helpers';
 import useColumns, { getFrameworkComponents, getStaticFields, gridFilterParser } from '../../constants/useColumns';
 import styles from '../Leads/Header.module.scss';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
@@ -571,6 +578,7 @@ export default function Account(props) {
   };
 
   const handleAccountSelect = (filterValues) => {
+    dispatch({ type: 'setPage', page: 0 });
     setselectedType(filterValues);
   };
 
@@ -669,26 +677,29 @@ export default function Account(props) {
           }}
           additionalParams={getQueryString(true)}
           extraImportExportLinks={[
-            ...((accountResource === 'supplierAccount' && user?.user?.brandPolicy?.serializedAssetCertification) ? [
-              {
-                title: 'Supplier View Template',
-                api: `${accountApi}/items/unknown/template`,
-                type: 'download'
-              },
-              {
-                title: 'Supplier View Export',
-                api: `${accountApi}/items/unknown/template?export=true${getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
-                  ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
-                  : ''
-                  }`,
-                type: 'export'
-              },
-              {
-                title: 'Supplier View Import',
-                api: `${accountApi}/items/unknown/import`,
-                type: 'import'
-              }
-            ] : [])
+            ...(accountResource === 'supplierAccount' && user?.user?.brandPolicy?.serializedAssetCertification
+              ? [
+                  {
+                    title: 'Supplier View Template',
+                    api: `${accountApi}/items/unknown/template`,
+                    type: 'download'
+                  },
+                  {
+                    title: 'Supplier View Export',
+                    api: `${accountApi}/items/unknown/template?export=true${
+                      getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
+                        ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
+                        : ''
+                    }`,
+                    type: 'export'
+                  },
+                  {
+                    title: 'Supplier View Import',
+                    api: `${accountApi}/items/unknown/import`,
+                    type: 'import'
+                  }
+                ]
+              : [])
           ]}
         />
       </div>
@@ -960,6 +971,7 @@ export default function Account(props) {
         {Object.keys(frameWorkComponent).length > 0 ? (
           isMobile && !isTablet ? (
             <CustomSwipableList
+              key={selectedType}
               allowSelection={true}
               allowSwipe={true}
               permissions={accountPermissions}
@@ -1076,8 +1088,9 @@ export default function Account(props) {
         {singleApproveDisapproveAccount.show ? (
           <ConfirmationDialog
             open={singleApproveDisapproveAccount.show}
-            message={`Are you sure you want to ${singleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} account: ${singleApproveDisapproveAccount.accountName
-              } ? `}
+            message={`Are you sure you want to ${singleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} account: ${
+              singleApproveDisapproveAccount.accountName
+            } ? `}
             onClose={() =>
               setSingleApproveDisapproveAccount({
                 id: null,
@@ -1092,8 +1105,9 @@ export default function Account(props) {
         {multipleApproveDisapproveAccount.show ? (
           <ConfirmationDialog
             open={multipleApproveDisapproveAccount.show}
-            message={`Are you sure you want to ${multipleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} selected ${multipleApproveDisapproveAccount.selectedRecords
-              } account(s) ? `}
+            message={`Are you sure you want to ${multipleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} selected ${
+              multipleApproveDisapproveAccount.selectedRecords
+            } account(s) ? `}
             onClose={() =>
               setMultipleApproveDisapproveAccount({
                 show: false,

@@ -548,6 +548,7 @@ const QuoteBuilders = () => {
   };
 
   const handleQuoteBuilderTypeSel = (filterValues) => {
+    dispatch({ type: 'setPage', page: 0 });
     setSelectedType(filterValues);
     history.push(`?type=${filterValues}`);
   };
@@ -727,6 +728,7 @@ const QuoteBuilders = () => {
         </div>
         {isMobile && !isTablet ? (
           <CustomSwipableList
+            key={selectedType}
             allowSelection={true}
             allowSwipe={true}
             permissions={permissions.quoteBuilder}

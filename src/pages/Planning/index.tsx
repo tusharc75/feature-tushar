@@ -149,11 +149,11 @@ const Planning = () => {
     if (isExport) {
       deepFilter = `?`;
     }
-    
+
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
     }
-   
+
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
@@ -321,6 +321,7 @@ const Planning = () => {
   }, []);
 
   const onTypeChange = (event, type) => {
+    dispatch({ type: 'setPage', page: 0 });
     const value = PlanningType.find((d) => d.key === type).value;
     setSelectedType(value);
     history.push(`?type=${value}`);
@@ -475,6 +476,7 @@ const Planning = () => {
         {Object.keys(frameWorkComponent).length > 0 ? (
           isMobile && !isTablet ? (
             <CustomSwipableList
+              key={selectedType}
               allowSelection={true}
               allowSwipe={true}
               permissions={permissions?.planning}

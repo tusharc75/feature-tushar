@@ -282,6 +282,7 @@ const Invoice = () => {
   };
 
   const handleInvoiceTypeSel = (filterValues) => {
+    dispatch({ type: 'setPage', page: 0 });
     setSelectedType(filterValues);
   };
 
@@ -349,7 +350,7 @@ const Invoice = () => {
           permissions={permissions?.invoice}
           module="invoice"
           api={invoice.api}
-          afterImportCompleted={() => { }}
+          afterImportCompleted={() => {}}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
@@ -406,6 +407,7 @@ const Invoice = () => {
         {Object.keys(frameworkComponent).length > 0 && columns ? (
           isMobile && !isTablet ? (
             <CustomSwipableList
+              key={selectedType}
               allowSelection={true}
               allowSwipe={true}
               permissions={permissions?.invoice}
