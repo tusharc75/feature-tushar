@@ -4125,3 +4125,27 @@ body {
 div[class*='line-clamp-'] {
   display: -webkit-box !important;
 }
+
+.show-only-selected-switch {
+  .MuiSwitch-track {
+    [data-mode='dark'] & {
+      background-color: #474752 !important;
+    }
+    border-color: var(--common-border-color) !important;
+  }
+  .Mui-checked + .MuiSwitch-track {
+    [data-mode='dark'] & {
+      background-color: white !important;
+    }
+  }
+  .Mui-disabled + .MuiSwitch-track {
+    [data-mode='dark'] & {
+      background-color: white !important;
+    }
+  }
+  .MuiSwitch-thumb {
+    [data-mode='dark'] & {
+      background-color: var(--dark-primary) !important;
+    }
+  }
+}
