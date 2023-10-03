@@ -73,7 +73,6 @@ const CustomSwitch = withStyles((theme: Theme) =>
   );
 });
 
-
 function CustomReactTableHeaderOptions({
   columns,
   // setColumns,
@@ -103,7 +102,6 @@ function CustomReactTableHeaderOptions({
   const { dispatch }: any = useData();
 
   useEffect(() => {
-
     const saved = localStorage.getItem(`${renderedFrom}_selected`);
     if (saved) {
       try {
@@ -121,7 +119,6 @@ function CustomReactTableHeaderOptions({
     } else {
       setDisableSelectionSwitch(true);
     }
-
   }, [selectedRecords]);
 
   const updateGridHiddenColumns = (hiddenColumns = []) => {
@@ -180,7 +177,6 @@ function CustomReactTableHeaderOptions({
   return (
     <>
       {showOnlyShowFilteredRecordSwitch && (
-
         <>
           <FormControlLabel
             value={checked}
@@ -194,12 +190,12 @@ function CustomReactTableHeaderOptions({
                 });
               }
             }}
+            className="show-only-selected-switch"
             control={<CustomSwitch disabled={disableSelectionSwitch} />}
             style={{ fontSize: '0.8rem', marginLeft: 0, padding: '0px 0 10px' }}
             label={<Typography style={{ fontWeight: 400 }}>Show Only Selected</Typography>}
             labelPlacement="end"
           />
-
         </>
       )}
     </>

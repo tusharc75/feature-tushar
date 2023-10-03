@@ -81,7 +81,7 @@ function Roadmap({ type, filter }) {
   };
 
   return activity ? (
-    <Box bgcolor="white">
+    <Box>
       <Box border={1} borderColor="var(--common-border-color)" display="flex" height={height} style={{ position: 'relative' }}>
         <Box display="flex" width="100%" height="100%" style={{ position: 'absolute' }}>
           <Box
@@ -90,7 +90,13 @@ function Roadmap({ type, filter }) {
             borderColor="var(--common-border-color)"
             style={{ position: 'relative', overflow: 'hidden' }}
           >
-            <Box height={60} bgcolor="grey.200" display="flex" style={{ position: 'sticky', top: 0, zIndex: 1 }}>
+            <Box
+              height={60}
+              style={{}}
+              display="flex"
+              style={{ borderBottom: '1px solid var(--common-border-color)' }}
+              className=" sticky top-0 z-[1]"
+            >
               <Box p={2} display="flex" alignItems="center">
                 <Map />
                 <Box mr={1} />
