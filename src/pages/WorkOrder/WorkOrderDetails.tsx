@@ -10,7 +10,15 @@ import DetailsPage from 'src/components/Shared/DetailsPage';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { workOrder, sidebarResource, ACTIVITY_RESOURCE, WORK_ORDER_STATUS, ASSET_STATUS, WORK_ORDER_TYPE, MATERIAL_SUB_TYPE } from 'src/constants/helpers';
+import {
+  workOrder,
+  sidebarResource,
+  ACTIVITY_RESOURCE,
+  WORK_ORDER_STATUS,
+  ASSET_STATUS,
+  WORK_ORDER_TYPE,
+  MATERIAL_SUB_TYPE
+} from 'src/constants/helpers';
 import queryString from 'query-string';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -214,7 +222,9 @@ const WorkOrderDetails = () => {
             {workOrderData ? (
               <>
                 {permissions?.workOrder?.isUpdate &&
-                  workOrderData?.serializedAsset && allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.completed && (
+                  workOrderData?.serializedAsset &&
+                  allowedToEdit &&
+                  workOrderData?.status !== WORK_ORDER_STATUS.completed && (
                     <Button
                       variant={isMobile && !isTablet ? 'text' : 'contained'}
                       size="small"
@@ -268,7 +278,15 @@ const WorkOrderDetails = () => {
             ) : (
               <Skeleton variant="text" width="150px" height="40px" />
             )}
-            <ActivityButton referenceId={workOrderData?._id} resource={ACTIVITY_RESOURCE.workOrder} resourceLabel={workOrderData?.workOrderNumber} />
+            <ActivityButton
+              referenceId={workOrderData?._id}
+              resource={ACTIVITY_RESOURCE.workOrder}
+              resourceLabel={workOrderData?.workOrderNumber}
+              extraRelatedTo={{
+                referenceId: workOrderData?.repairOrder?.optionValue,
+                resource: ACTIVITY_RESOURCE.repairOrder,
+              }}
+            />
           </Box>
         </Box>
       </Box>
@@ -283,11 +301,11 @@ const WorkOrderDetails = () => {
           <CustomTab index={2} value={2} className={'tabLayout'} {...a11yProps(2)}>
             <BiFoodMenu className="mr-1" fontSize="inherit" /> Products/Consumables
           </CustomTab>
-          {workOrderData?.type === WORK_ORDER_TYPE.productionOrder &&
+          {workOrderData?.type === WORK_ORDER_TYPE.productionOrder && (
             <CustomTab index={3} value={3} className={'tabLayout'} {...a11yProps(3)}>
               <BiFoodMenu className="mr-1" fontSize="inherit" /> BOM
             </CustomTab>
-          }
+          )}
           <CustomTab index={4} value={4} className={'tabLayout'} {...a11yProps(4)}>
             <RiFlowChart className="mr-1" fontSize="inherit" /> Views
           </CustomTab>
