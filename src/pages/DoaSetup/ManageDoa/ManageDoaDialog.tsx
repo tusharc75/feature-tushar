@@ -240,6 +240,7 @@ const DoaDialog = ({
   const [filter, setFilter] = useState(doaType ? DOAType.find((d) => d.value === doaType).key : 'Sequence');
   const [selectedType, setSelectedType] = useState(doaType ? doaType : DOAType.find((d) => d.key === 'Sequence').value);
   const formikRef = useRef<FormikProps<{ users: any[] }>>();
+
   const handleFilter = (event, newFilter) => {
     if (newFilter !== null) {
       setFilter(newFilter);
