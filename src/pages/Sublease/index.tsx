@@ -151,11 +151,11 @@ const Sublease = () => {
     if (isExport) {
       deepFilter = `?`;
     }
-    
+
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
     }
- 
+
     let filterById = [];
     if (referenceId) {
       filterById.push({ field: 'rentalJob', term: referenceId });
@@ -206,6 +206,7 @@ const Sublease = () => {
       });
   };
   const handleSubleaseTypeSel = (filterValues) => {
+    dispatch({ type: 'setPage', page: 0 });
     setSelectedType(filterValues);
     if (referenceId && referenceType) {
       history.push(`?type=${filterValues}&referenceType=${referenceType}&referenceId=${referenceId}`);
@@ -438,6 +439,7 @@ const Sublease = () => {
           Object.keys(frameWorkComponent).length > 0 ? (
             isMobile && !isTablet ? (
               <CustomSwipableList
+                key={selectedType}
                 allowSelection={true}
                 allowSwipe={true}
                 permissions={permissions.sublease}

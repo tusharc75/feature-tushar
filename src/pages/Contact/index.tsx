@@ -527,6 +527,7 @@ export default function Contact(props) {
   };
 
   const handleContactSelect = (filterValues) => {
+    dispatch({ type: 'setPage', page: 0 });
     setSelectedType(filterValues);
   };
   const handleOpen = () => {
@@ -785,6 +786,7 @@ export default function Contact(props) {
         {Object.keys(frameWorkComponent).length > 0 &&
           (isMobile && !isTablet ? (
             <CustomSwipableList
+              key={selectedType}
               allowSelection={true}
               allowSwipe={true}
               permissions={contactPermissions}
@@ -883,7 +885,7 @@ export default function Contact(props) {
               onClose={() => {
                 setShowCreateContactDialog({ open: false, isClone: false, idToClone: null });
               }}
-              onSuccess={() => { }}
+              onSuccess={() => {}}
               isRedirectToDetailPage={true}
             />
           )}

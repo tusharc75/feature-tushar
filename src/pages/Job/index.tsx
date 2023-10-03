@@ -285,6 +285,7 @@ const Job = () => {
   };
 
   const handleJobTypeSel = (filterValues) => {
+    dispatch({ type: 'setPage', page: 0 });
     setSelectedType(filterValues);
     history.push(`?type=${filterValues}`);
   };
@@ -402,6 +403,7 @@ const Job = () => {
             {Object.keys(frameworkComponents).length > 0 ? (
               isMobile && !isTablet ? (
                 <CustomSwipableList
+                  key={selectedType}
                   allowSelection={true}
                   allowSwipe={true}
                   permissions={permissions?.job}
