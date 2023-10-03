@@ -30,7 +30,6 @@ import { isEqual } from 'lodash';
 const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isRedirectToDetailPage = true, referenceData = null }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-
   const [submitting, setSubmitting] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -61,6 +60,14 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isR
           let data;
           const response: any = await axiosInstance().get(`${packages.api}/${packageId}`);
           data = response?.data?.data;
+          if (data?.customerAccount !== '') {
+            const inputString = data?.packageName;
+            const emDashIndex = inputString.indexOf('—');
+            if (emDashIndex !== -1) {
+              const resultString = inputString.slice(0, emDashIndex).trim();
+              data['packageName'] = resultString;
+            }
+          }
           if (isClone) {
             const { _id, brand, createdBy, entity, packageName, history, updatedBy, ...rest } = data;
             setPackageName(packageName);
@@ -81,7 +88,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isR
         let initialData = getObjKeys('', fieldsDataForCreate);
         if (referenceData) {
           if (referenceData?.packageType && fieldsDataForCreate?.find((e) => e.fieldName === 'packageType')) {
-            initialData['packageType'] = referenceData?.packageType
+            initialData['packageType'] = referenceData?.packageType;
           }
         }
         setInitialData({
@@ -93,13 +100,26 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isR
       toastConfig.setToastConfig(error);
     }
   };
+  const findCustomer = (value: any) => {
+    const customerOption = initialData?.fields?.find((e) => e.fieldName === 'customerAccount')?.option;
+    const findOptions = customerOption.filter((item) => item.optionValue === value);
+    return findOptions[0].optionLabel;
+  };
 
-  const handleSubmit = (values) => {
+  const handleSubmit = (values: any) => {
+    const data = { ...values };
+    if (data?.customerAccount !== '') {
+      const customerName = findCustomer(data?.customerAccount);
+      data['packageName'] = `${data?.packageName} — ${customerName}`;
+      if (!data.packageName.includes(customerName)) {
+        data['packageName'] = `${data?.packageName} — ${customerName}`;
+      }
+    }
     setSubmitting(true);
     if (packageId && isClone === false) {
       values._id = packageId;
       axiosInstance()
-        .put(`${packages.api}`, values)
+        .put(`${packages.api}`, data)
         .then(({ data }) => {
           setSubmitting(false);
           onSuccess();
@@ -115,7 +135,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isR
         });
     } else {
       axiosInstance()
-        .post(`${packages.api}`, values)
+        .post(`${packages.api}`, data)
         .then(({ data: { data, message } }) => {
           if (isRedirectToDetailPage) {
             history.push(`${routes.packagesDetail.path}/${data._id}`);
