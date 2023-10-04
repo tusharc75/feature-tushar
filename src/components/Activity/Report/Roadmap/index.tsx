@@ -90,13 +90,7 @@ function Roadmap({ type, filter }) {
             borderColor="var(--common-border-color)"
             style={{ position: 'relative', overflow: 'hidden' }}
           >
-            <Box
-              height={60}
-              style={{}}
-              display="flex"
-              style={{ borderBottom: '1px solid var(--common-border-color)' }}
-              className=" sticky top-0 z-[1]"
-            >
+            <Box height={60} display="flex" style={{ borderBottom: '1px solid var(--common-border-color)' }} className=" sticky top-0 z-[1]">
               <Box p={2} display="flex" alignItems="center">
                 <Map />
                 <Box mr={1} />
