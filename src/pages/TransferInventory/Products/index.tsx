@@ -232,7 +232,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
         <IconButton
           size="small"
           onClick={() => {
-            window.open(`${routes.invoiceDetail.path}/${params?.data?._id}`);
+            window.open(`/product/detail/${params.data.product}`);
           }}
         >
           <OpenInNewIcon fontSize="small" color="primary" />
