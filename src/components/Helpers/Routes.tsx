@@ -1049,7 +1049,7 @@ const routes = {
         ? storedRoutes.accountsReceivable?.title
         : RESOURCE_LABEL.accountsReceivable,
     path: '/accounts-receivable'
-  }
+  },
   deviceTemplates: {
     title: storedRoutes && storedRoutes.deviceTemplates && storedRoutes.deviceTemplates?.title ? storedRoutes.deviceTemplates?.title
       : RESOURCE_LABEL.deviceTemplates,
