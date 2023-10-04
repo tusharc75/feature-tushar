@@ -341,6 +341,7 @@ export const sidebarResource = {
   workStations: 'Work Stations',
   deviceTemplateAlert: 'Device Template Alert',
   chartOfAccount: 'Chart Of Account',
+  flash : 'Flash'
 };
 
 export const primaryFields = {
@@ -469,6 +470,7 @@ export const RESOURCE_LABEL = {
   workStations: 'Work Stations',
   deviceTemplateAlert: 'Device Template Alert',
   chartOfAccount: 'Chart Of Account',
+  flash : 'Flash'
 };
 
 export const CHILD_RESOURCE = {
@@ -845,6 +847,13 @@ export const leadTimeMaster = {
 export const workOrder = {
   resource: 'Work Order',
   api: '/work-order'
+};
+
+export const flash = {
+  api: '/flash',
+  route: '/flash',
+  permission: 'Flash',
+  resource: 'Flash'
 };
 
 export const profileMenuItems = {
@@ -2665,6 +2674,15 @@ export const SERVICE_TYPE = {
   shopService: 'Shop Service',
   fieldService: 'Field Service'
 };
+
+export const QUOTE_PROCESS_STATUS = {
+  new: 'New',
+  priceBuilder: 'Price Builder',
+  quoteBuilder: 'Quote Builder',
+  doaProcess: 'DOA Process',
+  sendToCustomer: 'Send To Customer',
+  end: 'End'
+}
 
 export const convertMsToTime = (milliseconds: any) => {
   function padTo2Digits(num) {

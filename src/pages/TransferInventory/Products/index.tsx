@@ -26,6 +26,8 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import AddBoxOutlinedIcon from '@material-ui/icons/AddBoxOutlined';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import ProductQtyDialog from './ProductQtyDialog';
 
 const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToEdit, fetchTransferInventoryData, updateStatus }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -44,11 +46,10 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
   const [isAdding, setIsAdding] = useState(false);
   const [columns, setColumns] = useState(null);
-
+  const [viewProductEditDialog, setProductEditDialog] = useState({ open: false, productData: null });
   const history = useHistory();
 
   const [assignNumber, setAssignNumber] = useState({ open: false, serialNumber: [], qty: 0, product: '' });
-
   useEffect(() => {
     fetchFields();
   }, []);
@@ -217,9 +218,28 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
   };
 
   const ProductNameRenderer = (params) => (
-    <p className="link text-truncate" title={params.value} onClick={() => window.open(`/product/detail/${params.data.product}`)}>
-      {params.value}
-    </p>
+    <>
+      {params?.data?.canDelete ?
+        <p
+          className="link text-truncate"
+          title={params.value}
+          onClick={() => {
+            setProductEditDialog({ open: true, productData: params?.data });
+          }}
+        >
+          {params.value}
+        </p> : <p className="text-truncate">{params.value}</p>}
+      <Box ml={1}>
+        <IconButton
+          size="small"
+          onClick={() => {
+            window.open(`/product/detail/${params.data.product}`);
+          }}
+        >
+          <OpenInNewIcon fontSize="small" color="primary" />
+        </IconButton>
+      </Box>
+    </>
   );
 
   const SerialNumberRenderer = (params) =>
@@ -320,6 +340,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
         qty: Number(qty)
       })
       .then(() => {
+        setProductEditDialog({ open: false, productData: null })
         fetchProducts();
       })
       .catch((err) => {
@@ -371,9 +392,9 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
               dataRows={dataRows}
               selectedRecords={selectedRecords}
               dispatch={dispatch}
-              onEdit={(data) => {}}
+              onEdit={(data) => { }}
               extraParamsToCheckDelete={true}
-              onDelete={(data) => {}}
+              onDelete={(data) => { }}
               rowCount={rowCount}
               page={page}
               loading={loading}
@@ -391,7 +412,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={(data) => {}}
+              onClone={(data) => { }}
               renderedFrom={renderedFrom}
             />
           ) : (
@@ -421,6 +442,16 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
           </Box>
         )}
       </Box>
+      {viewProductEditDialog.open && (
+        <ProductQtyDialog
+          rowData={viewProductEditDialog?.productData}
+          transferInventoryData={transferInventoryData}
+          onClose={() => {
+            setProductEditDialog({ open: false, productData: null });
+          }}
+          handleSave={onCellValueChanged}
+        />
+      )}
       {openAddNewInventory && transferInventoryData?.transferFromPlant?.optionValue && (
         <AddInventory
           isAdding={isAdding}

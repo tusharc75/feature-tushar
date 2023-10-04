@@ -223,7 +223,7 @@ export default function Attachment() {
           {row.original.relatedTo && row.original.relatedTo?.length > 0 ? (
             row.original.relatedTo.map((d) => {
               return (
-                <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center' }} key={d.name}>
                   <p>{d.name}</p>
                   <IconButton className="ml-3" size="small" onClick={() => redirectToResource(d?.type, d?.referenceId)}>
                     <OpenInNewIcon fontSize="small" color="primary" />
@@ -285,29 +285,33 @@ export default function Attachment() {
         const allPdf = _.every(row.original?.file, (d) => _.endsWith(d?.url, '.pdf'));
         return (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <HtmlTooltip title="Send Email" >
-              <IconButton size="small"
+            <HtmlTooltip title="Send Email">
+              <IconButton
+                size="small"
                 onClick={() => {
                   if (row.original.type === 'folder') {
-                    handleMailForFolder(row.original?._id, row.original?.name)
-                  }
-                  else {
+                    handleMailForFolder(row.original?._id, row.original?.name);
+                  } else {
                     handleMail(row.original);
                   }
-                }}>
+                }}
+              >
                 <SendIcon color="primary" style={{ maxWidth: '18px' }} />
               </IconButton>
             </HtmlTooltip>
             <HtmlTooltip title="Download">
-              <IconButton size="small" aria-label="Download" onClick={() => {
-                if (row.original.type === 'folder') {
-                  downloadFolder(row.original?._id, row.original?.name)
-                }
-                else {
-                  downloadFile(row.original)
-                }
-              }}
-              ><GetAppIcon fontSize="small" color="primary" />
+              <IconButton
+                size="small"
+                aria-label="Download"
+                onClick={() => {
+                  if (row.original.type === 'folder') {
+                    downloadFolder(row.original?._id, row.original?.name);
+                  } else {
+                    downloadFile(row.original);
+                  }
+                }}
+              >
+                <GetAppIcon fontSize="small" color="primary" />
               </IconButton>
             </HtmlTooltip>
             {allPdf && row.original.type === 'file' && (
@@ -335,7 +339,7 @@ export default function Attachment() {
                 </IconButton>
               </HtmlTooltip>
             )}
-          </div >
+          </div>
         );
       }
     }
@@ -715,7 +719,7 @@ export default function Attachment() {
           permissions={permissions?.attachment}
           module="Attachment"
           api={`/attachment`}
-          afterImportCompleted={() => { }}
+          afterImportCompleted={() => {}}
           total={rowCount}
           onlyExport={true}
           additionalParams={`&relatedTo=${JSON.stringify(filter)}${getQueryString(true)}`}
@@ -857,7 +861,7 @@ export default function Attachment() {
               childrenProperty="subRows"
               uniqueKey="_id"
               expander={true}
-              setWholeRowsCellColor={() => { }}
+              setWholeRowsCellColor={() => {}}
               renderedFrom={'attachment_render'}
               isClientSideGrid={false}
               rowCount={rowCount}
@@ -947,8 +951,8 @@ export default function Attachment() {
                   referenceId: open.parentResource
                     ? open.parentResource?.referenceId
                     : resource && selectedResourceData
-                      ? selectedResourceData.optionValue
-                      : user?.user?._id,
+                    ? selectedResourceData.optionValue
+                    : user?.user?._id,
                   access: true
                 }
               ]}
