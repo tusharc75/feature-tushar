@@ -206,6 +206,7 @@ const ManageAccountsReceivable = ({
                                       tooltipMessage={field?.tooltipMessage}
                                       size="small"
                                       fields={initialData?.fields}
+                                      disabled={field?.isSystemGenerate ? true : false }
                                     />
                                   </Grid>
                                 ))}
