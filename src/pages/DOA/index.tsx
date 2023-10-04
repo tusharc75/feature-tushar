@@ -1,5 +1,5 @@
 import { IconButton } from '@material-ui/core';
-import { camelCase } from 'lodash';
+import { camelCase, isEmpty } from 'lodash';
 import { useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
@@ -88,7 +88,7 @@ const DOARequest = () => {
   const NameRenderer = (params) => (
     <Link
       className="link"
-      to={params.data.quotation ? `/doa-request/quotation/${params.data.id}` : `/doa-request/${params.data.id}`}
+      to={params.data.quotation && !isEmpty(params.data.quotation) ? `/doa-request/quotation/${params.data.id}` : `/doa-request/${params.data.id}`}
       title={params.value}
     >
       {params.value}
@@ -231,16 +231,16 @@ const DOARequest = () => {
               history.push(`${routes.budget.path}?id=${d._id}`);
             }}
             extraParamsToCheckDelete={true}
-            onDelete={(d) => {}}
+            onDelete={(d) => { }}
             rowCount={rowCount}
             page={page}
             loading={loading}
             additionalDetails={[]}
             chips={[]}
             owerCollaboratorInitialsOrImages=""
-            onCreate={() => {}}
+            onCreate={() => { }}
             showClone={false}
-            onClone={() => {}}
+            onClone={() => { }}
             renderedFrom={renderedFrom}
           />
         ) : (
