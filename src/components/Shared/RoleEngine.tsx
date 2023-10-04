@@ -22,10 +22,11 @@ interface RoleProps {
   setResource?: any;
   isDisable?: boolean;
   style?: React.CSSProperties;
+  setSelectedResource?: any
 }
 
 const RoleEngine = (props: RoleProps) => {
-  const { field, resource, setField, setResource, isDisable, style } = props;
+  const { field, resource, setField, setResource, isDisable, style, setSelectedResource = ()=>{} } = props;
 
   const [isReadChecked, setIsReadChecked] = useState(false);
   const [isCreateChecked, setIsCreateChecked] = useState(false);
@@ -137,6 +138,7 @@ const RoleEngine = (props: RoleProps) => {
 
   const handleChange = (type, id, access) => (event) => {
     //Checking for the type if it is resource or field
+    setSelectedResource(id, type)
     if (type === 'resource') {
       const newResource = [...resource];
       const newField = [...field];
@@ -425,7 +427,11 @@ const Row = ({ _resource, isDisable, handleChange, fieldCheckbox }) => {
           />
         </TableCell>
         <TableCell align="center">
-          <Checkbox disabled={isDisable} checked={!!_resource.isHidden} onChange={handleChange('resource', _resource.resourceId, 'isHidden')} />
+          <Checkbox
+            disabled={isDisable || _resource?.isHiddenDisabled}
+            checked={!!_resource.isHidden}
+            onChange={handleChange('resource', _resource.resourceId, 'isHidden')}
+          />
         </TableCell>
       </TableRow>
       {open &&
