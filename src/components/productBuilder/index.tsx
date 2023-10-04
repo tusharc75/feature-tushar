@@ -61,7 +61,7 @@ const ProductBuilder = (props) => {
     permissions,
     fromQuote,
     setColumnForPDFExcel,
-    setColumnDatas,
+    setColumnData,
     fullScreen = false,
     quoteData = null,
     setNextStep,
@@ -114,83 +114,83 @@ const ProductBuilder = (props) => {
     axiosInstance()
       .get(`/productbuilder/getproduct/${id}`)
       .then(({ data: { data } }) => {
-        let columns = [];
-        columns = [
-          {
-            field: 'srno',
-            headerName: 'Item #',
-            width: 150,
-            show: true,
-            disabled: true,
-            cellRenderer: 'productNameRenderer',
-            primaryField: true
-          }
-        ];
-        let rendererNames = [];
-        let priceTemplateField = [];
-        let fields = data.productFields;
-        data.productTemplate?.forEach((ele) => {
-          fields = [...fields, ...ele.fields];
-        });
-        data.priceTemplate?.forEach((ele) => {
-          fields = [...fields, ...ele.fields];
-          ele.fields.map((item) => {
-            if (item.type === 'converter') {
-              item?.displayUnits.map((unit) => {
-                priceTemplateField.push(`${item.fieldName}_${unit.toLowerCase()}`);
-              });
+          let columns = [];
+          columns = [
+            {
+              field: 'index',
+              headerName: 'Index',
+              width: 150,
+              show: true,
+              disabled: true,
+              cellRenderer: 'productNameRenderer',
+              primaryField: true
             }
-            if (item?.type === 'decimal') {
-              priceTemplateField.push(`${item.fieldName}`);
-            }
+          ];
+          let rendererNames = [];
+          let priceTemplateField = [];
+          let fields = data.productFields;
+          data.productTemplate?.forEach((ele) => {
+            fields = [...fields, ...ele.fields];
           });
-        });
-        setPriceTemplateField(priceTemplateField);
-        GenrateColoum(fields, columns, rendererNames);
-        columns = sortBy(columns, function (item: any) {
-          return levalOrderBy.indexOf(item.leval);
-        });
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          commonRenderer: CommonRenderer,
-          productNameRenderer: ProductNameRenderer,
-          actionsRenderer: ActionsRenderer,
-          productTypeRenderer: ProductTypeRenderer,
-          ...tempFrameworkComponent
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
-        setColumns([...columns]);
-        setColumnDatas([...columns]);
-        if (setColumnForPDFExcel) {
-          setColumnForPDFExcel([...columns].filter((d) => d.field !== 'srno').map((d) => d.headerName));
-        }
-        setProductData(data);
-        let rows = data.product.map((item, index) => {
-          let res: any = {
-            ...prepareDataForGrid(item)
+          data.priceTemplate?.forEach((ele) => {
+            fields = [...fields, ...ele.fields];
+            ele.fields.map((item) => {
+              if (item.type === 'converter') {
+                item?.displayUnits.map((unit) => {
+                  priceTemplateField.push(`${item.fieldName}_${unit.toLowerCase()}`);
+                });
+              }
+              if (item?.type === 'decimal') {
+                priceTemplateField.push(`${item.fieldName}`);
+              }
+            });
+          });
+          setPriceTemplateField(priceTemplateField);
+          GenrateColoum(fields, columns, rendererNames);
+          columns = sortBy(columns, function (item: any) {
+            return levalOrderBy.indexOf(item.leval);
+          });
+          let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
+          tempFrameworkComponent = {
+            commonRenderer: CommonRenderer,
+            productNameRenderer: ProductNameRenderer,
+            actionsRenderer: ActionsRenderer,
+            productTypeRenderer: ProductTypeRenderer,
+            ...tempFrameworkComponent
           };
-          res.srno = index + 1;
-          res.isChecked = false;
-          res.canDelete = permissions?.isUpdate && fromQuote ? (hasPermission ? true : false) : true;
-          res.allowedToEdit = permissions?.isUpdate && fromQuote ? (hasPermission ? true : false) : true;
-          res.isSupplierExist = isPriceBuilder && fromQuote && permissions.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice;
-
-          if (isPriceBuilder) {
-            const tsp = res[`totalSalesPrice_${currency}`] || 0;
-            const qty = res?.qty || 0;
-            if (qty === 0 || tsp === 0) {
-              setNextStep(false)
-            }
+          setFrameWorkComponent({ ...tempFrameworkComponent });
+          setColumns([...columns]);
+          if(setColumnData){
+            setColumnData([...columns]);
           }
-          return res;
-        });
+          if (setColumnForPDFExcel) {
+            setColumnForPDFExcel([...columns].filter((d) => d.field !== 'index').map((d) => d.headerName));
+          }
+          setProductData(data);
+          let rows = data.product.map((item, index) => {
+            let res: any = {
+              ...prepareDataForGrid(item)
+            };
+            res.index = index + 1;
+            res.isChecked = false;
+            res.canDelete = permissions?.isUpdate && fromQuote ? (hasPermission ? true : false) : true;
+            res.allowedToEdit = permissions?.isUpdate && fromQuote ? (hasPermission ? true : false) : true;
+            res.isSupplierExist = isPriceBuilder && fromQuote && permissions.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice;
 
-
-        dispatch({ type: 'initialize', data: rows, count: rows.length });
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
-        refreshProducts(data);
+            if (isPriceBuilder) {
+              const tsp = res[`totalSalesPrice_${currency}`] || 0;
+              const qty = res?.qty || 0;
+              if (qty === 0 || tsp === 0) {
+                setNextStep(false)
+              }
+            }
+            return res;
+          });
+          dispatch({ type: 'initialize', data: rows, count: rows.length });
+          setTimeout(() => {
+            dispatch({ type: 'loading', loading: false });
+          }, gridLoadingTimeout);
+          refreshProducts(data);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -269,10 +269,10 @@ const ProductBuilder = (props) => {
             openProductModel(params.data._id);
           }}
         >
-          {params.data.srno}
+          {params.data.index}
         </a>
       ) : (
-        <>{params.data.srno}</>
+        <>{params.data.index}</>
       )}
     </>
   );
