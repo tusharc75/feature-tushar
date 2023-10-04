@@ -202,7 +202,6 @@ const DOAApproval = () => {
     setTotalProfit(tempTotalProfit);
   };
 
-
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -274,7 +273,7 @@ const DOAApproval = () => {
             <span className="listingHeader">DOA Request</span>
           </Grid>
         </Grid> */}
-        <div className="flex items-center flex-wrap gap-1 quotePanel">
+        <div className="flex items-center flex-wrap gap-1 quotePanel mb-4">
           {QData && (
             <>
               <div className="quoteBox">
@@ -300,25 +299,27 @@ const DOAApproval = () => {
           <div></div>
         </div>
 
-        {productBuilderId ? (
-          <ProductBuilder
-            fromQuote={true}
-            permissions={permissions[quoteBuilder.qbResource]}
-            hasPermission={false}
-            currency={quoteData?.currency.toLowerCase()}
-            productBuilderId={productBuilderId}
-            isAddNewProduct={isAddNewProduct}
-            setIsAddNewProduct={setIsAddNewProduct}
-            isAddExistingProduct={isAddExistingProduct}
-            setIsAddExistingProduct={setIsAddExistingProduct}
-            refreshProducts={productCalculationForDoa}
-            stage={'product'}
-            isPriceBuilder={true}
-            Editable={false}
-          />
-        ) : (
-          <Loader style={{ minHeight: 300 }} text="Loading..." />
-        )}
+        <div className="relative">
+          {productBuilderId ? (
+            <ProductBuilder
+              fromQuote={true}
+              permissions={permissions[quoteBuilder.qbResource]}
+              hasPermission={false}
+              currency={quoteData?.currency.toLowerCase()}
+              productBuilderId={productBuilderId}
+              isAddNewProduct={isAddNewProduct}
+              setIsAddNewProduct={setIsAddNewProduct}
+              isAddExistingProduct={isAddExistingProduct}
+              setIsAddExistingProduct={setIsAddExistingProduct}
+              refreshProducts={productCalculationForDoa}
+              stage={'product'}
+              isPriceBuilder={true}
+              Editable={false}
+            />
+          ) : (
+            <Loader style={{ minHeight: 300 }} text="Loading..." />
+          )}
+        </div>
       </Box>
       {showAIDialog && (
         <Dialog
