@@ -1093,6 +1093,16 @@ const routes = {
         : RESOURCE_LABEL.chartOfAccount,
     path: '/chart-of-account/detail'
   },
+  flash : {
+    title : storedRoutes && storedRoutes.flash && storedRoutes.flash.title
+    ? storedRoutes.flash?.title
+    : RESOURCE_LABEL.flash,
+    path : '/flash'
+  },
+  flashDetail: {
+    title: storedRoutes && storedRoutes.flash && storedRoutes.flash.title ? storedRoutes.flash?.title : RESOURCE_LABEL.flash,
+    path: '/flash/detail'
+  },
 };
 
 export default routes;

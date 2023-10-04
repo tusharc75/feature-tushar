@@ -239,6 +239,8 @@ import DeviceTemplatesAlert from './pages/DeviceTemplatesAlert';
 import DeviceTemplateAlertDetail from './pages/DeviceTemplatesAlert/DeviceTemplateAlertDetail'
 import ChartOfAccount from './pages/ChartOfAccount';
 import ChartOfAccountDetail from './pages/ChartOfAccount/ChartOfAccountDetail';
+import Flash from './pages/Flash';
+import FlashDetailsPage from './pages/Flash/FlashDetailsPage';
 
 var notificationInterval: any = null;
 
@@ -1050,6 +1052,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.chartOfAccountDetail.path}/:id`}>
               <ChartOfAccountDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.flash.path}`}>
+              <Flash />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.flashDetail.path}/:id`}>
+              <FlashDetailsPage />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
