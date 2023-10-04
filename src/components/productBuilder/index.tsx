@@ -64,7 +64,7 @@ const ProductBuilder = (props) => {
     setColumnDatas,
     fullScreen = false,
     quoteData = null,
-    setNextStep,
+    setNextStep
   } = props;
 
   const toastConfig = useContext(CustomToastContext);
@@ -98,7 +98,7 @@ const ProductBuilder = (props) => {
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
+  const { dataRows, appendRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
   const [frameWorkComponent, setFrameWorkComponent] = useState(null);
   const [columns, setColumns] = useState(null);
 
@@ -179,14 +179,27 @@ const ProductBuilder = (props) => {
             const tsp = res[`totalSalesPrice_${currency}`] || 0;
             const qty = res?.qty || 0;
             if (qty === 0 || tsp === 0) {
-              setNextStep(false)
+              setNextStep(false);
             }
           }
           return res;
         });
 
+        if (appendRows) {
+          dispatch({
+            type: 'initialize',
+            data: [...dataRows, ...rows],
+            count: rows.length
+          });
+        } else {
+          dispatch({
+            type: 'initialize',
+            data: rows,
+            count: rows.length
+          });
+        }
 
-        dispatch({ type: 'initialize', data: rows, count: rows.length });
+        // dispatch({ type: 'initialize', data: rows, count: rows.length });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
@@ -194,6 +207,9 @@ const ProductBuilder = (props) => {
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
+      })
+      .finally(() => {
+        dispatch({ type: 'loading', loading: false });
       });
   };
 
@@ -206,7 +222,7 @@ const ProductBuilder = (props) => {
     const permission = permissions?.isUpdate && fromQuote ? (hasPermission ? true : false) : true;
     return (
       <>
-        <HtmlTooltip title='Clone'>
+        <HtmlTooltip title="Clone">
           <IconButton
             disabled={permission ? false : true}
             size="small"
@@ -219,7 +235,7 @@ const ProductBuilder = (props) => {
             <FileCopyIcon fontSize="small" color={permission ? 'primary' : 'disabled'} />
           </IconButton>
         </HtmlTooltip>
-        <HtmlTooltip title='Edit'>
+        <HtmlTooltip title="Edit">
           <IconButton
             disabled={permission ? false : true}
             size="small"
@@ -243,7 +259,7 @@ const ProductBuilder = (props) => {
             <VisibilityIcon fontSize="small" color={params.data?.isSupplierExist ? 'primary' : 'disabled'} />
           </IconButton>
         )}
-        <HtmlTooltip title='Delete'>
+        <HtmlTooltip title="Delete">
           <IconButton
             disabled={permission ? false : true}
             size="small"
@@ -278,7 +294,12 @@ const ProductBuilder = (props) => {
   );
 
   const ProductTypeRenderer = (params) => (
-    <Link className="link text-truncate" target='_blank' title={params?.data?.productName} to={`${routes.productDetail.path}/${params.data?.productId}`}>
+    <Link
+      className="link text-truncate"
+      target="_blank"
+      title={params?.data?.productName}
+      to={`${routes.productDetail.path}/${params.data?.productId}`}
+    >
       {params?.data?.productName}
     </Link>
   );
@@ -707,8 +728,8 @@ const ProductBuilder = (props) => {
                 isPriceBuilder && fromQuote && permissions?.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice
                   ? false
                   : selectedRecords.length
-                    ? false
-                    : true
+                  ? false
+                  : true
               }
               onClick={openActions}
               endIcon={<ExpandMore />}
@@ -784,26 +805,26 @@ const ProductBuilder = (props) => {
               dataToShowForMobile
                 ? dataToShowForMobile.some((f) => f.editable === true)
                   ? [
-                    ...dataToShowForMobile
-                      .filter((f) => f.editable === true)
-                      .map((m) => {
-                        return {
-                          label: `${m.headerName}: `,
-                          field: m.field,
-                          forceShow: true
-                          // onClick: (data, index) => {
-                          //   setShowProductNumberOrProductNameUpdate({ open: true, title: m.headerName, property: m.field, value: data[m.field], indexOfRecord: index, record: data })
-                          // }
-                        };
-                      })
-                  ]
+                      ...dataToShowForMobile
+                        .filter((f) => f.editable === true)
+                        .map((m) => {
+                          return {
+                            label: `${m.headerName}: `,
+                            field: m.field,
+                            forceShow: true
+                            // onClick: (data, index) => {
+                            //   setShowProductNumberOrProductNameUpdate({ open: true, title: m.headerName, property: m.field, value: data[m.field], indexOfRecord: index, record: data })
+                            // }
+                          };
+                        })
+                    ]
                   : [
-                    {
-                      label: `Product description: `,
-                      field: 'productName',
-                      forceShow: true
-                    }
-                  ]
+                      {
+                        label: `Product description: `,
+                        field: 'productName',
+                        forceShow: true
+                      }
+                    ]
                 : []
             }
             onCreate={null}
