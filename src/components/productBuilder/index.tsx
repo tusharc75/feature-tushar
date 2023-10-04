@@ -61,7 +61,7 @@ const ProductBuilder = (props) => {
     permissions,
     fromQuote,
     setColumnForPDFExcel,
-    setColumnDatas,
+    setColumnData,
     fullScreen = false,
     quoteData = null,
     setNextStep
@@ -98,7 +98,7 @@ const ProductBuilder = (props) => {
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, appendRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords, appendRows } = state;
   const [frameWorkComponent, setFrameWorkComponent] = useState(null);
   const [columns, setColumns] = useState(null);
 
@@ -117,8 +117,8 @@ const ProductBuilder = (props) => {
         let columns = [];
         columns = [
           {
-            field: 'srno',
-            headerName: 'Item #',
+            field: 'index',
+            headerName: 'Index',
             width: 150,
             show: true,
             disabled: true,
@@ -160,16 +160,18 @@ const ProductBuilder = (props) => {
         };
         setFrameWorkComponent({ ...tempFrameworkComponent });
         setColumns([...columns]);
-        setColumnDatas([...columns]);
+        if (setColumnData) {
+          setColumnData([...columns]);
+        }
         if (setColumnForPDFExcel) {
-          setColumnForPDFExcel([...columns].filter((d) => d.field !== 'srno').map((d) => d.headerName));
+          setColumnForPDFExcel([...columns].filter((d) => d.field !== 'index').map((d) => d.headerName));
         }
         setProductData(data);
         let rows = data.product.map((item, index) => {
           let res: any = {
             ...prepareDataForGrid(item)
           };
-          res.srno = index + 1;
+          res.index = index + 1;
           res.isChecked = false;
           res.canDelete = permissions?.isUpdate && fromQuote ? (hasPermission ? true : false) : true;
           res.allowedToEdit = permissions?.isUpdate && fromQuote ? (hasPermission ? true : false) : true;
@@ -184,7 +186,6 @@ const ProductBuilder = (props) => {
           }
           return res;
         });
-
         if (appendRows) {
           dispatch({
             type: 'initialize',
@@ -198,7 +199,6 @@ const ProductBuilder = (props) => {
             count: rows.length
           });
         }
-
         // dispatch({ type: 'initialize', data: rows, count: rows.length });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -209,7 +209,9 @@ const ProductBuilder = (props) => {
         toastConfig.setToastConfig(error);
       })
       .finally(() => {
-        dispatch({ type: 'loading', loading: false });
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
       });
   };
 
@@ -285,10 +287,10 @@ const ProductBuilder = (props) => {
             openProductModel(params.data._id);
           }}
         >
-          {params.data.srno}
+          {params.data.index}
         </a>
       ) : (
-        <>{params.data.srno}</>
+        <>{params.data.index}</>
       )}
     </>
   );

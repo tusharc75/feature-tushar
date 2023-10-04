@@ -258,7 +258,7 @@ const CustomEditableGrid = ({ onClose, data, fields, columns, currency, handleSa
                               {...cell.getCellProps()}
                               className={`td ${cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''}`}
                             >
-                              {['expander', 'detail', 'type', 'srno']?.includes(cell.column.id) ? (
+                              {['expander', 'detail', 'type', 'index']?.includes(cell.column.id) ? (
                                 <div className="full-height-cell">{cell.render('Cell')}</div>
                               ) : (
                                 <FormTypes

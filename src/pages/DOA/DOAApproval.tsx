@@ -147,7 +147,7 @@ const DOAApproval = () => {
   };
 
   const productCalculationForDoa = (BuilderData) => {
-    const ignoredKeys = ['fields', '_id', 'productId', 'templateFields', 'id', 'string', 'srno'];
+    const ignoredKeys = ['fields', '_id', 'productId', 'templateFields', 'id', 'string', 'index'];
 
     let tempTotalCost = 0;
     let tempTotalSellingPrice = 0;
@@ -201,6 +201,7 @@ const DOAApproval = () => {
     setTotalMargin(tempTotalMargin);
     setTotalProfit(tempTotalProfit);
   };
+
 
   return (
     <Box className="main-container-v1">
