@@ -4,18 +4,16 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE } from '../../../constants/helpers';
+import { getObjKeysWithValues, yupSchema } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, arrayToDropwdownOption } from '../../../constants/helpers';
+import { CustomDialogTransition } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import CustomButton from '../../../components/Helpers/CustomButton';
 import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from '../../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
-import { uniq, map, orderBy, isEqual, intersection } from 'lodash';
-import { fetch_repair_order_product_fields } from 'src/components/RepairOrder/helper';
-import axiosInstance from 'src/axios/axiosInstance';
+import { isEqual } from 'lodash';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -24,7 +22,7 @@ interface EditDialogProps {
   handleSave: any;
 }
 
-const RepairOrderQtyDialog: FC<EditDialogProps> = ({ onClose, rowData, handleSave }) => {
+const ProductQtyDialog: FC<EditDialogProps> = ({ onClose, rowData, handleSave }) => {
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [fields, setFields] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -172,8 +170,7 @@ const RepairOrderQtyDialog: FC<EditDialogProps> = ({ onClose, rowData, handleSav
                   {'Close'}
                 </Button>
                 <CustomButton
-                  // loading={loading}
-                  // disabled={loading || isEqual(ref?.current?.values, initialData.values)}
+                  disabled={isEqual(ref?.current?.values, initialData.values)}
                   variant="contained"
                   color="primary"
                   type="submit"
@@ -228,4 +225,4 @@ const field = [
   }
 ];
 
-export default RepairOrderQtyDialog;
+export default ProductQtyDialog;
