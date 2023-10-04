@@ -85,7 +85,7 @@ const ProductGrid = (props) => {
         data = data.data?.map((u, index) => ({
           ...u,
           id: u._id,
-          srno: index + 1,
+          index: index + 1,
           // productTemplateDisplayValue: u.productTemplate?.optionLabel,
           productCategoryDisplayValue: u.productCategory?.optionLabel,
           priceTemplateDisplayValue: u.priceTemplate?.optionLabel,
@@ -95,8 +95,8 @@ const ProductGrid = (props) => {
         let column = [
           // { field: "id", headerName: "id", hide: true },
           {
-            field: "srno",
-            headerName: "Item #",
+            field: "index",
+            headerName: "Index",
             width: 70,
             filter: false,
             show: true,

@@ -284,7 +284,7 @@ export default function CustomAgGridEditable({
       (result, item) => {
         const keys = Object.keys(item);
         keys.forEach((key) => {
-          if (key === 'srno') {
+          if (key === 'index') {
             return;
           }
           result[key] = result[key] ? result[key] + item[key] : item[key];

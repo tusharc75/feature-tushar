@@ -1,16 +1,20 @@
 import { AiFillAccountBook } from 'react-icons/ai';
 import { SVGImages, IMAGE_WIDTH, IMAGE_HEIGHT, IconConst } from '../../assets/dashboard_images';
 import DashboardIcons from 'src/assets/dashboard_images/icons';
-import { CollaborationToolsIcon, CustomForms, FleetManagementIcon, IOT } from 'src/assets/sidebar_assets/icons';
-
 import {
   ProductSetup,
   ServiceManagementIcon,
   RentalOperationManagementIcon,
   ServiceOperationManagementIcon,
   PurchasingManagementIcon,
-  FieldServiceOperationIcon
-} from '../../assets/sidebar_assets/icons';
+  FieldServiceOperationIcon,
+  FleetManagementIcon,
+  CollaborationToolsIcon,
+  CustomForms,
+  IOT,
+  ForeCastingAndPlanning
+} from 'src/assets/sidebar_assets/icons';
+
 import {
   BiCog,
   BiCart,
@@ -149,6 +153,9 @@ export const setDataBySectionName = (secName, index = 0) => {
   } else if (compareName(['hiii', 'Custom Forms'], secName)) {
     sideBarIcon = <CustomForms size={18} />;
     icon = <DashboardIcons.CUSTOM_FORMS colors={iconColour} />;
+  } else if (compareName(['Forecasting & Planning'], secName)) {
+    sideBarIcon = <ForeCastingAndPlanning size={18} />;
+    icon = <DashboardIcons.FORECASTING_AND_PLANNING colors={iconColour} />;
   }
   return {
     icon: icon,

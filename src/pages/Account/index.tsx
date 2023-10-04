@@ -814,12 +814,7 @@ export default function Account(props) {
                             <ClickAwayListener onClickAway={handleClose}>
                               <MenuList id="menu" style={{ backgroundColor: 'transparent', fontSize: '10px' }}>
                                 {options.map((option, index) => (
-                                  <MenuItem
-                                    key={option}
-                                    selected={index === selectedIndex}
-                                    onClick={(event) => handleMenuItemClick(event, index)}
-                                    style={{ color: 'black' }}
-                                  >
+                                  <MenuItem key={option} selected={index === selectedIndex} onClick={(event) => handleMenuItemClick(event, index)}>
                                     {option}
                                   </MenuItem>
                                 ))}
