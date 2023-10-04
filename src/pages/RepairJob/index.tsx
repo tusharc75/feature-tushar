@@ -328,12 +328,13 @@ const RepairJob = () => {
   };
 
   const handleRepairJobTypeSel = (filterValues) => {
+    dispatch({ type: 'setPage', page: 0 });
     setSelectedType(filterValues);
-    if(referenceId && referenceType) {
+    if (referenceId && referenceType) {
       history.push(`?type=${filterValues}&referenceType=${referenceType}&referenceId=${referenceId}`);
-      } else {
-        history.push(`?type=${filterValues}`);
-      }
+    } else {
+      history.push(`?type=${filterValues}`);
+    }
   };
 
   const handleTransferEntityDialog = () => {
@@ -392,16 +393,16 @@ const RepairJob = () => {
   };
 
   const updateQueryParams = () => {
-    const queryParams = new URLSearchParams(history.location.search)
-    queryParams.delete('referenceId')
-    queryParams.delete('referenceType')
+    const queryParams = new URLSearchParams(history.location.search);
+    queryParams.delete('referenceId');
+    queryParams.delete('referenceType');
     referenceId = queryParams.get('referenceId');
     referenceType = queryParams.get('referenceType');
     history.replace({
-      search: queryParams.toString(),
-    })
+      search: queryParams.toString()
+    });
     fetchRepairJobs();
-  }
+  };
 
   return (
     <div className="main-container-v1">
@@ -467,19 +468,13 @@ const RepairJob = () => {
                 }}
               />
             )}
-            {referenceType && (
-              <Chip
-                className="ml-3"
-                color="primary"
-                label={`Rental Job : ${referenceType}`}
-                onDelete={updateQueryParams}
-              />
-            )}
+            {referenceType && <Chip className="ml-3" color="primary" label={`Rental Job : ${referenceType}`} onDelete={updateQueryParams} />}
           </RepairJobHeader>
         </div>
         {Object.keys(frameworkComponents).length > 0 ? (
           isMobile && !isTablet ? (
             <CustomSwipableList
+              key={selectedType}
               allowSelection={true}
               allowSwipe={true}
               permissions={permissions.repairJob}

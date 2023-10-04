@@ -614,30 +614,6 @@ const FIELD_SERVICE_OPERATION = ({ colors = ['#AD14F5', '#6203AC'] }) => {
   );
 };
 
-export const FLEET_MANAGEMENT = ({ colors = ['#3BE961', '#058D12'] }) => {
-  return (
-    <>
-      <div
-        className="grid place-items-center"
-        style={{ width: `${IMAGE_WIDTH}px`, height: `${IMAGE_HEIGHT}px`, background: `linear-gradient(129deg, ${colors[0]}, ${colors[1]})` }}
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 43 43">
-          <path
-            fill="#fff"
-            stroke="#fff"
-            d="M27.337 21.287l-8.16 8.16-4.202-4.205a1.441 1.441 0 00-2.475 1.013 1.437 1.437 0 00.44 1.023l5.22 5.222a1.437 1.437 0 002.036 0l9.177-9.177a1.44 1.44 0 10-2.036-2.036z"
-          ></path>
-          <path
-            fill="#fff"
-            stroke="#fff"
-            d="M34.114 3.822h-2.16V2.44a1.44 1.44 0 10-2.88 0v1.382H13.239V2.44a1.44 1.44 0 00-2.88 0v1.382h-2.16C4.23 3.822 1 7.052 1 11.02v23.093c0 3.97 3.23 7.199 7.199 7.199h25.915c3.97 0 7.199-3.23 7.199-7.2V11.02c0-3.969-3.23-7.198-7.2-7.198zM3.879 11.02A4.324 4.324 0 018.2 6.7h2.16v1.382a1.44 1.44 0 102.879 0V6.701h15.837v1.382a1.44 1.44 0 002.88 0V6.701h2.159a4.324 4.324 0 014.319 4.32v1.454H3.879V11.02zm30.235 27.412H8.199a4.324 4.324 0 01-4.32-4.32V15.355h34.554v18.76a4.324 4.324 0 01-4.32 4.319z"
-          ></path>
-        </svg>
-      </div>
-    </>
-  );
-};
-
 export const IOT = ({ colors = ['#3BE961', '#058D12'] }) => {
   return (
     <>
@@ -691,6 +667,57 @@ export const CUSTOM_FORMS = ({ colors = ['#3BE961', '#058D12'] }) => {
   );
 };
 
+export const FLEET_MANAGEMENT = ({ colors = ['#3BE961', '#058D12'] }) => {
+  return (
+    <>
+      <div
+        className="grid place-items-center"
+        style={{ width: `${IMAGE_WIDTH}px`, height: `${IMAGE_HEIGHT}px`, background: `linear-gradient(129deg, ${colors[0]}, ${colors[1]})` }}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 30 30">
+          <g clipPath="url(#clip0_5324_24098)">
+            <path
+              fill="#fff"
+              stroke="#fff"
+              strokeWidth="0.5"
+              d="M0 17.6v3.467c0 .46.158.9.44 1.225.28.325.662.508 1.06.508h15c0 1.38.474 2.702 1.318 3.677C18.662 27.452 19.806 28 21 28s2.338-.548 3.182-1.523c.844-.975 1.318-2.298 1.318-3.677h3c.398 0 .78-.183 1.06-.508.282-.325.44-.766.44-1.225V7.2c0-1.38-.474-2.702-1.318-3.677C27.838 2.548 26.694 2 25.5 2h-15c-1.193 0-2.338.548-3.182 1.523C6.474 4.498 6 5.821 6 7.2v12.133H3V17.6c0-.46-.158-.9-.44-1.226a1.406 1.406 0 00-1.06-.507c-.398 0-.78.182-1.06.507A1.88 1.88 0 000 17.6zm19.5 5.2c0-.343.088-.678.253-.963.165-.285.399-.507.673-.638.274-.132.576-.166.867-.099.29.067.558.232.768.474.21.243.352.552.41.888.058.336.028.685-.085 1.001a1.704 1.704 0 01-.553.778 1.36 1.36 0 01-.833.292c-.398 0-.78-.182-1.06-.507a1.88 1.88 0 01-.44-1.226zM9 12.4h18v6.933h-2.67a4.587 4.587 0 00-1.51-1.257A3.99 3.99 0 0021 17.63a3.99 3.99 0 00-1.82.445 4.587 4.587 0 00-1.51 1.257H9V12.4zm0-5.2c0-.46.158-.9.44-1.226a1.406 1.406 0 011.06-.507h15c.398 0 .78.182 1.06.507.282.325.44.766.44 1.226v1.733H9V7.2z"
+            ></path>
+          </g>
+          <defs>
+            <clipPath id="clip0_5324_24098">
+              <path fill="#fff" d="M0 0H30V30H0z"></path>
+            </clipPath>
+          </defs>
+        </svg>
+      </div>
+    </>
+  );
+};
+
+export const FORECASTING_AND_PLANNING = ({ colors = ['#3BE961', '#058D12'] }) => {
+  return (
+    <>
+      <div
+        className="grid place-items-center"
+        style={{ width: `${IMAGE_WIDTH}px`, height: `${IMAGE_HEIGHT}px`, background: `linear-gradient(129deg, ${colors[0]}, ${colors[1]})` }}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 43 43">
+          <path
+            fill="#fff"
+            stroke="#fff"
+            d="M27.337 21.287l-8.16 8.16-4.202-4.205a1.441 1.441 0 00-2.475 1.013 1.437 1.437 0 00.44 1.023l5.22 5.222a1.437 1.437 0 002.036 0l9.177-9.177a1.44 1.44 0 10-2.036-2.036z"
+          ></path>
+          <path
+            fill="#fff"
+            stroke="#fff"
+            d="M34.114 3.822h-2.16V2.44a1.44 1.44 0 10-2.88 0v1.382H13.239V2.44a1.44 1.44 0 00-2.88 0v1.382h-2.16C4.23 3.822 1 7.052 1 11.02v23.093c0 3.97 3.23 7.199 7.199 7.199h25.915c3.97 0 7.199-3.23 7.199-7.2V11.02c0-3.969-3.23-7.198-7.2-7.198zM3.879 11.02A4.324 4.324 0 018.2 6.7h2.16v1.382a1.44 1.44 0 102.879 0V6.701h15.837v1.382a1.44 1.44 0 002.88 0V6.701h2.159a4.324 4.324 0 014.319 4.32v1.454H3.879V11.02zm30.235 27.412H8.199a4.324 4.324 0 01-4.32-4.32V15.355h34.554v18.76a4.324 4.324 0 01-4.32 4.319z"
+          ></path>
+        </svg>
+      </div>
+    </>
+  );
+};
+
 const allIcons = {
   HERO,
   CRM,
@@ -717,7 +744,8 @@ const allIcons = {
   FIELD_SERVICE_OPERATION,
   FLEET_MANAGEMENT,
   IOT,
-  CUSTOM_FORMS
+  CUSTOM_FORMS,
+  FORECASTING_AND_PLANNING
 };
 
 export default allIcons;

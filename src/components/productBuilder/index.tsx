@@ -41,6 +41,7 @@ import MuiPickersUtilsProvider from '@material-ui/pickers/MuiPickersUtilsProvide
 import AskSupplierPriceDialog from './AskSupplierPriceDialog';
 import { useData } from './../../StateProvider/Provider';
 import ViewSupplierPriceDialog from './ViewSupplierPriceDialog';
+import HtmlTooltip from '../CustomTooltipTitle';
 
 let levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
 
@@ -205,27 +206,31 @@ const ProductBuilder = (props) => {
     const permission = permissions?.isUpdate && fromQuote ? (hasPermission ? true : false) : true;
     return (
       <>
-        <IconButton
-          disabled={permission ? false : true}
-          size="small"
-          aria-label="Clone"
-          onClick={() => {
-            openProductModel(params.data._id);
-            setIsClone(true);
-          }}
-        >
-          <FileCopyIcon fontSize="small" color={permission ? 'primary' : 'disabled'} />
-        </IconButton>
-        <IconButton
-          disabled={permission ? false : true}
-          size="small"
-          aria-label="Edit"
-          onClick={() => {
-            openProductModel(params.data._id);
-          }}
-        >
-          <EditIcon fontSize="small" color={permission ? 'primary' : 'disabled'} />
-        </IconButton>
+        <HtmlTooltip title='Clone'>
+          <IconButton
+            disabled={permission ? false : true}
+            size="small"
+            aria-label="Clone"
+            onClick={() => {
+              openProductModel(params.data._id);
+              setIsClone(true);
+            }}
+          >
+            <FileCopyIcon fontSize="small" color={permission ? 'primary' : 'disabled'} />
+          </IconButton>
+        </HtmlTooltip>
+        <HtmlTooltip title='Edit'>
+          <IconButton
+            disabled={permission ? false : true}
+            size="small"
+            aria-label="Edit"
+            onClick={() => {
+              openProductModel(params.data._id);
+            }}
+          >
+            <EditIcon fontSize="small" color={permission ? 'primary' : 'disabled'} />
+          </IconButton>
+        </HtmlTooltip>
         {params.data?.isSupplierExist && (
           <IconButton
             disabled={params.data?.isSupplierExist ? false : true}
@@ -238,17 +243,19 @@ const ProductBuilder = (props) => {
             <VisibilityIcon fontSize="small" color={params.data?.isSupplierExist ? 'primary' : 'disabled'} />
           </IconButton>
         )}
-        <IconButton
-          disabled={permission ? false : true}
-          size="small"
-          aria-label="Delete"
-          onClick={() => {
-            setDeleteRecord(params.data);
-            setShowDeleteConfirmBox(true);
-          }}
-        >
-          <DeleteIcon fontSize="small" color={permission ? 'error' : 'disabled'} />
-        </IconButton>
+        <HtmlTooltip title='Delete'>
+          <IconButton
+            disabled={permission ? false : true}
+            size="small"
+            aria-label="Delete"
+            onClick={() => {
+              setDeleteRecord(params.data);
+              setShowDeleteConfirmBox(true);
+            }}
+          >
+            <DeleteIcon fontSize="small" color={permission ? 'error' : 'disabled'} />
+          </IconButton>
+        </HtmlTooltip>
       </>
     );
   };
@@ -271,7 +278,7 @@ const ProductBuilder = (props) => {
   );
 
   const ProductTypeRenderer = (params) => (
-    <Link className="link text-truncate" title={params?.data?.productName} to={`${routes.productDetail.path}/${params.data?.productId}`}>
+    <Link className="link text-truncate" target='_blank' title={params?.data?.productName} to={`${routes.productDetail.path}/${params.data?.productId}`}>
       {params?.data?.productName}
     </Link>
   );

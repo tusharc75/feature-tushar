@@ -371,6 +371,7 @@ const Opportunities = () => {
   };
 
   const handleOpportunityTypeChange = (filterValues) => {
+    dispatch({ type: 'setPage', page: 0 });
     setSelectedType(filterValues);
   };
 
@@ -483,8 +484,9 @@ const Opportunities = () => {
               <Chip
                 className="ml-3"
                 color="primary"
-                label={`${accountDetails.resource === customerAccount.accountResource ? 'Customer' : 'Supplier'} Account: ${accountDetails.accountName
-                  }`}
+                label={`${accountDetails.resource === customerAccount.accountResource ? 'Customer' : 'Supplier'} Account: ${
+                  accountDetails.accountName
+                }`}
                 onDelete={() => {
                   setAccountDetails({ accountId: null, accountName: null, resource: null });
                 }}
@@ -496,6 +498,7 @@ const Opportunities = () => {
         {Object.keys(frameWorkComponent).length > 0 ? (
           isMobile && !isTablet ? (
             <CustomSwipableList
+              key={selectedType}
               allowSelection={true}
               allowSwipe={true}
               permissions={permissions[opportunityResource]}
@@ -583,8 +586,9 @@ const Opportunities = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.opportunityName ? 'Opportunity' : 'Opportunities'}   ${deleteRecord.opportunityName || ''
-              }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.opportunityName ? 'Opportunity' : 'Opportunities'}   ${
+              deleteRecord.opportunityName || ''
+            }?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
               setIsConformDialogVisible(false);

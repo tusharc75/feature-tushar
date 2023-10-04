@@ -60,11 +60,10 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isR
           let data;
           const response: any = await axiosInstance().get(`${packages.api}/${packageId}`);
           data = response?.data?.data;
-          if (data?.customerAccount !== '') {
-            const inputString = data?.packageName;
-            const emDashIndex = inputString.indexOf('—');
+          if (data?.customerAccount && data?.customerAccount !== '') {
+            const emDashIndex = data?.packageName?.indexOf('—');
             if (emDashIndex !== -1) {
-              const resultString = inputString.slice(0, emDashIndex).trim();
+              const resultString = data?.packageName?.slice(0, emDashIndex).trim();
               data['packageName'] = resultString;
             }
           }
@@ -100,26 +99,33 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isR
       toastConfig.setToastConfig(error);
     }
   };
-  const findCustomer = (value: any) => {
+
+  const findCustomerName = (value: any) => {
     const customerOption = initialData?.fields?.find((e) => e.fieldName === 'customerAccount')?.option;
     const findOptions = customerOption.filter((item) => item.optionValue === value);
-    return findOptions[0].optionLabel;
+    if (findOptions?.length) {
+      return findOptions[0]?.optionLabel;
+    }
+    else {
+      return null;
+    }
   };
 
   const handleSubmit = (values: any) => {
-    const data = { ...values };
-    if (data?.customerAccount !== '') {
-      const customerName = findCustomer(data?.customerAccount);
-      data['packageName'] = `${data?.packageName} — ${customerName}`;
-      if (!data.packageName.includes(customerName)) {
-        data['packageName'] = `${data?.packageName} — ${customerName}`;
+    const newValues = { ...values };
+    if (newValues?.customerAccount && newValues?.customerAccount !== '') {
+      const customerName = findCustomerName(newValues?.customerAccount);
+      if (customerName) {
+        if (customerName && !newValues['packageName']?.includes(customerName)) {
+          newValues['packageName'] = `${newValues?.packageName} — ${customerName}`;
+        }
       }
     }
     setSubmitting(true);
     if (packageId && isClone === false) {
-      values._id = packageId;
+      newValues._id = packageId;
       axiosInstance()
-        .put(`${packages.api}`, data)
+        .put(`${packages.api}`, newValues)
         .then(({ data }) => {
           setSubmitting(false);
           onSuccess();
@@ -135,7 +141,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isR
         });
     } else {
       axiosInstance()
-        .post(`${packages.api}`, data)
+        .post(`${packages.api}`, newValues)
         .then(({ data: { data, message } }) => {
           if (isRedirectToDetailPage) {
             history.push(`${routes.packagesDetail.path}/${data._id}`);
