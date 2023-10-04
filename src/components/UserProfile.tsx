@@ -25,13 +25,14 @@ export default function UserProfile(props) {
       >
         <Avatar style={{ height: 25, width: 25 }} src={user?.user?.avatar}></Avatar>
       </IconButton>
-      <Popper open={open} anchorEl={anchorRef.current} role={undefined} transition disablePortal>
+      <Popper open={open} anchorEl={anchorRef.current} role={undefined} transition style={{ zIndex: 1200 }} disablePortal>
         {({ TransitionProps, placement }) => (
           <Grow
             {...TransitionProps}
             style={{
               transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom'
             }}
+            in={open}
           >
             <Paper>
               <ClickAwayListener onClickAway={onClose}>
