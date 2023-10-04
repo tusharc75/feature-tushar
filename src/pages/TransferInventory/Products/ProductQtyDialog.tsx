@@ -58,14 +58,6 @@ const ProductQtyDialog: FC<EditDialogProps> = ({ onClose, rowData, handleSave })
     setFields(customData);
   };
 
-  const getTitle = () => {
-    if (rowData) {
-      return `Edit - ${rowData.productName}`;
-    } else {
-      return 'Bulk Edit';
-    }
-  };
-
   const handleSubmit = async (values) => {
     let rows: any = { ...rowData, ...values };
     handleSave({ data: rows });
@@ -93,7 +85,7 @@ const ProductQtyDialog: FC<EditDialogProps> = ({ onClose, rowData, handleSave })
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
-                title={getTitle()}
+                title={`Edit - ${rowData?.productName}`}
                 onClose={() => {
                   if (!isEqual(ref?.current?.values, initialData.values)) {
                     setShowConfirmDialog(true);
