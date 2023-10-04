@@ -3,7 +3,6 @@ import { Button, Dialog, Grid, Box } from '@material-ui/core';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { getObjKeysWithValues, yupSchema } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from '../../../constants/helpers';
@@ -23,6 +22,7 @@ interface EditDialogProps {
 }
 
 const ProductQtyDialog: FC<EditDialogProps> = ({ onClose, rowData, handleSave }) => {
+
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [fields, setFields] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -63,6 +63,14 @@ const ProductQtyDialog: FC<EditDialogProps> = ({ onClose, rowData, handleSave })
     handleSave({ data: rows });
   };
 
+  const validate = (values) => {
+    const errors = {};
+    if (values?.qty > rowData?.inventory) {
+      errors['qty'] = "Qty can't be greater then inventory";
+    }
+    return errors;
+  };
+
   return (
     <Dialog
       maxWidth="md"
@@ -79,7 +87,7 @@ const ProductQtyDialog: FC<EditDialogProps> = ({ onClose, rowData, handleSave })
           initialValues={initialData.values}
           validationSchema={yupSchema(initialData.fields)}
           validateOnMount
-          // validate={validate}
+          validate={validate}
           onSubmit={handleSubmit}
         >
           {({ values, errors, touched, setFieldValue, submitForm }) => (

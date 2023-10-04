@@ -667,7 +667,7 @@ const RoleDetailsPage = () => {
                     }}
                     getOptionLabel={(option) => option || ''}
                     value={values?.tier}
-                    renderInput={(params) => <TextField {...params} label="Select Tier" margin="none" size="small" variant="outlined" />}
+                    renderInput={(params) => <TextField {...params} label="Tier" margin="none" size="small" variant="outlined" />}
                   />
                 </Grid>
               </Grid>
@@ -962,10 +962,10 @@ const RoleDetailsPage = () => {
             roleDeleteRec
               ? `Are you sure you want to delete this Role ?`
               : userDeleteRec
-              ? `Are you sure you want to unassign ${userDeleteRec.firstName} from this Role?`
-              : entityDeleteRec
-              ? `Are you sure you want to unassign ${entityDeleteRec.entityName} from this Role?`
-              : ''
+                ? `Are you sure you want to unassign ${userDeleteRec.firstName} from this Role?`
+                : entityDeleteRec
+                  ? `Are you sure you want to unassign ${entityDeleteRec.entityName} from this Role?`
+                  : ''
           }
           onClose={() => {
             setShowConfirmBox(false);

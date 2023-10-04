@@ -219,15 +219,16 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
 
   const ProductNameRenderer = (params) => (
     <>
-      <p
-        className="link text-truncate"
-        title={params.value}
-        onClick={() => {
-          setProductEditDialog({ open: true, productData: params?.data });
-        }}
-      >
-        {params.value}
-      </p>
+      {params?.data?.canDelete ?
+        <p
+          className="link text-truncate"
+          title={params.value}
+          onClick={() => {
+            setProductEditDialog({ open: true, productData: params?.data });
+          }}
+        >
+          {params.value}
+        </p> : <p className="text-truncate">{params.value}</p>}
       <Box ml={1}>
         <IconButton
           size="small"
@@ -339,7 +340,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
         qty: Number(qty)
       })
       .then(() => {
-        setProductEditDialog({open:false,productData:null})
+        setProductEditDialog({ open: false, productData: null })
         fetchProducts();
       })
       .catch((err) => {
@@ -391,9 +392,9 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
               dataRows={dataRows}
               selectedRecords={selectedRecords}
               dispatch={dispatch}
-              onEdit={(data) => {}}
+              onEdit={(data) => { }}
               extraParamsToCheckDelete={true}
-              onDelete={(data) => {}}
+              onDelete={(data) => { }}
               rowCount={rowCount}
               page={page}
               loading={loading}
@@ -411,7 +412,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={(data) => {}}
+              onClone={(data) => { }}
               renderedFrom={renderedFrom}
             />
           ) : (
