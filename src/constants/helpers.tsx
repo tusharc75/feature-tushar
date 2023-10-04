@@ -336,6 +336,7 @@ export const sidebarResource = {
   driverMaster: 'Driver Master',
   trailerMaster: 'Trailer Master',
   iotDataPoints: 'Iot Data Points',
+  accountsReceivable: 'Accounts Receivable'
 };
 
 export const primaryFields = {
@@ -461,6 +462,7 @@ export const RESOURCE_LABEL = {
   iotChart: 'IoT Chart',
   iotReport: 'IoT Report'
 
+  accountsReceivable: 'Accounts Receivable'
 };
 
 export const CHILD_RESOURCE = {
@@ -2055,7 +2057,8 @@ export const ACTIVITY_RESOURCE = {
   user: 'user',
   marketSegment: 'marketSegment',
   budget: 'budget',
-  irtTicket: 'irtTicket'
+  irtTicket: 'irtTicket',
+  accountsReceivable : 'accountsReceivable'
 };
 
 export const LOG_RESOURCE = {

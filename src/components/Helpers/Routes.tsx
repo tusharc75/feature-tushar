@@ -1029,6 +1029,13 @@ const routes = {
       : RESOURCE_LABEL.iotReport,
     path: '/iot-report'
   },
+  accountsReceivable : {
+    title:
+      storedRoutes && storedRoutes.accountsReceivable && storedRoutes.accountsReceivable.title
+        ? storedRoutes.accountsReceivable?.title
+        : RESOURCE_LABEL.accountsReceivable,
+    path: '/accounts-receivable'
+  }
 };
 
 export default routes;

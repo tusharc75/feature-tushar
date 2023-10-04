@@ -231,6 +231,8 @@ import IotChart from './pages/IotChart';
 import IotChartDetail from './pages/IotChart/IotChartDetail'
 import IotReportList from './pages/IotReport';
 import IotReport from './pages/IotReport/Report';
+import AccountsReceivable from './pages/AccountsReceivable';
+import AccountsReceivableDetail from './pages/AccountsReceivable/AccountsReceivableDetail';
 
 var notificationInterval: any = null;
 
@@ -757,6 +759,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.posProductDetail.path}/:id/:warehouseId`}>
               <PosProductDetails />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.accountsReceivable.path}`}>
+              <AccountsReceivable />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.accountsReceivable.path}/:id`}>
+              <AccountsReceivableDetail />
             </PrivateRoute>
             <PrivateRoute exact path={'/dashboard-master/:id'}>
               <DashboardBuilder />
