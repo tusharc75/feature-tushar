@@ -41,6 +41,7 @@ import MuiPickersUtilsProvider from '@material-ui/pickers/MuiPickersUtilsProvide
 import AskSupplierPriceDialog from './AskSupplierPriceDialog';
 import { useData } from './../../StateProvider/Provider';
 import ViewSupplierPriceDialog from './ViewSupplierPriceDialog';
+import HtmlTooltip from '../CustomTooltipTitle';
 
 let levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
 
@@ -60,10 +61,10 @@ const ProductBuilder = (props) => {
     permissions,
     fromQuote,
     setColumnForPDFExcel,
-    setColumnDatas,
+    setColumnData,
     fullScreen = false,
     quoteData = null,
-    setNextStep,
+    setNextStep
   } = props;
 
   const toastConfig = useContext(CustomToastContext);
@@ -97,7 +98,7 @@ const ProductBuilder = (props) => {
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords, appendRows } = state;
   const [frameWorkComponent, setFrameWorkComponent] = useState(null);
   const [columns, setColumns] = useState(null);
 
@@ -116,8 +117,8 @@ const ProductBuilder = (props) => {
         let columns = [];
         columns = [
           {
-            field: 'srno',
-            headerName: 'Item #',
+            field: 'index',
+            headerName: 'Index',
             width: 150,
             show: true,
             disabled: true,
@@ -159,16 +160,18 @@ const ProductBuilder = (props) => {
         };
         setFrameWorkComponent({ ...tempFrameworkComponent });
         setColumns([...columns]);
-        setColumnDatas([...columns]);
+        if (setColumnData) {
+          setColumnData([...columns]);
+        }
         if (setColumnForPDFExcel) {
-          setColumnForPDFExcel([...columns].filter((d) => d.field !== 'srno').map((d) => d.headerName));
+          setColumnForPDFExcel([...columns].filter((d) => d.field !== 'index').map((d) => d.headerName));
         }
         setProductData(data);
         let rows = data.product.map((item, index) => {
           let res: any = {
             ...prepareDataForGrid(item)
           };
-          res.srno = index + 1;
+          res.index = index + 1;
           res.isChecked = false;
           res.canDelete = permissions?.isUpdate && fromQuote ? (hasPermission ? true : false) : true;
           res.allowedToEdit = permissions?.isUpdate && fromQuote ? (hasPermission ? true : false) : true;
@@ -178,14 +181,25 @@ const ProductBuilder = (props) => {
             const tsp = res[`totalSalesPrice_${currency}`] || 0;
             const qty = res?.qty || 0;
             if (qty === 0 || tsp === 0) {
-              setNextStep(false)
+              setNextStep(false);
             }
           }
           return res;
         });
-
-
-        dispatch({ type: 'initialize', data: rows, count: rows.length });
+        if (appendRows) {
+          dispatch({
+            type: 'initialize',
+            data: [...dataRows, ...rows],
+            count: rows.length
+          });
+        } else {
+          dispatch({
+            type: 'initialize',
+            data: rows,
+            count: rows.length
+          });
+        }
+        // dispatch({ type: 'initialize', data: rows, count: rows.length });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
@@ -193,6 +207,11 @@ const ProductBuilder = (props) => {
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
+      })
+      .finally(() => {
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
       });
   };
 
@@ -205,27 +224,31 @@ const ProductBuilder = (props) => {
     const permission = permissions?.isUpdate && fromQuote ? (hasPermission ? true : false) : true;
     return (
       <>
-        <IconButton
-          disabled={permission ? false : true}
-          size="small"
-          aria-label="Clone"
-          onClick={() => {
-            openProductModel(params.data._id);
-            setIsClone(true);
-          }}
-        >
-          <FileCopyIcon fontSize="small" color={permission ? 'primary' : 'disabled'} />
-        </IconButton>
-        <IconButton
-          disabled={permission ? false : true}
-          size="small"
-          aria-label="Edit"
-          onClick={() => {
-            openProductModel(params.data._id);
-          }}
-        >
-          <EditIcon fontSize="small" color={permission ? 'primary' : 'disabled'} />
-        </IconButton>
+        <HtmlTooltip title="Clone">
+          <IconButton
+            disabled={permission ? false : true}
+            size="small"
+            aria-label="Clone"
+            onClick={() => {
+              openProductModel(params.data._id);
+              setIsClone(true);
+            }}
+          >
+            <FileCopyIcon fontSize="small" color={permission ? 'primary' : 'disabled'} />
+          </IconButton>
+        </HtmlTooltip>
+        <HtmlTooltip title="Edit">
+          <IconButton
+            disabled={permission ? false : true}
+            size="small"
+            aria-label="Edit"
+            onClick={() => {
+              openProductModel(params.data._id);
+            }}
+          >
+            <EditIcon fontSize="small" color={permission ? 'primary' : 'disabled'} />
+          </IconButton>
+        </HtmlTooltip>
         {params.data?.isSupplierExist && (
           <IconButton
             disabled={params.data?.isSupplierExist ? false : true}
@@ -238,17 +261,19 @@ const ProductBuilder = (props) => {
             <VisibilityIcon fontSize="small" color={params.data?.isSupplierExist ? 'primary' : 'disabled'} />
           </IconButton>
         )}
-        <IconButton
-          disabled={permission ? false : true}
-          size="small"
-          aria-label="Delete"
-          onClick={() => {
-            setDeleteRecord(params.data);
-            setShowDeleteConfirmBox(true);
-          }}
-        >
-          <DeleteIcon fontSize="small" color={permission ? 'error' : 'disabled'} />
-        </IconButton>
+        <HtmlTooltip title="Delete">
+          <IconButton
+            disabled={permission ? false : true}
+            size="small"
+            aria-label="Delete"
+            onClick={() => {
+              setDeleteRecord(params.data);
+              setShowDeleteConfirmBox(true);
+            }}
+          >
+            <DeleteIcon fontSize="small" color={permission ? 'error' : 'disabled'} />
+          </IconButton>
+        </HtmlTooltip>
       </>
     );
   };
@@ -262,16 +287,21 @@ const ProductBuilder = (props) => {
             openProductModel(params.data._id);
           }}
         >
-          {params.data.srno}
+          {params.data.index}
         </a>
       ) : (
-        <>{params.data.srno}</>
+        <>{params.data.index}</>
       )}
     </>
   );
 
   const ProductTypeRenderer = (params) => (
-    <Link className="link text-truncate" title={params?.data?.productName} to={`${routes.productDetail.path}/${params.data?.productId}`}>
+    <Link
+      className="link text-truncate"
+      target="_blank"
+      title={params?.data?.productName}
+      to={`${routes.productDetail.path}/${params.data?.productId}`}
+    >
       {params?.data?.productName}
     </Link>
   );
@@ -700,8 +730,8 @@ const ProductBuilder = (props) => {
                 isPriceBuilder && fromQuote && permissions?.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice
                   ? false
                   : selectedRecords.length
-                    ? false
-                    : true
+                  ? false
+                  : true
               }
               onClick={openActions}
               endIcon={<ExpandMore />}
@@ -777,26 +807,26 @@ const ProductBuilder = (props) => {
               dataToShowForMobile
                 ? dataToShowForMobile.some((f) => f.editable === true)
                   ? [
-                    ...dataToShowForMobile
-                      .filter((f) => f.editable === true)
-                      .map((m) => {
-                        return {
-                          label: `${m.headerName}: `,
-                          field: m.field,
-                          forceShow: true
-                          // onClick: (data, index) => {
-                          //   setShowProductNumberOrProductNameUpdate({ open: true, title: m.headerName, property: m.field, value: data[m.field], indexOfRecord: index, record: data })
-                          // }
-                        };
-                      })
-                  ]
+                      ...dataToShowForMobile
+                        .filter((f) => f.editable === true)
+                        .map((m) => {
+                          return {
+                            label: `${m.headerName}: `,
+                            field: m.field,
+                            forceShow: true
+                            // onClick: (data, index) => {
+                            //   setShowProductNumberOrProductNameUpdate({ open: true, title: m.headerName, property: m.field, value: data[m.field], indexOfRecord: index, record: data })
+                            // }
+                          };
+                        })
+                    ]
                   : [
-                    {
-                      label: `Product description: `,
-                      field: 'productName',
-                      forceShow: true
-                    }
-                  ]
+                      {
+                        label: `Product description: `,
+                        field: 'productName',
+                        forceShow: true
+                      }
+                    ]
                 : []
             }
             onCreate={null}

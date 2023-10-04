@@ -305,7 +305,7 @@ export default function QuoteProcess(props) {
   const [showPDFArrangeColumns, setShowPDFArrangeColumns] = useState(false);
   const [showExcelArrangeColumns, setShowExcelArrangeColumns] = useState(false);
   const [stepFullScreen, setStepFullScreen] = useState(false);
-  const [columns, setColumnDatas] = useState([]);
+  const [columns, setColumnData] = useState([]);
 
   const [messageDialog, setMessageDialog] = useState({
     open: false,
@@ -384,7 +384,7 @@ export default function QuoteProcess(props) {
           data = data.data?.product?.map((u, index) => ({
             ...u,
             id: u._id,
-            srno: index + 1,
+            index: index + 1,
             // productTemplateDisplayValue: u.productTemplate?.optionLabel,
             productCategoryDisplayValue: u.productCategory?.optionLabel,
             priceTemplateDisplayValue: u.priceTemplate?.optionLabel
@@ -451,7 +451,7 @@ export default function QuoteProcess(props) {
 
   const productCalculationForDoa = (BuilderData) => {
     const inventory: { fieldName: string; fieldValue: any }[][] = [];
-    const ignoredKeys = ['fields', '_id', 'productId', 'templateFields', 'id', 'string', 'srno'];
+    const ignoredKeys = ['fields', '_id', 'productId', 'templateFields', 'id', 'string', 'index'];
 
     let totalCost = 0;
     let totalSellingPrice = 0;
@@ -1562,7 +1562,7 @@ export default function QuoteProcess(props) {
                     isAddExistingProduct={isAddExistingProduct}
                     setIsAddExistingProduct={setIsAddExistingProduct}
                     setColumnForPDFExcel={setColName}
-                    setColumnDatas={setColumnDatas}
+                    setColumnData={setColumnData}
                     refreshProducts={refreshProducts}
                     stage={ProcessStatus === 'New' ? 'product' : 'cost'}
                     isPriceBuilder={ProcessStatus === 'Price Builder'}

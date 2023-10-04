@@ -347,6 +347,7 @@ const Leads = () => {
   };
 
   const handleLeadTypeSel = (filteredValue) => {
+    dispatch({ type: 'setPage', page: 0 });
     setSelectedType(filteredValue);
   };
 
@@ -563,6 +564,7 @@ const Leads = () => {
         {Object.keys(frameWorkComponent).length > 0 ? (
           isMobile && !isTablet ? (
             <CustomSwipableList
+              key={selectedType}
               allowSelection={true}
               allowSwipe={true}
               permissions={permissions[leadResource]}

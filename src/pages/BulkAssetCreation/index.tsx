@@ -157,7 +157,7 @@ const BulkAssetCreation = () => {
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
     }
-  
+
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (referenceId) {
@@ -268,6 +268,7 @@ const BulkAssetCreation = () => {
   };
 
   const handleBulkAssetCreationType = (filterValues) => {
+    dispatch({ type: 'setPage', page: 0 });
     setSelectedType(filterValues);
     if (referenceId && referenceType) {
       history.push(`?type=${filterValues}&referenceType=${referenceType}&referenceId=${referenceId}`);
@@ -449,6 +450,7 @@ const BulkAssetCreation = () => {
           Object.keys(frameWorkComponent).length > 0 ? (
             isMobile && !isTablet ? (
               <CustomSwipableList
+                key={selectedType}
                 allowSelection={true}
                 allowSwipe={true}
                 permissions={permissions.bulkAssetCreation}
