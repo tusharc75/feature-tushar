@@ -14,6 +14,7 @@ import {
   IconButton
 } from '@material-ui/core';
 import { KeyboardArrowDown, KeyboardArrowUp } from '@material-ui/icons';
+import { roleTier } from 'src/constants/helpers';
 
 interface RoleProps {
   field: any[];
@@ -22,17 +23,22 @@ interface RoleProps {
   setResource?: any;
   isDisable?: boolean;
   style?: React.CSSProperties;
-  setSelectedResource?: any
+  tier?: string;
 }
 
 const RoleEngine = (props: RoleProps) => {
-  const { field, resource, setField, setResource, isDisable, style, setSelectedResource = ()=>{} } = props;
+  const { field, resource, setField, setResource, isDisable, style, tier = '' } = props;
 
   const [isReadChecked, setIsReadChecked] = useState(false);
   const [isCreateChecked, setIsCreateChecked] = useState(false);
   const [isUpdateChecked, setIsUpdateChecked] = useState(false);
   const [isDeleteChecked, setIsDeleteChecked] = useState(false);
   const [isHiddenChecked, setIsHiddenChecked] = useState(false);
+
+  const [selectedResource, setSelectedResource] = useState({
+    id: '',
+    type: ''
+  });
 
   useEffect(() => {
     let isAnyReadFoundUnchecked = false;
@@ -138,7 +144,10 @@ const RoleEngine = (props: RoleProps) => {
 
   const handleChange = (type, id, access) => (event) => {
     //Checking for the type if it is resource or field
-    setSelectedResource(id, type)
+    setSelectedResource({
+      id: id,
+      type: type
+    });
     if (type === 'resource') {
       const newResource = [...resource];
       const newField = [...field];
@@ -246,6 +255,100 @@ const RoleEngine = (props: RoleProps) => {
       setField(newField);
     }
   };
+
+  const validateRoleAndField = (resource: any[], field: any[]) => {
+    setField(
+      field?.map((f) => ({
+        ...f,
+        // isCreate: initialRender ? f?.isCreate === true : false,
+        // isRead: initialRender ? f?.isRead === true : false,
+        // isUpdate: initialRender ? f?.isUpdate === true : false,
+        isCreate: false,
+        isRead: false,
+        isUpdate: false,
+        isReadDisabled: false,
+        isCreateDisabled: tier === roleTier?.tier3 ? true : false,
+        isUpdateDisabled: tier === roleTier?.tier3 ? true : false,
+        isDeleteDisabled: tier === roleTier?.tier3 ? true : false,
+        isHiddenDisabled: tier === roleTier?.tier3 ? true : false
+      }))
+    );
+    setResource(
+      resource?.map((r) => ({
+        ...r,
+        // isCreate: initialRender ? r?.isCreate === true : false,
+        // isDelete: initialRender ? r?.isDelete === true : false,
+        // isRead: initialRender ? r?.isRead === true : false,
+        // isUpdate: initialRender ? r?.isUpdate === true : false,
+        // isHidden: initialRender ? r?.isHidden === true : false,
+        isCreate: false,
+        isDelete: false,
+        isRead: false,
+        isUpdate: false,
+        isHidden: false,
+        isReadDisabled: false,
+        isCreateDisabled: tier === roleTier?.tier3 ? true : false,
+        isUpdateDisabled: tier === roleTier?.tier3 ? true : false,
+        isDeleteDisabled: tier === roleTier?.tier3 ? true : false,
+        isHiddenDisabled: tier === roleTier?.tier3 ? true : false
+      }))
+    );
+  };
+
+  const validateTier2 = (resource: any[], field: any[], selectedResource: any) => {
+    if (tier === roleTier?.tier2) {
+      let checkedResource = [];
+      let unCheckedResource = [];
+
+      if (selectedResource.type === 'resource') {
+        checkedResource = resource?.filter((_r) => _r?.resourceId === selectedResource.id);
+        unCheckedResource = resource?.filter((_r) => _r?.resourceId !== selectedResource.id);
+      } else {
+        const resourceName = field?.filter((f) => f?.fieldData?._id === selectedResource?.id)[0]?.fieldData?.resource;
+        checkedResource = resource?.filter((_r) => _r?.name === resourceName);
+        unCheckedResource = resource?.filter((_r) => _r?.name !== resourceName);
+      }
+
+      let isChecked = false;
+      if (
+        checkedResource[0]?.isRead ||
+        checkedResource[0]?.isCreate ||
+        checkedResource[0]?.isUpdate ||
+        checkedResource[0]?.isDelete ||
+        checkedResource[0]?.isHidden
+      ) {
+        isChecked = true;
+      }
+
+      const index = resource?.findIndex((_r) => _r?.resourceId === checkedResource[0]?.resourceId);
+
+      let newResource = [...resource];
+
+      if (checkedResource[0]) {
+        newResource = unCheckedResource?.map((_r) => ({
+          ..._r,
+          isCreateDisabled: isChecked ? true : false,
+          isReadDisabled: isChecked ? true : false,
+          isUpdateDisabled: isChecked ? true : false,
+          isDeleteDisabled: isChecked ? true : false,
+          isHiddenDisabled: isChecked ? true : false
+        }));
+
+        newResource.splice(index, 0, checkedResource[0]);
+      }
+
+      setResource(newResource);
+      setField(field);
+    }
+  };
+
+  useEffect(() => {
+    validateRoleAndField(resource, field);
+  }, [tier]);
+
+  useEffect(() => {
+    validateTier2(resource, field, selectedResource);
+  }, [selectedResource]);
 
   return (
     <TableContainer

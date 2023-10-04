@@ -2774,3 +2774,9 @@ export const GenerateResourceLineNumber = (fields) => {
   }
   return lineNumber;
 };
+
+export const roleTier = {
+  tier1: 'Tier 1',
+  tier2: 'Tier 2',
+  tier3: 'Tier 3'
+};
