@@ -18,7 +18,7 @@ import {
   Checkbox
 } from '@material-ui/core';
 import { ControlPoint, KeyboardArrowDown, KeyboardArrowUp } from '@material-ui/icons';
-import { Skeleton } from '@material-ui/lab';
+import { Autocomplete, Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from '../../axios/axiosInstance';
 import routes from '../../components/Helpers/Routes';
@@ -65,7 +65,8 @@ const RoleDetailsPage = () => {
   const [isEdit, setIsEdit] = useState(false);
   const [values, setValues] = useState({
     name: '',
-    description: ''
+    description: '',
+    tier: ''
   });
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.role]);
 
@@ -105,6 +106,17 @@ const RoleDetailsPage = () => {
   const [defaultResourceName, setDefaultResourceName] = useState([]);
   const [superAdminAccess, setSuperAdminAccess] = useState(false);
   const [canAssignByAnyuser, setCanAssignByAnyuser] = useState(false);
+
+  const roleTier = {
+    tier1: 'Tier 1',
+    tier2: 'Tier 2',
+    tier3: 'Tier 3'
+  };
+
+  const [selectedResource, setSelectedResource] = useState({
+    id: '',
+    type: 'resource'
+  });
 
   const policyResources = [
     {
@@ -251,9 +263,15 @@ const RoleDetailsPage = () => {
         data: { data }
       } = await axiosInstance().get(`/role/${id}`);
       setRoleData(data);
-      setValues({ name: data.name, description: data.description });
-      setField(data.field);
-      setResource(data.resource);
+      setValues({ name: data.name, description: data.description, tier: data?.tier || roleTier?.tier1 });
+      if (data?.tier === roleTier.tier2) {
+        validateTier2(data.resource, data.field, data?.tier, {
+          id: data.resource?.filter?.((_r) => _r?.isRead || _r?.isCreate || _r?.isUpdate || _r?.isDelete || _r?.isHidden)[0]?.resourceId || '',
+          type: 'resource'
+        });
+      } else {
+        validateRoleAndField(data.resource, data.field, data?.tier || roleTier?.tier1, true);
+      }
       const current = {
         name: data.name,
         description: data.description,
@@ -301,7 +319,7 @@ const RoleDetailsPage = () => {
   };
 
   const checkError = () => {
-    return values?.name?.length === 0 || values?.description?.length === 0;
+    return values?.name?.length === 0 || values?.description?.length === 0 || values?.tier?.length === 0 || !values?.tier;
   };
 
   const dashboardList = async () => {
@@ -328,12 +346,33 @@ const RoleDetailsPage = () => {
   const handleUpdateRole = () => {
     setUpdating(true);
     let dashBoardIds = dashboardName.map((obj) => obj.id);
+
+    const resources = resource.map((r) => {
+      const newData = { ...r };
+      delete newData.isCreateDisabled;
+      delete newData.isDeleteDisabled;
+      delete newData.isReadDisabled;
+      delete newData.isUpdateDisabled;
+      delete newData.isHiddenDisabled;
+      return newData;
+    });
+
+    const fields = field.map((r) => {
+      const newData = { ...r };
+      delete newData.isCreateDisabled;
+      delete newData.isDeleteDisabled;
+      delete newData.isReadDisabled;
+      delete newData.isUpdateDisabled;
+      delete newData.isHiddenDisabled;
+      return newData;
+    });
+
     axiosInstance()
       .put(`/role`, {
         _id: id,
         ...values,
-        field,
-        resource,
+        field: fields,
+        resource: resources,
         type: roleData.type,
         policy: policyFieldCheckBox,
         dashBoards: dashBoardIds,
@@ -458,6 +497,90 @@ const RoleDetailsPage = () => {
     }
   };
 
+  const validateRoleAndField = (resource: any[], field: any[], tier: string, initialRender = false) => {
+    setField(
+      field?.map((f) => ({
+        ...f,
+        isCreate: initialRender ? f?.isCreate === true : false,
+        isRead: initialRender ? f?.isRead === true : false,
+        isUpdate: initialRender ? f?.isUpdate === true : false,
+        isCreateDisabled: tier === roleTier?.tier3 ? true : false,
+        isUpdateDisabled: tier === roleTier?.tier3 ? true : false,
+        isDeleteDisabled: tier === roleTier?.tier3 ? true : false,
+        isHiddenDisabled: tier === roleTier?.tier3 ? true : false
+      }))
+    );
+    setResource(
+      resource?.map((r) => ({
+        ...r,
+        isCreate: initialRender ? r?.isCreate === true : false,
+        isDelete: initialRender ? r?.isDelete === true : false,
+        isRead: initialRender ? r?.isRead === true : false,
+        isUpdate: initialRender ? r?.isUpdate === true : false,
+        isHidden: initialRender ? r?.isHidden === true : false,
+        isCreateDisabled: tier === roleTier?.tier3 ? true : false,
+        isUpdateDisabled: tier === roleTier?.tier3 ? true : false,
+        isDeleteDisabled: tier === roleTier?.tier3 ? true : false,
+        isHiddenDisabled: tier === roleTier?.tier3 ? true : false
+      }))
+    );
+  };
+
+  const validateTier2 = (resource: any[], field: any[], tier: string, selectedResource: any) => {
+    if (tier === roleTier?.tier2) {
+      let checkedResource = [];
+      let unCheckedResource = [];
+
+      if (selectedResource.type === 'resource') {
+        checkedResource = resource?.filter((_r) => _r?.resourceId === selectedResource.id);
+        unCheckedResource = resource?.filter((_r) => _r?.resourceId !== selectedResource.id);
+      } else {
+        const resourceName = field?.filter((f) => f?.fieldData?._id === selectedResource?.id)[0]?.fieldData?.resource;
+        checkedResource = resource?.filter((_r) => _r?.name === resourceName);
+        unCheckedResource = resource?.filter((_r) => _r?.name !== resourceName);
+      }
+
+      let isChecked = false;
+      if (
+        checkedResource[0]?.isRead ||
+        checkedResource[0]?.isCreate ||
+        checkedResource[0]?.isUpdate ||
+        checkedResource[0]?.isDelete ||
+        checkedResource[0]?.isHidden
+      ) {
+        isChecked = true;
+      }
+
+      const index = resource?.findIndex((_r) => _r?.resourceId === checkedResource[0]?.resourceId);
+
+      let newResource = [...resource];
+
+      if (checkedResource[0]) {
+        newResource = unCheckedResource?.map((_r) => ({
+          ..._r,
+          isCreateDisabled: isChecked ? true : false,
+          isReadDisabled: isChecked ? true : false,
+          isUpdateDisabled: isChecked ? true : false,
+          isDeleteDisabled: isChecked ? true : false,
+          isHiddenDisabled: isChecked ? true : false
+        }));
+
+        newResource.splice(index, 0, checkedResource[0]);
+      }
+
+      setResource(newResource);
+      setField(field)
+    }
+  };
+
+  useEffect(() => {
+    validateRoleAndField(resource, field, values?.tier);
+  }, [values?.tier]);
+
+  useEffect(() => {
+    validateTier2(resource, field, values?.tier, selectedResource);
+  }, [selectedResource]);
+
   const isEditDeleteDisable = [PERMISSION.superAdmin, PERMISSION.brandAdmin].indexOf(roleData?.permission) >= 0;
 
   return (
@@ -505,27 +628,49 @@ const RoleDetailsPage = () => {
       <Box className={`detail-container-v1`}>
         <Grid container spacing={3}>
           <Grid item xs={12} sm={12} md={8} lg={8}>
-            <div className="grid md:grid-cols-2 grid-cols-1 mb-4 gap-4">
-              <TextField
-                disabled={roleData?.type && roleData?.permission ? true : !permissions?.role?.isUpdate || !isEdit}
-                required
-                variant="outlined"
-                size="small"
-                fullWidth
-                label="Role Name"
-                value={values.name}
-                onChange={(e) => setValues({ ...values, name: e.target.value.trimStart() })}
-              />
-              <TextField
-                disabled={roleData?.type && roleData?.permission ? true : !permissions?.role?.isUpdate || !isEdit}
-                required
-                variant="outlined"
-                size="small"
-                fullWidth
-                label="Role Description"
-                value={values.description}
-                onChange={(e) => setValues({ ...values, description: e.target.value.trimStart() })}
-              />
+            <div className="mb-4">
+              <Grid container spacing={1}>
+                <Grid item lg={5} md={5} sm={12} xs={12}>
+                  <TextField
+                    disabled={roleData?.type && roleData?.permission ? true : !permissions?.role?.isUpdate || !isEdit}
+                    required
+                    variant="outlined"
+                    size="small"
+                    fullWidth
+                    label="Role Name"
+                    value={values.name}
+                    onChange={(e) => setValues({ ...values, name: e.target.value.trimStart() })}
+                  />
+                </Grid>
+                <Grid item lg={5} md={5} sm={12} xs={12}>
+                  <TextField
+                    disabled={roleData?.type && roleData?.permission ? true : !permissions?.role?.isUpdate || !isEdit}
+                    required
+                    variant="outlined"
+                    size="small"
+                    fullWidth
+                    label="Role Description"
+                    value={values.description}
+                    onChange={(e) => setValues({ ...values, description: e.target.value.trimStart() })}
+                  />
+                </Grid>
+                <Grid item lg={2} md={2} sm={12} xs={12}>
+                  <Autocomplete
+                    id={`roleTier`}
+                    disabled={roleData?.type && roleData?.permission ? true : !permissions?.role?.isUpdate || !isEdit}
+                    options={Object.values(roleTier)}
+                    autoHighlight
+                    disableClearable
+                    renderOption={(option) => option || ''}
+                    onChange={(event: any, newValue: any) => {
+                      setValues({ ...values, tier: newValue });
+                    }}
+                    getOptionLabel={(option) => option || ''}
+                    value={values?.tier}
+                    renderInput={(params) => <TextField {...params} label="Select Tier" margin="none" size="small" variant="outlined" />}
+                  />
+                </Grid>
+              </Grid>
             </div>
             <div>
               {loading ? (
@@ -543,6 +688,20 @@ const RoleDetailsPage = () => {
                       setField={setField}
                       setResource={setResource}
                       isDisable={permissions?.role.isUpdate ? (isEditDeleteDisable || !isEdit ? true : false) : true}
+                      setSelectedResource={(id: any, type: any) => {
+                        if (id === selectedResource.id) {
+                          setSelectedResource({
+                            id: '',
+                            type: ''
+                          });
+                        }
+                        setTimeout(() => {
+                          setSelectedResource({
+                            id: id,
+                            type: type
+                          });
+                        }, 100);
+                      }}
                     />
                     {isPolicyTableVisible() && (
                       <PolicyResources
