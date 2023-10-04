@@ -2675,6 +2675,15 @@ export const SERVICE_TYPE = {
   fieldService: 'Field Service'
 };
 
+export const QUOTE_PROCESS_STATUS = {
+  new: 'New',
+  priceBuilder: 'Price Builder',
+  quoteBuilder: 'Quote Builder',
+  doaProcess: 'DOA Process',
+  sendToCustomer: 'Send To Customer',
+  end: 'End'
+}
+
 export const convertMsToTime = (milliseconds: any) => {
   function padTo2Digits(num) {
     num = num - Math.floor(num) !== 0 ? num.toFixed(1) : num;

@@ -24,7 +24,7 @@ import BulkEditDialog from './BulkEditDialog';
 import Loader from '../Loader';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { handleAutoCalculation, extractFields } from '../../constants/formulaUtility';
-import { CustomDialogTransition, gridLoadingTimeout, supplierContact } from '../../constants/helpers';
+import { CustomDialogTransition, QUOTE_PROCESS_STATUS, gridLoadingTimeout, supplierContact } from '../../constants/helpers';
 import routes from '../../components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
 import { AiTwotoneEdit } from 'react-icons/ai';
@@ -42,6 +42,7 @@ import AskSupplierPriceDialog from './AskSupplierPriceDialog';
 import { useData } from './../../StateProvider/Provider';
 import ViewSupplierPriceDialog from './ViewSupplierPriceDialog';
 import HtmlTooltip from '../CustomTooltipTitle';
+import CommonSkeleton from '../Helpers/CommonSkeleton';
 
 let levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
 
@@ -64,6 +65,7 @@ const ProductBuilder = (props) => {
     setColumnData,
     fullScreen = false,
     quoteData = null,
+    processStatus,
     setNextStep
   } = props;
 
@@ -104,9 +106,12 @@ const ProductBuilder = (props) => {
 
   useEffect(() => {
     fetchProduct(productBuilderId);
-  }, [productBuilderId, stage]);
+  }, [productBuilderId, processStatus]);
 
   const fetchProduct = (id) => {
+    if (setNextStep) {
+      setNextStep(false)
+    }
     dispatch({ type: 'loading', loading: true });
     if (gridApi) {
       gridApi.setRowData([]);
@@ -176,14 +181,6 @@ const ProductBuilder = (props) => {
           res.canDelete = permissions?.isUpdate && fromQuote ? (hasPermission ? true : false) : true;
           res.allowedToEdit = permissions?.isUpdate && fromQuote ? (hasPermission ? true : false) : true;
           res.isSupplierExist = isPriceBuilder && fromQuote && permissions.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice;
-
-          if (isPriceBuilder) {
-            const tsp = res[`totalSalesPrice_${currency}`] || 0;
-            const qty = res?.qty || 0;
-            if (qty === 0 || tsp === 0) {
-              setNextStep(false);
-            }
-          }
           return res;
         });
         if (appendRows) {
@@ -203,6 +200,27 @@ const ProductBuilder = (props) => {
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
+
+        if (processStatus === QUOTE_PROCESS_STATUS.new) {
+          if (rows?.length) {
+            setNextStep(true)
+          }
+        }
+        else if (processStatus === QUOTE_PROCESS_STATUS.priceBuilder) {
+          if (rows?.find((ele) => (ele[`totalSalesPrice_${currency?.toLowerCase()}`] || 0) === 0 || (ele[`qty`] || 0) === 0)) {
+            setNextStep(false);
+          }
+          else {
+            setNextStep(true);
+          }
+        }
+        else if (processStatus === QUOTE_PROCESS_STATUS.quoteBuilder) {
+          setNextStep(true)
+        }
+        else if (processStatus === QUOTE_PROCESS_STATUS.doaProcess) {
+        }
+        else {
+        }
         refreshProducts(data);
       })
       .catch((error) => {
@@ -730,8 +748,8 @@ const ProductBuilder = (props) => {
                 isPriceBuilder && fromQuote && permissions?.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice
                   ? false
                   : selectedRecords.length
-                  ? false
-                  : true
+                    ? false
+                    : true
               }
               onClick={openActions}
               endIcon={<ExpandMore />}
@@ -807,26 +825,26 @@ const ProductBuilder = (props) => {
               dataToShowForMobile
                 ? dataToShowForMobile.some((f) => f.editable === true)
                   ? [
-                      ...dataToShowForMobile
-                        .filter((f) => f.editable === true)
-                        .map((m) => {
-                          return {
-                            label: `${m.headerName}: `,
-                            field: m.field,
-                            forceShow: true
-                            // onClick: (data, index) => {
-                            //   setShowProductNumberOrProductNameUpdate({ open: true, title: m.headerName, property: m.field, value: data[m.field], indexOfRecord: index, record: data })
-                            // }
-                          };
-                        })
-                    ]
+                    ...dataToShowForMobile
+                      .filter((f) => f.editable === true)
+                      .map((m) => {
+                        return {
+                          label: `${m.headerName}: `,
+                          field: m.field,
+                          forceShow: true
+                          // onClick: (data, index) => {
+                          //   setShowProductNumberOrProductNameUpdate({ open: true, title: m.headerName, property: m.field, value: data[m.field], indexOfRecord: index, record: data })
+                          // }
+                        };
+                      })
+                  ]
                   : [
-                      {
-                        label: `Product description: `,
-                        field: 'productName',
-                        forceShow: true
-                      }
-                    ]
+                    {
+                      label: `Product description: `,
+                      field: 'productName',
+                      forceShow: true
+                    }
+                  ]
                 : []
             }
             onCreate={null}
@@ -864,7 +882,9 @@ const ProductBuilder = (props) => {
             priceTemplateField={priceTemplateField}
           />
         ) : (
-          <Loader style={{ minHeight: 300 }} text="Loading..." />
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
         )}
       </Box>
       {isAddNewProduct && (
