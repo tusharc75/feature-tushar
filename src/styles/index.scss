@@ -141,6 +141,8 @@
   --chip-color-pending: rgb(255 255 255);
   --chip-border-pending: #eec032;
   --chip-background-pending: rgb(214 161 0);
+
+  --task-color: #587adc;
 }
 [data-mode='dark'] {
   .MuiOutlinedInput-notchedOutline {
@@ -1182,8 +1184,8 @@ body::-webkit-scrollbar-thumb {
 
 .detailHeader {
   padding: 10px;
-  background: #f5f5f5;
-  border-bottom: 1px solid #e9e9e9;
+  background: var(--dark-secondary, #f5f5f5);
+  border-bottom: 1px solid var(--common-border-color);
   border-radius: 6px 6px 0 0;
 }
 
@@ -1422,7 +1424,7 @@ body::-webkit-scrollbar-thumb {
 }
 
 .quotePanel {
-  background: #f9f9f9;
+  background: var(--dark-secondary, #f9f9f9);
   justify-content: center;
   border-radius: 4px;
 }
@@ -4146,6 +4148,19 @@ div[class*='line-clamp-'] {
   .MuiSwitch-thumb {
     [data-mode='dark'] & {
       background-color: var(--dark-primary) !important;
+    }
+  }
+}
+// React flow
+body {
+  [data-mode='dark'] & {
+    .react-flow__controls-button {
+      background-color: var(--dark-secondary);
+      color: var(--dark-primary-text);
+      border-color: var(--common-border-color) !important;
+      svg {
+        fill: var(--dark-primary-text);
+      }
     }
   }
 }

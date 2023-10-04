@@ -1,23 +1,7 @@
-import { Chip, Box } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+import { Box } from '@material-ui/core';
 import routes from '../../Helpers/Routes';
 
-const useStyles = makeStyles((theme) => ({
-  chipStyle: {
-    textAlign: 'center',
-    height: 'unset !important',
-    '& span.MuiChip-label': {
-      fontSize: '12px',
-      lineHeight: '15px',
-      fontWeight: '500',
-      padding: '8px 21px',
-      display: 'inline-block'
-    }
-  }
-}));
-
 export const ListRelatedTo = ({ relatedTo, originRelatedTo }) => {
-  const classes = useStyles();
   let filter = originRelatedTo.filter((_relatedTo) => _relatedTo.access === true);
 
   return filter.length ? (
