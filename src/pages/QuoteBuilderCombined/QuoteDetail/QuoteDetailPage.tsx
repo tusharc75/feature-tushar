@@ -1,4 +1,4 @@
-import { Button, makeStyles } from '@material-ui/core';
+import { Box, Button, makeStyles } from '@material-ui/core';
 import DetailsPage from '../../../components/Shared/DetailsPage';
 import axiosInstance from '../../../axios/axiosInstance';
 import { useMemo, useState, useContext, useEffect } from 'react';
@@ -6,6 +6,7 @@ import { formatAmountWithCurrency, processFieldName, stepsToIgnoreManualComplete
 import { BiLayerPlus } from 'react-icons/bi';
 import { HiPencil } from 'react-icons/hi';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const useStyles = makeStyles(() => ({
   detailBox: {
@@ -82,37 +83,14 @@ export default function QuoteDetailPage({
     <div className={`position-relative ${classes.detailBox}`}>
       {quoteData && (
         <>
-          <div className={classes.btnHeader}>
-            {/* {quotePermissions?.isCreate ? (
-                            <Button
-                                variant="text"
-                                style={{color:"white"}}
-                                size="small"
-                                className="mr-1"
-                                startIcon={<BiLayerPlus />}
-                                onClick={handleOpenCloneDialog}
-                            >
-                                Clone
-                            </Button>
-                        ) : null}
-                        {allowedToEdit ? (
-                            <Button
-                                variant="text"
-                                style={{color:"white"}}
-                                size="small"
-                                startIcon={<HiPencil />}
-                                onClick={handleOpenUpdateDialog}
-                            >
-                                Edit
-                            </Button>
-                        ) : null} */}
-          </div>
           {!loadingFields && quoteFields ? (
             <DetailsPage
               data={getCopyOfQuoteData}
               fields={!ifQuoteApprovedAapproved ? quoteFields.filter((_f) => _f.fieldData.sectionName !== 'Post-Quote Information') : quoteFields}
             />
-          ) : null}
+          ) : <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>}
         </>
       )}
     </div>

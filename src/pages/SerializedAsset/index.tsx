@@ -205,10 +205,11 @@ const SerializedAsset = () => {
       .then(({ data }) => {
         let rows = data.data?.map((u, user) => {
           let finalObject = prepareDataForGrid(u);
-          finalObject['canDelete'] = permissions?.serializedAsset?.isDelete;
           finalObject['isChecked'] = [...getLocalStorageArrayData(localStorageSelectedRecords)].some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions?.serializedAsset.isUpdate;
-          finalObject['canDelete'] = [ASSET_STATUS.inUse, ASSET_STATUS.reserved, ASSET_STATUS.delivered]?.includes(u?.status) ? false : true;
+          finalObject['canDelete'] = permissions?.serializedAsset?.isDelete &&
+            ![ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.lost, ASSET_STATUS.customerPossession, ASSET_STATUS.onPO,
+            ASSET_STATUS.scrap]?.includes(u?.status) ? false : true;
           return {
             ...finalObject
           };
@@ -269,7 +270,7 @@ const SerializedAsset = () => {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
     if (deepFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
     }
 
     if (filterByIds?.length || deepFilters?.length) {
@@ -280,7 +281,7 @@ const SerializedAsset = () => {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
     if (search) {
-      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (subleaseAsset) {
       deepFilter = `${deepFilter}&subleaseAsset=1`;
@@ -382,7 +383,7 @@ const SerializedAsset = () => {
           </IconButton>
         </HtmlTooltip>
       )}
-      {(permissions?.serializedAsset?.isDelete && params.data.canDelete) ? (
+      {permissions?.serializedAsset?.isDelete && params.data.canDelete ? (
         <HtmlTooltip title="Delete">
           <IconButton
             size="small"
@@ -440,35 +441,31 @@ const SerializedAsset = () => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[routes.serializedAsset]} />
-        </Grid>
-        <Grid item md={8} sm={1} xs={2}>
-          <ImportExportLinks
-            permissions={permissions?.serializedAsset}
-            module="product inventory"
-            api={serializedAsset.api}
-            afterImportCompleted={() => {
-              fetchProductInventory();
-            }}
-            isExportAllOrSomeFeature={true}
-            total={rowCount}
-            recordsToExport={[...getLocalStorageArrayData(localStorageSelectedRecords)].length}
-            ids={
-              [...getLocalStorageArrayData(localStorageSelectedRecords)].length
-                ? [...getLocalStorageArrayData(localStorageSelectedRecords)].map((obj) => obj._id)
-                : []
-            }
-            onExportToExcelSuccess={() => {
-              if (gridApi) gridApi.deselectAll();
-              else fetchProductInventory();
-            }}
-            additionalParams={getQueryString(true)}
-          />
-        </Grid>
-      </Grid>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[routes.serializedAsset]} />
+        <ImportExportLinks
+          permissions={permissions?.serializedAsset}
+          module="product inventory"
+          api={serializedAsset.api}
+          afterImportCompleted={() => {
+            fetchProductInventory();
+          }}
+          isExportAllOrSomeFeature={true}
+          total={rowCount}
+          recordsToExport={[...getLocalStorageArrayData(localStorageSelectedRecords)].length}
+          ids={
+            [...getLocalStorageArrayData(localStorageSelectedRecords)].length
+              ? [...getLocalStorageArrayData(localStorageSelectedRecords)].map((obj) => obj._id)
+              : []
+          }
+          onExportToExcelSuccess={() => {
+            if (gridApi) gridApi.deselectAll();
+            else fetchProductInventory();
+          }}
+          additionalParams={getQueryString(true)}
+        />
+      </div>
       <div className="main-container">
         <div className="header-panel">
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-[4fr_3fr] gap-4 items-start">
@@ -647,7 +644,10 @@ const SerializedAsset = () => {
                   onClose={closeActions}
                 >
                   <MenuItem
-                    disabled={!permissions?.serializedAsset?.isDelete || (getLocalStorageArrayData(localStorageSelectedRecords)?.filter((e) => !e.canDelete)?.length > 0)}
+                    disabled={
+                      !permissions?.serializedAsset?.isDelete ||
+                      getLocalStorageArrayData(localStorageSelectedRecords)?.filter((e) => !e.canDelete)?.length > 0
+                    }
                     onClick={() => {
                       closeActions();
                       setShowDeleteConfirmBox(true);
@@ -911,7 +911,7 @@ const SerializedAsset = () => {
           path={routes?.supplierAccount?.path}
         />
       )}
-    </Fragment>
+    </section>
   );
 };
 

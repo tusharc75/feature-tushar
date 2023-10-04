@@ -2,17 +2,16 @@ import { Box, Button, Grid, IconButton, Menu, MenuItem } from '@material-ui/core
 import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
-import { camelCase } from 'lodash';
+import { camelCase, map, uniq } from 'lodash';
 import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
 import { useData } from 'src/StateProvider/Provider';
 import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { FIELD_TICKET_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { FIELD_TICKET_STATUS, gridLoadingTimeout, prepareDataForGrid, removeLocalStorage, sidebarResource } from 'src/constants/helpers';
 import NoteAddIcon from '@material-ui/icons/NoteAdd';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import CreateInvoiceDialog from './CreateInvoiceDialog';
 import ViewInvoice from '../Invoice/ViewInvoice';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomContainer from 'src/components/CustomContainer';
@@ -21,9 +20,10 @@ import SearchBox from 'src/components/Helpers/SearchBox';
 import { ExpandMore } from '@material-ui/icons';
 
 const FieldTicketInvoice = () => {
-  const toastConfig = useContext(CustomToastContext);
-  const renderedFrom = camelCase(routes?.fieldTicket.title);
+
+  const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_invoice`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
+
   const {
     state: { permissions, selectedEntity, user }
   }: any = useData();
@@ -35,7 +35,8 @@ const FieldTicketInvoice = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [gridApi, setGridApi] = useState(null);
   const { getColumnData } = useColumns();
-  const [createInvoiceDialog, setCreateInvoiceDialog] = useState({ open: false, isBulkCreate: false, data: null });
+
+  const [createInvoiceDialog, setCreateInvoiceDialog] = useState({ open: false, data: null });
   const [viewInvoiceDialog, setViewInvoiceDialog] = useState({ open: false, data: null });
 
   const fetchGridColumns = async () => {
@@ -73,9 +74,7 @@ const FieldTicketInvoice = () => {
       .then(({ data: { data, count } }) => {
         let rows = data?.map((u: any) => {
           let finalObject: any = prepareDataForGrid(u);
-          finalObject['canDelete'] = permissions?.fieldTicket?.isDelete;
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions?.fieldTicket?.isUpdate;
           return {
             ...finalObject
           };
@@ -111,13 +110,11 @@ const FieldTicketInvoice = () => {
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
-    deepFilters.push({ field: 'status', term: [FIELD_TICKET_STATUS.readyToInvoice, FIELD_TICKET_STATUS.invoiced] });
-
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
     if (deepFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
     }
     if (filterByIds?.length || deepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
@@ -128,7 +125,7 @@ const FieldTicketInvoice = () => {
     }
 
     if (search) {
-      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
@@ -144,7 +141,7 @@ const FieldTicketInvoice = () => {
           <IconButton
             size="small"
             onClick={() => {
-              setCreateInvoiceDialog({ open: true, isBulkCreate: false, data: params.data });
+              setCreateInvoiceDialog({ open: true, data: [params.data] });
             }}
           >
             <NoteAddIcon fontSize="small" color="primary" />
@@ -185,30 +182,22 @@ const FieldTicketInvoice = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-  const isSelectedInvoiceEqual = (arr) => {
-
-    if(arr.some(k => 'invoiceId' in k)) return false
-
-    if (arr?.length <= 1) {
-      return true
+  const checkUniqCreateInvoice = () => {
+    if (selectedRecords.length === 0) {
+      return true;
     }
-
-    const customerAccountId = arr[0]?.customerAccountId;
-    const warehouseId = arr[0]?.warehouseId;
-    const wellNameId = arr[0]?.wellNameId;
-
-    let count = 0;
-
-    for (let i = 1; i < arr.length; i++) {
-      const data = arr[i]
-      if (data?.customerAccountId === customerAccountId && data?.warehouseId === warehouseId && data?.wellNameId === wellNameId) {
-        count++;
-      }
-      if (count === arr?.length - 1) return true
+    else if (selectedRecords.find((e) => e.status === FIELD_TICKET_STATUS.invoiced)) {
+      return true;
     }
-
-    return false;
-  }
+    else if (uniq(map(selectedRecords, 'customerAccountId')).length === 1
+      && uniq(map(selectedRecords, 'wellNameId')).length === 1
+      && uniq(map(selectedRecords, 'warehouseId')).length === 1
+      && uniq(map(selectedRecords, 'invoiceId')).length === 1) {
+      return false;
+    } else {
+      return true;
+    }
+  };
 
   return (
     <Fragment>
@@ -257,9 +246,9 @@ const FieldTicketInvoice = () => {
                     onClose={closeActions}
                   >
                     <MenuItem
-                      disabled={!isSelectedInvoiceEqual(selectedRecords)}
+                      disabled={checkUniqCreateInvoice()}
                       onClick={() => {
-                        setCreateInvoiceDialog({ open: true, isBulkCreate: true, data: null })
+                        setCreateInvoiceDialog({ open: true, data: selectedRecords })
                         closeActions();
                       }}
                     >
@@ -296,11 +285,10 @@ const FieldTicketInvoice = () => {
         {createInvoiceDialog.open && (
           <CreateInvoiceDialog
             fieldTicketData={createInvoiceDialog.data}
-            isBulkCreate={createInvoiceDialog.isBulkCreate}
-            selectedData={createInvoiceDialog.isBulkCreate ? selectedRecords : []}
-            onClose={() => setCreateInvoiceDialog({ open: false, isBulkCreate: false, data: null })}
+            onClose={() => setCreateInvoiceDialog({ open: false, data: null })}
             onSuccess={() => {
-              setCreateInvoiceDialog({ open: false, isBulkCreate: false, data: null });
+              setCreateInvoiceDialog({ open: false, data: null });
+              removeLocalStorage(localStorageSelectedRecords);
               fetchFieldTicketData();
             }}
           />
@@ -308,12 +296,12 @@ const FieldTicketInvoice = () => {
         {viewInvoiceDialog.open && (
           <ViewInvoice
             invoiceData={{ ...viewInvoiceDialog.data, invoiceNumber: viewInvoiceDialog?.data?.invoice, _id: viewInvoiceDialog?.data?.invoiceId }}
-            estimateStartDate={null}
             onClose={() => {
               setViewInvoiceDialog({ open: false, data: null });
             }}
             onSuccess={() => {
               setViewInvoiceDialog({ open: false, data: null });
+              removeLocalStorage(localStorageSelectedRecords);
               fetchFieldTicketData();
             }}
           />

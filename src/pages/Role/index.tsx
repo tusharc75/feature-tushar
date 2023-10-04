@@ -1,29 +1,28 @@
-import { useState, FC, useEffect, useContext, useReducer, Fragment } from 'react';
-import { Tooltip, IconButton, Grid } from '@material-ui/core';
+import { IconButton, Tooltip } from '@material-ui/core';
 import { Delete as DeleteIcon } from '@material-ui/icons';
-import { Link } from 'react-router-dom';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { camelCase } from 'lodash';
+import { FC, useContext, useEffect, useReducer, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { CiUser, IoCreateSharp, MdDescription } from 'react-icons/all';
+import { Link, useHistory } from 'react-router-dom';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import routes from './../../components/Helpers/Routes';
-import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
+import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
+import AssignRegionalRolesUserDialog from '../../components/AssignRolesDialog/AssignRegionalRolesUserDialog';
+import AssignUserDialog from '../../components/AssignRolesDialog/AssignUserDialog';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import MessageDialog from '../../components/Helpers/MessageDialog';
-import { useData } from '../../StateProvider/Provider';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import CreateRole from './CreateRole';
-import { PERMISSION } from '../../constants/Roles';
-import { localStorageKeys, roleTypes, gridPageSizes, isObjectEmpty, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
-import RoleHeader from './RoleHeader';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
-import AssignUserDialog from '../../components/AssignRolesDialog/AssignUserDialog';
-import AssignRegionalRolesUserDialog from '../../components/AssignRolesDialog/AssignRegionalRolesUserDialog';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { useHistory } from 'react-router-dom';
-import { isMobile, isTablet } from 'react-device-detect';
-import { FaSuitcase, MdDescription, IoCreateSharp } from 'react-icons/all';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { camelCase } from 'lodash';
+import { PERMISSION } from '../../constants/Roles';
+import { gridLoadingTimeout, isObjectEmpty, localStorageKeys, prepareDataForGrid, roleTypes, sidebarResource } from '../../constants/helpers';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import routes from './../../components/Helpers/Routes';
+import CreateRole from './CreateRole';
+import RoleHeader from './RoleHeader';
 
 const rolePermissionArray = [PERMISSION.superAdmin, PERMISSION.brandAdmin];
 let roleTimeout;
@@ -148,7 +147,6 @@ const Roles: FC = () => {
     actionsRenderer: ActionsRenderer
   };
 
-
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}&type=2`;
 
@@ -161,7 +159,7 @@ const Roles: FC = () => {
           term: filters[field].filter
         });
       });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
     }
 
     if (sorting.length > 0) {
@@ -169,7 +167,7 @@ const Roles: FC = () => {
     }
 
     if (search) {
-      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
 
     return deepFilter;
@@ -269,6 +267,7 @@ const Roles: FC = () => {
     setIsOpen({ open: false, isClone: false, idToClone: null });
   };
   const handleRoleTypeSelect = (filteredValue) => {
+    dispatch({ type: 'setPage', page: 0 });
     setSelectedType(filteredValue);
   };
 
@@ -319,12 +318,10 @@ const Roles: FC = () => {
             }}
           />
         ))}
-      <Fragment>
-        <Grid container className="headerbox">
-          <Grid item md={12} sm={12} xs={12}>
-            <CustomBreadCrumbs routes={[routes.role]} />
-          </Grid>
-        </Grid>
+      <section className="main-container-v1">
+        <div className="headerbox-v1">
+          <CustomBreadCrumbs routes={[routes.role]} />
+        </div>
         <CustomContainer>
           <div className="header-panel">
             <RoleHeader
@@ -342,11 +339,13 @@ const Roles: FC = () => {
               dispatch={dispatch}
               columns={columns}
               filters={filters}
+              resource={sidebarResource.role}
             />
           </div>
 
           {isMobile && !isTablet ? (
             <CustomSwipableList
+              key={selectedType}
               allowSelection={true}
               allowSwipe={true}
               permissions={permissions.role}
@@ -367,7 +366,7 @@ const Roles: FC = () => {
               loading={loading}
               additionalDetails={[
                 {
-                  icon: <FaSuitcase size={18} />,
+                  icon: <CiUser size={18} />,
                   field: 'type'
                 }
               ]}
@@ -406,7 +405,7 @@ const Roles: FC = () => {
               refreshGrid={fetchRoles}
               renderedFrom={renderedFrom}
               showOnlyShowFilteredRecordSwitch={true}
-              showFilters={true}
+              showFilters={false}
               resource={sidebarResource.role}
             />
           )}
@@ -430,7 +429,7 @@ const Roles: FC = () => {
             onOk={handleDeleteRole}
           />
         ) : null}
-      </Fragment>
+      </section>
     </>
   );
 };

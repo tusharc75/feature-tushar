@@ -3,7 +3,7 @@ import { Box, Grid, Button, Menu, MenuItem, IconButton } from '@material-ui/core
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { FIELD_TICKET_STATUS, getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { FIELD_TICKET_STATUS, SERVICE_ORDER_STATUS, getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import useColumns, { getFrameworkComponents, getStaticFields, gridFilterParser } from 'src/constants/useColumns';
 import routes from 'src/components/Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
@@ -18,7 +18,7 @@ import ManageFieldTicket from 'src/pages/FieldTicket/ManageFieldTicket';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import CustomRenderCell from 'src/components/Helpers/CustomRenderCell';
 
-const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdit, refreshFieldServiceOrder }) => {
+const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdit, handleChangeStatus }) => {
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const toastConfig = useContext(CustomToastContext);
   const [openDialog, setOpenDialog] = useState({ open: false, isClone: false, id: null });
@@ -87,6 +87,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
                 headerName: o?.fieldData?.fieldLabel,
                 show: true,
                 disabled: true,
+                width: 250,
                 cellRenderer: 'fieldTicketNumberRenderer'
               }
             ];
@@ -126,8 +127,8 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
           let finalObject = prepareDataForGrid(u);
           finalObject['isChecked'] = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some((s) => s._id === u._id);
           var isAllowedToEdit = [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id);
-          finalObject['allowedToEdit'] = isAllowedToEdit && permissions?.fieldTicket?.isUpdate && ![FIELD_TICKET_STATUS.invoiced]?.includes(u?.status);
-          finalObject['canDelete'] = u?.canDelete && permissions?.fieldTicket?.isDelete && u?.owner?.optionValue === user?.user?._id
+          finalObject['allowedToEdit'] = isAllowedToEdit && permissions?.fieldTicket?.isUpdate && ![FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed]?.includes(u?.status);
+          finalObject['canDelete'] = u?.canDelete && permissions?.fieldTicket?.isDelete && u?.owner?.optionValue === user?.user?._id && ![FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed]?.includes(u?.status)
           let res = {
             ...finalObject
           };
@@ -172,7 +173,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
     if (deepFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
     }
     if (filterByIds?.length || deepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
@@ -182,7 +183,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
     if (search) {
-      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
@@ -307,6 +308,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
                 onClose={closeActions}
               >
                 <MenuItem
+                  disabled={!selectedRecords?.every(s => s.canDelete)}
                   onClick={() => {
                     closeActions();
                     setShowDeleteConfirmBox(true);
@@ -357,12 +359,15 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
             customerAccount: serviceOrderData?.customerAccount?.optionValue || '',
             billingAddress: serviceOrderData?.billingAddress?.optionValue || '',
             shippingAddress: serviceOrderData?.shippingAddress?.optionValue || '',
+            taxCode: serviceOrderData?.taxCode?.optionValue || '',
             collaborator: serviceOrderData?.collaborator?.map((m) => m.optionValue) || [],
           }}
           onSuccess={() => {
+            if (serviceOrderData?.status === SERVICE_ORDER_STATUS.new) {
+              handleChangeStatus(SERVICE_ORDER_STATUS.inProgress);
+            }
             setOpenDialog({ open: false, isClone: false, id: null });
             fetchData();
-            refreshFieldServiceOrder();
           }}
           renderedFrom={renderedFrom}
         />

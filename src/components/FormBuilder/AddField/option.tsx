@@ -1,27 +1,27 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
-import Typography from '@material-ui/core/Typography';
-import TextField from '@material-ui/core/TextField';
 import Box from '@material-ui/core/Box';
+import Checkbox from '@material-ui/core/Checkbox';
+import FormControl from '@material-ui/core/FormControl';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Grid from '@material-ui/core/Grid';
 import IconButton from '@material-ui/core/IconButton';
-import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
-import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
-import Autocomplete from '@material-ui/lab/Autocomplete';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
-import { read, utils, writeFile } from 'xlsx';
-import { useDrag, useDrop, DropTargetMonitor } from 'react-dnd';
-import { XYCoord } from 'dnd-core';
-import update from 'immutability-helper';
-import { DragIndicator } from '@material-ui/icons';
+import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
-import FormControl from '@material-ui/core/FormControl';
-import InputLabel from '@material-ui/core/InputLabel';
-import axiosInstance from '../../../axios/axiosInstance';
-import { FixedSizeList } from 'react-window';
+import TextField from '@material-ui/core/TextField';
+import Typography from '@material-ui/core/Typography';
+import { DragIndicator } from '@material-ui/icons';
+import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
+import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
 import SortIcon from '@material-ui/icons/Sort';
+import Autocomplete from '@material-ui/lab/Autocomplete';
+import { XYCoord } from 'dnd-core';
+import update from 'immutability-helper';
 import { orderBy } from 'lodash';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { DropTargetMonitor, useDrag, useDrop } from 'react-dnd';
+import { FixedSizeList } from 'react-window';
+import { read, utils, writeFile } from 'xlsx';
+import axiosInstance from '../../../axios/axiosInstance';
 
 export const Option = ({ values, setFieldValue, fields, _id }) => {
   const defaultOption = [{ optionLabel: 'Option 1', optionValue: 'Option 1' }];
@@ -309,7 +309,7 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
           </label>
         </Grid>
       </Grid>
-      <Box border={1} mt={1} bgcolor="grey.100" borderColor="var(--common-border-color)">
+      <Box border={1} mt={1} borderColor="var(--common-border-color)">
         <FixedSizeList
           height={300}
           width={'100%'}
@@ -428,14 +428,14 @@ const Card = (props) => {
   drag(drop(ref));
   return (
     <div ref={ref} style={{ opacity }} data-handler-id={handlerId}>
-      <Box bgcolor="white" border={1} mb={1} p={1} borderColor="var(--common-border-color)">
+      <Box border={1} p={1} borderColor="var(--common-border-color)">
         <Grid container spacing={1}>
-          <Grid item xs={1}>
+          <Grid item md={1}>
             <IconButton>
               <DragIndicator />
             </IconButton>
           </Grid>
-          <Grid item xs={5}>
+          <Grid item md={5}>
             <TextField
               id="standard-basic"
               variant="outlined"
@@ -447,7 +447,7 @@ const Card = (props) => {
             />
           </Grid>
           {values['isDependentDropdown'] && values['dropdowDependentOn'] && values['dropdowDependentOn'] !== '' && (
-            <Grid item xs={4}>
+            <Grid item md={4}>
               <Select
                 id="demo-simple-select-outlined"
                 fullWidth
@@ -495,7 +495,7 @@ const Card = (props) => {
                 /> */}
             </Grid>
           )}
-          <Grid item xs={2}>
+          <Grid item md={2}>
             <IconButton aria-label="setting" onClick={() => AddRemoveValue('add', index)}>
               <AddCircleOutlineIcon fontSize="small" />
             </IconButton>

@@ -162,15 +162,17 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
       >
         <Toolbar />
         <div id="sidebarOrDrawer" style={{ borderTop: '1px solid #485B64' }}>
-          {toggleDrawer ? (
-            user?.brandLogo ? (
-              <img src={user.brandLogo} alt="brand" className={styles.logo} />
+          <div className="min-h-[33px]">
+            {toggleDrawer ? (
+              user?.brandLogo ? (
+                <img src={user.brandLogo} alt="brand" className={styles.logo} />
+              ) : (
+                <img className={styles.logo} src={SVG('LogoNew')} onClick={() => history.push('/')} alt="equip logo" title="eQuipt Logo" />
+              )
             ) : (
-              <img className={styles.logo} src={SVG('LogoNew')} onClick={() => history.push('/')} alt="equip logo" title="eQuipt Logo" />
-            )
-          ) : (
-            <img className={styles.logo} src={SVG('LogoNewShort')} onClick={() => history.push('/')} alt="equip logo" title="eQuipt Logo" />
-          )}
+              <img className={styles.logo} src={SVG('LogoNewShort')} onClick={() => history.push('/')} alt="equip logo" title="eQuipt Logo" />
+            )}
+          </div>
           <List className={`${styles.listContainer} sidebar-list`}>
             <ListItem
               button

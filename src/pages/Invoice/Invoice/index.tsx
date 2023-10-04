@@ -16,7 +16,7 @@ import { IconButton } from '@material-ui/core';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import routes from 'src/components/Helpers/Routes';
 
-const Invoice = ({ invoiceData, setNextStep, updateJobStatus, statusOptions, stepFullScreen, renderedFrom }) => {
+const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, stepFullScreen, renderedFrom }) => {
 
   const toastConfig = useContext(CustomToastContext);
 
@@ -26,7 +26,7 @@ const Invoice = ({ invoiceData, setNextStep, updateJobStatus, statusOptions, ste
 
   useEffect(() => {
     if (statusOptions.findIndex((d) => d.optionLabel === INVOICE_STATUS.readyToInvoice) > statusOptions.findIndex((d) => d.optionLabel === invoiceData?.status)) {
-      updateJobStatus(INVOICE_STATUS.readyToInvoice);
+      handleChangeStatus(INVOICE_STATUS.readyToInvoice);
     }
   }, []);
 
@@ -185,6 +185,21 @@ const Invoice = ({ invoiceData, setNextStep, updateJobStatus, statusOptions, ste
           referenceId={invoiceData?._id}
           columns={columns}
           isSendEmail={true}
+          defaultColumns={[
+            'type',
+            'detail',
+            'fieldTicket',
+            'qty',
+            'unit',
+            'pricingMethod',
+            'actualStartDate',
+            'actualEndDate',
+            `price_${invoiceData?.currency?.toLowerCase()}`,
+            `totalPrice_${invoiceData?.currency?.toLowerCase()}`,
+            `taxPercentage`,
+            `tax_${invoiceData?.currency?.toLowerCase()}`,
+            `finalPrice_${invoiceData?.currency?.toLowerCase()}`
+          ]}
         />
       </Box>
       <Grid item xs={12} md={12} sm={12}>

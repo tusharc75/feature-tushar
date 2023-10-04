@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react';
 import SearchBox from '../../components/Helpers/SearchBox';
 import { AddOutlined } from '@material-ui/icons';
-import { Box, Grid, MenuItem, Button, Menu } from '@material-ui/core';
+import { Box, Grid, MenuItem, Button, Menu, IconButton } from '@material-ui/core';
 import { ExpandMore } from '@material-ui/icons';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import styles from '../Leads/Header.module.scss';
 import { isMobile, isTablet } from 'react-device-detect';
-import { MdAdd, MdSort, MdFilterList } from 'react-icons/all';
+import { MdAdd, MdSort, MdFilterList, TbArrowsSort, MdOutlineFilterAlt } from 'react-icons/all';
 import MobileSortDialog from '../../components/MobileSortDialog';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
+import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
 import routes from 'src/components/Helpers/Routes';
 
 function QuotationHeader(props) {
@@ -29,7 +29,8 @@ function QuotationHeader(props) {
     columns,
     dispatch,
     showTransferEntityDialog,
-    filters
+    filters,
+    resource = ''
     // showCloneRentalManagementDialog
   } = props;
 
@@ -85,50 +86,52 @@ function QuotationHeader(props) {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
       <div className={'d-flex align-items-center gap-1'}>
         {isMobile && !isTablet ? (
-          <div className="d-flex flex-wrap">
-            <Button
-              onClick={handleClickOpen}
-              id="demo-customized-button"
-              aria-controls="demo-customized-menu"
-              aria-haspopup="true"
-              // aria-expanded={open ? 'true' : undefined}
-              variant="text"
-              disableElevation
-              startIcon={<MdSort />}
-            >
-              Sort
-            </Button>
+          <div className="d-flex flex-wrap items-center justify-between w-full gap-2">
+            <div>{toggleInner}</div>
+            <div className="flex flex-wrap items-center gap-1 ml-auto">
+              <IconButton
+                className={'mobileIconButton secondary'}
+                size="small"
+                onClick={handleClickOpen}
+                id="demo-customized-button"
+                aria-controls="demo-customized-menu"
+                aria-haspopup="true"
+                aria-expanded={open ? 'true' : undefined}
+              >
+                <TbArrowsSort className="rotate-90" size={16} />
+              </IconButton>
 
-            <MobileSortDialog
-              isOpen={open}
-              handleClose={handleClickClose}
-              contentPart={toggleInner}
-              secHeading={['Sort Quotation']}
-              columns={columns}
-              dispatch={dispatch}
-            />
+              <MobileSortDialog
+                isOpen={open}
+                handleClose={handleClickClose}
+                contentPart={toggleInner}
+                secHeading={['Sort Quotation']}
+                columns={columns}
+                dispatch={dispatch}
+              />
 
-            <Button
-              id="demo-customized-button"
-              aria-controls="demo-customized-menu"
-              aria-haspopup="true"
-              // aria-expanded={open ? 'true' : undefined}
-              variant="text"
-              disableElevation
-              startIcon={<MdFilterList />}
-              onClick={handleOpen}
-            >
-              Filter
-            </Button>
-            <MobileFilterDialog
-              isOpen={isOpenDialog}
-              handleClose={handleClose}
-              contentPart={toggleInner}
-              columns={columns}
-              dispatch={dispatch}
-              title={routes?.quotation?.title}
-              filters={filters}
-            />
+              <IconButton
+                className={'mobileIconButton secondary'}
+                size="small"
+                id="demo-customized-button"
+                aria-controls="demo-customized-menu"
+                aria-haspopup="true"
+                aria-expanded={open ? 'true' : undefined}
+                onClick={handleOpen}
+              >
+                <MdOutlineFilterAlt size={16} />
+              </IconButton>
+              <MobileFilterDialog
+                isOpen={isOpenDialog}
+                handleClose={handleClose}
+                contentPart={''}
+                columns={columns}
+                dispatch={dispatch}
+                title={routes?.quotation?.title}
+                filters={filters}
+                resource={resource}
+              />
+            </div>
           </div>
         ) : (
           options && (
@@ -192,6 +195,7 @@ function QuotationHeader(props) {
           )}
         </div>
       </div>
+      <DisplayFiltersForMobile resource={resource} />
     </div>
   );
 }

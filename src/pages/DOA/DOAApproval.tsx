@@ -1,15 +1,15 @@
-import { useEffect, useState, useContext, useReducer, Fragment } from "react";
-import { useParams, useHistory } from "react-router-dom";
-import ThumbUpIcon from "@material-ui/icons/ThumbUp";
-import ThumbDownIcon from "@material-ui/icons/ThumbDown";
-import axiosInstance from "../../axios/axiosInstance";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { Box, Button, Dialog, Grid, IconButton, Paper, Tooltip, Typography, useMediaQuery, } from "@material-ui/core";
-import { GiAbstract055, GiVintageRobot } from "react-icons/gi";
-import { AiOutlineEye } from "react-icons/ai";
-import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import Activity from "../../components/Activity";
-import PerformanceTuningImg from "../../assets/PerformanceTuning.png";
+import { useEffect, useState, useContext, useReducer, Fragment } from 'react';
+import { useParams, useHistory } from 'react-router-dom';
+import ThumbUpIcon from '@material-ui/icons/ThumbUp';
+import ThumbDownIcon from '@material-ui/icons/ThumbDown';
+import axiosInstance from '../../axios/axiosInstance';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { Box, Button, Dialog, Grid, IconButton, Paper, Tooltip, Typography, useMediaQuery } from '@material-ui/core';
+import { GiAbstract055, GiVintageRobot } from 'react-icons/gi';
+import { AiOutlineEye } from 'react-icons/ai';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import Activity from '../../components/Activity';
+import PerformanceTuningImg from '../../assets/PerformanceTuning.png';
 import {
   CustomDialogTransition,
   formatAmountWithCurrency,
@@ -18,23 +18,23 @@ import {
   defaultActivityShow,
   quoteBuilder,
   ACTIVITY_RESOURCE
-} from "../../constants/helpers";
-import { camelCase } from "lodash";
-import { useData } from "../../StateProvider/Provider";
-import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
-import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader";
-import { isMobile, isTablet } from "react-device-detect";
-import DOAReasonDialog from "./DOAReasonDialog"
+} from '../../constants/helpers';
+import { camelCase } from 'lodash';
+import { useData } from '../../StateProvider/Provider';
+import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
+import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
+import { isMobile, isTablet } from 'react-device-detect';
+import DOAReasonDialog from './DOAReasonDialog';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
-import ProductBuilder from "../../components/productBuilder";
-import Loader from "../../components/Loader";
-import ActivityButton from "src/components/Activity/ActivityButton";
+import ProductBuilder from '../../components/productBuilder';
+import Loader from '../../components/Loader';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 
 const DOAApproval = () => {
   const {
     state: {
-      user: { user: currentUser },
-    },
+      user: { user: currentUser }
+    }
   } = useData();
   const { setToastConfig } = useContext(CustomToastContext);
   const history = useHistory();
@@ -45,12 +45,12 @@ const DOAApproval = () => {
   const isSmallScreen = useMediaQuery('(max-width:1300px)');
   const [QData, setQData] = useState(null);
   const [needDOA, setneedDOA] = useState(false);
-  const [PDFName, setPDFName] = useState("");
-  const [buttontext, setButton] = useState("Accept");
+  const [PDFName, setPDFName] = useState('');
+  const [buttontext, setButton] = useState('Accept');
   const [QStatus, setQStatus] = useState(true);
   const [showAIDialog, setShowAIDialog] = useState(false);
   const [showQuoteStatusChangeDialog, setShowQuoteStatusChangeDialog] = useState(false);
-  const [quoteStatusChangeData, setQuoteStatusChangeData] = useState("");
+  const [quoteStatusChangeData, setQuoteStatusChangeData] = useState('');
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [totalCost, setTotalCost] = useState(0);
   const [totalSellingPrice, setTotalSellingPrice] = useState(0);
@@ -64,8 +64,8 @@ const DOAApproval = () => {
   var DOALimit = 0;
   var DOAsetup = false;
   const handleActivityHideShow = () => {
-    setActivityShow(!showActivity)
-  }
+    setActivityShow(!showActivity);
+  };
   useEffect(() => {
     if (id) {
       fetchQuote();
@@ -79,15 +79,14 @@ const DOAApproval = () => {
   }, [isSmallScreen]);
 
   const fetchQuote = () => {
-
     axiosInstance()
-      .get("/quote-builder/getQuotefromDOAId/" + id)
+      .get('/quote-builder/getQuotefromDOAId/' + id)
       .then(({ data }) => {
         setPDFName(data.PDF);
-        setQuoteData(data.quote)
-        setProductBuilderId(data?.version?.productBuilderId)
+        setQuoteData(data.quote);
+        setProductBuilderId(data?.version?.productBuilderId);
         setQData(data);
-        if (data?.version?.status !== "Sent for DOA") {
+        if (data?.version?.status !== 'Sent for DOA') {
           setQStatus(false);
         }
       })
@@ -96,15 +95,13 @@ const DOAApproval = () => {
       });
   };
 
-
-
   const ViewQuote = () => {
     axiosInstance()
-      .get("/user/download?fileName=" + PDFName, {
-        responseType: "blob",
+      .get('/user/download?fileName=' + PDFName, {
+        responseType: 'blob'
       })
       .then(({ data }) => {
-        const file = new Blob([data], { type: "application/pdf" });
+        const file = new Blob([data], { type: 'application/pdf' });
         const fileURL = URL.createObjectURL(file);
         const pdfWindow = window.open();
         pdfWindow.location.href = fileURL;
@@ -114,44 +111,43 @@ const DOAApproval = () => {
       });
   };
 
-
   const QuoteStatusChange = (accepted, signature, comment) => {
-    if (accepted !== "Rejected") {
+    if (accepted !== 'Rejected') {
       if (needDOA) {
         axiosInstance()
-          .post("/doa-request/createParent/" + id)
+          .post('/doa-request/createParent/' + id)
           .then(({ data }) => {
-            history.push("/doa-request");
+            history.push('/doa-request');
           })
           .catch((err) => {
-            setShowQuoteStatusChangeDialog(false)
+            setShowQuoteStatusChangeDialog(false);
           });
       } else {
         axiosInstance()
-          .post("/doa-request/doaResponse/" + id, { response: "Accepted" })
+          .post('/doa-request/doaResponse/' + id, { response: 'Accepted' })
           .then(({ data }) => {
-            history.push("/doa-request");
+            history.push('/doa-request');
           })
           .catch((err) => {
             setToastConfig(err);
-            setShowQuoteStatusChangeDialog(false)
+            setShowQuoteStatusChangeDialog(false);
           });
       }
     } else {
       axiosInstance()
-        .post("/doa-request/doaResponse/" + id, { response: "Rejected", comment: comment })
+        .post('/doa-request/doaResponse/' + id, { response: 'Rejected', comment: comment })
         .then(({ data }) => {
-          history.push("/doa-request");
+          history.push('/doa-request');
         })
         .catch((err) => {
           setToastConfig(err);
-          setShowQuoteStatusChangeDialog(false)
+          setShowQuoteStatusChangeDialog(false);
         });
     }
   };
 
   const productCalculationForDoa = (BuilderData) => {
-    const ignoredKeys = ['fields', '_id', 'productId', 'templateFields', 'id', 'string', 'srno'];
+    const ignoredKeys = ['fields', '_id', 'productId', 'templateFields', 'id', 'string', 'index'];
 
     let tempTotalCost = 0;
     let tempTotalSellingPrice = 0;
@@ -166,15 +162,15 @@ const DOAApproval = () => {
         data['commissionPercentPerUnit'] === null || data['commissionPercentPerUnit'] === undefined ? 0 : data['commissionPercentPerUnit'],
       [`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]:
         data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === null ||
-          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
+        data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
           ? 0
           : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]
     }));
 
     const fieldArray = [];
-    BuilderData.productFields?.map((data) => fieldArray.push(data))
-    BuilderData.priceTemplate?.map((data) => data["fields"].map(d => fieldArray.push(d)))
-    BuilderData.productTemplate?.map((data) => data["fields"].map(d => fieldArray.push(d)))
+    BuilderData.productFields?.map((data) => fieldArray.push(data));
+    BuilderData.priceTemplate?.map((data) => data['fields'].map((d) => fieldArray.push(d)));
+    BuilderData.productTemplate?.map((data) => data['fields'].map((d) => fieldArray.push(d)));
     tempBuilderData.forEach((quoteRows: { [x: string]: any }, i) => {
       const quoteRowKeys = Object?.keys(quoteRows);
       quoteRowKeys.forEach((key) => {
@@ -210,26 +206,26 @@ const DOAApproval = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs
-            routes={[
-              { title: "DOA Requests", path: "/doa-request" },
-              { title: QData?.quoteName || id },
-            ]}
-          />
+          <CustomBreadCrumbs routes={[{ title: 'DOA Requests', path: '/doa-request' }, { title: QData?.quoteName || id }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            <Button
-              onClick={() => ViewQuote()}
-              variant="outlined"
-              size="small"
-              startIcon={<AiOutlineEye />}
-              color="primary"
-            >
-              View
-            </Button>
-            <Tooltip title="AI Suggestion">
+            <Tooltip title="View" arrow placement="top">
+              <Button
+                onClick={() => ViewQuote()}
+                variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                size="small"
+                // startIcon={isMobile && !isTablet ? null : <AiOutlineEye />}
+                color="primary"
+                className="btn-outline-v1"
+              >
+                {isMobile && !isTablet ? <AiOutlineEye /> : 'View'}
+              </Button>
+            </Tooltip>
+            <Tooltip title="AI Suggestion" arrow placement="top">
               <IconButton
+                size="small"
+                className="btn-outline-v1"
                 onClick={() => {
                   setShowAIDialog(true);
                 }}
@@ -237,193 +233,129 @@ const DOAApproval = () => {
                 <GiVintageRobot />
               </IconButton>
             </Tooltip>
-            {QData && QStatus &&
-              QData?.DOA.requestTo.find((u) => u === currentUser._id) ? (
+            {QData && QStatus && QData?.DOA.requestTo.find((u) => u === currentUser._id) ? (
               <>
-                <Button
-                  onClick={() => {
-                    QuoteStatusChange("Accepted", "", "")
-                  }}
-                  variant="outlined"
-                  size="small"
-                  startIcon={<ThumbUpIcon />}
-                  color="primary"
-                >
-                  {buttontext}
-                </Button>
-                <Button
-                  onClick={() => {
-                    setQuoteStatusChangeData("Rejected")
-                    setShowQuoteStatusChangeDialog(true)
-                  }}
-                  startIcon={<ThumbDownIcon />}
-                  variant="contained"
-                  size="small"
-                  color="primary"
-                >
-                  Reject
-                </Button>
+                <Tooltip title={buttontext} arrow placement="top">
+                  <Button
+                    onClick={() => {
+                      QuoteStatusChange('Accepted', '', '');
+                    }}
+                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                    size="small"
+                    startIcon={isMobile && !isTablet ? null : <ThumbUpIcon />}
+                    color="primary"
+                    className="btn-outline-v1"
+                  >
+                    {isMobile && !isTablet ? <ThumbUpIcon /> : buttontext}
+                  </Button>
+                </Tooltip>
+                <Tooltip title={'Reject'} arrow placement="top">
+                  <Button
+                    onClick={() => {
+                      setQuoteStatusChangeData('Rejected');
+                      setShowQuoteStatusChangeDialog(true);
+                    }}
+                    startIcon={isMobile && !isTablet ? null : <ThumbDownIcon />}
+                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                    size="small"
+                    color="primary"
+                    className="btn-outline-v1"
+                  >
+                    {isMobile && !isTablet ? <ThumbDownIcon /> : 'Reject'}
+                  </Button>
+                </Tooltip>
               </>
             ) : null}
-            <ActivityButton 
-              referenceId={QData?.quoteBuilderId} 
-              resource="DOA" 
-              resourceLabel={ QData?.quoteName}
-              />
+            <ActivityButton referenceId={QData?.quoteBuilderId} resource="DOA" resourceLabel={QData?.quoteName} />
           </Box>
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Grid container className="detailHeader">
-          <Grid
-            item
-            xs={12}
-            md={5}
-            sm={6}
-            className="d-flex align-items-center gap-1"
-          >
+        {/* <Grid container className="detailHeader">
+          <Grid item xs={12} md={5} sm={6} className="d-flex align-items-center gap-1">
             <GiAbstract055 color="primary" />
             <span className="listingHeader">DOA Request</span>
           </Grid>
-          <Grid
-            item
-            xs={12}
-            md={7}
-            sm={6}
-            className="d-flex align-items-center gap-1"
-            container
-            justify="flex-end"
-          >
+        </Grid> */}
+        <div className="flex items-center flex-wrap gap-1 quotePanel mb-4">
+          {QData && (
+            <>
+              <div className="quoteBox">
+                <span>Total Profit</span>:{' '}
+                <span title={formatAmountWithCurrency(quoteData?.currency, totalProfit).fullFormatAmount}>
+                  {formatAmountWithCurrency(quoteData?.currency, totalProfit).fullFormatAmount || 0}
+                </span>
+              </div>
+              <div className="quoteBox">
+                <span>Total Cost Price</span>:{' '}
+                <span title={formatAmountWithCurrency(quoteData?.currency, totalCost).fullFormatAmount}>
+                  {formatAmountWithCurrency(quoteData?.currency, totalCost).fullFormatAmount || 0}
+                </span>
+              </div>
+              <div className="quoteBox">
+                <span>Total Selling Price</span>:{' '}
+                <span title={formatAmountWithCurrency(quoteData?.currency, totalSellingPrice).fullFormatAmount}>
+                  {formatAmountWithCurrency(quoteData?.currency, totalSellingPrice).fullFormatAmount || 0}
+                </span>
+              </div>
+            </>
+          )}
+          <div></div>
+        </div>
 
-          </Grid>
-        </Grid>
-        <Grid container>
-          <Grid item xs={12} sm={12} md={12} lg={12} spacing={2}>
-            <Grid
-              item
-              xs={12}
-              md={12}
-              sm={12}
-              className="d-flex align-items-center gap-1 quotePanel"
-            >
-              {QData && (
-                <>
-                  <div className="quoteBox">
-                    <span>Total Profit</span>
-                    <span
-                      title={
-                        formatAmountWithCurrency(
-                          quoteData?.currency,
-                          totalProfit
-                        ).fullFormatAmount
-                      }
-                    >
-                      {
-                        formatAmountWithCurrency(
-                          quoteData?.currency,
-                          totalProfit
-                        ).fullFormatAmount || 0
-                      }
-                    </span>
-                  </div>
-                  <div className="quoteBox">
-                    <span>Total Cost Price</span>
-                    <span
-                      title={
-                        formatAmountWithCurrency(
-                          quoteData?.currency,
-                          totalCost
-                        ).fullFormatAmount
-                      }
-                    >
-                      {
-                        formatAmountWithCurrency(
-                          quoteData?.currency,
-                          totalCost
-                        ).fullFormatAmount || 0
-                      }
-                    </span>
-                  </div>
-                  <div className="quoteBox">
-                    <span>Total Selling Price</span>
-                    <span
-                      title={
-                        formatAmountWithCurrency(
-                          quoteData?.currency,
-                          totalSellingPrice
-                        ).fullFormatAmount
-                      }
-                    >
-                      {
-                        formatAmountWithCurrency(
-                          quoteData?.currency,
-                          totalSellingPrice
-                        ).fullFormatAmount || 0
-                      }
-                    </span>
-                  </div>
-                </>
-              )}
-              <div></div>
-            </Grid>
-            {productBuilderId ? (
-              <ProductBuilder
-                fromQuote={true}
-                permissions={permissions[quoteBuilder.qbResource]}
-                hasPermission={false}
-                currency={quoteData?.currency.toLowerCase()}
-                productBuilderId={productBuilderId}
-                isAddNewProduct={isAddNewProduct}
-                setIsAddNewProduct={setIsAddNewProduct}
-                isAddExistingProduct={isAddExistingProduct}
-                setIsAddExistingProduct={setIsAddExistingProduct}
-                refreshProducts={productCalculationForDoa}
-                stage={'product'}
-                isPriceBuilder={true}
-                Editable={false}
-              />
-            ) : (
-              <Loader style={{ minHeight: 300 }} text="Loading..." />
-            )}
-          </Grid>
-        </Grid>
+        <div className="relative">
+          {productBuilderId ? (
+            <ProductBuilder
+              fromQuote={true}
+              permissions={permissions[quoteBuilder.qbResource]}
+              hasPermission={false}
+              currency={quoteData?.currency.toLowerCase()}
+              productBuilderId={productBuilderId}
+              isAddNewProduct={isAddNewProduct}
+              setIsAddNewProduct={setIsAddNewProduct}
+              isAddExistingProduct={isAddExistingProduct}
+              setIsAddExistingProduct={setIsAddExistingProduct}
+              refreshProducts={productCalculationForDoa}
+              stage={'product'}
+              isPriceBuilder={true}
+              Editable={false}
+            />
+          ) : (
+            <Loader style={{ minHeight: 300 }} text="Loading..." />
+          )}
+        </div>
       </Box>
-      {
-        showAIDialog && (
-          <Dialog
-            open={showAIDialog}
-            aria-labelledby="customized-dialog-title"
-            maxWidth="sm"
+      {showAIDialog && (
+        <Dialog
+          open={showAIDialog}
+          aria-labelledby="customized-dialog-title"
+          maxWidth="sm"
+          onClose={() => {
+            setShowAIDialog(false);
+          }}
+          fullWidth
+          fullScreen={fullScreen || isMobile || isTablet}
+          TransitionComponent={CustomDialogTransition}
+        >
+          <CustomDialogHeader
+            title="AI Suggestion"
             onClose={() => {
               setShowAIDialog(false);
             }}
-            fullWidth
-            fullScreen={fullScreen || (isMobile || isTablet)}
-            TransitionComponent={CustomDialogTransition}
-          >
-            <CustomDialogHeader
-              title="AI Suggestion"
-              onClose={() => {
-                setShowAIDialog(false);
-              }}
-              isMinimized={!fullScreen}
-              onMinimizeMaximize={() => {
-                setFullScreen(prevState => !prevState)
-              }}
-              showManimizeMaximize={true}
-            />
-            <CustomDialogContent>
-              <div className="text-align-center">
-                <Typography variant="h4">Under Construction </Typography>
-                <img
-                  src={`${PerformanceTuningImg}`}
-                  style={{ height: "300px" }}
-                />
-              </div>
-            </CustomDialogContent>
-          </Dialog>
-        )
-      }
+            isMinimized={!fullScreen}
+            onMinimizeMaximize={() => {
+              setFullScreen((prevState) => !prevState);
+            }}
+            showManimizeMaximize={true}
+          />
+          <CustomDialogContent>
+            <div className="text-align-center">
+              <Typography variant="h4">Under Construction </Typography>
+              <img src={`${PerformanceTuningImg}`} style={{ height: '300px' }} />
+            </div>
+          </CustomDialogContent>
+        </Dialog>
+      )}
       {showQuoteStatusChangeDialog && (
         <DOAReasonDialog
           reasonDialogOpen={showQuoteStatusChangeDialog}

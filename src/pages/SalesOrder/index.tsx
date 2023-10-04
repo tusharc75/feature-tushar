@@ -1,44 +1,40 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import { Link, useHistory } from 'react-router-dom';
-import { Chip, Grid, IconButton, Tooltip, Box } from '@material-ui/core';
+import { Chip, IconButton, Tooltip } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { FaRegistered, FaSuitcase } from 'react-icons/fa';
-import { MdContactPhone, RiContactsBookUploadFill, RiShip2Fill, FaWarehouse, SiStatuspage } from 'react-icons/all';
-import {
-  isObjectEmpty,
-  customerAccount,
-  supplierAccount,
-  gridLoadingTimeout,
-  salesOrder,
-  sidebarResource,
-  prepareDataForGrid,
-  getLocalStorageArrayData,
-  removeLocalStorage
-} from '../../constants/helpers';
-import CustomContainer from '../../components/CustomContainer';
-import routes from './../../components/Helpers/Routes';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import MessageDialog from '../../components/Helpers/MessageDialog';
-import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import SalesOrderHeader from './SalesOrderHeader';
-import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import { camelCase } from 'lodash';
+import { useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
+import { CiUser, FaWarehouse, MdContactPhone, RiContactsBookUploadFill, RiShip2Fill, SiStatuspage } from 'react-icons/all';
+import { FaRegistered } from 'react-icons/fa';
+import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField, gridFilterParser } from '../../constants/useColumns';
+import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
+import CustomContainer from '../../components/CustomContainer';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
+import MessageDialog from '../../components/Helpers/MessageDialog';
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import {
+  customerAccount,
+  getLocalStorageArrayData,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  removeLocalStorage,
+  salesOrder,
+  sidebarResource,
+  supplierAccount
+} from '../../constants/helpers';
+import useColumns, { checkStaticField, getFrameworkComponents, getStaticFields, gridFilterParser } from '../../constants/useColumns';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import routes from './../../components/Helpers/Routes';
 import ManageSalesOrderDialog from './ManageSalesOrderDialog';
-import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
-import { camelCase } from 'lodash'
+import SalesOrderHeader from './SalesOrderHeader';
 
 let salesOrderTimeout;
 
-
 const SalesOrder = () => {
-
   const SalesOrderType = [
     {
       key: `My ${routes?.salesOrder.title}`,
@@ -50,8 +46,7 @@ const SalesOrder = () => {
     }
   ];
 
-
-  const renderedFrom = camelCase(routes?.salesOrder.title)
+  const renderedFrom = camelCase(routes?.salesOrder.title);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
@@ -77,12 +72,13 @@ const SalesOrder = () => {
   });
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
+    state;
 
   const { getColumnData } = useColumns();
   const [frameworkComponent, setFrameworkComponent] = useState({});
   const [columns, setColumns] = useState(null);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   useEffect(() => {
     fetchGridColumns();
@@ -196,7 +192,6 @@ const SalesOrder = () => {
     </>
   );
 
-
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
     if (selectedType === 1) {
@@ -207,7 +202,7 @@ const SalesOrder = () => {
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
@@ -224,13 +219,13 @@ const SalesOrder = () => {
           term: { $in: [accountDetails.accountId] }
         });
       }
-    } 
+    }
 
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
     if (deepFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
     }
     if (filterByIds?.length || deepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
@@ -241,7 +236,7 @@ const SalesOrder = () => {
     }
 
     if (search) {
-      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
 
     return deepFilter;
@@ -260,12 +255,27 @@ const SalesOrder = () => {
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u, user);
-          finalObject["isChecked"] = false;
-          finalObject["allowedToEdit"] = permissions?.salesOrder?.isUpdate;
-          finalObject["canDelete"] = permissions?.salesOrder?.isDelete;
+          finalObject['isChecked'] = false;
+          finalObject['allowedToEdit'] = permissions?.salesOrder?.isUpdate;
+          finalObject['canDelete'] = permissions?.salesOrder?.isDelete;
           return finalObject;
         });
-        dispatch({ type: 'initialize', data: rows, count: count });
+        if (appendRows) {
+          dispatch({
+            type: 'initialize',
+            data: [...dataRows, ...rows],
+            count: count,
+            selectedRecords: [...dataRows, ...rows]
+          });
+        } else {
+          dispatch({
+            type: 'initialize',
+            data: rows,
+            count: count,
+            selectedRecords: rows
+          });
+        }
+        // dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
@@ -281,6 +291,7 @@ const SalesOrder = () => {
   };
 
   const handleSalesOrderTypeSel = (filterValues) => {
+    dispatch({ type: 'setPage', page: 0 });
     setSelectedType(filterValues);
   };
 
@@ -326,7 +337,7 @@ const SalesOrder = () => {
             type: 'success',
             message: data.message
           });
-          removeLocalStorage(localStorageSelectedRecords)
+          removeLocalStorage(localStorageSelectedRecords);
           setIsConformDialogVisible(false);
           setDeleteLoading(false);
           if (deleteRecord) setDeleteRecord({});
@@ -341,42 +352,32 @@ const SalesOrder = () => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[routes.salesOrder]} />
-        </Grid>
-        <Grid item md={8} sm={1} xs={2}>
-          <Grid container direction="row">
-            <Grid item xs={12} sm={12}>
-              <Grid container justify="flex-end">
-                <ImportExportLinks
-                  permissions={permissions?.salesOrder}
-                  module="salesOrder"
-                  api={salesOrder.api}
-                  afterImportCompleted={() => { }}
-                  isExportAllOrSomeFeature={true}
-                  total={rowCount}
-                  recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-                  ids={
-                    getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-                      ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-                      : []
-                  }
-                  onExportToExcelSuccess={() => {
-                    if (gridApi) gridApi.deselectAll();
-                    else fetchSalesOrder();
-                  }}
-                  additionalParams={getQueryString(true)}
-                />
-              </Grid>
-            </Grid>
-          </Grid>
-        </Grid>
-      </Grid>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[routes.salesOrder]} />
+        <ImportExportLinks
+          permissions={permissions?.salesOrder}
+          module="salesOrder"
+          api={salesOrder.api}
+          afterImportCompleted={() => {}}
+          isExportAllOrSomeFeature={true}
+          total={rowCount}
+          recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+          ids={
+            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+              ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+              : []
+          }
+          onExportToExcelSuccess={() => {
+            if (gridApi) gridApi.deselectAll();
+            else fetchSalesOrder();
+          }}
+          additionalParams={getQueryString(true)}
+        />
+      </div>
       <CustomContainer>
         <div className="header-panel">
-          {columns &&
+          {columns && (
             <SalesOrderHeader
               selectedRecords={selectedRecords}
               onTypeChange={handleSalesOrderTypeSel}
@@ -394,6 +395,7 @@ const SalesOrder = () => {
               dispatch={dispatch}
               filters={filters}
               selectedType={selectedType}
+              resource={sidebarResource.salesOrder}
             >
               {accountDetails.accountId && (
                 <Chip
@@ -410,23 +412,24 @@ const SalesOrder = () => {
                 />
               )}
             </SalesOrderHeader>
-          }
+          )}
         </div>
-        {(Object.keys(frameworkComponent).length > 0 && columns) ?
+        {Object.keys(frameworkComponent).length > 0 && columns ? (
           isMobile && !isTablet ? (
             <CustomSwipableList
+              key={selectedType}
               allowSelection={true}
               allowSwipe={true}
               permissions={permissions?.salesOrder}
-              primaryField={columns?.find(d => d.field === "salesOrderNo")}
+              primaryField={columns?.find((d) => d.field === 'salesOrderNo')}
               onClick={(data) => {
-                history.push(`${routes.salesOrderDetail.path}/${data._id}`)
+                history.push(`${routes.salesOrderDetail.path}/${data._id}`);
               }}
               dataRows={dataRows}
               selectedRecords={selectedRecords}
               dispatch={dispatch}
               onEdit={(data) => {
-                history.push(`${routes.salesOrderDetail.path}/${data._id}`)
+                history.push(`${routes.salesOrderDetail.path}/${data._id}`);
               }}
               extraParamsToCheckDelete={true}
               onDelete={(data) => {
@@ -434,48 +437,50 @@ const SalesOrder = () => {
                   show: true,
                   id: data._id,
                   salesOrderName: `${data.salesOrderNo}`
-                })
+                });
               }}
               rowCount={rowCount}
               page={page}
               loading={loading}
               additionalDetails={[
                 {
-                  icon: <FaSuitcase size={18} />,
-                  field: "customerAccount"
-                },
+                  icon: <CiUser size={18} />,
+                  field: 'customerAccount'
+                }
               ]}
               chips={[
                 {
                   icon: <MdContactPhone />,
-                  label: "Customer Contact: ",
-                  field: "customerContact"
+                  label: 'Customer Contact: ',
+                  field: 'customerContact'
                 },
                 {
                   icon: <RiContactsBookUploadFill />,
-                  label: "Billing Address: ",
-                  field: "billingAddress"
+                  label: 'Billing Address: ',
+                  field: 'billingAddress'
                 },
                 {
                   icon: <RiShip2Fill />,
-                  label: "Shipping Address: ",
-                  field: "shippingAddress"
+                  label: 'Shipping Address: ',
+                  field: 'shippingAddress'
                 },
                 {
                   icon: <FaWarehouse />,
-                  label: "Plants: ",
-                  field: "plants"
+                  label: 'Plants: ',
+                  field: 'plants'
                 },
                 {
                   icon: <SiStatuspage />,
-                  label: "Status: ",
-                  field: "status:"
+                  label: 'Status: ',
+                  field: 'status:'
                 }
               ]}
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={true}
-              onClone={(data) => { setShowManageSalesOrderDialog({ open: true, isClone: true, idToClone: data._id }) }}
+              onClone={(data) => {
+                setShowManageSalesOrderDialog({ open: true, isClone: true, idToClone: data._id });
+              }}
               renderedFrom={renderedFrom}
             />
           ) : (
@@ -497,7 +502,8 @@ const SalesOrder = () => {
               showFilters={true}
               resource={sidebarResource.salesOrder}
             />
-          ) : null}
+          )
+        ) : null}
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
             open={showDeleteWarningConfirmBox}
@@ -544,7 +550,7 @@ const SalesOrder = () => {
           }}
         />
       )}
-    </Fragment>
+    </section>
   );
 };
 

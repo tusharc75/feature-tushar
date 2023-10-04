@@ -1,69 +1,51 @@
 import Box from '@material-ui/core/Box/Box';
-import { useState, useEffect, useReducer, useContext, Fragment } from 'react';
+import { useState, useEffect, useContext, Fragment } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridComponents/CustomAgGrid';
-import { Link, useHistory } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
-import Grid from '@material-ui/core/Grid/Grid';
-import { Button, Tooltip, IconButton, Menu, MenuItem, Dialog, TextField, CircularProgress } from '@material-ui/core';
-import { AiFillFilePdf } from 'react-icons/ai';
+import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import {
-  gridLoadingTimeout,
   repairJob,
   REPAIR_JOB_STATUS,
   deliveryTicket,
   ASSET_STATUS,
-  serializedAsset,
   DELIVERY_TICKET_TYPE,
   DELIVERY_FROM_TO_TYPE,
   DELIVERY_TICKET_REFERENCE_TYPE,
-  prepareDataForGrid,
   INVENTORY_OWNER_TYPE,
   sidebarResource,
   CHILD_RESOURCE
 } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
-import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
 import { isMobile, isTablet } from 'react-device-detect';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import AssetScrapRepairDialog from '../../../components/AssetScrapRepairDialog/AssetScrapRepairDialog';
-import useColumns, { getStaticFields, getFrameworkComponents } from '../../../constants/useColumns';
-import { useData } from '../../../StateProvider/Provider';
 import { ExpandMore } from '@material-ui/icons';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
-import { GiAutoRepair } from 'react-icons/gi';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import { groupBy, uniq, map } from 'lodash';
 import RepairProcess from '../RepairProcess';
 import LayersIcon from '@material-ui/icons/Layers';
 import PreviewDownload from 'src/components/PreviewDownload';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { generateCustomTableColumns } from 'src/constants/columns';
+import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 
-const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatus, renderedFrom, allowedToEdit, allowUpdateStatus }) => {
+const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatus, renderedFrom, allowedToEdit, allowUpdateStatus, stepFullScreen }) => {
+
   const toastConfig = useContext(CustomToastContext);
-  const {
-    state: { user, permissions, selectedEntity }
-  }: any = useData();
-
-  const history = useHistory();
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
-
   const [showRemoveAssetFromReceivingTicketDialog, setShowRemoveAssetFromReceivingTicketDialog] = useState(false);
   const [okBtnLoading, setOkBtnLoading] = useState(false);
-
+  const [selectedRecords, setSelectedRecords] = useState([]);
+  const [rowsData, setRowsData] = useState(null);
   const [statusToUpdate, setStatusToUpdate] = useState({ open: false, isUpdating: false, status: '', message: '' });
   const [anchorEl, setAnchorEl] = useState(null);
-
-  const { getColumnData } = useColumns();
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [columns, setColumns] = useState(null);
-  const [newColumns, setNewColumns] = useState(null);
-
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, ticketType: '', data: {} });
   const [repairAssetDialog, setRepairAssetDialog] = useState({ open: false, assetId: null, assetName: null, assetIds: [] });
@@ -87,123 +69,195 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
   };
 
   useEffect(() => {
-    fetchGridColumns();
-    fetchRecords();
+    fetchFields()
   }, []);
 
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get(`/field?resource=${serializedAsset.resource}`)
-      .then(({ data: { data } }) => {
-        let columns = [];
-        let rendererNames = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName);
-            }
-          }
-        });
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          actionsRenderer: ActionsRenderer,
-          ...tempFrameworkComponent
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
-        columns = [...columns, ...getStaticFields()];
-        setColumns([...columns]);
+  const fetchFields = async () => {
+    const fieldResponce = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.repairJobAsset}`);
+    const {
+      data: { data }
+    } = await axiosInstance().put(`/field/find-field-labels`, {
+      fields: [
+        {
+          resource: 'Product',
+          fieldNames: ['productName', 'productDescription', 'productCategory']
+        },
+        {
+          resource: 'Serialized Asset',
+          fieldNames: ['assetNumber', 'serialNumber']
+        }
+      ]
+    });
 
-        const assetColumns: any = []
-        
-        data?.filter((e) => ['assetNumber', 'product', 'productDescription', 'status']?.includes(e.fieldData.fieldName))?.forEach((e) => {
-          assetColumns.push({
-            Header: e.fieldData.fieldLabel,
-            accessor: e.fieldData.fieldName
-          },)
+    let fields = CURReplaceByCurrencySingle(fieldResponce?.data?.data, repairJobData?.currency || "USD");
+    fields?.forEach((e) => {
+      e.isColumnEditable = false;
+    });
+    const assetField = data?.find((e) => e.resource === 'Serialized Asset')?.fieldNames || [];
+    const productField = data?.find((e) => e.resource === 'Product')?.fieldNames || [];
+
+    const newColumns = generateCustomTableColumns(fields, repairJobData?.currency || 'USD', renderedFrom);
+    let coloum: any = [
+      {
+        accessor: 'index',
+        Header: 'Index',
+        width: 70,
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+        Footer: () => {
+          return <>Total</>;
+        }
+      },
+    ];
+    assetField?.forEach((ele) => {
+      if (ele?.fieldName === 'assetNumber') {
+        coloum.push({
+          accessor: 'assetNumber',
+          Header: ele?.fieldLabel,
+          sticky: 'none',
+          width: 200,
+          Cell: ({ row }) => (
+            <>
+              {row.original.assetNumber ? (
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <p
+                    className="text-truncate"
+                  >{row.original.assetNumber}</p>
+                  <Box ml={1}>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        window.open(`${routes.serializedAssetDetail.path}/${row.original._id}`)
+                      }}
+                    >
+                      <OpenInNewIcon fontSize="small" color="primary" />
+                    </IconButton>
+                  </Box>
+                </div>
+              ) :
+                (
+                  <NoDataCell />
+                )
+              }
+            </>
+          )
         })
+      }
+      if (ele?.fieldName === 'serialNumber') {
+        coloum.push({
+          accessor: 'serialNumber',
+          Header: ele?.fieldLabel,
+          sticky: 'none',
+          width: 200,
+          Cell: ({ row }) => (
+            <>
+              {row.original.serialNumber ? (
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <p className="text-truncate">{row.original.serialNumber}</p>
+                </div>
+              ) : (
+                <NoDataCell />
+              )}
+            </>
 
-        axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.repairJobAsset}`)
-          .then(({ data: { data } }) => {
-            const repairJobAssetColumns = data?.map((item) => {
-              return {
-                Header: item.fieldLabel,
-                accessor: item.fieldName
-              };
-            });
-            setNewColumns([...assetColumns, ...repairJobAssetColumns]);
-          });
-        fetchRecords();
-      });
-  };
-
-  const fetchRecords = () => {
-    dispatch({ type: 'loading', loading: true });
-    dispatch({ type: 'initialize', data: [], count: 0 });
-    if (gridApi) {
-      gridApi.deselectAll();
-    }
-    localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
-    axiosInstance()
-      .get(`${repairJob.api}/${repairJobData._id}/assets`)
-      .then(({ data }) => {
-        let rows: any = data?.data.map((u) => {
-          let finalObject: any = prepareDataForGrid(u, user);
-          finalObject['canDelete'] = false;
-          finalObject['isChecked'] = false;
-          finalObject['allowedToEdit'] = finalObject?.repairTypeId ? true : false;
-          finalObject['hideSelection'] = [ASSET_STATUS.lost].includes(u.status);
-          return finalObject;
-        });
-        dispatch({ type: 'initialize', data: rows, count: rows.length });
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
+          )
+        })
+      }
+    });
+    productField?.forEach((ele) => {
+      coloum.push({
+        accessor: ele?.fieldName,
+        Header: ele?.fieldLabel,
+        sticky: 'none',
+        width: 200,
+        Cell: ({ row }) => (
+          <>
+            {row.original[ele?.fieldName] ? (
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <p className="text-truncate">{row.original[ele?.fieldName]}</p>
+              </div>
+            ) : (
+              <NoDataCell />
+            )}
+          </>
+        )
       })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+    });
+    coloum.push({
+      accessor: 'status',
+      Header: 'Status',
+      sticky: 'none',
+      width: 100,
+      Cell: ({ row }) => (
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <p className="text-truncate">{row.original.status}</p>
+        </div>
+      )
+    })
+    coloum = [...coloum, ...newColumns];
+    coloum.push({
+      accessor: 'action',
+      Header: 'Actions',
+      width: 100,
+      sticky: 'right',
+      Cell: ({ row }) => {
+        return <div className="d-flex gap-1">
+          {row?.original?.repairTypeId && (
+            <HtmlTooltip title="Repair Process">
+              <IconButton
+                size="small"
+                aria-label="Repair Process"
+                color="primary"
+                onClick={() => {
+                  setRepairProcessDialog({ open: true, assetId: row?.original?._id, assetNumber: row?.original?.assetNumber, repaired: row?.original?.repaired });
+                }}
+              >
+                <LayersIcon fontSize="small" />
+              </IconButton>
+            </HtmlTooltip>
+          )}
+          {row?.original?.repaired ? (
+            <HtmlTooltip title="Repaired">
+              <CheckCircleIcon color="primary" fontSize="small" />
+            </HtmlTooltip>
+          ) : ![ASSET_STATUS.lost, ASSET_STATUS.scrap].includes(row?.original?.status) &&
+            row?.original?.currentOwnerType === INVENTORY_OWNER_TYPE.brand &&
+            !row?.original?.repairTypeId ? (
+            <HtmlTooltip title="Repair Asset">
+              <IconButton
+                size="small"
+                aria-label="Repair Asset"
+                color="primary"
+                onClick={() => {
+                  setRepairAssetDialog({ open: true, assetId: row?.original?._id, assetName: `${row?.original?.assetNumber}`, assetIds: [] });
+                }}
+              >
+                <CheckCircleOutlineIcon fontSize="small" />
+              </IconButton>
+            </HtmlTooltip>
+          ) : null}
+        </div>
+      }
+    });
+    setColumns(coloum)
+    fetchRecords();
   };
 
-  const ActionsRenderer = (params) => (
-    <div className="d-flex gap-1">
-      {params?.data?.repairTypeId && (
-        <HtmlTooltip title="Repair Process">
-          <IconButton
-            size="small"
-            aria-label="Repair Process"
-            color="primary"
-            onClick={() => {
-              setRepairProcessDialog({ open: true, assetId: params.data._id, assetNumber: params.data.assetNumber, repaired: params.data.repaired });
-            }}
-          >
-            <LayersIcon fontSize="small" />
-          </IconButton>
-        </HtmlTooltip>
-      )}
-      {params.data.repaired ? (
-        <HtmlTooltip title="Repaired">
-          <CheckCircleIcon color="primary" fontSize="small" />
-        </HtmlTooltip>
-      ) : ![ASSET_STATUS.lost, ASSET_STATUS.scrap].includes(params.data?.status) &&
-        params.data?.currentOwnerType === INVENTORY_OWNER_TYPE.brand &&
-        !params?.data?.repairTypeId ? (
-        <HtmlTooltip title="Repair Asset">
-          <IconButton
-            size="small"
-            aria-label="Repair Asset"
-            color="primary"
-            onClick={() => {
-              setRepairAssetDialog({ open: true, assetId: params.data._id, assetName: `${params.data.assetNumber}`, assetIds: [] });
-            }}
-          >
-            <CheckCircleOutlineIcon fontSize="small" />
-          </IconButton>
-        </HtmlTooltip>
-      ) : null}
-    </div>
-  );
+  const fetchRecords = async () => {
+    var data: any = [];
+    const response = await axiosInstance().get(`${repairJob.api}/${repairJobData._id}/assets`)
+    data = response?.data?.data;
+    data.forEach((parent, i) => {
+      parent.index = i + 1;
+      parent.productName = parent.product?.optionLabel
+      parent.productDescription = parent?.productDetail?.productDescription
+      parent.productCategory = parent?.productCategory?.optionLabel
+      parent.isValid = parent.status === ASSET_STATUS.scrap || parent.status === ASSET_STATUS.lost ? false : true
+      parent.hideSelection = parent.status === ASSET_STATUS.lost;
+    });
+    setRowsData(data);
+    setSelectedRecords([]);
+  };
 
   const handleTicketDialog = (ticketType, pickupFromType, deliveryToType) => {
     const data = {};
@@ -213,19 +267,18 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
 
     var pickupFrom = '';
     if (selectedRecords[0].currentOwnerType === INVENTORY_OWNER_TYPE.brand) {
-      pickupFrom = selectedRecords[0].warehouseId;
+      pickupFrom = selectedRecords[0]?.warehouse?.optionValue;
     } else {
-      pickupFrom = selectedRecords[0]?.currentOwnerId;
+      pickupFrom = selectedRecords[0]?.currentOwner?.optionValue;
     }
 
     data['pickupFrom'] = pickupFrom;
-    data['pickupFromAddress'] = selectedRecords[0]?.currentLocationId;
+    data['pickupFromAddress'] = selectedRecords[0]?.currentLocation?.optionValue;
 
     data['deliveryToType'] = deliveryToType;
     data['isPickupFromDisable'] = true;
 
     data['wellName'] = repairJobData?.wellName?.optionValue;
-
     if (repairJobData?.wellNumber) {
       if (repairJobData?.wellNumber?.optionValue) {
         data['wellNumber'] = repairJobData?.wellNumber?.optionValue;
@@ -233,7 +286,6 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
         data['wellNumber'] = repairJobData?.wellNumber?.map((e) => e?.optionValue);
       }
     }
-
     data['afeNumber'] = repairJobData?.afeNumber;
 
     setShowTicketDialog({ open: true, ticketType: ticketType, data: data });
@@ -281,8 +333,10 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
           <PreviewDownload
             resource={sidebarResource.repairJob}
             referenceId={repairJobData?._id}
-            columns={newColumns}
-            hideDetailButton={true} />
+            columns={columns}
+            hideDetailButton={true}
+            isSendEmail={true}
+          />
           {allowedToEdit && repairJobData?.status !== REPAIR_JOB_STATUS.completed && (
             <Fragment>
               <Button
@@ -351,7 +405,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                 size="small"
                 onClick={openActions}
                 aria-controls="action-menu"
-                disabled={selectedRecords.length === 0}
+                disabled={selectedRecords.length === 0 || selectedRecords.some((s) => s.repaired === true) || checkUniqSupplier() || checkUniqWarehouse()}
                 endIcon={<ExpandMore />}
                 className="new-dropdown-v1"
               >
@@ -369,26 +423,24 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                 open={Boolean(anchorActionEl)}
                 onClose={closeActions}
               >
-                <MenuItem
-                  disabled={
-                    selectedRecords.length === 0 || checkUniqSupplier() || checkUniqWarehouse() || selectedRecords.some((s) => s.repaired === true)
-                  }
-                  onClick={() => {
-                    if (uniq(map(selectedRecords, 'currentOwnerType')).length === 1) {
-                      if (uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.brand) {
-                        handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.plant, DELIVERY_FROM_TO_TYPE.plant);
-                      } else if (uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.supplierAccount) {
-                        handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.supplier, DELIVERY_FROM_TO_TYPE.plant);
+                {uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.supplierAccount ?
+                  <MenuItem
+                    disabled={checkUniqSupplier() || checkUniqWarehouse()}
+                    onClick={() => {
+                      if (uniq(map(selectedRecords, 'currentOwnerType')).length === 1) {
+                        if (uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.brand) {
+                          handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.plant, DELIVERY_FROM_TO_TYPE.plant);
+                        } else if (uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.supplierAccount) {
+                          handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.supplier, DELIVERY_FROM_TO_TYPE.plant);
+                        }
                       }
-                    }
-                  }}
-                >
-                  Send to Plant
-                </MenuItem>
+                    }}
+                  >
+                    Receive to Plant
+                  </MenuItem> : null
+                }
                 <MenuItem
-                  disabled={
-                    selectedRecords.length === 0 || checkUniqSupplier() || checkUniqWarehouse() || selectedRecords.some((s) => s.repaired === true)
-                  }
+                  disabled={checkUniqSupplier() || checkUniqWarehouse()}
                   onClick={() => {
                     if (uniq(map(selectedRecords, 'currentOwnerType')).length === 1) {
                       if (uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.brand) {
@@ -401,81 +453,32 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                 >
                   Send to Supplier
                 </MenuItem>
-                {/* <MenuItem
-                                disabled={(selectedRecords.length === 0 || checkUniqSupplier() || selectedRecords.some(s => s.repaired === true))}
-                                onClick={() => { handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.supplier, DELIVERY_FROM_TO_TYPE.plant) }}>
-                                Receiving from Supplier
-                            </MenuItem> */}
               </Menu>
             </Fragment>
           )}
         </Box>
       </Box>
-      <Grid item xs={12} md={12} sm={12}>
-        {columns ? (
-          isMobile && !isTablet ? (
-            <CustomSwipableList
-              allowSelection={allowedToEdit}
-              allowSwipe={allowedToEdit && repairJobData && repairJobData['status'] !== REPAIR_JOB_STATUS.completed ? true : false}
-              permissions={{ isCreate: false, isUpdate: true, isDelete: true }}
-              primaryField={columns?.find((d) => d.field)}
-              onClick={(data) => {
-                history.push(`${routes.serializedAssetDetail.path}/${data._id}`);
-              }}
-              dataRows={dataRows}
-              selectedRecords={selectedRecords}
-              dispatch={dispatch}
-              onEdit={(data) => {
-                setRepairProcessDialog({ open: true, assetId: data._id, assetNumber: data.assetNumber, repaired: data.repaired });
-              }}
-              extraParamsToCheckDelete={true}
-              onDelete={() => { }}
-              rowCount={rowCount}
-              page={page}
-              loading={loading}
-              chips={[
-                {
-                  label: 'Status: ',
-                  field: 'status'
-                }
-              ]}
-              additionalDetails={[]}
-              owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-              onCreate={false}
-              showClone={false}
-              onClone={() => { }}
-              renderedFrom={renderedFrom}
-            />
-          ) : (
-            <CustomAgGrid
-              columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameWorkComponent}
-              setGridApi={setGridApi}
-              dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              allowSelection={allowedToEdit && repairJobData && repairJobData['status'] !== REPAIR_JOB_STATUS.completed ? true : false}
-              allowAction={allowedToEdit}
-              loading={loading}
-              renderedFrom={renderedFrom}
-              rowClassRules={{
-                'red-data-row': function (params) {
-                  return [ASSET_STATUS.lost, ASSET_STATUS.scrap].some((s) => s === params.data.status);
-                }
-              }}
-              isClientSideGrid={true}
-              refreshGrid={fetchRecords}
-            />
-          )
-        ) : (
-          <Box p={2} height={500}>
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Box>
-        )}
-      </Grid>
+      {columns && rowsData ? (<Box zIndex={5} width={'100%'}>
+        <CustomReactTable
+          height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
+          columns={columns}
+          data={rowsData}
+          setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
+          onSelect={setSelectedRecords}
+          childrenProperty="subRows"
+          uniqueKey="_id"
+          renderedFrom={renderedFrom}
+          isClientSideGrid={true}
+          hideSelection={!allowedToEdit}
+          hideAction={!allowedToEdit}
+          hideExpander={true}
+        />
+      </Box>
+      ) : (
+        <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
+      )}
       {showRemoveAssetFromReceivingTicketDialog && (
         <ConfirmationDialog
           open={showRemoveAssetFromReceivingTicketDialog}

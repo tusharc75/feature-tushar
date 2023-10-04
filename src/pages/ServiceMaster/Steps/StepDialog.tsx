@@ -46,6 +46,7 @@ export default function StepDialog({
   const [openFieldDialog, setOpenFieldDialog] = useState(false);
   const [fields, setFields] = useState(stepData ? stepData?.fields : []);
   const [allFollowingStepToJump, setAllFollowingStepToJump] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fllowingStep();
@@ -126,12 +127,12 @@ export default function StepDialog({
             failAddon: data?.failAddon && Array.isArray(data?.failAddon) ? data?.failAddon : [],
             isPassAddon: data?.isPassAddon === null ? false : data?.isPassAddon,
             passAddon: data?.passAddon && Array.isArray(data?.passAddon) ? data?.passAddon : [],
-            isSkipServiceOnPass: stepData?.isSkipServiceOnPass === null ? false : stepData?.isSkipServiceOnPass,
-            skipServiceOnPass: stepData?.skipServiceOnPass && Array.isArray(stepData?.skipServiceOnPass) ? stepData?.skipServiceOnPass : [],
-            isSkipServiceOnFail: stepData?.isSkipServiceOnFail === null ? false : stepData?.isSkipServiceOnFail,
-            skipServiceOnFail: stepData?.skipServiceOnFail && Array.isArray(stepData?.skipServiceOnFail) ? stepData?.skipServiceOnFail : [],
-            isAddStepsOnPass: stepData?.isAddStepsOnPass === null ? false : stepData?.isAddStepsOnPass,
-            isAddStepsOnFail: stepData?.isAddStepsOnFail === null ? false : stepData?.isAddStepsOnFail,
+            isSkipServiceOnPass: data?.isSkipServiceOnPass === null ? false : data?.isSkipServiceOnPass,
+            skipServiceOnPass: data?.skipServiceOnPass && Array.isArray(data?.skipServiceOnPass) ? data?.skipServiceOnPass : [],
+            isSkipServiceOnFail: data?.isSkipServiceOnFail === null ? false : data?.isSkipServiceOnFail,
+            skipServiceOnFail: data?.skipServiceOnFail && Array.isArray(data?.skipServiceOnFail) ? data?.skipServiceOnFail : [],
+            isAddStepsOnPass: data?.isAddStepsOnPass === null ? false : data?.isAddStepsOnPass,
+            isAddStepsOnFail: data?.isAddStepsOnFail === null ? false : data?.isAddStepsOnFail,
             isJumpStepPass: data?.isJumpStepPass === null ? false : data?.isJumpStepPass,
             jumpStepsPass: data?.jumpStepsPass && Array.isArray(data?.jumpStepsPass) ? data?.jumpStepsPass : [],
             isJumpStepFail: data?.isJumpStepFail === null ? false : data?.isJumpStepFail,
@@ -178,6 +179,8 @@ export default function StepDialog({
   }, []);
 
   const handleSubmit = (values) => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     values.leadDay = parseInt(values.leadDay);
     values.costPrice = parseFloat(values.costPrice);
     values.listPrice = parseFloat(values.listPrice);
@@ -207,7 +210,7 @@ export default function StepDialog({
           .catch((err) => {
             setLoading(false);
             toastConfig.setToastConfig(err);
-          });
+          }).finally(() => setIsSubmitting(false));
       } else {
         axiosInstance()
           .post(`${serviceMaster.api}/steps/${serviceId}`, values)
@@ -223,7 +226,7 @@ export default function StepDialog({
           .catch((err) => {
             setLoading(false);
             toastConfig.setToastConfig(err);
-          });
+          }).finally(() => setIsSubmitting(false));
       }
     }
   };
@@ -909,7 +912,7 @@ export default function StepDialog({
                   {reference === 'workOrder' && notEditable ? null : (
                     <CustomButton
                       loading={loading}
-                      disabled={loading}
+                      disabled={loading || isSubmitting}
                       onClick={(e) => {
                         e.preventDefault();
                         submitForm();

@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import { Grid, Chip, IconButton, Tooltip } from '@material-ui/core';
+import { Grid, Chip, IconButton, Tooltip, Box } from '@material-ui/core';
 import queryString from 'query-string';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -10,11 +10,11 @@ import routes from './../../components/Helpers/Routes';
 import { getLocalStorageArrayData, prepareDataForGrid, removeLocalStorage, sidebarResource } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { FaRegistered, FaSuitcase } from 'react-icons/fa';
-import { SiStatuspage } from 'react-icons/all';
+import { CiUser, SiStatuspage } from 'react-icons/all';
 import { gridLoadingTimeout, rentalManagement } from '../../constants/helpers';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import CustomContainer from '../../components/CustomContainer';
-import { useHistory } from 'react-router-dom';
+import { useHistory, Link } from 'react-router-dom';
 import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import RentalManagementHeader from './RentalManagementHeader';
@@ -29,6 +29,8 @@ import { setUpindexDB, objectStore, insertUpdate, findAll, findOne } from '../..
 import { CheckboxRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import DeleteIcon from '@material-ui/icons/Delete';
 import HideWhenOffline from '../../components/HideWhenOffline';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { Warning } from '@material-ui/icons';
 
 let rentalManagementTimeout;
 
@@ -72,7 +74,6 @@ const RentalManagement = () => {
     show: false,
     rentalJobName: ''
   });
-
 
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -143,7 +144,17 @@ const RentalManagement = () => {
       checkboxRenderer: CheckboxRenderer,
       actionsRenderer: ActionsRenderer
     };
-    setFrameWorkComponent({ ...tempFrameworkComponent });
+    // for demo purpose
+    columns?.forEach((e) => {
+      if (e.field === 'rentalJobName') {
+        e.cellRenderer = 'rentalJobNameRenderer';
+      }
+    });
+    // till for demo pupose
+    setFrameWorkComponent({
+      ...tempFrameworkComponent,
+      rentalJobNameRenderer: RentalJobNameRenderer
+    });
     let staticFields = getStaticFields();
     if (permissions?.sublease) {
       staticFields = [...extraColumns, ...staticFields];
@@ -153,6 +164,25 @@ const RentalManagement = () => {
     });
     setColumns([...columns]);
   };
+
+  // for demo purpose only
+  const RentalJobNameRenderer = (params) => {
+    return (
+      <Fragment>
+        <Link className="link text-truncate" title={params.value} to={`${routes.rentalManagement.path}/detail/${params.data?._id}`}>
+          {params.value}
+        </Link>
+        {params.data?.assetsNotReceivedInPo && (
+          <Box ml={1}>
+            <HtmlTooltip title={`Assets on PO not received`}>
+              <Warning style={{ fontSize: '14px' }} fontSize="small" color="error" />
+            </HtmlTooltip>
+          </Box>
+        )}
+      </Fragment>
+    );
+  };
+  // till here demo purpose only
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
@@ -238,11 +268,12 @@ const RentalManagement = () => {
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
 
-    if (selectedType === 1) {
-      deepFilter = deepFilter + `&myRecords=1`;
-    }
     if (isExport) {
       deepFilter = `?`;
+    }
+
+    if (selectedType === 1) {
+      deepFilter = deepFilter + `&myRecords=1`;
     }
 
     if (showFilteredRecordsOnly) {
@@ -250,13 +281,13 @@ const RentalManagement = () => {
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
 
-    const { filterByIds, deepFilters } = gridFilterParser(filters)
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
     if (deepFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
     }
     if (filterByIds?.length || deepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
@@ -266,7 +297,7 @@ const RentalManagement = () => {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
     if (search) {
-      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     return deepFilter;
   };
@@ -324,6 +355,7 @@ const RentalManagement = () => {
   };
 
   const handleRentalManagementTypeSel = (filterValues) => {
+    dispatch({ type: 'setPage', page: 0 });
     setSelectedType(filterValues);
     history.push(`?type=${filterValues}`);
   };
@@ -386,41 +418,31 @@ const RentalManagement = () => {
 
   return (
     <>
-      <Fragment>
-        <Grid container className="headerbox">
-          <Grid item md={4} sm={11} xs={10}>
-            <CustomBreadCrumbs routes={[routes.rentalManagement]} />
-          </Grid>
-          <Grid item md={8} sm={1} xs={2}>
-            <Grid container direction="row">
-              <Grid item xs={12} sm={12}>
-                <Grid container justify="flex-end">
-                  <ImportExportLinks
-                    permissions={permissions?.rentalManagement}
-                    module="rentalManagements"
-                    api={rentalManagement.api}
-                    afterImportCompleted={() => {
-                      fetchRentalManagement();
-                    }}
-                    isExportAllOrSomeFeature={true}
-                    total={rowCount}
-                    recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-                    ids={
-                      getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-                        ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-                        : []
-                    }
-                    onExportToExcelSuccess={() => {
-                      if (gridApi) gridApi.deselectAll();
-                      else fetchRentalManagement();
-                    }}
-                    additionalParams={getQueryString(true)}
-                  />
-                </Grid>
-              </Grid>
-            </Grid>
-          </Grid>
-        </Grid>
+      <section className="main-container-v1">
+        <div className="headerbox-v1">
+          <CustomBreadCrumbs routes={[routes.rentalManagement]} />
+          <ImportExportLinks
+            permissions={permissions?.rentalManagement}
+            module="rentalManagements"
+            api={rentalManagement.api}
+            afterImportCompleted={() => {
+              fetchRentalManagement();
+            }}
+            isExportAllOrSomeFeature={true}
+            total={rowCount}
+            recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+            ids={
+              getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+                ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+                : []
+            }
+            onExportToExcelSuccess={() => {
+              if (gridApi) gridApi.deselectAll();
+              else fetchRentalManagement();
+            }}
+            additionalParams={getQueryString(true)}
+          />
+        </div>
         {/* Tables Begins Here */}
         <CustomContainer>
           <div className="header-panel">
@@ -445,12 +467,13 @@ const RentalManagement = () => {
               gridApi={gridApi}
               fetchRentalManagement={fetchRentalManagement}
               filters={filters}
-            >
-            </RentalManagementHeader>
+              resource={sidebarResource.rentalManagement}
+            ></RentalManagementHeader>
           </div>
           {Object.keys(frameWorkComponent).length > 0 ? (
             isMobile && !isTablet ? (
               <CustomSwipableList
+                key={selectedType}
                 allowSelection={true}
                 allowSwipe={true}
                 permissions={permissions?.rentalManagement}
@@ -488,7 +511,7 @@ const RentalManagement = () => {
                 ]}
                 additionalDetails={[
                   {
-                    icon: <FaSuitcase size={18} />,
+                    icon: <CiUser size={18} />,
                     field: 'customerAccount'
                   }
                 ]}
@@ -547,8 +570,9 @@ const RentalManagement = () => {
           {singleRentalManagementDelete.show ? (
             <ConfirmationDialog
               open={singleRentalManagementDelete.show}
-              message={`Are you sure you want to delete this ${routes.rentalManagement.title.toLowerCase()} ${singleRentalManagementDelete ? (singleRentalManagementDelete?.id ? singleRentalManagementDelete?.rentalJobName : '') : ''
-                }?`}
+              message={`Are you sure you want to delete this ${routes.rentalManagement.title.toLowerCase()} ${
+                singleRentalManagementDelete ? (singleRentalManagementDelete?.id ? singleRentalManagementDelete?.rentalJobName : '') : ''
+              }?`}
               onClose={() =>
                 setSingleRentalManagementDelete({
                   id: null,
@@ -560,7 +584,7 @@ const RentalManagement = () => {
             />
           ) : null}
         </CustomContainer>
-      </Fragment>
+      </section>
       {showManageRentalManagementDialog.open && (
         <ManageRentalManagementDialog
           isClone={showManageRentalManagementDialog.isClone}

@@ -1,32 +1,28 @@
-import { useState, FC, useEffect, useContext, useReducer, Fragment } from 'react';
-import { Box, Button, Grid, IconButton, Menu, MenuItem, Tooltip } from '@material-ui/core';
-import { Link, useHistory } from 'react-router-dom';
-import { productTemplate, isObjectEmpty, gridLoadingTimeout } from '../../constants/helpers';
-import axiosInstance from '../../axios/axiosInstance';
-import Layout from '../../components/Layout';
-import routes from './../../components/Helpers/Routes';
-import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import styles from '../Leads/Header.module.scss';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import AddIcon from '@material-ui/icons/Add';
-import { useData } from '../../StateProvider/Provider';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import CustomContainer from '../../components/CustomContainer';
-import DeleteIcon from '@material-ui/icons/Delete';
-import { ImInsertTemplate } from 'react-icons/im';
-import SearchBox from '../../components/Helpers/SearchBox';
+import { Button, IconButton, Menu, MenuItem, Tooltip } from '@material-ui/core';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { MdAccountCircle } from 'react-icons/md';
-import { AiFillCrown, MdAdd, MdSort, MdFilterList } from 'react-icons/all';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { isMobile, isTablet } from 'react-device-detect';
-import { prepareDataForGrid } from '../../constants/helpers';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
-import MobileSortDialog from '../../components/MobileSortDialog';
 import { camelCase } from 'lodash';
+import { FC, useContext, useEffect, useReducer, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { TbArrowsSort } from 'react-icons/all';
+import { MdOutlineFilterAlt } from 'react-icons/md';
+import { Link, useHistory } from 'react-router-dom';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
+import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
+import CustomContainer from '../../components/CustomContainer';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import SearchBox from '../../components/Helpers/SearchBox';
+import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
+import MobileSortDialog from '../../components/MobileSortDialog';
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, productTemplate, sidebarResource } from '../../constants/helpers';
+import styles from '../Leads/Header.module.scss';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import routes from './../../components/Helpers/Routes';
 
 let productTemplateTimeout;
 
@@ -201,7 +197,7 @@ const ProductTemplate: FC = () => {
           term: filters[field].filter
         });
       });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
     }
 
     if (sorting.length > 0) {
@@ -209,7 +205,7 @@ const ProductTemplate: FC = () => {
     }
 
     if (search) {
-      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
@@ -285,123 +281,118 @@ const ProductTemplate: FC = () => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[routes.productTemplate]} />
-        </Grid>
-      </Grid>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[routes.productTemplate]} />
+      </div>
       <CustomContainer>
         <div className="header-panel">
-          <Grid container className={styles.filter_side_container}>
-            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className={'d-flex align-items-center gap-1'}>
               {isMobile && !isTablet && (
-                <div className="d-flex ">
-                  <Button
-                    onClick={handleClickOpen}
-                    id="demo-customized-button"
-                    aria-controls="demo-customized-menu"
-                    aria-haspopup="true"
-                    // aria-expanded={open ? 'true' : undefined}
-                    color="secondary"
-                    variant="text"
-                    disableElevation
-                    startIcon={<MdSort />}
-                  >
-                    Sort
-                  </Button>
+                <div className="d-flex flex-wrap items-center justify-between w-full">
+                  <div></div>
+                  <div className="flex flex-wrap items-center gap-1 ml-auto">
+                    <IconButton
+                      onClick={handleClickOpen}
+                      id="demo-customized-button"
+                      aria-controls="demo-customized-menu"
+                      aria-haspopup="true"
+                      // aria-expanded={open ? 'true' : undefined}
+                      className={'mobileIconButton secondary'}
+                      size="small"
+                    >
+                      <TbArrowsSort className="rotate-90" size={16} />
+                    </IconButton>
 
-                  <MobileSortDialog
-                    isOpen={open}
-                    handleClose={handleClickClose}
-                    contentPart={null}
-                    secHeading={['Sort Product Template']}
-                    columns={columns}
-                    dispatch={dispatch}
-                  />
+                    <MobileSortDialog
+                      isOpen={open}
+                      handleClose={handleClickClose}
+                      contentPart={null}
+                      secHeading={['Sort Product Template']}
+                      columns={columns}
+                      dispatch={dispatch}
+                    />
 
-                  <Button
-                    id="demo-customized-button"
-                    aria-controls="demo-customized-menu"
-                    aria-haspopup="true"
-                    // aria-expanded={open ? 'true' : undefined}
-                    variant="text"
-                    color="secondary"
-                    disableElevation
-                    startIcon={<MdFilterList />}
-                    onClick={handleOpen}
-                  >
-                    Filter
-                  </Button>
-                  <MobileFilterDialog
-                    isOpen={isOpenDialog}
-                    handleClose={handleClose}
-                    contentPart={null}
-                    columns={columns}
-                    dispatch={dispatch}
-                    title={routes?.productTemplate?.title}
-                    filters={filters}
-                  />
+                    <IconButton
+                      id="demo-customized-button"
+                      aria-controls="demo-customized-menu"
+                      aria-haspopup="true"
+                      // aria-expanded={open ? 'true' : undefined}
+                      className={'mobileIconButton secondary'}
+                      size="small"
+                      onClick={handleOpen}
+                    >
+                      <MdOutlineFilterAlt size={16} />
+                    </IconButton>
+                    <MobileFilterDialog
+                      isOpen={isOpenDialog}
+                      handleClose={handleClose}
+                      contentPart={null}
+                      columns={columns}
+                      dispatch={dispatch}
+                      title={routes?.productTemplate?.title}
+                      filters={filters}
+                      resource={sidebarResource.productTemplate}
+                    />
+                  </div>
                 </div>
               )}
-            </Grid>
-            <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
-              <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                <Grid style={{ display: 'flex', flex: 1 }}>
-                  <SearchBox
-                    onChange={handleSearch}
-                    className={styles.search_box_input}
-                    width={isMobile ? '200px' : '242px'}
-                    style={isMobile ? { flex: 1 } : {}}
-                    value={search}
-                  />
-                </Grid>
+            </div>
+            <div className="flex flex-wrap gap-[8px]  justify-end">
+              <SearchBox
+                onChange={handleSearch}
+                className={styles.search_box_input}
+                width={isMobile ? '200px' : '242px'}
+                style={isMobile ? { flex: 1 } : {}}
+                value={search}
+              />
 
-                <Grid style={{ display: 'flex', gap: '5px' }}>
-                  {productTemplatePermissions.isCreate && (
-                    <Button
-                      onClick={() => CreateNew('0', false)}
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      size="small"
-                      color="primary"
-                      className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
-                      startIcon={isMobile && !isTablet ? null : <AddOutlined />}
-                    >
-                      {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
-                    </Button>
-                  )}
-                  {productTemplatePermissions.isDelete && (
-                    <Button
-                      variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                      color="default"
-                      size="small"
-                      onClick={openActions}
-                      disabled={selectedRecords.length ? false : true}
-                      aria-controls="action-menu"
-                      className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
-                      endIcon={<ExpandMore />}
-                    >
-                      {isMobile && !isTablet ? '' : 'Actions'}
-                    </Button>
-                  )}
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
-                    }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
+              <div className="flex gap-[8px] flex-wrap items-center">
+                {productTemplatePermissions.isCreate && (
+                  <Button
+                    onClick={() => CreateNew('0', false)}
+                    variant={'contained'}
+                    size="small"
+                    color="primary"
+                    className={`no-shadow`}
+                    startIcon={<AddOutlined />}
                   >
-                    <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
-                  </Menu>
-                </Grid>
-              </Box>
-            </Grid>
-          </Grid>
+                    Add
+                  </Button>
+                )}
+                {productTemplatePermissions.isDelete && (
+                  <Button
+                    variant={'outlined'}
+                    color="default"
+                    size="small"
+                    onClick={openActions}
+                    disabled={selectedRecords.length ? false : true}
+                    aria-controls="action-menu"
+                    className={`new-dropdown-v1`}
+                    endIcon={<ExpandMore />}
+                  >
+                    Actions
+                  </Button>
+                )}
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  id="action-menu"
+                  open={Boolean(anchorEl)}
+                  onClose={closeActions}
+                >
+                  <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
+                </Menu>
+              </div>
+            </div>
+            <DisplayFiltersForMobile resource={sidebarResource.productTemplate} />
+          </div>
         </div>
         {isMobile && !isTablet ? (
           <CustomSwipableList
@@ -463,7 +454,7 @@ const ProductTemplate: FC = () => {
           />
         )}
       </CustomContainer>
-    </Fragment>
+    </section>
   );
 };
 

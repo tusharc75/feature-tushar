@@ -77,6 +77,12 @@ const ShowOnlySelected = ({ dispatch = null, renderedFrom = null, selectedRecord
       try {
         const initialValue = JSON.parse(saved);
         setDisableSelectionSwitch(initialValue.length === 0);
+        if (initialValue?.length === 0 && checked) {
+          setChecked(false);
+          dispatch({
+            type: 'showFilteredRecordsOnly'
+          });
+        }
       } catch {
         setDisableSelectionSwitch(true);
       }
@@ -100,6 +106,7 @@ const ShowOnlySelected = ({ dispatch = null, renderedFrom = null, selectedRecord
         }
       }}
       control={<CustomSwitch disabled={disableSelectionSwitch} />}
+      className="show-only-selected-switch"
       style={{ fontSize: '0.8rem', marginLeft: 0, ...style }}
       label={<Typography style={{ fontWeight: 400 }}>Show Only Selected</Typography>}
       labelPlacement="end"

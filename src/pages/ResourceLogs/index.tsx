@@ -25,7 +25,7 @@ const ResourceLogs = () => {
     state: { user, permissions }
   }: any = useData();
   const [gridApi, setGridApi] = useState(null);
-  const [openDialog, setOpenDialog] = useState({ open: false, changes: null, operations: null });
+  const [openDialog, setOpenDialog] = useState({ open: false, changes: null, operations: null, updatedBy: null });
   const [option, setOption] = useState([]);
 
   const [selectedResource, setSelectedResource] = useState(null);
@@ -93,8 +93,14 @@ const ResourceLogs = () => {
             var operations = [];
 
             if (Array.isArray(u?.changes)) {
+              if(u?.changes?.length === 0){
+                return;
+              }
               u?.changes?.forEach((e) => {
                 if (e?.fieldLabel) {
+                  if (e?.fieldLabel === 'history' || e?.fieldLabel === 'createdBy' || e?.fieldLabel === '_id') {
+                    return
+                  }
                   changes.push(e);
                   var oldValue = e?.oldValue;
                   var newValue = e?.newValue;
@@ -126,11 +132,15 @@ const ResourceLogs = () => {
             } else {
               u.changeString = 'Click View for check changes';
             }
+            if(u?.action == "create"){
+              u.changeString = "Created";
+            }
             u.changes = changes;
             u.operations = operations;
             u.key = selectedResource?.key;
             return u;
           });
+          rows = rows.filter((e) => e);
           dispatch({ type: 'initialize', data: rows, count: count });
           setTimeout(() => {
             dispatch({ type: 'loading', loading: false });
@@ -156,15 +166,19 @@ const ResourceLogs = () => {
 
   const UpdatedByRenderer = (params) => (
     <Fragment>
-      <Link className="link text-truncate" title={params?.value?.optionLabel} to={`${routes.userDetail.path}/${params?.value?.optionValue}`}>
+      <p 
+        className="link text-truncate" 
+        title={params?.value?.optionLabel} 
+        onClick = {() => window.open(`${routes.userDetail.path}/${params?.value?.optionValue}`)}
+      >
         {params?.value?.optionLabel}
-      </Link>
+      </p>
     </Fragment>
   );
 
   const columns = [
     {
-      field: 'resource',
+      field: 'referenceId',
       headerName: 'Resource',
       show: true,
       cellRenderer: 'resourceRenderer',
@@ -201,7 +215,7 @@ const ResourceLogs = () => {
     return (
       <>
         <HtmlTooltip title="View Changes">
-          <IconButton onClick={() => setOpenDialog({ open: true, changes: params?.data?.changes || [], operations: params?.data?.operations || [] })}>
+          <IconButton onClick={() => setOpenDialog({ open: true, changes: params?.data?.changes || [], operations: params?.data?.operations || [], updatedBy: params?.data?.updatedBy?.optionLabel || '' })}>
             <VisibilityIcon color="primary" fontSize="small" />
           </IconButton>
         </HtmlTooltip>
@@ -217,12 +231,10 @@ const ResourceLogs = () => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[routes.resourceLogs]} />
-        </Grid>
-      </Grid>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[routes.resourceLogs]} />
+      </div>
       <CustomContainer>
         <div className="header-panel">
           {/* xs={12} sm={6} md={4} lg={4} */}
@@ -275,12 +287,13 @@ const ResourceLogs = () => {
       {openDialog?.open && (
         <ChangesDialog
           open={openDialog?.open}
-          onClose={() => setOpenDialog({ open: false, changes: null, operations: null })}
+          onClose={() => setOpenDialog({ open: false, changes: null, operations: null, updatedBy: null })}
           changes={openDialog?.changes}
           operations={openDialog.operations}
+          updatedBy={openDialog?.updatedBy}
         />
       )}
-    </Fragment>
+    </section>
   );
 };
 

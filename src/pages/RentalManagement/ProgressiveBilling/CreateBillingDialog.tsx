@@ -342,7 +342,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
             ele.qty = 1;
             ele._id = ele?.inventoryDetail?._id;
             ele.materialId = ele?.inventoryDetail?._id;
-            ele.description = element?.productDetail?.productDescription || '';
+            ele.description = `${element?.productDetail?.productName}-${element?.productDetail?.productDescription || ''}`;
             let values = { qty: 1 };
             values['actualStartDate'] = ele?.manualStartDate;
             values['actualEndDate'] = ele?.manualEndDate || element?.estimateEndDate;
@@ -577,6 +577,8 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
 
         let priceFieldName = Object.keys(element).find((d) => d.includes('price_'));
 
+        const priceField = allFields?.find((e) => e.fieldName === 'price');
+
         let calValues: any;
         let values = JSON.parse(JSON.stringify(tempValues));
 
@@ -594,7 +596,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
           if (proRata) {
             values['pricingMethod'] = 'Per Day';
             if (priceFieldName) {
-              values[priceFieldName] = orginalMaterial.find((d) => d._id === element._id)[priceFieldName] / 7;
+              values[priceFieldName] = parseFloat((orginalMaterial.find((d) => d._id === element._id)[priceFieldName] / 7)?.toFixed(priceField?.decimalPlaces || 2));
             }
           }
           calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
@@ -603,7 +605,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
           if (proRata) {
             values['pricingMethod'] = 'Per Day';
             if (priceFieldName) {
-              values[priceFieldName] = orginalMaterial.find((d) => d._id === element._id)[priceFieldName] / 30;
+              values[priceFieldName] = parseFloat((orginalMaterial.find((d) => d._id === element._id)[priceFieldName] / 30)?.toFixed(priceField?.decimalPlaces || 2));
             }
           }
           calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);

@@ -16,6 +16,8 @@ const useStyles = makeStyles((theme) => ({
     textAlign: 'center',
     height: 'unset !important',
     padding: '2px 12px',
+    maxWidth: '100%',
+    margin: '3px',
     '& span.MuiChip-label': {
       fontWeight: '500'
     },
@@ -102,12 +104,14 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip, dontShowMyActiv
   };
 
   return (
-    <>
+    <div className={`w-full sm:w-[unset] sm:max-w-[500px] sm:min-w-[200px] flex-grow`}>
       <Autocomplete
+        limitTags={1}
         multiple={true}
         disableCloseOnSelect={true}
+        className={`sm:max-w-[500px] sm:min-w-[200px] flex-grow`}
         size="small"
-        fullWidth
+        // fullWidth
         loading={loading}
         options={options}
         getOptionLabel={(option) => (option ? option.name : '')}
@@ -120,7 +124,6 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip, dontShowMyActiv
           value.map((option, index) => (
             <Chip
               size={chip?.size || 'medium'}
-              style={{ margin: 3 }}
               label={
                 option && option.type === 'my'
                   ? activityName
@@ -133,43 +136,23 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip, dontShowMyActiv
             />
           ))
         }
-        renderInput={(params) =>
-          isMobile && !isTablet ? (
-            <TextField
-              {...params}
-              size="small"
-              variant="standard"
-              placeholder="Search or Filter"
-              className={isMobile ? 'serchBox' : ''}
-              InputProps={{
-                ...params.InputProps,
-                disableUnderline: true,
-                endAdornment: (
-                  <React.Fragment>
-                    {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                    {params.InputProps.endAdornment}
-                  </React.Fragment>
-                )
-              }}
-            />
-          ) : (
-            <TextField
-              {...params}
-              size="small"
-              variant="outlined"
-              placeholder="Search or Filter"
-              InputProps={{
-                ...params.InputProps,
-                endAdornment: (
-                  <React.Fragment>
-                    {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                    {params.InputProps.endAdornment}
-                  </React.Fragment>
-                )
-              }}
-            />
-          )
-        }
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            size="small"
+            variant="outlined"
+            placeholder="Search or Filter"
+            InputProps={{
+              ...params.InputProps,
+              endAdornment: (
+                <React.Fragment>
+                  {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                  {params.InputProps.endAdornment}
+                </React.Fragment>
+              )
+            }}
+          />
+        )}
         value={value}
         renderOption={(option) => {
           const index = options.findIndex((o) => o.type === option.type);
@@ -205,7 +188,7 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip, dontShowMyActiv
           activityId={selectedActivityId}
         />
       )}
-    </>
+    </div>
   );
 };
 

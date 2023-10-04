@@ -1,31 +1,29 @@
-import React, { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, Tab, Tabs, Menu, MenuItem } from '@material-ui/core';
+import { Box, Button, Grid, Menu, MenuItem, Tab, Tabs } from '@material-ui/core';
+import { ExpandMore } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
-import { useParams, useHistory } from 'react-router-dom';
-import axiosInstance from 'src/axios/axiosInstance';
-import routes from 'src/components/Helpers/Routes';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import DetailsPage from 'src/components/Shared/DetailsPage';
-import { useData } from 'src/StateProvider/Provider';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { productionOrder, productionOrderSteps, sidebarResource, ACTIVITY_RESOURCE, PRODUCTION_ORDER_STATUS } from 'src/constants/helpers';
+import { camelCase } from 'lodash';
 import queryString from 'query-string';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
-import TabPanel from 'src/components/TabPanel';
-import Steps, { getIndex } from 'src/components/Steps';
-import { camelCase } from 'lodash';
+import { useHistory, useParams } from 'react-router-dom';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 import ContentFullScreen from 'src/components/ContentFullScreen';
-import { isMobile, isTablet } from 'react-device-detect';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
-import { ExpandMore } from '@material-ui/icons';
-import { GrStatusInfo } from 'react-icons/gr';
+import routes from 'src/components/Helpers/Routes';
+import DetailsPage from 'src/components/Shared/DetailsPage';
+import Steps, { getIndex } from 'src/components/Steps';
+import TabPanel from 'src/components/TabPanel';
+import { ACTIVITY_RESOURCE, PRODUCTION_ORDER_STATUS, productionOrder, productionOrderSteps, sidebarResource } from 'src/constants/helpers';
 import ManageProductionOrder from './ManageProductionOrder';
 import Material from './Material';
-import ActivityButton from 'src/components/Activity/ActivityButton';
-import Process from './WorkOrder';
 import WorkOrder from './WorkOrder';
 
 function a11yProps(index: any) {
@@ -162,8 +160,8 @@ const ProductionOrderDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${productionOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
-      .catch((error) => { });
+      .then(({ data }) => {})
+      .catch((error) => {});
   };
 
   const handleStatusChange = (o) => {
@@ -214,9 +212,10 @@ const ProductionOrderDetails = () => {
                       size="small"
                       onClick={openActions}
                       aria-controls="action-menu"
-                      endIcon={isMobile && !isTablet ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
+                      className="btn-outline-v1"
+                      endIcon={<ExpandMore />}
                     >
-                      {isMobile && !isTablet ? <GrStatusInfo size={20} /> : 'Change Status'}
+                      Change Status
                     </Button>
                     <Menu
                       anchorEl={anchorEl}
@@ -264,11 +263,11 @@ const ProductionOrderDetails = () => {
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
             )}
-            <ActivityButton 
-              referenceId={productionOrderData?._id} 
-              resource={ACTIVITY_RESOURCE.productionOrder} 
+            <ActivityButton
+              referenceId={productionOrderData?._id}
+              resource={ACTIVITY_RESOURCE.productionOrder}
               resourceLabel={productionOrderData?.productionOrderNumber}
-              />
+            />
           </Box>
         </Box>
       </Box>

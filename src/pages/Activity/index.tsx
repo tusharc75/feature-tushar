@@ -20,10 +20,10 @@ const capitalize = (string) => {
 
 const useStyles = makeStyles((theme) => ({
   activityContainer: {
-    padding: '0 10px 10px'
+    padding: '0 0px 10px'
   },
   activityHeader: {
-    margin: '6px 6px',
+    margin: '6px 0px',
     borderRadius: '6px',
     '& .MuiGrid-spacing-xs-1': {
       width: 'calc(100% + 14px)'
@@ -63,37 +63,25 @@ const Activity = ({ type }) => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item xs={12}>
-          <CustomBreadCrumbs routes={[{ title: capitalize(routes[type].title) }]} />
-        </Grid>
-      </Grid>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[{ title: capitalize(routes[type].title) }]} />
+      </div>
       <CustomContainer>
         {filter && (
           <Fragment>
-            <Box className={classes.activityHeader}>
-              <Box style={{ marginBottom: 20 }}>
-                <Grid container>
-                  <Grid item xs={12} md={5} sm={7}>
-                    <Box display="flex" justifyContent="center">
-                      <CustomTabs value={viewType} setValue={setViewType} tabs={tabs} />
-                    </Box>
-                  </Grid>
-                  <Grid item xs={12} md={7} sm={5}>
-                    <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} activityName={type} />
-                  </Grid>
-                </Grid>
+            <div className="flex flex-wrap justify-between items-start content-start gap-2 mb-[16px]">
+              <Box display="flex" justifyContent="center">
+                <CustomTabs value={viewType} setValue={setViewType} tabs={tabs} />
               </Box>
-            </Box>
-            <Box className={classes.activityContainer}>
-              {viewType === 0 && <Board type={type} filter={filter} />}
-              {viewType === 1 && <Roadmap type={type} filter={filter} />}
-            </Box>
+              <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} activityName={type} />
+            </div>
+            {viewType === 0 && <Board type={type} filter={filter} />}
+            {viewType === 1 && <Roadmap type={type} filter={filter} />}
           </Fragment>
         )}
       </CustomContainer>
-    </Fragment>
+    </section>
   );
 };
 

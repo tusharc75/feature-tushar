@@ -1,38 +1,36 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import Grid from '@material-ui/core/Grid';
-import Box from '@material-ui/core/Box';
-import { useHistory } from 'react-router-dom';
-import { useData } from '../../StateProvider/Provider';
-import axiosInstance from '../../axios/axiosInstance';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import MessageDialog from '../../components/Helpers/MessageDialog';
-import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import routes from './../../components/Helpers/Routes';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { isObjectEmpty, gridLoadingTimeout, deliveryTicket, DELIVERY_FROM_TO_TYPE, getLocalStorageArrayData } from '../../constants/helpers';
-import CustomContainer from '../../components/CustomContainer';
-import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import styles from '../Leads/Header.module.scss';
-import { GiAbstract055 } from 'react-icons/gi';
-import SearchBox from '../../components/Helpers/SearchBox';
-import ManageDeliveryTicket from './ManageDeliveryTicket';
-import { sidebarResource, prepareDataForGrid } from '../../constants/helpers';
-import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
-import { isMobile, isTablet } from 'react-device-detect';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
-import { objectStore, findOne, findAll } from '../../constants/indexdbhelper';
-import { PickupFromRenderer, DeliveryToRenderer } from '../../components/DeliveryTicket/helper';
+import { Chip, IconButton } from '@material-ui/core';
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
+import { useContext, useEffect, useReducer, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { GiAbstract055 } from 'react-icons/gi';
+import { MdOutlineFilterAlt } from 'react-icons/md';
+import { TbArrowsSort } from 'react-icons/tb';
+import { useHistory } from 'react-router-dom';
 import HideWhenOffline from 'src/components/HideWhenOffline';
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
-import { Button, Chip } from '@material-ui/core';
+import MobileFilterDialog, { DisplayFiltersForMobile } from 'src/components/MobileFilterDialog';
 import MobileSortDialog from 'src/components/MobileSortDialog';
-import MobileFilterDialog from 'src/components/MobileFilterDialog';
-import { MdFilterList, MdSort } from 'react-icons/md';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
+import CustomContainer from '../../components/CustomContainer';
+import { DeliveryToRenderer, PickupFromRenderer } from '../../components/DeliveryTicket/helper';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
+import MessageDialog from '../../components/Helpers/MessageDialog';
+import SearchBox from '../../components/Helpers/SearchBox';
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import { deliveryTicket, getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { findAll, findOne, objectStore } from '../../constants/indexdbhelper';
+import useColumns, { getFrameworkComponents, getStaticFields, gridFilterParser } from '../../constants/useColumns';
+import styles from '../Leads/Header.module.scss';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import routes from './../../components/Helpers/Routes';
+import ManageDeliveryTicket from './ManageDeliveryTicket';
 
 let deliveryTicketTimeout;
 
@@ -50,8 +48,7 @@ const DeliveryTicket = () => {
   let renderedFrom = camelCase(routes?.deliveryTicket.title);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
-  const { type }: any = queryString.parse(history.location.search);
-  const [fromRental, setFromRental] = useState(history?.location?.state?.rental);
+  let { type, referenceId, referenceType }: any = queryString.parse(history.location.search);
   const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
   const [filter, setFilter] = useState(`All ${routes.deliveryTicket.title}`);
   const {
@@ -195,7 +192,7 @@ const DeliveryTicket = () => {
     if (renderCount > 0) {
       fetchDeliveryTicket();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, filters, sorting, selectedEntity, isOffline, selectedType, showFilteredRecordsOnly, fromRental]);
+  }, [page, limit, filters, sorting, selectedEntity, isOffline, selectedType, showFilteredRecordsOnly]);
 
   const ActionsRenderer = (params) => (
     <>
@@ -214,27 +211,30 @@ const DeliveryTicket = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-    if (selectedType === 1) {
-      deepFilter = deepFilter + `&myRecords=1`;
-    }
+
     if (isExport) {
       deepFilter = `?`;
     }
+
+    if (selectedType === 1) {
+      deepFilter = deepFilter + `&myRecords=1`;
+    }
+
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
-    if (fromRental) {
-      filterByIds.push({ field: 'rentalJob', term: fromRental?._id });
+    if (referenceId) {
+      filterByIds.push({ field: 'rentalJob', term: referenceId });
     }
 
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
     if (deepFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
     }
 
     if (filterByIds?.length || deepFilters?.length) {
@@ -245,7 +245,7 @@ const DeliveryTicket = () => {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
     if (search) {
-      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
@@ -259,8 +259,13 @@ const DeliveryTicket = () => {
   };
 
   const handleDeliveryTicketTypeSel = (filterValues) => {
+    dispatch({ type: 'setPage', page: 0 });
     setSelectedType(filterValues);
-    history.push(`?type=${filterValues}`);
+    if (referenceId && referenceType) {
+      history.push(`?type=${filterValues}&referenceType=${referenceType}&referenceId=${referenceId}`);
+    } else {
+      history.push(`?type=${filterValues}`);
+    }
   };
 
   const handleFilter = (event, newFilter) => {
@@ -333,45 +338,47 @@ const DeliveryTicket = () => {
     setisOpenDialog(false);
   };
 
+  const updateQueryParams = () => {
+    const queryParams = new URLSearchParams(history.location.search);
+    queryParams.delete('referenceId');
+    queryParams.delete('referenceType');
+    referenceId = queryParams.get('referenceId');
+    referenceType = queryParams.get('referenceType');
+    history.replace({
+      search: queryParams.toString()
+    });
+    fetchDeliveryTicket();
+  };
+
   return (
     <>
-      <Fragment>
-        <Grid container className="headerbox">
-          <Grid item md={4} sm={11} xs={10}>
-            <CustomBreadCrumbs routes={[routes.deliveryTicket]} />
-          </Grid>
-          <Grid item md={8} sm={1} xs={2}>
-            <Grid container direction="row">
-              <Grid item xs={12} sm={12}>
-                <Grid container justify="flex-end">
-                  <ImportExportLinks
-                    permissions={deliveryPermissions}
-                    module="deliveryTicket"
-                    api={deliveryTicket.api}
-                    afterImportCompleted={fetchDeliveryTicket}
-                    isExportAllOrSomeFeature={true}
-                    onlyExport={true}
-                    total={rowCount}
-                    recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-                    ids={
-                      getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-                        ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-                        : []
-                    }
-                    onExportToExcelSuccess={() => {
-                      if (gridApi) {
-                        gridApi.deselectAll();
-                      } else {
-                        fetchDeliveryTicket();
-                      }
-                    }}
-                    additionalParams={getQueryString(true)}
-                  />
-                </Grid>
-              </Grid>
-            </Grid>
-          </Grid>
-        </Grid>
+      <section className="main-container-v1">
+        <div className="headerbox-v1">
+          <CustomBreadCrumbs routes={[routes.deliveryTicket]} />
+          <ImportExportLinks
+            permissions={deliveryPermissions}
+            module="deliveryTicket"
+            api={deliveryTicket.api}
+            afterImportCompleted={fetchDeliveryTicket}
+            isExportAllOrSomeFeature={true}
+            onlyExport={true}
+            total={rowCount}
+            recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+            ids={
+              getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+                ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+                : []
+            }
+            onExportToExcelSuccess={() => {
+              if (gridApi) {
+                gridApi.deselectAll();
+              } else {
+                fetchDeliveryTicket();
+              }
+            }}
+            additionalParams={getQueryString(true)}
+          />
+        </div>
 
         {/* Tables Begins Here */}
         <CustomContainer>
@@ -381,34 +388,22 @@ const DeliveryTicket = () => {
                 <div className="flex flex-wrap">
                   <GiAbstract055 className="headerLogo" />
                   <span className="listingHeader">{routes.deliveryTicket.title} </span>
-                  {fromRental && (
-                    <Chip
-                      className="ml-3"
-                      color="primary"
-                      label={`Rental : ${fromRental.rentalJobName}`}
-                      onDelete={() => {
-                        setFromRental(null);
-                      }}
-                    />
-                  )}
+                  {referenceType && <Chip className="ml-3" color="primary" label={`Rental : ${referenceType}`} onDelete={updateQueryParams} />}
                 </div>
                 {isMobile && !isTablet ? (
                   <>
-                    <Grid style={{ display: 'inline-flex' }}>
-                      <Button
+                    <div className="flex flex-wrap items-center gap-1 ml-auto">
+                      <IconButton
                         onClick={handleClickOpen}
                         id="demo-customized-button"
                         aria-controls="demo-customized-menu"
                         aria-haspopup="true"
                         aria-expanded={'true'}
-                        variant="text"
-                        disableElevation
-                        startIcon={<MdSort />}
-                        className={'sort-filter-tablet'}
-                        style={isTablet ? { marginLeft: '50px' } : {}}
+                        className={'mobileIconButton secondary'}
+                        size="small"
                       >
-                        Sort
-                      </Button>
+                        <TbArrowsSort className="rotate-90" size={16} />
+                      </IconButton>
                       <MobileSortDialog
                         isOpen={sortOpen}
                         handleClose={handleClickClose}
@@ -418,19 +413,17 @@ const DeliveryTicket = () => {
                         dispatch={dispatch}
                       />
 
-                      <Button
+                      <IconButton
                         id="demo-customized-button"
                         aria-controls="demo-customized-menu"
                         aria-haspopup="true"
                         aria-expanded={'true'}
-                        variant="text"
-                        disableElevation
-                        className={'sort-filter-tablet'}
-                        startIcon={<MdFilterList />}
+                        className={'mobileIconButton secondary'}
+                        size="small"
                         onClick={handleOpen}
                       >
-                        Filter
-                      </Button>
+                        <MdOutlineFilterAlt size={16} />
+                      </IconButton>
 
                       <MobileFilterDialog
                         isOpen={isOpenDialog}
@@ -440,8 +433,9 @@ const DeliveryTicket = () => {
                         dispatch={dispatch}
                         title={routes?.deliveryTicket?.title}
                         filters={filters}
+                        resource={sidebarResource.deliveryTicket}
                       />
-                    </Grid>
+                    </div>
                   </>
                 ) : (
                   <HideWhenOffline>
@@ -505,11 +499,13 @@ const DeliveryTicket = () => {
                     }}>Delete</MenuItem>
                   </Menu> */}
               </div>
+              <DisplayFiltersForMobile resource={sidebarResource.deliveryTicket} />
             </div>
           </div>
 
           {isMobile && !isTablet ? (
             <CustomSwipableList
+              key={selectedType}
               allowSelection={true}
               allowSwipe={true}
               permissions={permissions.deliveryTicket}
@@ -596,7 +592,7 @@ const DeliveryTicket = () => {
             />
           ) : null}
         </CustomContainer>
-      </Fragment>
+      </section>
     </>
   );
 };

@@ -21,7 +21,8 @@ import {
   primaryFields,
   productInventory,
   isObjectEmpty,
-  sidebarResource
+  sidebarResource,
+  product
 } from 'src/constants/helpers';
 import Loader from 'src/components/Loader';
 import MomentUtils from '@date-io/moment';
@@ -41,7 +42,6 @@ import Dialog from '@material-ui/core/Dialog';
 let cancelTokenSource = null;
 
 const Report = () => {
-
   const [themeColor] = useAppTheme();
   const isDarkTheme = themeColor === 'dark';
   const theme = useTheme();
@@ -90,6 +90,7 @@ const Report = () => {
       let columns = [];
       let rendererNames = [];
       let resourceFieldData = [];
+      let curr = user?.user?.brandCurrency || "";
 
       if (resourceCamelCase === 'purchaseOrderDetails') {
         let {
@@ -105,8 +106,7 @@ const Report = () => {
           data: { data: productOption }
         } = await axiosInstance().get(`sa-formbuilder/lookup?lookupResource=Product`);
 
-        POFields.filter((field) =>
-          ['purchaseOrderNumber', 'purchaseOrderDate', 'supplierAccount', 'warehouse'].includes(field?.fieldData.fieldName)
+        POFields.filter((field) => ['purchaseOrderNumber', 'purchaseOrderDate', 'supplierAccount', 'warehouse'].includes(field?.fieldData.fieldName)
         ).forEach((field: any) => {
           if (field?.fieldData.fieldName === 'purchaseOrderNumber') {
             resourceFieldData.push(field);
@@ -149,14 +149,18 @@ const Report = () => {
               headerName: field?.fieldData?.fieldLabel,
               show: true,
               disabled: false,
+              filter: false,
+              sortable: false,
               cellRenderer: 'dateRenderer'
             });
           }
         });
 
-        productFields
-          .filter((field) => ['productName', 'productNumber'].includes(field?.fieldData.fieldName))
+        productFields.filter((field) => ['productName', 'productNumber', 'expenseItem'].includes(field?.fieldData.fieldName))
           .forEach((field: any) => {
+            if (field?.fieldData.fieldName === 'expenseItem') {
+              resourceFieldData.push(field);
+            }
             if (field?.fieldData.fieldName === 'productName') {
               resourceFieldData.push({
                 ...field,
@@ -184,7 +188,7 @@ const Report = () => {
         POProductFields.forEach((o) => {
           let currentColumn = getColumnData('Purchase Order Product', o?.fieldData, '');
           if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
+            columns = [...columns, { ...currentColumn?.columnData, filter: false, sortable: false }];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
               rendererNames.push(currentColumn?.rendererName);
             }
@@ -217,6 +221,10 @@ const Report = () => {
           data: { data: POFields }
         } = await axiosInstance().get(`/field?resource=Purchase Order`);
 
+        let {
+          data: { data: productOption }
+        } = await axiosInstance().get(`sa-formbuilder/lookup?lookupResource=Product`);
+
         POFields.filter((field) => ['purchaseOrderDate', 'supplierAccount', 'warehouse'].includes(field?.fieldData.fieldName)).forEach((field) => {
           if (field?.fieldData.fieldName === 'warehouse') {
             resourceFieldData.push(field);
@@ -230,8 +238,17 @@ const Report = () => {
         });
 
         productFields.forEach((o: any) => {
+          if (o?.fieldData.fieldName === 'expenseItem') {
+            resourceFieldData.push(o);
+          }
           if (o?.fieldData.fieldName === 'productCategory') {
             resourceFieldData.push(o);
+          }
+          if (o?.fieldData.fieldName === 'productName') {
+            resourceFieldData.push({
+              ...o,
+              fieldData: { ...o.fieldData, fieldName: '_id', type: 'dropDown', lookup: true, option: productOption?.Product || [] }
+            });
           }
           let currentColumn = getColumnData('Product', o?.fieldData, routes['productDetail'].path);
           if (currentColumn !== null) {
@@ -260,7 +277,7 @@ const Report = () => {
           },
           {
             field: 'averagePrice',
-            headerName: 'Average Cost',
+            headerName: `Average Cost ${curr}`,
             show: true,
             disabled: false,
             filter: false,
@@ -269,7 +286,7 @@ const Report = () => {
           },
           {
             field: 'totalPrice',
-            headerName: 'Total',
+            headerName: `Total ${curr}`,
             show: true,
             disabled: false,
             filter: false,
@@ -291,7 +308,18 @@ const Report = () => {
         }
 
         columns?.forEach((e) => {
-          if (['productName', 'productDescription', 'productNumber', 'productCategory', 'productCondition', 'totalQty', 'averagePrice', 'totalPrice', 'margin'].includes(e.field)
+          if (
+            [
+              'productName',
+              'productDescription',
+              'productNumber',
+              'productCategory',
+              'productCondition',
+              'totalQty',
+              'averagePrice',
+              'totalPrice',
+              'margin'
+            ].includes(e.field)
           ) {
             e.show = true;
           } else {
@@ -363,21 +391,26 @@ const Report = () => {
           });
         }
 
-        productFields.filter((field) => ['productName', 'productDescription', 'productNumber'].includes(field?.fieldData.fieldName))
+        productFields.filter((field) => ['productName', 'productDescription', 'productNumber', 'expenseItem'].includes(field?.fieldData.fieldName))
           .forEach((field: any) => {
+            if (field?.fieldData.fieldName === 'expenseItem') {
+              resourceFieldData.push(field);
+            }
             if (field?.fieldData.fieldName === 'productName') {
               resourceFieldData.push({
                 ...field,
                 fieldData: { ...field.fieldData, fieldName: 'product', type: 'dropDown', lookup: true, option: productOption?.Product || [] }
               });
             }
-            columns.push({
-              field: field?.fieldData.fieldName === 'productName' ? 'product' : field?.fieldData.fieldName,
-              headerName: field?.fieldData?.fieldLabel,
-              show: true,
-              disabled: false,
-              cellRenderer: field?.fieldData.fieldName === 'productName' ? 'productRenderer' : 'commonRenderer'
-            });
+            if (!['expenseItem'].includes(field?.fieldData.fieldName)) {
+              columns.push({
+                field: field?.fieldData.fieldName === 'productName' ? 'product' : field?.fieldData.fieldName,
+                headerName: field?.fieldData?.fieldLabel,
+                show: true,
+                disabled: false,
+                cellRenderer: field?.fieldData.fieldName === 'productName' ? 'productRenderer' : 'commonRenderer'
+              });
+            }
           });
 
         columns = [
@@ -402,8 +435,8 @@ const Report = () => {
               }
             }
           },
-          { field: 'price', headerName: 'Cost', show: true, filter: false, cellRenderer: 'commonRenderer' },
-          { field: 'totalPrice', headerName: 'Amount', show: true, filter: false, cellRenderer: 'commonRenderer' },
+          { field: 'price', headerName: `Cost ${curr}`, show: true, filter: false, cellRenderer: 'commonRenderer' },
+          { field: 'totalPrice', headerName: `Amount ${curr}`, show: true, filter: false, cellRenderer: 'commonRenderer' },
           { field: 'warehouse', headerName: routes.warehouse.title, show: true, cellRenderer: 'commonRenderer' },
           ...(user?.user?.brandPolicy?.storageLocation
             ? [
@@ -442,6 +475,9 @@ const Report = () => {
         } = await axiosInstance().get(`sa-formbuilder/lookup?lookupResource=Product`);
 
         productFields.forEach((o: any) => {
+          if (o?.fieldData.fieldName === 'expenseItem') {
+            resourceFieldData.push(o);
+          }
           if (o?.fieldData.fieldName === 'productName') {
             resourceFieldData.push({
               ...o,
@@ -491,7 +527,7 @@ const Report = () => {
           },
           {
             field: 'averagePrice',
-            headerName: 'Average Cost',
+            headerName: `Average Cost ${curr}`,
             show: true,
             disabled: false,
             filter: false,
@@ -500,7 +536,7 @@ const Report = () => {
           },
           {
             field: 'totalPrice',
-            headerName: 'Total',
+            headerName: `Total ${curr}`,
             show: true,
             disabled: false,
             filter: false,
@@ -519,18 +555,18 @@ const Report = () => {
       if (resourceCamelCase === 'numberOfAssetsByStatus') {
         let { data } = await axiosInstance().get(`/serialized-asset/report/assets-number-by-status?page=0&limit=1`);
         data?.columns?.forEach((e) => {
-          var cellRenderer = 'numberRenderer'
+          var cellRenderer = 'numberRenderer';
           if (e.fieldName === 'productName') {
-            cellRenderer = 'productRenderer'
+            cellRenderer = 'productRenderer';
           }
           if (e.fieldName === 'productCategory') {
-            cellRenderer = 'productCategoryRenderer'
+            cellRenderer = 'productCategoryRenderer';
           }
-          if (["productDescription", "productNumber"]?.includes(e.fieldName)) {
-            cellRenderer = 'commonRenderer'
+          if (['productDescription', 'productNumber']?.includes(e.fieldName)) {
+            cellRenderer = 'commonRenderer';
           }
           if (e.fieldName === 'warehouse') {
-            cellRenderer = 'plantRenderer'
+            cellRenderer = 'plantRenderer';
           }
           columns.push({
             field: e.fieldName,
@@ -539,9 +575,9 @@ const Report = () => {
             disabled: e.fieldName === 'productName' ? true : false,
             cellRenderer: cellRenderer,
             filter: false,
-            sortable: false,
-          })
-        })
+            sortable: false
+          });
+        });
 
         let fieldOptionResponce = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Product,Product Category,Warehouse`);
         const fieldOption = fieldOptionResponce?.data?.data;
@@ -555,9 +591,9 @@ const Report = () => {
             fieldName: 'product',
             type: 'dropDown',
             lookup: true,
-            option: fieldOption["Product"],
+            option: fieldOption['Product'],
             filter: false,
-            sortable: false,
+            sortable: false
           }
         });
         resourceFieldData.push({
@@ -570,9 +606,9 @@ const Report = () => {
             fieldName: 'warehouse',
             type: 'dropDown',
             lookup: true,
-            option: fieldOption["Warehouse"],
+            option: fieldOption['Warehouse'],
             filter: false,
-            sortable: false,
+            sortable: false
           }
         });
         resourceFieldData.push({
@@ -585,12 +621,11 @@ const Report = () => {
             fieldName: 'productCategory',
             type: 'dropDown',
             lookup: true,
-            option: fieldOption["Product Category"],
+            option: fieldOption['Product Category'],
             filter: false,
-            sortable: false,
+            sortable: false
           }
         });
-
 
         setFrameWorkComponent({
           productRenderer: ProductRenderer,
@@ -603,15 +638,15 @@ const Report = () => {
       if (resourceCamelCase === 'assetUtilization') {
         let { data } = await axiosInstance().get(`/serialized-asset/report/assets-utilization/column`);
         data?.data?.forEach((e) => {
-          var cellRenderer = 'commonRenderer'
+          var cellRenderer = 'commonRenderer';
           if (e.fieldName === 'assetNumber') {
-            cellRenderer = 'assetRenderer'
+            cellRenderer = 'assetRenderer';
           }
           if (e.fieldName === 'product') {
-            cellRenderer = 'productRenderer'
+            cellRenderer = 'productRenderer';
           }
           if (e.fieldName === 'inUseDays') {
-            cellRenderer = 'numberRenderer'
+            cellRenderer = 'numberRenderer';
           }
           columns.push({
             field: e.fieldName,
@@ -620,9 +655,9 @@ const Report = () => {
             disabled: false,
             cellRenderer: cellRenderer,
             filter: e.fieldName === 'assetNumber' ? true : false,
-            sortable: false,
-          })
-        })
+            sortable: false
+          });
+        });
 
         let fieldOptionResponce = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Product,Warehouse`);
         const fieldOption = fieldOptionResponce?.data?.data;
@@ -636,9 +671,9 @@ const Report = () => {
             fieldName: 'product',
             type: 'dropDown',
             lookup: true,
-            option: fieldOption["Product"],
+            option: fieldOption['Product'],
             filter: false,
-            sortable: false,
+            sortable: false
           }
         });
         resourceFieldData.push({
@@ -647,16 +682,15 @@ const Report = () => {
           isUpdate: true,
           fieldData: {
             _id: '63f71ce5b17c69a1ab7e4c06',
-            fieldLabel: columns?.find((e) => e.field === 'warehouse')?.headerName || 'Warehouse',
+            fieldLabel: columns?.find((e) => e.field === 'warehouse')?.headerName || routes.warehouse?.title,
             fieldName: 'warehouse',
             type: 'dropDown',
             lookup: true,
-            option: fieldOption["Warehouse"],
+            option: fieldOption['Warehouse'],
             filter: false,
-            sortable: false,
+            sortable: false
           }
         });
-
 
         setFrameWorkComponent({
           productRenderer: ProductRenderer,
@@ -678,9 +712,9 @@ const Report = () => {
             fieldName: 'user',
             type: 'dropDown',
             lookup: true,
-            option: fieldOption["User"],
+            option: fieldOption['User'],
             filter: false,
-            sortable: false,
+            sortable: false
           }
         });
         resourceFieldData.push({
@@ -693,13 +727,14 @@ const Report = () => {
             fieldName: 'date',
             type: 'date',
             filter: false,
-            sortable: false,
+            sortable: false
           }
         });
 
         setFrameWorkComponent({
           commonRenderer: CommonRenderer,
-          numberRenderer: NumberRenderer
+          numberRenderer: NumberRenderer,
+          userRenderer: UserRenderer
         });
       }
       if (resourceCamelCase === 'inUseSerializedAsset') {
@@ -714,113 +749,107 @@ const Report = () => {
         if (lookupResource) {
           data?.forEach((e) => {
             if (e?.fieldData?.fieldName === 'currentOwner') {
+              e.fieldData.lookup = true;
               e.fieldData.option = [...lookupResource?.[`Customer Account`], ...lookupResource?.[`Supplier Account`]];
             }
           });
         }
 
         fieldData.push({
-          "fieldData": {
-            "fieldName": "rentalJob",
-            "fieldLabel": "Rental Job",
-            "lookup": true,
-            "lookupResource": sidebarResource.rentalManagement,
-            "order": fieldData?.length + 1,
+          fieldData: {
+            fieldName: 'rentalJob',
+            fieldLabel: 'Rental Job',
+            lookup: true,
+            lookupResource: sidebarResource.rentalManagement,
+            order: fieldData?.length + 1,
             filter: false,
             sortable: false
           },
-          "isCreate": true,
-          "isRead": true,
-          "isUpdate": true
-        })
+          isCreate: true,
+          isRead: true,
+          isUpdate: true
+        });
 
         fieldData.push({
-          "fieldData": {
-            "fieldName": "customerAccount",
-            "fieldLabel": "Customer Account",
-            "lookup": true,
-            "lookupResource": sidebarResource.customerAccount,
-            "sectionName": "",
-            "order": fieldData?.length + 1,
+          fieldData: {
+            fieldName: 'customerAccount',
+            fieldLabel: 'Customer Account',
+            lookup: true,
+            lookupResource: sidebarResource.customerAccount,
+            sectionName: '',
+            order: fieldData?.length + 1,
             filter: false
           },
-          "isCreate": true,
-          "isRead": true,
-          "isUpdate": true
-        })
+          isCreate: true,
+          isRead: true,
+          isUpdate: true
+        });
         fieldData.push({
-          "fieldData": {
-            "fieldName": "billingAddress",
-            "fieldLabel": "Billing Address",
-            "lookup": true,
-            "lookupResource": sidebarResource.address,
-            "sectionName": "",
-            "order": fieldData?.length + 1,
-            filter: false
-
-          },
-          "isCreate": true,
-          "isRead": true,
-          "isUpdate": true
-        })
-        fieldData.push({
-          "fieldData": {
-            "fieldName": "shippingAddress",
-            "fieldLabel": "Shipping Address",
-            "lookup": true,
-            "lookupResource": sidebarResource.address,
-            "sectionName": "",
-            "order": fieldData?.length + 1,
+          fieldData: {
+            fieldName: 'billingAddress',
+            fieldLabel: 'Billing Address',
+            lookup: true,
+            lookupResource: sidebarResource.address,
+            sectionName: '',
+            order: fieldData?.length + 1,
             filter: false
           },
-          "isCreate": true,
-          "isRead": true,
-          "isUpdate": true
-        })
+          isCreate: true,
+          isRead: true,
+          isUpdate: true
+        });
         fieldData.push({
-          "fieldData": {
-            "fieldName": "rate",
-            "fieldLabel": "Rental Rate",
-            "order": fieldData?.length + 1,
+          fieldData: {
+            fieldName: 'shippingAddress',
+            fieldLabel: 'Shipping Address',
+            lookup: true,
+            lookupResource: sidebarResource.address,
+            sectionName: '',
+            order: fieldData?.length + 1,
             filter: false
           },
-          "isCreate": true,
-          "isRead": true,
-          "isUpdate": true
-        })
+          isCreate: true,
+          isRead: true,
+          isUpdate: true
+        });
         fieldData.push({
-          "fieldData": {
-            "fieldName": "startDate",
-            "fieldLabel": "Start Date",
+          fieldData: {
+            fieldName: 'rate',
+            fieldLabel: 'Rental Rate',
+            order: fieldData?.length + 1,
+            filter: false
+          },
+          isCreate: true,
+          isRead: true,
+          isUpdate: true
+        });
+        fieldData.push({
+          fieldData: {
+            fieldName: 'startDate',
+            fieldLabel: 'Start Date',
             type: 'date',
-            "order": fieldData?.length + 1,
+            order: fieldData?.length + 1,
             filter: false
-
           },
-          "isCreate": true,
-          "isRead": true,
-          "isUpdate": true
-        })
+          isCreate: true,
+          isRead: true,
+          isUpdate: true
+        });
         fieldData.push({
-          "fieldData": {
-            "fieldName": "endDate",
-            "fieldLabel": "End Date",
+          fieldData: {
+            fieldName: 'endDate',
+            fieldLabel: 'End Date',
             type: 'date',
-            "order": fieldData?.length + 1,
+            order: fieldData?.length + 1,
             filter: false
-
           },
-          "isCreate": true,
-          "isRead": true,
-          "isUpdate": true
-        })
-        const fieldWithoutFilter = ["rentalJob", "customerAccount", "billingAddress", "shippingAddress", "rate", "startDate", "endDate"];
+          isCreate: true,
+          isRead: true,
+          isUpdate: true
+        });
+        const fieldWithoutFilter = ['rentalJob', 'customerAccount', 'billingAddress', 'shippingAddress', 'rate', 'startDate', 'endDate'];
         fieldData.forEach((o) => {
-          let currentColumn: any = getColumnData(
-            routes.serializedAsset?.title,
-            o?.fieldData,
-            routes.serializedAssetDetail.path
-          );
+          let currentColumn: any = getColumnData(routes.serializedAsset?.title, o?.fieldData, routes.serializedAssetDetail.path);
           if (fieldWithoutFilter.includes(currentColumn?.columnData?.field)) {
             currentColumn.columnData.filter = false;
             currentColumn.columnData.sortable = false;
@@ -834,7 +863,7 @@ const Report = () => {
         });
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
         tempFrameworkComponent = {
-          ...tempFrameworkComponent,
+          ...tempFrameworkComponent
         };
         setFrameWorkComponent({ ...tempFrameworkComponent });
         columns = [...columns, ...getStaticFields()];
@@ -905,19 +934,19 @@ const Report = () => {
           {params.value}
         </Link>
       ) : params.data.referenceType === 'Transfer Inventory' ? (
-        <Link className="link" title={params.value} to={`${routes.transferInventoryDetail.path}/${params.data.referenceId}`} target="_blank" >
+        <Link className="link" title={params.value} to={`${routes.transferInventoryDetail.path}/${params.data.referenceId}`} target="_blank">
           {params.value}
         </Link>
       ) : params.data.referenceType === 'Transfer Asset' ? (
-        <Link className="link" title={params.value} to={`${routes.transferAssetDetail.path}/${params.data.referenceId}`} target="_blank" >
+        <Link className="link" title={params.value} to={`${routes.transferAssetDetail.path}/${params.data.referenceId}`} target="_blank">
           {params.value}
         </Link>
       ) : params.data.referenceType === 'Sales Order' ? (
-        <Link className="link" title={params.value} to={`${routes.salesOrderDetail.path}/${params.data.referenceId}`} target="_blank" >
+        <Link className="link" title={params.value} to={`${routes.salesOrderDetail.path}/${params.data.referenceId}`} target="_blank">
           {params.value}
         </Link>
       ) : params.data.referenceType === 'Bulk Asset Creation' ? (
-        <Link className="link" title={params.value} to={`${routes.bulkAssetCreationDetail.path}/${params.data.referenceId}`} target="_blank" >
+        <Link className="link" title={params.value} to={`${routes.bulkAssetCreationDetail.path}/${params.data.referenceId}`} target="_blank">
           {params.value}
         </Link>
       ) : params.data.referenceType === 'Serialized Asset' ? (
@@ -932,6 +961,10 @@ const Report = () => {
         <Link className="link" title={params.value} to={`${routes.workOrderDetail.path}/${params.data.referenceId}`} target="_blank">
           {params.value}
         </Link>
+      ) : params.data.referenceType === 'Field Ticket' ? (
+        <Link className="link" title={params.value} to={`${routes.fieldTicketDetail.path}/${params.data.referenceId}`} target="_blank">
+          {params.value}
+        </Link>
       ) : (
         params.value
       )
@@ -944,37 +977,43 @@ const Report = () => {
   const CreditDebitTypeRenderer = (params: any) => <span>{capitalize(params?.value)}</span>;
 
   const PurchaseOrderRenderer = (params: any) => (
-    <Link className="link" title={params.value} to={`${routes.purchaseOrderDetail.path}/${params.data.purchaseOrderId}`} target="_blank" >
+    <Link className="link" title={params.value} to={`${routes.purchaseOrderDetail.path}/${params.data.purchaseOrderId}`} target="_blank">
       {params.value}
     </Link>
   );
 
   const ProductRenderer = (params: any) => (
-    <Link className="link" title={params.value} to={`${routes.productDetail.path}/${params.data.productId}`} target="_blank" >
+    <Link className="link" title={params.value} to={`${routes.productDetail.path}/${params.data.productId}`} target="_blank">
       {params.value}
     </Link>
   );
 
   const AssetRenderer = (params: any) => (
-    <Link className="link" title={params.value} to={`${routes.serializedAssetDetail.path}/${params.data._id}`} target="_blank" >
+    <Link className="link" title={params.value} to={`${routes.serializedAssetDetail.path}/${params.data._id}`} target="_blank">
       {params.value}
     </Link>
   );
 
   const ProductCategoryRenderer = (params: any) => (
-    <Link className="link" title={params.value} to={`${routes.productCategoryDetail.path}/${params.data.productCategoryId}`} target="_blank" >
+    <Link className="link" title={params.value} to={`${routes.productCategoryDetail.path}/${params.data.productCategoryId}`} target="_blank">
       {params.value}
     </Link>
   );
 
   const PlantRenderer = (params: any) => (
-    <Link className="link" title={params.value} to={`${routes.warehouseDetail.path}/${params.data.warehouseId}`} target="_blank" >
+    <Link className="link" title={params.value} to={`${routes.warehouseDetail.path}/${params.data.warehouseId}`} target="_blank">
       {params.value}
     </Link>
   );
 
   const SupplierRenderer = (params: any) => (
-    <Link className="link" title={params.value} to={`${routes.supplierAccountDetail.path}/${params.data.supplierAccountId}`} target="_blank" >
+    <Link className="link" title={params.value} to={`${routes.supplierAccountDetail.path}/${params.data.supplierAccountId}`} target="_blank">
+      {params.value}
+    </Link>
+  );
+
+  const UserRenderer = (params: any) => (
+    <Link className="link" title={params.value} to={`${routes.userDetail.path}/${params.data.userId}`} target="_blank">
       {params.value}
     </Link>
   );
@@ -1018,7 +1057,7 @@ const Report = () => {
       gridApi.setRowData([]);
     }
 
-    var api = ''
+    var api = '';
     if (resourceCamelCase === 'purchaseOrderDetails') {
       api = `${productInventory.api}/report/purchase-order-product-wise-report`;
     }
@@ -1047,20 +1086,21 @@ const Report = () => {
     axiosInstance()
       .get(`${api}${filterQuery}`, {
         cancelToken: cancelTokenSource.token
-      }).then(({ data: { data, count, columns } }) => {
+      })
+      .then(({ data: { data, count, columns } }) => {
         if (resourceCamelCase === 'userSession') {
           setLoadingColumns(true);
           columns = columns?.map((e) => {
-            return ({
+            return {
               field: e.fieldName,
               headerName: e.fieldLabel,
               show: true,
               disabled: false,
-              cellRenderer: 'commonRenderer',
+              cellRenderer: e.fieldName === 'user' ? 'userRenderer' : 'commonRenderer',
               filter: false,
-              sortable: false,
-            })
-          })
+              sortable: false
+            };
+          });
           setColumns(columns);
           setLoadingColumns(false);
         }
@@ -1130,13 +1170,17 @@ const Report = () => {
         });
 
         forDeepFilter.forEach((key) => {
-          const options = selectedData[key].value;
-          options.forEach((o: any) => {
+          if (selectedData[key].type === 'checkBox') {
             deepFilter.push({
               field: key,
-              term: o.optionValue
+              term: selectedData[key].value ? 'Yes' : 'No'
             });
-          });
+          } else {
+            deepFilter.push({
+              field: key,
+              term: selectedData[key].value?.map((d: any) => d.optionValue)
+            });
+          }
         });
 
         if (filterById.length > 0) {
@@ -1204,7 +1248,7 @@ const Report = () => {
     setExporting(true);
     let filterQuery = getFilter(true);
 
-    var api = ''
+    var api = '';
     if (resourceCamelCase === 'purchaseOrderDetails') {
       api = `${productInventory.api}/report/purchase-order-product-wise-report/export`;
     }
@@ -1231,11 +1275,9 @@ const Report = () => {
     }
 
     axiosInstance()
-      .get(`${api}${filterQuery}&exportColumn=${JSON.stringify(columns)} `,
-        {
-          responseType: 'arraybuffer'
-        }
-      )
+      .get(`${api}${filterQuery}&exportColumn=${JSON.stringify(columns)} `, {
+        responseType: 'arraybuffer'
+      })
       .then((res) => {
         const fileName = res.headers['content-disposition'].split('filename=')[1];
         downloadExcel(res.data, fileName);
@@ -1254,37 +1296,22 @@ const Report = () => {
 
   return (
     <MuiPickersUtilsProvider utils={MomentUtils}>
-      <div>
-        <Grid container className="headerbox">
-          <Grid item xs={10}>
-            <CustomBreadCrumbs
-              routes={[
-                { title: 'Reports', path: '/reports' },
-                { title: resourceStartCase, path: '' }
-              ]}
-            />
-          </Grid>
-          <Grid item xs={2}>
-            <Grid container direction="row">
-              <Grid item xs={12} sm={12}>
-                <Grid container justifyContent="flex-end">
-                  {showGrid && (
-                    <div id="importExportLinks" style={{ minWidth: 80 }}>
-                      <span
-                        aria-disabled={isExporting}
-                        onClick={exportData}
-                        className={`${isExporting ? 'cursor-stop' : 'cursor-pointer'} mr - 2 setLink`}
-                        style={{ color: theme.palette.info.light }}
-                      >
-                        Export All
-                      </span>
-                    </div>
-                  )}
-                </Grid>
-              </Grid>
-            </Grid>
-          </Grid>
-        </Grid>
+      <div className="main-container-v1">
+        <div className="headerbox-v1">
+          <CustomBreadCrumbs
+            routes={[
+              { title: 'Reports', path: '/reports' },
+              { title: resourceStartCase, path: '' }
+            ]}
+          />
+          {showGrid && (
+            <div id="importExportLinks" style={{ minWidth: 80 }}>
+              <Button variant="outlined" size="small" disabled={isExporting} onClick={exportData} className={`btn-outline-v-1`}>
+                Export All
+              </Button>
+            </div>
+          )}
+        </div>
         <CustomContainer>
           <>
             <div className="header-panel">

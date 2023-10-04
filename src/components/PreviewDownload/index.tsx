@@ -5,7 +5,7 @@ import { AiFillFilePdf } from 'react-icons/ai';
 import { IoMdDownload } from 'react-icons/io';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
-import { CustomDialogTransition } from 'src/constants/helpers';
+import { CustomDialogTransition, downloadExcel } from 'src/constants/helpers';
 import { MdEmail } from 'react-icons/md';
 import { CreateEmail } from '../Activity/Email/CreateEmail';
 import { PreviewDialog } from './PreviewDialog';
@@ -20,7 +20,8 @@ function PreviewDownload({
   button1Title = 'Regular',
   button2Title = 'Detail',
   extraQueryParams = null,
-  subject = ''
+  subject = '',
+  isExcelDownload = false
 }) {
   const toastConfig = useContext(CustomToastContext);
 
@@ -45,55 +46,59 @@ function PreviewDownload({
   const [emailAttachments, setEmailAttachments] = useState([]);
 
   const handleViewPdf = (type, pdfType, visibleColumns) => {
-    let showColumns = allColumn
-      ?.filter((d) => visibleColumns?.includes(d?.fieldLabel))
-      .map((d) => { return d?.fieldName; });
+
     setLoadingType(pdfType);
 
+    let showColumns = allColumn?.filter((d) => visibleColumns?.includes(d?.fieldLabel)).map((d) => { return d?.fieldName; });
+
     let api = ''
-    if (pdfType === 'Detail') {
+    if (type === 'Export') {
+      api = `/excel/${referenceId}?resource=${resource}&columns=${showColumns}`;
+    }
+    else if (pdfType === 'Detail') {
       api = `/pdf/${referenceId}/detail?resource=${resource}&columns=${showColumns}`;
     }
     else {
       api = `/pdf/${referenceId}?resource=${resource}&columns=${showColumns}`;
     }
+
     if (extraQueryParams) {
       for (const key in extraQueryParams) {
         api = `${api}&${key}=${extraQueryParams[key]}`
       }
     }
-    axiosInstance().get(api).then(({ data }) => {
-      axiosInstance()
-        .get(`user/download?fileName=${data.data.fileName}`, {
-          responseType: 'blob'
-        })
-        .then(({ data }) => {
-          setLoadingType(null);
-          setLoading(false);
-          setShowColumnsDialog({ open: false, type: '' });
-          if (type === 'Download') {
-            const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', `${resource}.pdf`);
-            document.body.appendChild(link);
-            link.click();
-          } else if (type === 'Preview') {
-            const file = new Blob([data], { type: 'application/pdf' });
-            const fileURL = URL.createObjectURL(file);
-            const pdfWindow = window.open();
-            pdfWindow.location.href = fileURL;
-            toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
-          } else {
-            const file = new Blob([data], { type: 'application/pdf' });
-            generateBase64forFile(file, 'pdf', pdfType);
-          }
-        })
-        .catch((err) => {
-          setLoadingType(null);
-          toastConfig.setToastConfig(err);
-        });
-    })
+
+    const responseType = type === 'Export' ? 'arraybuffer' : 'blob';
+    axiosInstance().get(api, { responseType: responseType })
+      .then((response) => {
+        setLoadingType(null);
+        setLoading(false);
+        setShowColumnsDialog({ open: false, type: '' });
+
+        if (type === 'Export') {
+          const fileName = `${resource}.xlsx`;
+          downloadExcel(response.data, fileName);
+        } else if (type === 'Download') {
+          const blobData = new Blob([response.data], { type: 'application/pdf' });
+          const url = window.URL.createObjectURL(blobData);
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', `${resource}.pdf`);
+          document.body.appendChild(link);
+          link.click();
+        }
+        else if (type === 'Preview') {
+          const blobData = new Blob([response.data], { type: 'application/pdf' });
+          const fileURL = URL.createObjectURL(blobData);
+          const pdfWindow = window.open();
+          pdfWindow.location.href = fileURL;
+          toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
+        }
+        else {
+          const blobData = new Blob([response.data], { type: 'application/pdf' });
+          generateBase64forFile(blobData, 'pdf', pdfType);
+        }
+      })
       .catch((err) => {
         setLoadingType(null);
         toastConfig.setToastConfig(err);
@@ -109,6 +114,7 @@ function PreviewDownload({
         const attachments = {
           base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
           contentType: base64data.split(';')[0].split(':')[1],
+          extension: '.pdf',
           name: `${resource}-${pdfType}`
         };
         setEmailAttachments((prevState) => {
@@ -153,6 +159,24 @@ function PreviewDownload({
           >
             {isMobile && !isTablet ? <IoMdDownload size={20} /> : loadingType === 'download' ? 'Please wait...' : 'Download'}
           </Button>
+          {
+            isExcelDownload && (
+              <Button
+                className="btn-outline-v1"
+                variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                color="primary"
+                type="button"
+                size="small"
+                startIcon={isMobile && !isTablet ? '' : <IoMdDownload />}
+                disabled={loadingType === 'excel'}
+                onClick={(e) => {
+                  setDownlodingFile('Export');
+                  setShowColumnsDialog({ open: true, type: 'Excel' });
+                }}
+              >
+                {isMobile && !isTablet ? <IoMdDownload size={20} /> : loadingType === 'export' ? 'Please wait...' : 'Export To Excel'}
+              </Button>
+            )}
           {isSendEmail && (
             <Button
               variant={isMobile && !isTablet ? 'text' : 'outlined'}

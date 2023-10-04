@@ -8,7 +8,7 @@ import RefreshIcon from '@material-ui/icons/Refresh';
 import React from 'react';
 import { useData } from 'src/StateProvider/Provider';
 import CloseIcon from '@material-ui/icons/Close';
-import { WORKORDER_TECHNICIAN_SERVICE_STATUS } from 'src/constants/helpers';
+import { WORKORDER_SERVICE_STATUS, WORKORDER_TECHNICIAN_SERVICE_STATUS } from 'src/constants/helpers';
 import CardColTimeline, { groupBy } from 'src/components/CardColTimeline';
 import TechnicianDialog from './TechnicianDialog';
 
@@ -34,7 +34,7 @@ const WorkOrderTechnician = () => {
   const [selectedRepairOrder, setSelectedRepairOrder] = useState(null);
 
   const [loading, setLoading] = useState(false);
-  const [selectedServiceStatus, setSelectedServiceStatus] = useState(['Pending', 'In-Progress', 'Completed']);
+  const [selectedServiceStatus, setSelectedServiceStatus] = useState([WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress, WORKORDER_SERVICE_STATUS.completed]);
 
   const [cardData, setCardData] = useState(null);
 

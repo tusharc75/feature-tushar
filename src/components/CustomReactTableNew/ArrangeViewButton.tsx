@@ -18,7 +18,9 @@ const ArrangeViewButton = ({
   saveColumnOptions = false,
   setHiddenColumns = null,
   getToggleHideAllColumnsProps = null,
-  setColumnOrder = null
+  setColumnOrder = null,
+  defaultColumns = null,
+  refColsOrder = null
 }) => {
   const [openColumnSelection, setOpenColumnSelection] = useState(false);
   const [openColumnSelectionAnchorEl, setOpenColumnSelectionAnchorEl] = useState<HTMLButtonElement | null>(null);
@@ -99,9 +101,11 @@ const ArrangeViewButton = ({
             columnApi={null}
             isClientSideGrid={isClientSideGrid}
             renderedFrom={renderedFrom}
+            defaultColumns={defaultColumns}
             setHiddenColumns={setHiddenColumns}
             getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
             setColumnOrder={setColumnOrder}
+            refColsOrder={refColsOrder}
           />
         </>
       )}

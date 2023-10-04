@@ -25,9 +25,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField, gridFilterParser } from '../../constants/useColumns';
 import { camelCase } from 'lodash';
-import {
-  SiStatuspage,
-} from 'react-icons/all';
+import { SiStatuspage } from 'react-icons/all';
 import JobHeader from './JobHeader';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -36,9 +34,7 @@ import CardView from './CardView';
 
 let jobTimeout;
 
-
 const Job = () => {
-
   const JobType = [
     {
       key: `My ${routes?.job.title}`,
@@ -78,7 +74,7 @@ const Job = () => {
   const [frameworkComponents, setFrameworkComponents] = useState({});
   const [columns, setColumns] = useState([]);
   const [locationKeys, setLocationKeys] = useState([]);
-  const [viewType, setViewType] = useState(1)
+  const [viewType, setViewType] = useState(1);
 
   const { getColumnData } = useColumns();
 
@@ -216,15 +212,15 @@ const Job = () => {
     </>
   );
 
-
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-    
-    if (selectedType === 1) {
-      deepFilter = deepFilter + `&myRecords=1`;
-    }
+
     if (isExport) {
       deepFilter = `?`;
+    }
+
+    if (selectedType === 1) {
+      deepFilter = deepFilter + `&myRecords=1`;
     }
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
@@ -233,17 +229,17 @@ const Job = () => {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
     if (deepFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
     }
     if (filterByIds?.length || deepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
     }
-    
+
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
     if (search) {
-      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
       deepFilter = `${deepFilter}&getById=${JSON.stringify(getLocalStorageArrayData(localStorageSelectedRecords)?.map((m) => m._id))}`;
@@ -289,6 +285,7 @@ const Job = () => {
   };
 
   const handleJobTypeSel = (filterValues) => {
+    dispatch({ type: 'setPage', page: 0 });
     setSelectedType(filterValues);
     history.push(`?type=${filterValues}`);
   };
@@ -346,41 +343,31 @@ const Job = () => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[routes.job]} />
-        </Grid>
-        <Grid item md={8} sm={1} xs={2}>
-          <Grid container direction="row">
-            <Grid item xs={12} sm={12}>
-              <Grid container justify="flex-end">
-                <ImportExportLinks
-                  permissions={permissions?.job}
-                  module="job"
-                  api={'job'}
-                  afterImportCompleted={() => {
-                    fetchJob();
-                  }}
-                  isExportAllOrSomeFeature={true}
-                  total={rowCount}
-                  recordsToExport={getLocalStorageArrayData(localStorageSelectedRecords)?.length}
-                  ids={
-                    getLocalStorageArrayData(localStorageSelectedRecords)?.length
-                      ? getLocalStorageArrayData(localStorageSelectedRecords)?.map((obj) => obj._id)
-                      : []
-                  }
-                  onExportToExcelSuccess={() => {
-                    if (gridApi) gridApi.deselectAll();
-                    else fetchJob();
-                  }}
-                  additionalParams={getQueryString(true)}
-                />
-              </Grid>
-            </Grid>
-          </Grid>
-        </Grid>
-      </Grid>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[routes.job]} />
+        <ImportExportLinks
+          permissions={permissions?.job}
+          module="job"
+          api={'job'}
+          afterImportCompleted={() => {
+            fetchJob();
+          }}
+          isExportAllOrSomeFeature={true}
+          total={rowCount}
+          recordsToExport={getLocalStorageArrayData(localStorageSelectedRecords)?.length}
+          ids={
+            getLocalStorageArrayData(localStorageSelectedRecords)?.length
+              ? getLocalStorageArrayData(localStorageSelectedRecords)?.map((obj) => obj._id)
+              : []
+          }
+          onExportToExcelSuccess={() => {
+            if (gridApi) gridApi.deselectAll();
+            else fetchJob();
+          }}
+          additionalParams={getQueryString(true)}
+        />
+      </div>
       <CustomContainer>
         <div className="header-panel">
           <JobHeader
@@ -398,11 +385,11 @@ const Job = () => {
             filters={filters}
             viewType={viewType}
             setViewType={setViewType}
+            resource={sidebarResource.job}
           />
         </div>
 
-        {
-          viewType === 1 &&
+        {viewType === 1 && (
           <CardView
             jobs={dataRows}
             setShowManageJobDialog={setShowManageJobDialog}
@@ -410,13 +397,13 @@ const Job = () => {
             dispatch={dispatch}
             loading={loading}
           />
-        }
-        {
-          viewType === 2 &&
+        )}
+        {viewType === 2 && (
           <>
             {Object.keys(frameworkComponents).length > 0 ? (
               isMobile && !isTablet ? (
                 <CustomSwipableList
+                  key={selectedType}
                   allowSelection={true}
                   allowSwipe={true}
                   permissions={permissions?.job}
@@ -474,7 +461,7 @@ const Job = () => {
               )
             ) : null}
           </>
-        }
+        )}
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
             open={showDeleteWarningConfirmBox}
@@ -485,8 +472,7 @@ const Job = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.jobNumber ? 'Job' : 'Jobs'}   ${deleteRecord.jobNumber || ''
-              }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.jobNumber ? 'Job' : 'Jobs'}   ${deleteRecord.jobNumber || ''}?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
               setIsConformDialogVisible(false);
@@ -523,7 +509,7 @@ const Job = () => {
           open={showManageJobDialog.open}
         />
       )}
-    </Fragment>
+    </section>
   );
 };
 

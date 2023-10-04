@@ -1,37 +1,36 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import Grid from '@material-ui/core/Grid';
+import { useState, useEffect, useContext, Fragment } from 'react';
 import Button from '@material-ui/core/Button';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
-import { Box, capitalize, Chip, CircularProgress, Dialog, IconButton, Menu, MenuItem, TextField } from '@material-ui/core';
-import { getNestedSubRows } from 'src/components/RentalManagment/helper';
-import { isMobile } from 'react-device-detect';
+import { Box, Grid, Dialog, IconButton } from '@material-ui/core';
+import { isMobile, isTablet } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition, INVOICE_STATUS, dateFormat, formatAmountWithCurrency, invoice, pricingCondition, rentalManagement, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, INVOICE_STATUS, invoice, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { Add, Delete, Edit, ExpandMore } from '@material-ui/icons';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
-import { startCase } from 'lodash';
+import { camelCase, startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import PreviewDownload from 'src/components/PreviewDownload';
 import { generateCustomTableColumns } from 'src/constants/columns';
 import CommentDialog from 'src/components/CommentDialog';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
+import { IoMdDownload } from 'react-icons/io';
 
-const ViewInvoice = ({ invoiceData, estimateStartDate, onClose, onSuccess }) => {
+const ViewInvoice = ({ invoiceData, onClose, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);
-
-  const renderedFrom = 'view_invoice';
+  const renderedFrom = `${camelCase(routes?.invoice.title)}_view`;
 
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
-  const [commentDialog, setCommentDialog] = useState(false)
+  const [commentDialog, setCommentDialog] = useState(false);
+
+  const [isDownloadingZip, setIsDownloadingZip] = useState(false);
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
 
   useEffect(() => {
     fetchFields();
@@ -132,24 +131,25 @@ const ViewInvoice = ({ invoiceData, estimateStartDate, onClose, onSuccess }) => 
     const rows = data.material.filter((e) => !e.parentId);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === 'product'
-        ? parent.productDetail?.productName
-        : parent.type === 'package'
+      parent.detail = `${
+        parent.type === 'product'
+          ? parent.productDetail?.productName
+          : parent.type === 'package'
           ? parent.packageDetail?.packageName
           : parent.type === 'serializedAsset'
-            ? parent.serializedAssetDetail?.assetNumber
-            : parent.serviceDetail?.serviceName
-        }`;
+          ? parent.serializedAssetDetail?.assetNumber
+          : parent.serviceDetail?.serviceName
+      }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-            ? parent?.productDetail?.productDescription || ''
-            : parent.type === 'package'
-              ? parent?.packageDetail?.packageDescription || ''
-              : parent.type === 'serializedAsset'
-                ? parent.serializedAssetDetail?.product?.productDescription || ''
-                : '';
+          ? parent?.productDetail?.productDescription || ''
+          : parent.type === 'package'
+          ? parent?.packageDetail?.packageDescription || ''
+          : parent.type === 'serializedAsset'
+          ? parent.serializedAssetDetail?.product?.productDescription || ''
+          : '';
       parent.qtyDisplay = parent.qty;
       parent.subRows = generateNestedData(data.material, parent);
     });
@@ -171,24 +171,25 @@ const ViewInvoice = ({ invoiceData, estimateStartDate, onClose, onSuccess }) => 
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${_subRow?.type === 'product'
-        ? _subRow?.productDetail?.productName
-        : _subRow?.type === 'package'
+      _subRow.detail = `${
+        _subRow?.type === 'product'
+          ? _subRow?.productDetail?.productName
+          : _subRow?.type === 'package'
           ? _subRow?.packageDetail?.packageName
           : _subRow?.type === 'serializedAsset'
-            ? _subRow?.serializedAssetDetail?.assetNumber
-            : _subRow?.serviceDetail?.serviceName
-        }`;
+          ? _subRow?.serializedAssetDetail?.assetNumber
+          : _subRow?.serviceDetail?.serviceName
+      }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === 'package'
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : _subRow.type === 'serializedAsset'
-                ? _subRow.serializedAssetDetail?.product?.productDescription || ''
-                : '';
+          ? _subRow?.productDetail?.productDescription || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : _subRow.type === 'serializedAsset'
+          ? _subRow.serializedAssetDetail?.product?.productDescription || ''
+          : '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
@@ -196,22 +197,68 @@ const ViewInvoice = ({ invoiceData, estimateStartDate, onClose, onSuccess }) => 
   };
 
   const handleCancelInvoice = async (data) => {
-    axiosInstance().patch(`${routes?.fieldTicketInvoice.path}/status`, {
-      status: INVOICE_STATUS.cancelled,
-      invoice: invoiceData?._id,
-      fieldTicket: invoiceData?.id,
-      message: data,
-      material: rowsData.filter((d) => d.type !== 'manualEntry'),
-      additionalCost: rowsData.filter((d) => d.type === 'manualEntry')
-    })
+    axiosInstance()
+      .patch(`${routes?.fieldTicketInvoice.path}/invoice/cancle`, {
+        invoice: invoiceData?._id,
+        fieldTicket: invoiceData?.id,
+        comment: data
+      })
       .then(({ data }) => {
         onSuccess();
-        toastConfig.setToastConfig({ open: true, type: 'success', message: data.message });
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-  }
+  };
+
+  const handleDownloadZip = () => {
+    setIsDownloadingZip(true);
+    axiosInstance()
+      .get(`${invoice.api}/zip/${invoiceData._id}`, {
+        responseType: 'blob'
+      })
+      .then((response) => {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        const filename = response.headers['content-disposition'].split('filename=')[1];
+        link.setAttribute('download', filename);
+        document.body.appendChild(link);
+        link.click();
+        setIsDownloadingZip(false);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        setIsDownloadingZip(false);
+      });
+  };
+
+  const handleDownloadPdf = () => {
+    setIsDownloadingPdf(true);
+    axiosInstance()
+      .get(`${invoice.api}/zip/pdf/${invoiceData._id}`, {
+        responseType: 'blob'
+      })
+      .then((response) => {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        const filename = response.headers['content-disposition'].split('filename=')[1];
+        link.setAttribute('download', filename);
+        document.body.appendChild(link);
+        link.click();
+        setIsDownloadingPdf(false);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        setIsDownloadingPdf(false);
+      });
+  };
 
   return (
     <Fragment>
@@ -219,24 +266,70 @@ const ViewInvoice = ({ invoiceData, estimateStartDate, onClose, onSuccess }) => 
         <CustomDialogHeader title={`Invoice Number : ${invoiceData?.invoiceNumber}`} onClose={onClose} showRequiredLabel={false}></CustomDialogHeader>
         <CustomDialogContent>
           <Fragment>
-            <Box display="flex" justifyContent="space-between" p={1}>
-              {invoiceData &&
-                <PreviewDownload
-                  resource={sidebarResource.invoice}
-                  referenceId={invoiceData?._id}
-                  columns={columns}
-                  isSendEmail={true}
-                />
-              }
-              <DeleteButton text="Cancel Invoice" onClick={() => setCommentDialog(true)} />
-            </Box>
+            <div className="flex flex-wrap gap-2 p-2">
+              {invoiceData && (
+                <Box className="flex flex-wrap gap-2">
+                  <PreviewDownload
+                    resource={sidebarResource.invoice}
+                    referenceId={invoiceData?._id}
+                    columns={columns}
+                    hideDetailButton={true}
+                    isSendEmail={true}
+                    defaultColumns={[
+                      'type',
+                      'detail',
+                      'fieldTicket',
+                      'qty',
+                      'unit',
+                      'pricingMethod',
+                      'actualStartDate',
+                      'actualEndDate',
+                      `price_${invoiceData?.currency?.toLowerCase()}`,
+                      `totalPrice_${invoiceData?.currency?.toLowerCase()}`,
+                      `taxPercentage`,
+                      `tax_${invoiceData?.currency?.toLowerCase()}`,
+                      `finalPrice_${invoiceData?.currency?.toLowerCase()}`
+                    ]}
+                  />
+                  <Button
+                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                    className="btn-outline-v1"
+                    type="button"
+                    size="small"
+                    disabled={isDownloadingZip ? true : false}
+                    startIcon={isMobile ? '' : <IoMdDownload />}
+                    onClick={(e) => {
+                      handleDownloadZip();
+                    }}
+                  >
+                    {isMobile && !isTablet ? <IoMdDownload size={20} /> : isDownloadingZip ? 'Please wait...' : 'Save as Zip File'}
+                  </Button>
+                  <Button
+                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                    className="btn-outline-v1"
+                    type="button"
+                    size="small"
+                    disabled={isDownloadingPdf ? true : false}
+                    startIcon={isMobile ? '' : <IoMdDownload />}
+                    onClick={(e) => {
+                      handleDownloadPdf();
+                    }}
+                  >
+                    {isMobile && !isTablet ? <IoMdDownload size={20} /> : isDownloadingPdf ? 'Please wait...' : 'Download All'}
+                  </Button>
+                </Box>
+              )}
+              <div className="ml-auto">
+                {rowsData && rowsData?.length > 0 && <DeleteButton text="Cancel Invoice" onClick={() => setCommentDialog(true)} />}
+              </div>
+            </div>
             {columns && rowsData ? (
               <Box zIndex={5} width={'100%'} height={'calc(100vh - 285px)'} p={1}>
                 <CustomReactTable
                   height={'calc(100vh - 200px)'}
                   columns={columns}
                   data={rowsData}
-                  onSelect={() => { }}
+                  onSelect={() => {}}
                   childrenProperty="subRows"
                   uniqueKey="_id"
                   hideSelection={true}
@@ -272,11 +365,11 @@ const ViewInvoice = ({ invoiceData, estimateStartDate, onClose, onSuccess }) => 
         <CommentDialog
           required={true}
           handleSubmit={(data) => {
-            handleCancelInvoice(data)
-            setCommentDialog(false)
+            handleCancelInvoice(data);
+            setCommentDialog(false);
           }}
           handleClose={() => {
-            setCommentDialog(false)
+            setCommentDialog(false);
           }}
         />
       )}

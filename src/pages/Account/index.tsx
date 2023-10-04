@@ -1,52 +1,58 @@
-import React, { useContext, useEffect, useState, useReducer } from 'react';
-import { useData } from '../../StateProvider/Provider';
-import { Button, Menu, MenuItem, IconButton, Grid, Chip, MenuList } from '@material-ui/core';
-import { Link, useHistory } from 'react-router-dom';
-import { ExpandMore, AddOutlined } from '@material-ui/icons';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import MessageDialog from '../../components/Helpers/MessageDialog';
-import SearchBox from '../../components/Helpers/SearchBox';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import ManageAccountDialog from './ManageAccount/index';
-import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import axiosInstance from '../../axios/axiosInstance';
-import CustomContainer from '../../components/CustomContainer';
-import CancelIcon from '@material-ui/icons/Cancel';
-import accountClass from './account.module.scss';
-import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { FcApproval } from 'react-icons/fc';
+import { Button, Chip, IconButton, Menu, MenuItem, MenuList } from '@material-ui/core';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import Grow from '@material-ui/core/Grow';
 import Paper from '@material-ui/core/Paper';
 import Popper from '@material-ui/core/Popper';
-import { MdAccountCircle } from 'react-icons/md';
-import { gridLoadingTimeout, sidebarResource, prepareDataForGrid, getLocalStorageArrayData, removeLocalStorage } from '../../constants/helpers';
-import NoDataCell from '../../components/Helpers/NoDataCell';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import routes from './../../components/Helpers/Routes';
-import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import CancelIcon from '@material-ui/icons/Cancel';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
-import styles from '../Leads/Header.module.scss';
-import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
-import EntitySelectionsDialog from '../../components/EntitySelections';
-import { AiOutlineDeploymentUnit } from 'react-icons/ai';
-import { HiBadgeCheck } from 'react-icons/hi';
-import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
-import { isMobile, isTablet } from 'react-device-detect';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { MdAdd } from 'react-icons/all';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
-import MobileSortDialog from '../../components/MobileSortDialog';
-import { MdFilterList, MdSort, MdWeb } from 'react-icons/all';
-import { FaSuitcase, FaAddressBook, FaAddressCard } from 'react-icons/fa';
 import { camelCase } from 'lodash';
-import WarhouseList from './Warehouse/WarhouseList';
+import React, { useContext, useEffect, useReducer, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { AiOutlineDeploymentUnit } from 'react-icons/ai';
+import { CiUser, MdWeb, TbArrowsSort } from 'react-icons/all';
+import { FaAddressBook, FaAddressCard, FaSuitcase } from 'react-icons/fa';
+import { FcApproval } from 'react-icons/fc';
+import { HiBadgeCheck } from 'react-icons/hi';
+import { MdOutlineFilterAlt } from 'react-icons/md';
+import { Link, useHistory } from 'react-router-dom';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
+import CustomContainer from '../../components/CustomContainer';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
+import EntitySelectionsDialog from '../../components/EntitySelections';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
+import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
+import MessageDialog from '../../components/Helpers/MessageDialog';
+import NoDataCell from '../../components/Helpers/NoDataCell';
+import SearchBox from '../../components/Helpers/SearchBox';
+import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
+import MobileSortDialog from '../../components/MobileSortDialog';
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import {
+  getLocalStorageArrayData,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  removeLocalStorage,
+  sidebarResource,
+  supplierAccount
+} from '../../constants/helpers';
+import useColumns, { getFrameworkComponents, getStaticFields, gridFilterParser } from '../../constants/useColumns';
+import styles from '../Leads/Header.module.scss';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import routes from './../../components/Helpers/Routes';
+import ManageAccountDialog from './ManageAccount/index';
+import WarhouseList from './Warehouse/WarhouseList';
+import accountClass from './account.module.scss';
 
 const AccTypes = [
   {
@@ -343,12 +349,12 @@ export default function Account(props) {
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
 
-    if (selectedType === 2) {
-      deepFilter = deepFilter + `&myRecords=1`;
-    }
-
     if (isExport) {
       deepFilter = `?`;
+    }
+
+    if (selectedType === 2) {
+      deepFilter = deepFilter + `&myRecords=1`;
     }
 
     if (selectedEntity) {
@@ -364,7 +370,7 @@ export default function Account(props) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
     if (deepFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
     }
     if (filterByIds?.length || deepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
@@ -375,7 +381,7 @@ export default function Account(props) {
     }
 
     if (search) {
-      deepFilter = `${deepFilter}&search=${search}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
 
     if (showFilteredRecordsOnly) {
@@ -572,6 +578,7 @@ export default function Account(props) {
   };
 
   const handleAccountSelect = (filterValues) => {
+    dispatch({ type: 'setPage', page: 0 });
     setselectedType(filterValues);
   };
 
@@ -646,223 +653,206 @@ export default function Account(props) {
   );
 
   return (
-    <>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[{ title: routes[accountResource].title }]} />
-        </Grid>
-        <Grid item md={8} sm={1} xs={2}>
-          <ImportExportLinks
-            permissions={accountPermissions}
-            module="account(s)"
-            api={accountApi}
-            afterImportCompleted={() => {
-              fetchAccounts();
-            }}
-            isExportAllOrSomeFeature={true}
-            total={rowCount}
-            recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-            ids={
-              getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-                ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-                : []
-            }
-            onExportToExcelSuccess={() => {
-              if (gridApi) gridApi.deselectAll();
-              else fetchAccounts();
-            }}
-            additionalParams={getQueryString(true)}
-          />
-        </Grid>
-      </Grid>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[{ title: routes[accountResource].title }]} />
+        <ImportExportLinks
+          permissions={accountPermissions}
+          module="account(s)"
+          api={accountApi}
+          afterImportCompleted={() => {
+            fetchAccounts();
+          }}
+          isExportAllOrSomeFeature={true}
+          total={rowCount}
+          recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+          ids={
+            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+              ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+              : []
+          }
+          onExportToExcelSuccess={() => {
+            if (gridApi) gridApi.deselectAll();
+            else fetchAccounts();
+          }}
+          additionalParams={getQueryString(true)}
+          extraImportExportLinks={[
+            ...(accountResource === 'supplierAccount' && user?.user?.brandPolicy?.serializedAssetCertification
+              ? [
+                  {
+                    title: 'Supplier View Template',
+                    api: `${accountApi}/items/unknown/template`,
+                    type: 'download'
+                  },
+                  {
+                    title: 'Supplier View Export',
+                    api: `${accountApi}/items/unknown/template?export=true${
+                      getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
+                        ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
+                        : ''
+                    }`,
+                    type: 'export'
+                  },
+                  {
+                    title: 'Supplier View Import',
+                    api: `${accountApi}/items/unknown/import`,
+                    type: 'import'
+                  }
+                ]
+              : [])
+          ]}
+        />
+      </div>
       <CustomContainer>
         <div className={`${accountClass['account_header_inner_container']}`}>
-          <Grid container className="header-panel" justify="space-between" alignContent="center">
-            <Grid item md={6} sm={12} xs={12} className="d-flex align-items-center gap-1 ">
-              <div className={`${accountClass.account_header} ${accountClass['account_header-mobile']}`}>
-                <Grid style={{ display: 'inline-flex', alignItems: 'center' }}>
-                  <MdAccountCircle className="headerLogo" />{' '}
-                  <span id="resourceHeader" className="listingHeader">
-                    {routes[accountResource].title}
-                  </span>
-                </Grid>
+          <div className="header-panel">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className={'d-flex align-items-center gap-1'}>
+                <div className={`${accountClass.account_header} ${accountClass['account_header-mobile']}`}>
+                  {isMobile && (
+                    <div className="d-flex flex-wrap items-center justify-between w-full">
+                      <div>{toggleInner}</div>
+                      <div className="flex flex-wrap items-center gap-1 ml-auto">
+                        <IconButton
+                          onClick={handleClickOpen}
+                          id="demo-customized-button"
+                          aria-controls="demo-customized-menu"
+                          aria-haspopup="true"
+                          aria-expanded={open ? 'true' : undefined}
+                          className={'mobileIconButton secondary'}
+                          size="small"
+                        >
+                          <TbArrowsSort className="rotate-90" size={16} />
+                        </IconButton>
+                        <MobileSortDialog
+                          isOpen={sortOpen}
+                          handleClose={handleClickClose}
+                          contentPart={toggleInner}
+                          secHeading={['Sort Accounts']}
+                          columns={columns}
+                          dispatch={dispatch}
+                        />
 
-                {isMobile && (
-                  <>
-                    <Grid style={{ display: 'inline-flex' }}>
-                      <Button
-                        onClick={handleClickOpen}
-                        id="demo-customized-button"
-                        aria-controls="demo-customized-menu"
-                        aria-haspopup="true"
-                        aria-expanded={open ? 'true' : undefined}
-                        color="secondary"
-                        variant="text"
-                        disableElevation
-                        startIcon={<MdSort />}
-                        className={'sort-filter-tablet'}
-                        style={isTablet ? { marginLeft: '50px' } : {}}
-                      >
-                        Sort
-                      </Button>
-                      <MobileSortDialog
-                        isOpen={sortOpen}
-                        handleClose={handleClickClose}
-                        contentPart={toggleInner}
-                        secHeading={['Sort Accounts']}
-                        columns={columns}
-                        dispatch={dispatch}
-                      />
+                        <IconButton
+                          id="demo-customized-button"
+                          aria-controls="demo-customized-menu"
+                          aria-haspopup="true"
+                          aria-expanded={open ? 'true' : undefined}
+                          className={'mobileIconButton secondary'}
+                          size="small"
+                          onClick={handleOpen}
+                        >
+                          <MdOutlineFilterAlt size={16} />
+                        </IconButton>
 
-                      <Button
-                        id="demo-customized-button"
-                        aria-controls="demo-customized-menu"
-                        aria-haspopup="true"
-                        aria-expanded={open ? 'true' : undefined}
-                        variant="text"
-                        color="secondary"
-                        disableElevation
-                        className={'sort-filter-tablet'}
-                        startIcon={<MdFilterList />}
-                        onClick={handleOpen}
-                      >
-                        Filter
-                      </Button>
-
-                      <MobileFilterDialog
-                        isOpen={isOpenDialog}
-                        handleClose={handleFilterClose}
-                        contentPart={toggleInner}
-                        columns={columns}
-                        dispatch={dispatch}
-                        title={routes?.[accountResource]?.title}
-                        filters={filters}
-                      />
-                    </Grid>
-                  </>
-                )}
-
-                <div className={`align-items-center gap-1  layout-for-mobile`}>
-                  {AccTypes && (
-                    <ToggleButtonGroup
-                      id="resourceTypeSelector"
-                      size="small"
-                      className={`ml-8 ${'accountActions'}`}
-                      value={filter}
-                      exclusive
-                      onChange={handleFilter}
-                    >
-                      {AccTypes.map((k: any, index) => {
-                        return (
-                          <ToggleButton value={k.key} key={index}>
-                            {k.key}
-                          </ToggleButton>
-                        );
-                      })}
-                    </ToggleButtonGroup>
+                        <MobileFilterDialog
+                          isOpen={isOpenDialog}
+                          handleClose={handleFilterClose}
+                          contentPart={null}
+                          columns={columns}
+                          dispatch={dispatch}
+                          title={routes?.[accountResource]?.title}
+                          filters={filters}
+                          resource={sidebarResource[accountResource]}
+                        />
+                      </div>
+                    </div>
                   )}
 
-                  <ButtonGroup
-                    id="approveDisapprove"
-                    size="small"
-                    className={'accountActions'}
-                    variant="outlined"
-                    color="primary"
-                    ref={anchorRef}
-                    aria-label="small outlined button group"
-                  >
-                    <Button>{options[selectedIndex]}</Button>
-                    <Button
-                      color="primary"
-                      size="small"
-                      aria-controls={open ? 'split-button-menu' : undefined}
-                      aria-expanded={open ? 'true' : undefined}
-                      aria-label="select merge strategy"
-                      aria-haspopup="menu"
-                      onClick={handleToggle}
-                      className="all-button"
-                    >
-                      <ArrowDropDownIcon className="all-button-sub-icon" />
-                    </Button>
-                  </ButtonGroup>
-                  <Popper open={open} anchorEl={anchorRef.current} role={undefined} transition disablePortal style={{ zIndex: 1111111 }}>
-                    {({ TransitionProps, placement }) => (
-                      <Grow
-                        {...TransitionProps}
-                        style={{
-                          transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom'
-                        }}
+                  <div className={`align-items-center gap-1  layout-for-mobile`}>
+                    {AccTypes && (
+                      <ToggleButtonGroup
+                        id="resourceTypeSelector"
+                        size="small"
+                        className={`ml-8 ${'accountActions'}`}
+                        value={filter}
+                        exclusive
+                        onChange={handleFilter}
                       >
-                        <Paper>
-                          <ClickAwayListener onClickAway={handleClose}>
-                            <MenuList id="menu" style={{ backgroundColor: 'transparent', fontSize: '10px' }}>
-                              {options.map((option, index) => (
-                                <MenuItem
-                                  key={option}
-                                  selected={index === selectedIndex}
-                                  onClick={(event) => handleMenuItemClick(event, index)}
-                                  style={{ color: 'black' }}
-                                >
-                                  {option}
-                                </MenuItem>
-                              ))}
-                            </MenuList>
-                          </ClickAwayListener>
-                        </Paper>
-                      </Grow>
+                        {AccTypes.map((k: any, index) => {
+                          return (
+                            <ToggleButton value={k.key} key={index}>
+                              {k.key}
+                            </ToggleButton>
+                          );
+                        })}
+                      </ToggleButtonGroup>
                     )}
-                  </Popper>
+
+                    <ButtonGroup
+                      id="approveDisapprove"
+                      size="small"
+                      className={'accountActions'}
+                      variant="outlined"
+                      color="primary"
+                      ref={anchorRef}
+                      aria-label="small outlined button group"
+                    >
+                      <Button>{options[selectedIndex]}</Button>
+                      <Button
+                        color="primary"
+                        size="small"
+                        aria-controls={open ? 'split-button-menu' : undefined}
+                        aria-expanded={open ? 'true' : undefined}
+                        aria-label="select merge strategy"
+                        aria-haspopup="menu"
+                        onClick={handleToggle}
+                        className="all-button"
+                      >
+                        <ArrowDropDownIcon className="all-button-sub-icon" />
+                      </Button>
+                    </ButtonGroup>
+                    <Popper open={open} anchorEl={anchorRef.current} role={undefined} transition disablePortal style={{ zIndex: 1111111 }}>
+                      {({ TransitionProps, placement }) => (
+                        <Grow
+                          {...TransitionProps}
+                          style={{
+                            transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom'
+                          }}
+                        >
+                          <Paper>
+                            <ClickAwayListener onClickAway={handleClose}>
+                              <MenuList id="menu" style={{ backgroundColor: 'transparent', fontSize: '10px' }}>
+                                {options.map((option, index) => (
+                                  <MenuItem key={option} selected={index === selectedIndex} onClick={(event) => handleMenuItemClick(event, index)}>
+                                    {option}
+                                  </MenuItem>
+                                ))}
+                              </MenuList>
+                            </ClickAwayListener>
+                          </Paper>
+                        </Grow>
+                      )}
+                    </Popper>
+                  </div>
                 </div>
               </div>
-            </Grid>
-            <Grid
-              item
-              md={6}
-              sm={12}
-              xs={12}
-              className={`d-flex align-items-center gap-1 ${styles.filter_side}`}
-              justify={isMobile ? 'flex-start' : 'flex-end'}
-            >
-              <div
-                id="resourceOperations"
-                className={`${isMobile ? accountClass.mobile_filter_side_header : accountClass.account_header} ${accountClass['account_header-mobile']
-                  }`}
-                style={isMobile && !isTablet ? { flex: 1 } : {}}
-              >
-                <Grid style={{ display: 'flex', flex: 1 }}>
-                  <SearchBox
-                    onChange={handleSearch}
-                    className={isMobile ? accountClass.search_box_input : ''}
-                    style={isMobile ? { flex: 1 } : {}}
-                    value={search}
-                    width={isMobile ? '200px' : 'auto'}
-                  />
-                </Grid>
-
-                <Grid style={{ display: 'flex', gap: '5px' }}>
+              <div className="flex flex-wrap gap-[8px]  justify-end">
+                <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
+                <div className="flex gap-[8px] flex-wrap items-center">
                   {accountPermissions.isCreate && (
                     <Button
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
+                      variant={'contained'}
                       color="primary"
                       size="small"
-                      className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
+                      className={`no-shadow`}
                       onClick={clickCreateNew}
-                      startIcon={isMobile && !isTablet ? null : <AddOutlined />}
+                      startIcon={<AddOutlined />}
                     >
-                      {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
+                      Add
                     </Button>
                   )}
                   <Button
                     disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0}
-                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                    variant={'outlined'}
                     color="default"
                     size="small"
-                    className={isMobile && !isTablet ? 'mobile_button' : `${styles.add_submit_btn} ${styles.action_new_submit_btn} new-dropdown-v1`}
+                    className={`new-dropdown-v1`}
                     onClick={openActions}
                     aria-controls="action-menu"
                     endIcon={<ExpandMore />}
                   >
-                    {isMobile && !isTablet ? '' : 'Actions'}
+                    Actions
                   </Button>
                   <Menu
                     anchorEl={anchorEl}
@@ -966,15 +956,17 @@ export default function Account(props) {
                       </MenuItem>
                     )}
                   </Menu>
-                </Grid>
+                </div>
               </div>
-            </Grid>
-          </Grid>
+              <DisplayFiltersForMobile resource={sidebarResource[accountResource]} />
+            </div>
+          </div>
         </div>
 
         {Object.keys(frameWorkComponent).length > 0 ? (
           isMobile && !isTablet ? (
             <CustomSwipableList
+              key={selectedType}
               allowSelection={true}
               allowSwipe={true}
               permissions={accountPermissions}
@@ -1001,7 +993,7 @@ export default function Account(props) {
               loading={loading}
               additionalDetails={[
                 {
-                  icon: <FaSuitcase size={18} />,
+                  icon: <CiUser size={18} />,
                   field: 'parentAccount'
                 }
               ]}
@@ -1091,8 +1083,9 @@ export default function Account(props) {
         {singleApproveDisapproveAccount.show ? (
           <ConfirmationDialog
             open={singleApproveDisapproveAccount.show}
-            message={`Are you sure you want to ${singleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} account: ${singleApproveDisapproveAccount.accountName
-              } ? `}
+            message={`Are you sure you want to ${singleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} account: ${
+              singleApproveDisapproveAccount.accountName
+            } ? `}
             onClose={() =>
               setSingleApproveDisapproveAccount({
                 id: null,
@@ -1107,8 +1100,9 @@ export default function Account(props) {
         {multipleApproveDisapproveAccount.show ? (
           <ConfirmationDialog
             open={multipleApproveDisapproveAccount.show}
-            message={`Are you sure you want to ${multipleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} selected ${multipleApproveDisapproveAccount.selectedRecords
-              } account(s) ? `}
+            message={`Are you sure you want to ${multipleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} selected ${
+              multipleApproveDisapproveAccount.selectedRecords
+            } account(s) ? `}
             onClose={() =>
               setMultipleApproveDisapproveAccount({
                 show: false,
@@ -1175,6 +1169,6 @@ export default function Account(props) {
           />
         ) : null}
       </CustomContainer>
-    </>
+    </section>
   );
 }

@@ -337,6 +337,12 @@ export const sidebarResource = {
   trailerMaster: 'Trailer Master',
   iotDataPoints: 'Iot Data Points',
   accountsReceivable: 'Accounts Receivable'
+  iotDataPointsCategory: 'Iot Data Points Category',
+  deviceTemplates: 'Device Templates',
+  workStations: 'Work Stations',
+  deviceTemplateAlert: 'Device Template Alert',
+  chartOfAccount: 'Chart Of Account',
+  flash : 'Flash'
 };
 
 export const primaryFields = {
@@ -460,8 +466,12 @@ export const RESOURCE_LABEL = {
   trailerMaster: 'Trailer Master',
   iotDataPoints: 'IoT Data Points',
   iotChart: 'IoT Chart',
-  iotReport: 'IoT Report'
-
+  iotReport: 'IoT Report',
+  deviceTemplates: 'Device Templates',
+  workStations: 'Work Stations',
+  deviceTemplateAlert: 'Device Template Alert',
+  chartOfAccount: 'Chart Of Account',
+  flash : 'Flash'
   accountsReceivable: 'Accounts Receivable'
 };
 
@@ -493,7 +503,8 @@ export const CHILD_RESOURCE = {
   workOrderService: 'Work Order Service',
   demandOrderDetail: 'Demand Order Detail',
   productionOrderDetail: 'Production Order Detail',
-  invoiceCost: 'Invoice Cost'
+  invoiceCost: 'Invoice Cost',
+  serializedAssetsCertification: 'Serialized Assets Certificate'
 };
 
 export const sidebarResourceObjectFromValues = () => {
@@ -840,6 +851,13 @@ export const workOrder = {
   api: '/work-order'
 };
 
+export const flash = {
+  api: '/flash',
+  route: '/flash',
+  permission: 'Flash',
+  resource: 'Flash'
+};
+
 export const profileMenuItems = {
   profile: 1,
   notification: 2,
@@ -921,7 +939,7 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
 export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
   const obj = {};
 
-  const filterValues = (data: object | any) => (typeof data === 'string' ? data : typeof data === 'object' ? data.optionValue : '');
+  const filterValues = (data: object | any) => (typeof data === 'string' ? data : typeof data === 'object' ? data?.optionValue : '');
   for (const key of arr) {
     if (key.type === 'switch' || key.type === 'checkBox') {
       obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : false;
@@ -1084,6 +1102,9 @@ export const isObjectEmpty = (obj) => {
 };
 
 export const currencyCodeToSymbol = (currencyCode) => {
+  if (!currencyCode) {
+    return "";
+  }
   return currencies.filter((obj) => obj.currencyCode === currencyCode)[0].symbolNative;
 };
 
@@ -1876,6 +1897,8 @@ export const ASSET_STATUS = {
   needRepair: 'Need Repair',
   needRecert: 'Need Recert',
   inRepair: 'In-Repair',
+  customerPossession: 'Customer Possession',
+  onPO: 'On PO',
   notApplied: 'N/A'
 };
 
@@ -2001,6 +2024,12 @@ export const TRANSFER_INVENTORY_STATUS = {
   delivered: 'Delivered'
 };
 
+export const TRANSFER_ASSET_STATUS = {
+  new: 'New',
+  inProgress: 'In Progress',
+  completed: 'Completed'
+};
+
 export const REPAIR_PROCESS_STATUS = {
   start: 'Start',
   complete: 'Complete',
@@ -2111,131 +2140,201 @@ export const LOG_RESOURCE = {
   transferInventory: sidebarResource.transferInventory
 };
 
-export const IOT_REPORT_LIST = [{
-  title: sidebarResource.iotDataPoints,
-  key: 'iotDataPoints',
-  api: '/report/iot/data-points',
-  filters: [
-    {
-      fieldName: 'iotDataPoints',
-      fieldLabel: 'Iot Data Points',
-      resource: sidebarResource.iotDataPoints,
-      lookup: true,
-      type: 'dropDown',
-      _id: '1'
+export const INTERVALS = [
+  {
+    optionValue: '1second',
+    optionLabel: '1 Second'
+  },
+  {
+    optionValue: '5seconds',
+    optionLabel: '5 Seconds'
+  },
+  {
+    optionValue: '10seconds',
+    optionLabel: '10 Seconds'
+  },
+  {
+    optionValue: '30seconds',
+    optionLabel: '30 Seconds'
+  },
+  {
+    optionValue: '1minute',
+    optionLabel: '1 Minute'
+  },
+  {
+    optionValue: '5minutes',
+    optionLabel: '5 Minutes'
+  },
+  {
+    optionValue: '15minutes',
+    optionLabel: '15 Minutes'
+  },
+  {
+    optionValue: '1hour',
+    optionLabel: '1 Hour'
+  },
+  {
+    optionValue: '6hours',
+    optionLabel: '6 Hours'
+  },
+  {
+    optionValue: '1day',
+    optionLabel: '1 Day'
+  },
+  {
+    optionValue: '7days',
+    optionLabel: '7 Days'
+  },
+  {
+    optionValue: '30days',
+    optionLabel: '30 Days'
+  }
+];
 
-    }, {
-      fieldName: 'date',
-      fieldLabel: 'Date',
-      type: 'date',
-      _id: '2'
-
-    }]
-}]
+export const IOT_REPORT_LIST = [
+  {
+    title: sidebarResource.iotDataPoints,
+    key: 'iotDataPoints',
+    api: '/report/iot/data-points',
+    filters: [
+      {
+        fieldName: 'asset',
+        fieldLabel: 'Serialized Asset',
+        resource: sidebarResource.serializedAsset,
+        lookup: true,
+        type: 'dropDown',
+        multiple: false,
+        _id: '3'
+      },
+      {
+        fieldName: 'dataPoints',
+        fieldLabel: 'Iot Data Points',
+        resource: sidebarResource.iotDataPoints,
+        lookup: true,
+        type: 'dropDown',
+        multiple: true,
+        _id: '1'
+      },
+      {
+        fieldName: 'date',
+        fieldLabel: 'Date',
+        type: 'date',
+        _id: '2'
+      },
+      {
+        fieldName: 'interval',
+        fieldLabel: 'Interval',
+        type: 'dropDown',
+        options: INTERVALS,
+        _id: '4'
+      }
+    ]
+  }
+];
 
 export const REPORT_LIST = [
   {
     title: sidebarResource.rentalManagement,
     permission: 'rentalManagement',
     key: 'rentalManagement',
-    type: 'dynamic',
+    type: 'dynamic'
   },
   {
     title: sidebarResource.salesOrder,
     permission: 'salesOrder',
     key: 'salesOrder',
-    type: 'dynamic',
+    type: 'dynamic'
   },
   {
     title: sidebarResource.serializedAsset,
     permission: 'serializedAsset',
     key: 'serializedAsset',
-    type: 'dynamic',
+    type: 'dynamic'
   },
   {
     title: sidebarResource.lead,
     permission: 'lead',
     key: 'lead',
-    type: 'dynamic',
+    type: 'dynamic'
   },
   {
     title: sidebarResource.opportunity,
     permission: 'opportunity',
     key: 'opportunity',
-    type: 'dynamic',
+    type: 'dynamic'
   },
   {
     title: sidebarResource.quoteBuilder,
     permission: 'quoteBuilder',
     key: 'quoteBuilder',
-    type: 'dynamic',
+    type: 'dynamic'
   },
   {
     title: sidebarResource.projectSales,
     permission: 'projectSales',
     key: 'projectSales',
-    type: 'dynamic',
+    type: 'dynamic'
   },
   {
     title: 'Work Order',
     permission: 'workOrder',
     key: 'workOrder',
-    type: 'dynamic',
+    type: 'dynamic'
   },
   {
     title: sidebarResource.purchaseOrder,
     permission: 'purchaseOrder',
     key: 'purchaseOrder',
-    type: 'dynamic',
+    type: 'dynamic'
   },
   {
     title: 'Purchase Order Details',
     permission: 'purchaseOrder',
     key: 'purchaseOrderType',
-    type: 'purchaseOrderDetails',
+    type: 'purchaseOrderDetails'
   },
   {
     title: 'Inventory Evaluation',
     permission: 'purchaseOrder',
     key: 'purchaseOrderType',
-    type: 'inventoryEvaluation',
+    type: 'inventoryEvaluation'
   },
   {
     title: 'Inventory History',
     permission: 'purchaseOrder',
     key: 'purchaseOrderType',
-    type: 'inventoryHistory',
+    type: 'inventoryHistory'
   },
   {
     title: 'Average Price By Supplier',
     permission: 'purchaseOrder',
     key: 'purchaseOrderType',
-    type: 'averagePriceBySupplier',
+    type: 'averagePriceBySupplier'
   },
   {
     title: 'Number Of Assets by Status',
     permission: 'serializedAsset',
     key: 'purchaseOrderType',
-    type: 'numberOfAssetsByStatus',
+    type: 'numberOfAssetsByStatus'
   },
   {
     title: 'Asset Utilization',
     permission: 'serializedAsset',
     key: 'purchaseOrderType',
-    type: 'assetUtilization',
+    type: 'assetUtilization'
   },
   {
     title: 'User Session',
     permission: 'user',
     key: 'purchaseOrderType',
-    type: 'userSession',
+    type: 'userSession'
   },
   {
-    title: "In Used Serialized Asset",
+    title: 'In Used Serialized Asset',
     permission: 'serializedAsset',
     key: 'purchaseOrderType',
-    type: 'InUseSerializedAsset',
-  },
+    type: 'InUseSerializedAsset'
+  }
 ];
 
 export const RESOURCE_CALENDAR = [
@@ -2372,7 +2471,8 @@ export const QUOTATION_STATUS = {
 export const QUOTATION_TYPE = {
   salesOrder: 'Sales Order',
   rentalJob: 'Rental Job',
-  repairOrder: 'Repair Order'
+  repairOrder: 'Repair Order',
+  fieldJob: 'Field Job',
 };
 
 export const WORKORDER_SERVICE_COLOR = {
@@ -2429,13 +2529,13 @@ export const getChipColor = (status: ChipStatus): React.CSSProperties => {
       background = 'var(--chip-background-completed)';
       break;
 
-    case status === 'Failed' || status === 'Skipped' || status === 'Need Reperform':
+    case status === 'Failed' || status === 'Need Reperform':
       color = 'var(--chip-color-failed)';
       borderColor = 'var(--chip-border-failed)';
       background = 'var(--chip-background-failed)';
       break;
 
-    case status === 'Pending' || status === 'Backlog':
+    case status === 'Pending' || status === 'Backlog' || status === 'Skipped':
       color = 'var(--chip-color-pending)';
       borderColor = 'var(--chip-border-pending)';
       background = 'var(--chip-background-pending)';
@@ -2500,9 +2600,8 @@ export const WORK_ORDER_STATUS = {
 
 export const WORK_ORDER_TYPE = {
   repairOrder: 'Repair Order',
-  productionOrder: 'Production Order',
+  productionOrder: 'Production Order'
 };
-
 
 export const IRT_APPROVER_STATUS = {
   send: 'Email Sent',
@@ -2515,7 +2614,8 @@ export const SERVICE_ORDER_STATUS = {
   inProgress: 'In-Progress',
   readyToInvoice: 'Ready to Invoice',
   invoiced: 'Invoiced',
-  completed: 'Completed'
+  completed: 'Completed',
+  closed: 'Closed'
 };
 
 export const MATERIAL_REQUEST_STATUS = {
@@ -2539,7 +2639,7 @@ export const MATERIAL_TYPE = {
 
 export const MATERIAL_SUB_TYPE = {
   consumable: 'consumable',
-  bom: 'bom',
+  bom: 'bom'
 };
 
 export const FIELD_TICKET_STATUS = {
@@ -2547,9 +2647,9 @@ export const FIELD_TICKET_STATUS = {
   inProgress: 'In-Progress',
   submitted: 'Submitted',
   readyToInvoice: 'Ready to Invoice',
-  invoiced: 'Invoiced'
+  invoiced: 'Invoiced',
+  closed: 'Closed'
 };
-
 
 export const INVOICE_STATUS = {
   new: 'New',
@@ -2557,7 +2657,7 @@ export const INVOICE_STATUS = {
   readyToInvoice: 'Ready to Invoice',
   invoiced: 'Invoiced',
   closed: 'Closed',
-  cancelled: 'Cancelled',
+  cancelled: 'Cancelled'
 };
 
 export const SALES_ORDER_STATUS = {
@@ -2571,11 +2671,20 @@ export const SALES_ORDER_STATUS = {
 export const PRICING_TYPE = [
   { optionLabel: 'Rent', optionValue: 'Rent' },
   { optionLabel: 'Sell', optionValue: 'Price' }
-]
+];
 
 export const SERVICE_TYPE = {
   shopService: 'Shop Service',
   fieldService: 'Field Service'
+};
+
+export const QUOTE_PROCESS_STATUS = {
+  new: 'New',
+  priceBuilder: 'Price Builder',
+  quoteBuilder: 'Quote Builder',
+  doaProcess: 'DOA Process',
+  sendToCustomer: 'Send To Customer',
+  end: 'End'
 }
 
 export const convertMsToTime = (milliseconds: any) => {
@@ -2651,7 +2760,6 @@ export const getNestedlookupDependentOn = (fields, fieldName) => {
   checkNested(fields, fieldName, result);
   return result;
 };
-
 
 export const GenerateResourceLineNumber = (fields) => {
   const primaryField = fields?.find((e) => e?.primaryField);

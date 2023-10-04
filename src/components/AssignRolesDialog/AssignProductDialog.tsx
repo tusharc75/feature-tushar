@@ -43,7 +43,9 @@ const AssignProductDialog = ({
   assignedProducts,
   reference = 'product',
   serialized = null,
-  extraDeepFilter = []
+  extraDeepFilter = [],
+  extraFilterById = [],
+  isSubmitting = false
 }) => {
   const renderedFrom = `${routes.product.title}_${reference}_selected`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
@@ -169,41 +171,55 @@ const AssignProductDialog = ({
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
-    const updatedFilters = [];
+
+    const deepFilters = [];
+
     if (extraDeepFilter?.length > 0) {
       extraDeepFilter?.map((e) => {
-        updatedFilters.push(e);
+        deepFilters.push(e);
       })
     }
     if (isProductType) {
-      updatedFilters.push({
+      deepFilters.push({
         field: 'productType',
         term: 'Part'
       });
     }
+    
     if (reference === 'purchaseOrder') {
-      if (!user?.user?.brandPolicy?.showSerializedProduct) {
-        updatedFilters.push({ field: 'serializedProduct', term: 'No' });
+      if (!user?.user?.brandPolicy?.purchaseOrderShowSerializedProduct) {
+        deepFilters.push({ field: 'serializedProduct', term: 'No' });
       }
     } else {
       if (serialized != null) {
-        updatedFilters.push({
+        deepFilters.push({
           field: 'serializedProduct',
           term: `${serialized === true ? 'Yes' : 'No'}`
         });
       }
     }
+
     if (!isObjectEmpty(filters)) {
       Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
+        deepFilters.push({
           field: field,
           term: filters[field].filter
         });
       });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
-    } else {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
+    } 
+
+    if (extraFilterById?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(extraFilterById)}`;
     }
+
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
+    }
+
+    if (extraFilterById?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
+    }
+
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
@@ -310,7 +326,7 @@ const AssignProductDialog = ({
                 <Box className={styles.filter_side_header} component="div">
                   <SearchBox onChange={handleSearch} className={styles.search_box_input} width="242px" size="small" value={search} />
                   <Button
-                    disabled={isAssigning || disableSaveButton || [...getLocalStorageArrayData(localStorageSelectedRecords)].length === 0}
+                    disabled={isSubmitting || isAssigning || disableSaveButton || [...getLocalStorageArrayData(localStorageSelectedRecords)].length === 0}
                     onClick={handleAssignProduct}
                     color="primary"
                     size="small"

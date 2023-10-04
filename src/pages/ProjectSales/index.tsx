@@ -1,102 +1,102 @@
-import { useState, FC, useReducer, useEffect, useContext, Fragment } from "react";
-import { Chip, Grid } from "@material-ui/core";
-import axiosInstance from "../../axios/axiosInstance";
-import routes from "../../components/Helpers/Routes";
-import CustomBreadCrumbs from "../../components/CustomBreadCrumbs";
-import ProjectHeader from "./Header";
-import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
-import MessageDialog from "../../components/Helpers/MessageDialog";
-import { useData } from "../../StateProvider/Provider";
-import CreateProjectSales from "./CreateProjectSales";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { customerAccount, gridLoadingTimeout, gridPageSizes, isObjectEmpty, supplierAccount } from "../../constants/helpers";
-import GridDeleteIcon from "../../components/Helpers/GridDeleteIcon";
-import CustomAgGrid from "../../components/AgGridComponents/CustomAgGrid";
-import "./style.scss";
-import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
-import EntitySelectionsDialog from "../../components/EntitySelections"
-import { AiOutlineDeploymentUnit } from "react-icons/ai"
-import Tooltip from "@material-ui/core/Tooltip"
-import IconButton from "@material-ui/core/IconButton"
+import { useState, FC, useReducer, useEffect, useContext, Fragment } from 'react';
+import { Chip, Grid } from '@material-ui/core';
+import axiosInstance from '../../axios/axiosInstance';
+import routes from '../../components/Helpers/Routes';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import ProjectHeader from './Header';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import MessageDialog from '../../components/Helpers/MessageDialog';
+import { useData } from '../../StateProvider/Provider';
+import CreateProjectSales from './CreateProjectSales';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { customerAccount, gridLoadingTimeout, gridPageSizes, isObjectEmpty, supplierAccount } from '../../constants/helpers';
+import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
+import CustomAgGrid from '../../components/AgGridComponents/CustomAgGrid';
+import './style.scss';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
+import EntitySelectionsDialog from '../../components/EntitySelections';
+import { AiOutlineDeploymentUnit } from 'react-icons/ai';
+import Tooltip from '@material-ui/core/Tooltip';
+import IconButton from '@material-ui/core/IconButton';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { sidebarResource, prepareDataForGrid } from "../../constants/helpers"
-import { isMobile, isTablet } from "react-device-detect";
-import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import { sidebarResource, prepareDataForGrid } from '../../constants/helpers';
+import { isMobile, isTablet } from 'react-device-detect';
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { useHistory } from 'react-router-dom';
-import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField, gridFilterParser } from "../../constants/useColumns"
-import { StayPrimaryPortraitSharp } from "@material-ui/icons";
-import { BiDollar } from "react-icons/bi";
-import { SiMarketo, AiFillFileMarkdown, GiArrowScope, FaPercentage, FaAward, SiStatuspage, GoVersions } from "react-icons/all";
-import { camelCase } from "lodash";
+import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField, gridFilterParser } from '../../constants/useColumns';
+import { StayPrimaryPortraitSharp } from '@material-ui/icons';
+import { BiDollar } from 'react-icons/bi';
+import { SiMarketo, AiFillFileMarkdown, GiArrowScope, FaPercentage, FaAward, SiStatuspage, GoVersions } from 'react-icons/all';
+import { camelCase } from 'lodash';
 
 function reducer(state, action) {
   switch (action.type) {
-    case "loading":
+    case 'loading':
       return {
         ...state,
-        loading: action.loading,
+        loading: action.loading
       };
 
-    case "initialize":
+    case 'initialize':
       return {
         ...state,
         dataRows: action.data,
         rowCount: action.count
       };
 
-    case "selection":
+    case 'selection':
       return {
         ...state,
-        selectedRecords: action.selectedRecords,
+        selectedRecords: action.selectedRecords
       };
 
-    case "update":
+    case 'update':
       return {
         ...state,
         dataRows: action.data,
-        loading: false,
+        loading: false
       };
 
-    case "filter":
+    case 'filter':
       return {
         ...state,
         loading: true,
         filters: action.filters,
-        page: 0,
+        page: 0
       };
 
-    case "sort":
+    case 'sort':
       return {
         ...state,
         sorting: action.sorting,
-        loading: true,
+        loading: true
       };
 
-    case "search":
+    case 'search':
       return {
         ...state,
         search: action.search,
-        loading: true,
+        loading: true
       };
 
-    case "pageChange":
+    case 'pageChange':
       return {
         ...state,
-        page: action.page,
+        page: action.page
       };
 
-    case "pageSizeChange":
+    case 'pageSizeChange':
       return {
         ...state,
         limit: action.limit,
         page: 0,
-        loading: true,
+        loading: true
       };
 
-    case "complete":
+    case 'complete':
       return {
         ...state,
-        loading: false,
+        loading: false
       };
 
     default:
@@ -113,19 +113,19 @@ const intialState = {
   page: 0,
   limit: 25,
   pageSizes: gridPageSizes,
-  search: "",
+  search: '',
   filters: {},
   sorting: [],
-  selectedRecords: [],
+  selectedRecords: []
 };
 
 let projectSalesTimeout;
 const ProjectSales: FC = () => {
-  const renderedFrom = camelCase(routes?.projectSales.title)
+  const renderedFrom = camelCase(routes?.projectSales.title);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
-    state: { user, permissions, selectedEntity },
+    state: { user, permissions, selectedEntity }
   }: any = useData();
   const { getColumnData } = useColumns();
   const [isOpen, setIsOpen] = useState({ open: false, isClone: false, idToClone: null });
@@ -133,15 +133,14 @@ const ProjectSales: FC = () => {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [selectedType, setselectedType] = useState(1);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
-  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] =
-    useState({ show: false, isDelete: false });
+  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState({ show: false, isDelete: false });
   const [renderCount, setRenderCount] = useState(0);
-  const [projectSalesId, setProjectSalesId] = useState(null)
-  const [showEntityDialog, setShowEntityDialog] = useState(false)
+  const [projectSalesId, setProjectSalesId] = useState(null);
+  const [showEntityDialog, setShowEntityDialog] = useState(false);
   const [gridApi, setGridApi] = useState(null);
-  const [entities, setEntities] = useState([])
-  const [columns, setColumns] = useState([])
-  const [frameWorkComponent, setFrameWorkComponent] = useState({})
+  const [entities, setEntities] = useState([]);
+  const [columns, setColumns] = useState([]);
+  const [frameWorkComponent, setFrameWorkComponent] = useState({});
 
   const [referenceDetails, setReferenceDetails] = useState({
     referenceId: history.location?.state?.accountId,
@@ -150,59 +149,45 @@ const ProjectSales: FC = () => {
   });
 
   const [state, dispatch] = useReducer(reducer, intialState);
-  const {
-    dataRows,
-    rowCount,
-    loading,
-    page,
-    limit,
-    pageSizes,
-    search,
-    filters,
-    sorting,
-    selectedRecords,
-    appendRows
-  } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
   const columnState = JSON.parse(localStorage.getItem(renderedFrom));
   const [isAllChecked, setIsAllChecked] = useState(false);
-  const [clonedData, setClonedData] = useState([])
+  const [clonedData, setClonedData] = useState([]);
   const localStorageSelectedRecords = `${routes.projectSales.title}_selected`;
 
   useEffect(() => {
-    fetchGridColumns()
-  }, [])
+    fetchGridColumns();
+  }, []);
 
   const fetchGridColumns = async () => {
+    const response = await axiosInstance().get(`/field?resource=Project Sales&view=true`);
 
-    const response = await axiosInstance()
-      .get(`/field?resource=Project Sales&view=true`)
+    let data = response?.data?.data;
 
-    let data = response?.data?.data
-
-    let columns = []
-    let rendererNames = []
-    data.forEach(o => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.projectSalesDetail.path, true)
+    let columns = [];
+    let rendererNames = [];
+    data.forEach((o) => {
+      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.projectSalesDetail.path, true);
       if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData]
+        columns = [...columns, currentColumn?.columnData];
         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-          rendererNames.push(currentColumn?.rendererName)
+          rendererNames.push(currentColumn?.rendererName);
         }
       }
-      return o?.fieldData
-    })
-    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+      return o?.fieldData;
+    });
+    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
     tempFrameworkComponent = {
       ...tempFrameworkComponent,
       actionsRenderer: ActionsRenderer
-    }
-    setFrameWorkComponent({ ...tempFrameworkComponent })
-    let staticFields = getStaticFields()
-    staticFields.forEach(field => {
-      columns.push(checkStaticField(renderedFrom, field))
-    })
-    setColumns([...columns])
-  }
+    };
+    setFrameWorkComponent({ ...tempFrameworkComponent });
+    let staticFields = getStaticFields();
+    staticFields.forEach((field) => {
+      columns.push(checkStaticField(renderedFrom, field));
+    });
+    setColumns([...columns]);
+  };
 
   if (columnState) {
     columns.map((item) => {
@@ -235,26 +220,25 @@ const ProjectSales: FC = () => {
 
   const ActionsRenderer = (params) => (
     <>
-      {permissions?.projectSales?.isCreate ?
-        (<Tooltip
-          title={"Clone"} >
+      {permissions?.projectSales?.isCreate ? (
+        <Tooltip title={'Clone'}>
           <IconButton
             size="small"
             aria-label="Clone"
             onClick={() => {
-              setIsOpen({ open: true, isClone: true, idToClone: params.data._id })
+              setIsOpen({ open: true, isClone: true, idToClone: params.data._id });
             }}
           >
             <FileCopyIcon fontSize="small" color="primary" />
           </IconButton>
-        </Tooltip>) : (
-          <Tooltip className="cursor-stop" title="You do not have permission to clone/create">
-            <IconButton aria-label="Clone" size="small">
-              <FileCopyIcon />
-            </IconButton>
-          </Tooltip>
-        )
-      }
+        </Tooltip>
+      ) : (
+        <Tooltip className="cursor-stop" title="You do not have permission to clone/create">
+          <IconButton aria-label="Clone" size="small">
+            <FileCopyIcon />
+          </IconButton>
+        </Tooltip>
+      )}
       <GridDeleteIcon
         hasDeletePermission={permissions?.projectSales?.isDelete}
         ownerId={params.data.projectManagerId}
@@ -262,72 +246,72 @@ const ProjectSales: FC = () => {
         onDelete={() => showConfirmBox(params.data)}
         entity="Project"
       />
-      {
-        (permissions?.projectSales?.isUpdate && params?.data?.isTeamMember) ||
-          params?.data?.isManager ?
-          <Tooltip title="Entity">
-            <IconButton
-              size="small"
-              aria-label="Entity"
-              onClick={() => {
-                setProjectSalesId(params.data._id)
-                setShowEntityDialog(true)
-                if (params?.data?.entity) {
-                  let entities = []
-                  if (params?.data?.entityId) {
-                    entities.push(params?.data?.entityId)
-                  }
-                  if (params?.data?.restentity) {
-                    let restEntities = params?.data?.restentity.map(o => o.optionValue)
-                    entities = [...entities, ...restEntities]
-                  }
-                  setEntities([...entities])
+      {(permissions?.projectSales?.isUpdate && params?.data?.isTeamMember) || params?.data?.isManager ? (
+        <Tooltip title="Entity">
+          <IconButton
+            size="small"
+            aria-label="Entity"
+            onClick={() => {
+              setProjectSalesId(params.data._id);
+              setShowEntityDialog(true);
+              if (params?.data?.entity) {
+                let entities = [];
+                if (params?.data?.entityId) {
+                  entities.push(params?.data?.entityId);
                 }
-              }}>
-              <AiOutlineDeploymentUnit fontSize="15" color="primary" />
-            </IconButton>
-          </Tooltip> : (
-            <Tooltip className="cursor-stop" title="You do not have permission to update entity">
-              <IconButton aria-label="Clone" size="small">
-                <AiOutlineDeploymentUnit fontSize="15" />
-              </IconButton>
-            </Tooltip>
-          )
-      }
+                if (params?.data?.restentity) {
+                  let restEntities = params?.data?.restentity.map((o) => o.optionValue);
+                  entities = [...entities, ...restEntities];
+                }
+                setEntities([...entities]);
+              }
+            }}
+          >
+            <AiOutlineDeploymentUnit fontSize="15" color="primary" />
+          </IconButton>
+        </Tooltip>
+      ) : (
+        <Tooltip className="cursor-stop" title="You do not have permission to update entity">
+          <IconButton aria-label="Clone" size="small">
+            <AiOutlineDeploymentUnit fontSize="15" />
+          </IconButton>
+        </Tooltip>
+      )}
     </>
   );
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-    if (selectedType === 1) {
-      deepFilter = deepFilter + `&myRecords=1`;
-    }
+
     if (isExport) {
       deepFilter = `?`;
     }
+
+    if (selectedType === 1) {
+      deepFilter = deepFilter + `&myRecords=1`;
+    }
+
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
 
-    const { filterByIds, deepFilters } = gridFilterParser(filters)
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (referenceDetails.referenceId) {
       if (referenceDetails.resource === sidebarResource.opportunity) {
-          filterByIds.push({ field: "staticData.opportunity", term: referenceDetails.referenceId })
-      }
-      else if (referenceDetails.resource === customerAccount.accountResource) {
-          filterByIds.push({ field: 'customerAccountName', term: referenceDetails.referenceId })
-      }
-      else if (referenceDetails.resource === supplierAccount.accountResource) {
-          filterByIds.push({ field: 'supplierAccountName', term: { $in: [referenceDetails.referenceId] } })
+        filterByIds.push({ field: 'staticData.opportunity', term: referenceDetails.referenceId });
+      } else if (referenceDetails.resource === customerAccount.accountResource) {
+        filterByIds.push({ field: 'customerAccountName', term: referenceDetails.referenceId });
+      } else if (referenceDetails.resource === supplierAccount.accountResource) {
+        filterByIds.push({ field: 'supplierAccountName', term: { $in: [referenceDetails.referenceId] } });
       }
     }
-    
+
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
     if (deepFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
     }
 
     if (filterByIds?.length || deepFilters?.length) {
@@ -339,7 +323,7 @@ const ProjectSales: FC = () => {
     }
 
     if (search) {
-      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
 
     return deepFilter;
@@ -347,7 +331,7 @@ const ProjectSales: FC = () => {
 
   const fetchProjects = async () => {
     if (selectedEntity) {
-      dispatch({ type: "loading", loading: true });
+      dispatch({ type: 'loading', loading: true });
       const queryString = getQueryString();
 
       if (gridApi) {
@@ -358,70 +342,72 @@ const ProjectSales: FC = () => {
         .get(`/project-sales${queryString}`)
         .then(({ data: { data, count } }) => {
           let rows = data.map((project) => {
-
             let finalObject = prepareDataForGrid(project, user);
-            finalObject["canDelete"] = finalObject["projectManagerId"] === user?.user._id;
-            finalObject["isChecked"] = selectedRecords.some(s => s._id === project._id);
-            finalObject["allowedToEdit"] = finalObject["projectManagerId"] === user?.user._id;
+            finalObject['canDelete'] = finalObject['projectManagerId'] === user?.user._id;
+            finalObject['isChecked'] = selectedRecords.some((s) => s._id === project._id);
+            finalObject['allowedToEdit'] = finalObject['projectManagerId'] === user?.user._id;
 
-            finalObject["owerCollaboratorInitialsOrImages"] = [{ initials: finalObject["projectManager"] }];
+            finalObject['owerCollaboratorInitialsOrImages'] = [{ initials: finalObject['projectManager'] }];
             return {
               ...finalObject,
               isManager: user.user._id === project?.projectManager?.optionValue,
-              isTeamMember: Boolean(data.staticData?.user.find((u) => u._id === user.user._id)),
+              isTeamMember: Boolean(data.staticData?.user.find((u) => u._id === user.user._id))
             };
           });
           setIsAllChecked(false);
-          setClonedData(data)
+          setClonedData(data);
           if (appendRows) {
             dispatch({
-              type: "initialize", data: [...dataRows, ...rows],
-              count: count, selectedRecords: [...dataRows, ...rows].filter(f => f.isChecked === true)
+              type: 'initialize',
+              data: [...dataRows, ...rows],
+              count: count,
+              selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
             });
           } else {
             dispatch({
-              type: "initialize", data: rows, count: count,
-              selectedRecords: rows.filter(f => f.isChecked === true)
+              type: 'initialize',
+              data: rows,
+              count: count,
+              selectedRecords: rows.filter((f) => f.isChecked === true)
             });
           }
 
           if (gridApi) {
             try {
-              let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : []
+              let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords)
+                ? JSON.parse(localStorage.getItem(localStorageSelectedRecords))
+                : [];
               if (oldSelectedRecords.length > 0) {
                 gridApi.forEachNode(function (node) {
-                  node.setSelected(
-                    oldSelectedRecords.some((o) => o === node.data._id)
-                  );
+                  node.setSelected(oldSelectedRecords.some((o) => o === node.data._id));
                 });
               }
             } catch (ex) {
-              console.error("Error in getting selected records from local storage")
+              console.error('Error in getting selected records from local storage');
             }
           }
 
-          dispatch({ type: "initialize", data: rows, count: count });
+          dispatch({ type: 'initialize', data: rows, count: count });
           setTimeout(() => {
-            dispatch({ type: "loading", loading: false });
+            dispatch({ type: 'loading', loading: false });
           }, gridLoadingTimeout);
         })
         .catch((err) => {
           toastConfig.setToastConfig(err);
-          dispatch({ type: "loading", loading: false });
+          dispatch({ type: 'loading', loading: false });
         });
     }
   };
 
   const handleProjectFilter = (filterValues) => {
+    dispatch({ type: 'setPage', page: 0 });
     setselectedType(filterValues);
   };
 
   const showConfirmBox = (row) => {
     if (row === null) {
       if (permissions?.projectSales?.isDelete) {
-        const myData = selectedRecords.filter(
-          (s) => s.projectManagerId === user.user._id
-        );
+        const myData = selectedRecords.filter((s) => s.projectManagerId === user.user._id);
 
         if (selectedRecords?.length !== myData.length) {
           setShowDeleteWarningConfirmBox({ show: true, isDelete: true });
@@ -453,8 +439,8 @@ const ProjectSales: FC = () => {
         .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
-            type: "success",
-            message: data.message,
+            type: 'success',
+            message: data.message
           });
           setIsConformDialogVisible(false);
           setDeleteLoading(false);
@@ -470,7 +456,7 @@ const ProjectSales: FC = () => {
   };
 
   const handleSearch = (e) => {
-    dispatch({ type: "search", search: e.target.value });
+    dispatch({ type: 'search', search: e.target.value });
   };
 
   const handleCreate = () => {
@@ -492,31 +478,27 @@ const ProjectSales: FC = () => {
           fetchData={fetchProjects}
         />
       )}
-      <Fragment>
-        <Grid container className="headerbox">
-          <Grid item md={4} sm={11} xs={10}>
-            <CustomBreadCrumbs routes={[routes.projectSales]} />
-          </Grid>
-          <Grid item md={8} sm={1} xs={2}>
-            <ImportExportLinks
-              permissions={permissions?.projectSales}
-              module="project-sale(s)"
-              api={"project-sales"}
-              afterImportCompleted={() => {
-                fetchProjects();
-              }}
-              isExportAllOrSomeFeature={true}
-              total={rowCount}
-              recordsToExport={selectedRecords.length}
-              ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
-              onExportToExcelSuccess={() => {
-                if (gridApi) gridApi.deselectAll()
-                else fetchProjects()
-              }}
-              additionalParams={getQueryString(true)}
-            />
-          </Grid>
-        </Grid>
+      <section className="main-container-v1">
+        <div className="headerbox-v1">
+          <CustomBreadCrumbs routes={[routes.projectSales]} />
+          <ImportExportLinks
+            permissions={permissions?.projectSales}
+            module="project-sale(s)"
+            api={'project-sales'}
+            afterImportCompleted={() => {
+              fetchProjects();
+            }}
+            isExportAllOrSomeFeature={true}
+            total={rowCount}
+            recordsToExport={selectedRecords.length}
+            ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+            onExportToExcelSuccess={() => {
+              if (gridApi) gridApi.deselectAll();
+              else fetchProjects();
+            }}
+            additionalParams={getQueryString(true)}
+          />
+        </div>
         <div className="main-container">
           <div className="header-panel">
             <ProjectHeader
@@ -536,14 +518,19 @@ const ProjectSales: FC = () => {
               setShowEntityDialog={setShowEntityDialog}
               setEntities={setEntities}
               filters={filters}
+              resource={sidebarResource.projectSales}
             >
               {referenceDetails.referenceId && (
                 <Chip
                   className="ml-3"
                   color="primary"
-                  label={`${referenceDetails.resource === customerAccount.accountResource ? routes.customerAccount.title :
-                    referenceDetails.resource === supplierAccount.accountResource ? routes.supplierAccount.title :
-                      routes.opportunity.title} : ${referenceDetails.referenceName}`}
+                  label={`${
+                    referenceDetails.resource === customerAccount.accountResource
+                      ? routes.customerAccount.title
+                      : referenceDetails.resource === supplierAccount.accountResource
+                      ? routes.supplierAccount.title
+                      : routes.opportunity.title
+                  } : ${referenceDetails.referenceName}`}
                   onDelete={() => {
                     setReferenceDetails({ referenceId: null, referenceName: null, resource: null });
                   }}
@@ -552,95 +539,94 @@ const ProjectSales: FC = () => {
             </ProjectHeader>
           </div>
 
-          {
-            Object.keys(frameWorkComponent).length > 0 ?
-              isMobile && !isTablet ?
-                <CustomSwipableList
-                  allowSelection={true}
-                  allowSwipe={true}
-                  permissions={permissions?.projectSales}
-                  primaryField={columns?.find(d => d.primaryField)}
-                  onClick={(data) => {
-                    history.push(`${routes.projectSalesDetail.path}/${data._id}`)
-                  }}
-                  dataRows={dataRows}
-                  selectedRecords={selectedRecords}
-                  dispatch={dispatch}
-                  onEdit={(data) => {
-                    history.push(`${routes.projectSalesDetail.path}/${data._id}`)
-                  }}
-                  extraParamsToCheckDelete={true}
-                  onDelete={(data) => {
-                    showConfirmBox(data)
-                  }}
-                  rowCount={rowCount}
-                  page={page}
-                  loading={loading}
-                  additionalDetails={[
-
-                    {
-                      icon: <BiDollar size={18} />,
-                      field: "amount"
-                    }
-                  ]}
-                  chips={[
-                    {
-                      icon: <FaAward />,
-                      label: "Award Date : ",
-                      field: "awardDate",
-
-                    },
-                    {
-                      icon: <AiFillFileMarkdown />,
-                      label: "Market:",
-                      field: "marketSegment",
-                    },
-                    {
-                      icon: <SiMarketo />,
-                      label: "Sub-Market:",
-                      field: "subMarketSegment"
-                    },
-                    {
-                      icon: <GiArrowScope />,
-                      label: "Scope:",
-                      field: "scope"
-                    },
-                  ]}
-                  onCreate={false}
-                  showClone={true}
-                  onClone={(data) => {
-                    setIsOpen({ open: true, isClone: true, idToClone: data._id })
-                  }}
-                  renderedFrom={renderedFrom}
-                />
-                :
-                <CustomAgGrid
-                  columns={columns}
-                  dataRows={dataRows}
-                  frameworkComponents={frameWorkComponent}
-                  setGridApi={setGridApi}
-                  dispatch={dispatch}
-                  rowCount={rowCount}
-                  limit={limit}
-                  pageSizes={pageSizes}
-                  actionWidth={150}
-                  page={page}
-                  loading={loading}
-                  renderedFrom={renderedFrom}
-                  refreshGrid={fetchProjects}
-                  showOnlyShowFilteredRecordSwitch={true}
-                  showFilters={true}
-                  resource={sidebarResource.projectSales}
-                /> : null
-          }
+          {Object.keys(frameWorkComponent).length > 0 ? (
+            isMobile && !isTablet ? (
+              <CustomSwipableList
+                key={selectedType}
+                allowSelection={true}
+                allowSwipe={true}
+                permissions={permissions?.projectSales}
+                primaryField={columns?.find((d) => d.primaryField)}
+                onClick={(data) => {
+                  history.push(`${routes.projectSalesDetail.path}/${data._id}`);
+                }}
+                dataRows={dataRows}
+                selectedRecords={selectedRecords}
+                dispatch={dispatch}
+                onEdit={(data) => {
+                  history.push(`${routes.projectSalesDetail.path}/${data._id}`);
+                }}
+                extraParamsToCheckDelete={true}
+                onDelete={(data) => {
+                  showConfirmBox(data);
+                }}
+                rowCount={rowCount}
+                page={page}
+                loading={loading}
+                additionalDetails={[
+                  {
+                    icon: <BiDollar size={18} />,
+                    field: 'amount'
+                  }
+                ]}
+                chips={[
+                  {
+                    icon: <FaAward />,
+                    label: 'Award Date : ',
+                    field: 'awardDate'
+                  },
+                  {
+                    icon: <AiFillFileMarkdown />,
+                    label: 'Market:',
+                    field: 'marketSegment'
+                  },
+                  {
+                    icon: <SiMarketo />,
+                    label: 'Sub-Market:',
+                    field: 'subMarketSegment'
+                  },
+                  {
+                    icon: <GiArrowScope />,
+                    label: 'Scope:',
+                    field: 'scope'
+                  }
+                ]}
+                onCreate={false}
+                showClone={true}
+                onClone={(data) => {
+                  setIsOpen({ open: true, isClone: true, idToClone: data._id });
+                }}
+                renderedFrom={renderedFrom}
+              />
+            ) : (
+              <CustomAgGrid
+                columns={columns}
+                dataRows={dataRows}
+                frameworkComponents={frameWorkComponent}
+                setGridApi={setGridApi}
+                dispatch={dispatch}
+                rowCount={rowCount}
+                limit={limit}
+                pageSizes={pageSizes}
+                actionWidth={150}
+                page={page}
+                loading={loading}
+                renderedFrom={renderedFrom}
+                refreshGrid={fetchProjects}
+                showOnlyShowFilteredRecordSwitch={true}
+                showFilters={true}
+                resource={sidebarResource.projectSales}
+              />
+            )
+          ) : null}
         </div>
 
         {showDeleteWarningConfirmBox?.show ? (
           <MessageDialog
             open={showDeleteWarningConfirmBox?.show}
             message={
-              showDeleteWarningConfirmBox?.isDelete ?
-                `You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`
+              showDeleteWarningConfirmBox?.isDelete
+                ? `You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`
                 : `You are trying to update records which you do not have permission to update, Please remove those records from selection and try again.`
             }
             onClose={() => setShowDeleteWarningConfirmBox({ show: false, isDelete: false })}
@@ -650,8 +636,7 @@ const ProjectSales: FC = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete this record ${deleteRec.name || ""
-              }?`}
+            message={`Are you sure you want to delete this record ${deleteRec.name || ''}?`}
             onClose={() => {
               if (deleteRec) setDeleteRec({});
               setIsConformDialogVisible(false);
@@ -660,21 +645,20 @@ const ProjectSales: FC = () => {
             onOk={handleDeleteProjects}
           />
         ) : null}
-        {
-          showEntityDialog ?
-            <EntitySelectionsDialog
-              open={showEntityDialog}
-              resource={sidebarResource.projectSales}
-              resourceIds={selectedRecords.length ? selectedRecords.map(o => o._id) : [projectSalesId]}
-              onClose={() => {
-                setShowEntityDialog(false)
-                setProjectSalesId("")
-              }}
-              entities={entities}
-              onSuccess={fetchProjects}
-            /> : null
-        }
-      </Fragment>
+        {showEntityDialog ? (
+          <EntitySelectionsDialog
+            open={showEntityDialog}
+            resource={sidebarResource.projectSales}
+            resourceIds={selectedRecords.length ? selectedRecords.map((o) => o._id) : [projectSalesId]}
+            onClose={() => {
+              setShowEntityDialog(false);
+              setProjectSalesId('');
+            }}
+            entities={entities}
+            onSuccess={fetchProjects}
+          />
+        ) : null}
+      </section>
     </>
   );
 };

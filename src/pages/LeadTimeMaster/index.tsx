@@ -1,36 +1,27 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import { useHistory } from 'react-router-dom';
-import { Chip, Grid, IconButton, Tooltip, Fab } from '@material-ui/core';
+import { Chip, IconButton, Tooltip } from '@material-ui/core';
+import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { camelCase } from 'lodash';
 import queryString from 'query-string';
-import ManageLeadTimeMasterDialog from './ManageLeadTimeMaster';
-import {
-  isObjectEmpty,
-  customerAccount,
-  supplierAccount,
-  gridLoadingTimeout,
-  prepareDataForGrid,
-  getLocalStorageArrayData,
-  leadTimeMaster,
-  sidebarResource
-} from '../../constants/helpers';
-import CustomContainer from '../../components/CustomContainer';
-import routes from './../../components/Helpers/Routes';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import MessageDialog from '../../components/Helpers/MessageDialog';
-import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import LeadTimeHeader from './LeadTimeHeader';
+import { useContext, useEffect, useReducer, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { BiTimer, SiStatuspage } from 'react-icons/all';
+import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import { isMobile, isTablet } from 'react-device-detect';
+import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
+import CustomContainer from '../../components/CustomContainer';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
+import MessageDialog from '../../components/Helpers/MessageDialog';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField, gridFilterParser } from '../../constants/useColumns';
-import { camelCase } from 'lodash';
-import { SiStatuspage, BiTimer } from 'react-icons/all';
-import DeleteIcon from '@material-ui/icons/Delete';
+import { getLocalStorageArrayData, gridLoadingTimeout, leadTimeMaster, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import useColumns, { checkStaticField, getFrameworkComponents, getStaticFields, gridFilterParser } from '../../constants/useColumns';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import routes from './../../components/Helpers/Routes';
+import LeadTimeHeader from './LeadTimeHeader';
+import ManageLeadTimeMasterDialog from './ManageLeadTimeMaster';
 
 let leadMasterTimeout;
 const LeadMasterType = [
@@ -51,7 +42,7 @@ const LeadTimeMaster = () => {
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
-  const { type }: any = queryString.parse(history.location.search);
+  let { type, referenceId, referenceType }: any = queryString.parse(history.location.search);
   const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
   const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -80,8 +71,6 @@ const LeadTimeMaster = () => {
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const { getColumnData } = useColumns();
-
-  const [fromRental, setFromRental] = useState(history.location?.state?.rental);
 
   useEffect(() => {
     fetchGridColumns();
@@ -152,7 +141,7 @@ const LeadTimeMaster = () => {
     if (renderCount > 0) {
       fetchLeadTimeMasters();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting, accountDetails, fromRental, selectedEntity, showFilteredRecordsOnly]);
+  }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity, showFilteredRecordsOnly]);
 
   const handleSingleDeleteLeadTimeMaster = async () => {
     dispatch({ type: 'loading', loading: true });
@@ -229,24 +218,28 @@ const LeadTimeMaster = () => {
     if (isExport) {
       deepFilter = `?`;
     }
-   
+
     const { filterByIds, deepFilters } = gridFilterParser(filters);
+
+    if (referenceId) {
+      filterByIds.push({ field: 'rentalJob', term: referenceId });
+    }
 
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
     if (deepFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
     }
     if (filterByIds?.length || deepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
     }
-   
+
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
     if (search) {
-      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
@@ -262,7 +255,8 @@ const LeadTimeMaster = () => {
       gridApi.setRowData([]);
     }
     try {
-      let data: any = [], count;
+      let data: any = [],
+        count;
       const response: any = await axiosInstance().get(`${leadTimeMaster.api}${queryString}`);
       data = response?.data?.data;
       count = response?.data?.count;
@@ -301,8 +295,13 @@ const LeadTimeMaster = () => {
   };
 
   const handleLeadTimeMasterTypeSel = (filterValues) => {
+    dispatch({ type: 'setPage', page: 0 });
     setSelectedType(filterValues);
-    history.push(`?type=${filterValues}`);
+    if (referenceId && referenceType) {
+      history.push(`?type=${filterValues}&referenceType=${referenceType}&referenceId=${referenceId}`);
+    } else {
+      history.push(`?type=${filterValues}`);
+    }
   };
 
   const handleTransferEntityDialog = () => {
@@ -360,42 +359,44 @@ const LeadTimeMaster = () => {
     }
   };
 
+  const updateQueryParams = () => {
+    const queryParams = new URLSearchParams(history.location.search);
+    queryParams.delete('referenceId');
+    queryParams.delete('referenceType');
+    referenceId = queryParams.get('referenceId');
+    referenceType = queryParams.get('referenceType');
+    history.replace({
+      search: queryParams.toString()
+    });
+    fetchLeadTimeMasters();
+  };
+
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[routes.leadTimeMaster]} />
-        </Grid>
-        <Grid item md={8} sm={1} xs={2}>
-          <Grid container direction="row">
-            <Grid item xs={12} sm={12}>
-              <Grid container justify="flex-end">
-                <ImportExportLinks
-                  permissions={permissions.leadTimeMaster}
-                  module="leadTimeMaster"
-                  api={leadTimeMaster.api}
-                  afterImportCompleted={() => {
-                    fetchLeadTimeMasters();
-                  }}
-                  isExportAllOrSomeFeature={true}
-                  total={rowCount}
-                  recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-                  ids={
-                    getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-                      ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-                      : []
-                  }
-                  onExportToExcelSuccess={() => {
-                    if (gridApi) gridApi.deselectAll();
-                    else fetchLeadTimeMasters();
-                  }}
-                  additionalParams={getQueryString(true)}
-                />
-              </Grid>
-            </Grid>
-          </Grid>
-        </Grid>
-      </Grid>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[routes.leadTimeMaster]} />
+        <ImportExportLinks
+          permissions={permissions.leadTimeMaster}
+          module="leadTimeMaster"
+          api={leadTimeMaster.api}
+          afterImportCompleted={() => {
+            fetchLeadTimeMasters();
+          }}
+          isExportAllOrSomeFeature={true}
+          total={rowCount}
+          recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+          ids={
+            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+              ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+              : []
+          }
+          onExportToExcelSuccess={() => {
+            if (gridApi) gridApi.deselectAll();
+            else fetchLeadTimeMasters();
+          }}
+          additionalParams={getQueryString(true)}
+        />
+      </div>
       <CustomContainer>
         <div className="header-panel">
           <LeadTimeHeader
@@ -415,6 +416,7 @@ const LeadTimeMaster = () => {
             heading={routes.leadTimeMaster.title}
             showTransferEntityDialog={handleTransferEntityDialog}
             filters={filters}
+            resource={sidebarResource.leadTimeMaster}
           >
             {accountDetails.accountId && (
               <Chip
@@ -430,21 +432,13 @@ const LeadTimeMaster = () => {
                 }}
               />
             )}
-            {fromRental && (
-              <Chip
-                className="ml-3"
-                color="primary"
-                label={`Rental Job : ${fromRental?.rentalJobName}`}
-                onDelete={() => {
-                  setFromRental(null);
-                }}
-              />
-            )}
+            {referenceType && <Chip className="ml-3" color="primary" label={`Rental Job : ${referenceType}`} onDelete={updateQueryParams} />}
           </LeadTimeHeader>
         </div>
         {Object.keys(frameworkComponents).length > 0 ? (
           isMobile && !isTablet ? (
             <CustomSwipableList
+              key={selectedType}
               allowSelection={true}
               allowSwipe={true}
               permissions={permissions.leadTimeMaster}
@@ -512,8 +506,9 @@ const LeadTimeMaster = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.leadTimeMasterName ? 'Lead Time Master' : 'Lead Time Masters'}   ${deleteRecord.leadTimeMasterName || ''
-              }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.leadTimeMasterName ? 'Lead Time Master' : 'Lead Time Masters'}   ${
+              deleteRecord.leadTimeMasterName || ''
+            }?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
               setIsConformDialogVisible(false);
@@ -550,7 +545,7 @@ const LeadTimeMaster = () => {
           }}
         />
       )}
-    </Fragment>
+    </section>
   );
 };
 

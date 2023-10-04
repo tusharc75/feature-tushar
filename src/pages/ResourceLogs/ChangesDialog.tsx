@@ -9,7 +9,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import moment from 'moment';
 import { camelCase, capitalize } from 'lodash';
 
-const ChangesDialog = ({ open, onClose, changes, operations }) => {
+const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
 
   const [fullScreen, setFullScreen] = useState(true);
 
@@ -55,13 +55,13 @@ const ChangesDialog = ({ open, onClose, changes, operations }) => {
                               data?.type === 'date' ? (
                                 moment(data?.oldValue).format(dateFormat)
                               ) : data?.type === 'dropDown' && data?.lookup ? (
-                                <Link
+                                <p
                                   className="link text-truncate"
                                   title={data?.oldValue?.label}
-                                  to={`${routes[`${camelCase(data?.lookup_resource)}Detail`]?.path}/${data?.oldValue?.value}`}
+                                  onClick = { () => window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.oldValue?.value}`)}
                                 >
                                   {data?.oldValue?.label}
-                                </Link>
+                                </p>
                               ) : (
                                 data?.oldValue
                               )
@@ -74,14 +74,29 @@ const ChangesDialog = ({ open, onClose, changes, operations }) => {
                               data?.type === 'date' ? (
                                 moment(data?.newValue).format(dateFormat)
                               ) : data?.type === 'dropDown' && data?.lookup ? (
-                                <Link
+                                <p
                                   className="link text-truncate"
                                   title={data?.newValue?.label}
-                                  to={`${routes[`${camelCase(data?.lookup_resource)}Detail`]?.path}/${data?.newValue?.value}`}
+                                  onClick = { () => window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.newValue?.value}`)}
                                 >
                                   {data?.newValue?.label}
-                                </Link>
-                              ) : (
+                                </p>
+                              ) : data?.newValue === true ? (
+                                <Typography>True</Typography>
+                              ) : data?.newValue === false ? (
+                                <Typography>False</Typography>
+                              ) : data?.fieldLabel === 'updatedBy' ? (
+                                `${updatedBy}`
+                              ) : Array.isArray(data?.newValue) ? (
+                                data?.newValue?.map((value: any, index: any) => {
+                                  return (
+                                    <Typography key={index} className="text-truncate">
+                                      {value?.product?.optionLabel}
+                                    </Typography>
+                                  );
+                                })
+                              ) :
+                              (
                                 data?.newValue
                               )
                             ) : (
@@ -95,7 +110,8 @@ const ChangesDialog = ({ open, onClose, changes, operations }) => {
                 </TableBody>
               </Table>
             </TableContainer>
-          ) : null}
+          ) : 
+          <NoDataCell />}
           {operations?.length ?
             <TableContainer component={Paper}>
               <Table aria-label="customized table">
@@ -133,13 +149,13 @@ const ChangesDialog = ({ open, onClose, changes, operations }) => {
                                             data?.type === 'date' ? (
                                               moment(data?.oldValue).format(dateFormat)
                                             ) : data?.type === 'dropDown' && data?.lookup ? (
-                                              <Link
+                                              <p
                                                 className="link text-truncate"
                                                 title={data?.oldValue?.label}
-                                                to={`${routes[`${camelCase(data?.lookup_resource)}Detail`]?.path}/${data?.oldValue?.value}`}
+                                                onClick = { () => window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.oldValue?.value}`)}
                                               >
                                                 {data?.oldValue?.label}
-                                              </Link>
+                                              </p>
                                             ) : (
                                               data?.oldValue
                                             )
@@ -152,13 +168,13 @@ const ChangesDialog = ({ open, onClose, changes, operations }) => {
                                             data?.type === 'date' ? (
                                               moment(data?.newValue).format(dateFormat)
                                             ) : data?.type === 'dropDown' && data?.lookup ? (
-                                              <Link
+                                              <p
                                                 className="link text-truncate"
                                                 title={data?.newValue?.label}
-                                                to={`${routes[`${camelCase(data?.lookup_resource)}Detail`]?.path}/${data?.newValue?.value}`}
+                                                onClick = { () => window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.newValue?.value}`)}
                                               >
                                                 {data?.newValue?.label}
-                                              </Link>
+                                              </p>
                                             ) : (
                                               data?.newValue
                                             )

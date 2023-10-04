@@ -2,7 +2,7 @@ import { Box, Button, Paper, Typography } from '@material-ui/core';
 import { ExpandLess, ExpandMore } from '@material-ui/icons';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import ContentFullScreen from 'src/components/ContentFullScreen';
-import { COLOUR_MASTER, fieldServiceOrder } from 'src/constants/helpers';
+import { COLOUR_MASTER, fieldServiceOrder, fieldTicket, invoice } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import ReactFlow, { Controls, ControlButton, ReactFlowProvider } from 'react-flow-renderer';
 import { MdZoomOutMap } from 'react-icons/md';
@@ -16,18 +16,18 @@ const customNodeStyles = {
     background: '#E2F8FF',
     borderColor: '#8BCBDF'
   },
-  service: {
-    name: 'Service',
+  fieldTicket: {
+    name: 'Field Ticket',
     background: '#FFF7D9',
     borderColor: '#FDD33E'
   },
-  technician: {
-    name: 'Technician',
+  invoice: {
+    name: 'Invoice',
     background: '#E6E8F5',
     borderColor: '#9789F0'
   },
   serviceOrderClosed: {
-    name: 'Service Order Completed',
+    name: `${routes.fieldServiceOrder.title} Closed`,
     background: '#EDFFE1',
     borderColor: '#86DB71'
   }
@@ -47,13 +47,15 @@ function ServiceOrderViews({ serviceData }) {
   const fetchData = async () => {
     setLoading(true);
     try {
+      const fieldTickets = await axiosInstance().get(`${fieldTicket.api}?filterById=${JSON.stringify([{
+        field: 'fieldServiceOrder',
+        term: serviceData?._id
+      }])}`);
+
+      const invoices = await axiosInstance().get(`${invoice.api}?fieldServiceOrder=${serviceData?._id}`);
+
       var xPosition = 0;
-      const services = await axiosInstance().get(`${fieldServiceOrder.api}/${serviceData?._id}/material`);
-      const technicians = await axiosInstance().get(`${fieldServiceOrder.api}/${serviceData?._id}/technician`);
-      const allServices = services?.data?.data?.material;
-      const allTechnician = technicians?.data?.data;
-      const serviceIdMaterial = {};
-      const availableTechnician = {};
+      var flowEdge: any[] = [];
       var flow: any[] = [
         {
           id: `${serviceData?._id}`,
@@ -74,72 +76,78 @@ function ServiceOrderViews({ serviceData }) {
           style: customNodeStyles.fieldServiceOrder
         }
       ];
-      var flowEdge: any[] = [];
-      if (allServices?.length) xPosition = xPosition + 300;
-      allServices
-        ?.filter((s) => s?.type === 'service')
-        ?.map((service, index) => {
-          serviceIdMaterial[service?.materialId] = service._id;
+
+      const allFieldTickets = []
+      if (fieldTickets?.data?.data?.length) {
+        xPosition += 300;
+        fieldTickets?.data?.data?.map((fieldTicket, index) => {
+          allFieldTickets.push(fieldTicket._id)
           flow.push({
-            id: `${service._id}`,
+            id: `${fieldTicket?._id}`,
             type: 'default',
-            className: 'dark-node',
             sourcePosition: 'right',
             targetPosition: 'left',
             data: {
-              ref_type: 'purchaseOrder',
-              ref_id: service._id,
+              ref_type: 'fieldTicket',
+              ref_id: fieldTicket?._id,
               label: (
-                <HtmlTooltip arrow placement="top" title={`Service`}>
-                  <div>
-                    <Typography variant="subtitle2">{service?.serviceDetail?.serviceName ?? service?.serviceDetail?.serviceName}</Typography>
-                  </div>
-                </HtmlTooltip>
+                <div>
+                  <Typography variant="body2">{"Field Ticket"}</Typography>
+                  <Typography variant="subtitle2">{fieldTicket?.fieldTicketNumber ?? fieldTicket?.fieldTicketNumber}</Typography>
+                </div>
               )
             },
-            position: { x: xPosition, y: 100 * index },
-            style: customNodeStyles.service
+            position: { x: xPosition, y: 80 * index },
+            style: customNodeStyles.fieldTicket
           });
           flowEdge.push({
-            id: `${service?._id}__${serviceData?._id}_edge`,
+            id: `${fieldTicket?._id}__fieldTicket_edge_${index}`,
             source: `${serviceData?._id}`,
-            target: `${service?._id}`,
+            target: `${fieldTicket?._id}`,
             arrowHeadType: 'arrow'
           });
         });
+      }
 
-      if (allTechnician?.length) xPosition = xPosition + 300;
-      allTechnician?.map((technician, index) => {
-        availableTechnician[technician?.service?.optionValue] = true;
-        flow.push({
-          id: `${technician?.technician?._id}`,
-          type: 'default',
-          className: 'dark-node',
-          sourcePosition: 'right',
-          targetPosition: 'left',
-          data: {
-            ref_type: 'technician',
-            ref_id: technician?.technician?._id,
-            label: (
-              <HtmlTooltip arrow placement="top" title={`Technician`}>
+      if (invoices?.data?.data?.length) {
+        xPosition += 300;
+        invoices?.data?.data?.map((invoice, index) => {
+          flow.push({
+            id: `${invoice?._id}`,
+            type: 'default',
+            sourcePosition: 'right',
+            targetPosition: 'left',
+            data: {
+              ref_type: 'invoice',
+              ref_id: invoice?._id,
+              label: (
                 <div>
-                  <Typography variant="body2">{`${technician?.technician?.firstName ?? technician?.technician?.firstName} ${technician?.technician?.lastName ?? technician?.technician?.lastName
-                    }${technician?.technician?.employeeNumber ? ` - (${technician?.technician?.employeeNumber})` : ''}`}</Typography>
-                  <Typography variant="subtitle2">{technician?.technician?.status ?? technician?.status}</Typography>
+                  <Typography variant="body2">{"Invoice"}</Typography>
+                  <Typography variant="subtitle2">{invoice?.invoiceNumber ?? invoice?.invoiceNumber}</Typography>
                 </div>
-              </HtmlTooltip>
-            )
-          },
-          position: { x: xPosition, y: 100 * index },
-          style: customNodeStyles.technician
+              )
+            },
+            position: { x: xPosition, y: 80 * index },
+            style: customNodeStyles.invoice
+          });
+          if (invoice?.fieldTicket) {
+            invoice?.fieldTicket?.map((ft, index) => {
+
+              const indexToRemove = allFieldTickets.indexOf(ft?.optionValue);
+              if (indexToRemove > -1) {
+                allFieldTickets.splice(indexToRemove, 1);
+              }
+              flowEdge.push({
+                id: `${ft?.optionValue}__${invoice?._id}_edge_${index}`,
+                source: `${ft?.optionValue}`,
+                target: `${invoice?._id}`,
+                arrowHeadType: 'arrow'
+              });
+            })
+          }
         });
-        flowEdge.push({
-          id: `${technician?.service?.optionValue}__${technician?.technician?._id}_edge`,
-          source: `${serviceIdMaterial[technician?.service?.optionValue]}`,
-          target: `${technician?.technician?._id}`,
-          arrowHeadType: 'arrow'
-        });
-      });
+      }
+
       if (serviceData?.status === 'Closed') {
         xPosition += 300;
         flow.push({
@@ -163,24 +171,42 @@ function ServiceOrderViews({ serviceData }) {
           position: { x: xPosition, y: 80 },
           style: customNodeStyles.serviceOrderClosed
         });
-        allServices?.map((service, index) => {
-          if (!availableTechnician[service?.materialId]) {
-            flowEdge.push({
-              id: `${service?._id}__${serviceData?._id}_edge`,
-              source: `${service?._id}`,
-              target: `${serviceData?._id}_Closed`,
-              arrowHeadType: 'arrow'
-            });
-          }
-        });
-        allTechnician?.map((technician, index) => {
+        if (!invoices?.data?.data?.length && !fieldTickets?.data?.data?.length) {
           flowEdge.push({
-            id: `${technician?.technician?._id}__${serviceData?._id}_edge`,
-            source: `${technician?.technician?._id}`,
+            id: `${serviceData?._id}_closed_${serviceData?._id}_edge`,
+            source: `${serviceData?._id}`,
             target: `${serviceData?._id}_Closed`,
             arrowHeadType: 'arrow'
           });
-        });
+        } else {
+          invoices?.data?.data?.map((invoice, index) => {
+            flowEdge.push({
+              id: `${invoice?._id}_to_close_${serviceData?._id}_edge_${index}`,
+              source: `${invoice?._id}`,
+              target: `${serviceData?._id}_Closed`,
+              arrowHeadType: 'arrow'
+            });
+          });
+          fieldTickets?.data?.data?.map((fieldTicket, index) => {
+            // check this fieldTicket is in allFieldTickets
+            if (allFieldTickets.indexOf(fieldTicket?._id) > -1) {
+              flowEdge.push({
+                id: `${fieldTicket?._id}_to_close_${serviceData?._id}_edge_${index}`,
+                source: `${fieldTicket?._id}`,
+                target: `${serviceData?._id}_Closed`,
+                arrowHeadType: 'arrow'
+              });
+            }
+          });
+        }
+        // allTechnician?.map((technician, index) => {
+        //   flowEdge.push({
+        //     id: `${technician?.technician?._id}__${serviceData?._id}_edge`,
+        //     source: `${technician?.technician?._id}`,
+        //     target: `${serviceData?._id}_Closed`,
+        //     arrowHeadType: 'arrow'
+        //   });
+        // });
       }
 
       setFlowData([...flow, ...flowEdge]);

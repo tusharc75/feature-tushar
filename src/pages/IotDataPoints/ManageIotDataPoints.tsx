@@ -17,7 +17,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 
-const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null }) => {
+const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null }) => {
   const history = useHistory();
   const {
     state: { user }
@@ -53,7 +53,15 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null })
               const { fieldLabel, ...rest } = data;
               setCloneHeading(fieldLabel);
               tempData = rest;
-            } 
+            }
+            if (referenceData?.deviceTemplate) {
+              fields?.forEach((e) => {
+                if (e.fieldName === 'deviceTemplate') {
+                  e.disableOnEdit = true;
+                  e.isUneditable = true;
+                }
+              });
+            }
             setInitialData({
               fields: fields,
               values: getObjKeysWithValues(tempData, fields)
@@ -64,6 +72,16 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null })
           });
       } else {
         const tempInitialData: any = getObjKeys('', fieldsDataForCreate);
+        if (referenceData?.deviceTemplate) {
+          fieldsDataForCreate?.forEach((e) => {
+            if (e.fieldName === 'deviceTemplate') {
+              tempInitialData.deviceTemplate = referenceData?.deviceTemplate;
+              e.disableOnEdit = true;
+              e.isUneditable = true;
+            }
+          });
+        }
+
         setInitialData({
           fields: fieldsDataForCreate,
           values: tempInitialData
@@ -98,8 +116,11 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null })
         .post(`${routes.iotDataPoints?.path}`, values)
         .then(({ data: { data, message } }: any) => {
           setLoading(false);
-          history.push(`${routes.iotDataPointsDetail.path}/${data._id}`);
-          onSuccess(data);
+          if (referenceData) {
+            onSuccess(data);
+          } else {
+            history.push(`${routes.iotDataPointsDetail.path}/${data._id}`);
+          }
           setSubmitting(true);
           toastConfig.setToastConfig({
             open: true,
@@ -138,13 +159,12 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null })
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={`${
-                  id
-                    ? isClone
-                      ? `Clone - ${cloneHeading}`
-                      : `Update ${initialData.values?.fieldLabel ? `(${initialData.values?.fieldLabel})` : ''}`
-                    : `Create ${routes?.iotDataPoints?.title}`
-                }`}
+                title={`${id
+                  ? isClone
+                    ? `Clone - ${cloneHeading}`
+                    : `Update ${initialData.values?.fieldLabel ? `(${initialData.values?.fieldLabel})` : ''}`
+                  : `Create ${routes?.iotDataPoints?.title}`
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);

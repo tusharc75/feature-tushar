@@ -11,9 +11,16 @@ import { checkFormula } from "../../../constants/formulaUtility";
 import Chip from "@material-ui/core/Chip";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import Grid from "@material-ui/core/Grid";
+import HtmlTooltip from "src/components/CustomTooltipTitle";
+import { IconButton } from "@material-ui/core";
+import { FiMaximize2 } from 'react-icons/fi';
+import ContentFullScreen from "src/components/ContentFullScreen";
 
 export const Formula = ({ fields, values, setFieldValue, _id, touched, errors }) => {
+
   const [formulaError, setFormulaError] = useState(null);
+  const [stepFullScreen, setStepFullScreen] = useState(false);
+
   const inputRef = useRef<any>();
 
   const handleCheckSyntax = () => {
@@ -92,123 +99,137 @@ export const Formula = ({ fields, values, setFieldValue, _id, touched, errors })
 
   return (
     <Box>
-      <FormControl variant="outlined" fullWidth margin="dense">
-        <Autocomplete
-          multiple
-          disableCloseOnSelect={true}
-          id="tags-filled"
-          options={
-            fields &&
-            fields
-              .filter((_f) => _f._id !== _id)
-              .map((_field) => {
-                return _field.fieldLabel;
-              })
-          }
-          getOptionLabel={(option) => option}
-          value={
-            values["inputFields"]
-              ? convertValuetoLabel(values["inputFields"])
-              : []
-          }
-          renderTags={(value: string[], getTagProps) =>
-            value.map((option: string, index: number) => (
-              <Chip
-                variant="outlined"
-                label={option}
-                {...getTagProps({ index })}
-              />
-            ))
-          }
-          onChange={(e, value) =>
-            setFieldValue("inputFields", convertLabeltoValue(value))
-          }
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              margin="dense"
-              variant="outlined"
-              label="Input Parameters"
-              placeholder="Input Parameters"
-              name="inputFields"
-              error={touched['inputFields'] && Boolean(errors['inputFields'])}
-              helperText={touched['inputFields'] && errors['inputFields']}
+      <Grid container justifyContent="flex-end">
+        <HtmlTooltip title={`Full Screen`}>
+          <IconButton aria-label="Full Screen" onClick={() => {
+            setStepFullScreen(true)
+          }}
+            size="small">
+            <FiMaximize2 />
+          </IconButton>
+        </HtmlTooltip>
+      </Grid>
+      <ContentFullScreen title={'Formula'} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+        <Box>
+          <FormControl variant="outlined" fullWidth margin="dense">
+            <Autocomplete
+              multiple
+              disableCloseOnSelect={true}
+              id="tags-filled"
+              options={
+                fields &&
+                fields
+                  .filter((_f) => _f._id !== _id)
+                  .map((_field) => {
+                    return _field.fieldLabel;
+                  })
+              }
+              getOptionLabel={(option) => option}
+              value={
+                values["inputFields"]
+                  ? convertValuetoLabel(values["inputFields"])
+                  : []
+              }
+              renderTags={(value: string[], getTagProps) =>
+                value.map((option: string, index: number) => (
+                  <Chip
+                    variant="outlined"
+                    label={option}
+                    {...getTagProps({ index })}
+                  />
+                ))
+              }
+              onChange={(e, value) =>
+                setFieldValue("inputFields", convertLabeltoValue(value))
+              }
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  margin="dense"
+                  variant="outlined"
+                  label="Input Parameters"
+                  placeholder="Input Parameters"
+                  name="inputFields"
+                  error={touched['inputFields'] && Boolean(errors['inputFields'])}
+                  helperText={touched['inputFields'] && errors['inputFields']}
+                />
+              )}
             />
+          </FormControl>
+          {values["inputFields"] && values["inputFields"].length > 0 && (
+            <Box pt={0.5} pb={0.5}>
+              {values["inputFields"].map((_field) => (
+                <Chip
+                  className="ml-1 cursor-pointer mb-1"
+                  key={_field}
+                  label={generateLabel(_field)}
+                  onClick={() => handleAddInputField(_field)}
+                />
+              ))}
+            </Box>
           )}
-        />
-      </FormControl>
-      {values["inputFields"] && values["inputFields"].length > 0 && (
-        <Box pt={0.5} pb={0.5}>
-          {values["inputFields"].map((_field) => (
-            <Chip
-              className="ml-1 cursor-pointer mb-1"
-              key={_field}
-              label={generateLabel(_field)}
-              onClick={() => handleAddInputField(_field)}
+          <Box pt={0.5}>
+            <TextField
+              id="standard-basic"
+              name="formula"
+              variant="outlined"
+              label="Formula"
+              margin="dense"
+              fullWidth
+              multiline
+              rows={stepFullScreen ? 30 : 4}
+              type="text"
+              placeholder="Formula (return field1 + field2)"
+              inputRef={inputRef}
+              value={values["formula"]}
+              error={touched['formula'] && Boolean(errors['formula'])}
+              helperText={touched['formula'] && errors['formula']}
+              onKeyPress={(event) => {
+                event.stopPropagation();
+              }}
+              onChange={(e) => {
+                setFieldValue("formula", e.target.value);
+              }}
             />
-          ))}
+            <Grid container>
+              <Grid item xs={6}>
+                {formulaError && (
+                  <Typography variant="caption" display="block">
+                    {formulaError}{" "}
+                  </Typography>
+                )}
+                <Button size="small" onClick={handleCheckSyntax} color="primary">
+                  Check Syntax
+                </Button>
+              </Grid>
+              <Grid item xs={6}>
+                {values["type"] === "currencyAmount" && (
+                  <FormControl fullWidth margin="dense" variant="outlined">
+                    <InputLabel id="demo-simple-select-outlined-label">
+                      Formula applied on Currency
+                    </InputLabel>
+                    <Select
+                      labelId="demo-simple-select-outlined-label"
+                      id="demo-simple-select-outlined"
+                      value={values["formulaOnCurrency"]}
+                      onChange={(e) =>
+                        setFieldValue("formulaOnCurrency", e.target.value)
+                      }
+                      label="Formula applied on Currency"
+                      name="formulaOnCurrency"
+                    >
+                      {values["displayCurrency"] &&
+                        values["displayCurrency"].map((_currency) => (
+                          <MenuItem value={_currency}>{_currency}</MenuItem>
+                        ))}
+                    </Select>
+                  </FormControl>
+                )}
+              </Grid>
+            </Grid>
+          </Box>
         </Box>
-      )}
-      <Box pt={0.5}>
-        <TextField
-          id="standard-basic"
-          name="formula"
-          variant="outlined"
-          label="Formula"
-          margin="dense"
-          fullWidth
-          multiline
-          rows={4}
-          type="text"
-          placeholder="Formula (return field1 + field2)"
-          inputRef={inputRef}
-          value={values["formula"]}
-          error={touched['formula'] && Boolean(errors['formula'])}
-          helperText={touched['formula'] && errors['formula']}
-          onKeyPress={(event) => {
-            event.stopPropagation();
-          }}
-          onChange={(e) => {
-            setFieldValue("formula", e.target.value);
-          }}
-        />
-        <Grid container>
-          <Grid item xs={6}>
-            {formulaError && (
-              <Typography variant="caption" display="block">
-                {formulaError}{" "}
-              </Typography>
-            )}
-            <Button size="small" onClick={handleCheckSyntax} color="primary">
-              Check Syntax
-            </Button>
-          </Grid>
-          <Grid item xs={6}>
-            {values["type"] === "currencyAmount" && (
-              <FormControl fullWidth margin="dense" variant="outlined">
-                <InputLabel id="demo-simple-select-outlined-label">
-                  Formula applied on Currency
-                </InputLabel>
-                <Select
-                  labelId="demo-simple-select-outlined-label"
-                  id="demo-simple-select-outlined"
-                  value={values["formulaOnCurrency"]}
-                  onChange={(e) =>
-                    setFieldValue("formulaOnCurrency", e.target.value)
-                  }
-                  label="Formula applied on Currency"
-                  name="formulaOnCurrency"
-                >
-                  {values["displayCurrency"] &&
-                    values["displayCurrency"].map((_currency) => (
-                      <MenuItem value={_currency}>{_currency}</MenuItem>
-                    ))}
-                </Select>
-              </FormControl>
-            )}
-          </Grid>
-        </Grid>
-      </Box>
+      </ContentFullScreen>
     </Box>
   );
 };

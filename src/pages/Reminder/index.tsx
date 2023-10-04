@@ -130,9 +130,9 @@ const Reminder = () => {
         />
       )}
       <div className="main-container-v1">
-        <Grid container className="headerbox-v1">
+        <div className="headerbox-v1">
           <CustomBreadCrumbs routes={[{ title: routes.reminder.title }]} />
-        </Grid>
+        </div>
         <div className="detail-container-v1  min-h-[calc(100vh-99px)]">
           <div className=" grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 h-[calc(100vh-172px)] overflow-auto">
             <div className={`bg-[var(--dark-secondary,#f1f5ff)] rounded-[8px]`}>

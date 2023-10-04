@@ -12,10 +12,9 @@ import Dialog from '@material-ui/core/Dialog';
 import ManageAttachment from '../../../components/Activity/Attachments/ManageAttachment';
 import CustomContainer from '../../../components/CustomContainer';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import styles from '../../Leads/Header.module.scss';
 import { AiOutlinePaperClip } from 'react-icons/ai';
 import { AddOutlined } from '@material-ui/icons';
-import { Button, Tooltip, IconButton, MenuItem, Menu, TextField, Chip, Link, Popover, MenuList } from '@material-ui/core';
+import { Button, IconButton, MenuItem, Menu, TextField, Chip, Link, Popover, MenuList } from '@material-ui/core';
 import { useData } from '../../../StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, gridLoadingTimeout, sidebarResource } from '../../../constants/helpers';
@@ -23,7 +22,6 @@ import { Delete as DeleteIcon } from '@material-ui/icons';
 import { gridPageSizes, isObjectEmpty, displayDate } from '../../../constants/helpers';
 import { ExpandMore } from '@material-ui/icons';
 import routes from '../../../components/Helpers/Routes';
-import { MdAdd } from 'react-icons/all';
 import GetAppIcon from '@material-ui/icons/GetApp';
 import { Autocomplete } from '@material-ui/lab';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
@@ -225,13 +223,9 @@ export default function Attachment() {
           {row.original.relatedTo && row.original.relatedTo?.length > 0 ? (
             row.original.relatedTo.map((d) => {
               return (
-                <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center' }} key={d.name}>
                   <p>{d.name}</p>
-                  <IconButton
-                    className="ml-3"
-                    size="small"
-                    onClick={() => redirectToResource(d?.type, d?.referenceId)}
-                  >
+                  <IconButton className="ml-3" size="small" onClick={() => redirectToResource(d?.type, d?.referenceId)}>
                     <OpenInNewIcon fontSize="small" color="primary" />
                   </IconButton>
                   <Chip className="ml-3" color="primary" label={`${routes[d?.type]?.title}`} />
@@ -291,27 +285,37 @@ export default function Attachment() {
         const allPdf = _.every(row.original?.file, (d) => _.endsWith(d?.url, '.pdf'));
         return (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {row.original.type === 'file' && (
-              <Tooltip
-                title="Send Email"
+            <HtmlTooltip title="Send Email">
+              <IconButton
+                size="small"
                 onClick={() => {
-                  handleMail(row.original);
+                  if (row.original.type === 'folder') {
+                    handleMailForFolder(row.original?._id, row.original?.name);
+                  } else {
+                    handleMail(row.original);
+                  }
                 }}
               >
-                <IconButton size="small">
-                  <SendIcon color="primary" style={{ maxWidth: '18px' }} />
-                </IconButton>
-              </Tooltip>
-            )}
-            {row.original.type !== 'folder' && (
-              <Tooltip title="Download">
-                <IconButton size="small" aria-label="Delete" onClick={() => downloadFile(row.original)}>
-                  <GetAppIcon fontSize="small" color="primary" />
-                </IconButton>
-              </Tooltip>
-            )}
+                <SendIcon color="primary" style={{ maxWidth: '18px' }} />
+              </IconButton>
+            </HtmlTooltip>
+            <HtmlTooltip title="Download">
+              <IconButton
+                size="small"
+                aria-label="Download"
+                onClick={() => {
+                  if (row.original.type === 'folder') {
+                    downloadFolder(row.original?._id, row.original?.name);
+                  } else {
+                    downloadFile(row.original);
+                  }
+                }}
+              >
+                <GetAppIcon fontSize="small" color="primary" />
+              </IconButton>
+            </HtmlTooltip>
             {allPdf && row.original.type === 'file' && (
-              <Tooltip
+              <HtmlTooltip
                 title="Preview"
                 onClick={(e) => {
                   viewPdf(e, row.original);
@@ -320,27 +324,44 @@ export default function Attachment() {
                 <IconButton size="small">
                   <PreviewIcon fontSize="small" color="primary" />
                 </IconButton>
-              </Tooltip>
+              </HtmlTooltip>
             )}
-
             {row.original.canEdit ? (
-              <Tooltip title="Delete">
+              <HtmlTooltip title="Delete">
                 <IconButton size="small" aria-label="Delete" onClick={() => showConfirmBox(row.original)}>
                   <DeleteIcon fontSize="small" color="error" />
                 </IconButton>
-              </Tooltip>
+              </HtmlTooltip>
             ) : (
-              <Tooltip className="cursor-stop" title="Signed Quote Attachment can not be deleted">
+              <HtmlTooltip className="cursor-stop" title="Signed Quote Attachment can not be deleted">
                 <IconButton size="small" aria-label="Delete">
                   <DeleteIcon fontSize="small" color="disabled" />
                 </IconButton>
-              </Tooltip>
+              </HtmlTooltip>
             )}
           </div>
         );
       }
     }
   ];
+
+  const downloadFolder = (_id, name) => {
+    axiosInstance()
+      .get(`attachment/zip/${_id}`, {
+        responseType: 'blob'
+      })
+      .then(({ data }) => {
+        const url = window.URL.createObjectURL(new Blob([data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `${name || 'folder'}.zip`);
+        document.body.appendChild(link);
+        link.click();
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
 
   useEffect(() => {
     setResourceOptions(get_activity_resource(permissions));
@@ -440,6 +461,7 @@ export default function Attachment() {
         });
     }
   };
+
   const handleMail = (data) => {
     const file = data?.file;
     axiosInstance()
@@ -448,29 +470,40 @@ export default function Attachment() {
       })
       .then(({ data }) => {
         const tempfile = new Blob([data], { type: 'application/pdf' });
-        generateBase64forFile(tempfile, file[0].name, 'pdf');
+        generateBase64forFile(tempfile, file[0].name, `.${file[0].name.split('.')?.pop()}`);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
   };
 
-  const generateBase64forFile = (blobData, fileName, type) => {
+  const handleMailForFolder = (_id, name) => {
+    axiosInstance()
+      .get(`attachment/zip/${_id}`, { responseType: 'blob' })
+      .then(({ data }) => {
+        const zipfile = new Blob([data], { type: 'application/zip' });
+        generateBase64forFile(zipfile, `${name || 'folder'}.zip`, '.zip');
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const generateBase64forFile = (blobData, fileName, extension) => {
     let reader = new FileReader();
     reader.readAsDataURL(blobData);
     reader.onloadend = function () {
       let base64data: any = reader.result;
-      if (type === 'pdf') {
-        const attachments = [
-          {
-            base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
-            contentType: base64data.split(';')[0].split(':')[1],
-            name: fileName
-          }
-        ];
-        setEmailAttachment(attachments);
-        setSendMail(true);
-      }
+      const attachments = [
+        {
+          base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
+          contentType: base64data.split(';')[0].split(':')[1],
+          extension: extension,
+          name: fileName
+        }
+      ];
+      setEmailAttachment(attachments);
+      setSendMail(true);
     };
   };
 
@@ -605,9 +638,9 @@ export default function Attachment() {
   };
 
   const fetchChildAttachment = async (id) => {
-    const attachment = await axiosInstance().get(`/attachment/child/${id}`)
-    return attachment?.data?.data
-  }
+    const attachment = await axiosInstance().get(`/attachment/child/${id}`);
+    return attachment?.data?.data;
+  };
 
   const generateNestedData = (data, parent) => {
     const childRow = data
@@ -679,65 +712,62 @@ export default function Attachment() {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[{ title: routes.attachment.title }]} />
-        </Grid>
-        <Grid item md={8} sm={1} xs={2}>
-          <Grid container direction="row">
-            <Grid item xs={12} sm={12}>
-              <Grid container justify="flex-end">
-                <ImportExportLinks
-                  permissions={permissions?.attachment}
-                  module="Attachment"
-                  api={`/attachment`}
-                  afterImportCompleted={() => { }}
-                  total={rowCount}
-                  onlyExport={true}
-                  additionalParams={`&relatedTo=${JSON.stringify(filter)}${getQueryString(true)}`}
-                />
-              </Grid>
-            </Grid>
-          </Grid>
-        </Grid>
-      </Grid>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[{ title: routes.attachment.title }]} />
+        <ImportExportLinks
+          permissions={permissions?.attachment}
+          module="Attachment"
+          api={`/attachment`}
+          afterImportCompleted={() => {}}
+          total={rowCount}
+          onlyExport={true}
+          additionalParams={`&relatedTo=${JSON.stringify(filter)}${getQueryString(true)}`}
+        />
+      </div>
       <CustomContainer>
         {filter && (
           <div className="header-panel">
-            <Grid container className={styles.filter_side_container}>
-              <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center gap-1">
+            <div className="grid grid-cols-1 lg:grid-cols-[4fr_3fr] gap-4">
+              <div className={'d-flex flex-wrap items-start gap-2 content-start'}>
                 <AiOutlinePaperClip className="headerLogo" />
                 <span className="listingHeader">{routes.attachment.title} </span>
                 <Autocomplete
+                  limitTags={1}
                   options={resourceOptions}
                   getOptionLabel={(option) => option.optionLabel}
-                  style={{ width: '250px' }}
+                  className={`sm:max-w-[250px] sm:min-w-[200px] flex-grow`}
+                  fullWidth
                   value={resource}
                   onChange={(event, newValue) => {
                     setResource(newValue);
                     if (newValue) {
-                      setFilter((prevState) => [...prevState, { type: newValue?.optionValue, name: newValue?.optionLabel, isAll: true }]);
+                      //setFilter((prevState) => [...prevState, { type: newValue?.optionValue, name: newValue?.optionLabel, isAll: true }]);
                     } else {
                       setFilter([]);
                     }
                   }}
                   size="small"
-                  renderInput={(params) =>
-                    isMobile && !isTablet ? (
-                      <TextField {...params} label="Select Resource" variant="standard" className={isMobile ? 'serchBox' : ''} />
-                    ) : (
-                      <TextField {...params} label="Select Resource" variant="outlined" />
-                    )
-                  }
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      fullWidth
+                      className="flex-grow md:max-w-[250px]"
+                      margin="none"
+                      size="small"
+                      label="Select Resource"
+                      variant="outlined"
+                    />
+                  )}
                 />
                 {resource && resourceData && (
                   <Autocomplete
+                    limitTags={1}
                     disabled={loadingResources}
                     options={resourceData}
+                    className={`sm:max-w-[270px] sm:min-w-[250px] flex-grow`}
                     getOptionLabel={(option: any) => option.optionLabel}
                     getOptionSelected={(option: any, value: any) => option.optionLabel === value.optionLabel}
-                    style={{ width: '250px' }}
                     value={selectedResourceData}
                     onChange={(event, newValue) => {
                       setSelectedResourceData(newValue);
@@ -751,65 +781,70 @@ export default function Attachment() {
                       }
                     }}
                     size="small"
-                    renderInput={(params) => <TextField {...params} label={`Select ${resource.optionLabel}`} variant="outlined" />}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        fullWidth
+                        className={`sm:max-w-[270px] sm:min-w-[250px] flex-grow`}
+                        margin="none"
+                        size="small"
+                        label={`Select ${resource.optionLabel}`}
+                        variant="outlined"
+                      />
+                    )}
                   />
                 )}
-              </Grid>
-              <Grid item xs={12} md={6} sm={12} className={styles.filter_side}>
-                <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} style={{ width: '100%' }}>
-                  <Box style={{ flexGrow: 1, minWidth: 210 }}>
-                    <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'small' }} activityName="attachment" />
-                  </Box>
-                  <Box style={{ display: 'flex', gap: '5px' }}>
-                    {
-                      <Button
-                        variant={isMobile && !isTablet ? 'text' : 'contained'}
-                        color="primary"
-                        size="small"
-                        onClick={() => setOpen({ open: true, type: 'file', parentFolder: null, parentResource: null })}
-                        className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
-                        startIcon={isMobile && !isTablet ? null : <AddOutlined />}
-                      >
-                        {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
-                      </Button>
-                    }
-                    <Button
-                      variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                      color="default"
-                      size="small"
-                      onClick={openActions}
-                      aria-controls="action-menu"
-                      disabled={selectedRecords.length > 0 ? false : true}
-                      className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
-                    >
-                      {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
-                    </Button>
-                    <Menu
-                      anchorEl={anchorEl}
-                      keepMounted
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
+              </div>
+              <div className="flex flex-wrap gap-[8px]  justify-end items-start">
+                <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'small' }} activityName="attachment" />
+                <div className="flex gap-[8px] flex-wrap items-center">
+                  <Button
+                    variant={'contained'}
+                    color="primary"
+                    size="small"
+                    onClick={() => setOpen({ open: true, type: 'file', parentFolder: null, parentResource: null })}
+                    className={`no-shadow`}
+                    startIcon={<AddOutlined />}
+                  >
+                    Add
+                  </Button>
+                  <Button
+                    variant={'outlined'}
+                    color="default"
+                    size="small"
+                    onClick={openActions}
+                    aria-controls="action-menu"
+                    disabled={selectedRecords.length > 0 ? false : true}
+                    className={`new-dropdown-v1`}
+                    endIcon={<ExpandMore />}
+                  >
+                    Actions
+                  </Button>
+                  <Menu
+                    anchorEl={anchorEl}
+                    keepMounted
+                    getContentAnchorEl={null}
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'left'
+                    }}
+                    id="action-menu"
+                    open={Boolean(anchorEl)}
+                    onClose={closeActions}
+                  >
+                    <MenuItem
+                      disabled={permissions.attachment.isDelete ? !selectedRecords.some((records) => records.canEdit) : true}
+                      onClick={() => {
+                        showConfirmBox(null);
+                        closeActions();
                       }}
-                      id="action-menu"
-                      open={Boolean(anchorEl)}
-                      onClose={closeActions}
                     >
-                      <MenuItem
-                        disabled={permissions.attachment.isDelete ? !selectedRecords.some((records) => records.canEdit) : true}
-                        onClick={() => {
-                          showConfirmBox(null);
-                          closeActions();
-                        }}
-                      >
-                        Delete
-                      </MenuItem>
-                    </Menu>
-                  </Box>
-                </Box>
-              </Grid>
-            </Grid>
+                      Delete
+                    </MenuItem>
+                  </Menu>
+                </div>
+              </div>
+            </div>
           </div>
         )}
         <Box zIndex={5} width={'100%'}>
@@ -826,7 +861,7 @@ export default function Attachment() {
               childrenProperty="subRows"
               uniqueKey="_id"
               expander={true}
-              setWholeRowsCellColor={() => { }}
+              setWholeRowsCellColor={() => {}}
               renderedFrom={'attachment_render'}
               isClientSideGrid={false}
               rowCount={rowCount}
@@ -916,8 +951,8 @@ export default function Attachment() {
                   referenceId: open.parentResource
                     ? open.parentResource?.referenceId
                     : resource && selectedResourceData
-                      ? selectedResourceData.optionValue
-                      : user?.user?._id,
+                    ? selectedResourceData.optionValue
+                    : user?.user?._id,
                   access: true
                 }
               ]}
@@ -974,7 +1009,7 @@ export default function Attachment() {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.id ? deleteRecord?.name ?? 'this attachment?' : 'these attachments?'}`}
+            message={`Are you sure you want to delete this attachment(s)?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord(null);
               setIsConfirmDialogVisible(false);
@@ -984,6 +1019,6 @@ export default function Attachment() {
           />
         ) : null}
       </CustomContainer>
-    </Fragment>
+    </section>
   );
 }

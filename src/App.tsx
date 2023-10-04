@@ -228,11 +228,21 @@ import AzureSSOLogin from './pages/Auth/AzureSSOLogin';
 import IotDataPoints from './pages/IotDataPoints';
 import IotDataPointsDetail from './pages/IotDataPoints/IotDataPointsDetail';
 import IotChart from './pages/IotChart';
-import IotChartDetail from './pages/IotChart/IotChartDetail'
+import IotChartDetail from './pages/IotChart/IotChartDetail';
 import IotReportList from './pages/IotReport';
 import IotReport from './pages/IotReport/Report';
 import AccountsReceivable from './pages/AccountsReceivable';
 import AccountsReceivableDetail from './pages/AccountsReceivable/AccountsReceivableDetail';
+import DeviceTemplates from './pages/DeviceTemplates';
+import DeviceTemplatesDetails from './pages/DeviceTemplates/DeviceTemplatesDetails';
+import WorkStations from './pages/WorkStations';
+import WorkStationsDetail from './pages/WorkStations/WorkStationsDetail';
+import DeviceTemplatesAlert from './pages/DeviceTemplatesAlert';
+import DeviceTemplateAlertDetail from './pages/DeviceTemplatesAlert/DeviceTemplateAlertDetail'
+import ChartOfAccount from './pages/ChartOfAccount';
+import ChartOfAccountDetail from './pages/ChartOfAccount/ChartOfAccountDetail';
+import Flash from './pages/Flash';
+import FlashDetailsPage from './pages/Flash/FlashDetailsPage';
 
 var notificationInterval: any = null;
 
@@ -1026,6 +1036,36 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.iotReport.path}/:resource`}>
               <IotReport />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.deviceTemplates.path}`}>
+              <DeviceTemplates />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.deviceTemplatesDetail.path}/:id`}>
+              <DeviceTemplatesDetails />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.workStations.path}`}>
+              <WorkStations />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.workStationsDetail.path}/:id`}>
+              <WorkStationsDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.deviceTemplateAlert.path}`}>
+              <DeviceTemplatesAlert />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.deviceTemplateAlertDetail.path}`}>
+              <DeviceTemplateAlertDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.chartOfAccount.path}`}>
+              <ChartOfAccount />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.chartOfAccountDetail.path}/:id`}>
+              <ChartOfAccountDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.flash.path}`}>
+              <Flash />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.flashDetail.path}/:id`}>
+              <FlashDetailsPage />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />

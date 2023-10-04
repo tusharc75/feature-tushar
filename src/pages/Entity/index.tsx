@@ -1,28 +1,26 @@
-import { useState, FC, useEffect, useContext, useReducer, Fragment } from 'react';
-import { Dialog, Grid, IconButton, Tooltip } from '@material-ui/core';
-import { entity, gridLoadingTimeout, isObjectEmpty, sidebarResource } from '../../constants/helpers';
-import axiosInstance from '../../axios/axiosInstance';
-import routes from './../../components/Helpers/Routes';
-import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import EntityHeader from './Header';
-import { useData } from '../../StateProvider/Provider';
-import ManageEntity from './ManageEntity';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import AssignUsersDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import CustomContainer from '../../components/CustomContainer';
-import { FaUser, FaSuitcase, BsCurrencyExchange, FaAddressCard, IoCreate } from 'react-icons/all';
+import { Dialog, IconButton, Tooltip } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { prepareDataForGrid } from '../../constants/helpers';
-import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
-import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
-import ResourceTransferDialog from '../../components/ResourceTransferDialog';
+import { camelCase } from 'lodash';
+import { FC, useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { useHistory } from 'react-router-dom'
-import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
-import { camelCase } from "lodash";
-import { SET_USER } from "src/StateProvider/actionTypes";
+import { BsCurrencyExchange, FaAddressCard, FaSuitcase, FaUser, IoCreate } from 'react-icons/all';
+import { useHistory } from 'react-router-dom';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
+import AssignUsersDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
+import CustomContainer from '../../components/CustomContainer';
+import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
+import ResourceTransferDialog from '../../components/ResourceTransferDialog';
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import { entity, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import useColumns, { getFrameworkComponents, getStaticFields } from '../../constants/useColumns';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import routes from './../../components/Helpers/Routes';
+import EntityHeader from './Header';
+import ManageEntity from './ManageEntity';
 
 let entityTimeout;
 
@@ -204,7 +202,7 @@ const Entity: FC = () => {
           term: filters[field].filter
         });
       });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
     }
 
     if (sorting.length > 0) {
@@ -212,7 +210,7 @@ const Entity: FC = () => {
     }
 
     if (search) {
-      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
@@ -267,30 +265,26 @@ const Entity: FC = () => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[routes.entity]} />
-        </Grid>
-        <Grid item md={8} sm={1} xs={2}>
-          <ImportExportLinks
-            permissions={permissions[entityResource]}
-            module="entity(s)"
-            api={entityApi}
-            afterImportCompleted={() => {
-              fetchEntity();
-            }}
-            isExportAllOrSomeFeature={true}
-            total={rowCount}
-            recordsToExport={selectedRecords.length}
-            ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
-            onExportToExcelSuccess={() => {
-              if (gridApi) gridApi.deselectAll();
-              else fetchEntity();
-            }}
-          />
-        </Grid>
-      </Grid>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[routes.entity]} />
+        <ImportExportLinks
+          permissions={permissions[entityResource]}
+          module="entity(s)"
+          api={entityApi}
+          afterImportCompleted={() => {
+            fetchEntity();
+          }}
+          isExportAllOrSomeFeature={true}
+          total={rowCount}
+          recordsToExport={selectedRecords.length}
+          ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+          onExportToExcelSuccess={() => {
+            if (gridApi) gridApi.deselectAll();
+            else fetchEntity();
+          }}
+        />
+      </div>
 
       <CustomContainer>
         <div className="header-panel">
@@ -312,6 +306,7 @@ const Entity: FC = () => {
             openUserDialog={handleOpenDialog}
             anyEntitySelected={selectedRecords.length > 0} //single select entity can assign user
             filters={filters}
+            resource={sidebarResource.entity}
           />
         </div>
 
@@ -331,7 +326,7 @@ const Entity: FC = () => {
               history.push(`${routes.entityDetail.path}/${d._id}`);
             }}
             extraParamsToCheckDelete={false}
-            onDelete={(d) => { }}
+            onDelete={(d) => {}}
             rowCount={rowCount}
             page={page}
             loading={loading}
@@ -361,7 +356,7 @@ const Entity: FC = () => {
             owerCollaboratorInitialsOrImages=""
             onCreate={false}
             showClone={false}
-            onClone={() => { }}
+            onClone={() => {}}
             renderedFrom={renderedFrom}
           />
         ) : Object.keys(frameWorkComponent).length > 0 ? (
@@ -385,47 +380,39 @@ const Entity: FC = () => {
           />
         ) : null}
 
-        {
-          isOpen?.open && (
-            <ManageEntity
-              open={isOpen}
-              close={handleClose}
-              fetchData={fetchEntity}
-              isNew={true}
-              entityId={isOpen?.entityId}
-              isClone={isOpen?.isClone}
+        {isOpen?.open && (
+          <ManageEntity
+            open={isOpen}
+            close={handleClose}
+            fetchData={fetchEntity}
+            isNew={true}
+            entityId={isOpen?.entityId}
+            isClone={isOpen?.isClone}
+          />
+        )}
+        {usersDialogOpen && !usersDialogLoding && (
+          <Dialog fullWidth maxWidth="sm" open={usersDialogOpen} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
+            <AssignUsersDialog
+              entitiesDialogOpen={usersDialogOpen}
+              handleCloseDialog={handleCloseDialog}
+              type="user"
+              ids={selectedEntity ? [selectedEntity] : selectedRecords.map((rec) => rec._id)}
+              assignedEntity={users}
+              regionalRole={false}
+              onSuccess={() => {
+                setSelectedEntity(null);
+                handleCloseDialog();
+              }}
             />
-          )
-        }
-        {
-          usersDialogOpen && !usersDialogLoding && (
-            <Dialog
-              fullWidth
-              maxWidth="sm"
-              open={usersDialogOpen}
-              onClose={handleCloseDialog}
-              aria-labelledby="assign-roles-dialog"
-            >
-              <AssignUsersDialog
-                entitiesDialogOpen={usersDialogOpen}
-                handleCloseDialog={handleCloseDialog}
-                type="user"
-                ids={selectedEntity ? [selectedEntity] : selectedRecords.map(rec => rec._id)}
-                assignedEntity={users}
-                regionalRole={false}
-                onSuccess={() => {
-                  setSelectedEntity(null)
-                  handleCloseDialog();
-                }}
-              />
-            </Dialog>
-          )
-        }
+          </Dialog>
+        )}
         {showDeleteDialog ? (
           <ResourceTransferDialog
             open={true}
             fromResource={{ ...deleteEntity, name: deleteEntity.entityName ?? '' }}
-            allResourceData={user?.entity?.filter(entity => entity._id !== deleteEntity?._id).map(e => ({ ...e, optionLabel: e?.entityName, optionValue: e?._id }))}
+            allResourceData={user?.entity
+              ?.filter((entity) => entity._id !== deleteEntity?._id)
+              .map((e) => ({ ...e, optionLabel: e?.entityName, optionValue: e?._id }))}
             onClose={() => {
               setDeleteEntity({});
               setShowDeleteDialog(false);
@@ -440,7 +427,7 @@ const Entity: FC = () => {
           />
         ) : null}
       </CustomContainer>
-    </Fragment>
+    </section>
   );
 };
 

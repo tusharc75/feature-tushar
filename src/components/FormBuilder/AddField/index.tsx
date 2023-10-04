@@ -216,6 +216,7 @@ export const AddField = (props) => {
   return (<Dialog aria-labelledby="customized-dialog-title" fullWidth
     fullScreen={isMobile || isTablet}
     TransitionComponent={CustomDialogTransition}
+    disableEnforceFocus
     maxWidth={"md"} open={true}
     onClose={(e, reason) => {
       if (reason !== 'backdropClick') {

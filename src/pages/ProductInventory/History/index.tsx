@@ -124,7 +124,7 @@ const History = ({ product, warehouse, storageLocation }) => {
       })
     }
     if (updatedFilters?.length > 0) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
     }
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
@@ -140,6 +140,8 @@ const History = ({ product, warehouse, storageLocation }) => {
         setStorageLocationOptions(data['Storage Location'] || []);
       });
   };
+
+  const curr = user?.user?.brandCurrency || "";
 
   const columns = [
     { field: 'date', headerName: 'Date', show: true, cellRenderer: 'dateTimeRenderer', filter: false, sortable: false },
@@ -177,13 +179,13 @@ const History = ({ product, warehouse, storageLocation }) => {
       }
     },
     ...(!user?.user?.brandPolicy?.hideInventoryCount ? [{ field: 'finalInventory', headerName: 'Final Inventory', show: true, cellRenderer: 'commonRenderer', filter: false, sortable: false }] : []),
-    { field: 'price', headerName: 'Cost', show: true, filter: false, cellRenderer: 'commonRenderer' },
-    { field: 'totalPrice', headerName: 'Amount', show: true, filter: false, cellRenderer: 'commonRenderer' },
+    { field: 'price', headerName: `Cost ${curr}`, show: true, filter: false, cellRenderer: 'commonRenderer' },
+    { field: 'totalPrice', headerName: `Amount ${curr}`, show: true, filter: false, cellRenderer: 'commonRenderer' },
     ...(warehouse && warehouse?.split(',')?.length === 1
       ? [
         {
           field: 'finalAvgPrice',
-          headerName: 'Final Average Cost',
+          headerName: `Final Average Cost ${curr}`,
           show: true,
           cellRenderer: 'commonRenderer',
           filter: false,

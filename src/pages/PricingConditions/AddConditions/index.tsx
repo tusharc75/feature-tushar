@@ -222,102 +222,6 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
     { field: 'pricingMethod', headerName: 'Pricing Method', show: true, disabled: true, cellRenderer: 'commonRenderer' }
   ];
 
-  const uploadData = (event) => {
-    if (event.target.files && event.target.files.length) {
-      toastConfig.setToastConfig({
-        hideDuration: null,
-        open: true,
-        type: 'info',
-        message: `Uploading file, Please wait...`
-      });
-      const file = event.target.files[0];
-
-      let formData = new FormData();
-      formData.append('file', file);
-
-      let importApi = `${pricingCondition.api}/condition/import/${pricingConditionId}`;
-
-      axiosInstance()
-        .post(importApi, formData, {
-          responseType: 'blob',
-          headers: { 'Content-Type': 'multipart/form-data' }
-        })
-        .then((response) => {
-          if (!response.headers['content-disposition']) {
-            toastConfig.setToastConfig({
-              open: true,
-              type: 'success',
-              message: 'All Records Added Successfully'
-            });
-            fetchCondition();
-          } else {
-            const fileName = response.headers['content-disposition'].split('filename=')[1];
-            downloadExcel(response.data, fileName);
-            toastConfig.setToastConfig({
-              open: true,
-              type: 'error',
-              message: `Found some issue(s) while importing file. Please check the file and try again.`
-            });
-            fetchCondition();
-          }
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
-    }
-    setAnchorEl(null);
-  };
-
-  const exportToExcel = () => {
-    toastConfig.setToastConfig({
-      hideDuration: null,
-      open: true,
-      type: 'info',
-      message: `Your file will be downloaded/uploaded in a matter of seconds`
-    });
-    let exportApi = `${pricingCondition.api}/condition/template/${pricingConditionId}${getLocalStorageArrayData(localStorageSelectedRecords).length
-      ? `?ids=${JSON.stringify(getLocalStorageArrayData(localStorageSelectedRecords)?.map((e) => e?.materialId) || [])}`
-      : ''
-      }`;
-
-    axiosInstance()
-      .get(exportApi, {
-        responseType: 'arraybuffer'
-      })
-      .then((response) => {
-        const fileName = response.headers['content-disposition'].split('filename=')[1];
-        downloadExcel(response.data, fileName);
-        removeLocalStorage(renderFrom);
-        // localStorage.removeItem(renderFrom);
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: 'Exported to excel successfully.'
-        });
-      })
-      .catch((error) => {
-        localStorage.removeItem(renderFrom);
-        toastConfig.setToastConfig(error);
-      });
-    setAnchorEl(null);
-  };
-
-  const ImportInput = (
-    <input
-      onClick={(e: any) => (e.target.value = null)}
-      id="importFromExcel"
-      name="importFromExcel"
-      onChange={uploadData}
-      accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-      style={{
-        opacity: '0',
-        position: 'absolute',
-        zIndex: -1
-      }}
-      type="file"
-    />
-  );
-
   const openAddActions = (event) => {
     setAddAnchorEl(event.currentTarget);
   };
@@ -434,62 +338,51 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
               extraImportExportLinks={[
                 {
                   title: 'Product Template',
-                  api: `${pricingCondition.api}/template?conditionType=product&child=true&ids=${JSON.stringify([pricingConditionId])}`,
+                  api: `${pricingCondition.api}/template?materialType=product&child=true&ids=${JSON.stringify([pricingConditionId])}`,
                   type: 'download'
                 },
                 {
                   title: 'Product Export',
-                  api: `${pricingCondition.api}/template?export=true&conditionType=product&child=true&ids=${JSON.stringify([pricingConditionId])}`,
+                  api: `${pricingCondition.api}/template?export=true&materialType=product&child=true&ids=${JSON.stringify([pricingConditionId])}`,
                   type: 'export'
                 },
                 {
                   title: 'Product Import',
-                  api: `${pricingCondition.api}/import?conditionType=product&child=true&ids=${JSON.stringify([pricingConditionId])}`,
+                  api: `${pricingCondition.api}/import?materialType=product&child=true&ids=${JSON.stringify([pricingConditionId])}`,
                   type: 'import'
                 },
                 {
                   title: 'Package Template',
-                  api: `${pricingCondition.api}/template?conditionType=package&child=true&ids=${JSON.stringify([pricingConditionId])}`,
+                  api: `${pricingCondition.api}/template?materialType=package&child=true&ids=${JSON.stringify([pricingConditionId])}`,
                   type: 'download'
                 },
                 {
                   title: 'Package Export',
-                  api: `${pricingCondition.api}/template?export=true&conditionType=package&child=true&ids=${JSON.stringify([pricingConditionId])}`,
+                  api: `${pricingCondition.api}/template?export=true&materialType=package&child=true&ids=${JSON.stringify([pricingConditionId])}`,
                   type: 'export'
                 },
                 {
                   title: 'Package Import',
-                  api: `${pricingCondition.api}/import?conditionType=package&child=true&ids=${JSON.stringify([pricingConditionId])}`,
+                  api: `${pricingCondition.api}/import?materialType=package&child=true&ids=${JSON.stringify([pricingConditionId])}`,
                   type: 'import'
                 },
                 {
                   title: 'Service Template',
-                  api: `${pricingCondition.api}/template?conditionType=service&child=true&ids=${JSON.stringify([pricingConditionId])}`,
+                  api: `${pricingCondition.api}/template?materialType=service&child=true&ids=${JSON.stringify([pricingConditionId])}`,
                   type: 'download'
                 },
                 {
                   title: 'Service Export',
-                  api: `${pricingCondition.api}/template?export=true&conditionType=service&child=true&ids=${JSON.stringify([pricingConditionId])}`,
+                  api: `${pricingCondition.api}/template?export=true&materialType=service&child=true&ids=${JSON.stringify([pricingConditionId])}`,
                   type: 'export'
                 },
                 {
                   title: 'Service Import',
-                  api: `${pricingCondition.api}/import?conditionType=service&child=true&ids=${JSON.stringify([pricingConditionId])}`,
+                  api: `${pricingCondition.api}/import?materialType=service&child=true&ids=${JSON.stringify([pricingConditionId])}`,
                   type: 'import'
                 },
               ]}
             />
-            {/* <ImportExportMenu
-              permissions={permissions?.pricingCondition}
-              module="packages-products"
-              api={`${pricingCondition.api}/condition/template/${pricingConditionId}`}
-              afterImportCompleted={() => {
-                fetchCondition();
-              }}
-              isExportAllOrSomeFeature={true}
-              ids={[]}
-              additionalParams={``}
-            /> */}
           </Box>
         </Box>
       </Box>

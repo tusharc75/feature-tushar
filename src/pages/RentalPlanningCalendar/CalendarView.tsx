@@ -397,7 +397,6 @@ function CalendarView() {
                               setOpenRentalPlanningCalendarType(false);
                               setFilterToKeep([]);
                             }}
-                            style={{ color: 'black' }}
                           >
                             {option}
                           </MenuItem>
@@ -453,7 +452,6 @@ function CalendarView() {
                                 setSelectedOption(options[index]);
                                 setOpen(false);
                               }}
-                              style={{ color: 'black' }}
                             >
                               {option}
                             </MenuItem>

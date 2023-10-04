@@ -3,11 +3,10 @@ import Button from '@material-ui/core/Button';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
 import { Box, Dialog, IconButton } from '@material-ui/core';
-import { useData } from 'src/StateProvider/Provider';
 import { isMobile } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import { CustomDialogTransition, FIELD_TICKET_STATUS } from 'src/constants/helpers';
+import { CustomDialogTransition, FIELD_TICKET_STATUS, MATERIAL_TYPE } from 'src/constants/helpers';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -16,14 +15,19 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { generateCustomTableColumns } from 'src/constants/columns';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { startCase } from 'lodash';
+import { camelCase, startCase } from 'lodash';
 import { fetch_field_ticket_material_fields } from 'src/pages/FieldTicket/helper';
+import { useData } from 'src/StateProvider/Provider';
 
-const CreateInvoiceDialog = ({ fieldTicketData, isBulkCreate = false, selectedData = [], onSuccess, onClose }) => {
+const CreateInvoiceDialog = ({ fieldTicketData, onSuccess, onClose }) => {
 
     const toastConfig = useContext(CustomToastContext);
 
-    const renderedFrom = 'field_ticket_create_invoice';
+    const renderedFrom = `${camelCase(routes?.invoice.title)}_create`;
+
+    const {
+        state: { permissions, selectedEntity, user }
+    }: any = useData();
 
     const [columns, setColumns] = useState(null);
     const [rowsData, setRowsData] = useState(null);
@@ -35,8 +39,11 @@ const CreateInvoiceDialog = ({ fieldTicketData, isBulkCreate = false, selectedDa
 
     const fetchFields = async () => {
         setColumns(null);
-        const currency = fieldTicketData?.currency || selectedData[0]?.currency;
+        const currency = fieldTicketData[0]?.currency;
         var fields = await fetch_field_ticket_material_fields(currency);
+        fields?.forEach((e) => {
+            e.isColumnEditable = false;
+        });
         const newColumns = generateCustomTableColumns(fields, currency, renderedFrom);
         let column: any = [
             {
@@ -49,23 +56,29 @@ const CreateInvoiceDialog = ({ fieldTicketData, isBulkCreate = false, selectedDa
                     return <>Total</>;
                 }
             },
-            ...(isBulkCreate
-                ?
-                [
-                    {
-                        accessor: 'fieldTicketNumber',
-                        Header: 'Field Ticket',
-                        sticky: isMobile ? 'none' : 'left',
-                        Cell: ({ row }) => <p className="text-truncate">{row.original.fieldTicketNumber}</p>,
-                    }
-                ]
-                :
-                []
-            ),
+            {
+                accessor: 'fieldTicketNumber',
+                Header: 'Field Ticket',
+                Cell: ({ row }) =>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <p className="text-truncate">{row.original.fieldTicketNumber}</p>
+                        {permissions?.fieldTicket?.isRead &&
+                            <Box ml={1}>
+                                <IconButton
+                                    size="small"
+                                    onClick={() => {
+                                        window.open(`${routes.fieldTicketDetail.path}/${row.original.fieldTicketId}`);
+                                    }}
+                                >
+                                    <OpenInNewIcon fontSize="small" color="primary" />
+                                </IconButton>
+                            </Box>
+                        }
+                    </div>
+            },
             {
                 accessor: 'type',
                 Header: 'Type',
-                sticky: isMobile ? 'none' : 'left',
                 Cell: ({ row }) => (
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                         <p>{`${startCase(row.original?.type)} `}</p>
@@ -77,20 +90,19 @@ const CreateInvoiceDialog = ({ fieldTicketData, isBulkCreate = false, selectedDa
                 Header: 'Details',
                 minWidth: 300,
                 width: 300,
-                sticky: isMobile ? 'none' : 'left',
                 Cell: ({ row, rows }) => (
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                         <p title={row.original.detail}  >
                             {row.original.detail}
                         </p>
-                        {['product', 'service'].includes(row.original.type) &&
+                        {[MATERIAL_TYPE.service, MATERIAL_TYPE.product].includes(row.original.type) &&
                             <Box ml={1}>
                                 <IconButton
                                     size="small"
                                     onClick={() => {
-                                        if (row.original.type === 'service') {
+                                        if (row.original.type === MATERIAL_TYPE.service) {
                                             window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                                        } else if (row.original.type === 'product') {
+                                        } else if (row.original.type === MATERIAL_TYPE.product) {
                                             window.open(`${routes.productDetail.path}/${row.original.materialId}`);
                                         }
                                     }}
@@ -115,38 +127,25 @@ const CreateInvoiceDialog = ({ fieldTicketData, isBulkCreate = false, selectedDa
     };
 
     const fetchData = async () => {
-        let data = [];
+
         let material = []
         let cost = []
-        if (!isBulkCreate) {
-            const materialResponce = await axiosInstance().get(`/field-ticket/${fieldTicketData._id}/material`);
-            material = materialResponce?.data?.data?.material
 
-            const costResponce = await axiosInstance().get(`/field-ticket/${fieldTicketData._id}/cost`);
-            cost = costResponce?.data?.data || [];
-        } else {
-            const fieldTicketId = selectedData?.map(d => d.id);
-            const { data: { data: data } } = await axiosInstance().get(`${routes?.fieldTicketInvoice.path}/material?fieldTicketId=${JSON.stringify(fieldTicketId)}`);
-            material = data?.material || []
-            cost = data?.cost || []
+        const fieldTicketId = fieldTicketData?.map(d => d._id);
 
-        }
+        const { data: { data: data } } = await axiosInstance().get(`${routes?.fieldTicketInvoice.path}/material?fieldTicketId=${JSON.stringify(fieldTicketId)}`);
+
+        material = data?.material || []
+        cost = data?.cost || []
 
         material?.forEach((parent, i) => {
             parent.index = i + 1;
-            parent.detail = parent?.type === 'service' ? parent?.serviceDetail?.serviceName
-                : parent?.type === 'product' ? parent?.productDetail?.productName
+            parent.detail = parent?.type === MATERIAL_TYPE.service ? parent?.serviceDetail?.serviceName
+                : parent?.type === MATERIAL_TYPE.product ? parent?.productDetail?.productName
                     : ''
-            parent.description = parent?.type === 'service' ? parent?.serviceDetail?.serviceDescription
-                : parent?.type === 'product' ? parent?.productDetail?.productDescription
+            parent.description = parent?.type === MATERIAL_TYPE.service ? parent?.serviceDetail?.serviceDescription
+                : parent?.type === MATERIAL_TYPE.product ? parent?.productDetail?.productDescription
                     : ''
-            parent.qty = parent.qty;
-            parent.type = parent.type;
-            if (parent?.estimateStartDate || parent?.estimateEndDate) {
-                parent['actualStartDate'] = parent?.estimateStartDate;
-                parent['actualEndDate'] = parent?.estimateEndDate;
-                parent['actualJobDuration'] = parent?.estimateJobDuration;
-            }
         });
 
         cost?.forEach((ele, i) => {
@@ -155,98 +154,23 @@ const CreateInvoiceDialog = ({ fieldTicketData, isBulkCreate = false, selectedDa
             ele.detail = ele.description;
         })
 
-        data = [...material, ...cost]
-        setRowsData(data);
+        setRowsData([...material, ...cost]);
     }
 
     const handleCreateInvoice = () => {
-        rowsData?.forEach((element) => {
-            if (element.type !== 'manualEntry') {
-                delete element?.description;
-            }
-            delete element?.index;
-            delete element?.detail;
-            delete element?.productDetail;
-            delete element?.serviceDetail;
-            delete element?.estimateStartDate;
-            delete element?.estimateEndDate;
-            delete element?.estimateJobDuration;
-            delete element?.fieldTicketNumber;
-        });
-        if (isBulkCreate) {
-
-            const totalWellNumber: any = []
-            const totalCollaborator: any = []
-            const fieldTicket: any = []
-
-            selectedData.forEach(d => {
-                d.id && fieldTicket.push(d.id)
-                d.wellNumberId && totalWellNumber.push(d.wellNumberId)
-                d?.restwellNumber?.forEach(r => {
-                    totalWellNumber.push(r.optionValue)
-                });
-                d.collaboratorId && totalCollaborator.push(d.collaboratorId)
-                d?.restcollaborator?.forEach(r => {
-                    totalCollaborator.push(r.optionValue)
-                });
+        axiosInstance().post(`${routes.fieldTicketInvoice.path}/invoice`, {
+            fieldTicketIds: fieldTicketData.map((e) => e._id),
+        }).then(({ data }) => {
+            toastConfig.setToastConfig({
+                open: true,
+                type: 'success',
+                message: data.message,
             });
-
-            const wellNumber = [...new Set(totalWellNumber)];
-            const collaborator = [...new Set(totalCollaborator)];
-
-            const data = {
-                customerAccount: selectedData[0]?.customerAccountId || '',
-                fieldTicket,
-                wellName: selectedData[0]?.wellNameId || '',
-                wellNumber,
-                numberOfWells: wellNumber?.length,
-                warehouse: selectedData[0]?.warehouseId || "",
-                customerContact: selectedData[0]?.customerAccountId || "",
-                billingAddress: selectedData[0]?.billingAddressId || "",
-                shippingAddress: selectedData[0]?.shippingAddressId || "",
-                currency: selectedData[0]?.currency || "",
-                owner: selectedData[0]?.ownerId || "",
-                collaborator,
-                fieldServiceOrder: selectedData[0]?.fieldServiceOrderId || "",
-                material: rowsData.filter((d) => d.type !== 'manualEntry'),
-                additionalCost: rowsData.filter((d) => d.type === 'manualEntry')
-            }
-
-            axiosInstance().post(`${routes.fieldTicketInvoice.path}/invoice`, {
-                material: rowsData.filter((d) => d.type !== 'manualEntry'),
-                additionalCost: rowsData.filter((d) => d.type === 'manualEntry'),
-                ...data
-            })
-                .then(({ data }) => {
-                    toastConfig.setToastConfig({
-                        open: true,
-                        message: data.message,
-                        severity: 'success'
-                    })
-                    onSuccess();
-                })
-                .catch((error) => {
-                    toastConfig.setToastConfig(error);
-                });
-
-        } else {
-            axiosInstance().post(`${routes.fieldTicketInvoice.path}/${fieldTicketData._id}/invoice`, {
-                material: rowsData.filter((d) => d.type !== 'manualEntry'),
-                additionalCost: rowsData.filter((d) => d.type === 'manualEntry'),
-                invoiceId: fieldTicketData.status === FIELD_TICKET_STATUS.readyToInvoice ? fieldTicketData.invoiceId : null
-            })
-                .then(({ data }) => {
-                    toastConfig.setToastConfig({
-                        open: true,
-                        message: data.message,
-                        severity: 'success'
-                    })
-                    onSuccess();
-                })
-                .catch((error) => {
-                    toastConfig.setToastConfig(error);
-                });
-        }
+            onSuccess();
+        })
+            .catch((error) => {
+                toastConfig.setToastConfig(error);
+            });
     };
 
     return (<Dialog

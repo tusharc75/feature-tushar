@@ -1,16 +1,16 @@
-import { useState, useEffect } from 'react';
-import SearchBox from '../../components/Helpers/SearchBox';
-import { AddOutlined } from '@material-ui/icons';
-import { Box, Grid, MenuItem, Button, Menu } from '@material-ui/core';
-import { ExpandMore } from '@material-ui/icons';
+import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
-import styles from '../Leads/Header.module.scss';
+import { useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import MobileSortDialog from '../../components/MobileSortDialog';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
-import { MdAdd, MdSort, MdFilterList } from 'react-icons/md';
+import { MdOutlineFilterAlt } from 'react-icons/md';
+import { TbArrowsSort } from 'react-icons/tb';
 import routes from 'src/components/Helpers/Routes';
+import SearchBox from '../../components/Helpers/SearchBox';
+import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
+import MobileSortDialog from '../../components/MobileSortDialog';
+import styles from '../Leads/Header.module.scss';
 
 function RepairOrderHeader(props) {
   const {
@@ -30,7 +30,8 @@ function RepairOrderHeader(props) {
     selectedType,
     columns,
     dispatch,
-    filters
+    filters,
+    resource = ''
     // showCloneRentalManagementDialog
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
@@ -86,52 +87,52 @@ function RepairOrderHeader(props) {
       <div className={'d-flex align-items-center gap-1'}>
         {isMobile && !isTablet && (
           <>
-            <div className="flex">
-              <Button
-                onClick={handleClickOpen}
-                id="demo-customized-button"
-                aria-controls="demo-customized-menu"
-                aria-haspopup="true"
-                // aria-expanded={open ? 'true' : undefined}
-                variant="text"
-                disableElevation
-                startIcon={<MdSort />}
-                className={'sort-filter-tablet'}
-              >
-                Sort
-              </Button>
+            <div className="d-flex flex-wrap items-center justify-between w-full">
+              <div>{toggleInner}</div>
+              <div className="flex flex-wrap items-center gap-1">
+                <IconButton
+                  onClick={handleClickOpen}
+                  id="demo-customized-button"
+                  aria-controls="demo-customized-menu"
+                  aria-haspopup="true"
+                  aria-expanded={open ? 'true' : undefined}
+                  size="small"
+                  className={'mobileIconButton secondary'}
+                >
+                  <TbArrowsSort className="rotate-90" size={16} />
+                </IconButton>
 
-              <MobileSortDialog
-                isOpen={open}
-                handleClose={handleClickClose}
-                contentPart={toggleInner}
-                secHeading={['Sort Repair Order']}
-                columns={columns}
-                dispatch={dispatch}
-              />
+                <MobileSortDialog
+                  isOpen={open}
+                  handleClose={handleClickClose}
+                  contentPart={toggleInner}
+                  secHeading={['Sort Repair Order']}
+                  columns={columns}
+                  dispatch={dispatch}
+                />
 
-              <Button
-                onClick={handleOpen}
-                id="demo-customized-button"
-                aria-controls="demo-customized-menu"
-                aria-haspopup="true"
-                // aria-expanded={open ? 'true' : undefined}
-                variant="text"
-                disableElevation
-                className={'sort-filter-tablet'}
-                startIcon={<MdFilterList />}
-              >
-                Filter
-              </Button>
-              <MobileFilterDialog
-                isOpen={isOpenDialog}
-                handleClose={handleClose}
-                contentPart={toggleInner}
-                columns={columns}
-                dispatch={dispatch}
-                title={routes?.repairOrder?.title}
-                filters={filters}
-              />
+                <IconButton
+                  onClick={handleOpen}
+                  id="demo-customized-button"
+                  aria-controls="demo-customized-menu"
+                  aria-haspopup="true"
+                  // aria-expanded={open ? 'true' : undefined}
+                  size="small"
+                  className={'mobileIconButton secondary'}
+                >
+                  <MdOutlineFilterAlt size={16} />
+                </IconButton>
+                <MobileFilterDialog
+                  isOpen={isOpenDialog}
+                  handleClose={handleClose}
+                  contentPart={null}
+                  columns={columns}
+                  dispatch={dispatch}
+                  title={routes?.repairOrder?.title}
+                  filters={filters}
+                  resource={resource}
+                />
+              </div>
             </div>
           </>
         )}
@@ -210,6 +211,7 @@ function RepairOrderHeader(props) {
           )}
         </div>
       </div>
+      <DisplayFiltersForMobile resource={resource} />
     </div>
   );
 }

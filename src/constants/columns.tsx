@@ -6,6 +6,7 @@ import { flatMapDeep } from 'lodash';
 import moment from 'moment';
 import { Box, IconButton } from '@material-ui/core';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import SignatureCell from 'src/components/Helpers/SignatureCell';
 
 export const headerName = {
   firstName: 'Name'
@@ -125,7 +126,7 @@ export const getCustomColumnData = (title, field) => {
       accessor: field?.fieldName,
       Header: fieldHeaderName,
       show: gridMetaData[title]?.hide && gridMetaData[title]?.hide.indexOf(field?.fieldName) >= 0 ? false : true,
-      disabled: gridMetaData[title]?.disabled && gridMetaData[title]?.disabled.indexOf(field?.fieldName) >= 0 ? true : false,
+      disabled: (gridMetaData[title]?.disabled && gridMetaData[title]?.disabled.indexOf(field?.fieldName) >= 0) || field?.stopHideColumn ? true : false,
       editable: field?.isColumnEditable ?? false,
       isHideColumnSum: field?.isHideColumnSum ?? false,
       decimalPlaces: field?.decimalPlaces,
@@ -248,7 +249,7 @@ export const generateCustomTableColumns = (fields: any[], currency: string, rend
           column.push({
             ...currentColumn,
             width: 200,
-            Cell: ({ row }) => (row.original[ele.fieldName] ? <p>{Boolean(row.original[ele.fieldName]) ? 'Yes' : 'No'}</p> : <NoDataCell />)
+            Cell: ({ row }) => (<p>{Boolean(row.original[ele.fieldName]) ? 'Yes' : 'No'}</p>)
           });
         } else if (ele.type === 'multiSelect') {
           column.push({
@@ -256,6 +257,14 @@ export const generateCustomTableColumns = (fields: any[], currency: string, rend
             width: 200,
             Cell: ({ row }) =>
               row.original[ele.fieldName] ? ele.lookup ? columnData(ele, row) : <p>{row.original[ele.fieldName]?.join()}</p> : <NoDataCell />
+          });
+        } else if (ele.type === 'multiFileUpload') {
+
+        } else if (ele.type === 'signature') {
+          column.push({
+            ...currentColumn,
+            width: 200,
+            Cell: ({ row }) => row.original[ele.fieldName] ? <SignatureCell base64={row?.original[ele.fieldName]} /> : <NoDataCell />
           });
         } else {
           column.push({

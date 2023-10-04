@@ -38,7 +38,8 @@ import {
   formatAmountWithCurrency,
   gridLoadingTimeout,
   termsAndCondition,
-  ACTIVITY_RESOURCE
+  ACTIVITY_RESOURCE,
+  sidebarResource
 } from '../../../constants/helpers';
 import { useData } from '../../../StateProvider/Provider';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -59,7 +60,7 @@ import { VscVersions } from 'react-icons/vsc';
 import ThumbUpIcon from '@material-ui/icons/ThumbUp';
 import ThumbDownIcon from '@material-ui/icons/ThumbDown';
 import DOAReasonDialog from '../../DOA/DOAReasonDialog';
-import { ExpandMore } from '@material-ui/icons';
+import { Edit, ExpandMore } from '@material-ui/icons';
 import { MdDeleteSweep } from 'react-icons/md';
 import { GiReceiveMoney } from 'react-icons/gi';
 import { AiFillPlusCircle } from 'react-icons/ai';
@@ -68,6 +69,7 @@ import { IoArrowDownCircleSharp } from 'react-icons/all';
 import contactClass from '../../Contact/contact.module.scss';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const useStyles = makeStyles((theme) => ({
   reasonDialog: {
@@ -179,7 +181,7 @@ export default function QuoteDetail() {
   const [deletingDOA, setDeletingDOA] = useState(false);
   const [DOAApproved, setDOAApproved] = useState(false);
   const [isCloning, setCloning] = useState(false);
-  const [approvedButtonText] = useState('Accept');
+
   const [DOARequestId, setDOARequestId] = useState(null);
   const [showQuoteStatusChangeDialog, setShowQuoteStatusChangeDialog] = useState(false);
   const [showAllVersionStatus, setShowAllVersionStatus] = useState(false);
@@ -635,44 +637,47 @@ export default function QuoteDetail() {
       });
   };
 
-  const getHeading = (
-    <span>
-      {quoteData ? `${quoteData.quoteName}  ` : ''}
-      <span
-        className="cursor-pointer underlined"
-        onClick={() => {
-          setShowAllVersionStatus(true);
-        }}
-      >
-        (V-{currentVersion})
-      </span>
-    </span>
-  );
 
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs
-            routes={customizedRoutes}
-            onRouteClick={() => {
-              setShowAllVersionStatus(true);
-            }}
+          <CustomBreadCrumbs routes={customizedRoutes} onRouteClick={() => { setShowAllVersionStatus(true); }}
           />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             {quoteData ? (
               <>
+                {permissions[sidebarResource.quoteBuilder]?.isCreate ? (
+                  <Button
+                    variant="text"
+                    size="small"
+                    className="mr-1"
+                    startIcon={<BiLayerPlus />}
+                    onClick={handleOpenCloneDialog}>
+                    Clone
+                  </Button>
+                ) : null}
+                {allowedToEdit && (
+                  <Tooltip title="Edit">
+                    <Button
+                      variant={isMobile && !isTablet ? 'text' : 'contained'}
+                      className={'btn-outline-v1'}
+                      onClick={handleOpenUpdateDialog}>
+                      {isMobile && !isTablet ? <Edit /> : 'Edit'}
+                    </Button>
+                  </Tooltip>
+                )}
                 {processStatus !== 'New' && (
                   <Tooltip title="Quote Summary">
                     <Button
                       onClick={() => {
                         setShowTotalSalesDialog(true);
                       }}
-                      variant="outlined"
+                      variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                      className="btn-outline-v1"
                       size="small"
-                      className="mx-1 btn-outline-v1"
                       startIcon={<GiReceiveMoney />}
                       color="primary"
                     >
@@ -685,7 +690,7 @@ export default function QuoteDetail() {
                     variant={isMobile && !isTablet ? 'text' : 'outlined'}
                     color="primary"
                     size="small"
-                    className={`${isMobile && !isTablet ? contactClass.mobile_button_layout : 'mx-1'} btn-outline-v1`}
+                    className={`btn-outline-v1`}
                     onClick={() => {
                       setShowAllVersionStatus(true);
                     }}
@@ -695,9 +700,125 @@ export default function QuoteDetail() {
                     {isMobile && !isTablet ? <VscVersions size={20} /> : `Version : ${currentVersion}`}
                   </Button>
                 </Tooltip>
+                <Button
+                  variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                  color="default"
+                  size="small"
+                  className={`${isMobile && !isTablet ? contactClass.mobile_button_layout : 'mx-1'} new-dropdown-v1`}
+                  endIcon={isMobile && !isTablet ? null : <ExpandMore />}
+                  onClick={openActions}
+                  aria-controls="action-menu"
+                >
+                  {isMobile && !isTablet ? <IoArrowDownCircleSharp size={20} /> : 'Actions '}
+                </Button>
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  id="action-menu"
+                  open={Boolean(anchorEl)}
+                  onClose={closeActions}
+                >
+                  {permissions[qbResource].isDelete &&
+                    quoteData?.owner.optionValue &&
+                    user?.user?._id &&
+                    quoteData.owner.optionValue === user.user._id && (
+                      <MenuItem>
+                        <Button
+                          variant="text"
+                          size="small"
+                          startIcon={<MdDelete className={isMobile ? 'mr-1' : ''} />}
+                          onClick={() => setShowConfirmBox(true)}
+                        >
+                          Delete Quote
+                        </Button>
+                      </MenuItem>
+                    )}
+
+                  {currentVersion !== 1 && ifQuoteApproved.approved === false && (
+                    <MenuItem>
+                      <Button
+                        variant="text"
+                        size="small"
+                        disabled={
+                          !allowedToEdit ||
+                          deletingDOA ||
+                          loading ||
+                          (DOAneeded
+                            ? DOASteps.findIndex((d) => d?.key === processStatus) > 1
+                            : OtherSteps.findIndex((d) => d?.key === processStatus) > 1)
+                        }
+                        startIcon={<MdDeleteSweep className={isMobile ? 'mr-1' : ''} />}
+                        onClick={deleteVersion}
+                      >
+                        Delete Version-{currentVersion}
+                      </Button>
+                    </MenuItem>
+                  )}
+                  <MenuItem>
+                    <Button
+                      disabled={!allowedToEdit || isCloning || loading || ifQuoteApproved.approved}
+                      variant="text"
+                      type="button"
+                      size="small"
+                      startIcon={isCloning ? <CircularProgress color="inherit" size={16} /> : <BiLayerPlus className={isMobile ? 'mr-1' : ''} />}
+                      onClick={() => {
+                        cloneVersion();
+                      }}
+                    >
+                      {isCloning ? <>Cloning Version-{currentVersion}</> : `Clone Version-${currentVersion}`}
+                    </Button>
+                  </MenuItem>
+                  {allowedToEdit && ifQuoteApproved.approved && (
+                    <MenuItem>
+                      <Button
+                        variant="outlined"
+                        color="primary"
+                        size="small"
+                        startIcon={<HiPencil className={isMobile ? 'mr-1' : ''} />}
+                        disabled={quoteReOpening}
+                        onClick={() => setReopenReasonDialog(true)}
+                      >
+                        Re-Open
+                      </Button>
+                    </MenuItem>
+                  )}
+                  {allowedToEdit && ifQuoteApproved.approved && (
+                    <MenuItem>
+                      <Button
+                        variant="outlined"
+                        color="primary"
+                        size="small"
+                        startIcon={<HiPencil className={isMobile ? 'mr-1' : ''} />}
+                        onClick={() => {
+                          setOpenUpdateDialog(true);
+                        }}
+                      >
+                        Edit Information
+                      </Button>
+                    </MenuItem>
+                  )}
+                  {allowedToEdit && (
+                    <MenuItem>
+                      <Button
+                        variant="text"
+                        color="primary"
+                        size="small"
+                        startIcon={<HiPencil className={isMobile ? 'mr-1' : ''} />}
+                        onClick={handleOpenUpdateDialog}
+                      >
+                        Edit Quote
+                      </Button>
+                    </MenuItem>
+                  )}
+                </Menu>
                 {DOAApproved && versionStatus === 'Sent for DOA' && (
                   <>
-                    <Tooltip title={`${approvedButtonText}`}>
+                    <Tooltip title={`Accept`}>
                       <Button
                         onClick={() => {
                           QuoteStatusChange('Accepted', '', '');
@@ -708,7 +829,7 @@ export default function QuoteDetail() {
                         startIcon={<ThumbUpIcon />}
                         color="primary"
                       >
-                        {isMobile && !isTablet ? '' : `${approvedButtonText}`}
+                        {isMobile && !isTablet ? '' : `Accept`}
                       </Button>
                     </Tooltip>
                     <Tooltip title="Reject">
@@ -726,140 +847,16 @@ export default function QuoteDetail() {
                         {isMobile && !isTablet ? '' : 'Reject'}
                       </Button>
                     </Tooltip>
-
-                    <Button
-                      variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                      color="default"
-                      size="small"
-                      className={`${isMobile && !isTablet ? contactClass.mobile_button_layout : 'mx-1'} new-dropdown-v1`}
-                      endIcon={isMobile && !isTablet ? null : <ExpandMore />}
-                      onClick={openActions}
-                      // className={styles.action_submit_btn}
-                      aria-controls="action-menu"
-                    >
-                      {isMobile && !isTablet ? <IoArrowDownCircleSharp size={20} /> : 'Actions '}
-                    </Button>
-                    <Menu
-                      anchorEl={anchorEl}
-                      keepMounted
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
-                      }}
-                      id="action-menu"
-                      open={Boolean(anchorEl)}
-                      onClose={closeActions}
-                    >
-                      {permissions[qbResource].isDelete &&
-                        quoteData?.owner.optionValue &&
-                        user?.user?._id &&
-                        quoteData.owner.optionValue === user.user._id && (
-                          <MenuItem>
-                            <Button
-                              variant="text"
-                              size="small"
-                              startIcon={<MdDelete className={isMobile ? 'mr-1' : ''} />}
-                              onClick={() => setShowConfirmBox(true)}
-                            >
-                              Delete Quote
-                            </Button>
-                          </MenuItem>
-                        )}
-
-                      {currentVersion !== 1 && ifQuoteApproved.approved === false && (
-                        <MenuItem>
-                          <Button
-                            variant="text"
-                            size="small"
-                            disabled={
-                              !allowedToEdit ||
-                              deletingDOA ||
-                              loading ||
-                              (DOAneeded
-                                ? DOASteps.findIndex((d) => d?.key === processStatus) > 1
-                                : OtherSteps.findIndex((d) => d?.key === processStatus) > 1)
-                            }
-                            startIcon={<MdDeleteSweep className={isMobile ? 'mr-1' : ''} />}
-                            onClick={deleteVersion}
-                          >
-                            Delete Version-{currentVersion}
-                          </Button>
-                        </MenuItem>
-                      )}
-                      <MenuItem>
-                        <Button
-                          disabled={!allowedToEdit || isCloning || loading || ifQuoteApproved.approved}
-                          variant="text"
-                          type="button"
-                          size="small"
-                          startIcon={isCloning ? <CircularProgress color="inherit" size={16} /> : <BiLayerPlus className={isMobile ? 'mr-1' : ''} />}
-                          onClick={() => {
-                            cloneVersion();
-                          }}
-                        >
-                          {isCloning ? <>Cloning Version-{currentVersion}</> : `Clone Version-${currentVersion}`}
-                        </Button>
-                      </MenuItem>
-
-                      {allowedToEdit && ifQuoteApproved.approved && (
-                        <MenuItem>
-                          <Button
-                            variant="outlined"
-                            color="primary"
-                            size="small"
-                            startIcon={<HiPencil className={isMobile ? 'mr-1' : ''} />}
-                            disabled={quoteReOpening}
-                            onClick={() => setReopenReasonDialog(true)}
-                          >
-                            Re-Open
-                          </Button>
-                        </MenuItem>
-                      )}
-                      {allowedToEdit && ifQuoteApproved.approved && (
-                        <MenuItem>
-                          <Button
-                            variant="outlined"
-                            color="primary"
-                            size="small"
-                            startIcon={<HiPencil className={isMobile ? 'mr-1' : ''} />}
-                            onClick={() => {
-                              setOpenUpdateDialog(true);
-                            }}
-                          >
-                            Edit Information
-                          </Button>
-                        </MenuItem>
-                      )}
-                      {allowedToEdit && (
-                        <MenuItem>
-                          <Button
-                            variant="text"
-                            color="primary"
-                            size="small"
-                            startIcon={<HiPencil className={isMobile ? 'mr-1' : ''} />}
-                            onClick={handleOpenUpdateDialog}
-                          >
-                            Edit Quote
-                          </Button>
-                        </MenuItem>
-                      )}
-                    </Menu>
                   </>
                 )}
               </>
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
             )}
-            <ActivityButton
-              referenceId={quoteData?._id}
-              resource={ACTIVITY_RESOURCE.quote}
-              resourceLabel={quoteData?.quoteName}
-            />
+            <ActivityButton referenceId={quoteData?._id} resource={ACTIVITY_RESOURCE.quote} resourceLabel={quoteData?.quoteName} />
           </Box>
         </Box>
       </Box>
-
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab index={0}>
@@ -869,7 +866,6 @@ export default function QuoteDetail() {
             <BiFoodMenu className="mr-1" fontSize="inherit" /> Quote Versions
           </CustomTab>
         </CustomTabs>
-
         <TabPanel value={tabValue} index={0}>
           <>
             {quoteData && (
@@ -908,7 +904,8 @@ export default function QuoteDetail() {
               state={state}
               dispatch={dispatch}
               quoteData={quoteData}
-              ProcessStatus={processStatus}
+              processStatus={processStatus}
+              setProcessStatus={setProcessStatus}
               ifQuoteApproved={ifQuoteApproved}
               allowedToEdit={allowedToEdit}
               handleOpenUpdateDialog={handleOpenUpdateDialog}

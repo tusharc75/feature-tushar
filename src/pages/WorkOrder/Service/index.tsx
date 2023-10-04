@@ -60,7 +60,7 @@ const getTotalTime = (stepTimes: any) => {
       totalTimes += new Date().getTime() - new Date(item?.pauseDate || item?.startDate).getTime();
     }
   });
-  stepTimes.forEach((item) => {});
+  stepTimes.forEach((item) => { });
   return { shouldTimerRun, totalTimes };
 };
 
@@ -102,6 +102,7 @@ const RenderTotalTime = ({ stepTimes }: any) => {
 };
 
 const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWorkOrderData }) => {
+
   const toastConfig = useContext(CustomToastContext);
   const {
     state: {
@@ -227,7 +228,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
       setServiceSteps(services);
       if (
         services.filter((e) => e.type === 'service' && e.status === WORKORDER_SERVICE_STATUS.completed)?.length ===
-          services.filter((e) => e.type === 'service')?.length &&
+        services.filter((e) => e.type === 'service')?.length &&
         workOrderData?.status !== WORK_ORDER_STATUS.completed
       ) {
         fetchWorkOrderData();
@@ -295,6 +296,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
     axiosInstance()
       .post(`${workOrder.api}/service/${workOrderId}`, data)
       .then(() => {
+        setServiceDialog({ open: false, type: '', uniqueId: null, preWork: null });
         if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(quotationData?.status)) {
           createNewVersionQuote();
         } else {
@@ -540,7 +542,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                             closeAddServiceActions();
                           }}
                         >
-                          Add Services
+                          Add Existing Services
                         </MenuItem>
                         <MenuItem
                           onClick={() => {
@@ -799,23 +801,16 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
               {selectedService && (
                 <>
                   {selectedService?.type === 'service' ? (
-                    allowedToEdit ||
-                    (selectedService?.assignedUsers?.length > 0 && selectedService?.assignedUsers?.map((u) => u?.optionValue).includes(user?._id)) ? (
-                      <Steps
-                        workOrderId={workOrderId}
-                        warehouse={workOrderData?.warehouse}
-                        selectedService={selectedService}
-                        allowedToEdit={isAllowedToServiceEdit && selectedService?.clickable}
-                        setDisableCompleteFail={setDisableCompleteFail}
-                        fetchService={fetchServiceData}
-                        referencType="workOrder"
-                        stepSubmitedData={stepSubmitedData}
-                      />
-                    ) : (
-                      <Box textAlign="center">
-                        <p>No services</p>
-                      </Box>
-                    )
+                    <Steps
+                      workOrderId={workOrderId}
+                      warehouse={workOrderData?.warehouse}
+                      selectedService={selectedService}
+                      allowedToEdit={isAllowedToServiceEdit && selectedService?.clickable}
+                      setDisableCompleteFail={setDisableCompleteFail}
+                      fetchService={fetchServiceData}
+                      referencType="workOrder"
+                      stepSubmitedData={stepSubmitedData}
+                    />
                   ) : (
                     <Quotation />
                   )}
@@ -964,20 +959,20 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                                       data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
                                                         ? '#E1FCE3'
                                                         : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                        ? '#fabebe'
-                                                        : '#FFF5DD',
+                                                          ? '#fabebe'
+                                                          : '#FFF5DD',
                                                     color:
                                                       data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
                                                         ? '#048E0A'
                                                         : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                        ? '#fa0202'
-                                                        : '#FF8C21',
+                                                          ? '#fa0202'
+                                                          : '#FF8C21',
                                                     background:
                                                       data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
                                                         ? '#E1FCE3'
                                                         : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                        ? '#fabebe'
-                                                        : '#FFF5DD',
+                                                          ? '#fabebe'
+                                                          : '#FFF5DD',
                                                     fontWeight: 700
                                                   }}
                                                 />
@@ -1038,7 +1033,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                         size="small"
                         onClick={() => setServiceDialog({ open: true, type: 'service', uniqueId: null, preWork: null })}
                       >
-                        Add Services
+                        Add Existing Services
                       </Button>
                     </Box>
                     {serviceSteps?.length > 0 && (
@@ -1074,7 +1069,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                   setAnchorEl(null);
                 }}
               >
-                Add Services
+                Add Existing Services
               </MenuItem>
               <MenuItem
                 disabled={
@@ -1160,7 +1155,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                 </MenuItem>
               )}
               <MenuItem
-                disabled={!allowedToEdit || selectedService?.status === WORKORDER_SERVICE_STATUS.pending ? false : true}
+                disabled={allowedToEdit && selectedService?.status === WORKORDER_SERVICE_STATUS.pending ? false : true}
                 onClick={() => {
                   handleRemoveService(selectedService?.uniqueId);
                   setAnchorEl(null);
@@ -1203,10 +1198,9 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           ids={[]}
           onSuccess={(data) => {
             handleAddService(
-              data?.map((e) => e._id),
+              data?.map((e) => { return { _id: e._id, qty: parseInt(e?.qty) || 1 } }),
               serviceDialog.uniqueId
             );
-            setServiceDialog({ open: false, type: '', uniqueId: null, preWork: null });
           }}
           extraStaticFilter={serviceDialog.preWork === null ? [] : [{ field: 'preWork', term: serviceDialog.preWork }]}
         />
@@ -1217,8 +1211,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           serviceMasterId={null}
           onClose={() => setServiceDialog({ open: false, type: '', uniqueId: null, preWork: null })}
           onSuccess={(data) => {
-            handleAddService([data?.data?._id], serviceDialog.uniqueId);
-            setServiceDialog({ open: false, type: '', uniqueId: null, preWork: null });
+            handleAddService([{ _id: data?.data?._id, qty: 1 }], serviceDialog.uniqueId);
           }}
           isRedirectToDetailPage={false}
         />
@@ -1316,7 +1309,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           handleClose={() => {
             setAttchmentsDialog({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
           }}
-          handleSuccess={() => {}}
+          handleSuccess={() => { }}
         />
       )}
       {showManagePurchaseOrder && (

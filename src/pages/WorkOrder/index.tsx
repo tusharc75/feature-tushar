@@ -1,38 +1,41 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import Grid from '@material-ui/core/Grid';
-import Box from '@material-ui/core/Box';
-import { useHistory } from 'react-router-dom';
-import { useData } from '../../StateProvider/Provider';
-import axiosInstance from '../../axios/axiosInstance';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import MessageDialog from '../../components/Helpers/MessageDialog';
-import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import routes from './../../components/Helpers/Routes';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { isObjectEmpty, gridLoadingTimeout, workOrder, getLocalStorageArrayData, removeLocalStorage } from '../../constants/helpers';
-import CustomContainer from '../../components/CustomContainer';
-import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import styles from '../Leads/Header.module.scss';
-import { GiAbstract055 } from 'react-icons/gi';
-import SearchBox from '../../components/Helpers/SearchBox';
-import ManageWorkOrder from './ManageWorkOrder';
-import { sidebarResource, prepareDataForGrid } from '../../constants/helpers';
-import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
-import { isMobile, isTablet } from 'react-device-detect';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { camelCase } from 'lodash';
-import queryString from 'query-string';
-import HideWhenOffline from 'src/components/HideWhenOffline';
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
-import { Button, IconButton, Menu, MenuItem, Tooltip } from '@material-ui/core';
+import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
 import { ExpandMore } from '@material-ui/icons';
 import DeleteIcon from '@material-ui/icons/Delete';
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import { camelCase } from 'lodash';
+import queryString from 'query-string';
+import { useContext, useEffect, useReducer, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { MdOutlineFilterAlt } from 'react-icons/md';
+import { TbArrowsSort } from 'react-icons/tb';
+import { useHistory } from 'react-router-dom';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import MobileFilterDialog from 'src/components/MobileFilterDialog';
-import { MdFilterList, MdSort } from 'react-icons/md';
+import HideWhenOffline from 'src/components/HideWhenOffline';
+import MobileFilterDialog, { DisplayFiltersForMobile } from 'src/components/MobileFilterDialog';
 import MobileSortDialog from 'src/components/MobileSortDialog';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
+import CustomContainer from '../../components/CustomContainer';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
+import MessageDialog from '../../components/Helpers/MessageDialog';
+import SearchBox from '../../components/Helpers/SearchBox';
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import {
+  getLocalStorageArrayData,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  removeLocalStorage,
+  sidebarResource,
+  workOrder
+} from '../../constants/helpers';
+import useColumns, { getFrameworkComponents, getStaticFields, gridFilterParser } from '../../constants/useColumns';
+import styles from '../Leads/Header.module.scss';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import routes from './../../components/Helpers/Routes';
+import ManageWorkOrder from './ManageWorkOrder';
 
 let workOrderTimeout;
 
@@ -205,11 +208,13 @@ const WorkOrder = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-    if (selectedType === 1) {
-      deepFilter = deepFilter + `&myRecords=1`;
-    }
+
     if (isExport) {
       deepFilter = `?`;
+    }
+
+    if (selectedType === 1) {
+      deepFilter = deepFilter + `&myRecords=1`;
     }
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
@@ -218,7 +223,7 @@ const WorkOrder = () => {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
     if (deepFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
     }
 
     if (filterByIds?.length || deepFilters?.length) {
@@ -229,7 +234,7 @@ const WorkOrder = () => {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
     if (search) {
-      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
@@ -243,6 +248,7 @@ const WorkOrder = () => {
   };
 
   const handleWorkOrderTypeSel = (filterValues) => {
+    dispatch({ type: 'setPage', page: 0 });
     setSelectedType(filterValues);
     history.push(`?type=${filterValues}`);
   };
@@ -326,42 +332,32 @@ const WorkOrder = () => {
   );
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[routes.workOrder]} />
-        </Grid>
-        <Grid item md={8} sm={1} xs={2}>
-          <Grid container direction="row">
-            <Grid item xs={12} sm={12}>
-              <Grid container justify="flex-end">
-                <ImportExportLinks
-                  permissions={permissions?.workOrder}
-                  module="workOrder"
-                  api={workOrder.api}
-                  afterImportCompleted={fetchWorkOrder}
-                  total={rowCount}
-                  isExportAllOrSomeFeature={true}
-                  recordsToExport={getLocalStorageArrayData(localStorageSelectedRecords)?.length}
-                  ids={
-                    getLocalStorageArrayData(localStorageSelectedRecords)?.length
-                      ? getLocalStorageArrayData(localStorageSelectedRecords)?.map((obj) => obj._id)
-                      : []
-                  }
-                  onExportToExcelSuccess={() => {
-                    if (gridApi) {
-                      gridApi.deselectAll();
-                    } else {
-                      fetchWorkOrder();
-                    }
-                  }}
-                  additionalParams={getQueryString(true)}
-                />
-              </Grid>
-            </Grid>
-          </Grid>
-        </Grid>
-      </Grid>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[routes.workOrder]} />
+        <ImportExportLinks
+          permissions={permissions?.workOrder}
+          module="workOrder"
+          api={workOrder.api}
+          afterImportCompleted={fetchWorkOrder}
+          total={rowCount}
+          isExportAllOrSomeFeature={true}
+          recordsToExport={getLocalStorageArrayData(localStorageSelectedRecords)?.length}
+          ids={
+            getLocalStorageArrayData(localStorageSelectedRecords)?.length
+              ? getLocalStorageArrayData(localStorageSelectedRecords)?.map((obj) => obj._id)
+              : []
+          }
+          onExportToExcelSuccess={() => {
+            if (gridApi) {
+              gridApi.deselectAll();
+            } else {
+              fetchWorkOrder();
+            }
+          }}
+          additionalParams={getQueryString(true)}
+        />
+      </div>
       <CustomContainer>
         <div className="header-panel">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -369,52 +365,52 @@ const WorkOrder = () => {
               <HideWhenOffline>
                 {isMobile && !isTablet && (
                   <>
-                    <div className="flex">
-                      <Button
-                        onClick={handleClickOpen}
-                        id="demo-customized-button"
-                        aria-controls="demo-customized-menu"
-                        aria-haspopup="true"
-                        // aria-expanded={open ? 'true' : undefined}
-                        variant="text"
-                        disableElevation
-                        startIcon={<MdSort />}
-                        className={'sort-filter-tablet'}
-                      >
-                        Sort
-                      </Button>
+                    <div className="d-flex flex-wrap items-center justify-between w-full">
+                      <div>{toggleInner}</div>
+                      <div className="flex flex-wrap items-center gap-1">
+                        <IconButton
+                          onClick={handleClickOpen}
+                          id="demo-customized-button"
+                          aria-controls="demo-customized-menu"
+                          aria-haspopup="true"
+                          aria-expanded={open ? 'true' : undefined}
+                          size="small"
+                          className={'mobileIconButton secondary'}
+                        >
+                          <TbArrowsSort className="rotate-90" size={16} />
+                        </IconButton>
 
-                      <MobileSortDialog
-                        isOpen={open}
-                        handleClose={handleClickClose}
-                        contentPart={toggleInner}
-                        secHeading={['Sort Repair Order']}
-                        columns={columns}
-                        dispatch={dispatch}
-                      />
+                        <MobileSortDialog
+                          isOpen={open}
+                          handleClose={handleClickClose}
+                          contentPart={toggleInner}
+                          secHeading={['Sort Repair Order']}
+                          columns={columns}
+                          dispatch={dispatch}
+                        />
 
-                      <Button
-                        onClick={handleOpen}
-                        id="demo-customized-button"
-                        aria-controls="demo-customized-menu"
-                        aria-haspopup="true"
-                        // aria-expanded={open ? 'true' : undefined}
-                        variant="text"
-                        disableElevation
-                        className={'sort-filter-tablet'}
-                        startIcon={<MdFilterList />}
-                      >
-                        Filter
-                      </Button>
-                      <MobileFilterDialog
-                        isOpen={isOpenDialog}
-                        handleClose={handleClose}
-                        contentPart={toggleInner}
-                        columns={columns}
-                        dispatch={dispatch}
-                        title={routes?.repairOrder?.title}
-                        filters={filters}
-                      />
+                        <IconButton
+                          onClick={handleOpen}
+                          id="demo-customized-button"
+                          aria-controls="demo-customized-menu"
+                          aria-haspopup="true"
+                          aria-expanded={open ? 'true' : undefined}
+                          size="small"
+                          className={'mobileIconButton secondary'}
+                        >
+                          <MdOutlineFilterAlt size={16} />
+                        </IconButton>
+                        <MobileFilterDialog
+                          isOpen={isOpenDialog}
+                          handleClose={handleClose}
+                          contentPart={null}
+                          columns={columns}
+                          dispatch={dispatch}
+                          title={routes?.repairOrder?.title}
+                          filters={filters}
+                          resource={sidebarResource.workOrder}
+                        />
+                      </div>
                     </div>
                   </>
                 )}
@@ -482,10 +478,12 @@ const WorkOrder = () => {
                 </Menu>
               </div>
             </div>
+            <DisplayFiltersForMobile resource={sidebarResource.workOrder} />
           </div>
         </div>
         {isMobile && !isTablet ? (
           <CustomSwipableList
+            key={selectedType}
             allowSelection={true}
             allowSwipe={true}
             permissions={permissions.workOrder}
@@ -573,7 +571,7 @@ const WorkOrder = () => {
           />
         ) : null}
       </CustomContainer>
-    </Fragment>
+    </section>
   );
 };
 

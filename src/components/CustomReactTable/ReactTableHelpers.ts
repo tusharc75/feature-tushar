@@ -31,7 +31,15 @@ export const columnFilter = (rows, columnIds, filterValue, options = null) => {
         // Then add all the elements to a string separated by space
         // And an array of separate lowercase words without empty strings
         const textValues = columnIds
-            .map((col) => values && values[col])
+            .map((col) => {
+                const value = values && values[col];
+                if (typeof value === 'boolean') {
+                    return value ? 'yes' : 'no';
+                } else if (typeof value === 'object' && value && value?.optionLabel) {
+                    return value?.optionLabel;
+                }
+                return value;
+            })
             .filter((v) => ["string", "number"].includes(typeof v))
             .join(" ")
             .split(" ") // Delete extra spaces between words

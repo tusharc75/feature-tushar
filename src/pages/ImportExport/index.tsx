@@ -12,6 +12,8 @@ import CustomContainer from 'src/components/CustomContainer';
 import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
 import { CommonRenderer, DateTimeRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
 import { GetApp } from '@material-ui/icons';
+import { CustomImport } from './customImport';
+
 
 const ImportExport = () => {
 
@@ -29,16 +31,20 @@ const ImportExport = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, page, limit, pageSizes, appendRows } = state;
 
+  const [selectCustomHeader, setSelectCustomHeader] = useState(null);
+  const [selectTemplateHeader, setSelectTemplateHeader] = useState(null);
+  const [customImportDialog, setCustomImportDialog] = useState(false);
+  const [file, setFile] = useState({});
 
   useEffect(() => {
     fetchLogs();
-  }, [ selectResource, page, limit ]);
+  }, [selectResource, page, limit]);
 
   const fetchLogs = async () => {
     setLoading(true);
     axiosInstance()
       .get(`/import-export/logs${selectResource ? `?resource=${selectResource}` : ''}`)
-      .then(({ data: {data} }) => {
+      .then(({ data: { data } }) => {
         const count = data?.count;
         let rows = data?.data?.map((u) => {
           let finalObject = prepareDataForGrid(u);
@@ -56,12 +62,18 @@ const ImportExport = () => {
         } else {
           dispatch({
             type: 'initialize',
+            data: [],
+            count: 0,
+            selectedRecords: rows.filter((f) => f.isChecked === true)
+          });
+          dispatch({
+            type: 'initialize',
             data: rows,
             count: count,
             selectedRecords: rows.filter((f) => f.isChecked === true)
           });
         }
-        dispatch({ type: 'initialize', data: rows, count: data.count });
+        // dispatch({ type: 'initialize', data: rows, count: data.count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
@@ -166,6 +178,72 @@ const ImportExport = () => {
       });
   };
 
+
+  const handleCustomImport = async (e) => {
+    let files = e.target.files[0];
+    setExcelUploadProgress(0);
+    let formData = new FormData();
+    formData.append('file', files);
+    let uploadUrl = `/import-export/custom-import${selectResource ? `?resource=${selectResource}` : ''}`;
+    setImgUploading(true);
+    if (uploadingImageOrFileProgress) {
+      setUploadingImageOrFileProgress(1);
+    }
+    await axiosInstance()
+      .post(uploadUrl, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        onUploadProgress: (pE) => {
+          const completedPercent = Math.floor((pE.loaded * 100) / pE.total);
+          setExcelUploadProgress(completedPercent);
+          if (uploadingImageOrFileProgress) {
+            setUploadingImageOrFileProgress(completedPercent);
+          }
+          if (completedPercent === 100) {
+            setTimeout(() => {
+              setExcelUploadProgress(0);
+              if (uploadingImageOrFileProgress) {
+                setUploadingImageOrFileProgress(0);
+              }
+            }, 4000);
+          }
+        }
+      })
+      .then(({ data }) => {
+        setImgUploading(false);
+        let customHeader = data.data.CustomFileHeaders
+        setFile(data.data.file)
+        customHeader = customHeader.reduce((result, curr) => {
+          if (curr == null) {
+            return result
+          }
+          result.push({ "value": curr, "label": curr })
+          return result
+        }, [])
+        let templateHeader = data.data.TemplateHeaders
+        templateHeader = templateHeader.reduce((result, curr) => {
+          if (curr == null) {
+            return result
+          }
+          result.push({ "value": curr, "label": curr })
+          return result
+        }, [])
+
+        setSelectCustomHeader(customHeader);
+        setSelectTemplateHeader(templateHeader);
+        setCustomImportDialog(true);
+        fetchLogs();
+      })
+      .catch((err) => {
+        setImgUploading(false);
+        setToastConfig(err);
+        setExcelUploadProgress(0);
+        if (uploadingImageOrFileProgress) {
+          setUploadingImageOrFileProgress(0);
+        }
+      });
+  };
+
+
   const column = [
     {
       field: 'type',
@@ -189,23 +267,39 @@ const ImportExport = () => {
     }
   ];
 
-  const ActionRenderer = (params) => (
-    <>
-      <Tooltip title={params?.data?.status === 'Complete' ? 'Download' : 'Download Not available'}>
-        <IconButton
-          size="small"
-          color="inherit"
-          onClick={() => {
-            if (params?.data?.status === 'Complete') {
-              handleDownloadFile(params.data._id);
-            }
-          }}
+  const ActionRenderer = (params) => {
+    return (
+      <>
+        <Tooltip
+          title={
+            (params?.data?.status === 'Complete' || params?.data?.status === 'Partial Complete')
+              ? 'Download'
+              : 'Download Not available'
+          }
         >
-          <GetApp color={params?.data?.status === 'Complete' ? 'secondary' : 'disabled'} fontSize="small" />
-        </IconButton>
-      </Tooltip>
-    </>
-  );
+          <IconButton
+            size="small"
+            color="inherit"
+            onClick={() => {
+              if (params?.data?.status === 'Complete' || params?.data?.status === 'Partial Complete') {
+                handleDownloadFile(params.data._id);
+              }
+            }}
+          >
+            <GetApp
+              color={
+                (params?.data?.status === 'Complete' || params?.data?.status === 'Partial Complete')
+                  ? 'secondary'
+                  : 'disabled'
+              }
+              fontSize="small"
+            />
+          </IconButton>
+        </Tooltip>
+      </>
+    );
+  };
+
 
   const frameworkComponents = {
     dateTimeRenderer: DateTimeRenderer,
@@ -281,67 +375,85 @@ const ImportExport = () => {
             }}
           />
         </Box>
-        <Grid container spacing={2} xs={12} lg={12} md={12}>
-          <Grid item>
-            <input
-              id={`file`}
-              name={`file`}
-              onChange={handleImportFile}
-              style={{ display: 'none' }}
-              onClick={(e: any) => (e.target.value = null)}
-              type="file"
-              accept=".xlsx,.csv"
-            />
-            <label htmlFor={`file`}>
+
+        <Grid container xs={12} lg={12} md={12} style={{ maxWidth: '100%', justifyContent: "space-between" }}>
+          <Grid container spacing={2} xs={8} lg={8} md={8}>
+            <Grid item>
+              <input
+                id={`file`}
+                name={`file`}
+                onChange={handleImportFile}
+                style={{ display: 'none' }}
+                onClick={(e: any) => (e.target.value = null)}
+                type="file"
+                accept=".xlsx,.csv"
+              />
+              <label htmlFor={`file`}>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  component="span"
+                  disabled={isImgUploading || !selectResource}
+                  startIcon={<AiOutlineImport />}
+                >
+                  Import from Excel
+                </Button>
+              </label>
+              {isImgUploading && (
+                <>
+                  <CircularProgress variant="determinate" value={excelUploadProgress} size={30} />
+                  <Box>
+                    <Typography variant="caption" component="div" color="textSecondary">{`${excelUploadProgress}%`}</Typography>
+                  </Box>
+                </>
+              )}
+            </Grid>
+            <Grid item>
               <Button
                 size="small"
                 variant="outlined"
                 component="span"
                 disabled={isImgUploading || !selectResource}
-                startIcon={<AiOutlineImport />}
+                startIcon={<AiOutlineExport />}
+                onClick={() => {
+                  handleDownloadTemplate();
+                }}
               >
-                Import from Excel
+                Download Template {downloading.loading && downloading.type === 'template' && <CircularProgress size={20} />}
               </Button>
-            </label>
-            {isImgUploading && (
-              <>
-                <CircularProgress variant="determinate" value={excelUploadProgress} size={30} />
-                <Box>
-                  <Typography variant="caption" component="div" color="textSecondary">{`${excelUploadProgress}%`}</Typography>
-                </Box>
-              </>
-            )}
+            </Grid>
+            <Grid item>
+              <Button
+                type="button"
+                size="small"
+                color="primary"
+                variant="outlined"
+                onClick={handleExportExcel}
+                startIcon={<AiOutlineExport />}
+                disabled={selectResource == null}
+              >
+                Export to Excel {
+                  downloading.loading && downloading.type === 'export' && <CircularProgress size={20} />
+                }
+              </Button>
+            </Grid>
           </Grid>
-          <Grid item>
+          <Grid container xs={4} lg={4} md={4} justify="flex-end">
             <Button
               size="small"
               variant="outlined"
               component="span"
-              disabled={isImgUploading || !selectResource}
-              startIcon={<AiOutlineExport />}
+              disabled={!selectResource}
+              startIcon={<AiOutlineImport />}
               onClick={() => {
-                handleDownloadTemplate();
+                setCustomImportDialog(true)
               }}
             >
-              Download Template {downloading.loading && downloading.type === 'template' && <CircularProgress size={20} />}
-            </Button>
-          </Grid>
-          <Grid item>
-            <Button
-              type="button"
-              size="small"
-              color="primary"
-              variant="outlined"
-              onClick={handleExportExcel}
-              startIcon={<AiOutlineExport />}
-              disabled={selectResource == null}
-            >
-              Export to Excel {
-                downloading.loading && downloading.type === 'export' && <CircularProgress size={20} />
-              }
+              Custom Import
             </Button>
           </Grid>
         </Grid>
+
         <Box>
           <CustomAgGrid
             columns={column}
@@ -360,6 +472,25 @@ const ImportExport = () => {
             allowSelection={false}
             refreshGrid={fetchLogs}
           />
+          {
+            customImportDialog && (
+              <CustomImport
+                open={customImportDialog}
+                refreshGrid={fetchLogs}
+                handleFileImport={handleCustomImport}
+                isImgUploading={isImgUploading}
+                handleClose={() => {
+                  setSelectTemplateHeader(null);
+                  setCustomImportDialog(false)
+                }}
+                resource={selectResource ? selectResource : ''}
+                customImportHeader={selectCustomHeader}
+                templateImportHeader={selectTemplateHeader}
+                file={file}
+                excelUploadProgress={excelUploadProgress}
+              />
+            )
+          }
         </Box>
       </CustomContainer>
     </Fragment>

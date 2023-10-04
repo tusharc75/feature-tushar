@@ -1,36 +1,33 @@
-import { useContext, useEffect, useState, useReducer, Fragment } from 'react';
-import ManageBudgetDialog from './ManageBudgetDialog';
-import { Box, Button, Menu, MenuItem, Grid } from '@material-ui/core';
-import { useData } from '../../StateProvider/Provider';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import AddIcon from '@material-ui/icons/Add';
-import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import SearchBox from '../../components/Helpers/SearchBox';
-import CustomContainer from '../../components/CustomContainer';
-import styles from '../Leads/Header.module.scss';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { MdAdd, MdContacts } from 'react-icons/md';
-import axiosInstance from '../../axios/axiosInstance';
-import { isObjectEmpty, gridLoadingTimeout, budget, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
-import routes from './../../components/Helpers/Routes';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
-import Tooltip from '@material-ui/core/Tooltip';
+import { Box, Button, Menu, MenuItem } from '@material-ui/core';
 import IconButton from '@material-ui/core/IconButton';
+import Tooltip from '@material-ui/core/Tooltip';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import DeleteIcon from '@material-ui/icons/Delete';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
-import { useLocation, useHistory } from 'react-router-dom';
-import queryString from 'query-string';
-import { MdSort, MdFilterList, ImCalendar, FaSuitcase } from 'react-icons/all';
-import { isMobile, isTablet } from 'react-device-detect';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import MobileSortDialog from '../../components/MobileSortDialog';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
 import { camelCase } from 'lodash';
-import { Link } from 'react-router-dom';
+import queryString from 'query-string';
+import { useContext, useEffect, useReducer, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { FaSuitcase, ImCalendar, TbArrowsSort } from 'react-icons/all';
+import { MdContacts, MdOutlineFilterAlt } from 'react-icons/md';
+import { useHistory, useLocation } from 'react-router-dom';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
+import CustomContainer from '../../components/CustomContainer';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
+import SearchBox from '../../components/Helpers/SearchBox';
+import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
+import MobileSortDialog from '../../components/MobileSortDialog';
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import { budget, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import useColumns, { getFrameworkComponents, getStaticFields, gridFilterParser } from '../../constants/useColumns';
+import styles from '../Leads/Header.module.scss';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import routes from './../../components/Helpers/Routes';
+import ManageBudgetDialog from './ManageBudgetDialog';
 
 let timeout;
 function Budget() {
@@ -176,7 +173,7 @@ function Budget() {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
     if (deepFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
     }
     if (filterByIds?.length || deepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
@@ -187,7 +184,7 @@ function Budget() {
     }
 
     if (search) {
-      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
 
     if (showFilteredRecordsOnly) {
@@ -279,152 +276,134 @@ function Budget() {
           isClone={showManageBudgetDialog.isClone}
         />
       )}
-      <Fragment>
-        <Grid container className="headerbox">
-          <Grid item md={4} sm={11} xs={10}>
-            <CustomBreadCrumbs routes={[{ title: routes.budget.title }]} />
-          </Grid>
-          <Grid item md={8} sm={1} xs={2}>
-            <ImportExportLinks
-              permissions={permissions?.budget}
-              module="budget(s)"
-              api={'budget'}
-              afterImportCompleted={() => {
-                fetchBudgetList();
-              }}
-              isExportAllOrSomeFeature={true}
-              total={rowCount}
-              recordsToExport={selectedRecords.length}
-              ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
-              onExportToExcelSuccess={() => {
-                if (gridApi) gridApi.deselectAll();
-                else fetchBudgetList();
-              }}
-            />
-          </Grid>
-        </Grid>
+      <section className="main-container-v1">
+        <div className="headerbox-v1">
+          <CustomBreadCrumbs routes={[{ title: routes.budget.title }]} />
+          <ImportExportLinks
+            permissions={permissions?.budget}
+            module="budget(s)"
+            api={'budget'}
+            afterImportCompleted={() => {
+              fetchBudgetList();
+            }}
+            isExportAllOrSomeFeature={true}
+            total={rowCount}
+            recordsToExport={selectedRecords.length}
+            ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+            onExportToExcelSuccess={() => {
+              if (gridApi) gridApi.deselectAll();
+              else fetchBudgetList();
+            }}
+          />
+        </div>
 
         <CustomContainer>
           <div className="header-panel">
-            <Grid className={styles.filter_side_container} container justify="space-between">
-              <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+              <div className={'d-flex flex-wrap align-items-center gap-1 w-full'}>
                 <div className="d-flex align-items-center">
                   <MdContacts className="headerLogo" />
                   <span className="listingHeader">{routes.budget.title}</span>
                 </div>
                 {isMobile && !isTablet && (
-                  <div className="d-flex ">
-                    <Button
-                      onClick={handleClickOpen}
-                      id="demo-customized-button"
-                      aria-controls="demo-customized-menu"
-                      aria-haspopup="true"
-                      // aria-expanded={open ? 'true' : undefined}
-                      color="secondary"
-                      variant="text"
-                      disableElevation
-                      startIcon={<MdSort />}
-                    >
-                      Sort
-                    </Button>
+                  <div className="d-flex flex-wrap items-center justify-between w-full">
+                    <div></div>
+                    <div className="flex flex-wrap items-center gap-1">
+                      <IconButton
+                        onClick={handleClickOpen}
+                        id="demo-customized-button"
+                        aria-controls="demo-customized-menu"
+                        aria-haspopup="true"
+                        aria-expanded={open ? 'true' : undefined}
+                        size="small"
+                        className={'mobileIconButton secondary'}
+                      >
+                        <TbArrowsSort className="rotate-90" size={16} />
+                      </IconButton>
 
-                    <MobileSortDialog
-                      isOpen={open}
-                      handleClose={handleClickClose}
-                      contentPart={null}
-                      secHeading={['Sort Budget']}
-                      columns={columns}
-                      dispatch={dispatch}
-                    />
+                      <MobileSortDialog
+                        isOpen={open}
+                        handleClose={handleClickClose}
+                        contentPart={null}
+                        secHeading={['Sort Budget']}
+                        columns={columns}
+                        dispatch={dispatch}
+                      />
 
-                    <Button
-                      id="demo-customized-button"
-                      aria-controls="demo-customized-menu"
-                      aria-haspopup="true"
-                      // aria-expanded={open ? 'true' : undefined}
-                      variant="text"
-                      color="secondary"
-                      disableElevation
-                      startIcon={<MdFilterList />}
-                      onClick={handleOpen}
-                    >
-                      Filter
-                    </Button>
+                      <IconButton
+                        id="demo-customized-button"
+                        aria-controls="demo-customized-menu"
+                        aria-haspopup="true"
+                        aria-expanded={open ? 'true' : undefined}
+                        size="small"
+                        className={'mobileIconButton secondary'}
+                        onClick={handleOpen}
+                      >
+                        <MdOutlineFilterAlt size={16} />
+                      </IconButton>
 
-                    <MobileFilterDialog
-                      isOpen={isOpenDialog}
-                      handleClose={handleClose}
-                      contentPart={null}
-                      columns={columns}
-                      dispatch={dispatch}
-                      title={routes?.budget?.title}
-                      filters={filters}
-                    />
+                      <MobileFilterDialog
+                        isOpen={isOpenDialog}
+                        handleClose={handleClose}
+                        contentPart={null}
+                        columns={columns}
+                        dispatch={dispatch}
+                        title={routes?.budget?.title}
+                        filters={filters}
+                        resource={sidebarResource.budget}
+                      />
+                    </div>
                   </div>
                 )}
-              </Grid>
-              <Grid className={styles.filter_side} item md={6} sm={12} xs={12}>
-                <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                  <SearchBox
-                    onChange={onSearch}
-                    className={styles.search_box_input}
-                    value={search}
+              </div>
+              <div className="flex flex-wrap gap-[8px]  justify-end">
+                <SearchBox onChange={onSearch} className={styles.search_box_input} value={search} size="small" />
+
+                <div className="flex gap-[8px] flex-wrap items-center">
+                  <Button
+                    variant={'contained'}
+                    color="primary"
                     size="small"
-                    width="242px"
-                    style={isMobile ? { flex: 1 } : {}}
-                  />
+                    startIcon={<AddOutlined />}
+                    className={`no-shadow`}
+                    onClick={() => {
+                      setShowManageBudgetDialog({ show: true, id: null, isClone: false });
+                    }}
+                  >
+                    Add
+                  </Button>
 
-                  <Grid style={{ display: 'flex', gap: '5px' }}>
-                    <>
-                      <Button
-                        variant={isMobile && !isTablet ? 'text' : 'contained'}
-                        color="primary"
-                        size="small"
-                        startIcon={isMobile && !isTablet ? null : <AddOutlined />}
-                        className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
-                        onClick={() => {
-                          setShowManageBudgetDialog({ show: true, id: null, isClone: false });
-                        }}
-                      >
-                        {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
-                      </Button>
-                    </>
+                  <Button
+                    variant={'outlined'}
+                    color="default"
+                    size="small"
+                    className={`new-dropdown-v1`}
+                    onClick={openActions}
+                    disabled={selectedRecords.length ? false : true}
+                    aria-controls="action-menu"
+                    endIcon={<ExpandMore />}
+                  >
+                    Actions
+                  </Button>
 
-                    <>
-                      <Button
-                        variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                        color="default"
-                        size="small"
-                        className={
-                          isMobile && !isTablet ? 'mobile_button' : `${styles.add_submit_btn} ${styles.action_new_submit_btn} new-dropdown-v1`
-                        }
-                        onClick={openActions}
-                        disabled={selectedRecords.length ? false : true}
-                        aria-controls="action-menu"
-                        endIcon={<ExpandMore />}
-                      >
-                        {isMobile && !isTablet ? '' : 'Actions'}
-                      </Button>
-
-                      <Menu
-                        anchorEl={anchorEl}
-                        keepMounted
-                        getContentAnchorEl={null}
-                        anchorOrigin={{
-                          vertical: 'bottom',
-                          horizontal: 'left'
-                        }}
-                        id="action-menu"
-                        open={Boolean(anchorEl)}
-                        onClose={closeActions}
-                      >
-                        <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
-                      </Menu>
-                    </>
-                  </Grid>
-                </Box>
-              </Grid>
-            </Grid>
+                  <Menu
+                    anchorEl={anchorEl}
+                    keepMounted
+                    getContentAnchorEl={null}
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'left'
+                    }}
+                    id="action-menu"
+                    open={Boolean(anchorEl)}
+                    onClose={closeActions}
+                  >
+                    <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
+                  </Menu>
+                </div>
+              </div>
+              <DisplayFiltersForMobile resource={sidebarResource.budget} />
+            </div>
           </div>
           <Box component="div">
             {Object.keys(frameWorkComponent).length > 0 ? (
@@ -509,7 +488,7 @@ function Budget() {
             onOk={handleDelete}
           />
         )}
-      </Fragment>
+      </section>
     </>
   );
 }

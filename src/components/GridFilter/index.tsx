@@ -38,6 +38,13 @@ function GridFilter({ resource, currentGridApi, handleClose, setSelectedFilter, 
   useEffect(() => {
     fetchColumns();
     fetchUserFilters();
+    if (currentFomValue) {
+      for (const property in currentFomValue) {
+        if (isEmpty(currentFomValue[property])) {
+          delete currentFomValue[property];
+        }
+      }
+    }
     setFormValues(currentFomValue || {});
     setSelectedUserFilter(selectedFilter);
   }, []);
@@ -405,8 +412,8 @@ function GridFilter({ resource, currentGridApi, handleClose, setSelectedFilter, 
                                 betweenDate && betweenDate[`from_${field.fieldName}`]
                                   ? betweenDate[`from_${field.fieldName}`]
                                   : formValues[`from_${field.fieldName}`]
-                                  ? formValues[`from_${field.fieldName}`]
-                                  : new Date()
+                                    ? formValues[`from_${field.fieldName}`]
+                                    : new Date()
                               }
                             />
                           </Grid>
@@ -426,6 +433,7 @@ function GridFilter({ resource, currentGridApi, handleClose, setSelectedFilter, 
                             required={false}
                             fullWidth
                             size="small"
+                            fromFilter={true}
                           />
                         </Grid>
                       )}
@@ -453,7 +461,7 @@ function GridFilter({ resource, currentGridApi, handleClose, setSelectedFilter, 
           >
             {selectedUserFilter ? 'Update Filter' : 'Save Filter'}
           </Button>
-          <Button onClick={handleApplyFilter} size="small" className="no-shadow" color="primary" variant="contained">
+          <Button disabled={isEmpty(formValues) ? true : false} onClick={handleApplyFilter} size="small" className="no-shadow" color="primary" variant="contained">
             Apply Now
           </Button>
         </CustomDialogFooter>

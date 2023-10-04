@@ -185,6 +185,13 @@ const routes = {
         : RESOURCE_LABEL.priceTemplate,
     path: '/price-template'
   },
+  priceTemplateDetail: {
+    title:
+      storedRoutes && storedRoutes.priceTemplate && storedRoutes.priceTemplate.title
+        ? storedRoutes.priceTemplate?.title
+        : RESOURCE_LABEL.priceTemplate,
+    path: '/price-template'
+  },
   productBuilder: {
     title:
       storedRoutes && storedRoutes.productBuilder && storedRoutes.productBuilder.title
@@ -218,6 +225,13 @@ const routes = {
     path: '/product-category/detail'
   },
   productTemplate: {
+    title:
+      storedRoutes && storedRoutes.productTemplate && storedRoutes.productTemplate.title
+        ? storedRoutes.productTemplate?.title
+        : RESOURCE_LABEL.productTemplate,
+    path: '/product-template'
+  },
+  productTemplateDetail: {
     title:
       storedRoutes && storedRoutes.productTemplate && storedRoutes.productTemplate.title
         ? storedRoutes.productTemplate?.title
@@ -1020,7 +1034,7 @@ const routes = {
     path: '/iot-data-points/detail'
   },
   iotChart: {
-    title: storedRoutes && storedRoutes.iotChart && storedRoutes.iotChart?.title ? storedRoutes.iotDataPoints?.title
+    title: storedRoutes && storedRoutes.iotChart && storedRoutes.iotChart?.title ? storedRoutes.iotChart?.title
       : RESOURCE_LABEL.iotChart,
     path: '/iot-chart'
   },
@@ -1036,6 +1050,66 @@ const routes = {
         : RESOURCE_LABEL.accountsReceivable,
     path: '/accounts-receivable'
   }
+  deviceTemplates: {
+    title: storedRoutes && storedRoutes.deviceTemplates && storedRoutes.deviceTemplates?.title ? storedRoutes.deviceTemplates?.title
+      : RESOURCE_LABEL.deviceTemplates,
+    path: '/device-templates'
+  },
+  deviceTemplatesDetail: {
+    title:
+      storedRoutes && storedRoutes.deviceTemplates && storedRoutes.deviceTemplates.title
+        ? storedRoutes.deviceTemplates?.title
+        : RESOURCE_LABEL.deviceTemplates,
+    path: '/device-templates/detail'
+  },
+  workStations: {
+    title: storedRoutes && storedRoutes.workStations && storedRoutes.workStations?.title ? storedRoutes.workStations?.title
+      : RESOURCE_LABEL.workStations,
+    path: '/work-stations'
+  },
+  workStationsDetail: {
+    title:
+      storedRoutes && storedRoutes.workStations && storedRoutes.workStations.title
+        ? storedRoutes.workStations?.title
+        : RESOURCE_LABEL.workStations,
+    path: '/work-stations/detail'
+  },
+  deviceTemplateAlert: {
+    title:
+      storedRoutes && storedRoutes.deviceTemplateAlert && storedRoutes.deviceTemplateAlert.title
+        ? storedRoutes.deviceTemplateAlert?.title
+        : RESOURCE_LABEL.deviceTemplateAlert,
+    path: '/device-template-alert'
+  },
+  deviceTemplateAlertDetail: {
+    title:
+      storedRoutes && storedRoutes.deviceTemplateAlert && storedRoutes.deviceTemplateAlert.title
+        ? storedRoutes.deviceTemplateAlert?.title
+        : RESOURCE_LABEL.deviceTemplateAlert,
+    path: '/device-template-alert/detail'
+  },
+  chartOfAccount: {
+    title: storedRoutes && storedRoutes.chartOfAccount && storedRoutes.chartOfAccount?.title ? storedRoutes.chartOfAccount?.title
+      : RESOURCE_LABEL.chartOfAccount,
+    path: '/chart-of-account'
+  },
+  chartOfAccountDetail: {
+    title:
+      storedRoutes && storedRoutes.chartOfAccount && storedRoutes.chartOfAccount.title
+        ? storedRoutes.chartOfAccount?.title
+        : RESOURCE_LABEL.chartOfAccount,
+    path: '/chart-of-account/detail'
+  },
+  flash : {
+    title : storedRoutes && storedRoutes.flash && storedRoutes.flash.title
+    ? storedRoutes.flash?.title
+    : RESOURCE_LABEL.flash,
+    path : '/flash'
+  },
+  flashDetail: {
+    title: storedRoutes && storedRoutes.flash && storedRoutes.flash.title ? storedRoutes.flash?.title : RESOURCE_LABEL.flash,
+    path: '/flash/detail'
+  },
 };
 
 export default routes;

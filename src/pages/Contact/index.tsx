@@ -1,47 +1,49 @@
-import { useContext, useEffect, useState, useReducer, Fragment } from 'react';
-import { Box, Button, Menu, MenuItem, Grid, Dialog } from '@material-ui/core';
-import { useData } from '../../StateProvider/Provider';
-import { Link } from 'react-router-dom';
+import { Box, Button, Chip, Dialog, Grid, Menu, MenuItem } from '@material-ui/core';
+import IconButton from '@material-ui/core/IconButton';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import ManageContactDialog from './ManageContact';
-import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import SearchBox from '../../components/Helpers/SearchBox';
-import CustomContainer from '../../components/CustomContainer';
-import MessageDialog from '../../components/Helpers/MessageDialog';
-import styles from '../Leads/Header.module.scss';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
-import { MdContacts } from 'react-icons/md';
-import axiosInstance from '../../axios/axiosInstance';
-import { gridLoadingTimeout, prepareDataForGrid, userType, getLocalStorageArrayData, removeLocalStorage } from '../../constants/helpers';
-import { useHistory } from 'react-router-dom';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { Chip } from '@material-ui/core';
-import routes from './../../components/Helpers/Routes';
-import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import contactClass from './contact.module.scss';
-import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
-import EntitySelectionsDialog from '../../components/EntitySelections';
-import { AiOutlineDeploymentUnit } from 'react-icons/ai';
-import { sidebarResource } from '../../constants/helpers';
-import IconButton from '@material-ui/core/IconButton';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
-import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField, gridFilterParser } from '../../constants/useColumns';
-import NoDataCell from '../../components/Helpers/NoDataCell';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { isMobile, isTablet } from 'react-device-detect';
-import { MdAdd } from 'react-icons/all';
-import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
-import { FaSuitcase, MdFilterList, MdSort } from 'react-icons/all';
-import MobileSortDialog from '../../components/MobileSortDialog';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
 import { camelCase } from 'lodash';
-import WarhouseList from '../Account/Warehouse/WarhouseList';
+import { useContext, useEffect, useReducer, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { AiOutlineDeploymentUnit } from 'react-icons/ai';
+import { CiUser, FaSuitcase, TbArrowsSort } from 'react-icons/all';
+import { MdOutlineFilterAlt } from 'react-icons/md';
+import { Link, useHistory } from 'react-router-dom';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
+import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
+import CustomContainer from '../../components/CustomContainer';
+import EntitySelectionsDialog from '../../components/EntitySelections';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
+import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
+import MessageDialog from '../../components/Helpers/MessageDialog';
+import NoDataCell from '../../components/Helpers/NoDataCell';
+import SearchBox from '../../components/Helpers/SearchBox';
+import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
+import MobileSortDialog from '../../components/MobileSortDialog';
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import {
+  getLocalStorageArrayData,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  removeLocalStorage,
+  sidebarResource,
+  userType
+} from '../../constants/helpers';
+import useColumns, { checkStaticField, getFrameworkComponents, getStaticFields, gridFilterParser } from '../../constants/useColumns';
+import WarhouseList from '../Account/Warehouse/WarhouseList';
+import styles from '../Leads/Header.module.scss';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import routes from './../../components/Helpers/Routes';
+import ManageContactDialog from './ManageContact';
 
 const ContactTypes = [
   {
@@ -328,12 +330,12 @@ export default function Contact(props) {
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
 
-    if (selectedType === 2) {
-      deepFilter = deepFilter + `&myRecords=1`;
-    }
-
     if (isExport) {
       deepFilter = `?`;
+    }
+
+    if (selectedType === 2) {
+      deepFilter = deepFilter + `&myRecords=1`;
     }
 
     if (selectedEntity) {
@@ -350,7 +352,7 @@ export default function Contact(props) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
     if (deepFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
     }
     if (filterByIds?.length || deepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
@@ -361,7 +363,7 @@ export default function Contact(props) {
     }
 
     if (search) {
-      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
@@ -525,6 +527,7 @@ export default function Contact(props) {
   };
 
   const handleContactSelect = (filterValues) => {
+    dispatch({ type: 'setPage', page: 0 });
     setSelectedType(filterValues);
   };
   const handleOpen = () => {
@@ -544,278 +547,246 @@ export default function Contact(props) {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[{ title: routes[contactResource].title }]} />
-        </Grid>
-        <Grid item md={8} sm={1} xs={2}>
-          <ImportExportLinks
-            permissions={contactPermissions}
-            module="contact(s)"
-            api={contactApi}
-            afterImportCompleted={() => {
-              getContacts();
-            }}
-            isExportAllOrSomeFeature={true}
-            total={rowCount}
-            recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-            ids={
-              getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-                ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-                : []
-            }
-            onExportToExcelSuccess={() => {
-              if (gridApi) gridApi.deselectAll();
-              else getContacts();
-            }}
-            additionalParams={getQueryString(true)}
-          />
-        </Grid>
-      </Grid>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[{ title: routes[contactResource].title }]} />
+        <ImportExportLinks
+          permissions={contactPermissions}
+          module="contact(s)"
+          api={contactApi}
+          afterImportCompleted={() => {
+            getContacts();
+          }}
+          isExportAllOrSomeFeature={true}
+          total={rowCount}
+          recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+          ids={
+            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+              ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+              : []
+          }
+          onExportToExcelSuccess={() => {
+            if (gridApi) gridApi.deselectAll();
+            else getContacts();
+          }}
+          additionalParams={getQueryString(true)}
+        />
+      </div>
 
       <CustomContainer>
-        <div className={`${contactClass['contact_header_inner_container']}`}>
-          <Grid container className="header-panel" justify="space-between" alignContent="center">
-            <Grid item md={6} sm={12} xs={12} className="d-flex align-items-center gap-1">
-              <Grid container className="gap-1">
-                <Grid className="d-flex align-items-center gap-1 align-tablet">
-                  <Grid>
-                    <MdContacts className="headerLogo" />
-                    <span id="resourceHeader" className="listingHeader">
-                      {routes[contactResource].title}
-                    </span>
-                  </Grid>
+        <div className="header-panel">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className={'d-flex align-items-center gap-1'}>
+              {isMobile && (
+                <div className="d-flex flex-wrap items-center justify-between w-full">
+                  <div>{toggleInner}</div>
+                  <div className="flex flex-wrap items-center gap-1 ml-auto">
+                    <IconButton
+                      id="demo-customized-button"
+                      aria-controls="demo-customized-menu"
+                      aria-haspopup="true"
+                      aria-expanded={open ? 'true' : undefined}
+                      className={'mobileIconButton secondary'}
+                      size="small"
+                      onClick={handleClickOpen}
+                    >
+                      <TbArrowsSort className="rotate-90" size={16} />
+                    </IconButton>
 
-                  {isMobile && (
-                    <>
-                      <Grid style={{ display: 'inline-flex' }}>
-                        <Button
-                          id="demo-customized-button"
-                          aria-controls="demo-customized-menu"
-                          aria-haspopup="true"
-                          aria-expanded={open ? 'true' : undefined}
-                          color="secondary"
-                          variant="text"
-                          disableElevation
-                          onClick={handleClickOpen}
-                          startIcon={<MdSort />}
-                          style={{ marginLeft: '40px' }}
-                          className={'sort-filter-tablet'}
-                        >
-                          Sort
-                        </Button>
+                    <MobileSortDialog
+                      isOpen={sortOpen}
+                      handleClose={handleClickClose}
+                      contentPart={toggleInner}
+                      secHeading={['Sort Accounts']}
+                      columns={columns}
+                      dispatch={dispatch}
+                    />
+                    <IconButton
+                      id="demo-customized-button"
+                      aria-controls="demo-customized-menu"
+                      aria-haspopup="true"
+                      aria-expanded={open ? 'true' : undefined}
+                      size="small"
+                      onClick={handleOpen}
+                    >
+                      <MdOutlineFilterAlt size={16} />
+                    </IconButton>
+                    <MobileFilterDialog
+                      isOpen={isOpenDialog}
+                      handleClose={handleFilterClose}
+                      contentPart={null}
+                      columns={columns}
+                      dispatch={dispatch}
+                      title={routes?.[contactResource]?.title}
+                      filters={filters}
+                      resource={sidebarResource[contactResource]}
+                    />
+                  </div>
+                </div>
+              )}
 
-                        <MobileSortDialog
-                          isOpen={sortOpen}
-                          handleClose={handleClickClose}
-                          contentPart={toggleInner}
-                          secHeading={['Sort Accounts']}
-                          columns={columns}
-                          dispatch={dispatch}
-                        />
-                        <Button
-                          id="demo-customized-button"
-                          aria-controls="demo-customized-menu"
-                          aria-haspopup="true"
-                          aria-expanded={open ? 'true' : undefined}
-                          variant="text"
-                          color="secondary"
-                          disableElevation
-                          startIcon={<MdFilterList />}
-                          className={'sort-filter-tablet'}
-                          onClick={handleOpen}
-                        >
-                          Filter
-                        </Button>
-                        <MobileFilterDialog
-                          isOpen={isOpenDialog}
-                          handleClose={handleFilterClose}
-                          contentPart={toggleInner}
-                          columns={columns}
-                          dispatch={dispatch}
-                          title={routes?.[contactResource]?.title}
-                          filters={filters}
-                        />
-                      </Grid>
-                    </>
-                  )}
+              {ContactTypes && (
+                <ToggleButtonGroup
+                  id="resourceTypeSelector"
+                  size="small"
+                  className="ml-8 layout-for-mobile"
+                  value={filter}
+                  exclusive
+                  onChange={handleFilter}
+                >
+                  {ContactTypes.map((k, index) => {
+                    return (
+                      <ToggleButton value={k.key} key={index}>
+                        {k.key}
+                      </ToggleButton>
+                    );
+                  })}
+                </ToggleButtonGroup>
+              )}
 
-                  <Grid className="align-toggle-button">
-                    {ContactTypes && (
-                      <ToggleButtonGroup
-                        id="resourceTypeSelector"
-                        size="small"
-                        className="ml-8 layout-for-mobile"
-                        value={filter}
-                        exclusive
-                        onChange={handleFilter}
-                      >
-                        {ContactTypes.map((k, index) => {
-                          return (
-                            <ToggleButton value={k.key} key={index}>
-                              {k.key}
-                            </ToggleButton>
-                          );
-                        })}
-                      </ToggleButtonGroup>
-                    )}
-
-                    <Grid className={styles.Related_Account}>
-                      {accountDetails.accountId && (
-                        <Chip
-                          className="ml-3"
-                          color="primary"
-                          label={`Account: ${accountDetails.accountName}`}
-                          onDelete={() => {
-                            setAccountDetails({ accountId: null, accountName: null });
-                            // getContacts();
-                          }}
-                        />
-                      )}
-                    </Grid>
-                  </Grid>
-                </Grid>
-              </Grid>
-            </Grid>
-            <Grid item md={6} sm={12} xs={12} className={styles.filter_side}>
-              <Box id="resourceOperations" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                <Grid style={{ display: 'flex', flex: 1 }}>
-                  <SearchBox
-                    onChange={handleSearch}
-                    className={styles.search_box_input}
-                    value={search}
-                    size="small"
-                    width={isMobile ? '200px' : '242px'}
-                    style={isMobile ? { flex: 1 } : {}}
+              <Grid className={styles.Related_Account}>
+                {accountDetails.accountId && (
+                  <Chip
+                    className="ml-3"
+                    color="primary"
+                    label={`Account: ${accountDetails.accountName}`}
+                    onDelete={() => {
+                      setAccountDetails({ accountId: null, accountName: null });
+                      // getContacts();
+                    }}
                   />
-                </Grid>
+                )}
+              </Grid>
+            </div>
+            <div className="flex flex-wrap gap-[8px]  justify-end">
+              <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
 
-                <Grid style={{ display: 'flex', gap: '5px' }}>
-                  {contactPermissions?.isCreate && (
-                    <>
-                      <Button
-                        variant={isMobile && !isTablet ? 'text' : 'contained'}
-                        color="primary"
-                        size="small"
-                        onClick={clickCreateNew}
-                        className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
-                        startIcon={isMobile && !isTablet ? '' : <AddOutlined />}
-                      >
-                        {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
-                      </Button>
-                    </>
-                  )}
+              <div className="flex gap-[8px] flex-wrap items-center">
+                {contactPermissions?.isCreate && (
+                  <>
+                    <Button
+                      variant={'contained'}
+                      color="primary"
+                      size="small"
+                      onClick={clickCreateNew}
+                      className={`no-shadow`}
+                      startIcon={<AddOutlined />}
+                    >
+                      Add
+                    </Button>
+                  </>
+                )}
 
-                  {(contactPermissions?.isDelete || contactPermissions?.isUpdate) && (
-                    <>
-                      <Button
-                        disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0}
-                        variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                        color="default"
-                        size="small"
-                        onClick={openActions}
-                        className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
-                        aria-controls="action-menu"
-                        endIcon={<ExpandMore />}
-                      >
-                        {isMobile && !isTablet ? '' : 'Actions'}
-                      </Button>
-                      <Menu
-                        anchorEl={anchorEl}
-                        keepMounted
-                        getContentAnchorEl={null}
-                        anchorOrigin={{
-                          vertical: 'bottom',
-                          horizontal: 'left'
-                        }}
-                        id="action-menu"
-                        open={Boolean(anchorEl)}
-                        onClose={closeActions}
-                      >
-                        {contactPermissions?.isDelete && (
-                          <MenuItem
-                            disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0}
-                            onClick={() => {
-                              if (getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some((d) => d.canDelete === false)) {
-                                closeActions();
-                                setShowDeleteWarningConfirmBox({ show: true, isDelete: true });
-                              } else {
-                                closeActions();
-                                setShowDeleteConfirmBox(true);
-                              }
-                            }}
-                          >
-                            Delete
-                          </MenuItem>
-                        )}
-                        {user.user?.userType === userType.brandAdmin && (
-                          <MenuItem
-                            disabled={
-                              getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0 ||
-                              getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some((record) => record?.isUserExist)
-                            }
-                            onClick={handleAccessToPortal}
-                          >
-                            Give Access to Portal
-                          </MenuItem>
-                        )}
-                        {contactPermissions?.isUpdate && contactResource === 'customerContact' && permissions?.productInventory && (
-                          <MenuItem
-                            disabled={
-                              getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0 ||
-                              [...new Set(getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((d) => d.accountNameId))].length > 1
-                            }
-                            onClick={() => {
-                              setOpenAddPlantsDialog(true);
+                {(contactPermissions?.isDelete || contactPermissions?.isUpdate) && (
+                  <>
+                    <Button
+                      disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0}
+                      variant={'outlined'}
+                      color="default"
+                      size="small"
+                      onClick={openActions}
+                      className={`new-dropdown-v1`}
+                      aria-controls="action-menu"
+                      endIcon={<ExpandMore />}
+                    >
+                      Actions
+                    </Button>
+                    <Menu
+                      anchorEl={anchorEl}
+                      keepMounted
+                      getContentAnchorEl={null}
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left'
+                      }}
+                      id="action-menu"
+                      open={Boolean(anchorEl)}
+                      onClose={closeActions}
+                    >
+                      {contactPermissions?.isDelete && (
+                        <MenuItem
+                          disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0}
+                          onClick={() => {
+                            if (getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some((d) => d.canDelete === false)) {
                               closeActions();
-                            }}
-                          >
-                            Assign {routes.warehouse.title} &nbsp;{' '}
-                            <Chip size="small" label={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length} />
-                          </MenuItem>
-                        )}
-                        {contactPermissions?.isUpdate && (
-                          <MenuItem
-                            disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0}
-                            onClick={() => {
-                              if (getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some((d) => d.isUpdate === false)) {
-                                closeActions();
-                                setShowDeleteWarningConfirmBox({ show: true, isDelete: false });
-                              } else {
-                                closeActions();
-                                if (getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length) {
-                                  let entities = [];
-                                  getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((current) => {
-                                    if (current?.entityId) {
-                                      entities = [...entities, current?.entityId];
-                                    }
-                                    if (current?.restentity) {
-                                      let restEntities = current?.restentity.map((o) => o?.optionValue);
-                                      entities = [...entities, ...restEntities];
-                                    }
-                                  });
-                                  setEntities([...entities]);
-                                }
-                                setShowEntityDialog(true);
+                              setShowDeleteWarningConfirmBox({ show: true, isDelete: true });
+                            } else {
+                              closeActions();
+                              setShowDeleteConfirmBox(true);
+                            }
+                          }}
+                        >
+                          Delete
+                        </MenuItem>
+                      )}
+                      {user.user?.userType === userType.brandAdmin && (
+                        <MenuItem
+                          disabled={
+                            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0 ||
+                            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some((record) => record?.isUserExist)
+                          }
+                          onClick={handleAccessToPortal}
+                        >
+                          Give Access to Portal
+                        </MenuItem>
+                      )}
+                      {contactPermissions?.isUpdate && contactResource === 'customerContact' && permissions?.productInventory && (
+                        <MenuItem
+                          disabled={
+                            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0 ||
+                            [...new Set(getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((d) => d.accountNameId))].length > 1
+                          }
+                          onClick={() => {
+                            setOpenAddPlantsDialog(true);
+                            closeActions();
+                          }}
+                        >
+                          Assign {routes.warehouse.title} &nbsp;{' '}
+                          <Chip size="small" label={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length} />
+                        </MenuItem>
+                      )}
+                      {contactPermissions?.isUpdate && (
+                        <MenuItem
+                          disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0}
+                          onClick={() => {
+                            if (getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some((d) => d.isUpdate === false)) {
+                              closeActions();
+                              setShowDeleteWarningConfirmBox({ show: true, isDelete: false });
+                            } else {
+                              closeActions();
+                              if (getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length) {
+                                let entities = [];
+                                getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((current) => {
+                                  if (current?.entityId) {
+                                    entities = [...entities, current?.entityId];
+                                  }
+                                  if (current?.restentity) {
+                                    let restEntities = current?.restentity.map((o) => o?.optionValue);
+                                    entities = [...entities, ...restEntities];
+                                  }
+                                });
+                                setEntities([...entities]);
                               }
-                            }}
-                          >
-                            Assign Entity &nbsp; <Chip size="small" label={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length} />
-                          </MenuItem>
-                        )}
-                      </Menu>
-                    </>
-                  )}
-                </Grid>
-              </Box>
-            </Grid>
-          </Grid>
+                              setShowEntityDialog(true);
+                            }
+                          }}
+                        >
+                          Assign Entity &nbsp; <Chip size="small" label={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length} />
+                        </MenuItem>
+                      )}
+                    </Menu>
+                  </>
+                )}
+              </div>
+            </div>
+            <DisplayFiltersForMobile resource={sidebarResource[contactResource]} />
+          </div>
         </div>
 
         {Object.keys(frameWorkComponent).length > 0 &&
           (isMobile && !isTablet ? (
             <CustomSwipableList
+              key={selectedType}
               allowSelection={true}
               allowSwipe={true}
               permissions={contactPermissions}
@@ -842,7 +813,7 @@ export default function Contact(props) {
               loading={loading}
               additionalDetails={[
                 {
-                  icon: <FaSuitcase size={18} />,
+                  icon: <CiUser size={18} />,
                   field: 'accountName'
                 }
               ]}
@@ -1005,6 +976,6 @@ export default function Contact(props) {
           ) : null}
         </Box>
       </CustomContainer>
-    </Fragment>
+    </section>
   );
 }

@@ -142,7 +142,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
                   {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
                 </span>
                 {!isOffline && allowedToEdit && (
-                  <HtmlTooltip title="Add Service">
+                  <HtmlTooltip title="Add Existing Service">
                     <IconButton
                       onClick={() => setAddExistingProductDialog({ open: true, type: 'service', parentId: row.original?._id })}
                       size="small"
@@ -285,8 +285,6 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
               : '';
       parent.serializedProduct = parent.type === 'product' ? parent?.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
-      parent.pricingConditionDisplay = parent.pricingCondition?.optionLabel;
-      parent.pricingCondition = parent.pricingCondition?.optionValue;
       parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
       parent.assetQty = parent.serializedProduct
         ? inventory?.filter((e) => e._id === parent._id).length
@@ -416,7 +414,6 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
       delete element.detail;
       delete element.serializedProduct;
       delete element.qtyDisplay;
-      delete element.pricingConditionDisplay;
       delete element.isValid;
       delete element.hideSelection;
       delete element.assetQty;
@@ -539,7 +536,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
                     setAddExistingProductDialog({ open: true, type: 'service', parentId: null });
                   }}
                 >
-                  Add Services
+                  Add Existing Services
                 </MenuItem>
               )}
               {permissions?.packages?.isRead && (
@@ -549,7 +546,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
                     setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
                   }}
                 >
-                  {`Add Service Packages`}
+                  {`Add Existing Service Packages`}
                 </MenuItem>
               )}
               <MenuItem

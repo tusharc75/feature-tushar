@@ -24,6 +24,8 @@ import Logs from './Logs';
 import History from 'src/pages/ProductInventory/LedgerHistory';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import PreviewDownload from 'src/components/PreviewDownload';
+import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
+import AssetQtyDialog from './AssetQtyDialog';
 
 
 const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, renderedFrom, checkReceivedProduct, allowedToEdit }) => {
@@ -44,6 +46,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
   const [rowsData, setRowsData] = useState(null);
   const [columns, setColumns] = useState(null);
   const [selectedRecords, setSelectedRecords] = useState([]);
+  const [addAssetDialog, setAddAssetDialog] = useState({ open: false, product: null })
 
   useEffect(() => {
     fetchColumns();
@@ -86,7 +89,8 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
       Cell: ({ row }) => (
         <div className="d-flex gap-2 align-items-center">
           <p className="text-truncate">{row.original.detail}</p>
-          <IconButton
+
+          {['Product', 'Asset'].includes(row.original.type) && <IconButton
             size="small"
             onClick={() => {
               if (row.original.type === 'Product') {
@@ -98,7 +102,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
             }}
           >
             <OpenInNewIcon fontSize="small" color="primary" />
-          </IconButton>
+          </IconButton>}
         </div>
       )
     });
@@ -228,7 +232,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
 
     column.push({
       accessor: 'assetQty',
-      Header: 'Asset Received',
+      Header: 'Received Assets',
       width: 150,
       Cell: ({ row }) => (row.original['assetQty'] ? <p>{row.original['assetQty']}</p> : <NoDataCell />),
       Footer: (info) => {
@@ -239,7 +243,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
     });
     column.push({
       accessor: 'inventoryQty',
-      Header: 'Inventory Received',
+      Header: 'Received Quantity',
       width: 150,
       Cell: ({ row }) => (row.original['inventoryQty'] ? <p>{row.original['inventoryQty']}</p> : <NoDataCell />),
       Footer: (info) => {
@@ -262,6 +266,20 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
           Cell: ({ row }) =>
             row?.original?.type === 'Product' ? (
               <>
+                {/* {permissions?.serializedAsset?.isCreate &&
+                  row?.original?.serializedProduct && (row.original?.qty - (row.original?.actualReceived || 0) - (row?.original?.assetQty || 0)) > 0 &&
+                  <HtmlTooltip title={`Create ${routes.serializedAsset.title}`}>
+                    <IconButton
+                      size="small"
+                      aria-label={`Create ${routes.serializedAsset.title}`}
+                      onClick={() => {
+                        setAddAssetDialog({ open: true, product: row.original })
+                      }}
+                    >
+                      <AddCircleOutlineIcon fontSize="small" color={'primary'} />
+                    </IconButton>
+                  </HtmlTooltip>
+                } */}
                 {permissions?.purchaseOrder?.isUpdate &&
                   allowedToEdit &&
                   row?.original?.qty - (row?.original?.rejectQuantity || 0) - (row?.original?.assetQty || 0) &&
@@ -279,7 +297,8 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
                       </IconButton>
                     </span>
                   </HtmlTooltip>
-                ) : null}
+                ) : null
+                }
                 <HtmlTooltip title="History">
                   <span>
                     <IconButton
@@ -376,8 +395,8 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
             }
           });
         }
-        res['assetQty'] = subRows?.length;
-        res['inventoryQty'] = item?.actualReceived ? (item?.actualReceived || 0) - subRows?.length : 0;
+        res['assetQty'] = res?.subRows?.filter((e) => e.type === 'Asset')?.length;
+        res['inventoryQty'] = item?.actualReceived ? (item?.actualReceived || 0) - res?.subRows?.filter((e) => e.type === 'Asset')?.length : 0;
         return res;
       });
 
@@ -386,6 +405,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
           return { ...e, type: 'Product' };
         })
       );
+
       setRowsData(rows);
       setSelectedRecords([]);
     } catch (error) {
@@ -486,6 +506,17 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
             fetchProduct();
           }}
           productList={selectedRecords.filter((d) => d.type === 'Product' && d.qty !== d.actualReceived)}
+          purchaseOrderData={purchaseOrderData}
+        />
+      )}
+      {addAssetDialog.open && (
+        <AssetQtyDialog
+          onClose={() => setAddAssetDialog({ open: false, product: null })}
+          onSuccess={() => {
+            setAddAssetDialog({ open: false, product: null });
+            fetchProduct();
+          }}
+          product={addAssetDialog.product}
           purchaseOrderData={purchaseOrderData}
         />
       )}

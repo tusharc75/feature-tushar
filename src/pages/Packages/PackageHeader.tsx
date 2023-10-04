@@ -1,17 +1,16 @@
-import { useState, useEffect } from 'react';
-import SearchBox from '../../components/Helpers/SearchBox';
-import { AddOutlined } from '@material-ui/icons';
-import { Box, Grid, MenuItem, Button, Menu } from '@material-ui/core';
-import { ExpandMore } from '@material-ui/icons';
+import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
-import styles from '../Leads/Header.module.scss';
-import HideWhenOffline from '../../components/HideWhenOffline';
+import { useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { MdAdd, MdSort, MdFilterList } from 'react-icons/all';
-import MobileSortDialog from '../../components/MobileSortDialog';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
+import { MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
 import routes from 'src/components/Helpers/Routes';
+import SearchBox from '../../components/Helpers/SearchBox';
+import HideWhenOffline from '../../components/HideWhenOffline';
+import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
+import MobileSortDialog from '../../components/MobileSortDialog';
+import styles from '../Leads/Header.module.scss';
 
 function PackageHeader(props) {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -70,7 +69,8 @@ function PackageHeader(props) {
     columns,
     dispatch,
     // showClonePackageDialog
-    filters
+    filters,
+    resource
   } = props;
 
   let toggleInner = options && (
@@ -86,27 +86,23 @@ function PackageHeader(props) {
   );
 
   return (
-    <Grid className={styles.filter_side_container} container>
-      <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center gap-1">
-        <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
-          <div className="d-flex align-items-center">
-            {icon} <span className="listingHeader">{heading}</span>
-          </div>
-          {isMobile && !isTablet && (
-            <div className="d-flex ">
-              <Button
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className={'d-flex align-items-center gap-1'}>
+        {isMobile && !isTablet && (
+          <div className="d-flex flex-wrap items-center justify-between w-full">
+            <div></div>
+            <div className="flex flex-wrap items-center gap-1 ml-auto">
+              <IconButton
                 onClick={handleClickOpen}
                 id="demo-customized-button"
                 aria-controls="demo-customized-menu"
                 aria-haspopup="true"
-                // aria-expanded={open ? 'true' : undefined}
-                color="secondary"
-                variant="text"
-                disableElevation
-                startIcon={<MdSort />}
+                aria-expanded={open ? 'true' : undefined}
+                className={'mobileIconButton secondary'}
+                size="small"
               >
-                Sort
-              </Button>
+                <TbArrowsSort className="rotate-90" size={16} />
+              </IconButton>
 
               <MobileSortDialog
                 isOpen={open}
@@ -117,31 +113,30 @@ function PackageHeader(props) {
                 dispatch={dispatch}
               />
 
-              <Button
+              <IconButton
                 id="demo-customized-button"
                 aria-controls="demo-customized-menu"
                 aria-haspopup="true"
-                // aria-expanded={open ? 'true' : undefined}
-                variant="text"
-                color="secondary"
-                disableElevation
-                startIcon={<MdFilterList />}
+                aria-expanded={open ? 'true' : undefined}
+                className={'mobileIconButton secondary'}
+                size="small"
                 onClick={handleOpen}
               >
-                Filter
-              </Button>
+                <MdOutlineFilterAlt size={16} />
+              </IconButton>
               <MobileFilterDialog
                 isOpen={isOpenDialog}
                 handleClose={handleClose}
-                contentPart={toggleInner}
+                contentPart={null}
                 columns={columns}
                 dispatch={dispatch}
                 title={routes?.packages?.title}
                 filters={filters}
+                resource={resource}
               />
             </div>
-          )}
-        </Grid>
+          </div>
+        )}
         <HideWhenOffline>
           {options && (
             <ToggleButtonGroup size="small" className="ml-2" value={filter} exclusive onChange={handleFilter}>
@@ -157,33 +152,17 @@ function PackageHeader(props) {
         </HideWhenOffline>
 
         {children}
-      </Grid>
-      <Grid item xs={12} sm={12} md={6} className={styles.filter_side}>
-        <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-          <Grid style={{ display: 'flex', flex: 1 }}>
-            <HideWhenOffline>
-              <SearchBox
-                onChange={onSearch}
-                className={styles.search_box_input}
-                value={searchVal}
-                size="small"
-                width={isMobile && !isTablet ? '200px' : '242px'}
-                style={isMobile && !isTablet ? { flex: 1 } : {}}
-              />
-            </HideWhenOffline>
-          </Grid>
+      </div>
+      <div className="flex flex-wrap gap-[8px]  justify-end">
+        <div className="flex flex-wrap gap-[8px]  justify-end">
+          <HideWhenOffline>
+            <SearchBox onChange={onSearch} className={styles.search_box_input} value={searchVal} size="small" />
+          </HideWhenOffline>
 
-          <Grid style={{ display: 'flex', gap: '5px' }}>
+          <div className="flex gap-[8px] flex-wrap items-center">
             {packagePermissions.isCreate && packagePermissions.isUpdate && (
-              <Button
-                variant={isMobile && !isTablet ? 'text' : 'contained'}
-                color="primary"
-                size="small"
-                onClick={onCreate}
-                className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
-                startIcon={isMobile && !isTablet ? null : <AddOutlined />}
-              >
-                {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
+              <Button variant={'contained'} color="primary" size="small" onClick={onCreate} className={`no-shadow`} startIcon={<AddOutlined />}>
+                Add
               </Button>
             )}
 
@@ -191,15 +170,15 @@ function PackageHeader(props) {
               <>
                 <Button
                   disabled={canDelete}
-                  variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                  variant={'outlined'}
                   color="default"
                   size="small"
                   onClick={openActions}
                   aria-controls="action-menu"
-                  className={`${isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn} new-dropdown-v1`}
+                  className={`new-dropdown-v1`}
                   endIcon={<ExpandMore />}
                 >
-                  {isMobile && !isTablet ? '' : 'Actions'}
+                  Actions
                 </Button>
                 <Menu
                   anchorEl={anchorEl}
@@ -234,10 +213,11 @@ function PackageHeader(props) {
                 </Menu>
               </>
             </HideWhenOffline>
-          </Grid>
-        </Box>
-      </Grid>
-    </Grid>
+          </div>
+        </div>
+      </div>
+      <DisplayFiltersForMobile resource={resource} />
+    </div>
   );
 }
 export default PackageHeader;

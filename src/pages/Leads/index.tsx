@@ -226,13 +226,13 @@ const Leads = () => {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
 
-    const { filterByIds, deepFilters } = gridFilterParser(filters)
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
     if (deepFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
     }
 
     if (filterByIds?.length || deepFilters?.length) {
@@ -244,7 +244,7 @@ const Leads = () => {
     }
 
     if (search) {
-      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
 
     return deepFilter;
@@ -347,6 +347,7 @@ const Leads = () => {
   };
 
   const handleLeadTypeSel = (filteredValue) => {
+    dispatch({ type: 'setPage', page: 0 });
     setSelectedType(filteredValue);
   };
 
@@ -504,31 +505,27 @@ const Leads = () => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[routes.lead]} />
-        </Grid>
-        <Grid item md={8} sm={1} xs={2}>
-          <ImportExportLinks
-            permissions={leadsPermissions}
-            module="lead(s)"
-            api={leadApi}
-            afterImportCompleted={() => {
-              fetchLeads();
-            }}
-            isExportAllOrSomeFeature={true}
-            total={rowCount}
-            recordsToExport={selectedRecords.length}
-            ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
-            onExportToExcelSuccess={() => {
-              if (gridApi) gridApi.deselectAll();
-              else fetchLeads();
-            }}
-            additionalParams={getQueryString(true)}
-          />
-        </Grid>
-      </Grid>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[routes.lead]} />
+        <ImportExportLinks
+          permissions={leadsPermissions}
+          module="lead(s)"
+          api={leadApi}
+          afterImportCompleted={() => {
+            fetchLeads();
+          }}
+          isExportAllOrSomeFeature={true}
+          total={rowCount}
+          recordsToExport={selectedRecords.length}
+          ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+          onExportToExcelSuccess={() => {
+            if (gridApi) gridApi.deselectAll();
+            else fetchLeads();
+          }}
+          additionalParams={getQueryString(true)}
+        />
+      </div>
 
       <CustomContainer>
         <div className="header-panel">
@@ -547,6 +544,7 @@ const Leads = () => {
             showConfirmBox={showConfirmBox}
             icon={<HiUserGroup className="headerLogo" />}
             heading={routes.lead.title}
+            resource={sidebarResource.lead}
             allowToConvertLeadToOpportunity={
               permissions['customerAccount'].isCreate && permissions['customerContact'].isCreate && permissions['opportunity'].isCreate
             }
@@ -566,6 +564,7 @@ const Leads = () => {
         {Object.keys(frameWorkComponent).length > 0 ? (
           isMobile && !isTablet ? (
             <CustomSwipableList
+              key={selectedType}
               allowSelection={true}
               allowSwipe={true}
               permissions={permissions[leadResource]}
@@ -701,7 +700,7 @@ const Leads = () => {
           />
         )}
       </CustomContainer>
-    </Fragment>
+    </section>
   );
 };
 

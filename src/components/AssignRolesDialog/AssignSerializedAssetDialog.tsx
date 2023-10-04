@@ -143,12 +143,14 @@ const AssignSerializedAssetDialog = ({
       if (referenceData?.warehouse) {
         deepFilter = `${deepFilter}&plant=${referenceData?.warehouse}`;
       }
-      if (referenceData.product) {
-        deepFilter = `${deepFilter}&filterById=${JSON.stringify([{ field: 'product', term: referenceData.product }])}&filterByIdType=or`;
-      }
     }
     if (reference === 'planning') {
       deepFilter = `${deepFilter}&planning=true`;
+      const dateFilter = { from: referenceData?.fromDate, to: referenceData?.toDate };
+      deepFilter = `${deepFilter}&date=${JSON.stringify(dateFilter)}`;
+    }
+    if (reference === 'quotation') {
+      deepFilter = `${deepFilter}&quotation=true`;
       const dateFilter = { from: referenceData?.fromDate, to: referenceData?.toDate };
       deepFilter = `${deepFilter}&date=${JSON.stringify(dateFilter)}`;
     }

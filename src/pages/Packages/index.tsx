@@ -1,33 +1,32 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import { Grid, Chip, IconButton } from '@material-ui/core';
+import { IconButton } from '@material-ui/core';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { camelCase } from 'lodash';
+import { useContext, useEffect, useReducer, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { IoIosPricetags, RiPriceTagLine } from 'react-icons/all';
+import { BiPackage } from 'react-icons/bi';
+import { GoDeviceMobile } from 'react-icons/go';
+import { MdDescription } from 'react-icons/md';
+import { useHistory } from 'react-router-dom';
+import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
+import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
+import CustomContainer from '../../components/CustomContainer';
+import HtmlTooltip from '../../components/CustomTooltipTitle';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import { getLocalStorageArrayData, gridLoadingTimeout, packages, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import useColumns, { checkStaticField, getFrameworkComponents, getStaticFields, gridFilterParser } from '../../constants/useColumns';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { BiPackage } from 'react-icons/bi';
-import { isObjectEmpty, gridLoadingTimeout, packages, product, sidebarResource, getLocalStorageArrayData } from '../../constants/helpers';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import CustomContainer from '../../components/CustomContainer';
-import { useHistory } from 'react-router-dom';
-import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import PackageHeader from './PackageHeader';
 import ManagePackageDialog from './ManagePackageDialog';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField, gridFilterParser } from '../../constants/useColumns';
-import { camelCase } from 'lodash';
+import PackageHeader from './PackageHeader';
 import ProductListDialog from './ProductListDialog';
-import HtmlTooltip from '../../components/CustomTooltipTitle';
-import { prepareDataForGrid } from '../../constants/helpers';
-import { MdAccountCircle, MdDescription } from 'react-icons/md';
-import { GoDeviceMobile } from 'react-icons/go';
-import { AiFillCrown, IoIosPricetags, RiPriceTagLine } from 'react-icons/all';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { isMobile, isTablet } from 'react-device-detect';
-import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 
 let packagesTimeout;
 
@@ -185,13 +184,13 @@ const PackageList = () => {
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
 
-    const { filterByIds, deepFilters } = gridFilterParser(filters)
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
     if (deepFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
     }
 
     if (filterByIds?.length || deepFilters?.length) {
@@ -203,7 +202,7 @@ const PackageList = () => {
     }
 
     if (search) {
-      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
 
     return deepFilter;
@@ -229,7 +228,20 @@ const PackageList = () => {
           ...finalObject
         };
       });
-      dispatch({ type: 'initialize', data: rows, count: count });
+      if (appendRows) {
+        dispatch({
+          type: 'initialize',
+          data: [...dataRows, ...rows],
+          count: count
+        });
+      } else {
+        dispatch({
+          type: 'initialize',
+          data: rows,
+          count: count
+        });
+      }
+      // dispatch({ type: 'initialize', data: rows, count: count });
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
       }, gridLoadingTimeout);
@@ -244,6 +256,7 @@ const PackageList = () => {
   };
 
   const handlePackageTypeSel = (filterValues) => {
+    dispatch({ type: 'setPage', page: 0 });
     setSelectedType(filterValues);
   };
 
@@ -320,57 +333,48 @@ const PackageList = () => {
 
   return (
     <>
-      <Fragment>
-        <Grid container className="headerbox">
-          <Grid item md={4} sm={11} xs={10}>
-            <CustomBreadCrumbs routes={[routes.packages]} />
-          </Grid>
-          <Grid item md={8} sm={1} xs={2}>
-            <Grid container direction="row">
-              <Grid item xs={12} sm={12}>
-                <Grid container justify="flex-end">
-                  <ImportExportLinks
-                    permissions={permissions?.packages}
-                    module="packagess"
-                    api={packages.api}
-                    afterImportCompleted={() => {
-                      fetchPackages();
-                    }}
-                    isExportAllOrSomeFeature={true}
-                    total={rowCount}
-                    recordsToExport={selectedRecords.length}
-                    ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
-                    onExportToExcelSuccess={() => {
-                      if (gridApi) gridApi.deselectAll();
-                      else fetchPackages();
-                    }}
-                    additionalParams={getQueryString(true)}
-                    extraImportExportLinks={[
-                      {
-                        title: 'Sub-Package Template',
-                        api: `${packages.api}/unknown/package/template`,
-                        type: 'download'
-                      },
-                      {
-                        title: 'Sub-Package Export',
-                        api: `${packages.api}/unknown/package/template?export=true${getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
-                            ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
-                            : ''
-                          }`,
-                        type: 'export'
-                      },
-                      {
-                        title: 'Sub-Package Import',
-                        api: `${packages.api}/unknown/package/import`,
-                        type: 'import'
-                      }
-                    ]}
-                  />
-                </Grid>
-              </Grid>
-            </Grid>
-          </Grid>
-        </Grid>
+      <section className="main-container-v1">
+        <div className="headerbox-v1">
+          <CustomBreadCrumbs routes={[routes.packages]} />
+          <ImportExportLinks
+            permissions={permissions?.packages}
+            module="packagess"
+            api={packages.api}
+            afterImportCompleted={() => {
+              fetchPackages();
+            }}
+            isExportAllOrSomeFeature={true}
+            total={rowCount}
+            recordsToExport={selectedRecords.length}
+            ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+            onExportToExcelSuccess={() => {
+              if (gridApi) gridApi.deselectAll();
+              else fetchPackages();
+            }}
+            additionalParams={getQueryString(true)}
+            extraImportExportLinks={[
+              {
+                title: 'Sub-Package Template',
+                api: `${packages.api}/unknown/package/template`,
+                type: 'download'
+              },
+              {
+                title: 'Sub-Package Export',
+                api: `${packages.api}/unknown/package/template?export=true${
+                  getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
+                    ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
+                    : ''
+                }`,
+                type: 'export'
+              },
+              {
+                title: 'Sub-Package Import',
+                api: `${packages.api}/unknown/package/import`,
+                type: 'import'
+              }
+            ]}
+          />
+        </div>
         <CustomContainer>
           <div className="header-panel">
             <PackageHeader
@@ -390,14 +394,16 @@ const PackageList = () => {
               showTransferEntityDialog={handleTransferEntityDialog}
               openAssingToProduct={openAssingToProduct}
               filters={filters}
-            // showClonepackagesDialog={() => {
-            //   handleShowClonepackagesDialog()
-            // }}
+              resource={sidebarResource.packages}
+              // showClonepackagesDialog={() => {
+              //   handleShowClonepackagesDialog()
+              // }}
             ></PackageHeader>
           </div>
           {Object.keys(frameWorkComponent).length > 0 ? (
             isMobile && !isTablet ? (
               <CustomSwipableList
+                key={selectedType}
                 allowSelection={true}
                 allowSwipe={true}
                 permissions={permissions?.packages}
@@ -507,7 +513,7 @@ const PackageList = () => {
             />
           ) : null}
         </CustomContainer>
-      </Fragment>
+      </section>
       {showProductAssignDialog && (
         <AssignProductDialog
           reference="package"

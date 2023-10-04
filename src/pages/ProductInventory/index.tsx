@@ -122,7 +122,8 @@ const InventoryProduct = () => {
     selectedEntity,
     showFilteredRecordsOnly,
     fromProductMaster,
-    expenseItemValue
+    expenseItemValue,
+    showExpenseItem
   ]);
 
   const getPlants = () => {
@@ -300,13 +301,13 @@ const InventoryProduct = () => {
       });
     }
     if (updatedFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}`;
     }
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
     if (search) {
-      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
@@ -507,36 +508,32 @@ const InventoryProduct = () => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[routes.productInventory]} />
-        </Grid>
-        <Grid item md={8} sm={1} xs={2}>
-          <ImportExportLinks
-            additionalParams={getQueryString(true)}
-            permissions={{ isCreate: permissions?.productInventory?.isCreate && plantId !== 'All' }}
-            module="product inventory"
-            api={productInventory.api}
-            afterImportCompleted={() => {
-              fetchProductInventory();
-            }}
-            isDownloadExcel={true}
-            isExportAllOrSomeFeature={true}
-            total={rowCount}
-            recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-            ids={
-              getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-                ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-                : []
-            }
-            onExportToExcelSuccess={() => {
-              if (gridApi) gridApi.deselectAll();
-              else fetchProductInventory();
-            }}
-          />
-        </Grid>
-      </Grid>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[routes.productInventory]} />
+        <ImportExportLinks
+          additionalParams={getQueryString(true)}
+          permissions={{ isCreate: permissions?.productInventory?.isCreate && plantId !== 'All' }}
+          module="product inventory"
+          api={productInventory.api}
+          afterImportCompleted={() => {
+            fetchProductInventory();
+          }}
+          isDownloadExcel={true}
+          isExportAllOrSomeFeature={true}
+          total={rowCount}
+          recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+          ids={
+            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+              ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+              : []
+          }
+          onExportToExcelSuccess={() => {
+            if (gridApi) gridApi.deselectAll();
+            else fetchProductInventory();
+          }}
+        />
+      </div>
       <div className="main-container">
         <div className="header-panel">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-center">
@@ -808,7 +805,7 @@ const InventoryProduct = () => {
         )}
         {settingDialogOpen && <SettingsDialog warehouse={plantId} onClose={() => setSettingDialogOpen(false)} />}
       </div>
-    </Fragment>
+    </section>
   );
 };
 

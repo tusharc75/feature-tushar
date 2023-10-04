@@ -21,6 +21,8 @@ import { read, utils, writeFile } from 'xlsx';
 import DateUtils from '@date-io/date-fns';
 import moment from 'moment';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import CustomAssetDialog from 'src/pages/ConvertInventory/InventoryToAsset/CustomAssetDialog';
+import { isEqual } from 'lodash';
 
 const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrderData }) => {
   const [fullScreen, setFullScreen] = useState(true);
@@ -36,6 +38,8 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lockDate, setLockDate] = useState(null);
   const toastConfig = useContext(CustomToastContext);
+
+  const [assetNumberDialog, setAssetNumberDialog] = useState({ open: false, products: [], receiveDate: null });
 
   useEffect(() => {
     axiosInstance()
@@ -61,10 +65,9 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
   };
 
   const handleSubmit = (values) => {
-    setIsSubmitting(true);
     const data: any = [];
     values?.seriaizedAsset?.forEach((element) => {
-      if (parseInt(element?.inventoryQuantity)) {
+      if (parseInt(element?.inventoryQuantity) || parseInt(element?.assetQuantity)) {
         data.push({
           _id: element._id,
           product: element.productId,
@@ -80,26 +83,36 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
       }
     });
     if (data?.length) {
-      axiosInstance()
-        .post(`${purchaseOrder.api}/receive-inventory/${purchaseOrderID}`, { products: data, receiveDate: values?.receiveDate })
-        .then(({ data }) => {
-          setIsSubmitting(false);
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-          onSuccess();
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-          setIsSubmitting(false);
-        });
+      if (data?.find((e) => e?.assetQuantity)) {
+        setAssetNumberDialog({ open: true, products: data, receiveDate: values?.receiveDate })
+      }
+      else {
+        handleReceive(data, values?.receiveDate)
+      }
     } else {
-      setIsSubmitting(false);
       onSuccess();
     }
   };
+
+  const handleReceive = (products, receiveDate) => {
+    setIsSubmitting(true);
+    axiosInstance()
+      .post(`${purchaseOrder.api}/receive-inventory/${purchaseOrderID}`, { products: products, receiveDate: receiveDate })
+      .then(({ data }) => {
+        setIsSubmitting(false);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        setAssetNumberDialog({ open: false, products: [], receiveDate: null })
+        onSuccess();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setIsSubmitting(false);
+      });
+  }
 
   const getStorageLocation = () => {
     axiosInstance()
@@ -211,330 +224,370 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
   };
 
   return (
-    <Dialog
-      open
-      fullScreen={fullScreen}
-      maxWidth="md"
-      fullWidth
-      onClose={(e, reason) => {
-        if (reason !== 'backdropClick') {
-          onClose();
-        }
-      }}
-    >
-      <CustomDialogHeader
-        title={'Receiving'}
-        onClose={onClose}
-        isMinimized={!fullScreen}
-        onMinimizeMaximize={() => {
-          setFullScreen((prevState) => !prevState);
+    <>
+      <Dialog
+        open
+        fullScreen={fullScreen}
+        maxWidth="md"
+        fullWidth
+        onClose={(e, reason) => {
+          if (reason !== 'backdropClick') {
+            onClose();
+          }
         }}
-        showManimizeMaximize={true}
-      ></CustomDialogHeader>
-      <MuiPickersUtilsProvider utils={DateUtils}>
-        <Formik
-          initialValues={{
-            receiveDate: new Date(),
-            seriaizedAsset: productList.map((d) => ({
-              _id: d._id,
-              product: d.productName,
-              productId: d.productId,
-              warehouse: defaultWareHouse || '',
-              storageLocation: purchaseOrderData?.storageLocation || null,
-              inventoryQuantity: d.qty - (d.actualReceived || 0) - (d.rejectQuantity || 0),
-              assetQuantity: 0,
-              serializedProduct: d.serializedProduct || false,
-              serialNumber: [],
-              comment: '',
-              supplierPartNumber: '',
-              row: d
-            }))
+      >
+        <CustomDialogHeader
+          title={'Receiving'}
+          onClose={onClose}
+          isMinimized={!fullScreen}
+          onMinimizeMaximize={() => {
+            setFullScreen((prevState) => !prevState);
           }}
-          enableReinitialize={true}
-          onSubmit={() => {}}
-        >
-          {({ values, setFieldValue, errors }) => (
-            <>
-              <CustomDialogContent>
-                {values.seriaizedAsset && values.seriaizedAsset.length && warehouseOptions ? (
-                  <Box p={2}>
-                    <Form>
-                      <FieldArray
-                        name="seriaizedAsset"
-                        render={(arrayHelpers) => (
-                          <div className="grid gap-[15px] sm:gap-[18px]">
-                            {values.seriaizedAsset.map((data, index) => (
-                              <div
-                                style={{ border: '1.5px solid var(--common-border-color)' }}
-                                className="rounded-[6px] pt-[17px] px-[23px] pb-[21px] grid sm:grid-cols-[24px,1fr] md:gap-[29px] gap-[15px] shadow-[0px_4px_26.8799991607666px_0px_rgba(0,0,0,0.06)]"
-                                key={index}
-                              >
-                                <div className="bg-[var(--new\_theme\_color)] w-[24px] h-[24px] rounded-[6px] flex items-center justify-center">
-                                  <p className="text-white text-[13px] font-[700] leading-none">{index + 1}</p>
-                                </div>
-                                <div>
-                                  <div
-                                    style={{ borderBottom: '1px solid var(--common-border-color)' }}
-                                    className="flex border-b  border-b-[var(--common-border-color)] gap-[20px] md:gap-[61px] pb-[9px]"
-                                  >
-                                    <span>
-                                      <span className="text-[var(--primary-text)] font-semibold">PO Quantity: </span>
-                                      {data?.row?.qty}
-                                    </span>
-                                    <span>
-                                      <span className="text-[var(--primary-text)] font-semibold">Recieved: </span>
-                                      {data?.row?.actualReceived || 0}
-                                    </span>
-                                    <span>
-                                      <span className="text-[var(--primary-text)] font-semibold">Rejected: </span>
-                                      {data?.row?.rejectQuantity || 0}
-                                    </span>
+          showManimizeMaximize={true}
+        ></CustomDialogHeader>
+        <MuiPickersUtilsProvider utils={DateUtils}>
+          <Formik
+            initialValues={{
+              receiveDate: new Date(),
+              seriaizedAsset: productList.map((d) => ({
+                _id: d._id,
+                product: d.productName,
+                productId: d.productId,
+                warehouse: defaultWareHouse || '',
+                storageLocation: purchaseOrderData?.storageLocation || null,
+                inventoryQuantity: !d.serializedProduct ? d.qty - (d.actualReceived || 0) - (d.rejectQuantity || 0) : 0,
+                assetQuantity: d.serializedProduct ? d.qty - (d.actualReceived || 0) - (d.rejectQuantity || 0) : 0,
+                serializedProduct: d.serializedProduct || false,
+                serialNumber: [],
+                comment: '',
+                supplierPartNumber: '',
+                row: d
+              }))
+            }}
+            enableReinitialize={true}
+            onSubmit={() => { }}
+          >
+            {({ values, setFieldValue, errors }) => (
+              <>
+                <CustomDialogContent>
+                  {values.seriaizedAsset && values.seriaizedAsset.length && warehouseOptions ? (
+                    <Box p={2}>
+                      <Form>
+                        <FieldArray
+                          name="seriaizedAsset"
+                          render={(arrayHelpers) => (
+                            <div className="grid gap-[15px] sm:gap-[18px]">
+                              {values.seriaizedAsset.map((data, index) => (
+                                <div
+                                  style={{ border: '1.5px solid var(--common-border-color)' }}
+                                  className="rounded-[6px] pt-[17px] px-[23px] pb-[21px] grid sm:grid-cols-[24px,1fr] md:gap-[29px] gap-[15px] shadow-[0px_4px_26.8799991607666px_0px_rgba(0,0,0,0.06)]"
+                                  key={index}
+                                >
+                                  <div className="bg-[var(--new\_theme\_color)] w-[24px] h-[24px] rounded-[6px] flex items-center justify-center">
+                                    <p className="text-white text-[13px] font-[700] leading-none">{index + 1}</p>
                                   </div>
+                                  <div>
+                                    <div
+                                      style={{ borderBottom: '1px solid var(--common-border-color)' }}
+                                      className="flex border-b  border-b-[var(--common-border-color)] gap-[20px] md:gap-[61px] pb-[9px]"
+                                    >
+                                      <span>
+                                        <span className="text-[var(--primary-text)] font-semibold">PO Quantity: </span>
+                                        {data?.row?.qty}
+                                      </span>
+                                      <span>
+                                        <span className="text-[var(--primary-text)] font-semibold">Recieved: </span>
+                                        {data?.row?.actualReceived || 0}
+                                      </span>
+                                      <span>
+                                        <span className="text-[var(--primary-text)] font-semibold">Rejected: </span>
+                                        {data?.row?.rejectQuantity || 0}
+                                      </span>
+                                    </div>
 
-                                  {/* FIELDS */}
-                                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[20px] md:gap-[25px] mt-[28px]">
-                                    <Autocomplete
-                                      size="small"
-                                      value={data.product}
-                                      options={productList}
-                                      disabled
-                                      getOptionLabel={(option: any) => (option ? option : '')}
-                                      onChange={(_, newValue) => {
-                                        arrayHelpers.replace(index, {
-                                          ...values.seriaizedAsset[index],
-                                          ['product']: newValue
-                                        });
-                                      }}
-                                      renderInput={(params) => <TextField {...params} variant="outlined" name="product" label="Product" />}
-                                    />
-                                    <Autocomplete
-                                      size="small"
-                                      value={data.warehouse}
-                                      options={warehouseOptions}
-                                      getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                                      disabled
-                                      onChange={(_, newValue) => {
-                                        arrayHelpers.replace(index, {
-                                          ...values.seriaizedAsset[index],
-                                          ['warehouse']: newValue
-                                        });
-                                      }}
-                                      renderInput={(params) => (
-                                        <TextField
-                                          {...params}
-                                          variant="outlined"
-                                          name="warehouse"
-                                          label="Plant"
-                                          error={validate([data]).warehouse}
-                                          helperText={validate([data]).warehouse ? 'Plant is required' : ''}
-                                          required
-                                        />
-                                      )}
-                                    />
-                                    {user?.user?.brandPolicy?.storageLocation && (
+                                    {/* FIELDS */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[20px] md:gap-[25px] mt-[28px]">
                                       <Autocomplete
                                         size="small"
-                                        value={data?.storageLocation}
-                                        options={storageLocationOptions}
-                                        getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                                        value={data.product}
+                                        options={productList}
+                                        disabled
+                                        getOptionLabel={(option: any) => (option ? option : '')}
                                         onChange={(_, newValue) => {
                                           arrayHelpers.replace(index, {
                                             ...values.seriaizedAsset[index],
-                                            ['storageLocation']: newValue
+                                            ['product']: newValue
+                                          });
+                                        }}
+                                        renderInput={(params) => <TextField {...params} variant="outlined" name="product" label="Product" />}
+                                      />
+                                      <Autocomplete
+                                        size="small"
+                                        value={data.warehouse}
+                                        options={warehouseOptions}
+                                        getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+                                        disabled
+                                        onChange={(_, newValue) => {
+                                          arrayHelpers.replace(index, {
+                                            ...values.seriaizedAsset[index],
+                                            ['warehouse']: newValue
                                           });
                                         }}
                                         renderInput={(params) => (
                                           <TextField
                                             {...params}
                                             variant="outlined"
-                                            name="storageLocation"
-                                            label="Storage Location"
-                                            error={validate([data]).storageLocation}
-                                            helperText={validate([data]).storageLocation ? 'Storage Location is required' : ''}
+                                            name="warehouse"
+                                            label="Plant"
+                                            error={validate([data]).warehouse}
+                                            helperText={validate([data]).warehouse ? 'Plant is required' : ''}
                                             required
                                           />
                                         )}
                                       />
-                                    )}
-                                    <TextField
-                                      fullWidth
-                                      label="Inventory Quantity"
-                                      variant="outlined"
-                                      type="number"
-                                      size="small"
-                                      onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
-                                      name="inventoryQuantity"
-                                      placeholder="Inventory Quantity"
-                                      value={data.inventoryQuantity}
-                                      onChange={(e) => {
-                                        const value = e.target.value.replace(/[^0-9]/g, '');
-                                        arrayHelpers.replace(index, {
-                                          ...values.seriaizedAsset[index],
-                                          ['inventoryQuantity']: value
-                                        });
-                                      }}
-                                      error={validate([data])?.inventoryQuantity}
-                                      helperText={validate([data]).inventoryQuantity ? 'Receiving quantity is more than actual quantity' : ''}
-                                    />
-                                    {data?.serializedProduct && (
-                                      <div className="flex gap-2 items-center">
+                                      {user?.user?.brandPolicy?.storageLocation && (
                                         <Autocomplete
-                                          options={[]}
                                           size="small"
-                                          fullWidth={true}
-                                          freeSolo={true}
-                                          multiple={true}
-                                          disableCloseOnSelect
-                                          value={data.serialNumber}
-                                          onChange={(_, val) => {
+                                          value={data?.storageLocation}
+                                          options={storageLocationOptions}
+                                          getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                                          onChange={(_, newValue) => {
                                             arrayHelpers.replace(index, {
                                               ...values.seriaizedAsset[index],
-                                              ['serialNumber']: val
+                                              ['storageLocation']: newValue
                                             });
                                           }}
-                                          getOptionSelected={(item, current) => item === current}
-                                          getOptionLabel={(option) => option}
-                                          renderInput={(props) => (
+                                          renderInput={(params) => (
                                             <TextField
-                                              {...props}
-                                              placeholder={`Serial Number`}
+                                              {...params}
                                               variant="outlined"
-                                              name="serialNumber"
-                                              label={'Serial Number'}
-                                              error={validate([data])?.serialNumber}
-                                              helperText={
-                                                validate([data]).serialNumber ? 'Serial numbers should be less then inventory quantity' : ''
-                                              }
+                                              name="storageLocation"
+                                              label="Storage Location"
+                                              error={validate([data]).storageLocation}
+                                              helperText={validate([data]).storageLocation ? 'Storage Location is required' : ''}
+                                              required
                                             />
                                           )}
                                         />
-                                        <Typography
-                                          className="link cursor-pointer"
-                                          style={{ color: 'var(--primary)' }}
-                                          onClick={() => handleExportField(data)}
-                                        >
-                                          Export
-                                        </Typography>
-                                        <input
-                                          accept="json"
-                                          style={{ display: 'none' }}
-                                          onChange={handleImport(arrayHelpers, index, values)}
-                                          id={`import-file-${index}`}
-                                          multiple={false}
-                                          type="file"
+                                      )}
+                                      {(data?.serializedProduct && !user?.user?.brandPolicy?.purchaseOrderSerializedAddInventory) ?
+                                        null :
+                                        <TextField
+                                          fullWidth
+                                          label="Quantity"
+                                          variant="outlined"
+                                          type="number"
+                                          size="small"
+                                          onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
+                                          name="inventoryQuantity"
+                                          placeholder="Quantity"
+                                          value={data.inventoryQuantity}
+                                          onChange={(e) => {
+                                            const value = e.target.value.replace(/[^0-9]/g, '');
+                                            arrayHelpers.replace(index, {
+                                              ...values.seriaizedAsset[index],
+                                              ['inventoryQuantity']: value
+                                            });
+                                          }}
+                                          error={validate([data])?.inventoryQuantity}
+                                          helperText={validate([data]).inventoryQuantity ? 'Receiving quantity is more than actual quantity' : ''}
+                                        />}
+                                      {data?.serializedProduct && (
+                                        <TextField
+                                          fullWidth
+                                          label="Asset Quantity"
+                                          variant="outlined"
+                                          type="number"
+                                          size="small"
+                                          onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
+                                          name="assetQuantity"
+                                          placeholder="Asset Quantity"
+                                          value={data.assetQuantity}
+                                          onChange={(e) => {
+                                            const value = e.target.value.replace(/[^0-9]/g, '');
+                                            arrayHelpers.replace(index, {
+                                              ...values.seriaizedAsset[index],
+                                              ['assetQuantity']: value
+                                            });
+                                          }}
+                                          error={validate([data])?.assetQuantity}
+                                          helperText={validate([data]).assetQuantity ? 'Receiving quantity is more than actual quantity' : ''}
                                         />
-                                        <label htmlFor={`import-file-${index}`}>
-                                          <Typography className="cursor-pointer" style={{ color: 'var(--primary)' }}>
-                                            Import
+                                      )}
+                                      <TextField
+                                        fullWidth
+                                        label="Supplier Part Number"
+                                        variant="outlined"
+                                        type="text"
+                                        size="small"
+                                        name="supplierPartNumber"
+                                        placeholder="Supplier Part Number"
+                                        value={data.supplierPartNumber}
+                                        onChange={(e) => {
+                                          arrayHelpers.replace(index, {
+                                            ...values.seriaizedAsset[index],
+                                            ['supplierPartNumber']: e.target.value
+                                          });
+                                        }}
+                                      />
+                                      <TextField
+                                        fullWidth
+                                        label="Comment"
+                                        variant="outlined"
+                                        type="text"
+                                        size="small"
+                                        name="comment"
+                                        placeholder="Comment"
+                                        value={data.comment}
+                                        onChange={(e) => {
+                                          arrayHelpers.replace(index, {
+                                            ...values.seriaizedAsset[index],
+                                            ['comment']: e.target.value
+                                          });
+                                        }}
+                                      />
+                                      {data?.serializedProduct && user?.user?.brandPolicy?.purchaseOrderSerializedAddInventory && (
+                                        <div className="flex gap-2 items-center">
+                                          <Autocomplete
+                                            options={[]}
+                                            size="small"
+                                            fullWidth={true}
+                                            freeSolo={true}
+                                            multiple={true}
+                                            disableCloseOnSelect
+                                            value={data.serialNumber}
+                                            onChange={(_, val) => {
+                                              arrayHelpers.replace(index, {
+                                                ...values.seriaizedAsset[index],
+                                                ['serialNumber']: val
+                                              });
+                                            }}
+                                            getOptionSelected={(item, current) => item === current}
+                                            getOptionLabel={(option) => option}
+                                            renderInput={(props) => (
+                                              <TextField
+                                                {...props}
+                                                placeholder={`Serial Numbers`}
+                                                variant="outlined"
+                                                name="serialNumber"
+                                                label={'Serial Numbers'}
+                                                error={validate([data])?.serialNumber}
+                                                helperText={
+                                                  validate([data]).serialNumber ? 'Serial numbers should be less then inventory quantity' : ''
+                                                }
+                                              />
+                                            )}
+                                          />
+                                          <Typography
+                                            className="link cursor-pointer"
+                                            style={{ color: 'var(--primary)' }}
+                                            onClick={() => handleExportField(data)}
+                                          >
+                                            Export
                                           </Typography>
-                                        </label>
-                                      </div>
-                                    )}
-                                    <TextField
-                                      fullWidth
-                                      label="Supplier Part Number"
-                                      variant="outlined"
-                                      type="text"
-                                      size="small"
-                                      name="supplierPartNumber"
-                                      placeholder="Supplier Part Number"
-                                      value={data.supplierPartNumber}
-                                      onChange={(e) => {
-                                        arrayHelpers.replace(index, {
-                                          ...values.seriaizedAsset[index],
-                                          ['supplierPartNumber']: e.target.value
-                                        });
-                                      }}
-                                    />
-                                    <TextField
-                                      fullWidth
-                                      label="Comment"
-                                      variant="outlined"
-                                      type="text"
-                                      size="small"
-                                      name="comment"
-                                      placeholder="Comment"
-                                      value={data.comment}
-                                      onChange={(e) => {
-                                        arrayHelpers.replace(index, {
-                                          ...values.seriaizedAsset[index],
-                                          ['comment']: e.target.value
-                                        });
-                                      }}
-                                    />
+                                          <input
+                                            accept="json"
+                                            style={{ display: 'none' }}
+                                            onChange={handleImport(arrayHelpers, index, values)}
+                                            id={`import-file-${index}`}
+                                            multiple={false}
+                                            type="file"
+                                          />
+                                          <label htmlFor={`import-file-${index}`}>
+                                            <Typography className="cursor-pointer" style={{ color: 'var(--primary)' }}>
+                                              Import
+                                            </Typography>
+                                          </label>
+                                        </div>
+                                      )}
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      />
-                      <div className="datepicker mt-[14px]">
-                        <KeyboardDatePicker
-                          label="Received Date"
-                          variant="inline"
-                          inputVariant="outlined"
-                          required
-                          autoOk
-                          size="small"
-                          margin="dense"
-                          name="receiveDate"
-                          placeholder="Receive Date"
-                          value={values.receiveDate}
-                          format={dateFormatForInputControl}
-                          minDate={
-                            lockDate
-                              ? moment(lockDate).diff(moment(purchaseOrderData?.purchaseOrderDate), 'days') > 0
-                                ? lockDate
-                                : purchaseOrderData?.purchaseOrderDate
-                              : purchaseOrderData?.purchaseOrderDate
-                          }
-                          maxDate={new Date()}
-                          onChange={(value) => {
-                            setFieldValue('receiveDate', convertDateInDateTime(value));
-                          }}
-                          error={validateDate(values)?.receiveDate}
-                          helperText={validateDate(values)?.receiveDate ? validateDate(values)?.receiveDate : ''}
+                              ))}
+                            </div>
+                          )}
                         />
-                      </div>
-                    </Form>
-                  </Box>
-                ) : (
-                  <Box p={2} height={300}>
-                    <CommonSkeleton lenArray={[...Array(6).keys()]} />
-                  </Box>
-                )}
-              </CustomDialogContent>
-              <CustomDialogFooter>
-                <Button variant="outlined" disabled={isSubmitting} size="small" color="primary" onClick={onClose}>
-                  Cancel
-                </Button>
-                <Button
-                  onClick={() => {
-                    if (
-                      !validate(values.seriaizedAsset).inventoryQuantity &&
-                      !validate(values.seriaizedAsset).warehouse &&
-                      !validate(values.seriaizedAsset).storageLocation &&
-                      !validate(values.seriaizedAsset).assetQuantity &&
-                      !validate(values.seriaizedAsset).serialNumber &&
-                      !validateDate(values)?.receiveDate
-                    ) {
-                      handleSubmit(values);
-                    }
-                  }}
-                  size="small"
-                  variant="contained"
-                  disabled={isSubmitting}
-                  color="primary"
-                >
-                  Save
-                </Button>
-              </CustomDialogFooter>
-            </>
-          )}
-        </Formik>
-      </MuiPickersUtilsProvider>
-    </Dialog>
+                        <div className="datepicker mt-[14px]">
+                          <KeyboardDatePicker
+                            label="Received Date"
+                            variant="inline"
+                            inputVariant="outlined"
+                            required
+                            autoOk
+                            size="small"
+                            margin="dense"
+                            name="receiveDate"
+                            placeholder="Receive Date"
+                            value={values.receiveDate}
+                            format={dateFormatForInputControl}
+                            minDate={
+                              lockDate
+                                ? moment(lockDate).diff(moment(purchaseOrderData?.purchaseOrderDate), 'days') > 0
+                                  ? lockDate
+                                  : purchaseOrderData?.purchaseOrderDate
+                                : purchaseOrderData?.purchaseOrderDate
+                            }
+                            maxDate={new Date()}
+                            onChange={(value) => {
+                              setFieldValue('receiveDate', convertDateInDateTime(value));
+                            }}
+                            error={validateDate(values)?.receiveDate}
+                            helperText={validateDate(values)?.receiveDate ? validateDate(values)?.receiveDate : ''}
+                          />
+                        </div>
+                      </Form>
+                    </Box>
+                  ) : (
+                    <Box p={2} height={300}>
+                      <CommonSkeleton lenArray={[...Array(6).keys()]} />
+                    </Box>
+                  )}
+                </CustomDialogContent>
+                <CustomDialogFooter>
+                  <Button variant="outlined" disabled={isSubmitting} size="small" color="primary" onClick={onClose}>
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      if (
+                        !validate(values.seriaizedAsset).inventoryQuantity &&
+                        !validate(values.seriaizedAsset).warehouse &&
+                        !validate(values.seriaizedAsset).storageLocation &&
+                        !validate(values.seriaizedAsset).assetQuantity &&
+                        !validate(values.seriaizedAsset).serialNumber &&
+                        !validateDate(values)?.receiveDate
+                      ) {
+                        handleSubmit(values);
+                      }
+                    }}
+                    size="small"
+                    variant="contained"
+                    disabled={isSubmitting}
+                    color="primary"
+                  >
+                    Save
+                  </Button>
+                </CustomDialogFooter>
+              </>
+            )}
+          </Formik>
+        </MuiPickersUtilsProvider>
+      </Dialog>
+      {assetNumberDialog.open && (
+        <CustomAssetDialog
+          handleClose={() => setAssetNumberDialog({ open: false, products: [], receiveDate: null })}
+          products={assetNumberDialog.products?.filter((e) => e.serializedProduct)?.map((e) => { return { id: e._id, productName: productList.find((u) => u._id === e._id)?.productName, qty: e.assetQuantity } })}
+          handleSuccess={(rows) => {
+            const products = assetNumberDialog.products;
+            products?.forEach((e) => {
+              e.assetNumbers = rows?.find((ele) => isEqual(ele._id, e.id))?.assetNumbers || []
+            })
+            handleReceive(products, assetNumberDialog.receiveDate)
+          }}
+          loading={isSubmitting}
+        />
+      )}
+    </>
   );
 };
 

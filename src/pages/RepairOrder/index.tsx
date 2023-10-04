@@ -35,7 +35,6 @@ import DeleteIcon from '@material-ui/icons/Delete';
 let repairOrderTimeout;
 
 const RepairOrder = () => {
-
   const RepairOrderType = [
     {
       key: `My ${routes?.repairOrder.title}`,
@@ -55,7 +54,7 @@ const RepairOrder = () => {
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
-  const { type }: any = queryString.parse(history.location.search);
+  let { type, referenceId, referenceType }: any = queryString.parse(history.location.search);
   const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
   const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -78,7 +77,6 @@ const RepairOrder = () => {
   const [columns, setColumns] = useState([]);
 
   const { getColumnData } = useColumns();
-  const [fromRental, setFromRental] = useState(history.location?.state?.rental);
 
   useEffect(() => {
     fetchGridColumns();
@@ -149,7 +147,7 @@ const RepairOrder = () => {
     if (renderCount > 0) {
       fetchRepairOrders();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting, selectedEntity, fromRental, showFilteredRecordsOnly]);
+  }, [page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const handleSingleDeleteRepairOrder = async () => {
     dispatch({ type: 'loading', loading: true });
@@ -217,34 +215,37 @@ const RepairOrder = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-    if (selectedType === 1) {
-      deepFilter = deepFilter + `&myRecords=1`;
-    }
+
     if (isExport) {
       deepFilter = `?`;
     }
-    const { filterByIds, deepFilters } = gridFilterParser(filters)
 
-    if (fromRental) {
-      filterByIds.push({ field: "rentalJob", term: fromRental?._id });
+    if (selectedType === 1) {
+      deepFilter = deepFilter + `&myRecords=1`;
+    }
+
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
+
+    if (referenceId) {
+      filterByIds.push({ field: 'rentalJob', term: referenceId });
     }
 
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
     if (deepFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(deepFilters))}`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
     }
 
     if (filterByIds?.length || deepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
     }
-    
+
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
     if (search) {
-      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
       deepFilter = `${deepFilter}&getById=${JSON.stringify(getLocalStorageArrayData(localStorageSelectedRecords)?.map((m) => m._id))}`;
@@ -290,8 +291,13 @@ const RepairOrder = () => {
   };
 
   const handleRepairOrderTypeSel = (filterValues) => {
+    dispatch({ type: 'setPage', page: 0 });
     setSelectedType(filterValues);
-    history.push(`?type=${filterValues}`);
+    if (referenceId && referenceType) {
+      history.push(`?type=${filterValues}&referenceType=${referenceType}&referenceId=${referenceId}`);
+    } else {
+      history.push(`?type=${filterValues}`);
+    }
   };
 
   const handleTransferEntityDialog = () => {
@@ -350,42 +356,44 @@ const RepairOrder = () => {
     }
   };
 
+  const updateQueryParams = () => {
+    const queryParams = new URLSearchParams(history.location.search);
+    queryParams.delete('referenceId');
+    queryParams.delete('referenceType');
+    referenceId = queryParams.get('referenceId');
+    referenceType = queryParams.get('referenceType');
+    history.replace({
+      search: queryParams.toString()
+    });
+    fetchRepairOrders();
+  };
+
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[routes.repairOrder]} />
-        </Grid>
-        <Grid item md={8} sm={1} xs={2}>
-          <Grid container direction="row">
-            <Grid item xs={12} sm={12}>
-              <Grid container justify="flex-end">
-                <ImportExportLinks
-                  permissions={permissions?.repairOrder}
-                  module="repairOrder"
-                  api={repairOrder.api}
-                  afterImportCompleted={() => {
-                    fetchRepairOrders();
-                  }}
-                  isExportAllOrSomeFeature={true}
-                  total={rowCount}
-                  recordsToExport={getLocalStorageArrayData(localStorageSelectedRecords)?.length}
-                  ids={
-                    getLocalStorageArrayData(localStorageSelectedRecords)?.length
-                      ? getLocalStorageArrayData(localStorageSelectedRecords)?.map((obj) => obj._id)
-                      : []
-                  }
-                  onExportToExcelSuccess={() => {
-                    if (gridApi) gridApi.deselectAll();
-                    else fetchRepairOrders();
-                  }}
-                  additionalParams={getQueryString(true)}
-                />
-              </Grid>
-            </Grid>
-          </Grid>
-        </Grid>
-      </Grid>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[routes.repairOrder]} />
+        <ImportExportLinks
+          permissions={permissions?.repairOrder}
+          module="repairOrder"
+          api={repairOrder.api}
+          afterImportCompleted={() => {
+            fetchRepairOrders();
+          }}
+          isExportAllOrSomeFeature={true}
+          total={rowCount}
+          recordsToExport={getLocalStorageArrayData(localStorageSelectedRecords)?.length}
+          ids={
+            getLocalStorageArrayData(localStorageSelectedRecords)?.length
+              ? getLocalStorageArrayData(localStorageSelectedRecords)?.map((obj) => obj._id)
+              : []
+          }
+          onExportToExcelSuccess={() => {
+            if (gridApi) gridApi.deselectAll();
+            else fetchRepairOrders();
+          }}
+          additionalParams={getQueryString(true)}
+        />
+      </div>
       <CustomContainer>
         <div className="header-panel">
           <RepairOrderHeader
@@ -405,22 +413,15 @@ const RepairOrder = () => {
             heading={routes.repairOrder.title}
             showTransferEntityDialog={handleTransferEntityDialog}
             filters={filters}
+            resource={sidebarResource.repairOrder}
           >
-            {fromRental && (
-              <Chip
-                className="ml-3"
-                color="primary"
-                label={`Rental Job : ${fromRental?.rentalJobName}`}
-                onDelete={() => {
-                  setFromRental(null);
-                }}
-              />
-            )}
+            {referenceType && <Chip className="ml-3" color="primary" label={`Rental Job : ${referenceType}`} onDelete={updateQueryParams} />}
           </RepairOrderHeader>
         </div>
         {Object.keys(frameworkComponents).length > 0 ? (
           isMobile && !isTablet ? (
             <CustomSwipableList
+              key={selectedType}
               allowSelection={true}
               allowSwipe={true}
               permissions={permissions?.repairOrder}
@@ -488,8 +489,9 @@ const RepairOrder = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.repairOrderNumber ? 'Repair Order' : 'Repair Orders'}   ${deleteRecord.repairOrderNumber || ''
-              }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.repairOrderNumber ? 'Repair Order' : 'Repair Orders'}   ${
+              deleteRecord.repairOrderNumber || ''
+            }?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
               setIsConformDialogVisible(false);
@@ -525,7 +527,7 @@ const RepairOrder = () => {
           }}
         />
       )}
-    </Fragment>
+    </section>
   );
 };
 

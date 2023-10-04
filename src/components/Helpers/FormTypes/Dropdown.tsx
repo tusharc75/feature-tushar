@@ -26,6 +26,7 @@ import { camelCase, has, isEmpty } from 'lodash';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { NewAddressOptionList } from '../../../StateProvider/AddressProvider';
 import axiosInstance from 'src/axios/axiosInstance';
+import ManageDynamicForm from 'src/pages/DynamicForm/ManageDynamicForm';
 
 function dropdownOptions(options, values, fields, fieldData, newAddressOptionList = []) {
   const lookupDependentOn = fieldData?.lookupDependentOn;
@@ -106,7 +107,6 @@ function dropdownOptions(options, values, fields, fieldData, newAddressOptionLis
       }
     }
   }
-
   return optionsToShow;
 }
 
@@ -338,7 +338,13 @@ function Dropdown({
                 {...rest}
                 multiple
                 disableCloseOnSelect={true}
-                options={dropdownOptions(option, values, fields, fieldData)}
+                options={[
+                  ...(dropdownOptions(option, values, fields, fieldData).length > 0
+                    ? [{ optionValue: 'selectAll', optionLabel: 'Select All' }]
+                    : []),
+                  ...dropdownOptions(option, values, fields, fieldData)
+                ]}
+
                 getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
                 value={
                   values[name]
@@ -353,13 +359,30 @@ function Dropdown({
                 }}
                 onChange={
                   onChange
-                    ? onChange
+                    ? (e, value: any, reason) => {
+                      const isSelectedAll = value.some((val) => val.optionValue === 'selectAll');
+                      if (isSelectedAll) {
+                        onChange(e, dropdownOptions(option, values, fields, fieldData), reason)
+                      }
+                      else {
+                        onChange(e, value, reason)
+                      }
+                    }
                     : (e, value: any, reason) => {
                       if (setFieldValue) {
-                        setFieldValue(
-                          name,
-                          value.map((val) => val.optionValue)
-                        );
+                        const isSelectedAll = value.some((val) => val.optionValue === 'selectAll');
+
+                        if (isSelectedAll) {
+                          // If "Select All" is selected, set all other options as values
+                          setFieldValue(
+                            name,
+                            dropdownOptions(option, values, fields, fieldData)
+                              .map((item) => item.optionValue)
+                          );
+                        } else {
+                          // Remove "Select All" if it was selected and set the values accordingly
+                          setFieldValue(name, value.map((val) => val.optionValue));
+                        }
                       }
                     }
                 }
@@ -1001,6 +1024,49 @@ function Dropdown({
                             order: option.length,
                             ...(fieldData.lookupDependentOn && {
                               [fieldData.lookupDependentOn]: data?.parentMarketSegment || values[fieldData?.lookupDependentOn] || ''
+                            })
+                          };
+                          setOptionsList([tempNewOption, ...option]);
+                          handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                        }
+                      }}
+                    />
+                  )}
+                </>
+              </>
+            )}
+            {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.iotDataPointsCategory && permissions?.iotDataPointsCategory?.isCreate && (
+              <>
+                <>
+                  <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
+                    <IconButton
+                      disabled={fieldData?.isUneditable || rest?.disabled}
+                      onClick={() => setLookupDialog(true)}
+                      size="small"
+                      color="primary"
+                      style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
+                    >
+                      <AddCircleIcon />
+                    </IconButton>
+                  </HtmlTooltip>
+                  {lookupDialog && (
+                    <ManageDynamicForm
+                      resource={sidebarResource.iotDataPointsCategory}
+                      resourcePath={'/iot-data-points-category'}
+                      id={null}
+                      isClone={false}
+                      onClose={() => setLookupDialog(false)}
+                      redirected={false}
+                      onSuccess={(data) => {
+                        setLookupDialog(false);
+                        if (data?._id) {
+                          let tempNewOption = {
+                            default: true,
+                            optionLabel: data?.iotDataPointsCategoryName,
+                            optionValue: data?._id,
+                            order: option.length,
+                            ...(fieldData.lookupDependentOn && {
+                              [fieldData.lookupDependentOn]: data?.parentCategory || values[fieldData?.lookupDependentOn] || ''
                             })
                           };
                           setOptionsList([tempNewOption, ...option]);

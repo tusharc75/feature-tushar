@@ -69,6 +69,7 @@ const CustomReport = () => {
       if (lookupResource) {
         data?.forEach((e) => {
           if (e?.fieldData?.fieldName === 'currentOwner') {
+            e.fieldData.lookup = true;
             e.fieldData.option = [...lookupResource?.[`Customer Account`], ...lookupResource?.[`Supplier Account`]];
           }
         });
@@ -206,7 +207,7 @@ const CustomReport = () => {
       filterQuery = `${filterQuery}sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}&`;
     }
     if (search) {
-      filterQuery = `${filterQuery}search=${encodeURI(search)}&`;
+      filterQuery = `${filterQuery}search=${encodeURIComponent(search)}&`;
     }
     let deepFilter = [];
     customReportData?.filters?.forEach((filter: any) => {
@@ -223,79 +224,8 @@ const CustomReport = () => {
       }
     });
     if (deepFilter && deepFilter.length > 0) {
-      filterQuery = `${filterQuery}deepFilter=${encodeURI(JSON.stringify(deepFilter))}&`;
+      filterQuery = `${filterQuery}deepFilter=${encodeURIComponent(JSON.stringify(deepFilter))}&`;
     }
-
-    // if (selectedResources.length > 0) {
-    //   let deepFilter = [];
-    //   if (selectedData) {
-    //     const keys = selectedData ? Object.keys(selectedData) : [];
-    //     const idFilter = keys.filter((key) => selectedData[key] && selectedData[key].lookup);
-    //     const forDeepFilter = keys.filter((key) => selectedData[key] && !selectedData[key].lookup);
-
-    //     let filterById = idFilter.map((key) => {
-    //       const options = selectedData[key].value;
-    //       return {
-    //         field: key,
-    //         term: {
-    //           $in: options.map((d: any) => d.optionValue)
-    //         }
-    //       };
-    //     });
-
-    //     forDeepFilter.forEach((key) => {
-    //       if (selectedData[key].type === 'checkBox') {
-    //         deepFilter.push({
-    //           field: key,
-    //           term: selectedData[key].value ? 'Yes' : 'No'
-    //         });
-    //       } else {
-    //         deepFilter.push({
-    //           field: key,
-    //           term: selectedData[key].value?.map((d: any) => d.optionValue)
-    //         });
-    //       }
-    //     });
-
-    //     if (filterById.length > 0) {
-    //       filterQuery = `${filterQuery}filterById=${JSON.stringify(filterById)}&`;
-    //     }
-    //   }
-    //   if (betweenDate) {
-    //     const fields = Object.keys(betweenDate);
-    //     fields.forEach((field) => {
-    //       if (betweenDate[field]) {
-    //         deepFilter.push({
-    //           field,
-    //           term: moment(betweenDate[field]).format('MM/DD/YYYY')
-    //         });
-    //       }
-    //     });
-    //   }
-
-    //   if (!isObjectEmpty(filters)) {
-    //     Object.keys(filters).forEach((field) => {
-    //       deepFilter.push({
-    //         field: field,
-    //         term: encodeURI(filters[field].filter)
-    //       });
-    //     });
-    //   }
-
-    //   if (deepFilter && deepFilter.length > 0) {
-    //     filterQuery = `${filterQuery}deepFilter=${encodeURI(JSON.stringify(deepFilter))}&`;
-    //   }
-    // }
-
-    // if (statusPeriod && statusPeriodDate) {
-    //   const fields = Object.keys(statusPeriodDate);
-    //   fields.forEach((field) => {
-    //     if (statusPeriodDate[field]) {
-    //       filterQuery = `${filterQuery}${field}=${moment(statusPeriodDate[field]).format('MM/DD/YYYY')}&`;
-    //     }
-    //   });
-    // }
-
     return `?${filterQuery}`;
   };
 

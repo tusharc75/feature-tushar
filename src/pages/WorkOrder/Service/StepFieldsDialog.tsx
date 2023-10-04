@@ -119,10 +119,10 @@ const StepFieldsDialog = ({
     const [time, setTime] = React.useState(
       user?.brandPolicy?.workOrderTimer
         ? convertMsToTime(
-            stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start
-              ? (stepData?.duration || 0) + (new Date().getTime() - new Date(stepData?.pauseDate || stepData?.startDate).getTime())
-              : stepData?.duration || 0
-          )
+          stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start
+            ? (stepData?.duration || 0) + (new Date().getTime() - new Date(stepData?.pauseDate || stepData?.startDate).getTime())
+            : stepData?.duration || 0
+        )
         : 0
     );
 
@@ -409,7 +409,7 @@ const StepFieldsDialog = ({
                         Close
                       </Button>
                       <Box ml={1} />
-                      {allowedToEdit && (
+                      {(allowedToEdit && fieldData?.fields?.length > 0) && (
                         <Button variant="contained" size="small" onClick={() => setEditing(true)} color="primary">
                           Edit
                         </Button>

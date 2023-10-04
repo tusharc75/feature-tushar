@@ -93,6 +93,12 @@ const QuotationDetails = () => {
   const [stepList, setStepList] = useState(quotationProcessSteps);
   const [stepNames, setStepNames] = useState(quotationProcessSteps.map((item) => item.name));
 
+  useEffect(() => {
+    if (tabValue !== tab) {
+      setTabValue(tab ? parseInt(tab) : 0);
+    }
+  }, [tab]);
+
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
     history.push(`?tab=${newValue}`);
@@ -213,9 +219,15 @@ const QuotationDetails = () => {
       }
       setCurrentVersion(versionIndex);
       setCurrVersionId(data.versions[versionIndex]?._id);
-      setCurrentStep(getIndex(data.versions[versionIndex]?.processStatus, tempStepList));
       setVersionStatus(data.versions[versionIndex]?.status);
       setSentToCustomer(data.versions[versionIndex]?.status === QUOTATION_STATUS.sentToCustomer);
+
+      if (data.versions[versionIndex]?.status === QUOTATION_STATUS.acceptByCustomer) {
+        setCurrentStep(tempStepList?.length - 1)
+      }
+      else {
+        setCurrentStep(getIndex(data.versions[versionIndex]?.processStatus, tempStepList));
+      }
 
       if (data?.doasetup) {
         const doaResponse: any = await axiosInstance().get(`doa-request/doaFlow/${data._id}/${data.versions[versionIndex]?._id}`);
@@ -304,6 +316,9 @@ const QuotationDetails = () => {
         }
         if (quotationData?.type === QUOTATION_TYPE.repairOrder) {
           history.push(`${routes.repairOrderDetail.path}/${data?._id}`);
+        }
+        if (quotationData?.type === QUOTATION_TYPE.fieldJob) {
+          history.push(`${routes.fieldServiceOrderDetail.path}/${data?._id}`);
         }
       })
       .catch((error) => {
@@ -450,7 +465,8 @@ const QuotationDetails = () => {
                     quotationData?.status === QUOTATION_STATUS.acceptByCustomer &&
                     !quotationData?.rentalJob &&
                     !quotationData?.repairOrder &&
-                    !quotationData?.salesOrder && (
+                    !quotationData?.salesOrder &&
+                    !quotationData?.fieldJob && (
                       <MenuItem>
                         <Button
                           onClick={() => {

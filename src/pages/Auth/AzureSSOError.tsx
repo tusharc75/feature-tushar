@@ -12,9 +12,9 @@ const AzureSSOError = () => {
     const searchParams = new URLSearchParams(document.location.search);
     const errorMessage = searchParams.get('message');
     const email = searchParams.get('email');
-    if(email) setEmail(email)
+    if (email) setEmail(email)
     if (errorMessage) setError(errorMessage);
-   console.log("SAML Data -:",JSON.parse(searchParams.get('samlData') || ""))
+    console.log("SAML Data -:", JSON.parse(searchParams.get('samlData') || ""))
   }, []);
 
   return (
@@ -23,9 +23,9 @@ const AzureSSOError = () => {
       <div className={styles.main} style={{ '--custom-grid-cols': '1fr 1fr' } as React.CSSProperties}>
         <div className={styles.bg}>
           <div className={styles.contentContainer}>
-              <p>{error}</p>
-              {email && <p>Email returned from your IDP: {email}</p>}
-              <Link to="/login" className={`${'cursor-pointer'} ${'setLink'}`}>Login</Link>
+            <p>{error}</p>
+            {email && <p>Email returned from your IDP: {email}</p>}
+            <Link to="/login" className={`${'cursor-pointer'} ${'setLink'}`}>Login</Link>
           </div>
         </div>
       </div>
