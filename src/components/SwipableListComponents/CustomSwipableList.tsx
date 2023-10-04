@@ -35,7 +35,8 @@ export default function CustomSwipableList({
   fullHeight = false,
   renderedFrom,
   additionalDetails = [],
-  owerCollaboratorInitialsOrImages = null
+  owerCollaboratorInitialsOrImages = null,
+  actionCol = null
 }) {
   const [themeColor] = useAppTheme();
   const [isAllChecked, setIsAllChecked] = useState(false);
@@ -166,37 +167,40 @@ export default function CustomSwipableList({
                             </span>
                           </h4>
                         )}
-                        {allowSwipe && permissions?.isUpdate && d.allowedToEdit && permissions?.isDelete && (
-                          <div className="icon-layout  d-flex align-items-center gap-2">
-                            {showClone && permissions?.isCreate && (
-                              <IconButton
-                                size="small"
-                                className="max-w-[20px] max-h-[20px] p-[1px_!important]"
-                                aria-label="Clone"
-                                onClick={() => {
-                                  onClone(d);
-                                }}
-                              >
-                                <FileCopyIcon size={18} className="text-[var(--primary-text)]" />
-                              </IconButton>
-                            )}
-                            {permissions?.isUpdate && d.allowedToEdit && (
-                              <IconButton
-                                size="small"
-                                className="max-w-[20px] max-h-[20px] p-[1px_!important]"
-                                aria-label="Edit"
-                                onClick={() => onEdit(d)}
-                              >
-                                <EditIcon fontSize="small" className="text-[var(--primary-text)] w-[18px] h-[18px]" />
-                              </IconButton>
-                            )}
-                            {extraParamsToCheckDelete && permissions?.isDelete && d.canDelete && (
-                              <IconButton size="small" aria-label="Clone" onClick={() => onDelete(d)}>
-                                <MdDelete size={18} style={{ color: 'var(--danger-light)' }} />
-                              </IconButton>
-                            )}
-                          </div>
-                        )}
+                        <div className="icon-layout  d-flex align-items-center gap-2">
+                          {allowSwipe && permissions?.isUpdate && d.allowedToEdit && permissions?.isDelete && (
+                            <>
+                              {showClone && permissions?.isCreate && (
+                                <IconButton
+                                  size="small"
+                                  className="max-w-[20px] max-h-[20px] p-[1px_!important]"
+                                  aria-label="Clone"
+                                  onClick={() => {
+                                    onClone(d);
+                                  }}
+                                >
+                                  <FileCopyIcon size={18} className="text-[var(--primary-text)]" />
+                                </IconButton>
+                              )}
+                              {permissions?.isUpdate && d.allowedToEdit && (
+                                <IconButton
+                                  size="small"
+                                  className="max-w-[20px] max-h-[20px] p-[1px_!important]"
+                                  aria-label="Edit"
+                                  onClick={() => onEdit(d)}
+                                >
+                                  <EditIcon fontSize="small" className="text-[var(--primary-text)] w-[18px] h-[18px]" />
+                                </IconButton>
+                              )}
+                              {extraParamsToCheckDelete && permissions?.isDelete && d.canDelete && (
+                                <IconButton size="small" aria-label="Clone" onClick={() => onDelete(d)}>
+                                  <MdDelete size={18} style={{ color: 'var(--danger-light)' }} />
+                                </IconButton>
+                              )}
+                            </>
+                          )}
+                          {actionCol ? actionCol(d) : null}
+                        </div>
                       </div>
                     </div>
                   </div>
