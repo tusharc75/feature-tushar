@@ -235,31 +235,35 @@ const DOAApproval = () => {
             </Tooltip>
             {QData && QStatus && QData?.DOA.requestTo.find((u) => u === currentUser._id) ? (
               <>
-                <Button
-                  onClick={() => {
-                    QuoteStatusChange('Accepted', '', '');
-                  }}
-                  variant="outlined"
-                  size="small"
-                  startIcon={<ThumbUpIcon />}
-                  color="primary"
-                  className="btn-outline-v1"
-                >
-                  {buttontext}
-                </Button>
-                <Button
-                  onClick={() => {
-                    setQuoteStatusChangeData('Rejected');
-                    setShowQuoteStatusChangeDialog(true);
-                  }}
-                  startIcon={<ThumbDownIcon />}
-                  variant="contained"
-                  size="small"
-                  color="primary"
-                  className="btn-outline-v1"
-                >
-                  Reject
-                </Button>
+                <Tooltip title={buttontext} arrow placement="top">
+                  <Button
+                    onClick={() => {
+                      QuoteStatusChange('Accepted', '', '');
+                    }}
+                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                    size="small"
+                    startIcon={isMobile && !isTablet ? null : <ThumbUpIcon />}
+                    color="primary"
+                    className="btn-outline-v1"
+                  >
+                    {isMobile && !isTablet ? <ThumbUpIcon /> : buttontext}
+                  </Button>
+                </Tooltip>
+                <Tooltip title={'Reject'} arrow placement="top">
+                  <Button
+                    onClick={() => {
+                      setQuoteStatusChangeData('Rejected');
+                      setShowQuoteStatusChangeDialog(true);
+                    }}
+                    startIcon={isMobile && !isTablet ? null : <ThumbDownIcon />}
+                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                    size="small"
+                    color="primary"
+                    className="btn-outline-v1"
+                  >
+                    {isMobile && !isTablet ? <ThumbDownIcon /> : 'Reject'}
+                  </Button>
+                </Tooltip>
               </>
             ) : null}
             <ActivityButton referenceId={QData?.quoteBuilderId} resource="DOA" resourceLabel={QData?.quoteName} />
