@@ -83,7 +83,7 @@ const Chart = () => {
   };
 
   return charts && !userLoading ? (
-    <Box p={2} mt={3} className=" rounded-[10px] bg-[var(--card-bg)]">
+    <Box p={2} mt={3} className=" rounded-[10px] bg-[var(--card-bg)] shadow-[0px_3.90676px_39.0676px_rgba(0,0,0,0.08)]">
       <MuiPickersUtilsProvider utils={DateFnsUtils}>
         <React.Fragment>
           <GlobalFilter globalFilters={globalFilters} setGlobalFilters={setGlobalFilters} disabled={false} dashboardList={[]} />
