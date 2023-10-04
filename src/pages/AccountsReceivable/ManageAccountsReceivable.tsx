@@ -110,7 +110,7 @@ const ManageAccountsReceivable = ({
           if (referenceData) {
             onSuccess(data.data);
           } else {
-            history.push(`${routes.accountsReceivable.path}/detail/${data?.data?._id}`);
+            history.push(`${routes.accountsReceivable.path}/${data?.data?._id}`);
           }
           setSubmitting(true);
           toastConfig.setToastConfig({
