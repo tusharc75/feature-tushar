@@ -141,6 +141,8 @@
   --chip-color-pending: rgb(255 255 255);
   --chip-border-pending: #eec032;
   --chip-background-pending: rgb(214 161 0);
+
+  --task-color: #587adc;
 }
 [data-mode='dark'] {
   .MuiOutlinedInput-notchedOutline {
@@ -4146,6 +4148,19 @@ div[class*='line-clamp-'] {
   .MuiSwitch-thumb {
     [data-mode='dark'] & {
       background-color: var(--dark-primary) !important;
+    }
+  }
+}
+// React flow
+body {
+  [data-mode='dark'] & {
+    .react-flow__controls-button {
+      background-color: var(--dark-secondary);
+      color: var(--dark-primary-text);
+      border-color: var(--common-border-color) !important;
+      svg {
+        fill: var(--dark-primary-text);
+      }
     }
   }
 }
