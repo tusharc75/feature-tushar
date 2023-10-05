@@ -213,7 +213,7 @@ export default function CustomReactTable({
                   <span
                     {...row.getToggleRowExpandedProps({
                       style: {
-                        paddingLeft: `${isMobile && !isTablet ? row.depth * 10 + 'px' : row.depth * 2 + 'rem'}`
+                        paddingLeft: `${isMobile && !isTablet ? row.depth * 10 + 'px' : row.depth * 12 + 'px'}`
                       }
                     })}
                   >
@@ -254,7 +254,7 @@ export default function CustomReactTable({
               ),
               Cell: ({ row }) =>
                 row?.original?.hideSelection ? null : (
-                  <div style={{ paddingLeft: row.depth > 0 ? `${row.depth * 2}rem` : '' }}>
+                  <div style={{ paddingLeft: row.depth > 0 ? `${isMobile && !isTablet ? row.depth * 10 + 'px' : row.depth * 12 + 'px'}` : '' }}>
                     <IndeterminateCheckbox from="Cell" {...row.getToggleRowSelectedProps()} />
                   </div>
                 )
