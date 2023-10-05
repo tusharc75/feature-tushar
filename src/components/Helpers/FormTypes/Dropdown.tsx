@@ -898,7 +898,14 @@ function Dropdown({
                             [fieldData.lookupDependentOn]: values[fieldData.lookupDependentOn]
                           };
                           setOptionsList([tempNewOption, ...option]);
-                          handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                          if (type === 'multiSelect') {
+                            handleChange(
+                              name,
+                              tempNewOption && tempNewOption.optionValue ? [...[...(values[name] || [])], tempNewOption.optionValue] : []
+                            );
+                          } else {
+                            handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                          }
                         }
                       }}
                     />

@@ -152,11 +152,13 @@ const Steps = (props) => {
     setCommentError(null);
   };
 
+
+
   return (
     <div>
       <Steps1
         currentStep={currentStep}
-        isNextStepEnabled={!loading && !globalLoading && nextStep}
+        nextStep={!loading && !globalLoading && nextStep}
         isPrevStep={
           currentStep >= 0 && !loading && !globalLoading && isPrevStep
           // allowedToEdit &&
@@ -168,8 +170,7 @@ const Steps = (props) => {
         }
         isStepEnded={isStepEnded || currentStep === steps.length}
         steps={steps}
-        nextStep={steps[currentStep + 1]}
-        setCurrentStep={() => {}}
+        setCurrentStep={() => { }}
         handleNext={() => {
           if (versionStatus.includes('Sent to Customer') && steps[currentStep]?.key === 'Send To Customer') {
             setShowManualCustomerActionDialog(true);
