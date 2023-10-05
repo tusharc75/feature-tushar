@@ -90,8 +90,15 @@ function PreviewDownload({
         else if (type === 'Preview') {
           const blobData = new Blob([response.data], { type: 'application/pdf' });
           const fileURL = URL.createObjectURL(blobData);
-          const pdfWindow = window.open();
-          pdfWindow.location.href = fileURL;
+          const link = document.createElement('a');
+          link.href = fileURL;
+          link.target = '_blank';  
+          link.style.display = 'none';  
+          document.body.appendChild(link);
+          link.click();  
+          document.body.removeChild(link);
+          // const pdfWindow = window.open();
+          // pdfWindow.location.href = fileURL;
           toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
         }
         else {
