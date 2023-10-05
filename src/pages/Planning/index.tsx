@@ -243,14 +243,18 @@ const Planning = () => {
             <IconButton
               aria-label="Convert"
               onClick={() => {
+                let newPath = '';
                 if (params?.data?.type === 'Rental Job') {
-                  history.push(`${routes.rentalManagementDetail.path}/${params?.data?.rentalJobId}`);
+                  newPath = `${routes.rentalManagementDetail.path}/${params?.data?.rentalJobId}`;
                 }
                 if (params?.data?.type === 'Sales Order') {
-                  history.push(`${routes.salesOrderDetail.path}/${params?.data?.salesOrderId}`);
+                  newPath = `${routes.salesOrderDetail.path}/${params?.data?.salesOrderId}`;
                 }
                 if (params?.data?.type === 'Field Service Order') {
-                  history.push(`${routes?.fieldServiceOrderDetail.path}/${params?.data?.serviceOrderId}`);
+                  newPath = `${routes?.fieldServiceOrderDetail.path}/${params?.data?.serviceOrderId}`;
+                }
+                if (newPath) {
+                  window.open(newPath, '_blank');
                 }
               }}
             >
