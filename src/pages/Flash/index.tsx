@@ -1,7 +1,7 @@
 import { Box, Menu, MenuItem } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import { AddOutlined, ExpandMore, CheckCircleOutlined, CancelOutlined } from '@material-ui/icons';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useReducer, useState } from 'react';
@@ -38,6 +38,7 @@ const Flash = () => {
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
+  const [statusChangeRecord, setStatusChangeRecord] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const [gridApi, setGridApi] = useState(null);
   const [sortOpen, setSortOpen] = useState(false);
@@ -49,8 +50,8 @@ const Flash = () => {
 
   const [isOpenDialog, setisOpenDialog] = useState(false);
   const [showStatusChangeDialog, setShowStatusChangeDialog] = useState({
-    open : false,
-    value : null
+    open: false,
+    value: null
   });
 
   const {
@@ -184,31 +185,70 @@ const Flash = () => {
       });
   };
 
-  const handleUpdateStatus = (value : string) =>{
-    
-    const prepareData = selectedRecords?.map((d) => ({
-      id: d._id,
-      status: value
-    }));
+  const handleUpdateStatus = (value: string) => {
+
+    let prepareData = [];
+    if (statusChangeRecord) {
+      prepareData.push({
+        id: statusChangeRecord.id,
+        status: statusChangeRecord.value
+      })
+    }
+
+    else {
+      prepareData = selectedRecords?.map((d) => ({
+        id: d._id,
+        status: value
+      }));
+    }
 
     axiosInstance()
       .put(`${flash.api}/updateStatus`, prepareData)
       .then(() => {
         fetchData();
         setShowStatusChangeDialog({
-          open : false,
-          value : null
+          open: false,
+          value: null
         })
         setAnchorEl(null);
+        setStatusChangeRecord(null);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-    
+
   }
 
   const ActionsRenderer = (params) => (
     <>
+      {permissions?.flash?.isUpdate && (
+        <>
+          <HtmlTooltip title="Approve">
+            <IconButton
+              size="small"
+              aria-label="Approve"
+              onClick={() => {
+                setStatusChangeRecord({ id: params?.data?._id, value: 'Approved' });
+                setShowStatusChangeDialog({ open: true, value: 'Approved' })
+              }}
+            >
+              <CheckCircleOutlined color='secondary' />
+            </IconButton>
+          </HtmlTooltip>
+          <HtmlTooltip title="Deny">
+            <IconButton
+              size="small"
+              aria-label="Deny"
+              onClick={() => {
+                setStatusChangeRecord({ id: params?.data?._id, value: 'Deny' });
+                setShowStatusChangeDialog({ open: true, value: 'Deny' })
+              }}
+            >
+              <CancelOutlined color='error' />
+            </IconButton>
+          </HtmlTooltip>
+        </>
+      )}
       {permissions?.flash?.isDelete && (
         <HtmlTooltip title="Delete">
           <IconButton
@@ -352,60 +392,65 @@ const Flash = () => {
                     Add
                   </Button>
                 )}
-                {permissions?.flash?.isDelete && (
-                  <>
-                    <Button
-                      variant={'outlined'}
-                      color="default"
-                      size="small"
-                      onClick={openActions}
-                      disabled={selectedRecords.length ? false : true}
-                      aria-controls="action-menu"
-                      className={`new-dropdown-v1`}
-                      endIcon={<ExpandMore />}
-                    >
-                      Actions
-                    </Button>
-                    <Menu
-                      anchorEl={anchorEl}
-                      keepMounted
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
-                      }}
-                      id="action-menu"
-                      open={Boolean(anchorEl)}
-                      onClose={closeActions}
-                    >
-                      
-                      <MenuItem
-                        disabled={
-                          !(
-                            (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.allowedToEdit === true)?.length) === selectedRecords?.length
-                          )
-                        }
-                        onClick={(e) => {
-                          closeActions();
-                          setShowStatusChangeDialog({open : true, value : 'Approved'});
-                          
-                        }}
-                      >
-                        Approve
-                      </MenuItem>
-                      <MenuItem
-                        disabled={
-                          !(
-                            (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length
-                          )
-                        }
-                        onClick={(e) => {
-                          closeActions();
-                          setShowStatusChangeDialog({open : true, value : 'Deny'});
-                        }}
-                      >
-                        Deny
-                      </MenuItem>
+                <>
+                  <Button
+                    variant={'outlined'}
+                    color="default"
+                    size="small"
+                    onClick={openActions}
+                    disabled={selectedRecords.length ? false : true}
+                    aria-controls="action-menu"
+                    className={`new-dropdown-v1`}
+                    endIcon={<ExpandMore />}
+                  >
+                    Actions
+                  </Button>
+                  <Menu
+                    anchorEl={anchorEl}
+                    keepMounted
+                    getContentAnchorEl={null}
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'left'
+                    }}
+                    id="action-menu"
+                    open={Boolean(anchorEl)}
+                    onClose={closeActions}
+                  >
+                    {permissions?.flash?.isUpdate && (
+                      <>
+
+                        <MenuItem
+                          disabled={
+                            !(
+                              (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.allowedToEdit === true)?.length) === selectedRecords?.length
+                            )
+                          }
+                          onClick={(e) => {
+                            closeActions();
+                            setShowStatusChangeDialog({ open: true, value: 'Approved' });
+
+                          }}
+                        >
+                          Approve
+                        </MenuItem>
+                        <MenuItem
+                          disabled={
+                            !(
+                              (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length
+                            )
+                          }
+                          onClick={(e) => {
+                            closeActions();
+                            setShowStatusChangeDialog({ open: true, value: 'Deny' });
+                          }}
+                        >
+                          Deny
+                        </MenuItem>
+
+                      </>
+                    )}
+                    {permissions?.flash?.isDelete && (
                       <MenuItem
                         disabled={
                           !(
@@ -423,9 +468,9 @@ const Flash = () => {
                       >
                         Delete
                       </MenuItem>
-                    </Menu>
-                  </>
-                )}
+                    )}
+                  </Menu>
+                </>
               </div>
             </div>
             <DisplayFiltersForMobile resource={sidebarResource.flash} />
@@ -519,9 +564,10 @@ const Flash = () => {
           open={showStatusChangeDialog.open}
           message={`Are you sure you want to change the staus of selected records to ${showStatusChangeDialog?.value}? `}
           onClose={() => {
-            setShowStatusChangeDialog({open:false, value:null})
+            setStatusChangeRecord(null);
+            setShowStatusChangeDialog({ open: false, value: null });
           }}
-          onOk={()=>handleUpdateStatus(showStatusChangeDialog?.value)}
+          onOk={() => handleUpdateStatus(showStatusChangeDialog?.value)}
         />
       )}
     </section>
