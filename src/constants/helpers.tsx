@@ -2032,6 +2032,13 @@ export const REPAIR_PROCESS_STATUS = {
   failed: 'Failed'
 } as const;
 
+
+export const PLANNING_STATUS = {
+  open: 'Open',
+  converted: 'Converted'
+} as const;
+
+
 export const asyncForEach = async (array: any[], callback: (arrayIndex: any, i: number, array: any[]) => Promise<any>) => {
   for (let index = 0; index < array.length; index++) {
     await callback(array[index], index, array);

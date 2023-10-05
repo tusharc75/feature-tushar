@@ -90,13 +90,15 @@ function PreviewDownload({
           const link = document.createElement('a');
           link.href = url;
           link.setAttribute('download', `${resource}.pdf`);
-          document.body.appendChild(link);
           link.click();
         } else if (type === 'Preview') {
           const blobData = new Blob([response.data], { type: 'application/pdf' });
           const fileURL = URL.createObjectURL(blobData);
-          const pdfWindow = window.open();
-          pdfWindow.location.href = fileURL;
+          const link = document.createElement('a');
+          link.href = fileURL;
+          link.target = '_blank';  
+          link.style.display = 'none';  
+          link.click();  
           toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
         } else {
           const blobData = new Blob([response.data], { type: 'application/pdf' });

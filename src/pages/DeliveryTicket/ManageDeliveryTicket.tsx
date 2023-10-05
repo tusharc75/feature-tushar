@@ -531,6 +531,9 @@ const ManageDeliveryTicket = ({
       if (!moment(values['createDate']).isSameOrAfter(moment(createDateMin))) {
         errors['createDate'] = `Please select valid date`;
       }
+      if (moment(values['createDate']).isAfter(moment())) {
+        errors['createDate'] = `Please select valid date`;
+      }
     }
     return errors;
   }

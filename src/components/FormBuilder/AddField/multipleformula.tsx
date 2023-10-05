@@ -6,6 +6,11 @@ import Chip from '@material-ui/core/Chip';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { Button, Typography } from '@material-ui/core';
 import { checkFormula } from '../../../constants/formulaUtility';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { IconButton } from "@material-ui/core";
+import { FiMaximize2 } from 'react-icons/fi';
+import ContentFullScreen from "src/components/ContentFullScreen";
+import Grid from "@material-ui/core/Grid";
 
 export const MultipleFormula = ({ fields, values, setFieldValue, _id, touched, errors }) => {
   useEffect(() => {
@@ -19,6 +24,7 @@ export const MultipleFormula = ({ fields, values, setFieldValue, _id, touched, e
 
   const [isMyInputFocused, setIsMyInputFocused] = useState(null);
   const [formulaError, setFormulaError] = useState(null);
+  const [stepFullScreen, setStepFullScreen] = useState(false);
 
   const handleCheckSyntax = () => {
     if (values['formulaoption'] && values['formulaoption'].length !== 0) {
@@ -108,132 +114,146 @@ export const MultipleFormula = ({ fields, values, setFieldValue, _id, touched, e
 
   return (
     <Box>
-      <FormControl variant="outlined" fullWidth margin="dense">
-        <Autocomplete
-          multiple
-          disableCloseOnSelect={true}
-          id="tags-filled"
-          options={
-            fields &&
-            fields
-              .filter((_f) => _f._id !== _id)
-              .map((_field) => {
-                return _field.fieldLabel;
-              })
-          }
-          getOptionLabel={(option) => option}
-          value={values['formulaFields'] ? convertValuetoLabel(values['formulaFields']) : []}
-          renderTags={(value: string[], getTagProps) =>
-            value.map((option: string, index: number) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)
-          }
-          onChange={(e, value) => handleChangeFormulaField(value)}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              margin="dense"
-              variant="outlined"
-              label="Formula Fields"
-              placeholder="Formula Fields"
-              name="formulaFields"
-              error={touched['formulaFields'] && Boolean(errors['formulaFields'])}
-              helperText={touched['formulaFields'] && errors['formulaFields']}
+      <Grid container justifyContent="flex-end">
+        <HtmlTooltip title={`Full Screen`}>
+          <IconButton aria-label="Full Screen" onClick={() => {
+            setStepFullScreen(true)
+          }}
+            size="small">
+            <FiMaximize2 />
+          </IconButton>
+        </HtmlTooltip>
+      </Grid>
+      <ContentFullScreen title={'Formula'} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+        <>
+          <FormControl variant="outlined" fullWidth margin="dense">
+            <Autocomplete
+              multiple
+              disableCloseOnSelect={true}
+              id="tags-filled"
+              options={
+                fields &&
+                fields
+                  .filter((_f) => _f._id !== _id)
+                  .map((_field) => {
+                    return _field.fieldLabel;
+                  })
+              }
+              getOptionLabel={(option) => option}
+              value={values['formulaFields'] ? convertValuetoLabel(values['formulaFields']) : []}
+              renderTags={(value: string[], getTagProps) =>
+                value.map((option: string, index: number) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)
+              }
+              onChange={(e, value) => handleChangeFormulaField(value)}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  margin="dense"
+                  variant="outlined"
+                  label="Formula Fields"
+                  placeholder="Formula Fields"
+                  name="formulaFields"
+                  error={touched['formulaFields'] && Boolean(errors['formulaFields'])}
+                  helperText={touched['formulaFields'] && errors['formulaFields']}
+                />
+              )}
             />
-          )}
-        />
-      </FormControl>
-      <FormControl variant="outlined" fullWidth margin="dense">
-        <Autocomplete
-          multiple
-          disableCloseOnSelect={true}
-          id="tags-filled"
-          options={
-            fields &&
-            fields.map((_field) => {
-              return _field.fieldLabel;
-            })
-          }
-          getOptionLabel={(option) => option}
-          value={values['formulainputFields'] ? convertValuetoLabel(values['formulainputFields']) : []}
-          renderTags={(value: string[], getTagProps) =>
-            value.map((option: string, index: number) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)
-          }
-          onChange={(e, value) => setFieldValue('formulainputFields', convertLabeltoValue(value))}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              margin="dense"
-              variant="outlined"
-              label="Input Parameters"
-              placeholder="Input Parameters"
-              name="formulainputFields"
-              error={touched['formulainputFields'] && Boolean(errors['formulainputFields'])}
-              helperText={touched['formulainputFields'] && errors['formulainputFields']}
+          </FormControl>
+          <FormControl variant="outlined" fullWidth margin="dense">
+            <Autocomplete
+              multiple
+              disableCloseOnSelect={true}
+              id="tags-filled"
+              options={
+                fields &&
+                fields.map((_field) => {
+                  return _field.fieldLabel;
+                })
+              }
+              getOptionLabel={(option) => option}
+              value={values['formulainputFields'] ? convertValuetoLabel(values['formulainputFields']) : []}
+              renderTags={(value: string[], getTagProps) =>
+                value.map((option: string, index: number) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)
+              }
+              onChange={(e, value) => setFieldValue('formulainputFields', convertLabeltoValue(value))}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  margin="dense"
+                  variant="outlined"
+                  label="Input Parameters"
+                  placeholder="Input Parameters"
+                  name="formulainputFields"
+                  error={touched['formulainputFields'] && Boolean(errors['formulainputFields'])}
+                  helperText={touched['formulainputFields'] && errors['formulainputFields']}
+                />
+              )}
             />
+          </FormControl>
+          {values['formulainputFields'] && values['formulainputFields'].length > 0 && (
+            <Box pt={0.5} pb={0.5}>
+              {values['formulainputFields'].map((_field) => (
+                <Chip className="ml-1 cursor-pointer" key={_field} label={generateLabel(_field)} onClick={() => handleAddInputField(_field)} />
+              ))}
+            </Box>
           )}
-        />
-      </FormControl>
-      {values['formulainputFields'] && values['formulainputFields'].length > 0 && (
-        <Box pt={0.5} pb={0.5}>
-          {values['formulainputFields'].map((_field) => (
-            <Chip className="ml-1 cursor-pointer" key={_field} label={generateLabel(_field)} onClick={() => handleAddInputField(_field)} />
-          ))}
-        </Box>
-      )}
-      {values['formulaFields'] && values['formulaFields'].length > 0 && (
-        <Box marginTop={1} border={1} p={1} borderColor="var(--common-border-color)" maxHeight={300} style={{ overflow: 'auto' }}>
-          <table style={{ width: '100%' }}>
-            <tbody>
-              <>
-                {values['formulaFields'] &&
-                  values['formulaFields'].map((_field, i) => (
-                    <tr key={i}>
-                      <td className="pt-2" style={{ paddingRight: 10, width: '50px' }}>
-                        {_field}
-                      </td>
-                      <td className="pt-2">
-                        <TextField
-                          name={'formulaoption_' + _field}
-                          id={'formulaoption_' + _field}
-                          variant="outlined"
-                          margin="dense"
-                          fullWidth
-                          multiline
-                          rows={2}
-                          placeholder="Formula (return field1 + field2)"
-                          style={{ margin: 0 }}
-                          inputRef={inputRef.current[i]}
-                          //onBlur={() => setIsMyInputFocused(null)}
-                          onFocus={() => setIsMyInputFocused(i)}
-                          onKeyPress={(event) => {
-                            event.stopPropagation();
-                          }}
-                          value={values['formulaoption'] && values['formulaoption'][_field] && values['formulaoption'][_field]}
-                          onChange={(event) => onChangeValue(i, _field, event.target.value)}
-                          error={touched['formulaoption_' + _field] && Boolean(errors['formulaoption_' + _field])}
-                          helperText={touched['formulaoption_' + _field] && errors['formulaoption_' + _field]}
-                        />
-                      </td>
-                    </tr>
-                  ))}
-                {
-                  <tr>
-                    <td colSpan={2}>
-                      {formulaError && (
-                        <Typography variant="caption" display="block">
-                          {formulaError}
-                        </Typography>
-                      )}
-                      <Button size="small" onClick={handleCheckSyntax} color="primary">
-                        Check Syntax
-                      </Button>
-                    </td>
-                  </tr>
-                }
-              </>
-            </tbody>
-          </table>
-        </Box>
-      )}
+          {values['formulaFields'] && values['formulaFields'].length > 0 && (
+            <Box marginTop={1} border={1} p={1} borderColor="var(--common-border-color)" maxHeight={500} style={{ overflow: 'auto' }}>
+              <table style={{ width: '100%' }}>
+                <tbody>
+                  <>
+                    {values['formulaFields'] &&
+                      values['formulaFields'].map((_field, i) => (
+                        <tr key={i}>
+                          <td className="pt-2" style={{ paddingRight: 10, width: '50px' }}>
+                            {_field}
+                          </td>
+                          <td className="pt-2">
+                            <TextField
+                              name={'formulaoption_' + _field}
+                              id={'formulaoption_' + _field}
+                              variant="outlined"
+                              margin="dense"
+                              fullWidth
+                              multiline
+                              rows={stepFullScreen ? 20 : 2}
+                              placeholder="Formula (return field1 + field2)"
+                              style={{ margin: 0 }}
+                              inputRef={inputRef.current[i]}
+                              //onBlur={() => setIsMyInputFocused(null)}
+                              onFocus={() => setIsMyInputFocused(i)}
+                              onKeyPress={(event) => {
+                                event.stopPropagation();
+                              }}
+                              value={values['formulaoption'] && values['formulaoption'][_field] && values['formulaoption'][_field]}
+                              onChange={(event) => onChangeValue(i, _field, event.target.value)}
+                              error={touched['formulaoption_' + _field] && Boolean(errors['formulaoption_' + _field])}
+                              helperText={touched['formulaoption_' + _field] && errors['formulaoption_' + _field]}
+                            />
+                          </td>
+                        </tr>
+                      ))}
+                    {
+                      <tr>
+                        <td colSpan={2}>
+                          {formulaError && (
+                            <Typography variant="caption" display="block">
+                              {formulaError}
+                            </Typography>
+                          )}
+                          <Button size="small" onClick={handleCheckSyntax} color="primary">
+                            Check Syntax
+                          </Button>
+                        </td>
+                      </tr>
+                    }
+                  </>
+                </tbody>
+              </table>
+            </Box>
+          )}
+        </>
+      </ContentFullScreen>
     </Box>
   );
 };
