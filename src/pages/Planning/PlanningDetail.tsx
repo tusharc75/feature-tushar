@@ -33,6 +33,7 @@ const PlanningDetail = () => {
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const [showConverConfirmBox, setShowConverConfirmBox] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [tabValue, setTabValue] = useState(0);
@@ -96,6 +97,23 @@ const PlanningDetail = () => {
     }
   };
 
+  const handleConvert = () => {
+    axiosInstance()
+      .post(`${routes?.planning?.path}/convert-planning`, { id: planningData?._id })
+      .then(({ data }) => {
+        setShowConverConfirmBox(false);
+        fetchData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
   };
@@ -108,6 +126,8 @@ const PlanningDetail = () => {
     setTabValue(newValue);
   };
 
+  console.log(planningData);
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -117,6 +137,15 @@ const PlanningDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <>
+              {permissions?.planning?.isUpdate && allowedToEdit && planningData?.status!='Closed' && (
+                <Button
+                  variant={isMobile && !isTablet ? 'text' : 'contained'}
+                  className="btn-outline-v1"
+                  onClick={() => {setShowConverConfirmBox(true)}}
+                >
+                  {isMobile && !isTablet ? <BiEdit size={20} /> : 'Convert'}
+                </Button>
+              )}
               {permissions?.planning?.isUpdate && allowedToEdit && (
                 <Button
                   variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -204,6 +233,14 @@ const PlanningDetail = () => {
           onOk={handleDelete}
         />
       )}
+      {showConverConfirmBox && (
+          <ConfirmationDialog
+            open={true}
+            message={`Are you sure you want to convert planning  ${planningData?.planningNumber} ?`}
+            onClose={() => {setShowConverConfirmBox(false)}}
+            onOk={handleConvert}
+          />
+        )}
       {openUpdateDialog && (
         <ManagePlanning
           id={id}
