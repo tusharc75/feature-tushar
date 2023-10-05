@@ -35,7 +35,6 @@ export const PreviewDialog = ({
   button2Title,
   downlodingFile
 }) => {
-  const columnOrderAccessKey = `${resource}_previewDownload`;
   const toastConfig = useContext(CustomToastContext);
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -44,34 +43,15 @@ export const PreviewDialog = ({
   const [views, setViews] = useState([]);
   const [showSaveViewDialog, setShowSaveViewDialog] = useState({ open: false, data: null });
   const [visibleColumnsPdf, setVisibleColumnsPdf] = useState([]);
-  const [columnByOrder, setColumnByOrder] = useState([]);
 
-  useEffect(() => {
-    if (localStorage.getItem(columnOrderAccessKey)) {
-      const columnOrder = JSON.parse(localStorage.getItem(columnOrderAccessKey));
-      const columns = [];
-      allColumn?.forEach((column, i) => {
-        const index = columnOrder?.findIndex((_c) => _c === column?.fieldLabel);
-        if (i === index || index === -1) {
-          columns.push(column);
-        } else {
-          columns.splice(index, 0, column);
-        }
-      });
-      setColumnByOrder(columns);
-    } else {
-      setColumnByOrder([...allColumn]);
-    }
-  }, [columns]);
-
-  useEffect(() => {
+  useEffect(() => {   
     const temp =
-      defaultColumns?.length > 0
-        ? columnByOrder?.filter((e: any) => defaultColumns?.includes(e?.fieldName))?.map((e) => e.fieldLabel)
-        : columnByOrder?.map((e) => e.fieldLabel);
+    defaultColumns?.length > 0
+      ? allColumn?.filter((e: any) => defaultColumns?.includes(e?.fieldName))?.map((e) => e.fieldLabel)
+      : allColumn?.map((e) => e.fieldLabel);
 
-    setVisibleColumnsPdf([...temp]);
-  }, [columnByOrder]);
+  setVisibleColumnsPdf([...temp]);
+  }, [columns]);
 
   useEffect(() => {
     fetchUserViews();
@@ -114,7 +94,7 @@ export const PreviewDialog = ({
     if (data && data.columns) {
       const columnsArray = data?.columns?.split(',')?.map((item) => item?.trim());
       setVisibleColumnsPdf(
-        columnByOrder
+        allColumn
           ?.filter((d) => columnsArray?.includes(d?.fieldName))
           .map((d) => {
             return d?.fieldLabel;
@@ -192,16 +172,16 @@ export const PreviewDialog = ({
                       onChange={(e, val) => {
                         if (
                           val.includes('Select All') &&
-                          ['Select All', ...columnByOrder?.map((e) => e?.fieldLabel)].sort().toString() !== val.sort().toString()
+                          ['Select All', ...allColumn?.map((e) => e?.fieldLabel)].sort().toString() !== val.sort().toString()
                         ) {
-                          setVisibleColumnsPdf(columnByOrder?.map((e) => e?.fieldLabel));
-                        } else if (['Select All', ...columnByOrder?.map((e) => e?.fieldLabel)].sort().toString() === val.sort().toString()) {
+                          setVisibleColumnsPdf(allColumn?.map((e) => e?.fieldLabel));
+                        } else if (['Select All', ...allColumn?.map((e) => e?.fieldLabel)].sort().toString() === val.sort().toString()) {
                           setVisibleColumnsPdf([]);
                         } else {
-                          setVisibleColumnsPdf(columnByOrder?.map((e) => e?.fieldLabel)?.filter((d) => val.includes(d)));
+                          setVisibleColumnsPdf(allColumn?.map((e) => e?.fieldLabel)?.filter((d) => val.includes(d)));
                         }
                       }}
-                      options={['Select All', ...columnByOrder?.map((e) => e?.fieldLabel)]}
+                      options={['Select All', ...allColumn?.map((e) => e?.fieldLabel)]}
                       disableCloseOnSelect
                       getOptionLabel={(option) => option}
                       renderOption={(option, { selected }) => (
@@ -211,7 +191,7 @@ export const PreviewDialog = ({
                             checkedIcon={checkedIcon}
                             style={{ marginRight: 8 }}
                             checked={
-                              ['Select All', ...columnByOrder?.map((e) => e?.fieldLabel)].sort().toString() ===
+                              ['Select All', ...allColumn?.map((e) => e?.fieldLabel)].sort().toString() ===
                               ['Select All', ...visibleColumnsPdf].sort().toString()
                                 ? true
                                 : selected
@@ -224,12 +204,7 @@ export const PreviewDialog = ({
                     />
                   </Box>
                   <Box width="5%">
-                    <ArrangeView
-                      columns={columns}
-                      visibleColumnsPdf={visibleColumnsPdf}
-                      setVisibleColumnsPdf={setVisibleColumnsPdf}
-                      columnOrderAccessKey={columnOrderAccessKey}
-                    />
+                    <ArrangeView columns={visibleColumnsPdf} setColumns={setVisibleColumnsPdf} />
                   </Box>
                 </Box>
               </FormControl>

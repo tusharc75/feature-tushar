@@ -17,7 +17,7 @@ const ItemTypes = {
 };
 
 export default function ArrangeView(props) {
-  const { columns, visibleColumnsPdf = [], setVisibleColumnsPdf, columnOrderAccessKey } = props;
+  const { columns, setColumns } = props;
 
   const [open, setOpen] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -26,14 +26,7 @@ export default function ArrangeView(props) {
   const [column, setColumn] = useState([]);
 
   useEffect(() => {
-    let columnOrder = [];
-    if (localStorage.getItem(columnOrderAccessKey)) {
-      const column = JSON.parse(localStorage.getItem(columnOrderAccessKey));
-      columnOrder = column?.map((col, idx) => ({ id: idx + 1, text: col }));
-    } else {
-      columnOrder = columns.map((col, idx) => ({ id: idx + 1, text: col?.headerName || '' }));
-    }
-    setColumn(columnOrder);
+    setColumn(columns.map((col, idx) => ({ id: idx + 1, text: col || '' })));
   }, [columns]);
 
   const moveCard = useCallback(
@@ -53,16 +46,8 @@ export default function ArrangeView(props) {
 
   const onSave = () => {
     setSubmitting(true);
-    const columns = column.map((c) => c.text);
-    setVisibleColumnsPdf(columns?.filter((_c) => visibleColumnsPdf?.includes(_c)));
-    localStorage.setItem(columnOrderAccessKey, JSON.stringify(columns));
+    setColumns(column.map((c) => c.text));
     setSubmitting(false);
-    onClose();
-  };
-
-  const handleReset = () => {
-    setVisibleColumnsPdf(columns?.filter((_c) => visibleColumnsPdf?.includes(_c?.headerName))?.map(_c => _c?.headerName));
-    localStorage.removeItem(columnOrderAccessKey);
     onClose();
   };
 
@@ -108,9 +93,6 @@ export default function ArrangeView(props) {
           <CustomDialogFooter>
             <Button disabled={isSubmitting} color="primary" variant="outlined" size="small" onClick={onClose}>
               Cancel
-            </Button>
-            <Button disabled={isSubmitting} color="primary" variant="outlined" size="small" onClick={handleReset}>
-              Reset
             </Button>
             <Button disabled={isSubmitting} color="primary" variant="contained" size="small" onClick={onSave}>
               {isSubmitting ? <CircularProgress size={18} /> : 'Save'}

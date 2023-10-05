@@ -52,11 +52,15 @@ function PreviewDownload({
   const handleViewPdf = (type, pdfType, visibleColumns) => {
     setLoadingType(pdfType);
 
-    let showColumns = allColumn
-      ?.filter((d) => visibleColumns?.includes(d?.fieldLabel))
-      .map((d) => {
-        return d?.fieldName;
-      });
+    // let showColumns = allColumn
+    //   ?.filter((d) => visibleColumns?.includes(d?.fieldLabel))
+    //   .map((d) => {
+    //     return d?.fieldName;
+    //   });
+
+    let showColumns = visibleColumns?.map((d) => {
+      return allColumn?.find((c) => c?.fieldLabel === d)?.fieldName;
+    });
 
     let api = '';
     if (type === 'Export') {
@@ -96,9 +100,9 @@ function PreviewDownload({
           const fileURL = URL.createObjectURL(blobData);
           const link = document.createElement('a');
           link.href = fileURL;
-          link.target = '_blank';  
-          link.style.display = 'none';  
-          link.click();  
+          link.target = '_blank';
+          link.style.display = 'none';
+          link.click();
           toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
         } else {
           const blobData = new Blob([response.data], { type: 'application/pdf' });
@@ -163,7 +167,7 @@ function PreviewDownload({
               setShowColumnsDialog({ open: true, type: 'PDF' });
             }}
           >
-            {isMobile && !isTablet ? <DownloadIcon size={20} /> : loadingType === 'download' ? 'Please wait...' : 'Download'}
+            {isMobile && !isTablet ? <DownloadIcon fontSize={20} /> : loadingType === 'download' ? 'Please wait...' : 'Download'}
           </Button>
           {isExcelDownload && (
             <Button
