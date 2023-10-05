@@ -162,7 +162,7 @@ const InvoiceDetails = () => {
 
   const handleDownload = () => {
     setIsDownloading(true);
-  
+
     axiosInstance()
       .get(`/invoice/zip/${invoiceData._id}`, {
         responseType: 'blob'
@@ -171,10 +171,10 @@ const InvoiceDetails = () => {
         const url = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement('a');
         link.href = url;
-  
+
         const filename = response.headers["content-disposition"].split("filename=")[1];
         link.setAttribute('download', filename);
-        
+
         document.body.appendChild(link);
         link.click();
         setIsDownloading(false);
@@ -213,17 +213,17 @@ const InvoiceDetails = () => {
             {invoiceData ? (
               <>
                 <Button
-                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                    className="btn-outline-v1"
-                    type="button"
-                    size="small"
-                    disabled={isDownloading ? true : false}
-                    startIcon={isMobile ? '' : <IoMdDownload />}
-                    onClick={(e) => {
-                      handleDownload();
-                    }}
-                  >
-                    {isMobile && !isTablet ? <IoMdDownload size={20} /> : isDownloading ? 'Please wait...' : 'Download'}
+                  variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                  className="btn-outline-v1"
+                  type="button"
+                  size="small"
+                  disabled={isDownloading ? true : false}
+                  startIcon={isMobile ? '' : <IoMdDownload />}
+                  onClick={(e) => {
+                    handleDownload();
+                  }}
+                >
+                  {isMobile && !isTablet ? <IoMdDownload size={20} /> : isDownloading ? 'Please wait...' : 'Download'}
                 </Button>
                 {invoiceData?.versions?.length &&
                   <Button
@@ -241,7 +241,7 @@ const InvoiceDetails = () => {
                   </Button>
                 }
                 {permissions?.invoice?.isUpdate && allowedToEdit &&
-                  ![INVOICE_STATUS.invoiced, INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(invoiceData?.status) && (
+                  ![INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(invoiceData?.status) && (
                     <Button
                       variant={isMobile && !isTablet ? 'text' : 'contained'}
                       className={'btn-outline-v1'}
@@ -331,7 +331,7 @@ const InvoiceDetails = () => {
             steps={invoiceProcessSteps}
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
-            isStepEnded={[INVOICE_STATUS.invoiced, INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(invoiceData?.status)}
+            isStepEnded={[INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(invoiceData?.status)}
           />
           <ContentFullScreen title={invoiceProcessStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
             {currentStep === 0 && invoiceData && (
