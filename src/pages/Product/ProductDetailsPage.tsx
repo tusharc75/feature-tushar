@@ -383,7 +383,7 @@ const ProductDetailsPage = () => {
                                 <Box display={'flex'} justifyContent="space-between" className={'form-head-v1'}>
                                   <Box display="flex" alignItems="center">
                                     <Typography style={{ fontWeight: '600' }} className="form-label-style-v1" variant="subtitle2">
-                                      {routes?.productInventory?.title}
+                                      {productData?.expenseItem ? 'Expense Quantity' : routes?.productInventory?.title}
                                     </Typography>
                                     <Box pl={1} display="flex">
                                       <IconButton
@@ -426,7 +426,7 @@ const ProductDetailsPage = () => {
                                       </>
                                     ) : (
                                       <Box textAlign="center" padding={2} minHeight={10}>
-                                        <Typography>No {routes.productInventory.title} Found</Typography>
+                                        <Typography>No Record Found</Typography>
                                       </Box>
                                     )}
                                     {permissions?.product?.isUpdate &&

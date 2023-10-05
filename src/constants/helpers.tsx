@@ -336,12 +336,13 @@ export const sidebarResource = {
   driverMaster: 'Driver Master',
   trailerMaster: 'Trailer Master',
   iotDataPoints: 'Iot Data Points',
+  accountsReceivable: 'Accounts Receivable',
   iotDataPointsCategory: 'Iot Data Points Category',
   deviceTemplates: 'Device Templates',
   workStations: 'Work Stations',
   deviceTemplateAlert: 'Device Template Alert',
   chartOfAccount: 'Chart Of Account',
-  flash : 'Flash'
+  flash: 'Flash'
 };
 
 export const primaryFields = {
@@ -470,7 +471,8 @@ export const RESOURCE_LABEL = {
   workStations: 'Work Stations',
   deviceTemplateAlert: 'Device Template Alert',
   chartOfAccount: 'Chart Of Account',
-  flash : 'Flash'
+  flash: 'Flash',
+  accountsReceivable: 'Accounts Receivable'
 };
 
 export const CHILD_RESOURCE = {
@@ -2034,6 +2036,13 @@ export const REPAIR_PROCESS_STATUS = {
   failed: 'Failed'
 } as const;
 
+
+export const PLANNING_STATUS = {
+  open: 'Open',
+  converted: 'Converted'
+} as const;
+
+
 export const asyncForEach = async (array: any[], callback: (arrayIndex: any, i: number, array: any[]) => Promise<any>) => {
   for (let index = 0; index < array.length; index++) {
     await callback(array[index], index, array);
@@ -2084,7 +2093,8 @@ export const ACTIVITY_RESOURCE = {
   user: 'user',
   marketSegment: 'marketSegment',
   budget: 'budget',
-  irtTicket: 'irtTicket'
+  irtTicket: 'irtTicket',
+  accountsReceivable: 'accountsReceivable'
 };
 
 export const LOG_RESOURCE = {

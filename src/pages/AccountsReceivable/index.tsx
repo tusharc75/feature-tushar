@@ -1,4 +1,4 @@
-import { Box, Button, Chip, Grid, IconButton, Menu, MenuItem, Tooltip } from '@material-ui/core';
+import { Button, IconButton, Menu, MenuItem, Tooltip } from '@material-ui/core';
 import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
@@ -11,113 +11,86 @@ import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser }
 import { useData } from 'src/StateProvider/Provider';
 import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import { MdAdd } from 'react-icons/md';
+import { MdAdd, MdOutlineFilterAlt } from 'react-icons/md';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import axiosInstance from 'src/axios/axiosInstance';
-import {
-  PLANNING_STATUS,
-  getLocalStorageArrayData,
-  gridLoadingTimeout,
-  isObjectEmpty,
-  prepareDataForGrid,
-  removeLocalStorage,
-  sidebarResource
-} from 'src/constants/helpers';
-import { Link } from 'react-router-dom';
+import { getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, removeLocalStorage, sidebarResource } from 'src/constants/helpers';
+import { useHistory } from 'react-router-dom';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import ManagePlanning from './ManagePlanning';
 import styles from '../Leads/Header.module.scss';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import AutorenewIcon from '@material-ui/icons/Autorenew';
-import VisibilityIcon from '@material-ui/icons/Visibility';
-import { useHistory } from 'react-router-dom';
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import queryString from 'query-string';
+import ManageAccountsReceivale from './ManageAccountsReceivable';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import MobileFilterDialog, { DisplayFiltersForMobile } from 'src/components/MobileFilterDialog';
+import MobileSortDialog from 'src/components/MobileSortDialog';
+import { TbArrowsSort } from 'react-icons/tb';
 
-const Planning = () => {
-  const PlanningType = [
-    {
-      key: `My ${routes?.planning.title}`,
-      value: 1
-    },
-    {
-      key: `All ${routes?.planning.title}`,
-      value: 2
-    }
-  ];
-
-  const renderedFrom = camelCase(routes?.planning.title);
+const AccountsReceivable = () => {
+  const renderedFrom = camelCase(routes?.accountsReceivable.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const toastConfig = useContext(CustomToastContext);
-  const history = useHistory();
-
   const {
     state: { permissions, selectedEntity, user }
   }: any = useData();
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
-  const { type }: any = queryString.parse(history.location.search);
-
-  const [selectedPlanningType, setSelectedPlanningType] = useState(history.location.state);
-  const [planningId, setPlanningId] = useState(null);
+  const [accountReceivableId, setAccountReceivableId] = useState(null);
   const [open, setOpen] = useState({ open: false, isClone: false });
   const [anchorEl, setAnchorEl] = useState(null);
+  const history = useHistory();
+  const { type }: any = queryString.parse(history.location.search);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
-  const [showConverConfirmBox, setShowConverConfirmBox] = useState({ open: false, id: null, planningNumber: '' });
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [columns, setColumns] = useState([]);
   const [gridApi, setGridApi] = useState(null);
-  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
   const { getColumnData } = useColumns();
+  const { isOffline } = useContext(CustomOfflineContext);
 
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource?.planning}`)
-      .then(({ data: { data } }) => {
-        let columns = [];
-        let rendererNames = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.planningDetail.path, true);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName);
-            }
-          }
-        });
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent,
-          actionsRenderer: ActionsRenderer
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
-        columns = [...columns, ...getStaticFields()];
-        setColumns([...columns]);
-      });
+  const fetchGridColumns = async () => {
+    let data;
+    const response = await axiosInstance().get(`/field?resource=${sidebarResource?.accountsReceivable}`);
+    data = response?.data?.data;
+    let columns = [];
+    let rendererNames = [];
+    data.forEach((o) => {
+      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.accountsReceivable.path, true);
+      if (currentColumn !== null) {
+        columns = [...columns, currentColumn?.columnData];
+        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+          rendererNames.push(currentColumn?.rendererName);
+        }
+      }
+    });
+    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
+    tempFrameworkComponent = {
+      ...tempFrameworkComponent,
+      actionsRenderer: ActionsRenderer
+    };
+    setFrameWorkComponent({ ...tempFrameworkComponent });
+    columns = [...columns, ...getStaticFields()];
+    setColumns([...columns]);
   };
 
-  const fetchData = () => {
+  const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-
     if (gridApi) {
       gridApi.setRowData([]);
     }
     axiosInstance()
-      .get(`${routes?.planning.path}${queryString}`)
-      .then(({ data: { data } }) => {
-        let count = data?.count;
-        let rows = data?.data?.map((u: any) => {
+      .get(`${routes?.accountsReceivable.path}${queryString}`)
+      .then(({ data: { data, count } }) => {
+        let rows = data?.map((u: any) => {
           let finalObject: any = prepareDataForGrid(u);
-          finalObject['canDelete'] = permissions?.planning?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;
+          finalObject['canDelete'] = permissions?.fieldTicket?.isDelete && u?.canDelete;
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions?.planning?.isUpdate;
+          finalObject['allowedToEdit'] = permissions?.accountsReceivable?.isUpdate;
           return {
             ...finalObject
           };
@@ -126,18 +99,17 @@ const Planning = () => {
           dispatch({
             type: 'initialize',
             data: [...dataRows, ...rows],
-            count: count,
-            selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
+            count: count
+            // selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
           });
         } else {
           dispatch({
             type: 'initialize',
             data: rows,
-            count: count,
-            selectedRecords: rows.filter((f) => f.isChecked === true)
+            count: count
+            // selectedRecords: rows.filter((f) => f.isChecked === true)
           });
         }
-        dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
@@ -145,28 +117,13 @@ const Planning = () => {
   };
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = `?page=${page}&limit=${limit}`;
-
-    if (isExport) {
-      deepFilter = `?`;
-    }
-
-    if (selectedType === 1) {
-      deepFilter = deepFilter + `&myRecords=1`;
-    }
+    let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
 
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
-
-    if (selectedPlanningType) {
-      deepFilters.push({
-        field: 'type',
-        term: selectedPlanningType
-      });
-    }
 
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
@@ -204,107 +161,53 @@ const Planning = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-  const handleConvert = () => {
-    axiosInstance()
-      .post(`${routes?.planning?.path}/convert-planning`, { id: showConverConfirmBox?.id })
-      .then(({ data }) => {
-        setShowConverConfirmBox({ open: false, id: null, planningNumber: '' });
-        fetchData();
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data?.message
-        });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  };
-
   const ActionsRenderer = (params) => (
     <Fragment>
-      <HtmlTooltip title={permissions?.planning?.isCreate ? 'Clone' : 'You do not have permission to clone/create'}>
-        <span>
+      <Tooltip title="Clone">
+        <IconButton
+          size="small"
+          aria-label="Clone"
+          onClick={() => {
+            setAccountReceivableId(params.data.id);
+            setOpen({ open: true, isClone: true });
+          }}
+        >
+          <FileCopyIcon fontSize="small" color="primary" />
+        </IconButton>
+      </Tooltip>
+
+      {params?.data?.canDelete ? (
+        <Tooltip title="Delete">
           <IconButton
-            disabled={permissions?.planning?.isCreate ? false : true}
-            aria-label="Clone"
-            size="small"
-            onClick={() => {
-              setPlanningId(params.data.id);
-              setOpen({ open: true, isClone: true });
-            }}
-          >
-            <FileCopyIcon fontSize="small" color={permissions?.planning?.isCreate ? 'primary' : 'disabled'} />
-          </IconButton>
-        </span>
-      </HtmlTooltip>
-      {params?.data?.status === PLANNING_STATUS.converted ? (
-        <HtmlTooltip title={`View Converted ${params?.data?.type}`}>
-          <span>
-            <IconButton
-              aria-label="Convert"
-              onClick={() => {
-                let newPath = '';
-                if (params?.data?.type === 'Rental Job') {
-                  newPath = `${routes.rentalManagementDetail.path}/${params?.data?.rentalJobId}`;
-                }
-                if (params?.data?.type === 'Sales Order') {
-                  newPath = `${routes.salesOrderDetail.path}/${params?.data?.salesOrderId}`;
-                }
-                if (params?.data?.type === 'Field Service Order') {
-                  newPath = `${routes?.fieldServiceOrderDetail.path}/${params?.data?.serviceOrderId}`;
-                }
-                if (newPath) {
-                  window.open(newPath, '_blank');
-                }
-              }}
-            >
-              <VisibilityIcon fontSize="small" color={'primary'} />
-            </IconButton>
-          </span>
-        </HtmlTooltip>
-      ) : (
-        <HtmlTooltip title={permissions?.planning?.isUpdate ? 'Convert' : 'You do not have permission to convert'}>
-          <span>
-            <IconButton
-              disabled={permissions?.planning?.isUpdate ? false : true}
-              aria-label="Convert"
-              onClick={() => {
-                setShowConverConfirmBox({ open: true, id: params?.data?._id, planningNumber: params?.data?.planningNumber });
-              }}
-            >
-              <AutorenewIcon fontSize="small" color={permissions?.planning?.isUpdate ? 'primary' : 'disabled'} />
-            </IconButton>
-          </span>
-        </HtmlTooltip>
-      )}
-      <HtmlTooltip title={params?.data?.canDelete ? 'Delete' : 'You do not have permission to delete'}>
-        <span>
-          <IconButton
-            disabled={params?.data?.canDelete ? false : true}
             aria-label="Delete"
-            size="small"
             onClick={() => {
               setDeleteRecord(params.data);
               setShowDeleteConfirmBox(true);
             }}
           >
-            <DeleteIcon fontSize="small" color={params?.data?.canDelete ? 'error' : 'disabled'} />
+            <DeleteIcon fontSize="small" color="error" />
           </IconButton>
-        </span>
-      </HtmlTooltip>
+        </Tooltip>
+      ) : (
+        <Tooltip className="cursor-stop" title="You do not have permission to delete">
+          <IconButton aria-label="Delete">
+            <DeleteIcon fontSize="small" color="disabled" />
+          </IconButton>
+        </Tooltip>
+      )}
     </Fragment>
   );
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     let ids = [];
     if (deleteRecord) {
       ids.push(deleteRecord._id);
     } else {
       ids = selectedRecords.map((m) => m._id);
     }
+
     axiosInstance()
-      .put(`${routes?.planning?.path}/remove`, { ids: ids })
+      .put(`${routes?.accountsReceivable?.path}/remove`, { ids: ids })
       .then(({ data }) => {
         removeLocalStorage(localStorageSelectedRecords);
         fetchData();
@@ -325,28 +228,38 @@ const Planning = () => {
     fetchGridColumns();
   }, []);
 
-  const onTypeChange = (event, type) => {
-    dispatch({ type: 'setPage', page: 0 });
-    const value = PlanningType.find((d) => d.key === type).value;
-    setSelectedType(value);
-    history.push(`?type=${value}`);
-  };
-
   useEffect(() => {
     fetchData();
-  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedType, selectedPlanningType]);
+  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, isOffline]);
+
+  const [isOpenDialog, setisOpenDialog] = useState(false);
+  const [openSort, setOpenSort] = useState(false);
+
+  const handleOpen = () => {
+    setisOpenDialog(true);
+  };
+
+  const handleClose = () => {
+    setisOpenDialog(false);
+  };
+
+  const handleClickOpen = () => {
+    setOpenSort(true);
+  };
+
+  const handleClickClose = () => {
+    setOpenSort(false);
+  };
 
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: routes.planning.title }]} />
+        <CustomBreadCrumbs routes={[{ title: routes.accountsReceivable.title }]} />
         <ImportExportLinks
-          permissions={permissions?.planning}
-          module="planning"
-          api={'planning'}
-          afterImportCompleted={() => {
-            fetchData();
-          }}
+          permissions={permissions.accountsReceivable}
+          module="accountsReceivable"
+          api={'accounts-receivable'}
+          afterImportCompleted={fetchData}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
@@ -365,59 +278,63 @@ const Planning = () => {
       <CustomContainer>
         <div className="header-panel">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className={'d-flex align-items-center gap-1'}>
-              <ToggleButtonGroup
-                size="small"
-                className="align-items-center gap-1"
-                value={PlanningType[selectedType - 1].key}
-                exclusive
-                onChange={onTypeChange}
-              >
-                {PlanningType.map((k, index) => {
-                  return (
-                    <ToggleButton value={k.key} key={index}>
-                      {k.key}
-                    </ToggleButton>
-                  );
-                })}
-              </ToggleButtonGroup>
-              {permissions?.planningView?.isRead && (
-                <Box ml={1}>
-                  <ToggleButtonGroup size="small">
-                    <ToggleButton
-                      onClick={() => {
-                        history.push({
-                          pathname: routes.planningView.path,
-                          state: {
-                            resource: sidebarResource?.planning
-                          }
-                        });
-                      }}
-                    >
-                      <span>{`Calendar`}</span>
-                    </ToggleButton>
-                  </ToggleButtonGroup>
-                </Box>
-              )}
-              {selectedPlanningType && (
-                <Chip
-                  className="ml-3"
-                  color="primary"
-                  label={'Type: Rental Job'}
-                  onDelete={() => {
-                    setSelectedPlanningType(null);
-                  }}
-                />
+            <div className={'flex justify-between align-items-center gap-1 w-full'}>
+              {isMobile && !isTablet && (
+                <div className="flex flex-wrap items-center gap-1 justify-end">
+                  <IconButton
+                    size="small"
+                    className={'mobileIconButton secondary'}
+                    onClick={handleClickOpen}
+                    id="demo-customized-button"
+                    aria-controls="demo-customized-menu"
+                    aria-haspopup="true"
+                    aria-expanded={open ? 'true' : undefined}
+                    style={isTablet ? { marginLeft: '50px' } : {}}
+                  >
+                    <TbArrowsSort className="rotate-90" size={16} />
+                  </IconButton>
+
+                  <MobileSortDialog
+                    isOpen={openSort}
+                    handleClose={handleClickClose}
+                    contentPart={''}
+                    secHeading={['Sort Repair Job']}
+                    columns={columns}
+                    dispatch={dispatch}
+                  />
+
+                  <IconButton
+                    size="small"
+                    onClick={handleOpen}
+                    id="demo-customized-button"
+                    aria-controls="demo-customized-menu"
+                    aria-haspopup="true"
+                    aria-expanded={open ? 'true' : undefined}
+                    className={'mobileIconButton secondary'}
+                  >
+                    <MdOutlineFilterAlt size={16} />
+                  </IconButton>
+                  <MobileFilterDialog
+                    isOpen={isOpenDialog}
+                    handleClose={handleClose}
+                    contentPart={''}
+                    columns={columns}
+                    dispatch={dispatch}
+                    title={routes?.repairJob?.title}
+                    filters={filters}
+                    resource={sidebarResource.accountsReceivable}
+                  />
+                </div>
               )}
             </div>
             <div className="flex flex-wrap gap-[8px]  justify-end">
               <SearchBox onChange={handleSearch} className={styles.search_box_input} size="small" value={search} />
               <div className="flex gap-[8px] flex-wrap items-center">
-                {permissions?.planning?.isCreate && (
+                {permissions?.accountsReceivable.isCreate && (
                   <Button
-                    className={'no-shadow'}
+                    className={`no-shadow`}
                     onClick={() => {
-                      setPlanningId(null);
+                      setAccountReceivableId(null);
                       setOpen({ open: true, isClone: false });
                     }}
                     variant={'contained'}
@@ -428,7 +345,7 @@ const Planning = () => {
                     Add
                   </Button>
                 )}
-                {permissions?.planning?.isDelete && (
+                {permissions?.accountsReceivable?.isDelete && (
                   <>
                     <Button
                       variant={'outlined'}
@@ -437,7 +354,7 @@ const Planning = () => {
                       onClick={openActions}
                       disabled={selectedRecords.length ? false : true}
                       aria-controls="action-menu"
-                      className={`new-dropdown-v1`}
+                      className={` new-dropdown-v1`}
                       endIcon={<ExpandMore />}
                     >
                       Actions
@@ -455,11 +372,15 @@ const Planning = () => {
                       onClose={closeActions}
                     >
                       <MenuItem
-                        disabled={!((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length)}
+                        disabled={
+                          !(
+                            (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length
+                          )
+                        }
                         onClick={() => {
                           closeActions();
-                          if (selectedRecords.length === 1) {
-                            setDeleteRecord(selectedRecords[0]);
+                          {
+                            selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
                           }
                           setShowDeleteConfirmBox(true);
                         }}
@@ -471,25 +392,24 @@ const Planning = () => {
                 )}
               </div>
             </div>
+            <DisplayFiltersForMobile resource={sidebarResource.accountsReceivable} />
           </div>
         </div>
         {Object.keys(frameWorkComponent).length > 0 ? (
           isMobile && !isTablet ? (
             <CustomSwipableList
-              key={selectedType}
               allowSelection={true}
               allowSwipe={true}
-              permissions={permissions?.planning}
+              permissions={permissions.accountsReceivable}
               primaryField={columns?.find((d) => d.primaryField)}
               onClick={(data) => {
-                setPlanningId(data.id);
-                setOpen({ open: true, isClone: false });
+                history.push(`${routes.accountsReceivable.path}/${data.id}`);
               }}
               dataRows={dataRows}
               selectedRecords={selectedRecords}
               dispatch={dispatch}
               onEdit={(data) => {
-                setPlanningId(data.id);
+                setAccountReceivableId(data.id);
                 setOpen({ open: true, isClone: false });
               }}
               extraParamsToCheckDelete={true}
@@ -505,7 +425,7 @@ const Planning = () => {
               onCreate={false}
               showClone={true}
               onClone={(data) => {
-                setPlanningId(data.id);
+                setAccountReceivableId(data.id);
                 setOpen({ open: true, isClone: true });
               }}
               chips={[]}
@@ -528,14 +448,14 @@ const Planning = () => {
               refreshGrid={fetchData}
               showOnlyShowFilteredRecordSwitch={true}
               showFilters={true}
-              resource={sidebarResource.planning}
+              resource={sidebarResource.accountsReceivable}
             />
           )
         ) : null}
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete planning  ${deleteRecord?.planningNumber || ''} ?`}
+            message={`Are you sure you want to delete Account Receivable  ${deleteRecord?.arNumber || ''} ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
@@ -543,19 +463,9 @@ const Planning = () => {
             onOk={handleDelete}
           />
         )}
-        {showConverConfirmBox.open && (
-          <ConfirmationDialog
-            open={true}
-            message={`Are you sure you want to convert planning  ${showConverConfirmBox?.planningNumber} ?`}
-            onClose={() => {
-              setShowConverConfirmBox({ open: false, id: null, planningNumber: '' });
-            }}
-            onOk={handleConvert}
-          />
-        )}
         {open?.open && (
-          <ManagePlanning
-            id={planningId}
+          <ManageAccountsReceivale
+            id={accountReceivableId}
             isClone={open?.isClone}
             onClose={() => setOpen({ open: false, isClone: false })}
             onSuccess={() => {
@@ -569,4 +479,4 @@ const Planning = () => {
   );
 };
 
-export default Planning;
+export default AccountsReceivable;
