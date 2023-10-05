@@ -126,8 +126,6 @@ const PlanningDetail = () => {
     setTabValue(newValue);
   };
 
-  console.log(planningData);
-
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
