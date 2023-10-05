@@ -15,6 +15,7 @@ import { MdAdd } from 'react-icons/md';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import axiosInstance from 'src/axios/axiosInstance';
 import {
+  PLANNING_STATUS,
   getLocalStorageArrayData,
   gridLoadingTimeout,
   isObjectEmpty,
@@ -114,7 +115,7 @@ const Planning = () => {
         let count = data?.count;
         let rows = data?.data?.map((u: any) => {
           let finalObject: any = prepareDataForGrid(u);
-          finalObject['canDelete'] = permissions?.planning?.isDelete && finalObject?.ownerId === user?.user?._id;
+          finalObject['canDelete'] = permissions?.planning?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions?.planning?.isUpdate;
           return {
@@ -237,7 +238,7 @@ const Planning = () => {
           </IconButton>
         </span>
       </HtmlTooltip>
-      {params?.data?.status === 'Closed' ? (
+      {params?.data?.status === PLANNING_STATUS.converted ? (
         <HtmlTooltip title={`View Converted ${params?.data?.type}`}>
           <span>
             <IconButton
@@ -454,16 +455,11 @@ const Planning = () => {
                       onClose={closeActions}
                     >
                       <MenuItem
-                        disabled={
-                          !(
-                            (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length
-                          )
-                        }
+                        disabled={!((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length)}
                         onClick={() => {
                           closeActions();
-                          // eslint-disable-next-line no-lone-blocks
-                          {
-                            selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
+                          if (selectedRecords.length === 1) {
+                            setDeleteRecord(selectedRecords[0]);
                           }
                           setShowDeleteConfirmBox(true);
                         }}

@@ -17,7 +17,7 @@ import Material from './Material';
 import { camelCase } from 'lodash';
 import ManagePlanning from './ManagePlanning';
 import { FaWpforms } from 'react-icons/fa';
-import { ACTIVITY_RESOURCE } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, PLANNING_STATUS } from 'src/constants/helpers';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 
 const PlanningDetail = () => {
@@ -65,6 +65,9 @@ const PlanningDetail = () => {
       var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
       if (user?.role?.selectedEntity?.superAdminAccess) {
         isAllowedToEdit = true;
+      }
+      if (data?.status === PLANNING_STATUS.converted) {
+        isAllowedToEdit = false;
       }
       setAllowedToEdit(isAllowedToEdit);
       setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
@@ -135,13 +138,13 @@ const PlanningDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <>
-              {permissions?.planning?.isUpdate && allowedToEdit && planningData?.status!='Closed' && (
+              {permissions?.planning?.isUpdate && allowedToEdit && planningData?.status != PLANNING_STATUS.converted && (
                 <Button
                   variant={isMobile && !isTablet ? 'text' : 'contained'}
                   className="btn-outline-v1"
-                  onClick={() => {setShowConverConfirmBox(true)}}
+                  onClick={() => { setShowConverConfirmBox(true) }}
                 >
-                  {isMobile && !isTablet ? <BiEdit size={20} /> : 'Convert'}
+                  {'Convert'}
                 </Button>
               )}
               {permissions?.planning?.isUpdate && allowedToEdit && (
@@ -153,13 +156,13 @@ const PlanningDetail = () => {
                   {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                 </Button>
               )}
-              {permissions?.planning?.isDelete && allowedToDelete && (
+              {permissions?.planning?.isDelete && allowedToDelete && planningData?.canDelete && (
                 <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
               )}
-            <ActivityButton 
-              referenceId={planningData?._id} 
-              resource={ACTIVITY_RESOURCE.planning} 
-              resourceLabel={planningData?.planningNumber}
+              <ActivityButton
+                referenceId={planningData?._id}
+                resource={ACTIVITY_RESOURCE.planning}
+                resourceLabel={planningData?.planningNumber}
               />
             </>
           </Box>
@@ -232,13 +235,13 @@ const PlanningDetail = () => {
         />
       )}
       {showConverConfirmBox && (
-          <ConfirmationDialog
-            open={true}
-            message={`Are you sure you want to convert planning  ${planningData?.planningNumber} ?`}
-            onClose={() => {setShowConverConfirmBox(false)}}
-            onOk={handleConvert}
-          />
-        )}
+        <ConfirmationDialog
+          open={true}
+          message={`Are you sure you want to convert planning  ${planningData?.planningNumber} ?`}
+          onClose={() => { setShowConverConfirmBox(false) }}
+          onOk={handleConvert}
+        />
+      )}
       {openUpdateDialog && (
         <ManagePlanning
           id={id}

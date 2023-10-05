@@ -9,6 +9,7 @@ import { CommonRenderer, DateTimeRenderer } from '../../../components/AgGridComp
 import { Link } from 'react-router-dom';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { camelCase } from 'lodash';
+import { sidebarResource } from 'src/constants/helpers';
 
 const AssetHistory = ({ id }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -139,6 +140,16 @@ const AssetHistory = ({ id }) => {
             className="link"
             title={params.value}
             to={`${routes.quotationDetail.path}/${params.data.referenceId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {params.value}
+          </Link>
+        ) : params.data?.type === sidebarResource.planning ? (
+          <Link
+            className="link"
+            title={params.value}
+            to={`${routes.planningDetail.path}/${params.data.referenceId}`}
             target="_blank"
             rel="noopener noreferrer"
           >
