@@ -71,7 +71,7 @@ const CalendarView = ({ product, warehouse, storageLocation }) => {
       return {
         ...d,
         id: d?._id,
-        title: d?.isFinalInventory ? `Final Inventory (${d.finalInventory})` : `${d?.type === 'credit' ? '↑' : '↓'} ${d?.referenceType} (${d?.qty})`,
+        title: d?.isFinalInventory ? `Final Quantity (${d.finalInventory})` : `${d?.type === 'credit' ? '↑' : '↓'} ${d?.referenceType} (${d?.qty})`,
         start: new Date(d.date),
         end: new Date(d.date)
       };
