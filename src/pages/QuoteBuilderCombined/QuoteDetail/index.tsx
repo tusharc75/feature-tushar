@@ -26,7 +26,7 @@ import { BiFoodMenu, BiLayerPlus } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
 import { GiReceiveMoney } from 'react-icons/gi';
 import { HiPencil } from 'react-icons/hi';
-import { MdDelete, MdDeleteSweep } from 'react-icons/md';
+import { MdDelete } from 'react-icons/md';
 import { VscIssueReopened, VscVersions } from 'react-icons/vsc';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
@@ -638,18 +638,6 @@ export default function QuoteDetail() {
           <Box className="control-buttons-v1">
             {quoteData ? (
               <>
-                {permissions[sidebarResource.quoteBuilder]?.isCreate ? (
-                  <Button variant="text" size="small" className="mr-1" startIcon={<BiLayerPlus />} onClick={handleOpenCloneDialog}>
-                    Clone
-                  </Button>
-                ) : null}
-                {allowedToEdit && (
-                  <Tooltip title="Edit">
-                    <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className={'btn-outline-v1'} onClick={handleOpenUpdateDialog}>
-                      {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                    </Button>
-                  </Tooltip>
-                )}
                 {processStatus !== 'New' && (
                   <Tooltip title="Quote Summary">
                     <Button
@@ -704,33 +692,11 @@ export default function QuoteDetail() {
                   open={Boolean(anchorEl)}
                   onClose={closeActions}
                 >
-                  {permissions[qbResource].isDelete &&
-                    quoteData?.owner.optionValue &&
-                    user?.user?._id &&
-                    quoteData.owner.optionValue === user.user._id && (
-                      <MenuItem onClick={() => setShowConfirmBox(true)}>
-                        <div className="flex gap-3 items-center">
-                          <MdDelete />
-                          <Typography variant="inherit">Delete Quote</Typography>
-                        </div>
-                      </MenuItem>
-                    )}
-
-                  {currentVersion !== 1 && ifQuoteApproved.approved === false && (
-                    <MenuItem
-                      disabled={
-                        !allowedToEdit ||
-                        deletingDOA ||
-                        loading ||
-                        (DOAneeded
-                          ? DOASteps.findIndex((d) => d?.key === processStatus) > 1
-                          : OtherSteps.findIndex((d) => d?.key === processStatus) > 1)
-                      }
-                      onClick={deleteVersion}
-                    >
+                  {allowedToEdit && (
+                    <MenuItem onClick={handleOpenUpdateDialog}>
                       <div className="flex gap-3 items-center">
-                        <MdDeleteSweep />
-                        <Typography variant="inherit">Delete Version-{currentVersion}</Typography>
+                        <HiPencil />
+                        <Typography variant="inherit">Edit Quote</Typography>
                       </div>
                     </MenuItem>
                   )}
@@ -767,14 +733,36 @@ export default function QuoteDetail() {
                       </div>
                     </MenuItem>
                   )}
-                  {allowedToEdit && (
-                    <MenuItem onClick={handleOpenUpdateDialog}>
+                  {currentVersion !== 1 && ifQuoteApproved.approved === false && (
+                    <MenuItem
+                      disabled={
+                        !allowedToEdit ||
+                        deletingDOA ||
+                        loading ||
+                        (DOAneeded
+                          ? DOASteps.findIndex((d) => d?.key === processStatus) > 1
+                          : OtherSteps.findIndex((d) => d?.key === processStatus) > 1)
+                      }
+                      onClick={deleteVersion}
+                    >
                       <div className="flex gap-3 items-center">
-                        <HiPencil />
-                        <Typography variant="inherit">Edit Quote</Typography>
+                        <MdDelete />
+                        <Typography variant="inherit">Delete Version-{currentVersion}</Typography>
                       </div>
                     </MenuItem>
                   )}
+
+                  {permissions[qbResource].isDelete &&
+                    quoteData?.owner.optionValue &&
+                    user?.user?._id &&
+                    quoteData.owner.optionValue === user.user._id && (
+                      <MenuItem onClick={() => setShowConfirmBox(true)}>
+                        <div className="flex gap-3 items-center">
+                          <MdDelete />
+                          <Typography variant="inherit">Delete Quote</Typography>
+                        </div>
+                      </MenuItem>
+                    )}
                 </Menu>
                 {DOAApproved && versionStatus === 'Sent for DOA' && (
                   <>

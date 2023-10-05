@@ -360,7 +360,7 @@ export default function QuoteProcess(props) {
     fetchUserEmails();
     if (processStatus === QUOTE_PROCESS_STATUS.doaProcess) {
       const currentVersionStatus = quoteData?.versions[currentVersion]?.status;
-      if (currentVersionStatus.includes('Accepted') && DOAneeded) {
+      if (currentVersionStatus.includes('Accepted')) {
         setNextStep(true);
       }
       else {
