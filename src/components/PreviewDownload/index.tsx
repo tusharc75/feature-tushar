@@ -2,11 +2,12 @@ import { Box, Button, Dialog } from '@material-ui/core';
 import { useContext, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { AiFillFilePdf } from 'react-icons/ai';
-import { IoMdDownload } from 'react-icons/io';
+
+import { MdEmail } from 'react-icons/md';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { DownloadIcon, ExportIcon } from 'src/assets/svg/svgIcons';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomDialogTransition, downloadExcel } from 'src/constants/helpers';
-import { MdEmail } from 'react-icons/md';
 import { CreateEmail } from '../Activity/Email/CreateEmail';
 import { PreviewDialog } from './PreviewDialog';
 
@@ -33,7 +34,10 @@ function PreviewDownload({
           fieldLabel: d?.Header || d?.headerName,
           fieldName: d?.accessor || d?.field
         };
-      })?.map((d) => { return { ...d, fieldName: d.fieldName === 'qtyDisplay' ? 'qty' : d.fieldName } }) || [];
+      })
+      ?.map((d) => {
+        return { ...d, fieldName: d.fieldName === 'qtyDisplay' ? 'qty' : d.fieldName };
+      }) || [];
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
@@ -46,30 +50,32 @@ function PreviewDownload({
   const [emailAttachments, setEmailAttachments] = useState([]);
 
   const handleViewPdf = (type, pdfType, visibleColumns) => {
-
     setLoadingType(pdfType);
 
-    let showColumns = allColumn?.filter((d) => visibleColumns?.includes(d?.fieldLabel)).map((d) => { return d?.fieldName; });
+    let showColumns = allColumn
+      ?.filter((d) => visibleColumns?.includes(d?.fieldLabel))
+      .map((d) => {
+        return d?.fieldName;
+      });
 
-    let api = ''
+    let api = '';
     if (type === 'Export') {
       api = `/excel/${referenceId}?resource=${resource}&columns=${showColumns}`;
-    }
-    else if (pdfType === 'Detail') {
+    } else if (pdfType === 'Detail') {
       api = `/pdf/${referenceId}/detail?resource=${resource}&columns=${showColumns}`;
-    }
-    else {
+    } else {
       api = `/pdf/${referenceId}?resource=${resource}&columns=${showColumns}`;
     }
 
     if (extraQueryParams) {
       for (const key in extraQueryParams) {
-        api = `${api}&${key}=${extraQueryParams[key]}`
+        api = `${api}&${key}=${extraQueryParams[key]}`;
       }
     }
 
     const responseType = type === 'Export' ? 'arraybuffer' : 'blob';
-    axiosInstance().get(api, { responseType: responseType })
+    axiosInstance()
+      .get(api, { responseType: responseType })
       .then((response) => {
         setLoadingType(null);
         setLoading(false);
@@ -86,15 +92,13 @@ function PreviewDownload({
           link.setAttribute('download', `${resource}.pdf`);
           document.body.appendChild(link);
           link.click();
-        }
-        else if (type === 'Preview') {
+        } else if (type === 'Preview') {
           const blobData = new Blob([response.data], { type: 'application/pdf' });
           const fileURL = URL.createObjectURL(blobData);
           const pdfWindow = window.open();
           pdfWindow.location.href = fileURL;
           toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
-        }
-        else {
+        } else {
           const blobData = new Blob([response.data], { type: 'application/pdf' });
           generateBase64forFile(blobData, 'pdf', pdfType);
         }
@@ -150,33 +154,32 @@ function PreviewDownload({
             color="primary"
             type="button"
             size="small"
-            startIcon={isMobile && !isTablet ? '' : <IoMdDownload />}
+            startIcon={isMobile && !isTablet ? '' : <DownloadIcon />}
             disabled={loadingType === 'download'}
             onClick={(e) => {
               setDownlodingFile('Download');
               setShowColumnsDialog({ open: true, type: 'PDF' });
             }}
           >
-            {isMobile && !isTablet ? <IoMdDownload size={20} /> : loadingType === 'download' ? 'Please wait...' : 'Download'}
+            {isMobile && !isTablet ? <DownloadIcon size={20} /> : loadingType === 'download' ? 'Please wait...' : 'Download'}
           </Button>
-          {
-            isExcelDownload && (
-              <Button
-                className="btn-outline-v1"
-                variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                color="primary"
-                type="button"
-                size="small"
-                startIcon={isMobile && !isTablet ? '' : <IoMdDownload />}
-                disabled={loadingType === 'excel'}
-                onClick={(e) => {
-                  setDownlodingFile('Export');
-                  setShowColumnsDialog({ open: true, type: 'Excel' });
-                }}
-              >
-                {isMobile && !isTablet ? <IoMdDownload size={20} /> : loadingType === 'export' ? 'Please wait...' : 'Export To Excel'}
-              </Button>
-            )}
+          {isExcelDownload && (
+            <Button
+              className="btn-outline-v1"
+              variant={isMobile && !isTablet ? 'text' : 'outlined'}
+              color="primary"
+              type="button"
+              size="small"
+              startIcon={isMobile && !isTablet ? '' : <ExportIcon />}
+              disabled={loadingType === 'excel'}
+              onClick={(e) => {
+                setDownlodingFile('Export');
+                setShowColumnsDialog({ open: true, type: 'Excel' });
+              }}
+            >
+              {isMobile && !isTablet ? <ExportIcon /> : loadingType === 'export' ? 'Please wait...' : 'Export To Excel'}
+            </Button>
+          )}
           {isSendEmail && (
             <Button
               variant={isMobile && !isTablet ? 'text' : 'outlined'}
@@ -229,7 +232,7 @@ function PreviewDownload({
           maxWidth="md"
           onClose={() => {
             setSendEmail(false);
-            setEmailAttachments([])
+            setEmailAttachments([]);
             setFullScreen(false);
           }}
           fullWidth
@@ -238,12 +241,12 @@ function PreviewDownload({
             generatingFile={false}
             handleClose={() => {
               setSendEmail(false);
-              setEmailAttachments([])
+              setEmailAttachments([]);
               setFullScreen(false);
             }}
             fetchData={() => {
               setSendEmail(false);
-              setEmailAttachments([])
+              setEmailAttachments([]);
             }}
             id={referenceId}
             isQuoteBuilder={true}
