@@ -1,36 +1,32 @@
-import { useEffect, useState, useContext, useReducer, Fragment } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import ThumbUpIcon from '@material-ui/icons/ThumbUp';
 import ThumbDownIcon from '@material-ui/icons/ThumbDown';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { Box, Button, Dialog, Grid, IconButton, Paper, Tooltip, Typography, useMediaQuery } from '@material-ui/core';
-import { GiAbstract055, GiVintageRobot } from 'react-icons/gi';
-import { AiOutlineEye } from 'react-icons/ai';
+import { Box, Button, Dialog, Grid, IconButton, Tooltip, Typography, useMediaQuery } from '@material-ui/core';
+import { GiVintageRobot } from 'react-icons/gi';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import Activity from '../../components/Activity';
 import PerformanceTuningImg from '../../assets/PerformanceTuning.png';
 import {
   CustomDialogTransition,
   formatAmountWithCurrency,
-  gridLoadingTimeout,
-  gridPageSizes,
   defaultActivityShow,
   quoteBuilder,
-  ACTIVITY_RESOURCE
+  sidebarResource
 } from '../../constants/helpers';
-import { camelCase } from 'lodash';
 import { useData } from '../../StateProvider/Provider';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import { isMobile, isTablet } from 'react-device-detect';
 import DOAReasonDialog from './DOAReasonDialog';
-import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import ProductBuilder from '../../components/productBuilder';
-import Loader from '../../components/Loader';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import PreviewDownload from 'src/components/PreviewDownload';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const DOAApproval = () => {
+
   const {
     state: {
       user: { user: currentUser }
@@ -41,12 +37,15 @@ const DOAApproval = () => {
   const {
     state: { permissions }
   }: any = useData();
+
   const { id } = useParams();
+
   const isSmallScreen = useMediaQuery('(max-width:1300px)');
+
   const [QData, setQData] = useState(null);
+  const [versionData, setVersionData] = useState(null);
+
   const [needDOA, setneedDOA] = useState(false);
-  const [PDFName, setPDFName] = useState('');
-  const [buttontext, setButton] = useState('Accept');
   const [QStatus, setQStatus] = useState(true);
   const [showAIDialog, setShowAIDialog] = useState(false);
   const [showQuoteStatusChangeDialog, setShowQuoteStatusChangeDialog] = useState(false);
@@ -61,11 +60,9 @@ const DOAApproval = () => {
   const [productBuilderId, setProductBuilderId] = useState(null);
   const [isAddNewProduct, setIsAddNewProduct] = useState(false);
   const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);
-  var DOALimit = 0;
-  var DOAsetup = false;
-  const handleActivityHideShow = () => {
-    setActivityShow(!showActivity);
-  };
+  const [columns, setColumnData] = useState([]);
+
+
   useEffect(() => {
     if (id) {
       fetchQuote();
@@ -82,8 +79,8 @@ const DOAApproval = () => {
     axiosInstance()
       .get('/quote-builder/getQuotefromDOAId/' + id)
       .then(({ data }) => {
-        setPDFName(data.PDF);
         setQuoteData(data.quote);
+        setVersionData(data?.version)
         setProductBuilderId(data?.version?.productBuilderId);
         setQData(data);
         if (data?.version?.status !== 'Sent for DOA') {
@@ -95,21 +92,6 @@ const DOAApproval = () => {
       });
   };
 
-  const ViewQuote = () => {
-    axiosInstance()
-      .get('/user/download?fileName=' + PDFName, {
-        responseType: 'blob'
-      })
-      .then(({ data }) => {
-        const file = new Blob([data], { type: 'application/pdf' });
-        const fileURL = URL.createObjectURL(file);
-        const pdfWindow = window.open();
-        pdfWindow.location.href = fileURL;
-      })
-      .catch((err) => {
-        setToastConfig(err);
-      });
-  };
 
   const QuoteStatusChange = (accepted, signature, comment) => {
     if (accepted !== 'Rejected') {
@@ -162,7 +144,7 @@ const DOAApproval = () => {
         data['commissionPercentPerUnit'] === null || data['commissionPercentPerUnit'] === undefined ? 0 : data['commissionPercentPerUnit'],
       [`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]:
         data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === null ||
-        data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
+          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
           ? 0
           : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]
     }));
@@ -210,18 +192,18 @@ const DOAApproval = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            <Tooltip title="View" arrow placement="top">
-              <Button
-                onClick={() => ViewQuote()}
-                variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                size="small"
-                // startIcon={isMobile && !isTablet ? null : <AiOutlineEye />}
-                color="primary"
-                className="btn-outline-v1"
-              >
-                {isMobile && !isTablet ? <AiOutlineEye /> : 'View'}
-              </Button>
-            </Tooltip>
+            <PreviewDownload
+              resource={sidebarResource.quoteBuilder}
+              referenceId={quoteData?._id}
+              columns={columns}
+              hideDetailButton={true}
+              extraQueryParams={{ uniqueId: versionData?._id }}
+              defaultColumns={['productName',
+                'unit',
+                'qty',
+                `salesPricePerUnit_${quoteData?.currency?.toLowerCase()}`,
+                `totalSalesPrice_${quoteData?.currency?.toLowerCase()}`]}
+            />
             <Tooltip title="AI Suggestion" arrow placement="top">
               <IconButton
                 size="small"
@@ -235,7 +217,7 @@ const DOAApproval = () => {
             </Tooltip>
             {QData && QStatus && QData?.DOA.requestTo.find((u) => u === currentUser._id) ? (
               <>
-                <Tooltip title={buttontext} arrow placement="top">
+                <Tooltip title={'Accept'} arrow placement="top">
                   <Button
                     onClick={() => {
                       QuoteStatusChange('Accepted', '', '');
@@ -246,7 +228,7 @@ const DOAApproval = () => {
                     color="primary"
                     className="btn-outline-v1"
                   >
-                    {isMobile && !isTablet ? <ThumbUpIcon /> : buttontext}
+                    {isMobile && !isTablet ? <ThumbUpIcon /> : 'Accept'}
                   </Button>
                 </Tooltip>
                 <Tooltip title={'Reject'} arrow placement="top">
@@ -271,12 +253,6 @@ const DOAApproval = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        {/* <Grid container className="detailHeader">
-          <Grid item xs={12} md={5} sm={6} className="d-flex align-items-center gap-1">
-            <GiAbstract055 color="primary" />
-            <span className="listingHeader">DOA Request</span>
-          </Grid>
-        </Grid> */}
         <div className="flex items-center flex-wrap gap-1 quotePanel mb-4">
           {QData && (
             <>
@@ -302,7 +278,6 @@ const DOAApproval = () => {
           )}
           <div></div>
         </div>
-
         <div className="relative">
           {productBuilderId ? (
             <ProductBuilder
@@ -316,12 +291,15 @@ const DOAApproval = () => {
               isAddExistingProduct={isAddExistingProduct}
               setIsAddExistingProduct={setIsAddExistingProduct}
               refreshProducts={productCalculationForDoa}
-              stage={'product'}
+              stage={'cost'}
               isPriceBuilder={true}
               Editable={false}
+              setColumnData={setColumnData}
             />
           ) : (
-            <Loader style={{ minHeight: 300 }} text="Loading..." />
+            <Box p={2} height={500}>
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Box>
           )}
         </div>
       </Box>
