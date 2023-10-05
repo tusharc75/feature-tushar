@@ -336,6 +336,7 @@ export const sidebarResource = {
   driverMaster: 'Driver Master',
   trailerMaster: 'Trailer Master',
   iotDataPoints: 'Iot Data Points',
+  accountsReceivable: 'Accounts Receivable',
   iotDataPointsCategory: 'Iot Data Points Category',
   deviceTemplates: 'Device Templates',
   workStations: 'Work Stations',
@@ -470,7 +471,8 @@ export const RESOURCE_LABEL = {
   workStations: 'Work Stations',
   deviceTemplateAlert: 'Device Template Alert',
   chartOfAccount: 'Chart Of Account',
-  flash : 'Flash'
+  flash : 'Flash',
+  accountsReceivable: 'Accounts Receivable'
 };
 
 export const CHILD_RESOURCE = {
@@ -2084,7 +2086,8 @@ export const ACTIVITY_RESOURCE = {
   user: 'user',
   marketSegment: 'marketSegment',
   budget: 'budget',
-  irtTicket: 'irtTicket'
+  irtTicket: 'irtTicket',
+  accountsReceivable : 'accountsReceivable'
 };
 
 export const LOG_RESOURCE = {
@@ -2773,4 +2776,10 @@ export const GenerateResourceLineNumber = (fields) => {
     }
   }
   return lineNumber;
+};
+
+export const roleTier = {
+  tier1: 'Tier 1',
+  tier2: 'Tier 2',
+  tier3: 'Tier 3'
 };
