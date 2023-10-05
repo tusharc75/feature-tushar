@@ -10,7 +10,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import CustomButton from '../../components/Helpers/CustomButton';
 import routes from '../../components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, setFieldsInAscendingOrder, flash } from '../../constants/helpers';
+import { CustomDialogTransition, setFieldsInAscendingOrder, flash, GenerateResourceLineNumber } from '../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { Box, Grid } from '@material-ui/core';
@@ -37,6 +37,7 @@ const ManageFlash = ({ isClone = false, flashId = null, onClose, onSuccess }) =>
     axiosInstance()
       .get(`/field?resource=${flash.resource}`)
       .then(({ data: { data } }) => {
+
         let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
         let fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
         if (flashId) {
@@ -55,6 +56,7 @@ const ManageFlash = ({ isClone = false, flashId = null, onClose, onSuccess }) =>
             });
         } else {
           let createValues: any = getObjKeys('', fieldsDataForCreate);
+          createValues['flashNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
           setInitialData({
             fields: fieldsDataForCreate,
             values: createValues
@@ -65,7 +67,6 @@ const ManageFlash = ({ isClone = false, flashId = null, onClose, onSuccess }) =>
         toastConfig.setToastConfig(error);
       });
   }, [flashId]);
-
   useEffect(() => {
     setFormsData(setFieldsInAscendingOrder(initialData.fields));
   }, [initialData.fields]);

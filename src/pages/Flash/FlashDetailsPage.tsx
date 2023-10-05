@@ -93,7 +93,7 @@ const FlashDetailsPage = () => {
       </Box>
       <Box className="detail-container-v1">
         <Grid container spacing={1}>
-          <Grid item xs={12} sm={12} md={8} lg={8}>
+          <Grid item xs={12} sm={12} md={12} lg={12}>
             <div style={{ height: '650px' }}>
               <Box>
                 {flashData && fields.length ? (
