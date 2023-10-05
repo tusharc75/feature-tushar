@@ -263,20 +263,34 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
     const data = {};
     data['ticketName'] = repairJobData.repairJobName;
     data['referenceId'] = repairJobData._id;
-    data['pickupFromType'] = pickupFromType;
 
+    data['pickupFromType'] = pickupFromType;
     var pickupFrom = '';
     if (selectedRecords[0].currentOwnerType === INVENTORY_OWNER_TYPE.brand) {
       pickupFrom = selectedRecords[0]?.warehouse?.optionValue;
     } else {
       pickupFrom = selectedRecords[0]?.currentOwner?.optionValue;
     }
-
     data['pickupFrom'] = pickupFrom;
     data['pickupFromAddress'] = selectedRecords[0]?.currentLocation?.optionValue;
+    data['isPickupFromDisable'] = true;
+
 
     data['deliveryToType'] = deliveryToType;
-    data['isPickupFromDisable'] = true;
+    if (deliveryToType === DELIVERY_FROM_TO_TYPE.supplier && pickupFromType === DELIVERY_FROM_TO_TYPE.plant) {
+      if (repairJobData?.supplierAccount?.optionValue) {
+        data['deliveryTo'] = repairJobData?.supplierAccount?.optionValue;
+        data['isDeliveryToDisable'] = true;
+      }
+      if (repairJobData?.shippingAddress?.optionValue) {
+        data['deliveryToAddress'] = repairJobData?.shippingAddress?.optionValue;
+      }
+    }
+    else if (deliveryToType === DELIVERY_FROM_TO_TYPE.plant) {
+      if (repairJobData?.warehouse?.optionValue) {
+        data['deliveryTo'] = repairJobData?.warehouse?.optionValue;
+      }
+    }
 
     data['wellName'] = repairJobData?.wellName?.optionValue;
     if (repairJobData?.wellNumber) {
