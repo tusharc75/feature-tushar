@@ -1,7 +1,7 @@
 import { Box, Menu, MenuItem } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
-import { AddOutlined } from '@material-ui/icons';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useReducer, useState } from 'react';
@@ -48,6 +48,10 @@ const Flash = () => {
     state;
 
   const [isOpenDialog, setisOpenDialog] = useState(false);
+  const [showStatusChangeDialog, setShowStatusChangeDialog] = useState({
+    open : false,
+    value : null
+  });
 
   const {
     state: { permissions, selectedEntity }
@@ -180,6 +184,29 @@ const Flash = () => {
       });
   };
 
+  const handleUpdateStatus = (value : string) =>{
+    
+    const prepareData = selectedRecords?.map((d) => ({
+      id: d._id,
+      status: value
+    }));
+
+    axiosInstance()
+      .put(`${flash.api}/updateStatus`, prepareData)
+      .then(() => {
+        fetchData();
+        setShowStatusChangeDialog({
+          open : false,
+          value : null
+        })
+        setAnchorEl(null);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+    
+  }
+
   const ActionsRenderer = (params) => (
     <>
       {permissions?.flash?.isDelete && (
@@ -233,7 +260,7 @@ const Flash = () => {
         <CustomBreadCrumbs routes={[routes.flash]} />
         <ImportExportLinks
           permissions={permissions?.flash}
-          module="purchase order"
+          module="flash"
           api={flash.api}
           afterImportCompleted={() => {
             fetchData();
@@ -279,7 +306,7 @@ const Flash = () => {
                       isOpen={sortOpen}
                       handleClose={handleClickClose}
                       contentPart={null}
-                      secHeading={['Sort Purchase Order']}
+                      secHeading={['Sort Flash']}
                       columns={columns}
                       dispatch={dispatch}
                     />
@@ -325,29 +352,80 @@ const Flash = () => {
                     Add
                   </Button>
                 )}
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  id="action-menu"
-                  open={Boolean(anchorEl)}
-                  onClose={closeActions}
-                >
-                  {permissions?.flash?.isDelete && (
-                    <MenuItem
-                      onClick={() => {
-                        closeActions();
-                        setShowDeleteConfirmBox(true);
-                      }}
+                {permissions?.flash?.isDelete && (
+                  <>
+                    <Button
+                      variant={'outlined'}
+                      color="default"
+                      size="small"
+                      onClick={openActions}
+                      disabled={selectedRecords.length ? false : true}
+                      aria-controls="action-menu"
+                      className={`new-dropdown-v1`}
+                      endIcon={<ExpandMore />}
                     >
-                      Delete
-                    </MenuItem>
-                  )}
-                </Menu>
+                      Actions
+                    </Button>
+                    <Menu
+                      anchorEl={anchorEl}
+                      keepMounted
+                      getContentAnchorEl={null}
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left'
+                      }}
+                      id="action-menu"
+                      open={Boolean(anchorEl)}
+                      onClose={closeActions}
+                    >
+                      
+                      <MenuItem
+                        disabled={
+                          !(
+                            (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.allowedToEdit === true)?.length) === selectedRecords?.length
+                          )
+                        }
+                        onClick={(e) => {
+                          closeActions();
+                          setShowStatusChangeDialog({open : true, value : 'Approved'});
+                          
+                        }}
+                      >
+                        Approve
+                      </MenuItem>
+                      <MenuItem
+                        disabled={
+                          !(
+                            (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length
+                          )
+                        }
+                        onClick={(e) => {
+                          closeActions();
+                          setShowStatusChangeDialog({open : true, value : 'Deny'});
+                        }}
+                      >
+                        Deny
+                      </MenuItem>
+                      <MenuItem
+                        disabled={
+                          !(
+                            (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length
+                          )
+                        }
+                        onClick={() => {
+                          closeActions();
+                          // eslint-disable-next-line no-lone-blocks
+                          {
+                            selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
+                          }
+                          setShowDeleteConfirmBox(true);
+                        }}
+                      >
+                        Delete
+                      </MenuItem>
+                    </Menu>
+                  </>
+                )}
               </div>
             </div>
             <DisplayFiltersForMobile resource={sidebarResource.flash} />
@@ -434,6 +512,16 @@ const Flash = () => {
             setShowDeleteConfirmBox(false);
           }}
           onOk={handleDelete}
+        />
+      )}
+      {showStatusChangeDialog.open && (
+        <ConfirmationDialog
+          open={showStatusChangeDialog.open}
+          message={`Are you sure you want to change the staus of selected records to ${showStatusChangeDialog?.value}? `}
+          onClose={() => {
+            setShowStatusChangeDialog({open:false, value:null})
+          }}
+          onOk={()=>handleUpdateStatus(showStatusChangeDialog?.value)}
         />
       )}
     </section>
