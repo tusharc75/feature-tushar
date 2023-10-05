@@ -188,7 +188,7 @@ const DOAApproval = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ title: 'DOA Requests', path: '/doa-request' }, { title: QData?.quoteName || id }]} />
+          <CustomBreadCrumbs routes={[{ title: 'DOA Requests', path: '/doa-request' }, { title: QData ? `${QData?.quoteName} (${versionData?.versionNumber})` : '' }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">

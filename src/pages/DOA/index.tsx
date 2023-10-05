@@ -17,17 +17,18 @@ import CustomSwipableList from '../../components/SwipableListComponents/CustomSw
 import { gridLoadingTimeout, sidebarResource } from '../../constants/helpers';
 
 const DOARequest = () => {
+  
   const renderedFrom = camelCase(routes?.DOARequest.title);
   const toastConfig = useContext(CustomToastContext);
   const [gridApi, setGridApi] = useState(null);
   const history = useHistory();
   const [isOpenDialog, setisOpenDialog] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
-  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
 
-  const [columns] = useState([
+  const [state, dispatch] = useReducer(reducer, intialState);
+  const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
+
+  const columns: any = [
     {
       field: 'name',
       headerName: 'Name',
@@ -53,8 +54,9 @@ const DOARequest = () => {
       headerName: 'Status',
       show: true
     }
-  ]);
+  ]
 
+  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
   if (columnState) {
     columns.map((item) => {
       columnState.map((d) => {
