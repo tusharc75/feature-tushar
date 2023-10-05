@@ -37,7 +37,7 @@ import AssignUserDialog from '../../components/AssignRolesDialog/AssignUserDialo
 import AssignRegionalRolesUserDialog from '../../components/AssignRolesDialog/AssignRegionalRolesUserDialog';
 import { SET_USER, USER_LOADING, SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import { PERMISSION } from '../../constants/Roles';
-import { roleTypes, sidebarResource } from '../../constants/helpers';
+import { roleTier, roleTypes, sidebarResource } from '../../constants/helpers';
 import { startCase, camelCase } from 'lodash';
 import PolicyResources from './PolicyResources';
 import DashboardResources from './DashboardResources';
@@ -106,17 +106,6 @@ const RoleDetailsPage = () => {
   const [defaultResourceName, setDefaultResourceName] = useState([]);
   const [superAdminAccess, setSuperAdminAccess] = useState(false);
   const [canAssignByAnyuser, setCanAssignByAnyuser] = useState(false);
-
-  const roleTier = {
-    tier1: 'Tier 1',
-    tier2: 'Tier 2',
-    tier3: 'Tier 3'
-  };
-
-  const [selectedResource, setSelectedResource] = useState({
-    id: '',
-    type: 'resource'
-  });
 
   const policyResources = [
     {
@@ -264,14 +253,16 @@ const RoleDetailsPage = () => {
       } = await axiosInstance().get(`/role/${id}`);
       setRoleData(data);
       setValues({ name: data.name, description: data.description, tier: data?.tier || roleTier?.tier1 });
-      if (data?.tier === roleTier.tier2) {
-        validateTier2(data.resource, data.field, data?.tier, {
-          id: data.resource?.filter?.((_r) => _r?.isRead || _r?.isCreate || _r?.isUpdate || _r?.isDelete || _r?.isHidden)[0]?.resourceId || '',
-          type: 'resource'
-        });
-      } else {
-        validateRoleAndField(data.resource, data.field, data?.tier || roleTier?.tier1, true);
-      }
+      // if (data?.tier === roleTier.tier2) {
+      //   validateTier2(data.resource, data.field, data?.tier, {
+      //     id: data.resource?.filter?.((_r) => _r?.isRead || _r?.isCreate || _r?.isUpdate || _r?.isDelete || _r?.isHidden)[0]?.resourceId || '',
+      //     type: 'resource'
+      //   });
+      // } else {
+      //   validateRoleAndField(data.resource, data.field, data?.tier || roleTier?.tier1, true);
+      // }
+      setResource(data.resource);
+      setField(data.field);
       const current = {
         name: data.name,
         description: data.description,
@@ -497,90 +488,6 @@ const RoleDetailsPage = () => {
     }
   };
 
-  const validateRoleAndField = (resource: any[], field: any[], tier: string, initialRender = false) => {
-    setField(
-      field?.map((f) => ({
-        ...f,
-        isCreate: initialRender ? f?.isCreate === true : false,
-        isRead: initialRender ? f?.isRead === true : false,
-        isUpdate: initialRender ? f?.isUpdate === true : false,
-        isCreateDisabled: tier === roleTier?.tier3 ? true : false,
-        isUpdateDisabled: tier === roleTier?.tier3 ? true : false,
-        isDeleteDisabled: tier === roleTier?.tier3 ? true : false,
-        isHiddenDisabled: tier === roleTier?.tier3 ? true : false
-      }))
-    );
-    setResource(
-      resource?.map((r) => ({
-        ...r,
-        isCreate: initialRender ? r?.isCreate === true : false,
-        isDelete: initialRender ? r?.isDelete === true : false,
-        isRead: initialRender ? r?.isRead === true : false,
-        isUpdate: initialRender ? r?.isUpdate === true : false,
-        isHidden: initialRender ? r?.isHidden === true : false,
-        isCreateDisabled: tier === roleTier?.tier3 ? true : false,
-        isUpdateDisabled: tier === roleTier?.tier3 ? true : false,
-        isDeleteDisabled: tier === roleTier?.tier3 ? true : false,
-        isHiddenDisabled: tier === roleTier?.tier3 ? true : false
-      }))
-    );
-  };
-
-  const validateTier2 = (resource: any[], field: any[], tier: string, selectedResource: any) => {
-    if (tier === roleTier?.tier2) {
-      let checkedResource = [];
-      let unCheckedResource = [];
-
-      if (selectedResource.type === 'resource') {
-        checkedResource = resource?.filter((_r) => _r?.resourceId === selectedResource.id);
-        unCheckedResource = resource?.filter((_r) => _r?.resourceId !== selectedResource.id);
-      } else {
-        const resourceName = field?.filter((f) => f?.fieldData?._id === selectedResource?.id)[0]?.fieldData?.resource;
-        checkedResource = resource?.filter((_r) => _r?.name === resourceName);
-        unCheckedResource = resource?.filter((_r) => _r?.name !== resourceName);
-      }
-
-      let isChecked = false;
-      if (
-        checkedResource[0]?.isRead ||
-        checkedResource[0]?.isCreate ||
-        checkedResource[0]?.isUpdate ||
-        checkedResource[0]?.isDelete ||
-        checkedResource[0]?.isHidden
-      ) {
-        isChecked = true;
-      }
-
-      const index = resource?.findIndex((_r) => _r?.resourceId === checkedResource[0]?.resourceId);
-
-      let newResource = [...resource];
-
-      if (checkedResource[0]) {
-        newResource = unCheckedResource?.map((_r) => ({
-          ..._r,
-          isCreateDisabled: isChecked ? true : false,
-          isReadDisabled: isChecked ? true : false,
-          isUpdateDisabled: isChecked ? true : false,
-          isDeleteDisabled: isChecked ? true : false,
-          isHiddenDisabled: isChecked ? true : false
-        }));
-
-        newResource.splice(index, 0, checkedResource[0]);
-      }
-
-      setResource(newResource);
-      setField(field)
-    }
-  };
-
-  useEffect(() => {
-    validateRoleAndField(resource, field, values?.tier);
-  }, [values?.tier]);
-
-  useEffect(() => {
-    validateTier2(resource, field, values?.tier, selectedResource);
-  }, [selectedResource]);
-
   const isEditDeleteDisable = [PERMISSION.superAdmin, PERMISSION.brandAdmin].indexOf(roleData?.permission) >= 0;
 
   return (
@@ -688,20 +595,7 @@ const RoleDetailsPage = () => {
                       setField={setField}
                       setResource={setResource}
                       isDisable={permissions?.role.isUpdate ? (isEditDeleteDisable || !isEdit ? true : false) : true}
-                      setSelectedResource={(id: any, type: any) => {
-                        if (id === selectedResource.id) {
-                          setSelectedResource({
-                            id: '',
-                            type: ''
-                          });
-                        }
-                        setTimeout(() => {
-                          setSelectedResource({
-                            id: id,
-                            type: type
-                          });
-                        }, 100);
-                      }}
+                      tier={values?.tier}
                     />
                     {isPolicyTableVisible() && (
                       <PolicyResources
@@ -962,10 +856,10 @@ const RoleDetailsPage = () => {
             roleDeleteRec
               ? `Are you sure you want to delete this Role ?`
               : userDeleteRec
-                ? `Are you sure you want to unassign ${userDeleteRec.firstName} from this Role?`
-                : entityDeleteRec
-                  ? `Are you sure you want to unassign ${entityDeleteRec.entityName} from this Role?`
-                  : ''
+              ? `Are you sure you want to unassign ${userDeleteRec.firstName} from this Role?`
+              : entityDeleteRec
+              ? `Are you sure you want to unassign ${entityDeleteRec.entityName} from this Role?`
+              : ''
           }
           onClose={() => {
             setShowConfirmBox(false);
