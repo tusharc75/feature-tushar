@@ -84,7 +84,6 @@ function PreviewDownload({
           const link = document.createElement('a');
           link.href = url;
           link.setAttribute('download', `${resource}.pdf`);
-          document.body.appendChild(link);
           link.click();
         }
         else if (type === 'Preview') {
@@ -94,11 +93,7 @@ function PreviewDownload({
           link.href = fileURL;
           link.target = '_blank';  
           link.style.display = 'none';  
-          document.body.appendChild(link);
           link.click();  
-          document.body.removeChild(link);
-          // const pdfWindow = window.open();
-          // pdfWindow.location.href = fileURL;
           toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
         }
         else {
