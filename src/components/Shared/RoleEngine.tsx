@@ -116,19 +116,21 @@ const RoleEngine = (props: RoleProps) => {
     setIsDeleteChecked(!isAnyDeleteFoundUnchecked);
     setIsHiddenChecked(!isAnyHiddenFoundUnchecked);
 
-    // if (tier === roleTier.tier2 && renderCount === 0) {
-    //   setSelectedResource({
-    //     id: resource?.filter?.((_r) => _r?.isRead || _r?.isCreate || _r?.isUpdate || _r?.isDelete || _r?.isHidden)[0]?.resourceId || '',
-    //     type: 'resource'
-    //   });
-    //   if (selectedResource.id === '') {
-    //     const resourceName = field?.filter?.((_f) => _f?.isRead || _f?.isCreate || _f?.isUpdate)[0]?.fieldData?.resource;
-    //     setSelectedResource({
-    //       id: resource?.find((_r) => _r?.name === resourceName)?.resourceId || '',
-    //       type: 'field'
-    //     });
-    //   }
-    // }
+    if (tier === roleTier.tier2 && renderCount === 0) {
+      const temp = {
+        id: '',
+        type: ''
+      };
+      temp.id = resource?.filter?.((_r) => _r?.isRead || _r?.isCreate || _r?.isUpdate || _r?.isDelete || _r?.isHidden)[0]?.resourceId || '';
+      temp.type = 'resource';
+
+      if (!temp.id) {
+        const resourceName = field?.filter?.((_f) => _f?.isRead || _f?.isCreate || _f?.isUpdate)[0]?.fieldData?.resource;
+        temp.id = resource?.find((_r) => _r?.name === resourceName)?.resourceId || '';
+        temp.type = 'field';
+      }
+      setSelectedResource(temp);
+    }
   }, [field, resource]);
 
   const updateRoles = (propertyToUpdate, isChecked) => {
@@ -306,8 +308,6 @@ const RoleEngine = (props: RoleProps) => {
 
   const validateTier2 = (resource: any[], field: any[], selectedResource: any) => {
     if (tier === roleTier?.tier2) {
-      console.log('selectedResource', selectedResource);
-
       let checkedResource = [];
       let unCheckedResource = [];
 
@@ -319,8 +319,6 @@ const RoleEngine = (props: RoleProps) => {
         checkedResource = resource?.filter((_r) => _r?.name === resourceName);
         unCheckedResource = resource?.filter((_r) => _r?.name !== resourceName);
       }
-
-      console.log('checkedResource', checkedResource);
 
       let isChecked = false;
       if (
