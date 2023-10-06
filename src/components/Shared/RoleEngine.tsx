@@ -117,6 +117,21 @@ const RoleEngine = (props: RoleProps) => {
     setIsDeleteChecked(!isAnyDeleteFoundUnchecked);
     setIsHiddenChecked(!isAnyHiddenFoundUnchecked);
 
+    if (tier === ROLE_TIER.tier2 && renderCount === 0) {
+      const temp = {
+        id: '',
+        type: ''
+      };
+      temp.id = resource?.filter?.((_r) => _r?.isRead || _r?.isCreate || _r?.isUpdate || _r?.isDelete || _r?.isHidden)[0]?.resourceId || '';
+      temp.type = 'resource';
+
+      if (!temp.id) {
+        const resourceName = field?.filter?.((_f) => _f?.isRead || _f?.isCreate || _f?.isUpdate)[0]?.fieldData?.resource;
+        temp.id = resource?.find((_r) => _r?.name === resourceName)?.resourceId || '';
+        temp.type = 'field';
+      }
+      setSelectedResource(temp);
+    }
   }, [field, resource]);
 
   const updateRoles = (propertyToUpdate, isChecked) => {
