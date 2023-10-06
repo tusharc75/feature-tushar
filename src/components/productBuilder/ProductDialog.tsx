@@ -234,23 +234,18 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
   };
 
   const replaceUnit = (label, unit, sUnit = null, tUnit = null) => {
-    if (label !== 'Secondary Unit' && label !== 'Tertiary Unit') {
+    if (!['Unit', 'Secondary Unit', 'Tertiary Unit']?.includes(label)) {
       if (label.includes('Secondary Unit') && sUnit) {
         label = `${label.split(' Secondary Unit')[0]} Secondary Unit (${sUnit})`;
       }
-      if (!label.includes('Secondary Unit') && label.includes('Unit') && unit) {
-        if (label !== 'Unit') {
-          label = `${label.split(' Unit')[0]} Unit (${unit})`;
-        }
+      if (!label.includes('Tertiary Unit') && !label.includes('Secondary Unit') && label.includes('Unit') && unit) {
+        label = `${label.split(' Unit')[0]} Unit (${unit})`;
       }
-
       if (label.includes('Tertiary Unit') && tUnit) {
         label = `${label.split(' Tertiary Unit')[0]} Tertiary Unit (${tUnit})`;
       }
-      if (!label.includes('Tertiary Unit') && label.includes('Unit') && unit) {
-        if (label !== 'Unit') {
-          label = `${label.split(' Unit')[0]} Unit (${unit})`;
-        }
+      if (!label.includes('Tertiary Unit') && !label.includes('Secondary Unit') && label.includes('Unit') && unit) {
+        label = `${label.split(' Unit')[0]} Unit (${unit})`;
       }
     }
     return label;
