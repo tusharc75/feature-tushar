@@ -52,6 +52,7 @@ function PreviewDownload({
   const handleViewPdf = (type, pdfType, visibleColumns) => {
     setLoadingType(pdfType);
 
+    console.log(visibleColumns)
     // let showColumns = allColumn
     //   ?.filter((d) => visibleColumns?.includes(d?.fieldLabel))
     //   .map((d) => {
@@ -125,7 +126,7 @@ function PreviewDownload({
           base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
           contentType: base64data.split(';')[0].split(':')[1],
           extension: '.pdf',
-          name: `${resource}-${pdfType}`
+          name: `${resource}-${pdfType === 'Regular' ? button1Title : button2Title}`
         };
         setEmailAttachments((prevState) => {
           return [...prevState, attachments];
@@ -195,12 +196,8 @@ function PreviewDownload({
               disabled={loadingType === 'email'}
               startIcon={isMobile ? '' : <MdEmail />}
               onClick={() => {
-                setLoadingType('email');
-                handleViewPdf('Email', 'Detail', columns);
-                if (!hideDetailButton) {
-                  handleViewPdf('Email', 'Regular', columns);
-                }
-                setSendEmail(true);
+                setDownlodingFile('Send Email');
+                setShowColumnsDialog({ open: true, type: 'PDF' });
               }}
             >
               {isMobile && !isTablet ? <MdEmail size={20} /> : loadingType === 'email' ? 'Please wait...' : `Send Email`}
@@ -215,7 +212,17 @@ function PreviewDownload({
             setShowColumnsDialog({ open: false, type: '' });
           }}
           handleViewPdf={(type, visibleColumnsPdf) => {
-            handleViewPdf(downlodingFile, type, visibleColumnsPdf);
+            if (downlodingFile === 'Send Email') {
+              setLoadingType('email');
+              handleViewPdf('Email', 'Regular', visibleColumnsPdf);
+              if (!hideDetailButton) {
+                handleViewPdf('Email', 'Detail', defaultColumns);
+              }
+              setSendEmail(true);
+            }
+            else {
+              handleViewPdf(downlodingFile, type, visibleColumnsPdf);
+            }
           }}
           loadingType={loadingType}
           loading={loading}
