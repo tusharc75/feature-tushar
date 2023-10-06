@@ -52,11 +52,16 @@ function PreviewDownload({
   const handleViewPdf = (type, pdfType, visibleColumns) => {
     setLoadingType(pdfType);
 
-    let showColumns = allColumn
-      ?.filter((d) => visibleColumns?.includes(d?.fieldLabel))
-      .map((d) => {
-        return d?.fieldName;
-      });
+    console.log(visibleColumns)
+    // let showColumns = allColumn
+    //   ?.filter((d) => visibleColumns?.includes(d?.fieldLabel))
+    //   .map((d) => {
+    //     return d?.fieldName;
+    //   });
+
+    let showColumns = visibleColumns?.map((d) => {
+      return allColumn?.find((c) => c?.fieldLabel === d)?.fieldName;
+    });
 
     let api = '';
     if (type === 'Export') {
@@ -96,9 +101,9 @@ function PreviewDownload({
           const fileURL = URL.createObjectURL(blobData);
           const link = document.createElement('a');
           link.href = fileURL;
-          link.target = '_blank';  
-          link.style.display = 'none';  
-          link.click();  
+          link.target = '_blank';
+          link.style.display = 'none';
+          link.click();
           toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
         } else {
           const blobData = new Blob([response.data], { type: 'application/pdf' });
@@ -121,7 +126,7 @@ function PreviewDownload({
           base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
           contentType: base64data.split(';')[0].split(':')[1],
           extension: '.pdf',
-          name: `${resource}-${pdfType}`
+          name: `${resource}-${pdfType === 'Regular' ? button1Title : button2Title}`
         };
         setEmailAttachments((prevState) => {
           return [...prevState, attachments];
@@ -163,7 +168,7 @@ function PreviewDownload({
               setShowColumnsDialog({ open: true, type: 'PDF' });
             }}
           >
-            {isMobile && !isTablet ? <DownloadIcon size={20} /> : loadingType === 'download' ? 'Please wait...' : 'Download'}
+            {isMobile && !isTablet ? <DownloadIcon fontSize={20} /> : loadingType === 'download' ? 'Please wait...' : 'Download'}
           </Button>
           {isExcelDownload && (
             <Button
@@ -191,12 +196,8 @@ function PreviewDownload({
               disabled={loadingType === 'email'}
               startIcon={isMobile ? '' : <MdEmail />}
               onClick={() => {
-                setLoadingType('email');
-                handleViewPdf('Email', 'Detail', columns);
-                if (!hideDetailButton) {
-                  handleViewPdf('Email', 'Regular', columns);
-                }
-                setSendEmail(true);
+                setDownlodingFile('Send Email');
+                setShowColumnsDialog({ open: true, type: 'PDF' });
               }}
             >
               {isMobile && !isTablet ? <MdEmail size={20} /> : loadingType === 'email' ? 'Please wait...' : `Send Email`}
@@ -211,7 +212,17 @@ function PreviewDownload({
             setShowColumnsDialog({ open: false, type: '' });
           }}
           handleViewPdf={(type, visibleColumnsPdf) => {
-            handleViewPdf(downlodingFile, type, visibleColumnsPdf);
+            if (downlodingFile === 'Send Email') {
+              setLoadingType('email');
+              handleViewPdf('Email', 'Regular', visibleColumnsPdf);
+              if (!hideDetailButton) {
+                handleViewPdf('Email', 'Detail', defaultColumns);
+              }
+              setSendEmail(true);
+            }
+            else {
+              handleViewPdf(downlodingFile, type, visibleColumnsPdf);
+            }
           }}
           loadingType={loadingType}
           loading={loading}

@@ -172,7 +172,13 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
     setIsDownloading(true);
     setDownloadProgress(0);
 
-    if (file.url) {
+    if (file?.base64) {
+      let link = document.createElement("a");
+      link.href = `data:application/${file?.contentType};base64,${file?.base64}`;
+      link.download = `${file?.name}${file?.extension}`;
+      link.click();
+    }
+    else if (file.url) {
       axiosInstance()
         .get(`user/download?fileName=${file.url}`, {
           responseType: 'blob',
@@ -254,8 +260,8 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
                         ? attachment?.name
                           ? attachment?.name
                           : attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
-                          ? attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
-                          : attachment.substring(attachment.lastIndexOf('/') + 1)
+                            ? attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
+                            : attachment.substring(attachment.lastIndexOf('/') + 1)
                         : 'attachment'}
                     </Typography>
                     {attachment?.date && <Typography variant="body2">{moment(attachment?.date)?.format(dateTimeFormat)}</Typography>}
@@ -267,8 +273,8 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
                             ? attachment?.name
                               ? attachment?.name
                               : attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
-                              ? attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
-                              : attachment?.substring(attachment.lastIndexOf('/') + 1)
+                                ? attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
+                                : attachment?.substring(attachment.lastIndexOf('/') + 1)
                             : 'attachment'
                         }
                       >
@@ -276,8 +282,8 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
                           ? attachment?.name
                             ? attachment?.name
                             : attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
-                            ? attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
-                            : attachment?.substring(attachment.lastIndexOf('/') + 1)
+                              ? attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
+                              : attachment?.substring(attachment.lastIndexOf('/') + 1)
                           : 'attachment'}
                       </Typography>
                       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
