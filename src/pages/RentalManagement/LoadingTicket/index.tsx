@@ -432,7 +432,7 @@ const LoadingTicket = ({
 
   const ActionRenderer = (params) =>
     user?.user?.brandPolicy?.assetDeliveredStatus &&
-      [RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy, RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable]?.includes(params?.data?.rentalAssetStatus) &&
+      [RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy, RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable, RENTAL_INTERNAL_ASSET_STATUS.delivered]?.includes(params?.data?.rentalAssetStatus) &&
       params?.data?.type === 'Asset' ? (
       <HtmlTooltip title={'Change Date'}>
         <span>
