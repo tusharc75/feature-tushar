@@ -52,15 +52,7 @@ function PreviewDownload({
   const handleViewPdf = (type, pdfType, visibleColumns) => {
     setLoadingType(pdfType);
 
-    // let showColumns = allColumn
-    //   ?.filter((d) => visibleColumns?.includes(d?.fieldLabel))
-    //   .map((d) => {
-    //     return d?.fieldName;
-    //   });
-
-    let showColumns = visibleColumns?.map((d) => {
-      return allColumn?.find((c) => c?.fieldLabel === d)?.fieldName;
-    });
+    let showColumns = visibleColumns?.map((e) => e?.fieldName)?.toString();
 
     let api = '';
     if (type === 'Export') {
@@ -215,7 +207,7 @@ function PreviewDownload({
               setLoadingType('email');
               handleViewPdf('Email', 'Regular', visibleColumnsPdf);
               if (!hideDetailButton) {
-                handleViewPdf('Email', 'Detail', defaultColumns);
+                handleViewPdf('Email', 'Detail', visibleColumnsPdf);
               }
               setSendEmail(true);
             }

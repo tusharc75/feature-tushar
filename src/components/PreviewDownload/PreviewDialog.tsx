@@ -44,13 +44,9 @@ export const PreviewDialog = ({
   const [showSaveViewDialog, setShowSaveViewDialog] = useState({ open: false, data: null });
   const [visibleColumnsPdf, setVisibleColumnsPdf] = useState([]);
 
-  useEffect(() => {   
-    const temp =
-    defaultColumns?.length > 0
-      ? allColumn?.filter((e: any) => defaultColumns?.includes(e?.fieldName))?.map((e) => e.fieldLabel)
-      : allColumn?.map((e) => e.fieldLabel);
-
-  setVisibleColumnsPdf([...temp]);
+  useEffect(() => {
+    const temp = defaultColumns?.length > 0 ? allColumn?.filter((e: any) => defaultColumns?.includes(e?.fieldName)) : allColumn;
+    setVisibleColumnsPdf([...temp]);
   }, [columns]);
 
   useEffect(() => {
@@ -62,9 +58,9 @@ export const PreviewDialog = ({
       .get(`/pdf/view?resource=${resource}`)
       .then(({ data: { data } }) => {
         setViews(data);
-        // if (data?.length && !selectedView) {
-        //     handleSelectView(data[0])
-        // }
+        if (data?.length && selectedView && data?.find((e) => e._id === selectedView?._id)) {
+          handleSelectView(data?.find((e) => e._id === selectedView?._id))
+        }
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -93,13 +89,7 @@ export const PreviewDialog = ({
     setSelectedView(data);
     if (data && data.columns) {
       const columnsArray = data?.columns?.split(',')?.map((item) => item?.trim());
-      setVisibleColumnsPdf(
-        allColumn
-          ?.filter((d) => columnsArray?.includes(d?.fieldName))
-          .map((d) => {
-            return d?.fieldLabel;
-          })
-      );
+      setVisibleColumnsPdf(columnsArray?.map(e => { return allColumn.find(col => col.fieldName === e) }).filter(col => col !== undefined));
     }
   };
 
@@ -170,20 +160,20 @@ export const PreviewDialog = ({
                       multiple
                       value={visibleColumnsPdf}
                       onChange={(e, val) => {
-                        if (
-                          val.includes('Select All') &&
-                          ['Select All', ...allColumn?.map((e) => e?.fieldLabel)].sort().toString() !== val.sort().toString()
-                        ) {
-                          setVisibleColumnsPdf(allColumn?.map((e) => e?.fieldLabel));
-                        } else if (['Select All', ...allColumn?.map((e) => e?.fieldLabel)].sort().toString() === val.sort().toString()) {
+                        if (val.find((e) => e.fieldName === 'Select All') && ['Select All', ...allColumn?.map((e) => e?.fieldName)].sort().toString() !== val?.map((e) => e?.fieldName).sort().toString()) {
+                          setVisibleColumnsPdf(allColumn);
+                        } else if (['Select All', ...allColumn?.map((e) => e?.fieldName)].sort().toString() === val?.map((e) => e?.fieldName).sort().toString()) {
                           setVisibleColumnsPdf([]);
                         } else {
-                          setVisibleColumnsPdf(allColumn?.map((e) => e?.fieldLabel)?.filter((d) => val.includes(d)));
+                          setVisibleColumnsPdf(val);
                         }
                       }}
-                      options={['Select All', ...allColumn?.map((e) => e?.fieldLabel)]}
+                      options={[{ fieldLabel: 'Select All', fieldName: 'Select All' }, ...allColumn]}
+                      getOptionLabel={(option) => option?.fieldLabel}
+                      getOptionSelected={(option: any, value: any) =>
+                        option.fieldName === value.fieldName
+                      }
                       disableCloseOnSelect
-                      getOptionLabel={(option) => option}
                       renderOption={(option, { selected }) => (
                         <React.Fragment>
                           <Checkbox
@@ -191,20 +181,22 @@ export const PreviewDialog = ({
                             checkedIcon={checkedIcon}
                             style={{ marginRight: 8 }}
                             checked={
-                              ['Select All', ...allColumn?.map((e) => e?.fieldLabel)].sort().toString() ===
-                              ['Select All', ...visibleColumnsPdf].sort().toString()
+                              ['Select All', ...allColumn?.map((e) => e?.fieldName)].sort().toString() ===
+                                ['Select All', ...visibleColumnsPdf?.map((e) => e?.fieldName)].sort().toString()
                                 ? true
                                 : selected
                             }
                           />
-                          {option}
+                          {option.fieldLabel}
                         </React.Fragment>
                       )}
                       renderInput={(params) => <TextField {...params} variant="outlined" label={`Visible Columns in ${type}`} placeholder="Select" />}
                     />
                   </Box>
                   <Box width="5%">
-                    <ArrangeView columns={visibleColumnsPdf} setColumns={setVisibleColumnsPdf} />
+                    <ArrangeView
+                      columns={visibleColumnsPdf}
+                      setColumns={setVisibleColumnsPdf} />
                   </Box>
                 </Box>
               </FormControl>
@@ -216,40 +208,57 @@ export const PreviewDialog = ({
             onClick={() => {
               setShowSaveViewDialog({ open: true, data: selectedView });
             }}
-            disabled={visibleColumnsPdf.length == 0}
+            disabled={visibleColumnsPdf?.length == 0}
             size="small"
             className="yellow-button"
           >
             {selectedView ? 'Update View' : 'Save View'}
           </CustomButton>
-          <CustomButton
-            variant="contained"
-            className="no-shadow"
-            color="primary"
-            size="small"
-            loading={loadingType === 'Regular' || loading}
-            disabled={loadingType || visibleColumnsPdf?.length === 0}
-            onClick={(e) => {
-              handleViewPdf('Regular', visibleColumnsPdf);
-            }}
-          >
-            {hideDetailButton ? `${downlodingFile}` : `${button1Title} ${downlodingFile}`}
-          </CustomButton>
-          {hideDetailButton ? null : (
+
+          {downlodingFile === 'Send Email' ?
             <CustomButton
               variant="contained"
-              color="primary"
               className="no-shadow"
+              color="primary"
               size="small"
-              loading={loadingType === 'Detail' || loading}
+              loading={loadingType === 'Regular' || loading}
               disabled={loadingType || visibleColumnsPdf?.length === 0}
               onClick={(e) => {
-                handleViewPdf('Detail', visibleColumnsPdf);
+                handleViewPdf('Regular', visibleColumnsPdf);
               }}
             >
-              {`${button2Title} ${downlodingFile}`}
-            </CustomButton>
-          )}
+              {downlodingFile}
+            </CustomButton> :
+            <>
+              <CustomButton
+                variant="contained"
+                className="no-shadow"
+                color="primary"
+                size="small"
+                loading={loadingType === 'Regular' || loading}
+                disabled={loadingType || visibleColumnsPdf?.length === 0}
+                onClick={(e) => {
+                  handleViewPdf('Regular', visibleColumnsPdf);
+                }}
+              >
+                {hideDetailButton ? `${downlodingFile}` : `${button1Title} ${downlodingFile}`}
+              </CustomButton>
+              {hideDetailButton ? null : (
+                <CustomButton
+                  variant="contained"
+                  color="primary"
+                  className="no-shadow"
+                  size="small"
+                  loading={loadingType === 'Detail' || loading}
+                  disabled={loadingType || visibleColumnsPdf?.length === 0}
+                  onClick={(e) => {
+                    handleViewPdf('Detail', visibleColumnsPdf);
+                  }}
+                >
+                  {`${button2Title} ${downlodingFile}`}
+                </CustomButton>
+              )}</>
+          }
         </CustomDialogFooter>
       </Dialog>
 
@@ -263,11 +272,7 @@ export const PreviewDialog = ({
       )}
       {showSaveViewDialog.open && (
         <ViewDialog
-          columns={allColumn
-            ?.filter((d) => visibleColumnsPdf?.includes(d?.fieldLabel))
-            .map((d) => {
-              return d?.fieldName;
-            })}
+          columns={visibleColumnsPdf?.map((e) => e?.fieldName)}
           resource={resource}
           handleSucess={() => {
             setShowSaveViewDialog({ open: false, data: null });
