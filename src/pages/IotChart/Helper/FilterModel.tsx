@@ -2,10 +2,9 @@ import DateFnsUtils from '@date-io/date-fns';
 import { Box, TextField } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import { KeyboardDateTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
-import { INTERVALS } from '../../../constants/helpers'
+import { INTERVALS } from '../../../constants/helpers';
 
 export default function FilterModel({ dateFilters, setDateFilters }) {
-
   return (
     <Box display="flex" justifyContent="end">
       <MuiPickersUtilsProvider utils={DateFnsUtils}>
@@ -16,9 +15,9 @@ export default function FilterModel({ dateFilters, setDateFilters }) {
             fullWidth
             size="small"
             margin="none"
-            format="dd/MM/yyyy HH:mm"
             autoOk
             maxDate={dateFilters.to}
+            format="dd/MM/yyyy HH:mm"
             label="From"
             views={['year', 'month', 'date', 'hours', 'minutes']}
             value={dateFilters.from}
