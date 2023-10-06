@@ -1232,7 +1232,8 @@ export default function QuoteProcess(props) {
         <Steps
           steps={DOAneeded ? DOASteps : OtherSteps}
           currentStep={DOAneeded ? DOASteps.findIndex((d) => d?.key === processStatus) :
-            OtherSteps.findIndex((d) => d?.key === processStatus)
+            processStatus === QUOTE_PROCESS_STATUS.doaProcess ? OtherSteps.findIndex((d) => d?.key === QUOTE_PROCESS_STATUS.quoteBuilder)
+              : OtherSteps.findIndex((d) => d?.key === processStatus)
           }
           id={quoteData._id}
           version={currentVersion}
