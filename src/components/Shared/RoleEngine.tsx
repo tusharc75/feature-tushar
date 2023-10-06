@@ -356,7 +356,6 @@ const RoleEngine = (props: RoleProps) => {
   }, [tier]);
 
   useEffect(() => {
-    console.log('selectedResource', selectedResource);
     validateTier2(resource, field, selectedResource);
   }, [selectedResource]);
 
