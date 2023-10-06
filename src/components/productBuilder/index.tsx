@@ -24,7 +24,7 @@ import BulkEditDialog from './BulkEditDialog';
 import Loader from '../Loader';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { handleAutoCalculation, extractFields } from '../../constants/formulaUtility';
-import { CustomDialogTransition, gridLoadingTimeout, supplierContact } from '../../constants/helpers';
+import { CustomDialogTransition, QUOTE_PROCESS_STATUS, gridLoadingTimeout, supplierContact } from '../../constants/helpers';
 import routes from '../../components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
 import { AiTwotoneEdit } from 'react-icons/ai';
@@ -42,6 +42,7 @@ import AskSupplierPriceDialog from './AskSupplierPriceDialog';
 import { useData } from './../../StateProvider/Provider';
 import ViewSupplierPriceDialog from './ViewSupplierPriceDialog';
 import HtmlTooltip from '../CustomTooltipTitle';
+import CommonSkeleton from '../Helpers/CommonSkeleton';
 
 let levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
 
@@ -61,10 +62,11 @@ const ProductBuilder = (props) => {
     permissions,
     fromQuote,
     setColumnForPDFExcel,
-    setColumnDatas,
+    setColumnData,
     fullScreen = false,
     quoteData = null,
-    setNextStep,
+    processStatus,
+    setNextStep
   } = props;
 
   const toastConfig = useContext(CustomToastContext);
@@ -98,15 +100,18 @@ const ProductBuilder = (props) => {
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords, appendRows } = state;
   const [frameWorkComponent, setFrameWorkComponent] = useState(null);
   const [columns, setColumns] = useState(null);
 
   useEffect(() => {
     fetchProduct(productBuilderId);
-  }, [productBuilderId, stage]);
+  }, [productBuilderId, processStatus]);
 
   const fetchProduct = (id) => {
+    if (setNextStep) {
+      setNextStep(false)
+    }
     dispatch({ type: 'loading', loading: true });
     if (gridApi) {
       gridApi.setRowData([]);
@@ -117,8 +122,8 @@ const ProductBuilder = (props) => {
         let columns = [];
         columns = [
           {
-            field: 'srno',
-            headerName: 'Item #',
+            field: 'index',
+            headerName: 'Index',
             width: 150,
             show: true,
             disabled: true,
@@ -160,40 +165,71 @@ const ProductBuilder = (props) => {
         };
         setFrameWorkComponent({ ...tempFrameworkComponent });
         setColumns([...columns]);
-        setColumnDatas([...columns]);
+        if (setColumnData) {
+          setColumnData([...columns]);
+        }
         if (setColumnForPDFExcel) {
-          setColumnForPDFExcel([...columns].filter((d) => d.field !== 'srno').map((d) => d.headerName));
+          setColumnForPDFExcel([...columns].filter((d) => d.field !== 'index').map((d) => d.headerName));
         }
         setProductData(data);
         let rows = data.product.map((item, index) => {
           let res: any = {
             ...prepareDataForGrid(item)
           };
-          res.srno = index + 1;
+          res.index = index + 1;
           res.isChecked = false;
           res.canDelete = permissions?.isUpdate && fromQuote ? (hasPermission ? true : false) : true;
           res.allowedToEdit = permissions?.isUpdate && fromQuote ? (hasPermission ? true : false) : true;
           res.isSupplierExist = isPriceBuilder && fromQuote && permissions.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice;
-
-          if (isPriceBuilder) {
-            const tsp = res[`totalSalesPrice_${currency}`] || 0;
-            const qty = res?.qty || 0;
-            if (qty === 0 || tsp === 0) {
-              setNextStep(false)
-            }
-          }
           return res;
         });
-
-
-        dispatch({ type: 'initialize', data: rows, count: rows.length });
+        if (appendRows) {
+          dispatch({
+            type: 'initialize',
+            data: [...dataRows, ...rows],
+            count: rows.length
+          });
+        } else {
+          dispatch({
+            type: 'initialize',
+            data: rows,
+            count: rows.length
+          });
+        }
+        // dispatch({ type: 'initialize', data: rows, count: rows.length });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
+
+        if (processStatus === QUOTE_PROCESS_STATUS.new) {
+          if (rows?.length) {
+            setNextStep(true)
+          }
+        }
+        else if (processStatus === QUOTE_PROCESS_STATUS.priceBuilder) {
+          if (rows?.find((ele) => (ele[`totalSalesPrice_${currency?.toLowerCase()}`] || 0) === 0 || (ele[`qty`] || 0) === 0)) {
+            setNextStep(false);
+          }
+          else {
+            setNextStep(true);
+          }
+        }
+        else if (processStatus === QUOTE_PROCESS_STATUS.quoteBuilder) {
+          setNextStep(true)
+        }
+        else if (processStatus === QUOTE_PROCESS_STATUS.doaProcess) {
+        }
+        else {
+        }
         refreshProducts(data);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
+      })
+      .finally(() => {
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
       });
   };
 
@@ -206,7 +242,7 @@ const ProductBuilder = (props) => {
     const permission = permissions?.isUpdate && fromQuote ? (hasPermission ? true : false) : true;
     return (
       <>
-        <HtmlTooltip title='Clone'>
+        <HtmlTooltip title="Clone">
           <IconButton
             disabled={permission ? false : true}
             size="small"
@@ -219,7 +255,7 @@ const ProductBuilder = (props) => {
             <FileCopyIcon fontSize="small" color={permission ? 'primary' : 'disabled'} />
           </IconButton>
         </HtmlTooltip>
-        <HtmlTooltip title='Edit'>
+        <HtmlTooltip title="Edit">
           <IconButton
             disabled={permission ? false : true}
             size="small"
@@ -243,7 +279,7 @@ const ProductBuilder = (props) => {
             <VisibilityIcon fontSize="small" color={params.data?.isSupplierExist ? 'primary' : 'disabled'} />
           </IconButton>
         )}
-        <HtmlTooltip title='Delete'>
+        <HtmlTooltip title="Delete">
           <IconButton
             disabled={permission ? false : true}
             size="small"
@@ -269,16 +305,21 @@ const ProductBuilder = (props) => {
             openProductModel(params.data._id);
           }}
         >
-          {params.data.srno}
+          {params.data.index}
         </a>
       ) : (
-        <>{params.data.srno}</>
+        <>{params.data.index}</>
       )}
     </>
   );
 
   const ProductTypeRenderer = (params) => (
-    <Link className="link text-truncate" target='_blank' title={params?.data?.productName} to={`${routes.productDetail.path}/${params.data?.productId}`}>
+    <Link
+      className="link text-truncate"
+      target="_blank"
+      title={params?.data?.productName}
+      to={`${routes.productDetail.path}/${params.data?.productId}`}
+    >
       {params?.data?.productName}
     </Link>
   );
@@ -841,7 +882,9 @@ const ProductBuilder = (props) => {
             priceTemplateField={priceTemplateField}
           />
         ) : (
-          <Loader style={{ minHeight: 300 }} text="Loading..." />
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
         )}
       </Box>
       {isAddNewProduct && (

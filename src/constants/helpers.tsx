@@ -336,11 +336,13 @@ export const sidebarResource = {
   driverMaster: 'Driver Master',
   trailerMaster: 'Trailer Master',
   iotDataPoints: 'Iot Data Points',
+  accountsReceivable: 'Accounts Receivable',
   iotDataPointsCategory: 'Iot Data Points Category',
   deviceTemplates: 'Device Templates',
   workStations: 'Work Stations',
   deviceTemplateAlert: 'Device Template Alert',
   chartOfAccount: 'Chart Of Account',
+  flash: 'Flash'
 };
 
 export const primaryFields = {
@@ -469,6 +471,8 @@ export const RESOURCE_LABEL = {
   workStations: 'Work Stations',
   deviceTemplateAlert: 'Device Template Alert',
   chartOfAccount: 'Chart Of Account',
+  flash: 'Flash',
+  accountsReceivable: 'Accounts Receivable'
 };
 
 export const CHILD_RESOURCE = {
@@ -847,6 +851,13 @@ export const workOrder = {
   api: '/work-order'
 };
 
+export const flash = {
+  api: '/flash',
+  route: '/flash',
+  permission: 'Flash',
+  resource: 'Flash'
+};
+
 export const profileMenuItems = {
   profile: 1,
   notification: 2,
@@ -1005,21 +1016,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-          .required(`${input.fieldLabel} is required`)
+            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+            .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(
+            .matches(
+              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+              'Enter valid URL'
+            )
+            .required(`${input.fieldLabel} is required`)
+        : string().matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          )
-          .required(`${input.fieldLabel} is required`)
-        : string().matches(
-          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-          'Enter valid URL'
-        );
+          );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
@@ -1092,7 +1103,7 @@ export const isObjectEmpty = (obj) => {
 
 export const currencyCodeToSymbol = (currencyCode) => {
   if (!currencyCode) {
-    return "";
+    return '';
   }
   return currencies.filter((obj) => obj.currencyCode === currencyCode)[0].symbolNative;
 };
@@ -1671,20 +1682,16 @@ export const graphOptions = {
     // size: 13,
     borderWidth: 1.5,
     borderWidthSelected: 2,
-    // font: {
-    //   size: 15,
-    //   align: "center",
-    //   bold: {
-    //     color: "#bbbdc0",
-    //     size: 15,
-    //     vadjust: 0,
-    //     mod: "bold",
-    //   },
-    // },
+    font: {
+      size: 15,
+      align: 'center',
+      color: '#163340'
+    },
     shadow: true
   },
   edges: {
     width: 0.01,
+    color: '#fff',
     // color: {
     //   color: "#D3D3D3",
     //   highlight: "#797979",
@@ -2025,6 +2032,13 @@ export const REPAIR_PROCESS_STATUS = {
   failed: 'Failed'
 } as const;
 
+
+export const PLANNING_STATUS = {
+  open: 'Open',
+  converted: 'Converted'
+} as const;
+
+
 export const asyncForEach = async (array: any[], callback: (arrayIndex: any, i: number, array: any[]) => Promise<any>) => {
   for (let index = 0; index < array.length; index++) {
     await callback(array[index], index, array);
@@ -2075,7 +2089,8 @@ export const ACTIVITY_RESOURCE = {
   user: 'user',
   marketSegment: 'marketSegment',
   budget: 'budget',
-  irtTicket: 'irtTicket'
+  irtTicket: 'irtTicket',
+  accountsReceivable: 'accountsReceivable'
 };
 
 export const LOG_RESOURCE = {
@@ -2460,7 +2475,7 @@ export const QUOTATION_TYPE = {
   salesOrder: 'Sales Order',
   rentalJob: 'Rental Job',
   repairOrder: 'Repair Order',
-  fieldJob: 'Field Job',
+  fieldJob: 'Field Job'
 };
 
 export const WORKORDER_SERVICE_COLOR = {
@@ -2666,6 +2681,15 @@ export const SERVICE_TYPE = {
   fieldService: 'Field Service'
 };
 
+export const QUOTE_PROCESS_STATUS = {
+  new: 'New',
+  priceBuilder: 'Price Builder',
+  quoteBuilder: 'Quote Builder',
+  doaProcess: 'DOA Process',
+  sendToCustomer: 'Send To Customer',
+  end: 'End'
+};
+
 export const convertMsToTime = (milliseconds: any) => {
   function padTo2Digits(num) {
     num = num - Math.floor(num) !== 0 ? num.toFixed(1) : num;
@@ -2755,4 +2779,10 @@ export const GenerateResourceLineNumber = (fields) => {
     }
   }
   return lineNumber;
+};
+
+export const roleTier = {
+  tier1: 'Tier 1',
+  tier2: 'Tier 2',
+  tier3: 'Tier 3'
 };

@@ -1,74 +1,61 @@
-import React, { useContext, useEffect, useMemo, useState, useReducer, Fragment } from 'react';
-import { useHistory, useParams, useLocation } from 'react-router-dom';
-import ReactDOM from 'react-dom';
 import {
-  useMediaQuery,
-  Paper,
   Box,
-  Tabs,
-  Tab,
-  Grid,
   Button,
-  DialogTitle,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
-  makeStyles,
-  TextField,
-  Tooltip,
+  DialogTitle,
   Menu,
   MenuItem,
-  CircularProgress
+  TextField,
+  Tooltip,
+  Typography,
+  makeStyles
 } from '@material-ui/core';
+import { Edit, ExpandMore } from '@material-ui/icons';
+import ThumbDownIcon from '@material-ui/icons/ThumbDown';
+import ThumbUpIcon from '@material-ui/icons/ThumbUp';
 import { Skeleton } from '@material-ui/lab';
+import queryString from 'query-string';
+import React, { useContext, useEffect, useMemo, useReducer, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import ReactDOM from 'react-dom';
+import { IoArrowDownCircleSharp } from 'react-icons/all';
 import { BiFoodMenu, BiLayerPlus } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
-import { MdDelete } from 'react-icons/md';
-import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
-import DetailsPageHeader from '../../../components/DetailsPageHeader';
-import DeleteButton from '../../../components/Helpers/DeleteButton';
-import { reducer, intialState } from '../../../components/AgGridComponents/CustomAgGrid';
-import {
-  quote,
-  customerAccount,
-  supplierAccount,
-  opportunity,
-  quoteBuilder,
-  yyyyMMDD,
-  formatAmountWithCurrency,
-  gridLoadingTimeout,
-  termsAndCondition,
-  ACTIVITY_RESOURCE,
-  sidebarResource
-} from '../../../constants/helpers';
-import { useData } from '../../../StateProvider/Provider';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import routes from '../../../components/Helpers/Routes';
-import axiosInstance from '../../../axios/axiosInstance';
-import InfoIcon from '@material-ui/icons/Info';
-import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import ManageQuoteDialog from '../ManageQuote/ManageQuoteDialog';
-import { HiPencil } from 'react-icons/hi';
-import { isMobile, isTablet } from 'react-device-detect';
-import ProjectInAccordion from '../../../components/ProjectInAccordion/ProjectInAccordion';
-import QuoteProcess from './QuoteProcess';
-import QuoteDetailPage from './QuoteDetailPage';
-import AllVersionStatus from './AllVersionStatus';
-import queryString from 'query-string';
-import { GoIssueReopened } from 'react-icons/go';
-import { VscVersions } from 'react-icons/vsc';
-import ThumbUpIcon from '@material-ui/icons/ThumbUp';
-import ThumbDownIcon from '@material-ui/icons/ThumbDown';
-import DOAReasonDialog from '../../DOA/DOAReasonDialog';
-import { Edit, ExpandMore } from '@material-ui/icons';
-import { MdDeleteSweep } from 'react-icons/md';
 import { GiReceiveMoney } from 'react-icons/gi';
-import { AiFillPlusCircle } from 'react-icons/ai';
-import { MdLibraryAdd } from 'react-icons/md';
-import { IoArrowDownCircleSharp } from 'react-icons/all';
-import contactClass from '../../Contact/contact.module.scss';
+import { HiPencil } from 'react-icons/hi';
+import { MdDelete } from 'react-icons/md';
+import { VscIssueReopened, VscVersions } from 'react-icons/vsc';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../../StateProvider/Provider';
+import axiosInstance from '../../../axios/axiosInstance';
+import { intialState, reducer } from '../../../components/AgGridComponents/CustomAgGrid';
+import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
+import routes from '../../../components/Helpers/Routes';
+import ProjectInAccordion from '../../../components/ProjectInAccordion/ProjectInAccordion';
+import {
+  ACTIVITY_RESOURCE,
+  customerAccount,
+  formatAmountWithCurrency,
+  gridLoadingTimeout,
+  opportunity,
+  quoteBuilder,
+  sidebarResource,
+  termsAndCondition,
+  yyyyMMDD
+} from '../../../constants/helpers';
+import contactClass from '../../Contact/contact.module.scss';
+import DOAReasonDialog from '../../DOA/DOAReasonDialog';
+import ManageQuoteDialog from '../ManageQuote/ManageQuoteDialog';
+import AllVersionStatus from './AllVersionStatus';
+import QuoteDetailPage from './QuoteDetailPage';
+import QuoteProcess from './QuoteProcess';
 
 const useStyles = makeStyles((theme) => ({
   reasonDialog: {
@@ -180,7 +167,7 @@ export default function QuoteDetail() {
   const [deletingDOA, setDeletingDOA] = useState(false);
   const [DOAApproved, setDOAApproved] = useState(false);
   const [isCloning, setCloning] = useState(false);
-  const [approvedButtonText] = useState('Accept');
+
   const [DOARequestId, setDOARequestId] = useState(null);
   const [showQuoteStatusChangeDialog, setShowQuoteStatusChangeDialog] = useState(false);
   const [showAllVersionStatus, setShowAllVersionStatus] = useState(false);
@@ -636,20 +623,6 @@ export default function QuoteDetail() {
       });
   };
 
-  const getHeading = (
-    <span>
-      {quoteData ? `${quoteData.quoteName}  ` : ''}
-      <span
-        className="cursor-pointer underlined"
-        onClick={() => {
-          setShowAllVersionStatus(true);
-        }}
-      >
-        (V-{currentVersion})
-      </span>
-    </span>
-  );
-
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -665,18 +638,6 @@ export default function QuoteDetail() {
           <Box className="control-buttons-v1">
             {quoteData ? (
               <>
-                {permissions[sidebarResource.quoteBuilder]?.isCreate ? (
-                  <Button variant="text" size="small" className="mr-1" startIcon={<BiLayerPlus />} onClick={handleOpenCloneDialog}>
-                    Clone
-                  </Button>
-                ) : null}
-                {allowedToEdit ? (
-                  <Tooltip title="Edit">
-                    <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className={'btn-outline-v1'} onClick={handleOpenUpdateDialog}>
-                      {isMobile && !isTablet ? <Edit /> : 'Edit'}
-                    </Button>
-                  </Tooltip>
-                ) : null}
                 {processStatus !== 'New' && (
                   <Tooltip title="Quote Summary">
                     <Button
@@ -708,9 +669,104 @@ export default function QuoteDetail() {
                     {isMobile && !isTablet ? <VscVersions size={20} /> : `Version : ${currentVersion}`}
                   </Button>
                 </Tooltip>
+                <Button
+                  variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                  color="default"
+                  size="small"
+                  className={`${isMobile && !isTablet ? contactClass.mobile_button_layout : 'mx-1'} new-dropdown-v1`}
+                  endIcon={isMobile && !isTablet ? null : <ExpandMore />}
+                  onClick={openActions}
+                  aria-controls="action-menu"
+                >
+                  {isMobile && !isTablet ? <IoArrowDownCircleSharp size={20} /> : 'Actions '}
+                </Button>
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  id="action-menu"
+                  open={Boolean(anchorEl)}
+                  onClose={closeActions}
+                >
+                  {allowedToEdit && (
+                    <MenuItem onClick={handleOpenUpdateDialog}>
+                      <div className="flex gap-3 items-center">
+                        <HiPencil />
+                        <Typography variant="inherit">Edit Quote</Typography>
+                      </div>
+                    </MenuItem>
+                  )}
+                  <MenuItem
+                    onClick={() => {
+                      cloneVersion();
+                    }}
+                    disabled={!allowedToEdit || isCloning || loading || ifQuoteApproved.approved}
+                  >
+                    <div className="flex gap-3 items-center">
+                      {isCloning ? <CircularProgress color="inherit" size={16} /> : <BiLayerPlus />}
+                      <Typography variant="inherit">
+                        {isCloning ? <>Cloning Version-{currentVersion}</> : `Clone Version-${currentVersion}`}
+                      </Typography>
+                    </div>
+                  </MenuItem>
+                  {allowedToEdit && ifQuoteApproved.approved && (
+                    <MenuItem disabled={quoteReOpening} onClick={() => setReopenReasonDialog(true)}>
+                      <div className="flex gap-3 items-center">
+                        <VscIssueReopened />
+                        <Typography variant="inherit">Re-Open</Typography>
+                      </div>
+                    </MenuItem>
+                  )}
+                  {allowedToEdit && ifQuoteApproved.approved && (
+                    <MenuItem
+                      onClick={() => {
+                        setOpenUpdateDialog(true);
+                      }}
+                    >
+                      <div className="flex gap-3 items-center">
+                        <HiPencil />
+                        <Typography variant="inherit">Edit Information</Typography>
+                      </div>
+                    </MenuItem>
+                  )}
+                  {currentVersion !== 1 && ifQuoteApproved.approved === false && (
+                    <MenuItem
+                      disabled={
+                        !allowedToEdit ||
+                        deletingDOA ||
+                        loading ||
+                        (DOAneeded
+                          ? DOASteps.findIndex((d) => d?.key === processStatus) > 1
+                          : OtherSteps.findIndex((d) => d?.key === processStatus) > 1)
+                      }
+                      onClick={deleteVersion}
+                    >
+                      <div className="flex gap-3 items-center">
+                        <MdDelete />
+                        <Typography variant="inherit">Delete Version-{currentVersion}</Typography>
+                      </div>
+                    </MenuItem>
+                  )}
+
+                  {permissions[qbResource].isDelete &&
+                    quoteData?.owner.optionValue &&
+                    user?.user?._id &&
+                    quoteData.owner.optionValue === user.user._id && (
+                      <MenuItem onClick={() => setShowConfirmBox(true)}>
+                        <div className="flex gap-3 items-center">
+                          <MdDelete />
+                          <Typography variant="inherit">Delete Quote</Typography>
+                        </div>
+                      </MenuItem>
+                    )}
+                </Menu>
                 {DOAApproved && versionStatus === 'Sent for DOA' && (
                   <>
-                    <Tooltip title={`${approvedButtonText}`}>
+                    <Tooltip title={`Accept`}>
                       <Button
                         onClick={() => {
                           QuoteStatusChange('Accepted', '', '');
@@ -721,7 +777,7 @@ export default function QuoteDetail() {
                         startIcon={<ThumbUpIcon />}
                         color="primary"
                       >
-                        {isMobile && !isTablet ? '' : `${approvedButtonText}`}
+                        {isMobile && !isTablet ? '' : `Accept`}
                       </Button>
                     </Tooltip>
                     <Tooltip title="Reject">
@@ -739,125 +795,6 @@ export default function QuoteDetail() {
                         {isMobile && !isTablet ? '' : 'Reject'}
                       </Button>
                     </Tooltip>
-
-                    <Button
-                      variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                      color="default"
-                      size="small"
-                      className={`${isMobile && !isTablet ? contactClass.mobile_button_layout : 'mx-1'} new-dropdown-v1`}
-                      endIcon={isMobile && !isTablet ? null : <ExpandMore />}
-                      onClick={openActions}
-                      // className={styles.action_submit_btn}
-                      aria-controls="action-menu"
-                    >
-                      {isMobile && !isTablet ? <IoArrowDownCircleSharp size={20} /> : 'Actions '}
-                    </Button>
-                    <Menu
-                      anchorEl={anchorEl}
-                      keepMounted
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
-                      }}
-                      id="action-menu"
-                      open={Boolean(anchorEl)}
-                      onClose={closeActions}
-                    >
-                      {permissions[qbResource].isDelete &&
-                        quoteData?.owner.optionValue &&
-                        user?.user?._id &&
-                        quoteData.owner.optionValue === user.user._id && (
-                          <MenuItem>
-                            <Button
-                              variant="text"
-                              size="small"
-                              startIcon={<MdDelete className={isMobile ? 'mr-1' : ''} />}
-                              onClick={() => setShowConfirmBox(true)}
-                            >
-                              Delete Quote
-                            </Button>
-                          </MenuItem>
-                        )}
-
-                      {currentVersion !== 1 && ifQuoteApproved.approved === false && (
-                        <MenuItem>
-                          <Button
-                            variant="text"
-                            size="small"
-                            disabled={
-                              !allowedToEdit ||
-                              deletingDOA ||
-                              loading ||
-                              (DOAneeded
-                                ? DOASteps.findIndex((d) => d?.key === processStatus) > 1
-                                : OtherSteps.findIndex((d) => d?.key === processStatus) > 1)
-                            }
-                            startIcon={<MdDeleteSweep className={isMobile ? 'mr-1' : ''} />}
-                            onClick={deleteVersion}
-                          >
-                            Delete Version-{currentVersion}
-                          </Button>
-                        </MenuItem>
-                      )}
-                      <MenuItem>
-                        <Button
-                          disabled={!allowedToEdit || isCloning || loading || ifQuoteApproved.approved}
-                          variant="text"
-                          type="button"
-                          size="small"
-                          startIcon={isCloning ? <CircularProgress color="inherit" size={16} /> : <BiLayerPlus className={isMobile ? 'mr-1' : ''} />}
-                          onClick={() => {
-                            cloneVersion();
-                          }}
-                        >
-                          {isCloning ? <>Cloning Version-{currentVersion}</> : `Clone Version-${currentVersion}`}
-                        </Button>
-                      </MenuItem>
-
-                      {allowedToEdit && ifQuoteApproved.approved && (
-                        <MenuItem>
-                          <Button
-                            variant="outlined"
-                            color="primary"
-                            size="small"
-                            startIcon={<HiPencil className={isMobile ? 'mr-1' : ''} />}
-                            disabled={quoteReOpening}
-                            onClick={() => setReopenReasonDialog(true)}
-                          >
-                            Re-Open
-                          </Button>
-                        </MenuItem>
-                      )}
-                      {allowedToEdit && ifQuoteApproved.approved && (
-                        <MenuItem>
-                          <Button
-                            variant="outlined"
-                            color="primary"
-                            size="small"
-                            startIcon={<HiPencil className={isMobile ? 'mr-1' : ''} />}
-                            onClick={() => {
-                              setOpenUpdateDialog(true);
-                            }}
-                          >
-                            Edit Information
-                          </Button>
-                        </MenuItem>
-                      )}
-                      {allowedToEdit && (
-                        <MenuItem>
-                          <Button
-                            variant="text"
-                            color="primary"
-                            size="small"
-                            startIcon={<HiPencil className={isMobile ? 'mr-1' : ''} />}
-                            onClick={handleOpenUpdateDialog}
-                          >
-                            Edit Quote
-                          </Button>
-                        </MenuItem>
-                      )}
-                    </Menu>
                   </>
                 )}
               </>
@@ -868,7 +805,6 @@ export default function QuoteDetail() {
           </Box>
         </Box>
       </Box>
-
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab index={0}>
@@ -878,7 +814,6 @@ export default function QuoteDetail() {
             <BiFoodMenu className="mr-1" fontSize="inherit" /> Quote Versions
           </CustomTab>
         </CustomTabs>
-
         <TabPanel value={tabValue} index={0}>
           <>
             {quoteData && (
@@ -917,7 +852,8 @@ export default function QuoteDetail() {
               state={state}
               dispatch={dispatch}
               quoteData={quoteData}
-              ProcessStatus={processStatus}
+              processStatus={processStatus}
+              setProcessStatus={setProcessStatus}
               ifQuoteApproved={ifQuoteApproved}
               allowedToEdit={allowedToEdit}
               handleOpenUpdateDialog={handleOpenUpdateDialog}

@@ -20,7 +20,6 @@ const Steps = ({
   setStepFullScreen = null,
   updateStatus = null,
   isPrevStep = true,
-  isNextStepEnabled = true,
   handleNext = null,
   handlePrev = null,
   className = '',
@@ -78,15 +77,19 @@ const Steps = ({
   };
 
   const isNextButtonDisabled = React.useMemo(() => {
-    if (showExtraStep) return currentStep === steps.length || !nextStep || !isNextStepEnabled;
-    return currentStep === steps.length - 1 || (currentStep === 0 && isNextStep) || !nextStep || !isNextStepEnabled;
+    if (showExtraStep) return currentStep === steps.length || !nextStep;
+    return currentStep === steps.length - 1 || (currentStep === 0 && isNextStep) || !nextStep;
   }, [currentStep, steps.length, showExtraStep, nextStep, isNextStep]);
 
   return (
     <div>
       {isMobile && !isTablet ? (
         <MobileSteps
-          stepName={`${activeStep + 1}/${steps.length} ${steps[currentStep]?.title ? steps[currentStep]?.title : ''}`}
+          stepName={`${
+            activeStep + 1 > steps.length || isStepEnded
+              ? 'Completed'
+              : `${activeStep + 1}/${steps.length} ${steps[currentStep]?.title ? steps[currentStep]?.title : ''}`
+          }`}
           nextButton={
             <Button
               size="small"

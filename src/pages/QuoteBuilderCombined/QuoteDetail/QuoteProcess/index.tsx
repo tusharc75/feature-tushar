@@ -33,8 +33,8 @@ import {
   customerContact,
   formatAmountWithCurrency,
   opportunity,
-  QUOTATION_STATUS,
   quote,
+  QUOTE_PROCESS_STATUS,
   quoteBuilder,
   sidebarResource,
   supplierAccount
@@ -212,7 +212,7 @@ export default function QuoteProcess(props) {
     state,
     dispatch,
     quoteData,
-    ProcessStatus,
+    processStatus,
     allowedToEdit,
     ifQuoteApproved,
     currentVersion,
@@ -248,7 +248,7 @@ export default function QuoteProcess(props) {
   const history = useHistory();
 
   const [quoteCurrency] = useState(quoteData?.currency);
-  const [nextStep, setNextStep] = useState(true);
+  const [nextStep, setNextStep] = useState(false);
   const [prevStep, setPrevStep] = useState(true)
   const [redCard, setRedCard] = useState(false);
   const [totalProfit, setTotalProfit] = useState({
@@ -305,7 +305,7 @@ export default function QuoteProcess(props) {
   const [showPDFArrangeColumns, setShowPDFArrangeColumns] = useState(false);
   const [showExcelArrangeColumns, setShowExcelArrangeColumns] = useState(false);
   const [stepFullScreen, setStepFullScreen] = useState(false);
-  const [columns, setColumnDatas] = useState([]);
+  const [columns, setColumnData] = useState([]);
 
   const [messageDialog, setMessageDialog] = useState({
     open: false,
@@ -358,20 +358,19 @@ export default function QuoteProcess(props) {
 
   useEffect(() => {
     fetchUserEmails();
-    const tempProcessStatus = quoteData?.versions[currentVersion]?.processStatus;
-    const tempOverallStatus = quoteData?.versions[currentVersion]?.status;
-
-    if (tempProcessStatus === 'DOA Process' && !tempOverallStatus.includes('Accepted') && DOAneeded) {
-      setNextStep(false);
+    if (processStatus === QUOTE_PROCESS_STATUS.doaProcess) {
+      const currentVersionStatus = quoteData?.versions[currentVersion]?.status;
+      if (currentVersionStatus.includes('Accepted')) {
+        setNextStep(true);
+      }
+      else {
+        setNextStep(false);
+      }
     }
-    if (tempProcessStatus === 'DOA Process' && tempOverallStatus.includes('Accepted') && DOAneeded) {
-      setNextStep(true);
-    }
-    if (tempProcessStatus === 'Customer Process') {
-      setNextStep(false);
-    }
-    if (tempProcessStatus === 'Quote Builder' || 'Send To Customer') {
-      setNextStep(true);
+    if (processStatus === QUOTE_PROCESS_STATUS.sendToCustomer) {
+      if (ifQuoteApproved.approved || quoteData?.versions[currentVersion]?.offered) {
+        setNextStep(true);
+      }
     }
   }, [quoteData]);
 
@@ -384,7 +383,7 @@ export default function QuoteProcess(props) {
           data = data.data?.product?.map((u, index) => ({
             ...u,
             id: u._id,
-            srno: index + 1,
+            index: index + 1,
             // productTemplateDisplayValue: u.productTemplate?.optionLabel,
             productCategoryDisplayValue: u.productCategory?.optionLabel,
             priceTemplateDisplayValue: u.priceTemplate?.optionLabel
@@ -428,9 +427,8 @@ export default function QuoteProcess(props) {
   }, [DOAsetup, DOAlimit]);
 
   const fetchDOAData = () => {
-    if ((ProcessStatus === 'DOA Process' && DOAneeded) || (versionStatus.includes('Rejected by DOA') && ProcessStatus === 'End')) {
-      axiosInstance()
-        .get(`doa-request/doaFlow/${quoteData._id}/${currentVersion}`)
+    if ((processStatus === QUOTE_PROCESS_STATUS.doaProcess && DOAneeded) || (versionStatus.includes('Rejected by DOA') && processStatus === 'End')) {
+      axiosInstance().get(`doa-request/doaFlow/${quoteData._id}/${currentVersion}`)
         .then(({ data: { data } }) => {
           setDOAData(data.reverse());
         })
@@ -451,7 +449,7 @@ export default function QuoteProcess(props) {
 
   const productCalculationForDoa = (BuilderData) => {
     const inventory: { fieldName: string; fieldValue: any }[][] = [];
-    const ignoredKeys = ['fields', '_id', 'productId', 'templateFields', 'id', 'string', 'srno'];
+    const ignoredKeys = ['fields', '_id', 'productId', 'templateFields', 'id', 'string', 'index'];
 
     let totalCost = 0;
     let totalSellingPrice = 0;
@@ -557,9 +555,6 @@ export default function QuoteProcess(props) {
                   colName.push(d);
                 }
               });
-              // if (data.required) {
-              //     (quoteRows[fieldName] && quoteRows[fieldName] !== "") || ((quoteRows[`${fieldName}_${data.displayCurrency.toLowerCase()}`] && quoteRows[`${fieldName}_${data.displayCurrency.toLowerCase()}`] !== "")) ? requiredFieldArray.push({ "key": quoteRows[fieldName], "value": true }) : requiredFieldArray.push({ "key": quoteRows[fieldName], "value": false }) //next button disable logic
-              // }
             }
           });
         }
@@ -573,25 +568,6 @@ export default function QuoteProcess(props) {
             key = splitKey[0];
             currency = splitKey[1].toUpperCase();
           }
-          // let fields = quoteRows["fields"];
-          // let field = fields.filter(
-          //     (d: { fieldName: string }) => d.fieldName === key
-          // );
-
-          // if (typeof field[0] !== "undefined") {
-          //     if (typeof quoteRows[key] === "object") {
-          //         inventorydata.push({
-          //             fieldName: field[0].fieldLabel,
-          //             fieldValue: quoteRows[key] ? quoteRows[key][key] : null,
-          //         });
-          //     } else {
-          //         inventorydata.push({
-          //             fieldName: field[0].fieldLabel,
-          //             fieldValue:
-          //                 quoteRows[indexkey] === null ? 0 : quoteRows[indexkey],
-          //         });
-          //     }
-
           if (currency === quoteData?.currency && key === 'totalCost') {
             totalCost = totalCost + quoteRows[indexkey];
           } else if (currency === quoteData?.currency && key === 'totalSalesPrice') {
@@ -601,7 +577,6 @@ export default function QuoteProcess(props) {
           } else if (currency === quoteData?.currency && key === 'totalMargin') {
             totalMargin = totalMargin + quoteRows[indexkey];
           }
-          // }
         }
       });
 
@@ -613,7 +588,7 @@ export default function QuoteProcess(props) {
           return isEmpty.length > 0 ? true : false;
         });
 
-      if (DOASteps.findIndex((d) => d?.key === ProcessStatus) === 1 || ProcessStatus === 'Price Builder') {
+      if (DOASteps.findIndex((d) => d?.key === processStatus) === 1 || processStatus === 'Price Builder') {
         let hasPrice = false;
         tempBuilderData.forEach((data) => {
           if (
@@ -631,11 +606,11 @@ export default function QuoteProcess(props) {
           withZeroAmt = tempBuilderData.filter((d) => d[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] === 0);
         }
 
-        if ((!ungivenValues && ungivenValues.length === 0) || (!withZeroAmt.length && hasPrice && !withZeroQty.length)) {
-          setNextStep(true);
-        } else {
-          setNextStep(false);
-        }
+        // if ((!ungivenValues && ungivenValues.length === 0) || (!withZeroAmt.length && hasPrice && !withZeroQty.length)) {
+        //   setNextStep(true);
+        // } else {
+        //   setNextStep(false);
+        // }
       }
       dynamicTable.push(labelsWithVal);
       inventory.push(inventorydata);
@@ -668,24 +643,6 @@ export default function QuoteProcess(props) {
   };
 
   const refreshProducts = (data) => {
-    if (ProcessStatus === 'New' && data?.product?.length === 0) {
-      setNextStep(false);
-    }
-    if (ProcessStatus === 'New' && data?.product?.length > 0) {
-      setNextStep(true);
-    }
-    if (ProcessStatus === 'Price Builder' && data?.product?.length === 0) {
-      axiosInstance()
-        .post(`quote-builder/updateprocess/${quoteData._id}?version=${currentVersion}`, {
-          processStatus: 'New'
-        })
-        .then(() => {
-          fetchQuoteData(currentVersion);
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
-    }
     productBuilderdatatoQuoteBuilderdata(data);
   };
 
@@ -1043,10 +1000,6 @@ export default function QuoteProcess(props) {
       });
   };
 
-  let isHideReminder = false;
-  if (quoteData?.versions && quoteData.versions[currentVersion] && quoteData.versions[currentVersion]?.adobeAgreementStatus === 'SIGNED') {
-    isHideReminder = true;
-  }
 
   const handleCases = () => {
     if (DOAreq) {
@@ -1273,26 +1226,22 @@ export default function QuoteProcess(props) {
     return ((profit * 100) / parsedCP).toFixed(2);
   };
 
-
   return (
     <>
       <div>
         <Steps
           steps={DOAneeded ? DOASteps : OtherSteps}
-          currentStep={
-            DOAneeded
-              ? DOASteps.findIndex((d) => d?.key === ProcessStatus)
-              : ProcessStatus === 'DOA Process'
-                ? OtherSteps.findIndex((d) => d?.key === 'Quote Builder')
-                : OtherSteps.findIndex((d) => d?.key === ProcessStatus)
+          currentStep={DOAneeded ? DOASteps.findIndex((d) => d?.key === processStatus) :
+            OtherSteps.findIndex((d) => d?.key === processStatus)
           }
           id={quoteData._id}
           version={currentVersion}
           Refresh={fetchQuoteData}
-          nextStep={
-            ProcessStatus === 'Send To Customer' && (!ifQuoteApproved.approved && !quoteData?.versions[currentVersion]?.offered) ? false :
-              ['Rejected by Customer', 'Sent for DOA', 'Sent to Customer'].includes(versionStatus) ? true : nextStep
-          }
+          nextStep={nextStep}
+          // nextStep={
+          //   processStatus === 'Send To Customer' && (!ifQuoteApproved.approved && !quoteData?.versions[currentVersion]?.offered) ? false :
+          //     ['Rejected by Customer', 'Sent for DOA', 'Sent to Customer'].includes(versionStatus) ? true : nextStep
+          // }
           isPrevStep={['Rejected by Customer', 'Sent for DOA', 'Sent to Customer'].includes(versionStatus) ? false : prevStep}
           versionStatus={versionStatus}
           loading={loading}
@@ -1305,7 +1254,7 @@ export default function QuoteProcess(props) {
               state?.selectedRecords
             );
           }}
-          isStepEnded={['End'].includes(ProcessStatus)}
+          isStepEnded={['End'].includes(processStatus)}
           handleViewPdf={handleViewPdf}
           allowedToEdit={allowedToEdit}
           DOAData={DOAData}
@@ -1316,7 +1265,7 @@ export default function QuoteProcess(props) {
       </div>
       <div className={`pt-[12px] subDetailModule `}>
         <ContentFullScreen
-          title={DOASteps.find((d) => d?.key === ProcessStatus).label || ''}
+          title={DOASteps.find((d) => d?.key === processStatus).label || ''}
           fullScreen={stepFullScreen}
           setFullScreen={setStepFullScreen}
         >
@@ -1324,7 +1273,7 @@ export default function QuoteProcess(props) {
             <Grid container className="position-relative">
               <div className="flex items-center justify-between flex-wrap w-full mx-3 gap-[8px]">
                 <div className="flex flex-wrap items-center gap-2">
-                  {!ifQuoteApproved.approved && ProcessStatus === 'New' && allowedToEdit ? (
+                  {!ifQuoteApproved.approved && processStatus === QUOTE_PROCESS_STATUS.new && allowedToEdit ? (
                     <>
                       <Tooltip title="Add New Product">
                         <Button
@@ -1357,7 +1306,7 @@ export default function QuoteProcess(props) {
                       </Tooltip>
                     </>
                   ) : null}
-                  {!['New', 'Price Builder'].includes(ProcessStatus) && allowedToEdit && (
+                  {![QUOTE_PROCESS_STATUS.new, QUOTE_PROCESS_STATUS.priceBuilder].includes(processStatus) && allowedToEdit && (
                     <PreviewDownload
                       resource={sidebarResource.quoteBuilder}
                       referenceId={quoteData?._id}
@@ -1373,7 +1322,7 @@ export default function QuoteProcess(props) {
                         `totalSalesPrice_${quoteData?.currency?.toLowerCase()}`]}
                     />
                   )}
-                  {['Send To Customer', 'End'].includes(ProcessStatus) && (
+                  {[QUOTE_PROCESS_STATUS.sendToCustomer, QUOTE_PROCESS_STATUS.end].includes(processStatus) && (
                     <>
                       <Tooltip title="AI Suggestion">
                         <Button
@@ -1414,42 +1363,9 @@ export default function QuoteProcess(props) {
                     </>
                   )}
                 </div>
-                {ProcessStatus === 'Quote Builder' ? (
+                {/* Test Code */}
+                {processStatus === QUOTE_PROCESS_STATUS.quoteBuilder ? (
                   <span className="d-flex flex-wrap gap-2 align-items-center justify-content-end ml-auto">
-                    <Tooltip title="View">
-                      <Button
-                        onClick={() => {
-                          handleViewPdf(true, false);
-                        }}
-                        variant="outlined"
-                        disabled={viewDownloadLoading || updatingVersion}
-                        size="small"
-                        className="setIconForMobile"
-                        startIcon={isMobile && !isTablet ? '' : <AiOutlineEye />}
-                        color="primary"
-                      >
-                        {isMobile && !isTablet ? <AiOutlineEye size={20} /> : ''}
-                        {isMobile && !isTablet ? '' : 'View'}
-                      </Button>
-                    </Tooltip>
-                    <Tooltip title="Download">
-                      <Button
-                        disabled={viewDownloadLoading || updatingVersion}
-                        onClick={() => {
-                          handleViewPdf(false, true);
-                          exportToCSV();
-                        }}
-                        variant="outlined"
-                        size="small"
-                        className="setIconForMobile"
-                        startIcon={isMobile && !isTablet ? '' : <FiDownloadCloud />}
-                        color="primary"
-                      >
-                        {isMobile && !isTablet ? <FiDownloadCloud size={20} /> : ''}
-                        {isMobile && !isTablet ? '' : 'Download'}
-                      </Button>
-                    </Tooltip>
-
                     <Tooltip title="View">
                       <Button
                         onClick={() => {
@@ -1511,8 +1427,10 @@ export default function QuoteProcess(props) {
                     </Tooltip>
                   </span>
                 ) : null}
-                {(ProcessStatus === 'DOA Process' && versionStatus === 'Building Quote' && DOAneeded) ||
-                  (ProcessStatus === 'Send To Customer' && versionStatus !== 'Sent to Customer') ? (
+                {/* Test Code */}
+
+                {(processStatus === 'DOA Process' && versionStatus === 'Building Quote' && DOAneeded) ||
+                  (processStatus === 'Send To Customer' && versionStatus !== 'Sent to Customer') ? (
                   <div className={`flex flex-wrap items-center ml-auto ${isMobile ? 'actio-pos-quote' : ''}`}>
                     {!ifQuoteApproved.approved && (
                       <Button
@@ -1562,12 +1480,13 @@ export default function QuoteProcess(props) {
                     isAddExistingProduct={isAddExistingProduct}
                     setIsAddExistingProduct={setIsAddExistingProduct}
                     setColumnForPDFExcel={setColName}
-                    setColumnDatas={setColumnDatas}
+                    setColumnData={setColumnData}
                     refreshProducts={refreshProducts}
-                    stage={ProcessStatus === 'New' ? 'product' : 'cost'}
-                    isPriceBuilder={ProcessStatus === 'Price Builder'}
-                    Editable={allowedToEdit && (ProcessStatus === 'Price Builder' || ProcessStatus === 'New') ? true : false}
+                    stage={processStatus === QUOTE_PROCESS_STATUS.new ? 'product' : 'cost'}
+                    isPriceBuilder={processStatus === QUOTE_PROCESS_STATUS.priceBuilder}
+                    Editable={allowedToEdit && ([QUOTE_PROCESS_STATUS.new, QUOTE_PROCESS_STATUS.priceBuilder]?.includes(processStatus)) ? true : false}
                     fullScreen={stepFullScreen}
+                    processStatus={processStatus}
                     setNextStep={setNextStep}
                   />
                 ) : (
@@ -1685,7 +1604,7 @@ export default function QuoteProcess(props) {
           accepted={quoteStatusChangeData}
         />
       )}
-      {showTotalSalesDialog && ProcessStatus !== 'New' && (
+      {showTotalSalesDialog && processStatus !== 'New' && (
         <Dialog
           open={showTotalSalesDialog}
           aria-labelledby="customized-dialog-title"
@@ -1752,7 +1671,7 @@ export default function QuoteProcess(props) {
           </CustomDialogContent>
         </Dialog>
       )}
-      {(showPDFArrangeColumns || showExcelArrangeColumns) && ProcessStatus !== 'New' && (
+      {(showPDFArrangeColumns || showExcelArrangeColumns) && processStatus !== 'New' && (
         <Dialog
           open={showPDFArrangeColumns ? showPDFArrangeColumns : showExcelArrangeColumns}
           aria-labelledby="customized-dialog-title"

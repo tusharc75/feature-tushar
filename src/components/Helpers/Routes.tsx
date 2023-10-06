@@ -1043,6 +1043,13 @@ const routes = {
       : RESOURCE_LABEL.iotReport,
     path: '/iot-report'
   },
+  accountsReceivable : {
+    title:
+      storedRoutes && storedRoutes.accountsReceivable && storedRoutes.accountsReceivable.title
+        ? storedRoutes.accountsReceivable?.title
+        : RESOURCE_LABEL.accountsReceivable,
+    path: '/accounts-receivable'
+  },
   deviceTemplates: {
     title: storedRoutes && storedRoutes.deviceTemplates && storedRoutes.deviceTemplates?.title ? storedRoutes.deviceTemplates?.title
       : RESOURCE_LABEL.deviceTemplates,
@@ -1092,6 +1099,16 @@ const routes = {
         ? storedRoutes.chartOfAccount?.title
         : RESOURCE_LABEL.chartOfAccount,
     path: '/chart-of-account/detail'
+  },
+  flash : {
+    title : storedRoutes && storedRoutes.flash && storedRoutes.flash.title
+    ? storedRoutes.flash?.title
+    : RESOURCE_LABEL.flash,
+    path : '/flash'
+  },
+  flashDetail: {
+    title: storedRoutes && storedRoutes.flash && storedRoutes.flash.title ? storedRoutes.flash?.title : RESOURCE_LABEL.flash,
+    path: '/flash/detail'
   },
 };
 

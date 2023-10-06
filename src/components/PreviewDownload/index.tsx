@@ -2,14 +2,14 @@ import { Box, Button, Dialog } from '@material-ui/core';
 import { useContext, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { AiFillFilePdf } from 'react-icons/ai';
-import { IoMdDownload } from 'react-icons/io';
+
+import { MdEmail } from 'react-icons/md';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { DownloadIcon, ExportIcon } from 'src/assets/svg/svgIcons';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomDialogTransition, downloadExcel } from 'src/constants/helpers';
-import { MdEmail } from 'react-icons/md';
 import { CreateEmail } from '../Activity/Email/CreateEmail';
 import { PreviewDialog } from './PreviewDialog';
-import { CiExport } from 'react-icons/ci';
 
 function PreviewDownload({
   resource,
@@ -36,7 +36,10 @@ function PreviewDownload({
           fieldLabel: d?.Header || d?.headerName,
           fieldName: d?.accessor || d?.field
         };
-      })?.map((d) => { return { ...d, fieldName: d.fieldName === 'qtyDisplay' ? 'qty' : d.fieldName } }) || [];
+      })
+      ?.map((d) => {
+        return { ...d, fieldName: d.fieldName === 'qtyDisplay' ? 'qty' : d.fieldName };
+      }) || [];
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
@@ -48,85 +51,38 @@ function PreviewDownload({
 
   const [emailAttachments, setEmailAttachments] = useState([]);
 
-  // const handleViewPdf = (type, pdfType, visibleColumns) => {
-  //   let showColumns = allColumn
-  //     ?.filter((d) => visibleColumns?.includes(d?.fieldLabel))
-  //     .map((d) => { return d?.fieldName; });
-  //   setLoadingType(pdfType);
-
-  //   let api = ''
-  //   if (pdfType === 'Detail') {
-  //     api = `/pdf/${referenceId}/detail?resource=${resource}&columns=${showColumns}`;
-  //   }
-  //   else {
-  //     api = `/pdf/${referenceId}?resource=${resource}&columns=${showColumns}`;
-  //   }
-  //   if (extraQueryParams) {
-  //     for (const key in extraQueryParams) {
-  //       api = `${api}&${key}=${extraQueryParams[key]}`
-  //     }
-  //   }
-  //   axiosInstance().get(api).then(({ data }) => {
-  //     axiosInstance()
-  //       .get(`user/download?fileName=${data.data.fileName}`, {
-  //         responseType: 'blob'
-  //       })
-  //       .then(({ data }) => {
-  //         setLoadingType(null);
-  //         setLoading(false);
-  //         setShowColumnsDialog({ open: false, type: '' });
-  //         if (type === 'Download') {
-  //           const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
-  //           const link = document.createElement('a');
-  //           link.href = url;
-  //           link.setAttribute('download', `${resource}.pdf`);
-  //           document.body.appendChild(link);
-  //           link.click();
-  //         } else if (type === 'Preview') {
-  //           const file = new Blob([data], { type: 'application/pdf' });
-  //           const fileURL = URL.createObjectURL(file);
-  //           const pdfWindow = window.open();
-  //           pdfWindow.location.href = fileURL;
-  //           toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
-  //         } else {
-  //           const file = new Blob([data], { type: 'application/pdf' });
-  //           generateBase64forFile(file, 'pdf', pdfType);
-  //         }
-  //       })
-  //       .catch((err) => {
-  //         setLoadingType(null);
-  //         toastConfig.setToastConfig(err);
-  //       });
-  //   })
-  //     .catch((err) => {
-  //       setLoadingType(null);
-  //       toastConfig.setToastConfig(err);
-  //     });
-  // };
-
   const handleViewPdf = (type, pdfType, visibleColumns) => {
-    let showColumns = allColumn
-      ?.filter((d) => visibleColumns?.includes(d?.fieldLabel))
-      .map((d) => { return d?.fieldName; });
     setLoadingType(pdfType);
 
-    let api = ''
+    // let showColumns = allColumn
+    //   ?.filter((d) => visibleColumns?.includes(d?.fieldLabel))
+    //   .map((d) => {
+    //     return d?.fieldName;
+    //   });
+
+    let showColumns = visibleColumns?.map((d) => {
+      return allColumn?.find((c) => c?.fieldLabel === d)?.fieldName;
+    });
+
+    let api = '';
     if (type === 'Export') {
-      api = `/excel/${referenceId}/detail?resource=${resource}&columns=${showColumns}`;
+      api = `/excel/${referenceId}?resource=${resource}&columns=${showColumns}`;
     } else if (pdfType === 'Detail') {
       api = multiple ?  `pdf/multiple/detail?resource=${resource}&ids=${ids}&columns=${showColumns}`: `/pdf/${referenceId}/detail?resource=${resource}&columns=${showColumns}`;
     }
     else {
       api = multiple ?  `pdf/multiple?resource=${resource}&ids=${ids}&columns=${showColumns}`: `/pdf/${referenceId}?resource=${resource}&columns=${showColumns}`;
     }
+
     if (extraQueryParams) {
       for (const key in extraQueryParams) {
-        api = `${api}&${key}=${extraQueryParams[key]}`
+        api = `${api}&${key}=${extraQueryParams[key]}`;
       }
     }
 
     const responseType = type === 'Export' ? 'arraybuffer' : 'blob';
-    axiosInstance().get(api, { responseType: responseType })
+    axiosInstance()
+      .get(api, { responseType: responseType })
       .then((response) => {
         setLoadingType(null);
         setLoading(false);
@@ -141,17 +97,17 @@ function PreviewDownload({
           const link = document.createElement('a');
           link.href = url;
           link.setAttribute('download', `${resource}.pdf`);
-          document.body.appendChild(link);
           link.click();
-        }
-        else if (type === 'Preview') {
+        } else if (type === 'Preview') {
           const blobData = new Blob([response.data], { type: 'application/pdf' });
           const fileURL = URL.createObjectURL(blobData);
-          const pdfWindow = window.open();
-          pdfWindow.location.href = fileURL;
+          const link = document.createElement('a');
+          link.href = fileURL;
+          link.target = '_blank';
+          link.style.display = 'none';
+          link.click();
           toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
-        }
-        else {
+        } else {
           const blobData = new Blob([response.data], { type: 'application/pdf' });
           generateBase64forFile(blobData, 'pdf', pdfType);
         }
@@ -207,33 +163,32 @@ function PreviewDownload({
             color="primary"
             type="button"
             size="small"
-            startIcon={isMobile && !isTablet ? '' : <IoMdDownload />}
+            startIcon={isMobile && !isTablet ? '' : <DownloadIcon />}
             disabled={loadingType === 'download'}
             onClick={(e) => {
               setDownlodingFile('Download');
               setShowColumnsDialog({ open: true, type: 'PDF' });
             }}
           >
-            {isMobile && !isTablet ? <IoMdDownload size={20} /> : loadingType === 'download' ? 'Please wait...' : 'Download'}
+            {isMobile && !isTablet ? <DownloadIcon fontSize={20} /> : loadingType === 'download' ? 'Please wait...' : 'Download'}
           </Button>
-          {
-            isExcelDownload && (
-              <Button
-                className="btn-outline-v1"
-                variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                color="primary"
-                type="button"
-                size="small"
-                startIcon={isMobile && !isTablet ? '' : <CiExport />}
-                disabled={loadingType === 'excel'}
-                onClick={(e) => {
-                  setDownlodingFile('Export');
-                  setShowColumnsDialog({ open: true, type: 'Excel' });
-                }}
-              >
-                {isMobile && !isTablet ? <IoMdDownload size={20} /> : loadingType === 'export' ? 'Please wait...' : 'Export To Excel'}
-              </Button>
-            )}
+          {isExcelDownload && (
+            <Button
+              className="btn-outline-v1"
+              variant={isMobile && !isTablet ? 'text' : 'outlined'}
+              color="primary"
+              type="button"
+              size="small"
+              startIcon={isMobile && !isTablet ? '' : <ExportIcon />}
+              disabled={loadingType === 'excel'}
+              onClick={(e) => {
+                setDownlodingFile('Export');
+                setShowColumnsDialog({ open: true, type: 'Excel' });
+              }}
+            >
+              {isMobile && !isTablet ? <ExportIcon /> : loadingType === 'export' ? 'Please wait...' : 'Export To Excel'}
+            </Button>
+          )}
           {isSendEmail && (
             <Button
               variant={isMobile && !isTablet ? 'text' : 'outlined'}
@@ -286,7 +241,7 @@ function PreviewDownload({
           maxWidth="md"
           onClose={() => {
             setSendEmail(false);
-            setEmailAttachments([])
+            setEmailAttachments([]);
             setFullScreen(false);
           }}
           fullWidth
@@ -295,12 +250,12 @@ function PreviewDownload({
             generatingFile={false}
             handleClose={() => {
               setSendEmail(false);
-              setEmailAttachments([])
+              setEmailAttachments([]);
               setFullScreen(false);
             }}
             fetchData={() => {
               setSendEmail(false);
-              setEmailAttachments([])
+              setEmailAttachments([]);
             }}
             id={referenceId}
             isQuoteBuilder={true}
