@@ -745,14 +745,7 @@ export default function QuoteDetail() {
                   )}
                   {currentVersion !== 1 && ifQuoteApproved.approved === false && (
                     <MenuItem
-                      disabled={
-                        !allowedToEdit ||
-                        deletingDOA ||
-                        loading ||
-                        (DOAneeded
-                          ? DOASteps.findIndex((d) => d?.key === processStatus) > 1
-                          : OtherSteps.findIndex((d) => d?.key === processStatus) > 1)
-                      }
+                      disabled={!allowedToEdit}
                       onClick={() => {
                         closeActions()
                         deleteVersion()
