@@ -7,7 +7,7 @@ import { MdEmail } from 'react-icons/md';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { DownloadIcon, ExportIcon } from 'src/assets/svg/svgIcons';
 import axiosInstance from 'src/axios/axiosInstance';
-import { CustomDialogTransition, downloadExcel } from 'src/constants/helpers';
+import { CustomDialogTransition, downloadExcel, sidebarResource } from 'src/constants/helpers';
 import { CreateEmail } from '../Activity/Email/CreateEmail';
 import { PreviewDialog } from './PreviewDialog';
 
@@ -22,7 +22,9 @@ function PreviewDownload({
   button2Title = 'Detail',
   extraQueryParams = null,
   subject = '',
-  isExcelDownload = false
+  isExcelDownload = false,
+  versionNumber = null,
+  handleRefresh = null,
 }) {
   const toastConfig = useContext(CustomToastContext);
 
@@ -52,15 +54,7 @@ function PreviewDownload({
   const handleViewPdf = (type, pdfType, visibleColumns) => {
     setLoadingType(pdfType);
 
-    // let showColumns = allColumn
-    //   ?.filter((d) => visibleColumns?.includes(d?.fieldLabel))
-    //   .map((d) => {
-    //     return d?.fieldName;
-    //   });
-
-    let showColumns = visibleColumns?.map((d) => {
-      return allColumn?.find((c) => c?.fieldLabel === d)?.fieldName;
-    });
+    let showColumns = visibleColumns?.map((e) => e?.fieldName)?.toString();
 
     let api = '';
     if (type === 'Export') {
@@ -125,7 +119,7 @@ function PreviewDownload({
           base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
           contentType: base64data.split(';')[0].split(':')[1],
           extension: '.pdf',
-          name: `${resource}-${pdfType}`
+          name: `${resource}-${pdfType === 'Regular' ? button1Title : button2Title}`
         };
         setEmailAttachments((prevState) => {
           return [...prevState, attachments];
@@ -195,12 +189,8 @@ function PreviewDownload({
               disabled={loadingType === 'email'}
               startIcon={isMobile ? '' : <MdEmail />}
               onClick={() => {
-                setLoadingType('email');
-                handleViewPdf('Email', 'Detail', columns);
-                if (!hideDetailButton) {
-                  handleViewPdf('Email', 'Regular', columns);
-                }
-                setSendEmail(true);
+                setDownlodingFile('Send Email');
+                setShowColumnsDialog({ open: true, type: 'PDF' });
               }}
             >
               {isMobile && !isTablet ? <MdEmail size={20} /> : loadingType === 'email' ? 'Please wait...' : `Send Email`}
@@ -215,7 +205,17 @@ function PreviewDownload({
             setShowColumnsDialog({ open: false, type: '' });
           }}
           handleViewPdf={(type, visibleColumnsPdf) => {
-            handleViewPdf(downlodingFile, type, visibleColumnsPdf);
+            if (downlodingFile === 'Send Email') {
+              setLoadingType('email');
+              handleViewPdf('Email', 'Regular', visibleColumnsPdf);
+              if (!hideDetailButton) {
+                handleViewPdf('Email', 'Detail', visibleColumnsPdf);
+              }
+              setSendEmail(true);
+            }
+            else {
+              handleViewPdf(downlodingFile, type, visibleColumnsPdf);
+            }
           }}
           loadingType={loadingType}
           loading={loading}
@@ -244,6 +244,7 @@ function PreviewDownload({
           fullWidth
         >
           <CreateEmail
+            showESign={resource === sidebarResource.quoteBuilder ? true : false}
             generatingFile={false}
             handleClose={() => {
               setSendEmail(false);
@@ -253,6 +254,9 @@ function PreviewDownload({
             fetchData={() => {
               setSendEmail(false);
               setEmailAttachments([]);
+              if (handleRefresh) {
+                handleRefresh()
+              }
             }}
             id={referenceId}
             isQuoteBuilder={true}
@@ -266,6 +270,7 @@ function PreviewDownload({
             }}
             showManimizeMaximize={true}
             referenceType={resource}
+            versionNumber={versionNumber}
           />
         </Dialog>
       )}
