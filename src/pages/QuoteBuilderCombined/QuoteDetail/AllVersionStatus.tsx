@@ -1,8 +1,7 @@
-import { Dialog, IconButton, Tooltip } from '@material-ui/core';
+import { Dialog, IconButton } from '@material-ui/core';
 import { useContext, useReducer, useState } from 'react'
 import axiosInstance from '../../../axios/axiosInstance';
 import { formatAmountWithCurrency, gridLoadingTimeout } from '../../../constants/helpers';
-import { Link } from "react-router-dom";
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useEffect } from 'react';
 import CustomAgGrid, { reducer, intialState } from "../../../components/AgGridComponents/CustomAgGrid";
@@ -12,6 +11,7 @@ import CustomRenderCell from '../../../components/Helpers/CustomRenderCell';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import { isMobile, isTablet } from 'react-device-detect';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const DOASteps = [
     {
@@ -67,10 +67,8 @@ export default function AllVersionStatus({ open, onClose, quoteId, quoteData, qu
         ;
 
     const ActionsRenderer = params => <>
-
         {quotePermissions?.isCreate ?
-
-            <Tooltip title="Clone quote with versions">
+            <HtmlTooltip title="Clone version to quote">
                 <IconButton
                     size="small"
                     aria-label="clone version"
@@ -80,15 +78,16 @@ export default function AllVersionStatus({ open, onClose, quoteId, quoteData, qu
                 >
                     <FileCopyIcon fontSize="small" color="primary" />
                 </IconButton>
-            </Tooltip>
+            </HtmlTooltip>
             :
-            <Tooltip className="cursor-stop" title={`You don't have permission to clone`}>
+            <HtmlTooltip className="cursor-stop" title={`You don't have permission to clone`}>
                 <IconButton size="small" aria-label="clone version">
                     <FileCopyIcon fontSize="small" color="primary" />
                 </IconButton>
-            </Tooltip>
+            </HtmlTooltip>
         }
     </>
+
     const frameworkComponents = {
         nameRenderer: NameRenderer,
         commonRenderer: CommonRenderer,
@@ -103,7 +102,6 @@ export default function AllVersionStatus({ open, onClose, quoteId, quoteData, qu
 
     const getVersionStatus = () => {
         dispatch({ type: "loading", loading: true });
-
         if (gridApi) {
             gridApi.setRowData([]);
         }
