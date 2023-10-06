@@ -1950,8 +1950,7 @@ export const RENTAL_INTERNAL_ASSET_STATUS = {
   return: 'Return',
   consumed: 'Consumed',
   standBy: 'Stand By',
-  standByNotChargeable: 'Stand By-Not Chargeable',
-  delivered : 'Delivered',
+  standByNotChargeable: 'Stand By-Not Chargeable'
 } as const;
 
 export const REPAIR_JOB_STATUS = {

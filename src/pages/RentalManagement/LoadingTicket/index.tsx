@@ -319,6 +319,8 @@ const LoadingTicket = ({
 
       productAssets = [...productAssets?.filter((e) => !e.isReplaced), ...productAssets?.filter((e) => e.isReplaced)];
 
+      console.log(productAssets);
+
       dispatch({ type: 'initialize', data: productAssets, count: productAssets.length });
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
@@ -432,7 +434,7 @@ const LoadingTicket = ({
 
   const ActionRenderer = (params) =>
     user?.user?.brandPolicy?.assetDeliveredStatus &&
-      [RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy, RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable, RENTAL_INTERNAL_ASSET_STATUS.delivered]?.includes(params?.data?.rentalAssetStatus) &&
+      [RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy, RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable]?.includes(params?.data?.rentalAssetStatus) &&
       params?.data?.type === 'Asset' ? (
       <HtmlTooltip title={'Change Date'}>
         <span>
@@ -671,8 +673,8 @@ const LoadingTicket = ({
               message: `Delivered Successfully`
             });
             setOpenDateDialog({ open: false, type: null, status: null, prevStatus: null, assets: [], loading: false });
+            fetchRecords();
           }
-          fetchRecords();
           checkProgressiveBilling();
         })
         .catch((error) => {
