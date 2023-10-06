@@ -52,7 +52,6 @@ function PreviewDownload({
   const handleViewPdf = (type, pdfType, visibleColumns) => {
     setLoadingType(pdfType);
 
-    console.log(visibleColumns)
     // let showColumns = allColumn
     //   ?.filter((d) => visibleColumns?.includes(d?.fieldLabel))
     //   .map((d) => {
