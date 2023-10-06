@@ -232,6 +232,7 @@ export default function QuoteProcess(props) {
     DOAlimit,
     DOAsetup
   } = props;
+
   const defaultSelectColumns = [
     'Product Description',
     'Unit',
@@ -239,6 +240,7 @@ export default function QuoteProcess(props) {
     `Sales Price Per Unit ${quoteData?.currency}`,
     `Total Sales Price ${quoteData?.currency}`
   ];
+
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
   const { qbResource, qbApi } = quoteBuilder;
@@ -273,7 +275,6 @@ export default function QuoteProcess(props) {
     fullFormatAmountWithCurrencyName: ''
   });
 
-  const [buttonMessage, setButtonMessage] = useState('Send to Customer');
   const [DOAreq, setDOAreq] = useState(false);
   const [DOAneeded, setDOAneeded] = useState(false);
   const [Customerreq, setCustomerreq] = useState(true);
@@ -284,16 +285,12 @@ export default function QuoteProcess(props) {
   const [visibleColumnsExcel, setVisibleColumnsExcel] = useState(defaultSelectColumns);
   const [ColumnName, setColName] = useState([]);
   const [dynamicTableData, setDynamicTableData] = useState([]);
-  const [deletingDOA, setDeletingDOA] = useState(false);
-  const [reminderLoading, setReminderLoading] = useState(false);
-  const [isCloning, setCloning] = useState(false);
   const [isRearrangeColumns, setRearrangeColumns] = useState(false);
   const [isRearrangeColumnsExcel, setRearrangeColumnsExcel] = useState(false);
   const [isAddNewProduct, setIsAddNewProduct] = useState(false);
   const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);
   const [showQuoteStatusChangeDialog, setShowQuoteStatusChangeDialog] = useState(false);
   const [quoteStatusChangeData, setQuoteStatusChangeData] = useState('');
-  const [approvedButtonText] = useState('Accept');
   const [loading, setLoading] = useState(false);
   const [pdfFileBase64, setPdfFileBase64] = useState(null);
   const [excelFileBase64, setExcelFileBase64] = useState(null);
@@ -307,11 +304,10 @@ export default function QuoteProcess(props) {
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [columns, setColumnData] = useState([]);
 
-  const [messageDialog, setMessageDialog] = useState({
-    open: false,
-    message: null
-  });
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+
+  const [sendToLoading, setSendToLoading] = useState(false);
+
+  const [messageDialog, setMessageDialog] = useState({ open: false, message: null });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   useEffect(() => {
@@ -322,7 +318,6 @@ export default function QuoteProcess(props) {
 
   useEffect(() => {
     dispatch({ type: 'selection', selectedRecords: quoteData?.versions[currentVersion]?.TNC });
-
     axiosInstance()
       .get(`/doa-request`)
       .then(({ data: { data } }) => {
@@ -403,11 +398,9 @@ export default function QuoteProcess(props) {
           if (DOAsetup && totalSellingPrice > DOAlimit && versionStatus === 'Building Quote') {
             setDOAreq(true);
             setCustomerreq(false);
-            setButtonMessage('Send for DOA');
           } else if (versionStatus.includes('Rejected by DOA')) {
             setDOAreq(true);
             setCustomerreq(false);
-            setButtonMessage('Re-Send for DOA');
           } else if (versionStatus === 'Sent for DOA') {
             setDOAreq(false);
             setCustomerreq(false);
@@ -434,7 +427,6 @@ export default function QuoteProcess(props) {
         })
         .catch((err) => {
           setDOAData(null);
-          // toastConfig.setToastConfig(err);
         });
     }
   };
@@ -643,13 +635,9 @@ export default function QuoteProcess(props) {
   };
 
   const refreshProducts = (data) => {
-    productBuilderdatatoQuoteBuilderdata(data);
-  };
-
-  const productBuilderdatatoQuoteBuilderdata = (BuilderData) => {
-    if (BuilderData && Object.keys(BuilderData).length !== 0) {
+    if (data && Object.keys(data).length !== 0) {
       setRedCard(false);
-      const { totalMargin, totalSellingPrice, totalCost, totalProfit } = productCalculationForDoa(BuilderData);
+      const { totalMargin, totalSellingPrice, totalCost, totalProfit } = productCalculationForDoa(data);
       setTotalProfit(formatAmountWithCurrency(quoteData.currency, totalProfit));
       setTotalMargin(formatAmountWithCurrency(quoteData.currency, totalMargin));
       setTotalSale(formatAmountWithCurrency(quoteData.currency, totalSellingPrice));
@@ -658,7 +646,6 @@ export default function QuoteProcess(props) {
       if (totalSellingPrice < totalCost) {
         setRedCard(true);
       }
-      setButtonMessage('Send to Customer');
       setDOAreq(false);
       setCustomerreq(true);
       if (DOAsetup && totalSellingPrice > DOAlimit) {
@@ -669,11 +656,9 @@ export default function QuoteProcess(props) {
       if (DOAsetup && totalSellingPrice > DOAlimit && versionStatus === 'Building Quote') {
         setDOAreq(true);
         setCustomerreq(false);
-        setButtonMessage('Send for DOA');
       } else if (versionStatus.includes('Rejected by DOA')) {
         setDOAreq(true);
         setCustomerreq(false);
-        setButtonMessage('Re-Send for DOA');
       } else if (versionStatus === 'Sent for DOA') {
         setDOAreq(false);
         setCustomerreq(false);
@@ -688,59 +673,6 @@ export default function QuoteProcess(props) {
         setDOAreq(false);
         setCustomerreq(false);
       }
-    }
-  };
-
-  const cloneVersion = () => {
-    const previousVersionTNC = quoteData.versions[currentVersion]?.acceptedColumns;
-    setCloning(true);
-    axiosInstance()
-      .post(`/quote-builder/createVersion/${quoteData._id}?version=${currentVersion}`, { TNC: previousVersionTNC })
-      .then(() => {
-        fetchQuoteData(0);
-        setCloning(false);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        setCloning(false);
-      });
-  };
-
-  const deleteVersion = () => {
-    let versions = quoteData?.versions;
-
-    delete versions[currentVersion];
-
-    setDeletingDOA(true);
-    axiosInstance()
-      .delete(`${qbApi}/${quoteData._id}/${currentVersion}`)
-      .then(() => {
-        setDeletingDOA(false);
-        fetchQuoteData(0);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        setDeletingDOA(false);
-      });
-  };
-
-  const handleSendReminder = () => {
-    if (quoteData && currentVersion) {
-      setReminderLoading(true);
-      axiosInstance()
-        .get(`quote-builder/reminder/${quoteData._id}/${currentVersion}`)
-        .then((data: { data }) => {
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: 'Reminder Sent'
-          });
-          setReminderLoading(false);
-        })
-        .catch((err) => {
-          toastConfig.setToastConfig(err);
-          setReminderLoading(false);
-        });
     }
   };
 
@@ -1000,19 +932,8 @@ export default function QuoteProcess(props) {
       });
   };
 
-
   const handleCases = () => {
-    if (DOAreq) {
-      axiosInstance()
-        .post(`/doa-request/create/${quoteData._id}?version=${currentVersion}`)
-        .then(({ data }) => {
-          handleVersionUpdate(visibleColumns, visibleColumnsExcel, 'Sent for DOA', state?.selectedRecords);
-          fetchQuoteData(currentVersion);
-        })
-        .catch((err) => {
-          toastConfig.setToastConfig(err);
-        });
-    }
+
     if (Customerreq) {
       exportToCSV(true);
       if (!pdfFileBase64) {
@@ -1092,12 +1013,6 @@ export default function QuoteProcess(props) {
     }
   };
 
-  const handleVersionUpdateFromAdditionalData = (additionalData) => {
-    if (!isEqual(state.selectedRecords, additionalData)) {
-      handleVersionUpdate(visibleColumns, visibleColumnsExcel, versionStatus, additionalData);
-    }
-  };
-
   const onSendEmailSuccess = () => {
     setSendEmail(false);
     // handleVersionUpdate("", visibleColumns, "Sent to Customer", selectedRecords);
@@ -1120,22 +1035,6 @@ export default function QuoteProcess(props) {
       name: `Quotation-${quoteData.quoteName}-v${currentVersion}`
     });
   }
-
-  const handleOfferToCustomer = () => {
-    axiosInstance()
-      .patch(`/quote-builder/send-offer/${quoteData._id}/${currentVersion}`)
-      .then(({ data }) => {
-        fetchQuoteData(currentVersion);
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
-  };
 
   const fetchUserEmails = () => {
     let ownerCollaboratorEmails = [];
@@ -1207,24 +1106,47 @@ export default function QuoteProcess(props) {
     // }
   };
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleChangeVersionInQuote = (event) => {
-    handleChangeVersion(event);
-    setAnchorEl(null);
-  };
-
   const findProfitPercentage = (CP, Profit) => {
     let parsedCP = parseInt(CP?.amountWithouCurrencyCode?.replace(/[^0-9]/g, '') ?? 0);
     let profit = parseInt(Profit?.amountWithouCurrencyCode?.replace(/[^0-9]/g, '') ?? 0);
     return ((profit * 100) / parsedCP).toFixed(2);
   };
+
+  const handleSendForDOA = () => {
+    setSendToLoading(true)
+    axiosInstance()
+      .post(`/doa-request/create/${quoteData._id}?version=${currentVersion}`)
+      .then(({ data }) => {
+        handleVersionUpdate(visibleColumns, visibleColumnsExcel, 'Sent for DOA', state?.selectedRecords);
+        fetchQuoteData(currentVersion);
+        fetchDOAData();
+        setSendToLoading(false)
+      })
+      .catch((err) => {
+        setSendToLoading(false)
+        toastConfig.setToastConfig(err);
+      });
+  }
+
+  const handleOfferToCustomer = () => {
+    setSendToLoading(true)
+    axiosInstance()
+      .patch(`/quote-builder/send-offer/${quoteData._id}/${currentVersion}`)
+      .then(({ data }) => {
+        setSendToLoading(false)
+        fetchQuoteData(currentVersion);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((err) => {
+        setSendToLoading(false)
+        toastConfig.setToastConfig(err);
+      });
+  };
+
 
   return (
     <>
@@ -1313,18 +1235,25 @@ export default function QuoteProcess(props) {
                       referenceId={quoteData?._id}
                       columns={columns}
                       hideDetailButton={true}
-                      isSendEmail={true}
+                      isSendEmail={processStatus === QUOTE_PROCESS_STATUS.sendToCustomer
+                        && versionStatus !== 'Send To Customer'
+                        && !ifQuoteApproved.approved
+                        && !quoteData?.versions[currentVersion]?.offered ? true : false}
                       isExcelDownload={true}
-                      extraQueryParams={{ uniqueId: quoteData.versions[currentVersion]._id }}
+                      extraQueryParams={{ uniqueId: quoteData?.versions[currentVersion]?._id }}
+                      versionNumber={currentVersion}
                       subject={`${user?.user?.brandName ?? 'Brand'} Offer - ${quoteData?.quoteName ?? ''}`}
                       defaultColumns={['productName',
                         'unit',
                         'qty',
                         `salesPricePerUnit_${quoteData?.currency?.toLowerCase()}`,
                         `totalSalesPrice_${quoteData?.currency?.toLowerCase()}`]}
+                      handleRefresh={() => {
+                        fetchQuoteData(currentVersion);
+                      }}
                     />
                   )}
-                  {[QUOTE_PROCESS_STATUS.sendToCustomer, QUOTE_PROCESS_STATUS.end].includes(processStatus) && (
+                  {[QUOTE_PROCESS_STATUS.sendToCustomer].includes(processStatus) && (
                     <>
                       <Tooltip title="AI Suggestion">
                         <Button
@@ -1431,42 +1360,45 @@ export default function QuoteProcess(props) {
                 ) : null}
                 {/* Test Code */}
 
-                {(processStatus === 'DOA Process' && versionStatus === 'Building Quote' && DOAneeded) ||
-                  (processStatus === 'Send To Customer' && versionStatus !== 'Sent to Customer') ? (
+                {processStatus === QUOTE_PROCESS_STATUS.doaProcess
+                  && versionStatus === 'Building Quote' && DOAneeded ? (
                   <div className={`flex flex-wrap items-center ml-auto ${isMobile ? 'actio-pos-quote' : ''}`}>
-                    {!ifQuoteApproved.approved && (
-                      <Button
-                        onClick={() => {
-                          handleCases();
-                          fetchUserEmails();
-                        }}
-                        disabled={!allowedToEdit || (!DOAreq && !Customerreq) || loading}
-                        startIcon={<BiMailSend />}
-                        variant="contained"
-                        size="small"
-                        color="primary"
-                      >
-                        {isMobile && !isTablet ? '' : `${buttonMessage}`}
-                      </Button>
-                    )}
+                    <Button
+                      onClick={() => {
+                        handleSendForDOA()
+                      }}
+                      disabled={!allowedToEdit || sendToLoading}
+                      startIcon={<BiMailSend />}
+                      variant="contained"
+                      size="small"
+                      color="primary"
+                    >
+                      {isMobile && !isTablet ? '' : `Send for DOA`}
+                    </Button>
+                  </div>
+                ) : null}
+
+                {processStatus === QUOTE_PROCESS_STATUS.sendToCustomer && versionStatus !== 'Send To Customer' && !ifQuoteApproved.approved ? (
+                  <div className={`flex flex-wrap items-center ml-auto ${isMobile ? 'actio-pos-quote' : ''}`}>
                     <span className="d-flex align-items-center justify-content-end ml-3">
-                      {!ifQuoteApproved.approved && buttonMessage === 'Send to Customer' && !quoteData?.versions[currentVersion]?.offered && (
+                      {!quoteData?.versions[currentVersion]?.offered && (
                         <Button
                           onClick={() => {
                             handleOfferToCustomer();
                           }}
-                          disabled={!allowedToEdit || (!DOAreq && !Customerreq) || loading}
+                          disabled={!allowedToEdit || sendToLoading}
                           startIcon={<BiMailSend />}
                           variant="contained"
                           size="small"
                           color="primary"
                         >
-                          {isMobile && !isTablet ? '' : `Offered Outside of System`}
+                          {isMobile && !isTablet ? '' : `Process Quote`}
                         </Button>
                       )}
                     </span>
                   </div>
                 ) : null}
+
               </div>
               <Grid item xs={12} sm={12} md={12} className="mt-1">
                 {quoteData && !loading && productBuilderId ? (
@@ -1571,7 +1503,7 @@ export default function QuoteProcess(props) {
             fetchData={onSendEmailSuccess}
             id={quoteData._id}
             showESign={true}
-            version={currentVersion}
+            versionNumber={currentVersion}
             isQuoteBuilder={true}
             options={userEmails?.to}
             cc={userEmails?.cc ?? []}
