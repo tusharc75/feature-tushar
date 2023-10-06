@@ -37,7 +37,7 @@ import AssignUserDialog from '../../components/AssignRolesDialog/AssignUserDialo
 import AssignRegionalRolesUserDialog from '../../components/AssignRolesDialog/AssignRegionalRolesUserDialog';
 import { SET_USER, USER_LOADING, SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import { PERMISSION } from '../../constants/Roles';
-import { roleTier, roleTypes, sidebarResource } from '../../constants/helpers';
+import { ROLE_TIER, roleTypes, sidebarResource } from '../../constants/helpers';
 import { startCase, camelCase } from 'lodash';
 import PolicyResources from './PolicyResources';
 import DashboardResources from './DashboardResources';
@@ -252,7 +252,7 @@ const RoleDetailsPage = () => {
         data: { data }
       } = await axiosInstance().get(`/role/${id}`);
       setRoleData(data);
-      setValues({ name: data.name, description: data.description, tier: data?.tier || roleTier?.tier1 });
+      setValues({ name: data.name, description: data.description, tier: data?.tier || ROLE_TIER?.tier1 });
       setResource(data.resource);
       setField(data.field);
       const current = {
@@ -557,7 +557,7 @@ const RoleDetailsPage = () => {
                   <Autocomplete
                     id={`roleTier`}
                     disabled={roleData?.type && roleData?.permission ? true : !permissions?.role?.isUpdate || !isEdit}
-                    options={Object.values(roleTier)}
+                    options={Object.values(ROLE_TIER)}
                     autoHighlight
                     disableClearable
                     renderOption={(option) => option || ''}
@@ -848,10 +848,10 @@ const RoleDetailsPage = () => {
             roleDeleteRec
               ? `Are you sure you want to delete this Role ?`
               : userDeleteRec
-              ? `Are you sure you want to unassign ${userDeleteRec.firstName} from this Role?`
-              : entityDeleteRec
-              ? `Are you sure you want to unassign ${entityDeleteRec.entityName} from this Role?`
-              : ''
+                ? `Are you sure you want to unassign ${userDeleteRec.firstName} from this Role?`
+                : entityDeleteRec
+                  ? `Are you sure you want to unassign ${entityDeleteRec.entityName} from this Role?`
+                  : ''
           }
           onClose={() => {
             setShowConfirmBox(false);
