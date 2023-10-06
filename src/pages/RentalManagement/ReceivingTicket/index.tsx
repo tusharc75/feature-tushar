@@ -1007,6 +1007,7 @@ const ReceivingTicket = ({
             message: `Cancelled Successfully`
           });
           fetchRecords();
+          fetchRentalData();
         })
         .catch((error) => {
           setOkBtnLoading(false);
