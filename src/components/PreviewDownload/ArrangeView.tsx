@@ -16,8 +16,7 @@ const ItemTypes = {
   CARD: 'card'
 };
 
-export default function ArrangeView(props) {
-  const { columns, setColumns } = props;
+export default function ArrangeView({ columns, setColumns }) {
 
   const [open, setOpen] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -26,7 +25,7 @@ export default function ArrangeView(props) {
   const [column, setColumn] = useState([]);
 
   useEffect(() => {
-    setColumn(columns.map((col, idx) => ({ id: idx + 1, text: col || '' })));
+    setColumn(columns.map((e, idx) => ({ id: idx + 1, ...e })));
   }, [columns]);
 
   const moveCard = useCallback(
@@ -46,7 +45,7 @@ export default function ArrangeView(props) {
 
   const onSave = () => {
     setSubmitting(true);
-    setColumns(column.map((c) => c.text));
+    setColumns(column.map((e) => { return { fieldName: e.fieldName, fieldLabel: e.fieldLabel } }));
     setSubmitting(false);
     onClose();
   };
@@ -73,19 +72,20 @@ export default function ArrangeView(props) {
       {open && (
         <Dialog open onClose={onClose} maxWidth="sm" fullWidth fullScreen={fullScreen || isMobile || isTablet}>
           <CustomDialogHeader
-            title="Re-arrange sequence for columns"
+            title="Arrange View"
             onClose={onClose}
             isMinimized={!fullScreen}
             onMinimizeMaximize={() => {
               setFullScreen((prevState) => !prevState);
             }}
             showManimizeMaximize={true}
+            showRequiredLabel={false}
           />
           <CustomDialogContent>
             <List component="nav" aria-label="main mailbox folders">
               <DndProvider backend={HTML5Backend}>
-                {column.map(({ text, id }, index) => (
-                  <RenderListItem key={id} index={index} id={id} text={text} moveCard={moveCard} />
+                {column.map(({ fieldLabel, id }, index) => (
+                  <RenderListItem key={id} index={index} id={id} fieldLabel={fieldLabel} moveCard={moveCard} />
                 ))}
               </DndProvider>
             </List>
@@ -106,7 +106,7 @@ export default function ArrangeView(props) {
 
 interface ItemProps {
   id: any;
-  text: string;
+  fieldLabel: string;
   index: number;
   moveCard: (dragIndex: number, hoverIndex: number) => void;
 }
@@ -117,7 +117,7 @@ interface DragItem {
   type: string;
 }
 
-const RenderListItem = ({ index, id, text, moveCard }: ItemProps) => {
+const RenderListItem = ({ index, id, fieldLabel, moveCard }: ItemProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const [{ handlerId }, drop] = useDrop({
     accept: ItemTypes.CARD,
@@ -168,7 +168,7 @@ const RenderListItem = ({ index, id, text, moveCard }: ItemProps) => {
         <ListItemIcon>
           <DragIndicator />
         </ListItemIcon>
-        <ListItemText primary={text} />
+        <ListItemText primary={fieldLabel} />
       </ListItem>
     </div>
   );
