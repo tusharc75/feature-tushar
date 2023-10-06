@@ -15,6 +15,7 @@ import CustomDialogFooter from '../../../../components/CustomDialog/CustomDialog
 import CustomDialogContent from '../../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../../../../components/CustomDialog/CustomDialogHeader';
 import { isMobile, isTablet } from 'react-device-detect';
+import DoaStepUsers from './DoaStepUsers';
 
 import Steps1 from 'src/components/Steps';
 
@@ -152,8 +153,6 @@ const Steps = (props) => {
     setCommentError(null);
   };
 
-
-
   return (
     <div>
       <Steps1
@@ -170,7 +169,7 @@ const Steps = (props) => {
         }
         isStepEnded={isStepEnded || currentStep === steps.length}
         steps={steps}
-        setCurrentStep={() => { }}
+        setCurrentStep={() => {}}
         handleNext={() => {
           if (versionStatus.includes('Sent to Customer') && steps[currentStep]?.key === 'Send To Customer') {
             setShowManualCustomerActionDialog(true);
@@ -186,47 +185,18 @@ const Steps = (props) => {
         <></>
       ) : (
         <>
-          <div className="absolute top-[63px] right-[25px] text-[20px] bg-[var(--dark-primary)] font-semibold rounded-bl-md">
+          <div className="absolute top-[64px] right-[25px] text-[20px] bg-[var(--dark-primary)] font-semibold rounded-bl-md">
             {!versionStatus.includes('Accepted by Customer') && approvedQuote.approved && approvedQuote.versionApproved === version && (
-              <div className={`${approvedClasses} font-bold text d-flex align-items-center justify-content-center  px-2 py-[3px] max-w-max gap-1 rounded-bl-md`}   >
+              <div
+                className={`${approvedClasses} font-bold text d-flex align-items-center justify-content-center  px-2 py-[3px] max-w-max gap-1 rounded-bl-md`}
+              >
                 <h6>Quote version - {approvedQuote.versionApproved} of this quote has been Approved</h6>
               </div>
             )}
             <>
-              {versionStatus === 'Sent for DOA' && (
-                <>
-                  {DOAData && (
-                    <>
-                      <NewStepper heading={' '} quoteDOA={DOAData} />
-                      <div
-                        className={`${classes.sent} d-flex align-items-center justify-content-center  px-2 py-[3px] max-w-max gap-1 rounded-bl-md`}
-                      >
-                        <AiOutlineClockCircle size={20} />
-                        <h6>DOA Sent</h6>
-                      </div>
-                    </>
-                  )}
-                </>
-              )}
-              {versionStatus.split(' (')[0] === 'Accepted  by DOA' && (
-                <>
-                  {DOAData && <NewStepper heading={' '} quoteDOA={DOAData} />}
-
-                  <div className={`${approvedClasses} d-flex align-items-center justify-content-center  px-2 py-[3px] max-w-max gap-1 rounded-bl-md`}>
-                    <FcApproval size={20} />
-                    <h6>Approved by DOA</h6>
-                  </div>
-                </>
-              )}
-              {versionStatus.split(' (')[0] === 'Rejected by DOA' && (
-                <>
-                  {DOAData && <NewStepper heading={' '} quoteDOA={DOAData} />}
-                  <div className={`${classes.rejectedByDoa} d-flex align-items-center justify-content-center  px-2 py-[3px] max-w-max gap-1 rounded-bl-md`}    >
-                    <FcCancel size={20} />
-                    <h6>Rejected by DOA</h6>
-                  </div>
-                </>
-              )}
+              {versionStatus === 'Sent for DOA' && <DoaStepUsers DOAData={DOAData} versionStatus={'Sent for DOA'} />}
+              {versionStatus.split(' (')[0] === 'Accepted  by DOA' && <DoaStepUsers DOAData={DOAData} versionStatus={'Accepted by DOA'} />}
+              {versionStatus.split(' (')[0] === 'Rejected by DOA' && <DoaStepUsers DOAData={DOAData} versionStatus={'Rejected by DOA'} />}
               {versionStatus === 'Sent to Customer' && (
                 <div className={`${classes.sent} d-flex align-items-center justify-content-center  px-2 py-[3px] max-w-max gap-1 rounded-bl-md`}>
                   <AiOutlineClockCircle size={20} />

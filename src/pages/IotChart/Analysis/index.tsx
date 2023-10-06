@@ -11,7 +11,8 @@ import SearchBox from 'src/components/Helpers/SearchBox';
 const Analysis = ({ assetId, dataPoints, customDataPoints }) => {
   
   const [dateFilters, setDateFilters] = useState({
-    from: new Date(moment().subtract(8, 'days').format('MM-DD-YYYY')),
+    from: new Date(moment().subtract(8, 'days').format('MM/DD/YYYY')),
+    // from: new Date(moment().subtract(8, 'days').format('MM-DD-YYYY')),
     to: new Date(),
     intervals: '1hour'
   });

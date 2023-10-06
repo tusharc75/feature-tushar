@@ -1,0 +1,141 @@
+import React, { FC, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
+import routes from 'src/components/Helpers/Routes';
+import { Collapse, Tooltip, Button } from '@material-ui/core';
+
+import { AiOutlineClockCircle, AiOutlineClose } from 'react-icons/ai';
+import { FcApproval, FcCancel } from 'react-icons/fc';
+import { GiSandsOfTime } from 'react-icons/gi';
+import { BsCheck2 } from 'react-icons/bs';
+import { KeyboardArrowUp } from '@material-ui/icons';
+
+const DEFAULT_DATA_COUNT = 3; // this value will change how many users will be displayed by default;
+
+const statusIconAndColorClassMap = {
+  approve: { icon: <BsCheck2 size={13} className="block" />, colorClasses: 'text-[#64B067]' },
+  pending: { icon: <GiSandsOfTime size={13} className="block" />, colorClasses: 'text-[#858B9D]' },
+  rejected: { icon: <AiOutlineClose size={13} className="block" />, colorClasses: 'text-[#EC6852]' }
+};
+
+const versionStatusIconMap = {
+  'Sent for DOA': {
+    icon: <AiOutlineClockCircle size={20} />,
+    lebel: 'DOA Sent',
+    colorClass: 'text-[#00acc1]'
+  },
+  'Rejected by DOA': {
+    icon: <FcCancel size={20} />,
+    lebel: 'Rejected by DOA',
+    colorClass: 'text-[#d60f0f]'
+  },
+  'Accepted by DOA': {
+    icon: <FcApproval size={20} />,
+    lebel: 'Approved by DOA',
+    colorClass: 'text-[#6ca826] dark:text-[#294c00]'
+  }
+};
+
+export type TDOAData = {
+  users?: User[];
+  status?: TStatus;
+};
+export interface User {
+  firstName?: string;
+  lastName?: string;
+  id?: string;
+  status?: TStatus;
+  data?: Date;
+}
+
+type TStatus = 'approve' | 'pending' | 'rejected';
+
+type TDoaStepUsersProps = {
+  DOAData?: TDOAData[];
+  versionStatus?: 'Sent for DOA' | 'Rejected by DOA' | 'Accepted by DOA';
+} & React.HTMLAttributes<HTMLDivElement>;
+
+const DoaStepUsers: FC<TDoaStepUsersProps> = ({ DOAData, versionStatus, ...props }) => {
+  const [open, setOpen] = useState(false);
+
+  const visibleData = React.useMemo(() => {
+    return DOAData?.slice(0, DEFAULT_DATA_COUNT) || [];
+  }, [DOAData]);
+
+  const collapsedData = React.useMemo(() => {
+    return DOAData?.slice(DEFAULT_DATA_COUNT, DOAData.length) || [];
+  }, [DOAData]);
+  const versionData = useMemo(() => versionStatusIconMap[versionStatus], [versionStatus]);
+
+  return (
+    <div className="bg-[white] dark:bg-[var(--dark-primary)] min-w-[124px]" {...props}>
+      <div className={`flex items-center text-[12px] px-[7px] py-[4px] mb-[8px] gap-[7px] max-w-[133px] ${versionData?.colorClass}`}>
+        {versionData?.icon}
+        <p title={versionData?.lebel} className=" line-clamp-1">
+          {versionData?.lebel}
+        </p>
+      </div>
+      <div className="step relative z-50 px-[4px] [--line-height:6px] py-[var(--line-height)]  max-w-[133px]">
+        {visibleData?.map((d, index) => {
+          return <RenderUser userData={d} index={index} />;
+        })}
+        {collapsedData && collapsedData?.length > 0 && (
+          <>
+            <Collapse in={open}>
+              {collapsedData?.map((d, index) => {
+                return <RenderUser userData={d} index={index} />;
+              })}
+            </Collapse>
+            <Button
+              variant="text"
+              size="small"
+              style={{
+                width: '20px',
+                height: '20px',
+                padding: '2px',
+                minWidth: 'unset',
+                marginLeft: 32
+              }}
+              onClick={() => setOpen((prev) => !prev)}
+            >
+              {open ? <KeyboardArrowUp /> : `+${collapsedData?.length}`}
+            </Button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default DoaStepUsers;
+
+type TRenderUserProps = {
+  userData?: TDOAData;
+  index: number;
+};
+
+const lineClassName =
+  'absolute block left-0 right-0 mx-auto h-[var(--line-height)] block bg-[var(--primary)] dark:bg-[var(--common-border-color)] w-[1px]';
+
+const RenderUser = ({ userData, index }: TRenderUserProps) => {
+  const user = userData?.users?.[0];
+  const icon = statusIconAndColorClassMap[userData?.status];
+  const userFullName = `${user?.firstName} ${user?.lastName}`;
+
+  return (
+    <div key={user.id || index} className="grid grid-cols-[24px_85px] gap-[7px] items-center  mb-[var(--line-height)]">
+      <div
+        style={{ borderWidth: '1px', borderStyle: 'solid' }}
+        className={`status-icon w-[24px] h-[24px] rounded-full dark:border-[var(--common-border-color)] border-[var(--primary)] relative  ${icon.colorClasses} `}
+      >
+        <div className={`${lineClassName} -top-[var(--line-height)]`} />
+        <Tooltip title={<span className=" capitalize">{userData.status}</span>} placement="top" arrow>
+          <span className="block absolute inset-0 m-auto max-w-[13px] max-h-[13px] ">{icon.icon}</span>
+        </Tooltip>
+        <div className={`${lineClassName} -bottom-[var(--line-height)]`} />
+      </div>
+      <Link title={userFullName} className="link text-[12px] font-normal max-w-[85px] line-clamp-1" to={`${routes.userDetail.path}/${user?.id}`}>
+        {userFullName}
+      </Link>
+    </div>
+  );
+};
