@@ -360,7 +360,7 @@ export default function QuoteProcess(props) {
     fetchUserEmails();
     if (processStatus === QUOTE_PROCESS_STATUS.doaProcess) {
       const currentVersionStatus = quoteData?.versions[currentVersion]?.status;
-      if (currentVersionStatus.includes('Accepted') && DOAneeded) {
+      if (currentVersionStatus.includes('Accepted')) {
         setNextStep(true);
       }
       else {
@@ -1232,7 +1232,8 @@ export default function QuoteProcess(props) {
         <Steps
           steps={DOAneeded ? DOASteps : OtherSteps}
           currentStep={DOAneeded ? DOASteps.findIndex((d) => d?.key === processStatus) :
-            OtherSteps.findIndex((d) => d?.key === processStatus)
+            processStatus === QUOTE_PROCESS_STATUS.doaProcess ? OtherSteps.findIndex((d) => d?.key === QUOTE_PROCESS_STATUS.quoteBuilder)
+              : OtherSteps.findIndex((d) => d?.key === processStatus)
           }
           id={quoteData._id}
           version={currentVersion}
@@ -1315,6 +1316,7 @@ export default function QuoteProcess(props) {
                       isSendEmail={true}
                       isExcelDownload={true}
                       extraQueryParams={{ uniqueId: quoteData.versions[currentVersion]._id }}
+                      subject={`${user?.user?.brandName ?? 'Brand'} Offer - ${quoteData?.quoteName ?? ''}`}
                       defaultColumns={['productName',
                         'unit',
                         'qty',

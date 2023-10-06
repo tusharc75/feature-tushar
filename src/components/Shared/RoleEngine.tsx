@@ -35,6 +35,8 @@ const RoleEngine = (props: RoleProps) => {
   const [isDeleteChecked, setIsDeleteChecked] = useState(false);
   const [isHiddenChecked, setIsHiddenChecked] = useState(false);
 
+  const [renderCount, setRenderCount] = useState(0);
+
   const [selectedResource, setSelectedResource] = useState({
     id: '',
     type: ''
@@ -113,6 +115,20 @@ const RoleEngine = (props: RoleProps) => {
     setIsUpdateChecked(!isAnyUpdateFoundUnchecked);
     setIsDeleteChecked(!isAnyDeleteFoundUnchecked);
     setIsHiddenChecked(!isAnyHiddenFoundUnchecked);
+
+    // if (tier === roleTier.tier2 && renderCount === 0) {
+    //   setSelectedResource({
+    //     id: resource?.filter?.((_r) => _r?.isRead || _r?.isCreate || _r?.isUpdate || _r?.isDelete || _r?.isHidden)[0]?.resourceId || '',
+    //     type: 'resource'
+    //   });
+    //   if (selectedResource.id === '') {
+    //     const resourceName = field?.filter?.((_f) => _f?.isRead || _f?.isCreate || _f?.isUpdate)[0]?.fieldData?.resource;
+    //     setSelectedResource({
+    //       id: resource?.find((_r) => _r?.name === resourceName)?.resourceId || '',
+    //       type: 'field'
+    //     });
+    //   }
+    // }
   }, [field, resource]);
 
   const updateRoles = (propertyToUpdate, isChecked) => {
@@ -260,12 +276,9 @@ const RoleEngine = (props: RoleProps) => {
     setField(
       field?.map((f) => ({
         ...f,
-        // isCreate: initialRender ? f?.isCreate === true : false,
-        // isRead: initialRender ? f?.isRead === true : false,
-        // isUpdate: initialRender ? f?.isUpdate === true : false,
-        isCreate: false,
-        isRead: false,
-        isUpdate: false,
+        isCreate: renderCount === 0 ? f?.isCreate === true : false,
+        isRead: renderCount === 0 ? f?.isRead === true : false,
+        isUpdate: renderCount === 0 ? f?.isUpdate === true : false,
         isReadDisabled: false,
         isCreateDisabled: tier === roleTier?.tier3 ? true : false,
         isUpdateDisabled: tier === roleTier?.tier3 ? true : false,
@@ -276,16 +289,11 @@ const RoleEngine = (props: RoleProps) => {
     setResource(
       resource?.map((r) => ({
         ...r,
-        // isCreate: initialRender ? r?.isCreate === true : false,
-        // isDelete: initialRender ? r?.isDelete === true : false,
-        // isRead: initialRender ? r?.isRead === true : false,
-        // isUpdate: initialRender ? r?.isUpdate === true : false,
-        // isHidden: initialRender ? r?.isHidden === true : false,
-        isCreate: false,
-        isDelete: false,
-        isRead: false,
-        isUpdate: false,
-        isHidden: false,
+        isCreate: renderCount === 0 ? r?.isCreate === true : false,
+        isDelete: renderCount === 0 ? r?.isDelete === true : false,
+        isRead: renderCount === 0 ? r?.isRead === true : false,
+        isUpdate: renderCount === 0 ? r?.isUpdate === true : false,
+        isHidden: renderCount === 0 ? r?.isHidden === true : false,
         isReadDisabled: false,
         isCreateDisabled: tier === roleTier?.tier3 ? true : false,
         isUpdateDisabled: tier === roleTier?.tier3 ? true : false,
@@ -293,10 +301,13 @@ const RoleEngine = (props: RoleProps) => {
         isHiddenDisabled: tier === roleTier?.tier3 ? true : false
       }))
     );
+    setRenderCount(renderCount + 1);
   };
 
   const validateTier2 = (resource: any[], field: any[], selectedResource: any) => {
     if (tier === roleTier?.tier2) {
+      console.log('selectedResource', selectedResource);
+
       let checkedResource = [];
       let unCheckedResource = [];
 
@@ -308,6 +319,8 @@ const RoleEngine = (props: RoleProps) => {
         checkedResource = resource?.filter((_r) => _r?.name === resourceName);
         unCheckedResource = resource?.filter((_r) => _r?.name !== resourceName);
       }
+
+      console.log('checkedResource', checkedResource);
 
       let isChecked = false;
       if (
@@ -339,6 +352,8 @@ const RoleEngine = (props: RoleProps) => {
 
       setResource(newResource);
       setField(field);
+
+      setRenderCount(renderCount + 1);
     }
   };
 
@@ -363,7 +378,7 @@ const RoleEngine = (props: RoleProps) => {
               <FormControlLabel
                 control={
                   <Checkbox
-                    disabled={isDisable}
+                    disabled={isDisable || tier === roleTier.tier2}
                     checked={isReadChecked}
                     onChange={(e) => {
                       setIsReadChecked(e.target.checked);
@@ -378,7 +393,7 @@ const RoleEngine = (props: RoleProps) => {
               <FormControlLabel
                 control={
                   <Checkbox
-                    disabled={isDisable}
+                    disabled={isDisable || tier === roleTier.tier2}
                     checked={isCreateChecked}
                     onChange={(e) => {
                       setIsCreateChecked(e.target.checked);
@@ -398,7 +413,7 @@ const RoleEngine = (props: RoleProps) => {
               <FormControlLabel
                 control={
                   <Checkbox
-                    disabled={isDisable}
+                    disabled={isDisable || tier === roleTier.tier2}
                     checked={isUpdateChecked}
                     onChange={(e) => {
                       setIsUpdateChecked(e.target.checked);
@@ -418,7 +433,7 @@ const RoleEngine = (props: RoleProps) => {
               <FormControlLabel
                 control={
                   <Checkbox
-                    disabled={isDisable}
+                    disabled={isDisable || tier === roleTier.tier2}
                     checked={isDeleteChecked}
                     onChange={(e) => {
                       setIsDeleteChecked(e.target.checked);
@@ -438,7 +453,7 @@ const RoleEngine = (props: RoleProps) => {
               <FormControlLabel
                 control={
                   <Checkbox
-                    disabled={isDisable}
+                    disabled={isDisable || tier === roleTier.tier2}
                     checked={isHiddenChecked}
                     onChange={(e) => {
                       setIsHiddenChecked(e.target.checked);

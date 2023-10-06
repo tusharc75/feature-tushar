@@ -4115,6 +4115,15 @@ body {
 .form-types {
   .MuiChip-root.MuiAutocomplete-tag {
     max-width: 341px !important;
+    @media all and (max-width: 600px) {
+      max-width: 288px !important;
+    }
+    & span {
+      max-width: 341px !important;
+      @media all and (max-width: 600px) {
+        max-width: 288px !important;
+      }
+    }
   }
 }
 
@@ -4124,8 +4133,9 @@ body {
   }
 }
 
-div[class*='line-clamp-'] {
+*[class*='line-clamp-'] {
   display: -webkit-box !important;
+  word-break: break-all;
 }
 
 .show-only-selected-switch {

@@ -150,24 +150,19 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
     columnApi.setColumnsVisible(hiddenColumns, false);
     columnApi.setColumnsVisible(nonHiddenColumns, true);
 
-    if (!isClientSideGrid || saveColumnOptions) {
-      let tempColumnState = columnApi.getColumnState();
-      let hidedColumns = tempColumnState.filter((o) => o?.hide).map((o) => o?.colId);
-      const lockedColumns = newColumns?.filter(col => col?.lockPosition)?.map((col) => col?.field) || [];
-      const otherColumns = newColumns?.filter(col => !col?.lockPosition)?.map((col) => col?.field) || [];
-      const colOrder = [...lockedColumns, ...otherColumns];
-      updateGridHiddenColumns(hidedColumns, colOrder);
-    }
+    let tempColumnState = columnApi.getColumnState();
+    let hidedColumns = tempColumnState.filter((o) => o?.hide).map((o) => o?.colId);
+    const lockedColumns = newColumns?.filter(col => col?.lockPosition)?.map((col) => col?.field) || [];
+    const otherColumns = newColumns?.filter(col => !col?.lockPosition)?.map((col) => col?.field) || [];
+    const colOrder = [...lockedColumns, ...otherColumns];
+    updateGridHiddenColumns(hidedColumns, colOrder);
+
     const columnState = JSON.stringify(columnApi.getColumnState());
     localStorage.setItem(renderedFrom, columnState);
     onClose();
   };
 
-  /**
-   *
-   *  Drag'n'Drop function
-   *
-   */
+
   const moveItem = React.useCallback(
     (dragIndex: number, hoverIndex: number) => {
       const dragCard = sortedColumns[dragIndex];
@@ -185,8 +180,6 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
 
 
   const handleReset = () => {
-    // refreshGrid();
-
     delete localStorage[renderedFrom];
     const newColumns = [...defaultColumns];
     newColumns?.forEach((e: any) => {
@@ -225,11 +218,9 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
     columnApi.setColumnsVisible(hiddenColumns, false);
     columnApi.setColumnsVisible(nonHiddenColumns, true);
 
-    if (!isClientSideGrid || saveColumnOptions) {
-      let tempColumnState = columnApi.getColumnState();
-      let hidedColumns = tempColumnState.filter((o) => o?.hide).map((o) => o?.colId);
-      updateGridHiddenColumns(hidedColumns, []);
-    }
+    let tempColumnState = columnApi.getColumnState();
+    let hidedColumns = tempColumnState.filter((o) => o?.hide).map((o) => o?.colId);
+    updateGridHiddenColumns(hidedColumns, []);
 
     onClose();
   }

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext, Fragment } from 'react';
 import { Box, Button, Grid, Paper, useMediaQuery } from '@material-ui/core';
+import { Edit } from '@material-ui/icons';
 import { useHistory, useParams } from 'react-router-dom';
 import { Skeleton } from '@material-ui/lab';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -22,7 +23,7 @@ import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
 import queryString from 'query-string';
 import { MdDelete, MdEdit } from 'react-icons/md';
 import { FaFunnelDollar } from 'react-icons/all';
-import { BiEdit } from 'react-icons/bi';
+import { FaSyncAlt } from 'react-icons/fa';
 import accountClass from '../Account/account.module.scss';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 
@@ -340,11 +341,11 @@ const LeadDetailsPage = () => {
             {!isLeadAlreadyConvertedToOpportunity && hasPermissionToConvertToOpportunity && (
               <>
                 <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
+                  variant={'contained'}
                   color="primary"
                   size="small"
-                  className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
-                  style={isMobile && !isTablet ? { color: 'var(--warning-light)', borderColor: 'var(--warning-light)' } : {}}
+                  className={'no-shadow'}
+                  // style={isMobile && !isTablet ? { color: 'var(--warning-light)', borderColor: 'var(--warning-light)' } : {}}
                   onClick={() => {
                     const leadName = [leadData.firstName, leadData.middleName, leadData.lastName].filter((d) => d).join(' ');
                     setConvertLeadToOpportunityConfirmationDialog({
@@ -355,7 +356,7 @@ const LeadDetailsPage = () => {
                     });
                   }}
                 >
-                  {isMobile && !isTablet ? <FaFunnelDollar size={19} /> : 'Convert Lead To Opportunity'}
+                  {isMobile && !isTablet ? <FaSyncAlt size={15} /> : 'Convert Lead To Opportunity'}
                 </Button>
               </>
             )}
@@ -366,17 +367,17 @@ const LeadDetailsPage = () => {
                 onClick={handleOpneUpdateDialog}
                 className={'btn-outline-v1'}
               >
-                {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                {isMobile && !isTablet ? <Edit /> : 'Edit'}
               </Button>
             )}
             {leadsPermissions.isDelete && allowedToDelete && (
               <DeleteButton text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'} onClick={() => setShowConfirmBox(true)} />
             )}
-            <ActivityButton 
-              referenceId={leadData?._id} 
-              resource={ACTIVITY_RESOURCE.lead} 
+            <ActivityButton
+              referenceId={leadData?._id}
+              resource={ACTIVITY_RESOURCE.lead}
               resourceLabel={`${leadData?.firstName} ${leadData?.lastName}`}
-              />
+            />
           </Box>
         </Box>
       </Box>
