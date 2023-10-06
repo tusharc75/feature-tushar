@@ -7,7 +7,7 @@ import { MdEmail } from 'react-icons/md';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { DownloadIcon, ExportIcon } from 'src/assets/svg/svgIcons';
 import axiosInstance from 'src/axios/axiosInstance';
-import { CustomDialogTransition, downloadExcel } from 'src/constants/helpers';
+import { CustomDialogTransition, downloadExcel, sidebarResource } from 'src/constants/helpers';
 import { CreateEmail } from '../Activity/Email/CreateEmail';
 import { PreviewDialog } from './PreviewDialog';
 
@@ -22,7 +22,9 @@ function PreviewDownload({
   button2Title = 'Detail',
   extraQueryParams = null,
   subject = '',
-  isExcelDownload = false
+  isExcelDownload = false,
+  versionNumber = null,
+  handleRefresh = null,
 }) {
   const toastConfig = useContext(CustomToastContext);
 
@@ -242,6 +244,7 @@ function PreviewDownload({
           fullWidth
         >
           <CreateEmail
+            showESign={resource === sidebarResource.quoteBuilder ? true : false}
             generatingFile={false}
             handleClose={() => {
               setSendEmail(false);
@@ -251,6 +254,9 @@ function PreviewDownload({
             fetchData={() => {
               setSendEmail(false);
               setEmailAttachments([]);
+              if (handleRefresh) {
+                handleRefresh()
+              }
             }}
             id={referenceId}
             isQuoteBuilder={true}
@@ -264,6 +270,7 @@ function PreviewDownload({
             }}
             showManimizeMaximize={true}
             referenceType={resource}
+            versionNumber={versionNumber}
           />
         </Dialog>
       )}
