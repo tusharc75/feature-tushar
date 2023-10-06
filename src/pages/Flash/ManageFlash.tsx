@@ -33,6 +33,45 @@ const ManageFlash = ({ isClone = false, flashId = null, onClose, onSuccess }) =>
   const [flashData, setFlashData] = useState(null);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
+  
+  const fieldConfigurations = {
+    Bankrupt: [
+      'date',
+      'caseNumber',
+      'chapter'
+    ],
+    'Credit card refused': [
+      'deniedBecause'
+    ],
+    'Final demand': [
+      'date',
+      'amount',
+      'disputed'
+    ],
+    NSF: [
+      'date',
+      'amount',
+      'returned'
+    ],
+    'Past due': [
+      'daysPastDue',
+      'amount',
+      'holdingOrders'
+    ],
+    'Placed for Collections': [
+      'date',
+      'amount',
+      'disputed'
+    ],
+    'Terms Withdrawn': [
+      'termsWithdrawn'
+    ],
+    Comment : [
+      'comment'
+    ]
+  };
+
+
   useEffect(() => {
     axiosInstance()
       .get(`/field?resource=${flash.resource}`)
@@ -67,9 +106,30 @@ const ManageFlash = ({ isClone = false, flashId = null, onClose, onSuccess }) =>
         toastConfig.setToastConfig(error);
       });
   }, [flashId]);
+
   useEffect(() => {
-    setFormsData(setFieldsInAscendingOrder(initialData.fields));
+    const filteredFields = initialData.fields.filter((d) => {
+      if (d?.sectionName === "Other Information") {
+        return d?.fieldName === 'comment';
+      }
+      return true;
+    });
+    setFormsData(setFieldsInAscendingOrder(filteredFields));
   }, [initialData.fields]);
+
+  const handleTypeChange = (data) => {
+    const selectedFieldNames = new Set(fieldConfigurations[data] || []);
+    selectedFieldNames.add('comment');
+  
+    const filteredFields = initialData.fields.filter((d) => {
+      if (d?.sectionName === "Other Information") {
+        return selectedFieldNames.has(d.fieldName);
+      }
+      return true;
+    });
+  
+    setFormsData(setFieldsInAscendingOrder(filteredFields));
+  }; 
 
   const handleSubmit = (values) => {
   
@@ -189,6 +249,9 @@ const ManageFlash = ({ isClone = false, flashId = null, onClose, onSuccess }) =>
                                   options={field.option}
                                   setFieldValue={(name, value) => {
                                     setFieldValue(name, value);
+                                    if (field.fieldName === 'flashType') {
+                                      handleTypeChange(value);
+                                    }
                                   }}
                                   required={field.required}
                                   fullWidth

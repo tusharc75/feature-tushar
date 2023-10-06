@@ -221,7 +221,7 @@ const Flash = () => {
 
   const ActionsRenderer = (params) => (
     <>
-      {permissions?.flash?.isUpdate && (
+      {permissions?.flash?.isUpdate && params?.data?.status === "Pending" &&(
         <>
           <HtmlTooltip title="Approve">
             <IconButton
@@ -249,7 +249,7 @@ const Flash = () => {
           </HtmlTooltip>
         </>
       )}
-      {permissions?.flash?.isDelete && (
+      {permissions?.flash?.isDelete && params?.data?.status === "Pending" && (
         <HtmlTooltip title="Delete">
           <IconButton
             size="small"
@@ -424,6 +424,7 @@ const Flash = () => {
                           disabled={
                             !(
                               (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.allowedToEdit === true)?.length) === selectedRecords?.length
+                              && selectedRecords?.filter((e)=>e?.status === "Pending")?.length === selectedRecords?.length
                             )
                           }
                           onClick={(e) => {
@@ -438,6 +439,7 @@ const Flash = () => {
                           disabled={
                             !(
                               (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length
+                              && selectedRecords?.filter((e)=>e?.status === "Pending")?.length === selectedRecords?.length
                             )
                           }
                           onClick={(e) => {
@@ -455,6 +457,7 @@ const Flash = () => {
                         disabled={
                           !(
                             (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length
+                            && selectedRecords?.filter((e)=>e?.status === "Pending")?.length === selectedRecords?.length
                           )
                         }
                         onClick={() => {
