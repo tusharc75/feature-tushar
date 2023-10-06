@@ -1315,6 +1315,7 @@ export default function QuoteProcess(props) {
                       isSendEmail={true}
                       isExcelDownload={true}
                       extraQueryParams={{ uniqueId: quoteData.versions[currentVersion]._id }}
+                      subject={`${user?.user?.brandName ?? 'Brand'} Offer - ${quoteData?.quoteName ?? ''}`}
                       defaultColumns={['productName',
                         'unit',
                         'qty',
