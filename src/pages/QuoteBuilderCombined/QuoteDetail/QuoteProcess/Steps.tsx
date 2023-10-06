@@ -15,7 +15,7 @@ import CustomDialogFooter from '../../../../components/CustomDialog/CustomDialog
 import CustomDialogContent from '../../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../../../../components/CustomDialog/CustomDialogHeader';
 import { isMobile, isTablet } from 'react-device-detect';
-import DoaStepUsers from './DoaStepUsers';
+import DoaStepUsers from './DOAStepUsers';
 
 import Steps1 from 'src/components/Steps';
 
