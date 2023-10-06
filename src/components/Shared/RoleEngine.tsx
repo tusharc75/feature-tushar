@@ -35,6 +35,8 @@ const RoleEngine = (props: RoleProps) => {
   const [isDeleteChecked, setIsDeleteChecked] = useState(false);
   const [isHiddenChecked, setIsHiddenChecked] = useState(false);
 
+  const [renderCount, setRenderCount] = useState(0);
+
   const [selectedResource, setSelectedResource] = useState({
     id: '',
     type: ''
@@ -113,6 +115,20 @@ const RoleEngine = (props: RoleProps) => {
     setIsUpdateChecked(!isAnyUpdateFoundUnchecked);
     setIsDeleteChecked(!isAnyDeleteFoundUnchecked);
     setIsHiddenChecked(!isAnyHiddenFoundUnchecked);
+
+    // if (tier === roleTier.tier2 && renderCount === 0) {
+    //   setSelectedResource({
+    //     id: resource?.filter?.((_r) => _r?.isRead || _r?.isCreate || _r?.isUpdate || _r?.isDelete || _r?.isHidden)[0]?.resourceId || '',
+    //     type: 'resource'
+    //   });
+    //   if (selectedResource.id === '') {
+    //     const resourceName = field?.filter?.((_f) => _f?.isRead || _f?.isCreate || _f?.isUpdate)[0]?.fieldData?.resource;
+    //     setSelectedResource({
+    //       id: resource?.find((_r) => _r?.name === resourceName)?.resourceId || '',
+    //       type: 'field'
+    //     });
+    //   }
+    // }
   }, [field, resource]);
 
   const updateRoles = (propertyToUpdate, isChecked) => {
@@ -260,12 +276,9 @@ const RoleEngine = (props: RoleProps) => {
     setField(
       field?.map((f) => ({
         ...f,
-        // isCreate: initialRender ? f?.isCreate === true : false,
-        // isRead: initialRender ? f?.isRead === true : false,
-        // isUpdate: initialRender ? f?.isUpdate === true : false,
-        isCreate: false,
-        isRead: false,
-        isUpdate: false,
+        isCreate: renderCount === 0 ? f?.isCreate === true : false,
+        isRead: renderCount === 0 ? f?.isRead === true : false,
+        isUpdate: renderCount === 0 ? f?.isUpdate === true : false,
         isReadDisabled: false,
         isCreateDisabled: tier === roleTier?.tier3 ? true : false,
         isUpdateDisabled: tier === roleTier?.tier3 ? true : false,
@@ -276,16 +289,11 @@ const RoleEngine = (props: RoleProps) => {
     setResource(
       resource?.map((r) => ({
         ...r,
-        // isCreate: initialRender ? r?.isCreate === true : false,
-        // isDelete: initialRender ? r?.isDelete === true : false,
-        // isRead: initialRender ? r?.isRead === true : false,
-        // isUpdate: initialRender ? r?.isUpdate === true : false,
-        // isHidden: initialRender ? r?.isHidden === true : false,
-        isCreate: false,
-        isDelete: false,
-        isRead: false,
-        isUpdate: false,
-        isHidden: false,
+        isCreate: renderCount === 0 ? r?.isCreate === true : false,
+        isDelete: renderCount === 0 ? r?.isDelete === true : false,
+        isRead: renderCount === 0 ? r?.isRead === true : false,
+        isUpdate: renderCount === 0 ? r?.isUpdate === true : false,
+        isHidden: renderCount === 0 ? r?.isHidden === true : false,
         isReadDisabled: false,
         isCreateDisabled: tier === roleTier?.tier3 ? true : false,
         isUpdateDisabled: tier === roleTier?.tier3 ? true : false,
@@ -293,6 +301,7 @@ const RoleEngine = (props: RoleProps) => {
         isHiddenDisabled: tier === roleTier?.tier3 ? true : false
       }))
     );
+    setRenderCount(renderCount + 1);
   };
 
   const validateTier2 = (resource: any[], field: any[], selectedResource: any) => {
@@ -347,6 +356,7 @@ const RoleEngine = (props: RoleProps) => {
   }, [tier]);
 
   useEffect(() => {
+    console.log('selectedResource', selectedResource);
     validateTier2(resource, field, selectedResource);
   }, [selectedResource]);
 

@@ -253,14 +253,6 @@ const RoleDetailsPage = () => {
       } = await axiosInstance().get(`/role/${id}`);
       setRoleData(data);
       setValues({ name: data.name, description: data.description, tier: data?.tier || roleTier?.tier1 });
-      // if (data?.tier === roleTier.tier2) {
-      //   validateTier2(data.resource, data.field, data?.tier, {
-      //     id: data.resource?.filter?.((_r) => _r?.isRead || _r?.isCreate || _r?.isUpdate || _r?.isDelete || _r?.isHidden)[0]?.resourceId || '',
-      //     type: 'resource'
-      //   });
-      // } else {
-      //   validateRoleAndField(data.resource, data.field, data?.tier || roleTier?.tier1, true);
-      // }
       setResource(data.resource);
       setField(data.field);
       const current = {
