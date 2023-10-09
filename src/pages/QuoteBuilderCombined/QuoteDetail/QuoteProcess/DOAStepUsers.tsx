@@ -12,17 +12,17 @@ const DEFAULT_DATA_COUNT = 3; // this value will change how many users will be d
 const statusIconAndColorClassMap = {
   approve: {
     icon: <DOAApproved size={16} className="block" />,
-    colorClasses: 'text-[#64B067] hover:bg-[#64B067] hover:text-[white]',
+    colorClasses: 'text-[#64B067]',
     text: 'Accepted'
   },
   pending: {
     icon: <DOAPending size={16} className="block" />,
-    colorClasses: 'text-[#858B9D] hover:bg-[#858B9D] hover:text-[white]',
+    colorClasses: 'text-[#858B9D]',
     text: 'Pending'
   },
   rejected: {
     icon: <DOARejected size={16} className="block" />,
-    colorClasses: 'text-[#EC6852] hover:bg-[#EC6852] hover:text-[white]',
+    colorClasses: 'text-[#EC6852]',
     text: 'Declined'
   }
 };
