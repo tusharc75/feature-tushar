@@ -161,8 +161,8 @@ export default function CustomSwipableList({
                     <div className="flex-grow">
                       <div className="heading-with-icon">
                         {primaryField && (
-                          <h4 className="quote-name text-truncate">
-                            <span onClick={() => onClick(d)} className="link quote-name text-truncate">
+                          <h4 className="quote-name line-clamp-1">
+                            <span onClick={() => onClick(d)} className="link quote-name line-clamp-1">
                               {d[primaryField.field]}
                             </span>
                           </h4>
