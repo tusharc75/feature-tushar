@@ -58,6 +58,14 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
       .then(({ data: { data } }) => {
         data = data.filter((obj) => obj?.fieldData?.fieldName !== 'rentalJob');
 
+        data?.forEach((e) => {
+          if (e?.fieldData?.fieldName === 'chartOfAccount' && e?.fieldData?.isDefaultValue && e?.fieldData?.defaultValue) {
+            const filteredOption = e.fieldData?.option?.filter((obj) => obj?.optionValue === e?.fieldData?.defaultValue) || [];
+            e.fieldData.option = filteredOption;
+          }
+
+        })
+
         const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
         const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
