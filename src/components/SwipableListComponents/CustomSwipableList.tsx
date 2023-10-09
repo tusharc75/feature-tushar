@@ -222,6 +222,7 @@ export default function CustomSwipableList({
                         )
                     )}
                   </div>
+
                   {chips.length > 0 && (
                     <div className="mt-1 pt-2" style={{ borderTop: '1px solid var(--common-border-color)' }}>
                       <div className=" d-flex gap-1 flex-wrap">
