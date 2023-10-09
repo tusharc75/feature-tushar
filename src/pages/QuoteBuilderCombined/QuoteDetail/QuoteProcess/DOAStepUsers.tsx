@@ -5,17 +5,20 @@ import { Collapse, Tooltip, Button } from '@material-ui/core';
 
 import { AiOutlineClockCircle, AiOutlineClose } from 'react-icons/ai';
 import { FcApproval, FcCancel } from 'react-icons/fc';
+import { BsCheck } from 'react-icons/bs';
 import { GiSandsOfTime } from 'react-icons/gi';
 import { BsCheck2 } from 'react-icons/bs';
 import { KeyboardArrowUp } from '@material-ui/icons';
 import { Block } from '@material-ui/icons';
 
+import { HourglassEmpty, CheckRounded, CancelOutlined } from '@material-ui/icons';
+
 const DEFAULT_DATA_COUNT = 3; // this value will change how many users will be displayed by default;
 
 const statusIconAndColorClassMap = {
-  approve: { icon: <BsCheck2 size={13} className="block" />, colorClasses: 'text-[#64B067]' },
-  pending: { icon: <GiSandsOfTime size={13} className="block" />, colorClasses: 'text-[#858B9D]' },
-  rejected: { icon: <AiOutlineClose size={13} className="block" />, colorClasses: 'text-[#EC6852]' }
+  approve: { icon: <CheckRounded className="block max-w-[20px] max-h-[20px]" />, colorClasses: 'text-[#64B067]', text: 'Accepted' },
+  pending: { icon: <HourglassEmpty className="block max-w-[20px] max-h-[20px] h-full" />, colorClasses: 'text-[#858B9D]', text: 'Pending' },
+  rejected: { icon: <CancelOutlined className="block max-w-[20px] max-h-[20px]" />, colorClasses: 'text-[#EC6852]', text: 'Declined' }
 };
 
 const versionStatusIconMap = {
@@ -120,6 +123,7 @@ const lineClassName =
 const RenderUser = ({ userData, index }: TRenderUserProps) => {
   const user = userData?.users?.[0];
   const icon = statusIconAndColorClassMap[userData?.status];
+
   const userFullName = `${user?.firstName} ${user?.lastName}`;
 
   return (
@@ -129,12 +133,18 @@ const RenderUser = ({ userData, index }: TRenderUserProps) => {
         className={`status-icon w-[24px] h-[24px] rounded-full dark:border-[var(--common-border-color)] border-[var(--primary)] relative  ${icon.colorClasses} `}
       >
         <div className={`${lineClassName} -top-[var(--line-height)]`} />
-        <Tooltip title={<span className=" capitalize">{userData.status}</span>} placement="top" arrow>
-          <span className="block absolute inset-0 m-auto max-w-[13px] max-h-[13px] ">{icon.icon}</span>
+        <Tooltip title={<span className=" capitalize">{icon.text}</span>} placement="top" arrow>
+          <span className="block absolute inset-0 m-auto max-w-[20px] max-h-[20px] cursor-pointer ">{icon.icon}</span>
         </Tooltip>
         <div className={`${lineClassName} -bottom-[var(--line-height)]`} />
       </div>
-      <Link title={userFullName} className="link text-[12px] font-normal max-w-[85px] line-clamp-1" to={`${routes.userDetail.path}/${user?.id}`}>
+      <Link
+        title={userFullName}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="link text-[12px] font-normal max-w-[85px] line-clamp-1"
+        to={`${routes.userDetail.path}/${user?.id}`}
+      >
         {userFullName}
       </Link>
     </div>
