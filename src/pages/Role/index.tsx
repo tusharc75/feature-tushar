@@ -404,7 +404,7 @@ const Roles: FC = () => {
               isClientSideGrid={true}
               refreshGrid={fetchRoles}
               renderedFrom={renderedFrom}
-              showOnlyShowFilteredRecordSwitch={true}
+              showOnlyShowFilteredRecordSwitch={false}
               showFilters={false}
               resource={sidebarResource.role}
             />
