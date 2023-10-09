@@ -8,6 +8,7 @@ import { FcApproval, FcCancel } from 'react-icons/fc';
 import { GiSandsOfTime } from 'react-icons/gi';
 import { BsCheck2 } from 'react-icons/bs';
 import { KeyboardArrowUp } from '@material-ui/icons';
+import { Block } from '@material-ui/icons';
 
 const DEFAULT_DATA_COUNT = 3; // this value will change how many users will be displayed by default;
 
@@ -21,17 +22,17 @@ const versionStatusIconMap = {
   'Sent for DOA': {
     icon: <AiOutlineClockCircle size={20} />,
     lebel: 'DOA Sent',
-    colorClass: 'text-[#00acc1]'
+    colorClass: 'bg-[#00acc1] text-[white]'
   },
   'Rejected by DOA': {
-    icon: <FcCancel size={20} />,
+    icon: <Block className="[font-size:20px_!important]" />,
     lebel: 'Rejected by DOA',
-    colorClass: 'text-[#d60f0f]'
+    colorClass: 'bg-[#d60f0f]'
   },
   'Accepted by DOA': {
     icon: <FcApproval size={20} />,
     lebel: 'Approved by DOA',
-    colorClass: 'text-[#6ca826] dark:text-[#294c00]'
+    colorClass: 'bg-[#6ca826] dark:bg-[#294c00]'
   }
 };
 
@@ -68,9 +69,9 @@ const DoaStepUsers: FC<TDoaStepUsersProps> = ({ DOAData, versionStatus, ...props
 
   return (
     <div className="bg-[white] dark:bg-[var(--dark-primary)] min-w-[124px]" {...props}>
-      <div className={`flex items-center text-[12px] px-[7px] py-[4px] mb-[8px] gap-[7px] max-w-[133px] ${versionData?.colorClass}`}>
-        {versionData?.icon}
-        <p title={versionData?.lebel} className=" line-clamp-1">
+      <div className={`flex items-center text-[12px] px-[7px] py-[4px] mb-[8px] gap-[7px] max-w-[133px] `}>
+        <div className={`${versionData?.colorClass} w-[20px] h-[20px] rounded-full`}>{versionData?.icon}</div>
+        <p title={versionData?.lebel} className=" line-clamp-1 text-[var(--primary-text)]">
           {versionData?.lebel}
         </p>
       </div>

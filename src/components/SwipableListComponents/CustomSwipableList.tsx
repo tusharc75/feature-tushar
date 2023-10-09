@@ -110,6 +110,7 @@ export default function CustomSwipableList({
             </div>
           </div>
         ) : null}
+
         <div style={{ overflowY: 'auto', height: fullHeight === true ? 'auto' : 'calc(100vh - 215px)' }} id="scrollableDiv" className="-mx-2">
           <div>
             <InfiniteScroll
@@ -161,8 +162,8 @@ export default function CustomSwipableList({
                     <div className="flex-grow">
                       <div className="heading-with-icon">
                         {primaryField && (
-                          <h4 className="quote-name text-truncate">
-                            <span onClick={() => onClick(d)} className="link quote-name text-truncate">
+                          <h4 className="quote-name line-clamp-1">
+                            <span onClick={() => onClick(d)} className="link quote-name line-clamp-1">
                               {d[primaryField.field]}
                             </span>
                           </h4>
@@ -221,6 +222,7 @@ export default function CustomSwipableList({
                         )
                     )}
                   </div>
+
                   {chips.length > 0 && (
                     <div className="mt-1 pt-2" style={{ borderTop: '1px solid var(--common-border-color)' }}>
                       <div className=" d-flex gap-1 flex-wrap">
