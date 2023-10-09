@@ -66,7 +66,7 @@ function IotChart() {
     if (showAsset) {
       filterByIds.push({
         field: 'currentLocation',
-        term: showAsset
+        term: { $in: [showAsset]}
       });
     }
 
@@ -125,6 +125,7 @@ function IotChart() {
                     >
                       <MyLocationIcon className={`absolute -top-[10px] left-[18px]`} />
                       <Typography variant="h6">{location?.currentLocation}</Typography>
+                      <Typography>{location?._id}</Typography>
                     </DashBoardCardShell>
                   </div>
                 );
