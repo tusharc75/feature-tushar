@@ -9,7 +9,7 @@ import { ExpandLess, ExpandMore } from '@material-ui/icons';
 const PerformanceAnalysis = ({ assetId, dataPoints = [], customDataPoints = [] }) => {
 
   const [dateFilters, setDateFilters] = useState({
-    from: new Date(moment().subtract(8, 'days').toJSON()),
+    from: new Date(moment().subtract(8, 'days').startOf('day').toJSON()),
     to: new Date(),
     intervals: '1hour'
   });
