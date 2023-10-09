@@ -125,7 +125,6 @@ function IotChart() {
                     >
                       <MyLocationIcon className={`absolute -top-[10px] left-[18px]`} />
                       <Typography variant="h6">{location?.currentLocation}</Typography>
-                      <Typography>{location?._id}</Typography>
                     </DashBoardCardShell>
                   </div>
                 );
