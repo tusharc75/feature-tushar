@@ -173,12 +173,11 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
     setDownloadProgress(0);
 
     if (file?.base64) {
-      let link = document.createElement("a");
+      let link = document.createElement('a');
       link.href = `data:application/${file?.contentType};base64,${file?.base64}`;
       link.download = `${file?.name}${file?.extension}`;
       link.click();
-    }
-    else if (file.url) {
+    } else if (file.url) {
       axiosInstance()
         .get(`user/download?fileName=${file.url}`, {
           responseType: 'blob',
@@ -243,38 +242,41 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
 
   return (
     <>
-      <Grid container spacing={1} className={emailStyles.createEmailContainer}>
+      <div className="flex flex-wrap gap-2 py-3">
         {attachments && attachments.length > 0 ? (
           <>
             {attachments.map((attachment, i) => {
               return (
-                <Grid item key={i} sm={3} xs={3} md={3} xl={3} style={{ maxWidth: '150px' }}>
-                  <Paper className={emailStyles.fileContainer}>
-                    <img
-                      src={getFileIconSrc(attachment?.contentType ? attachment?.contentType : attachment.url ? attachment.url : attachment)}
-                      className={`${emailStyles.file} object-contain`}
-                      alt="attchment"
-                    />
-                    <Typography noWrap variant="body2">
-                      {attachment
-                        ? attachment?.name
+                <>
+                  <div className="max-w-[138px] flex-grow group border border-[var(--common-border-color)] min-h-[153px] relative rounded-[4px] p-[var(--gutter)] [--gutter:18px]">
+                    <div className="front  group-hover:hidden">
+                      <div className="mx-auto h-[79px] mb-[11px]">
+                        <img
+                          src={getFileIconSrc(attachment?.contentType ? attachment?.contentType : attachment.url ? attachment.url : attachment)}
+                          className={`object-contain mx-auto block h-full w-full max-w-full`}
+                          alt="attchment"
+                        />
+                      </div>
+                      <p className=" line-clamp-1 text-[14px] text-[var(--text-primary)]">
+                        {attachment
                           ? attachment?.name
-                          : attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
+                            ? attachment?.name
+                            : attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
                             ? attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
                             : attachment.substring(attachment.lastIndexOf('/') + 1)
-                        : 'attachment'}
-                    </Typography>
-                    {attachment?.date && <Typography variant="body2">{moment(attachment?.date)?.format(dateTimeFormat)}</Typography>}
-                    <div className={emailStyles.fileOverlay}>
-                      <Typography
-                        variant="subtitle2"
+                          : 'attachment'}
+                      </p>
+                    </div>
+                    <div className="back group-hover:opacity-100 opacity-0 absolute inset-0 p-[var(--gutter)] flex flex-col justify-between">
+                      <p
+                        className=" line-clamp-4 text-[14px] text-[var(--text-primary)]"
                         title={
                           attachment
                             ? attachment?.name
                               ? attachment?.name
                               : attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
-                                ? attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
-                                : attachment?.substring(attachment.lastIndexOf('/') + 1)
+                              ? attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
+                              : attachment?.substring(attachment.lastIndexOf('/') + 1)
                             : 'attachment'
                         }
                       >
@@ -282,11 +284,11 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
                           ? attachment?.name
                             ? attachment?.name
                             : attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
-                              ? attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
-                              : attachment?.substring(attachment.lastIndexOf('/') + 1)
+                            ? attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
+                            : attachment?.substring(attachment.lastIndexOf('/') + 1)
                           : 'attachment'}
-                      </Typography>
-                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      </p>
+                      <div className="flex justify-between">
                         <Tooltip title="Download" placement="top">
                           <IconButton size={'small'} onClick={(event) => downloadFile(event, attachment)} style={{ paddingBottom: '1px' }}>
                             {<GetAppIcon />}
@@ -325,13 +327,13 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
                         )}
                       </div>
                     </div>
-                  </Paper>
-                </Grid>
+                  </div>
+                </>
               );
             })}
           </>
         ) : null}
-      </Grid>
+      </div>
       {showConfirmationDialog && (
         <ConfirmationDialog
           open={showConfirmationDialog}
