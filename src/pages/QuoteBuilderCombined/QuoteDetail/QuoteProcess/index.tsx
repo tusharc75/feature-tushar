@@ -1303,7 +1303,7 @@ export default function QuoteProcess(props) {
                   )}
                 </div>
                 {/* Test Code */}
-                {processStatus === QUOTE_PROCESS_STATUS.quoteBuilder ? (
+                {/* {processStatus === QUOTE_PROCESS_STATUS.quoteBuilder ? (
                   <span className="d-flex flex-wrap gap-2 align-items-center justify-content-end ml-auto">
                     <Tooltip title="View">
                       <Button
@@ -1365,7 +1365,7 @@ export default function QuoteProcess(props) {
                       </Button>
                     </Tooltip>
                   </span>
-                ) : null}
+                ) : null} */}
                 {/* Test Code */}
 
                 {processStatus === QUOTE_PROCESS_STATUS.doaProcess && versionStatus === 'Building Quote' && DOAneeded ? (
