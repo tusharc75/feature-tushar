@@ -162,7 +162,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
       >
         <Toolbar />
         <div id="sidebarOrDrawer" style={{ borderTop: '1px solid #485B64' }}>
-          <div className="min-h-[56px]">
+          <div className="max-[959px]:min-h-[56px]">
             {toggleDrawer ? (
               user?.brandLogo ? (
                 <img src={user.brandLogo} alt="brand" className={styles.logo} />
