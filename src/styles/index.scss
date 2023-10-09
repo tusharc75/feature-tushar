@@ -4116,14 +4116,14 @@ body {
   .MuiChip-root.MuiAutocomplete-tag {
     max-width: 341px !important;
     @media all and (max-width: 600px) {
-      max-width: 288px !important;
+      max-width: 202px !important;
     }
-    & span {
-      max-width: 341px !important;
-      @media all and (max-width: 600px) {
-        max-width: 288px !important;
-      }
-    }
+    // & span {
+    //   max-width: 341px !important;
+    //   @media all and (max-width: 600px) {
+    //     max-width: 288px !important;
+    //   }
+    // }
   }
 }
 
