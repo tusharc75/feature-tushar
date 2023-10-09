@@ -14,7 +14,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { FaDiceOne } from 'react-icons/fa';
 import axiosInstance from 'src/axios/axiosInstance';
 
-const DemandOrderQtyDialog = ({ onClose, materialData, salesOrderData, handleUpdate, loadingEdit, bulkEdit, showSaveAndNext }) => {
+const DemandOrderQtyDialog = ({ onClose, materialData, demandOrderData, handleUpdate, loadingEdit, bulkEdit, showSaveAndNext }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [fields, setFields] = useState([]);
@@ -29,7 +29,7 @@ const DemandOrderQtyDialog = ({ onClose, materialData, salesOrderData, handleUpd
     setInitialData({ fields: [], values: {} });
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.demandOrderDetail}`);
     var data = response?.data?.data;
-    data = CURReplaceByCurrencySingle(data, salesOrderData?.currency || 'USD');
+    data = CURReplaceByCurrencySingle(data, demandOrderData?.currency || 'USD');
     if (bulkEdit) {
       let unitArray: any = [];
       materialData?.forEach((element) => {

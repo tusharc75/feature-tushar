@@ -395,7 +395,11 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
             </Menu>
           </Box>
           <Box display="flex">
-            <PreviewDownload resource={sidebarResource.productionOrder} referenceId={productionOrderData?._id} columns={columns} />
+            <PreviewDownload
+              fileName={`${routes.productionOrder.title}-${productionOrderData?.productionOrderNumber}`}
+              resource={sidebarResource.productionOrder}
+              referenceId={productionOrderData?._id}
+              columns={columns} />
             <Box ml={1} />
             <Button
               disabled={selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true}
