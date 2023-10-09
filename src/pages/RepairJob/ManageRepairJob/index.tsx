@@ -56,7 +56,8 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
     axiosInstance()
       .get(`/field?resource=${sidebarResource.repairJob}`)
       .then(({ data: { data } }) => {
-        data = data.filter((obj) => obj?.fieldData?.fieldName !== 'rentalJob');
+        const hideFields = ['rentalJob', 'actualEndDate']
+        data = data.filter((obj) => !hideFields?.includes(obj?.fieldData?.fieldName));
 
         data?.forEach((e) => {
           if (e?.fieldData?.fieldName === 'chartOfAccount' && e?.fieldData?.isDefaultValue && e?.fieldData?.defaultValue) {
