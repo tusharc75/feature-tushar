@@ -57,9 +57,10 @@ const AddSerializedAsset = ({
   transferAssetId = null,
   notIn = null,
   filterByPlant = null,
-  handleSuccess = null
+  handleSuccess = null,
+  chartOfAccount = null
 }) => {
-  
+
   const renderedFrom = `${camelCase(routes?.serializedAsset.title)}_assign`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -265,7 +266,11 @@ const AddSerializedAsset = ({
       }
 
       if (referenceType === 'Repair Job') {
-        deepFilter = `${deepFilter}&repairJob=true`;
+        if (chartOfAccount) {
+          deepFilter = `${deepFilter}&repairJob=true&chartOfAccount=${chartOfAccount?.optionValue}`;
+        } else {
+          deepFilter = `${deepFilter}&repairJob=true`;
+        }
       } else if (referenceType === 'Transfer Asset') {
         deepFilter = `${deepFilter}&transferable=true`;
       } else if (referenceType === 'Rental Job') {
