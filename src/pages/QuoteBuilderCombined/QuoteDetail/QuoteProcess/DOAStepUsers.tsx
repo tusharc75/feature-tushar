@@ -1,31 +1,37 @@
+import { Button, Collapse, Tooltip } from '@material-ui/core';
 import React, { FC, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import routes from 'src/components/Helpers/Routes';
-import { Collapse, Tooltip, Button } from '@material-ui/core';
+import { FcApproval } from 'react-icons/fc';
+import { Block, KeyboardArrowUp, WatchLater } from '@material-ui/icons';
 
-import { AiOutlineClockCircle, AiOutlineClose } from 'react-icons/ai';
-import { FcApproval, FcCancel } from 'react-icons/fc';
-import { BsCheck } from 'react-icons/bs';
-import { GiSandsOfTime } from 'react-icons/gi';
-import { BsCheck2 } from 'react-icons/bs';
-import { KeyboardArrowUp } from '@material-ui/icons';
-import { Block } from '@material-ui/icons';
-
-import { HourglassEmpty, CheckRounded, CancelOutlined } from '@material-ui/icons';
+import { DOAApproved, DOARejected, DOAPending } from 'src/assets/svg/svgIcons';
 
 const DEFAULT_DATA_COUNT = 3; // this value will change how many users will be displayed by default;
 
 const statusIconAndColorClassMap = {
-  approve: { icon: <CheckRounded className="block max-w-[20px] max-h-[20px]" />, colorClasses: 'text-[#64B067]', text: 'Accepted' },
-  pending: { icon: <HourglassEmpty className="block max-w-[20px] max-h-[20px] h-full" />, colorClasses: 'text-[#858B9D]', text: 'Pending' },
-  rejected: { icon: <CancelOutlined className="block max-w-[20px] max-h-[20px]" />, colorClasses: 'text-[#EC6852]', text: 'Declined' }
+  approve: {
+    icon: <DOAApproved size={16} className="block" />,
+    colorClasses: 'text-[#64B067] hover:bg-[#64B067] hover:text-[white]',
+    text: 'Accepted'
+  },
+  pending: {
+    icon: <DOAPending size={16} className="block" />,
+    colorClasses: 'text-[#858B9D] hover:bg-[#858B9D] hover:text-[white]',
+    text: 'Pending'
+  },
+  rejected: {
+    icon: <DOARejected size={16} className="block" />,
+    colorClasses: 'text-[#EC6852] hover:bg-[#EC6852] hover:text-[white]',
+    text: 'Declined'
+  }
 };
 
 const versionStatusIconMap = {
   'Sent for DOA': {
-    icon: <AiOutlineClockCircle size={20} />,
+    icon: <WatchLater className="[font-size:20px_!important]" />,
     lebel: 'DOA Sent',
-    colorClass: 'bg-[#00acc1] text-[white]'
+    colorClass: 'bg-[white] text-[#00acc1]'
   },
   'Rejected by DOA': {
     icon: <Block className="[font-size:20px_!important]" />,
@@ -130,11 +136,11 @@ const RenderUser = ({ userData, index }: TRenderUserProps) => {
     <div key={user.id || index} className="grid grid-cols-[24px_85px] gap-[7px] items-center  mb-[var(--line-height)]">
       <div
         style={{ borderWidth: '1px', borderStyle: 'solid' }}
-        className={`status-icon w-[24px] h-[24px] rounded-full dark:border-[var(--common-border-color)] border-[var(--primary)] relative  ${icon.colorClasses} `}
+        className={`status-icon w-[24px] h-[24px] rounded-full dark:border-[var(--common-border-color)] border-[var(--primary)] relative transition-colors ${icon.colorClasses} `}
       >
         <div className={`${lineClassName} -top-[var(--line-height)]`} />
         <Tooltip title={<span className=" capitalize">{icon.text}</span>} placement="top" arrow>
-          <span className="block absolute inset-0 m-auto max-w-[20px] max-h-[20px] cursor-pointer ">{icon.icon}</span>
+          <span className="block absolute inset-0 m-auto max-w-[16px] max-h-[16px] cursor-pointer ">{icon.icon}</span>
         </Tooltip>
         <div className={`${lineClassName} -bottom-[var(--line-height)]`} />
       </div>
