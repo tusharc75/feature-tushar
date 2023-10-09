@@ -22,7 +22,7 @@ import SearchBox from '../../components/Helpers/SearchBox';
 import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { budget, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { budget, gridLoadingTimeout, prepareDataForGrid, sidebarResource, removeLocalStorage, getLocalStorageArrayData } from '../../constants/helpers';
 import useColumns, { getFrameworkComponents, getStaticFields, gridFilterParser } from '../../constants/useColumns';
 import styles from '../Leads/Header.module.scss';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
@@ -241,6 +241,7 @@ function Budget() {
     axiosInstance()
       .put(`${budgetApi}/remove`, { ids: ids })
       .then(() => {
+        removeLocalStorage(localStorageSelectedRecords);
         fetchBudgetList();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
@@ -288,8 +289,12 @@ function Budget() {
             }}
             isExportAllOrSomeFeature={true}
             total={rowCount}
-            recordsToExport={selectedRecords.length}
-            ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+            recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+            ids={
+              getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+                ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+                : []
+            }
             onExportToExcelSuccess={() => {
               if (gridApi) gridApi.deselectAll();
               else fetchBudgetList();
