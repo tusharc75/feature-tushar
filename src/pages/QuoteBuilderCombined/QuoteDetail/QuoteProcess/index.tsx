@@ -251,7 +251,7 @@ export default function QuoteProcess(props) {
 
   const [quoteCurrency] = useState(quoteData?.currency);
   const [nextStep, setNextStep] = useState(false);
-  const [prevStep, setPrevStep] = useState(true)
+  const [prevStep, setPrevStep] = useState(true);
   const [redCard, setRedCard] = useState(false);
   const [totalProfit, setTotalProfit] = useState({
     shortFormatAmount: '',
@@ -303,7 +303,6 @@ export default function QuoteProcess(props) {
   const [showExcelArrangeColumns, setShowExcelArrangeColumns] = useState(false);
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [columns, setColumnData] = useState([]);
-
 
   const [sendToLoading, setSendToLoading] = useState(false);
 
@@ -357,8 +356,7 @@ export default function QuoteProcess(props) {
       const currentVersionStatus = quoteData?.versions[currentVersion]?.status;
       if (currentVersionStatus.includes('Accepted')) {
         setNextStep(true);
-      }
-      else {
+      } else {
         setNextStep(false);
       }
     }
@@ -421,7 +419,8 @@ export default function QuoteProcess(props) {
 
   const fetchDOAData = () => {
     if ((processStatus === QUOTE_PROCESS_STATUS.doaProcess && DOAneeded) || (versionStatus.includes('Rejected by DOA') && processStatus === 'End')) {
-      axiosInstance().get(`doa-request/doaFlow/${quoteData._id}/${currentVersion}`)
+      axiosInstance()
+        .get(`doa-request/doaFlow/${quoteData._id}/${currentVersion}`)
         .then(({ data: { data } }) => {
           setDOAData(data.reverse());
         })
@@ -456,7 +455,7 @@ export default function QuoteProcess(props) {
         data['commissionPercentPerUnit'] === null || data['commissionPercentPerUnit'] === undefined ? 0 : data['commissionPercentPerUnit'],
       [`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]:
         data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === null ||
-          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
+        data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
           ? 0
           : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]
     }));
@@ -933,7 +932,6 @@ export default function QuoteProcess(props) {
   };
 
   const handleCases = () => {
-
     if (Customerreq) {
       exportToCSV(true);
       if (!pdfFileBase64) {
@@ -1113,27 +1111,27 @@ export default function QuoteProcess(props) {
   };
 
   const handleSendForDOA = () => {
-    setSendToLoading(true)
+    setSendToLoading(true);
     axiosInstance()
       .post(`/doa-request/create/${quoteData._id}?version=${currentVersion}`)
       .then(({ data }) => {
         handleVersionUpdate(visibleColumns, visibleColumnsExcel, 'Sent for DOA', state?.selectedRecords);
         fetchQuoteData(currentVersion);
         fetchDOAData();
-        setSendToLoading(false)
+        setSendToLoading(false);
       })
       .catch((err) => {
-        setSendToLoading(false)
+        setSendToLoading(false);
         toastConfig.setToastConfig(err);
       });
-  }
+  };
 
   const handleOfferToCustomer = () => {
-    setSendToLoading(true)
+    setSendToLoading(true);
     axiosInstance()
       .patch(`/quote-builder/send-offer/${quoteData._id}/${currentVersion}`)
       .then(({ data }) => {
-        setSendToLoading(false)
+        setSendToLoading(false);
         fetchQuoteData(currentVersion);
         toastConfig.setToastConfig({
           open: true,
@@ -1142,19 +1140,21 @@ export default function QuoteProcess(props) {
         });
       })
       .catch((err) => {
-        setSendToLoading(false)
+        setSendToLoading(false);
         toastConfig.setToastConfig(err);
       });
   };
-
 
   return (
     <>
       <div>
         <Steps
           steps={DOAneeded ? DOASteps : OtherSteps}
-          currentStep={DOAneeded ? DOASteps.findIndex((d) => d?.key === processStatus) :
-            processStatus === QUOTE_PROCESS_STATUS.doaProcess ? OtherSteps.findIndex((d) => d?.key === QUOTE_PROCESS_STATUS.quoteBuilder)
+          currentStep={
+            DOAneeded
+              ? DOASteps.findIndex((d) => d?.key === processStatus)
+              : processStatus === QUOTE_PROCESS_STATUS.doaProcess
+              ? OtherSteps.findIndex((d) => d?.key === QUOTE_PROCESS_STATUS.quoteBuilder)
               : OtherSteps.findIndex((d) => d?.key === processStatus)
           }
           id={quoteData._id}
@@ -1186,6 +1186,7 @@ export default function QuoteProcess(props) {
           setStepFullScreen={() => setStepFullScreen(true)}
         />
       </div>
+
       <div className={`pt-[12px] subDetailModule `}>
         <ContentFullScreen
           title={DOASteps.find((d) => d?.key === processStatus).label || ''}
@@ -1236,19 +1237,25 @@ export default function QuoteProcess(props) {
                       fileName={`${`Quote-${quoteData?.quoteName}-V(${currentVersion})`}`}
                       columns={columns}
                       hideDetailButton={true}
-                      isSendEmail={processStatus === QUOTE_PROCESS_STATUS.sendToCustomer
-                        && versionStatus !== 'Send To Customer'
-                        && !ifQuoteApproved.approved
-                        && !quoteData?.versions[currentVersion]?.offered ? true : false}
+                      isSendEmail={
+                        processStatus === QUOTE_PROCESS_STATUS.sendToCustomer &&
+                        versionStatus !== 'Send To Customer' &&
+                        !ifQuoteApproved.approved &&
+                        !quoteData?.versions[currentVersion]?.offered
+                          ? true
+                          : false
+                      }
                       isExcelDownload={true}
                       extraQueryParams={{ uniqueId: quoteData?.versions[currentVersion]?._id }}
                       versionNumber={currentVersion}
                       subject={`${user?.user?.brandName ?? 'Brand'} Offer - ${quoteData?.quoteName ?? ''}`}
-                      defaultColumns={['productName',
+                      defaultColumns={[
+                        'productName',
                         'unit',
                         'qty',
                         `salesPricePerUnit_${quoteData?.currency?.toLowerCase()}`,
-                        `totalSalesPrice_${quoteData?.currency?.toLowerCase()}`]}
+                        `totalSalesPrice_${quoteData?.currency?.toLowerCase()}`
+                      ]}
                       handleRefresh={() => {
                         fetchQuoteData(currentVersion);
                       }}
@@ -1361,12 +1368,11 @@ export default function QuoteProcess(props) {
                 ) : null}
                 {/* Test Code */}
 
-                {processStatus === QUOTE_PROCESS_STATUS.doaProcess
-                  && versionStatus === 'Building Quote' && DOAneeded ? (
+                {processStatus === QUOTE_PROCESS_STATUS.doaProcess && versionStatus === 'Building Quote' && DOAneeded ? (
                   <div className={`flex flex-wrap items-center ml-auto ${isMobile ? 'actio-pos-quote' : ''}`}>
                     <Button
                       onClick={() => {
-                        handleSendForDOA()
+                        handleSendForDOA();
                       }}
                       disabled={!allowedToEdit || sendToLoading}
                       startIcon={<BiMailSend />}
@@ -1398,7 +1404,6 @@ export default function QuoteProcess(props) {
                     </span>
                   </div>
                 ) : null}
-
               </div>
               <Grid item xs={12} sm={12} md={12} className="mt-1">
                 {quoteData && !loading && productBuilderId ? (
@@ -1418,7 +1423,7 @@ export default function QuoteProcess(props) {
                     refreshProducts={refreshProducts}
                     stage={processStatus === QUOTE_PROCESS_STATUS.new ? 'product' : 'cost'}
                     isPriceBuilder={processStatus === QUOTE_PROCESS_STATUS.priceBuilder}
-                    Editable={allowedToEdit && ([QUOTE_PROCESS_STATUS.new, QUOTE_PROCESS_STATUS.priceBuilder]?.includes(processStatus)) ? true : false}
+                    Editable={allowedToEdit && [QUOTE_PROCESS_STATUS.new, QUOTE_PROCESS_STATUS.priceBuilder]?.includes(processStatus) ? true : false}
                     fullScreen={stepFullScreen}
                     processStatus={processStatus}
                     setNextStep={setNextStep}
@@ -1662,8 +1667,8 @@ export default function QuoteProcess(props) {
                           checked={
                             (showExcelArrangeColumns &&
                               ['Select All', ...ColumnName].sort().toString() === ['Select All', ...visibleColumnsExcel].sort().toString()) ||
-                              (showPDFArrangeColumns &&
-                                ['Select All', ...ColumnName].sort().toString() === ['Select All', ...visibleColumns].sort().toString())
+                            (showPDFArrangeColumns &&
+                              ['Select All', ...ColumnName].sort().toString() === ['Select All', ...visibleColumns].sort().toString())
                               ? true
                               : selected
                           }
