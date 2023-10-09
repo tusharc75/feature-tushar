@@ -10,6 +10,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { ViewDialog } from './ViewDialog';
 import ArrangeView from './ArrangeView';
+import HtmlTooltip from '../CustomTooltipTitle';
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -73,12 +74,16 @@ export const PreviewFields = ({
                             <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'} width={'100%'}>
                                 <span style={{ width: 'calc(100% - 71px)' }}>{option?.name}</span>
                                 <Box>
-                                    <IconButton size="small" style={{ marginRight: '20px' }}>
-                                        <AiFillEdit />
-                                    </IconButton>
-                                    <IconButton size="small" onClick={() => setIsViewDeleteConfirm({ open: true, id: option._id })}>
-                                        <RiDeleteBin6Fill />
-                                    </IconButton>
+                                    <HtmlTooltip title='Edit'>
+                                        <IconButton size="small" style={{ marginRight: '20px' }}>
+                                            <AiFillEdit />
+                                        </IconButton>
+                                    </HtmlTooltip>
+                                    <HtmlTooltip title='Delete'>
+                                        <IconButton size="small" onClick={() => setIsViewDeleteConfirm({ open: true, id: option._id })}>
+                                            <RiDeleteBin6Fill />
+                                        </IconButton>
+                                    </HtmlTooltip>
                                 </Box>
                             </Box>
                         )}

@@ -1388,7 +1388,6 @@ export default function QuoteProcess(props) {
                             handleOfferToCustomer();
                           }}
                           disabled={!allowedToEdit || sendToLoading}
-                          startIcon={<BiMailSend />}
                           variant="contained"
                           size="small"
                           color="primary"
