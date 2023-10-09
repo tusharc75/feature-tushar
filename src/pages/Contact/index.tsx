@@ -152,7 +152,6 @@ export default function Contact(props) {
       columns.push(checkStaticField(routes.projectSales.title, field));
     });
     setColumns([...columns]);
-    console.log(columns);
   };
   //  Grid Variables - End
   if (columnState) {
@@ -784,7 +783,6 @@ export default function Contact(props) {
             <DisplayFiltersForMobile resource={sidebarResource[contactResource]} />
           </div>
         </div>
-        {console.log(dataRows)}
 
         {Object.keys(frameWorkComponent).length > 0 &&
           (isMobile && !isTablet ? (
