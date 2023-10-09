@@ -345,6 +345,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
       <Box display="flex" justifyContent="flex-end" m={1}>
         <Box display="flex" alignItems="center" gridGap={'8px'} className="isolate">
           <PreviewDownload
+            fileName={`${routes.repairJob.title}-${repairJobData?.repairJobName}`}
             resource={sidebarResource.repairJob}
             referenceId={repairJobData?._id}
             columns={columns}

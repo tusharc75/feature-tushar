@@ -316,6 +316,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
             <Box display="flex" justifyContent="space-between" p={1}>
               {invoiceData &&
                 <PreviewDownload
+                  fileName={`${routes.invoice.title}-${invoiceData?.invoiceNumber}`}
                   resource={sidebarResource.invoice}
                   referenceId={invoiceData?._id}
                   columns={columns}

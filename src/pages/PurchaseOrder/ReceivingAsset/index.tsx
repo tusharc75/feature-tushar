@@ -457,6 +457,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
         </Box>
         <div className="d-flex gap-2">
           <PreviewDownload
+            fileName={`${routes.purchaseOrder.title}-${purchaseOrderData?.purchaseOrderNumber}`}
             resource={sidebarResource.purchaseOrder}
             referenceId={purchaseOrderData?._id}
             columns={columns?.map((e) => { return { ...e, accessor: e.accessor === 'serializedProductView' ? 'serializedProduct' : e.accessor } })}

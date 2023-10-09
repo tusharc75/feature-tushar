@@ -360,6 +360,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     <Fragment>
       <Box display="flex" flexDirection={'row'} justifyContent={'flex-end'} mx={1} my={1}>
         <PreviewDownload
+          fileName={`${routes.transferAsset.title}-${transferAssetData?.transferAssetNumber}`}
           resource={sidebarResource.transferAsset}
           referenceId={transferAssetId}
           columns={columns?.filter((e) => ['assetNumber', 'serialNumber', 'product', 'productDescription', 'status']?.includes(e?.accessor))}
