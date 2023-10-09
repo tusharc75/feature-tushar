@@ -703,7 +703,7 @@ const Product = () => {
 
               {isProductTemplate && (
                 <Autocomplete
-                  style={{ width: '250px' }}
+                  className="md:min-w-[250px] flex-grow md:flex-grow-0 sm:max-w-[250px]"
                   options={productTemplateList}
                   getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
                   getOptionSelected={(option: any, val) => option.optionValue === val}
@@ -715,26 +715,14 @@ const Product = () => {
                   onChange={(e, val) => {
                     setProductTemplate(val && val.optionValue ? val.optionValue : '');
                   }}
-                  renderInput={(params) =>
-                    isMobile && !isTablet ? (
-                      <TextField
-                        {...params}
-                        margin="dense"
-                        name="productTemplate"
-                        placeholder="Product Template"
-                        variant="standard"
-                        fullWidth
-                        className={isMobile ? 'serchBox' : ''}
-                      />
-                    ) : (
-                      <TextField {...params} margin="dense" name="productTemplate" label="Product Template" variant="outlined" fullWidth />
-                    )
-                  }
+                  renderInput={(params) => (
+                    <TextField {...params} margin="none" size="small" name="productTemplate" label="Product Template" variant="outlined" fullWidth />
+                  )}
                 />
               )}
               {isProductType && (
                 <Autocomplete
-                  style={{ width: '250px' }}
+                  className="md:min-w-[250px] flex-grow md:flex-grow-0 sm:max-w-[250px]"
                   options={productTypeList}
                   getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
                   getOptionSelected={(option: any, val) => option.optionValue === val}
@@ -746,21 +734,9 @@ const Product = () => {
                   onChange={(e, val) => {
                     setProductType(val && val.optionValue ? val.optionValue : '');
                   }}
-                  renderInput={(params) =>
-                    isMobile && !isTablet ? (
-                      <TextField
-                        {...params}
-                        margin="dense"
-                        name="productType"
-                        placeholder="Product Type"
-                        variant="standard"
-                        fullWidth
-                        className={isMobile ? 'serchBox' : ''}
-                      />
-                    ) : (
-                      <TextField {...params} margin="dense" name="productType" label="Product Type" variant="outlined" fullWidth />
-                    )
-                  }
+                  renderInput={(params) => (
+                    <TextField {...params} margin="none" size={'small'} name="productType" label="Product Type" variant="outlined" fullWidth />
+                  )}
                 />
               )}
             </div>

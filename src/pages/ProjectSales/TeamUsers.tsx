@@ -46,7 +46,7 @@ const TeamUsers = ({ data, permissions, managerId, removeUser }) => {
                     <ListItem disableGutters className={classes.list}>
                       <ListItemText
                         primary={
-                          <div className={`flex gap-2 justify-between max-w-full mb-1`}>
+                          <div className={`flex gap-2 justify-between max-w-full mb-1 min-h-[30px] items-center`}>
                             <p className="link line-clamp-1" onClick={() => window.open(`/user/detail/${obj._id}`)}>
                               {`${obj.firstName} ${obj.lastName}` || ''}
                             </p>
@@ -69,6 +69,18 @@ const TeamUsers = ({ data, permissions, managerId, removeUser }) => {
                                 /> */}
                               </>
                             )}
+                            {permissions?.projectSales?.isUpdate && managerId !== obj._id && (
+                              <IconButton
+                                title={`Remove ${obj.firstName}`}
+                                size="small"
+                                edge="end"
+                                aria-label="delete"
+                                style={{ margin: 0 }}
+                                onClick={() => removeUser(obj)}
+                              >
+                                <Delete color="error" />
+                              </IconButton>
+                            )}
                           </div>
                         }
                         secondary={
@@ -78,12 +90,6 @@ const TeamUsers = ({ data, permissions, managerId, removeUser }) => {
                           </div>
                         }
                       />
-
-                      {permissions?.projectSales?.isUpdate && managerId !== obj._id && (
-                        <IconButton title={`Remove ${obj.firstName}`} size="small" edge="end" aria-label="delete" onClick={() => removeUser(obj)}>
-                          <Delete color="error" />
-                        </IconButton>
-                      )}
                     </ListItem>
                   </BoxWithBorder>
                 </Grid>
