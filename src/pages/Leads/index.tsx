@@ -74,7 +74,7 @@ const Leads = () => {
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
 
   const columnState = JSON.parse(localStorage.getItem(leadResource));
 
@@ -129,7 +129,7 @@ const Leads = () => {
     if (renderCount > 0) {
       fetchLeads();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting, selectedEntity]);
+  }, [page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
     let data;
@@ -224,6 +224,11 @@ const Leads = () => {
     }
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
+    }
+
+    if (showFilteredRecordsOnly) {
+      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
