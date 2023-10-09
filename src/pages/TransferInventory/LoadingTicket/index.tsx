@@ -295,9 +295,10 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
     <Fragment>
       <Box display="flex" justifyContent="flex-end" m={1}>
         <PreviewDownload
+          fileName={`${routes.transferInventory.title}-${transferInventoryData?.transferNumber}`}
           hideDetailButton={true}
           resource={sidebarResource.transferInventory}
-          referenceId={transferInventoryData._id}
+          referenceId={transferInventoryData?._id}
           columns={columns?.filter((e) => ['productName', 'productNumber', 'productDescription', 'productDescription', 'qty']?.includes(e.field))} />
         {interPlantTransfer ? (
           <Box ml={1}>
