@@ -10,7 +10,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import { leadDetailPage } from '../../routes/Lead';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { gridLoadingTimeout, isObjectEmpty, processFieldName, sidebarResource } from '../../constants/helpers';
+import { gridLoadingTimeout, isObjectEmpty, processFieldName, sidebarResource, removeLocalStorage, getLocalStorageArrayData } from '../../constants/helpers';
 import ManageLeadDialog from './ManageLeadDialog/ManageLeadDialog';
 import { HiUserGroup } from 'react-icons/hi';
 import { lead, prepareDataForGrid } from '../../constants/helpers';
@@ -76,24 +76,11 @@ const Leads = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
 
-  const columnState = JSON.parse(localStorage.getItem(leadResource));
-
   const [columns, setColumns] = useState([]);
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
 
-  const [isAllChecked, setIsAllChecked] = useState(false);
-  const [clonedData, setClonedData] = useState([]);
   const localStorageSelectedRecords = `${leadResource}_selected`;
 
-  if (columnState) {
-    columns.map((item) => {
-      columnState.map((d) => {
-        if (d.colId === item.field) {
-          item.show = !d.hide;
-        }
-      });
-    });
-  }
   //  Grid Variables - End
 
   const [convertLeadToOpportunityConfirmationDialog, setConvertLeadToOpportunityConfirmationDialog] = useState({
@@ -303,8 +290,6 @@ const Leads = () => {
           };
           return res;
         });
-        setIsAllChecked(false);
-        setClonedData(data);
         if (appendRows) {
           dispatch({
             type: 'initialize',
@@ -319,21 +304,6 @@ const Leads = () => {
             count: count,
             selectedRecords: rows.filter((f) => f.isChecked === true)
           });
-        }
-
-        if (gridApi) {
-          try {
-            let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords)
-              ? JSON.parse(localStorage.getItem(localStorageSelectedRecords))
-              : [];
-            if (oldSelectedRecords.length > 0) {
-              gridApi.forEachNode(function (node) {
-                node.setSelected(oldSelectedRecords.some((o) => o === node.data._id));
-              });
-            }
-          } catch (ex) {
-            console.error('Error in getting selected records from local storage');
-          }
         }
 
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -465,6 +435,7 @@ const Leads = () => {
             type: 'success',
             message: data.message
           });
+          removeLocalStorage(localStorageSelectedRecords);
           setIsConformDialogVisible(false);
           setOkButtonLoading(false);
           if (deleteRecord.id) {
@@ -522,8 +493,12 @@ const Leads = () => {
           }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
-          recordsToExport={selectedRecords.length}
-          ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+          recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+          ids={
+            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+              ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+              : []
+          }
           onExportToExcelSuccess={() => {
             if (gridApi) gridApi.deselectAll();
             else fetchLeads();
