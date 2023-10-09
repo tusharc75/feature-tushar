@@ -23,7 +23,7 @@ const statusIconAndColorClassMap = {
   rejected: {
     icon: <DOARejected size={16} className="block" />,
     colorClasses: 'text-[#EC6852]',
-    text: 'Declined'
+    text: 'Rejected'
   }
 };
 
@@ -31,12 +31,12 @@ const versionStatusIconMap = {
   'Sent for DOA': {
     icon: <WatchLater className="[font-size:20px_!important]" />,
     lebel: 'DOA Sent',
-    colorClass: 'bg-[white] text-[#00acc1]'
+    colorClass: 'text-[#00acc1]'
   },
   'Rejected by DOA': {
     icon: <Block className="[font-size:20px_!important]" />,
     lebel: 'Rejected by DOA',
-    colorClass: 'bg-[#d60f0f]'
+    colorClass: 'text-[#d60f0f]'
   },
   'Accepted by DOA': {
     icon: <FcApproval size={20} />,
@@ -77,14 +77,16 @@ const DoaStepUsers: FC<TDoaStepUsersProps> = ({ DOAData, versionStatus, ...props
   const versionData = useMemo(() => versionStatusIconMap[versionStatus], [versionStatus]);
 
   return (
-    <div className="bg-[white] dark:bg-[var(--dark-primary)] min-w-[124px]" {...props}>
-      <div className={`flex items-center text-[12px] px-[7px] py-[4px] mb-[8px] gap-[7px] max-w-[133px] `}>
+    <div className="  min-w-[120px]" {...props}>
+      <div
+        className={`flex items-center text-[12px] px-[7px] py-[4px]  gap-[7px] [--width:177px] max-w-[var(--width)] bg-[white] dark:bg-[var(--dark-primary)]`}
+      >
         <div className={`${versionData?.colorClass} w-[20px] h-[20px] rounded-full`}>{versionData?.icon}</div>
-        <p title={versionData?.lebel} className=" line-clamp-1 text-[var(--primary-text)]">
+        <p title={versionData?.lebel} className=" line-clamp-1 text-[var(--primary-text)] text-[13px]">
           {versionData?.lebel}
         </p>
       </div>
-      <div className="step relative z-50 px-[4px] [--line-height:6px] py-[var(--line-height)]  max-w-[133px]">
+      <div className="step bg-[white] dark:bg-[var(--dark-primary)] pt-[12px] relative z-50 px-[4px] [--line-height:6px] py-[var(--line-height)]  max-w-[120px] ml-auto">
         {visibleData?.map((d, index) => {
           return <RenderUser userData={d} index={index} />;
         })}

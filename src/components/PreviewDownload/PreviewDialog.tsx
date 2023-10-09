@@ -172,7 +172,7 @@ export const PreviewDialog = ({
                   handleView('Regular', visibleColumnsPdf, visibleColumnsExcel);
                 }}
               >
-                {hideDetailButton ? `${operation}` : `${button1Title} ${operation}`}
+                {type === 'Excel' ? 'Export' : hideDetailButton ? `${operation}` : `${button1Title} ${operation}`}
               </CustomButton>
               {hideDetailButton ? null : (
                 <CustomButton
