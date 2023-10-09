@@ -36,7 +36,8 @@ export default function CustomSwipableList({
   renderedFrom,
   additionalDetails = [],
   owerCollaboratorInitialsOrImages = null,
-  actionCol = null
+  actionCol = null,
+  renderExtraChip = null
 }) {
   const [themeColor] = useAppTheme();
   const [isAllChecked, setIsAllChecked] = useState(false);
@@ -229,7 +230,7 @@ export default function CustomSwipableList({
                         {[
                           ...chips.map((c) =>
                             c.forceShow === true || d[c.field] ? (
-                              <div>
+                              <div key={c.field}>
                                 <span
                                   title={`${c.label} ${(c.fieldType === 'date' ? moment(d[c.field]).format(dateFormat) : d[c.field]) ?? ''}`}
                                   style={{ border: '1px solid #B8CCFE' }}
@@ -259,6 +260,7 @@ export default function CustomSwipableList({
                             )
                           )
                         ]}
+                        {renderExtraChip && renderExtraChip(d, index)}
                       </div>
                     </div>
                   )}
