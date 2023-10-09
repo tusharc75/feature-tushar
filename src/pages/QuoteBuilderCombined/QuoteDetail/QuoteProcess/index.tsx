@@ -1233,6 +1233,7 @@ export default function QuoteProcess(props) {
                     <PreviewDownload
                       resource={sidebarResource.quoteBuilder}
                       referenceId={quoteData?._id}
+                      fileName={`${`Quote-${quoteData?.quoteName}-V(${currentVersion})`}`}
                       columns={columns}
                       hideDetailButton={true}
                       isSendEmail={processStatus === QUOTE_PROCESS_STATUS.sendToCustomer
@@ -1387,7 +1388,6 @@ export default function QuoteProcess(props) {
                             handleOfferToCustomer();
                           }}
                           disabled={!allowedToEdit || sendToLoading}
-                          startIcon={<BiMailSend />}
                           variant="contained"
                           size="small"
                           color="primary"

@@ -9,7 +9,7 @@ import { ExpandLess, ExpandMore } from '@material-ui/icons';
 const PerformanceAnalysis = ({ assetId, dataPoints = [], customDataPoints = [] }) => {
 
   const [dateFilters, setDateFilters] = useState({
-    from: new Date(moment().subtract(8, 'days').toJSON()),
+    from: new Date(moment().subtract(8, 'days').startOf('day').toJSON()),
     to: new Date(),
     intervals: '1hour'
   });
@@ -114,7 +114,7 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [], customDataPoints = [] }
                             />
                           }
                           className="  max-w-full [&>span+span]:max-w-full [&>span+span]:block [&>span+span]:line-clamp-1 "
-                          label={<div className="line-clamp-1 [overflow-wrap:anywhere]">{dataPoint?.fieldLabel}</div>}
+                          label={<div className="line-clamp-1 [overflow-wrap:anywhere] mt-2">{dataPoint?.fieldLabel}</div>}
                         />
                       </div>
                     );

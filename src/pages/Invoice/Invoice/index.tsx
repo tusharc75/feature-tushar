@@ -181,6 +181,7 @@ const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, 
     <Fragment>
       <Box p={2}>
         <PreviewDownload
+          fileName={`${routes.invoice.title}-${invoiceData?.invoiceNumber}`}
           resource={sidebarResource.invoice}
           referenceId={invoiceData?._id}
           columns={columns}

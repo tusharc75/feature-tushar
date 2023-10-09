@@ -9,6 +9,36 @@ interface svgInterface extends React.SVGAttributes<SVGElement> {}
 interface svgInterfaceWithSize extends svgInterface {
   size?: number;
 }
+
+export const DOAApproved: React.FC<svgInterfaceWithSize> = ({ size = 14, width = 14, height = 14, ...others }) => {
+  return (
+    <svg {...others} xmlns="http://www.w3.org/2000/svg" width={size ?? width} height={size ?? height} fill="none" viewBox="0 0 14 14">
+      <path stroke="currentcolor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.143" d="M2.5 7.643l3 3 6-6.429"></path>
+    </svg>
+  );
+};
+
+export const DOARejected: React.FC<svgInterfaceWithSize> = ({ size = 14, width = 14, height = 14, ...others }) => {
+  return (
+    <svg {...others} xmlns="http://www.w3.org/2000/svg" width={size ?? width} height={size ?? height} fill="none" viewBox="0 0 14 14">
+      <path stroke="currentcolor" strokeLinecap="round" strokeWidth="1.714" d="M11.429 10.857L2.857 2.286m8.572 0l-8.572 8.571"></path>
+    </svg>
+  );
+};
+export const DOAPending: React.FC<svgInterfaceWithSize> = ({ size = 14, width = 14, height = 14, ...others }) => {
+  return (
+    <svg {...others} xmlns="http://www.w3.org/2000/svg" width={size ?? width} height={size ?? height} fill="none" viewBox="0 0 14 14">
+      <path fill="currentcolor" d="M7.571 3.571H6.428v.572a.571.571 0 101.143 0V3.57z"></path>
+      <path
+        fill="currentcolor"
+        fillRule="evenodd"
+        d="M3.571 1.286v1.143h.572v1.714A2.857 2.857 0 007 7a2.857 2.857 0 00-2.857 2.857v1.714H3.57v1.143h6.857v-1.143h-.571V9.857A2.857 2.857 0 007 7a2.857 2.857 0 002.857-2.857V2.429h.571V1.286H3.571zm1.715 1.143h3.428v1.714a1.714 1.714 0 01-3.428 0V2.429zm0 7.428v1.714h3.428V9.857a1.714 1.714 0 00-3.428 0z"
+        clipRule="evenodd"
+      ></path>
+    </svg>
+  );
+};
+
 export const PreWorkIcon = ({ className = '', width = '', height = '', size = 15, color = '#298B88', style = {} }) => {
   return (
     <svg

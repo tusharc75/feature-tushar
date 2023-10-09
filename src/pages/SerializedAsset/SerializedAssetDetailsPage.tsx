@@ -274,6 +274,18 @@ const SerializedAssetDetailsPage = () => {
           <Box className="control-buttons-v1">
             {assetDetails ? (
               <>
+                {permissions?.iotChart?.isRead && (
+                  <Button
+                    variant="outlined"
+                    className={'btn-outline-v1'}
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes.iotChart.path}/${assetDetails?._id}`);
+                    }}
+                  >
+                    View Data
+                  </Button>
+                )}
                 {permissions?.serializedAsset?.isUpdate && assetDetails.active && (
                   <>
                     {permissions?.repairJob?.isCreate &&

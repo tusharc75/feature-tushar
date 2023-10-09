@@ -1,29 +1,21 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { Box, Checkbox, Dialog, FormControl, Grid, IconButton, TextField } from '@material-ui/core';
+import { useContext, useEffect, useState } from 'react';
+import { Box, Dialog, Grid } from '@material-ui/core';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomButton from '../Helpers/CustomButton';
-import { Autocomplete } from '@material-ui/lab';
-import { AiFillEdit } from 'react-icons/ai';
-import { RiDeleteBin6Fill } from 'react-icons/ri';
-import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
-import CheckBoxIcon from '@material-ui/icons/CheckBox';
-import ConfirmationDialog from '../Helpers/ConfirmationDialog';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { ViewDialog } from './ViewDialog';
-import ArrangeView from './ArrangeView';
+import { PreviewFields } from './PreviewFields';
 
-const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
-const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 export const PreviewDialog = ({
   type,
   handleClose,
-  handleViewPdf,
+  handleView,
   loadingType,
   loading,
   hideDetailButton,
@@ -33,20 +25,26 @@ export const PreviewDialog = ({
   columns,
   button1Title,
   button2Title,
-  downlodingFile
+  operation,
+  isExcelDownload
 }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [isViewDeleteConfirm, setIsViewDeleteConfirm] = useState({ open: false, id: null });
-  const [selectedView, setSelectedView] = useState(null);
   const [views, setViews] = useState([]);
   const [showSaveViewDialog, setShowSaveViewDialog] = useState({ open: false, data: null });
+
+
+  const [selectedPdfView, setSelectedPdfView] = useState(null);
   const [visibleColumnsPdf, setVisibleColumnsPdf] = useState([]);
+
+  const [selectedExcelView, setSelectedExcelView] = useState(null);
+  const [visibleColumnsExcel, setVisibleColumnsExcel] = useState([]);
 
   useEffect(() => {
     const temp = defaultColumns?.length > 0 ? allColumn?.filter((e: any) => defaultColumns?.includes(e?.fieldName)) : allColumn;
     setVisibleColumnsPdf([...temp]);
+    setVisibleColumnsExcel([...temp]);
   }, [columns]);
 
   useEffect(() => {
@@ -58,8 +56,8 @@ export const PreviewDialog = ({
       .get(`/pdf/view?resource=${resource}`)
       .then(({ data: { data } }) => {
         setViews(data);
-        if (data?.length && selectedView && data?.find((e) => e._id === selectedView?._id)) {
-          handleSelectView(data?.find((e) => e._id === selectedView?._id))
+        if (data?.length && selectedPdfView && data?.find((e) => e._id === selectedPdfView?._id)) {
+          handleSelectView(data?.find((e) => e._id === selectedPdfView?._id))
         }
       })
       .catch((err) => {
@@ -67,26 +65,8 @@ export const PreviewDialog = ({
       });
   };
 
-  const handleDeleteView = () => {
-    axiosInstance()
-      .post(`/pdf/view/remove`, { _id: isViewDeleteConfirm.id })
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-        fetchUserViews();
-        setIsViewDeleteConfirm({ open: false, id: null });
-        setSelectedView(null);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
-  };
-
   const handleSelectView = (data) => {
-    setSelectedView(data);
+    setSelectedPdfView(data);
     if (data && data.columns) {
       const columnsArray = data?.columns?.split(',')?.map((item) => item?.trim());
       setVisibleColumnsPdf(columnsArray?.map(e => { return allColumn.find(col => col.fieldName === e) }).filter(col => col !== undefined));
@@ -123,99 +103,50 @@ export const PreviewDialog = ({
         <CustomDialogContent>
           <Grid container justify="space-between" alignItems="center">
             <Grid item style={{ padding: 5, marginTop: 10 }} xs={12} md={12} sm={12}>
-              <FormControl fullWidth>
-                <Box pb={5}>
-                  <Autocomplete
-                    fullWidth
-                    size="small"
-                    value={selectedView}
-                    onChange={(e, selectedOption) => {
-                      handleSelectView(selectedOption);
-                    }}
-                    getOptionLabel={(option) => option.name}
-                    renderOption={(option) => (
-                      <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'} width={'100%'}>
-                        <span style={{ width: 'calc(100% - 71px)' }}>{option?.name}</span>
-                        <Box>
-                          <IconButton size="small" style={{ marginRight: '20px' }}>
-                            <AiFillEdit />
-                          </IconButton>
-                          <IconButton size="small" onClick={() => setIsViewDeleteConfirm({ open: true, id: option._id })}>
-                            <RiDeleteBin6Fill />
-                          </IconButton>
-                        </Box>
-                      </Box>
-                    )}
-                    id="controllable-states-demo"
-                    options={views}
-                    renderInput={(params) => <TextField {...params} fullWidth label="Select View" variant="outlined" />}
+              {type?.includes('PDF') &&
+                <PreviewFields
+                  views={views}
+                  selectedView={selectedPdfView}
+                  setSelectedView={setSelectedPdfView}
+                  visibleColumns={visibleColumnsPdf}
+                  setVisibleColumns={setVisibleColumnsPdf}
+                  fetchUserViews={fetchUserViews}
+                  allColumn={allColumn}
+                  resource={resource}
+                  type={"PDF"}
+                />}
+              {type?.includes('Excel') &&
+                <Box mt={3}>
+                  <PreviewFields
+                    views={views}
+                    selectedView={selectedExcelView}
+                    setSelectedView={setSelectedExcelView}
+                    visibleColumns={visibleColumnsExcel}
+                    setVisibleColumns={setVisibleColumnsExcel}
+                    fetchUserViews={fetchUserViews}
+                    allColumn={allColumn}
+                    resource={resource}
+                    type={"Excel"}
                   />
                 </Box>
-                <Box display="flex" justifyContent="space-between" alignItems="center">
-                  <Box width="94%">
-                    <Autocomplete
-                      id="demo-mutiple-chip"
-                      fullWidth
-                      size="small"
-                      multiple
-                      value={visibleColumnsPdf}
-                      onChange={(e, val) => {
-                        if (val.find((e) => e.fieldName === 'Select All') && ['Select All', ...allColumn?.map((e) => e?.fieldName)].sort().toString() !== val?.map((e) => e?.fieldName).sort().toString()) {
-                          setVisibleColumnsPdf(allColumn);
-                        } else if (['Select All', ...allColumn?.map((e) => e?.fieldName)].sort().toString() === val?.map((e) => e?.fieldName).sort().toString()) {
-                          setVisibleColumnsPdf([]);
-                        } else {
-                          setVisibleColumnsPdf(val);
-                        }
-                      }}
-                      options={[{ fieldLabel: 'Select All', fieldName: 'Select All' }, ...allColumn]}
-                      getOptionLabel={(option) => option?.fieldLabel}
-                      getOptionSelected={(option: any, value: any) =>
-                        option.fieldName === value.fieldName
-                      }
-                      disableCloseOnSelect
-                      renderOption={(option, { selected }) => (
-                        <React.Fragment>
-                          <Checkbox
-                            icon={icon}
-                            checkedIcon={checkedIcon}
-                            style={{ marginRight: 8 }}
-                            checked={
-                              ['Select All', ...allColumn?.map((e) => e?.fieldName)].sort().toString() ===
-                                ['Select All', ...visibleColumnsPdf?.map((e) => e?.fieldName)].sort().toString()
-                                ? true
-                                : selected
-                            }
-                          />
-                          {option.fieldLabel}
-                        </React.Fragment>
-                      )}
-                      renderInput={(params) => <TextField {...params} variant="outlined" label={`Visible Columns in ${type}`} placeholder="Select" />}
-                    />
-                  </Box>
-                  <Box width="5%">
-                    <ArrangeView
-                      columns={visibleColumnsPdf}
-                      setColumns={setVisibleColumnsPdf} />
-                  </Box>
-                </Box>
-              </FormControl>
+              }
             </Grid>
           </Grid>
         </CustomDialogContent>
         <CustomDialogFooter>
-          <CustomButton
-            onClick={() => {
-              setShowSaveViewDialog({ open: true, data: selectedView });
-            }}
-            disabled={visibleColumnsPdf?.length == 0}
-            size="small"
-            className="yellow-button"
-          >
-            {selectedView ? 'Update View' : 'Save View'}
-          </CustomButton>
-
-          {downlodingFile === 'Send Email' ?
+          {operation !== 'Send Email' &&
+            <CustomButton
+              onClick={() => {
+                setShowSaveViewDialog({ open: true, data: selectedPdfView });
+              }}
+              disabled={visibleColumnsPdf?.length == 0}
+              size="small"
+              className="yellow-button"
+            >
+              {selectedPdfView ? 'Update View' : 'Save View'}
+            </CustomButton>
+          }
+          {operation === 'Send Email' ?
             <CustomButton
               variant="contained"
               className="no-shadow"
@@ -224,10 +155,10 @@ export const PreviewDialog = ({
               loading={loadingType === 'Regular' || loading}
               disabled={loadingType || visibleColumnsPdf?.length === 0}
               onClick={(e) => {
-                handleViewPdf('Regular', visibleColumnsPdf);
+                handleView('Regular', visibleColumnsPdf, visibleColumnsExcel);
               }}
             >
-              {downlodingFile}
+              {operation}
             </CustomButton> :
             <>
               <CustomButton
@@ -238,10 +169,10 @@ export const PreviewDialog = ({
                 loading={loadingType === 'Regular' || loading}
                 disabled={loadingType || visibleColumnsPdf?.length === 0}
                 onClick={(e) => {
-                  handleViewPdf('Regular', visibleColumnsPdf);
+                  handleView('Regular', visibleColumnsPdf, visibleColumnsExcel);
                 }}
               >
-                {hideDetailButton ? `${downlodingFile}` : `${button1Title} ${downlodingFile}`}
+                {hideDetailButton ? `${operation}` : `${button1Title} ${operation}`}
               </CustomButton>
               {hideDetailButton ? null : (
                 <CustomButton
@@ -252,24 +183,15 @@ export const PreviewDialog = ({
                   loading={loadingType === 'Detail' || loading}
                   disabled={loadingType || visibleColumnsPdf?.length === 0}
                   onClick={(e) => {
-                    handleViewPdf('Detail', visibleColumnsPdf);
+                    handleView('Detail', visibleColumnsPdf, visibleColumnsExcel);
                   }}
                 >
-                  {`${button2Title} ${downlodingFile}`}
+                  {`${button2Title} ${operation}`}
                 </CustomButton>
               )}</>
           }
         </CustomDialogFooter>
       </Dialog>
-
-      {isViewDeleteConfirm.open && (
-        <ConfirmationDialog
-          open={true}
-          message={`Are you sure you want to delete ?`}
-          onClose={() => setIsViewDeleteConfirm({ open: false, id: null })}
-          onOk={handleDeleteView}
-        />
-      )}
       {showSaveViewDialog.open && (
         <ViewDialog
           columns={visibleColumnsPdf?.map((e) => e?.fieldName)}

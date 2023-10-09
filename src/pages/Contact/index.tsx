@@ -438,14 +438,15 @@ export default function Contact(props) {
             console.error('Error in getting selected records from local storage');
           }
         }
-
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
         dispatch({ type: 'loading', loading: false });
+      })
+      .finally(() => {
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
       });
   };
 
@@ -782,7 +783,6 @@ export default function Contact(props) {
             <DisplayFiltersForMobile resource={sidebarResource[contactResource]} />
           </div>
         </div>
-        {console.log(dataRows)}
 
         {Object.keys(frameWorkComponent).length > 0 &&
           (isMobile && !isTablet ? (
@@ -822,12 +822,9 @@ export default function Contact(props) {
                 {
                   label: 'Email : ',
                   field: 'email'
-                },
-                {
-                  label: 'Entity',
-                  field: 'entity'
                 }
               ]}
+              renderExtraChip={(data) => <RenderExtraChip data={data} />}
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={true}
@@ -980,3 +977,29 @@ export default function Contact(props) {
     </section>
   );
 }
+
+const RenderExtraChip = ({ data }) => {
+  const chip = (text: string) => (
+    <HtmlTooltip title={data?.restentity?.map((o) => o.optionLabel).join(', ') || ''} arrow placement="top">
+      <span
+        className={`${
+          text && text !== ''
+            ? 'rounded-full line-clamp-1 block px-3 py-[3px] font-semibold text-[12px] bg-[#F2F6FF] dark:bg-[var(--dark-primary)] dark:border-[var(--common-border-color)_!important]'
+            : ''
+        }`}
+      >
+        {text && text !== '' ? `Entity : ${text}` : null}
+        {data?.restentity?.length > 0 ? <span>, +{data.restentity.length} more..</span> : null}
+      </span>
+    </HtmlTooltip>
+  );
+  if (data?.entityId && data?.entity) {
+    return (
+      <Link to={`${routes.entityDetail.path}/${data.entityId}`} target="_blank">
+        {chip(data.entity)}
+      </Link>
+    );
+  }
+
+  return <>{chip(data?.entity)}</>;
+};
