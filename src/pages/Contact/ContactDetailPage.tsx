@@ -1,40 +1,41 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { Box, Button, Grid, Paper, Tab, Tabs, Typography, List, Dialog } from '@material-ui/core';
-import { isMobile, isTablet } from 'react-device-detect';
-import { useHistory, useParams } from 'react-router-dom';
-import { Skeleton } from '@material-ui/lab';
-import { Link } from 'react-router-dom';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import { useData } from '../../StateProvider/Provider';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import axiosInstance from './../../axios/axiosInstance';
-import { getObjKeysWithValues, sidebarResource, customerAccount, processFieldName, userType, customerContact } from './../../constants/helpers';
-import DeleteButton from '../../components/Helpers/DeleteButton';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import ManageContactDialog from './ManageContact';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import OrgChartContainer from '../../components/OrgChart/OrgChartContainer';
-import QuickLinks, { IQuickLinks } from '../../components/QuickLinks/QuickLinks';
-import FullScreenDialog from '../../components/Helpers/FullScreenDialog';
+import { Box, Button, Dialog, Grid, List, ListItemText, Paper, Tab, Tabs, Tooltip, Typography } from '@material-ui/core';
 import ListItem from '@material-ui/core/ListItem/ListItem';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
-import { ListItemText } from '@material-ui/core';
-import { AiOutlineMail } from 'react-icons/ai';
-import { BiEdit, BiPhone } from 'react-icons/bi';
-import { FiStar } from 'react-icons/fi';
-import OpportunityInAccordian from '../../components/OpportunityInAccordian/OpportunityInAccordian';
-import ProjectInAccordion from '../../components/ProjectInAccordion/ProjectInAccordion';
-import QuotesInAccordion from '../../components/QuotesInAccordion/QuotesInAccordion';
-import ProcessFlow from '../../components/ProcessFlow';
-import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
-import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
+import { Edit } from '@material-ui/icons';
+import { Skeleton } from '@material-ui/lab';
 import queryString from 'query-string';
-import AddReportsToContact from './AddReportsToContact';
+import React, { useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { AiOutlineMail } from 'react-icons/ai';
+import { BiPhone } from 'react-icons/bi';
+import { FiStar } from 'react-icons/fi';
+import { HiShoppingCart } from 'react-icons/hi';
 import { MdDelete } from 'react-icons/md';
-import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
-import Warehouse from '../Account/Warehouse';
-import ActivityButton from 'src/components/Activity/ActivityButton';
+import { RiLayoutFill } from 'react-icons/ri';
+import { Link, useHistory, useParams } from 'react-router-dom';
 import { AccountHierarchyIcon } from 'src/assets/svg/svgIcons';
+import ActivityButton from 'src/components/Activity/ActivityButton';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
+import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
+import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import DeleteButton from '../../components/Helpers/DeleteButton';
+import FullScreenDialog from '../../components/Helpers/FullScreenDialog';
+import OpportunityInAccordian from '../../components/OpportunityInAccordian/OpportunityInAccordian';
+import OrgChartContainer from '../../components/OrgChart/OrgChartContainer';
+import ProcessFlow from '../../components/ProcessFlow';
+import ProjectInAccordion from '../../components/ProjectInAccordion/ProjectInAccordion';
+import QuickLinks, { IQuickLinks } from '../../components/QuickLinks/QuickLinks';
+import QuotesInAccordion from '../../components/QuotesInAccordion/QuotesInAccordion';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import Warehouse from '../Account/Warehouse';
+import axiosInstance from './../../axios/axiosInstance';
+import { customerAccount, customerContact, getObjKeysWithValues, processFieldName, sidebarResource } from './../../constants/helpers';
+import AddReportsToContact from './AddReportsToContact';
+import ManageContactDialog from './ManageContact';
 
 const ContactDetailsPage = (props) => {
   const toastConfig = useContext(CustomToastContext);
@@ -558,36 +559,42 @@ const ContactDetailsPage = (props) => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             {permissions?.eCommercePolicy?.isRead && contactResource === customerContact.contactResource && (
-              <Button
-                size="small"
-                variant={isMobile ? 'text' : 'contained'}
-                disabled={contactData.relatedUser?.eCommerceAccess}
-                onClick={handleEcommerceAccess}
-                className={'btn-outline-v1'}
-              >
-                E-Commerce Access
-              </Button>
+              <Tooltip title="E-Commerce Access" arrow placement="top">
+                <Button
+                  size="small"
+                  variant={isMobile && !isTablet ? 'text' : 'contained'}
+                  disabled={contactData.relatedUser?.eCommerceAccess}
+                  onClick={handleEcommerceAccess}
+                  className={'btn-outline-v1'}
+                >
+                  {isMobile && !isTablet ? <HiShoppingCart /> : 'E-Commerce Access'}
+                </Button>
+              </Tooltip>
             )}
             {contactPermissions?.isUpdate && contactData?.owner?.optionValue === user?.user?._id && (
-              <Button
-                size="small"
-                variant={isMobile ? 'text' : 'contained'}
-                disabled={contactData?.isUserExist}
-                onClick={handlePortalAccess}
-                className={'btn-outline-v1'}
-              >
-                Give Portal Access
-              </Button>
+              <Tooltip title="Give Portal Access" arrow placement="top">
+                <Button
+                  size="small"
+                  variant={isMobile && !isTablet ? 'text' : 'contained'}
+                  disabled={contactData?.isUserExist}
+                  onClick={handlePortalAccess}
+                  className={'btn-outline-v1'}
+                >
+                  {isMobile && !isTablet ? <RiLayoutFill /> : 'Give Portal Access'}
+                </Button>
+              </Tooltip>
             )}
             {contactPermissions?.isUpdate && canEdit ? (
-              <Button
-                variant={isMobile && !isTablet ? 'text' : 'contained'}
-                size="small"
-                onClick={handleOpneUpdateDialog}
-                className={'btn-outline-v1'}
-              >
-                {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-              </Button>
+              <Tooltip title="Edit" arrow placement="top">
+                <Button
+                  variant={isMobile && !isTablet ? 'text' : 'contained'}
+                  size="small"
+                  onClick={handleOpneUpdateDialog}
+                  className={'btn-outline-v1'}
+                >
+                  {isMobile && !isTablet ? <Edit /> : 'Edit'}
+                </Button>
+              </Tooltip>
             ) : null}
 
             {contactPermissions?.isDelete && contactData?.owner?.optionValue && user?.user?._id && contactData.owner.optionValue === user.user._id ? (

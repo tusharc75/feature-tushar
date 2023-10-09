@@ -18,7 +18,7 @@ import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { customerAccount, gridLoadingTimeout, opportunity, prepareDataForGrid, sidebarResource, supplierAccount } from '../../constants/helpers';
+import { customerAccount, gridLoadingTimeout, opportunity, prepareDataForGrid, sidebarResource, supplierAccount, getLocalStorageArrayData, removeLocalStorage } from '../../constants/helpers';
 import useColumns, { checkStaticField, getFrameworkComponents, getStaticFields, gridFilterParser } from '../../constants/useColumns';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
@@ -78,20 +78,9 @@ const Opportunities = () => {
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
-  const columnState = JSON.parse(localStorage.getItem(opportunityResource));
-  const [isAllChecked, setIsAllChecked] = useState(false);
-  const [clonedData, setClonedData] = useState([]);
+
   const localStorageSelectedRecords = `${opportunityResource}_selected`;
 
-  if (columnState) {
-    columns.map((item) => {
-      columnState.map((d) => {
-        if (d.colId === item.field) {
-          item.show = !d.hide;
-        }
-      });
-    });
-  }
 
   //  Grid Variables - End
   useEffect(() => {
@@ -326,8 +315,7 @@ const Opportunities = () => {
             };
             return res;
           });
-          setIsAllChecked(false);
-          setClonedData(data);
+         
           if (appendRows) {
             dispatch({
               type: 'initialize',
@@ -342,21 +330,6 @@ const Opportunities = () => {
               count: count,
               selectedRecords: rows.filter((f) => f.isChecked === true)
             });
-          }
-
-          if (gridApi) {
-            try {
-              let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords)
-                ? JSON.parse(localStorage.getItem(localStorageSelectedRecords))
-                : [];
-              if (oldSelectedRecords.length > 0) {
-                gridApi.forEachNode(function (node) {
-                  node.setSelected(oldSelectedRecords.some((o) => o === node.data._id));
-                });
-              }
-            } catch (ex) {
-              console.error('Error in getting selected records from local storage');
-            }
           }
 
           dispatch({ type: 'initialize', data: rows, count: count });
@@ -427,6 +400,7 @@ const Opportunities = () => {
             type: 'success',
             message: data.message
           });
+          removeLocalStorage(localStorageSelectedRecords);
           setIsConformDialogVisible(false);
           setDeleteLoading(false);
           if (deleteRecord) setDeleteRecord({});
@@ -453,8 +427,12 @@ const Opportunities = () => {
           }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
-          recordsToExport={selectedRecords.length}
-          ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+          recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+          ids={
+            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+              ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+              : []
+          }
           onExportToExcelSuccess={() => {
             if (gridApi) gridApi.deselectAll();
             else fetchOpportunities();
