@@ -114,7 +114,7 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [], customDataPoints = [] }
                             />
                           }
                           className="  max-w-full [&>span+span]:max-w-full [&>span+span]:block [&>span+span]:line-clamp-1 "
-                          label={<div className="line-clamp-1 [overflow-wrap:anywhere]">{dataPoint?.fieldLabel}</div>}
+                          label={<div className="line-clamp-1 [overflow-wrap:anywhere] mt-2">{dataPoint?.fieldLabel}</div>}
                         />
                       </div>
                     );

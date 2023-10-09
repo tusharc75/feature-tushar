@@ -36,6 +36,14 @@ function IotChart() {
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
+      // axiosInstance()
+      // .get(`/iot-chart${serializedAsset.api}-location`)
+      // .then(({ data }) => {
+      //   console.log('ddddddd', data)
+      // })
+      // .catch((error) => {
+      //   toastConfig.setToastConfig(error);
+      // });
   };
 
   const getQueryString = () => {
