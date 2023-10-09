@@ -77,7 +77,7 @@ const Opportunities = () => {
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
   const columnState = JSON.parse(localStorage.getItem(opportunityResource));
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [clonedData, setClonedData] = useState([]);
@@ -169,7 +169,7 @@ const Opportunities = () => {
     if (renderCount > 0) {
       fetchOpportunities();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting, selectedEntity, accountDetails]);
+  }, [page, limit, selectedType, filters, sorting, selectedEntity, accountDetails, showFilteredRecordsOnly]);
 
   const handleSingleDeleteOpportunity = async () => {
     dispatch({ type: 'loading', loading: true });
@@ -244,6 +244,11 @@ const Opportunities = () => {
 
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
+    }
+
+    if (showFilteredRecordsOnly) {
+      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
 
     if (selectedEntity) {
