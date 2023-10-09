@@ -66,7 +66,7 @@ function IotChart() {
     if (showAsset) {
       filterByIds.push({
         field: 'currentLocation',
-        term: showAsset
+        term: { $in: [showAsset]}
       });
     }
 
