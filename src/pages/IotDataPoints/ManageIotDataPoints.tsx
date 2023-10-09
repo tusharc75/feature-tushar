@@ -82,6 +82,8 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, r
           });
         }
 
+        tempInitialData.formula = ''
+
         setInitialData({
           fields: fieldsDataForCreate,
           values: tempInitialData
@@ -159,12 +161,13 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, r
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={`${id
-                  ? isClone
-                    ? `Clone - ${cloneHeading}`
-                    : `Update ${initialData.values?.fieldLabel ? `(${initialData.values?.fieldLabel})` : ''}`
-                  : `Create ${routes?.iotDataPoints?.title}`
-                  }`}
+                title={`${
+                  id
+                    ? isClone
+                      ? `Clone - ${cloneHeading}`
+                      : `Update ${initialData.values?.fieldLabel ? `(${initialData.values?.fieldLabel})` : ''}`
+                    : `Create ${routes?.iotDataPoints?.title}`
+                }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -176,7 +179,49 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, r
                   <InputField
                     errors={errors}
                     values={values}
-                    setFieldValue={setFieldValue}
+                    // setFieldValue={setFieldValue}
+                    setFieldValue={(name, value) => {
+                      setFieldValue(name, value);
+                      if (name === 'custom' && value) {
+                        setInitialData({
+                          fields: [
+                            ...initialData?.fields,
+                            {
+                              _id: parseInt((Math.random() * 100000).toString()),
+                              fieldLabel: 'Formula',
+                              type: 'formula',
+                              multiline: true,
+                              rows: 4,
+                              fullWidth: true,
+                              required: true,
+                              isTooltip: false,
+                              tooltipMessage: '',
+                              editAble: true,
+                              deletAble: true,
+                              hiddenField: false,
+                              isDefaultValue: false,
+                              disableOnEdit: false,
+                              lookup: false,
+                              lookupResource: '',
+                              entityWiseLookup: false,
+                              isDropdown: false,
+                              isWarningTooltip: false,
+                              warningTooltipMessage: '',
+                              defaultValue: '',
+                              fieldName: 'formula',
+                              sectionName: 'IoT Information',
+                              resource: 'Iot Data Points'
+                            }
+                          ],
+                          values: initialData?.values
+                        });
+                      } else if (name === 'custom' && !value) {
+                        setInitialData({
+                          fields: initialData?.fields?.filter((f) => f?.fieldName !== 'formula'),
+                          values: initialData?.values
+                        });
+                      }
+                    }}
                     touched={touched}
                     fieldsData={initialData.fields}
                     size="small"
