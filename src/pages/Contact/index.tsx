@@ -782,6 +782,7 @@ export default function Contact(props) {
             <DisplayFiltersForMobile resource={sidebarResource[contactResource]} />
           </div>
         </div>
+        {console.log(dataRows)}
 
         {Object.keys(frameWorkComponent).length > 0 &&
           (isMobile && !isTablet ? (
