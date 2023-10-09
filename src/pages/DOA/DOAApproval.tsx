@@ -193,6 +193,7 @@ const DOAApproval = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <PreviewDownload
+              fileName={`${`Quote-${quoteData?.quoteName}-V(${versionData?.versionNumber})`}`}
               resource={sidebarResource.quoteBuilder}
               referenceId={quoteData?._id}
               columns={columns}

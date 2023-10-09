@@ -272,6 +272,8 @@ const Product = () => {
               col.headerName = fieldLabel;
               col.width = 180;
               col.show = true;
+              col.filter = false;
+              col.sortable = false;
               col.cellRenderer = 'commonRenderer';
               col.leval = 'product-template';
               column.push(col);
@@ -288,6 +290,8 @@ const Product = () => {
                 col.headerName = fieldLabel;
                 col.width = 180;
                 col.show = true;
+                col.filter = false;
+                col.sortable = false;
                 col.cellRenderer = 'commonRenderer';
                 col.leval = 'product-template';
                 column.push(col);
@@ -304,6 +308,8 @@ const Product = () => {
               col.headerName = fieldLabel;
               col.width = 180;
               col.show = true;
+              col.filter = false;
+              col.sortable = false;
               col.cellRenderer = 'commonRenderer';
               col.leval = 'product-template';
               column.push(col);
@@ -313,7 +319,7 @@ const Product = () => {
       } else {
         if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
           let currentColumn: any = getColumnData(renderedFrom, ele, routes.productDetail.path);
-          column.push({ ...currentColumn.columnData, leval: 'product-template' });
+          column.push({ ...currentColumn.columnData, leval: 'product-template', filter: false, sortable: false });
           if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
             rendererNames.push(currentColumn?.rendererName);
           }
@@ -561,11 +567,10 @@ const Product = () => {
             },
             {
               title: 'Child Product Export',
-              api: `${product.api}/unknown/bom/template?export=true${
-                getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
+              api: `${product.api}/unknown/bom/template?export=true${getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
                   ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
                   : ''
-              }`,
+                }`,
               type: 'export'
             },
             {
@@ -580,11 +585,10 @@ const Product = () => {
             },
             {
               title: 'Service/Consumable Export',
-              api: `${product.api}/unknown/service-master/template?export=true${
-                getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
+              api: `${product.api}/unknown/service-master/template?export=true${getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
                   ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
                   : ''
-              }`,
+                }`,
               type: 'export'
             },
             {
@@ -599,11 +603,10 @@ const Product = () => {
             },
             {
               title: 'Service Package Export',
-              api: `${product.api}/unknown/package/template?export=true${
-                getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
+              api: `${product.api}/unknown/package/template?export=true${getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
                   ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
                   : ''
-              }`,
+                }`,
               type: 'export'
             },
             {
@@ -703,7 +706,7 @@ const Product = () => {
 
               {isProductTemplate && (
                 <Autocomplete
-                  style={{ width: '250px' }}
+                  className="md:min-w-[250px] flex-grow md:flex-grow-0 sm:max-w-[250px]"
                   options={productTemplateList}
                   getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
                   getOptionSelected={(option: any, val) => option.optionValue === val}
@@ -715,26 +718,14 @@ const Product = () => {
                   onChange={(e, val) => {
                     setProductTemplate(val && val.optionValue ? val.optionValue : '');
                   }}
-                  renderInput={(params) =>
-                    isMobile && !isTablet ? (
-                      <TextField
-                        {...params}
-                        margin="dense"
-                        name="productTemplate"
-                        placeholder="Product Template"
-                        variant="standard"
-                        fullWidth
-                        className={isMobile ? 'serchBox' : ''}
-                      />
-                    ) : (
-                      <TextField {...params} margin="dense" name="productTemplate" label="Product Template" variant="outlined" fullWidth />
-                    )
-                  }
+                  renderInput={(params) => (
+                    <TextField {...params} margin="none" size="small" name="productTemplate" label="Product Template" variant="outlined" fullWidth />
+                  )}
                 />
               )}
               {isProductType && (
                 <Autocomplete
-                  style={{ width: '250px' }}
+                  className="md:min-w-[250px] flex-grow md:flex-grow-0 sm:max-w-[250px]"
                   options={productTypeList}
                   getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
                   getOptionSelected={(option: any, val) => option.optionValue === val}
@@ -746,21 +737,9 @@ const Product = () => {
                   onChange={(e, val) => {
                     setProductType(val && val.optionValue ? val.optionValue : '');
                   }}
-                  renderInput={(params) =>
-                    isMobile && !isTablet ? (
-                      <TextField
-                        {...params}
-                        margin="dense"
-                        name="productType"
-                        placeholder="Product Type"
-                        variant="standard"
-                        fullWidth
-                        className={isMobile ? 'serchBox' : ''}
-                      />
-                    ) : (
-                      <TextField {...params} margin="dense" name="productType" label="Product Type" variant="outlined" fullWidth />
-                    )
-                  }
+                  renderInput={(params) => (
+                    <TextField {...params} margin="none" size={'small'} name="productType" label="Product Type" variant="outlined" fullWidth />
+                  )}
                 />
               )}
             </div>

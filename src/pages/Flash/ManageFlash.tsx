@@ -32,7 +32,6 @@ const ManageFlash = ({ isClone = false, flashId = null, onClose, onSuccess }) =>
   const [formsData, setFormsData] = useState([]);
   const [flashData, setFlashData] = useState(null);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-
   
   const fieldConfigurations = {
     Bankrupt: [
@@ -132,7 +131,6 @@ const ManageFlash = ({ isClone = false, flashId = null, onClose, onSuccess }) =>
   }; 
 
   const handleSubmit = (values) => {
-  
     setLoading(true);
     if (flashId && isClone === false) {
       values._id = flashId;
@@ -172,16 +170,52 @@ const ManageFlash = ({ isClone = false, flashId = null, onClose, onSuccess }) =>
   };
 
   const handleScroll = (errors) => {
-    const err = Object.keys(errors);
+    const getCurrentDisplayedFields = [
+      ...formsData?.map((d) =>
+        d?.sectionFields?.map((m) => m?.fieldName)
+      )
+    ].flat();
+    
+    const err = Object.keys(errors).filter((key) =>
+      getCurrentDisplayedFields.includes(key)
+    );
     if (err.length) {
       const input = document.querySelector(`input[name=${err[0]}]`);
-      input.scrollIntoView({
+      input?.scrollIntoView({
         behavior: 'smooth',
         block: 'center',
         inline: 'start'
       });
     }
   };
+
+  const fixErrors = (errors) => {
+    const getCurrentDisplayedFields = [
+      ...formsData?.map((d) =>
+        d?.sectionFields?.map((m) => m?.fieldName)
+      )
+    ].flat();
+  
+    const err = Object.keys(errors).filter((key) =>
+      getCurrentDisplayedFields.includes(key)
+    );
+  
+    // Create a new object with only the keys present in err
+    const filteredErrors = {};
+    err?.forEach((key) => {
+      filteredErrors[key] = errors[key];
+    });    
+    // Now, filteredErrors contains only the keys present in err
+    return filteredErrors;
+  };
+
+  const transFormData = (formsData)=>{
+    return [
+      ...formsData?.map((d) =>
+        d?.sectionFields?.map((m) => m)
+      )
+    ].flat();
+  }
 
   return (
     <Dialog
@@ -201,7 +235,7 @@ const ManageFlash = ({ isClone = false, flashId = null, onClose, onSuccess }) =>
         <Formik
           innerRef={ref}
           initialValues={initialData.values}
-          validationSchema={yupSchema(initialData.fields)}
+          validationSchema={yupSchema(transFormData(formsData))}
           validateOnMount
           onSubmit={handleSubmit}
         >
@@ -241,7 +275,7 @@ const ManageFlash = ({ isClone = false, flashId = null, onClose, onSuccess }) =>
                                   fieldData={field}
                                   disabled={Boolean(flashId) && field.disableOnEdit && !isClone}
                                   values={values}
-                                  errors={errors}
+                                  errors={fixErrors(errors)}
                                   touched={touched}
                                   label={field.fieldLabel}
                                   name={field.fieldName}

@@ -299,6 +299,7 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
             </Fragment>
           )}
           <PreviewDownload
+            fileName={`${routes.rentalManagement.title}-${rentalManagementData?.rentalJobName}`}
             resource={sidebarResource.rentalManagement}
             referenceId={rentalManagementData._id}
             columns={columns}

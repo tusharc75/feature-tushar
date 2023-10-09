@@ -14,17 +14,25 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { getColors } from '../Home/helpers';
 import { DataPointsIcon } from 'src/assets/svg/svgIcons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import MyLocationIcon from '@material-ui/icons/MyLocation';
 
 function IotChart() {
-
   const toastConfig = useContext(CustomToastContext);
 
   const [rowsData, setRowsData] = useState(null);
+  const [assetLocation, setAssetLocation] = useState(null);
   const [search, setSearch] = useState();
+  const [showAsset, setShowAsset] = useState(null);
 
   useEffect(() => {
-    fetchData();
-  }, [search]);
+    fetchAssetLocation();
+  }, []);
+
+  useEffect(() => {
+    if (showAsset) {
+      fetchData();
+    }
+  }, [search, showAsset]);
 
   const fetchData = () => {
     const queryString = getQueryString();
@@ -38,11 +46,34 @@ function IotChart() {
       });
   };
 
+  const fetchAssetLocation = () => {
+    axiosInstance()
+      .get(`/iot-chart${serializedAsset.api}-location`)
+      .then(({ data }) => {
+        setAssetLocation(data.data);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   const getQueryString = () => {
+    const filterByIds = [];
     let deepFilter = `?page=${0}&limit=${100}`;
     if (search) {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
+    if (showAsset) {
+      filterByIds.push({
+        field: 'currentLocation',
+        term: { $in: [showAsset]}
+      });
+    }
+
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    }
+
     return `${deepFilter}&filterType=and&filterByIdType=and`;
   };
 
@@ -68,7 +99,8 @@ function IotChart() {
       icon: ['#FAC94B', '#FF9B04'],
       iconGradient: ['#FAC94B', '#FF9B04', '#FAC94B'],
       gradient: ['#FAC94B', '#FF9B04']
-    }]
+    }
+  ];
 
   return (
     <div className="main-container-v1">
@@ -76,39 +108,70 @@ function IotChart() {
         <CustomBreadCrumbs routes={[routes.iotChart]} />
       </div>
       <CustomContainer>
-        <div className="flex justify-end mb-3">
-          <SearchBox onChange={handleSearch} size="small" value={search} className="flex-grow md:flex-grow-0" />
-        </div>
-        {rowsData ? (
-          <Box className={cardStyle.reportGrid}>
-            {rowsData?.map((asset, i) => {
-              var colors = colours[0];
-              if (asset?.runningStatus) {
-                colors = colours[1];
-              }
-              return (
-                <div key={i} className={cardStyle.singleCard}>
-                  <Link to={`${routes.iotChart.path}/${asset?._id}`}>
+        {!showAsset ? (
+          assetLocation ? (
+            <Box className={cardStyle.reportGrid}>
+              {assetLocation?.map((location) => {
+                return (
+                  <div key={location?._id} className={cardStyle.singleCard}>
                     <DashBoardCardShell
                       darkThemeBackgroundColor="var(--dark-secondary)"
                       background={'#fff'}
-                      gradientColors={colors.gradient}
                       className={cardStyle.cardInner}
                       minHeight={false}
+                      onClick={() => {
+                        setShowAsset(location?._id);
+                      }}
                     >
-                      <DataPointsIcon colors={colors.iconGradient} className={`absolute -top-[23px] left-[18px]`} />
-                      <Typography variant="h6">{asset?.assetNumber}</Typography>
-                      <Typography variant="body2">{asset?.currentLocation?.optionLabel}</Typography>
+                      <MyLocationIcon className={`absolute -top-[10px] left-[18px]`} />
+                      <Typography variant="h6">{location?.currentLocation}</Typography>
                     </DashBoardCardShell>
-                  </Link>
-                </div>
-              );
-            })}
-          </Box>
+                  </div>
+                );
+              })}
+            </Box>
+          ) : (
+            <Box p={2} height={500}>
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Box>
+          )
         ) : (
-          <Box p={2} height={500}>
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Box>
+          <>
+            <div className="flex justify-end mb-3">
+              <SearchBox onChange={handleSearch} size="small" value={search} className="flex-grow md:flex-grow-0" />
+            </div>
+            {rowsData ? (
+              <Box className={cardStyle.reportGrid}>
+                {rowsData?.map((asset, i) => {
+                  var colors = colours[0];
+                  if (asset?.runningStatus) {
+                    colors = colours[1];
+                  }
+                  return (
+                    <div key={i} className={cardStyle.singleCard}>
+                      <Link to={`${routes.iotChart.path}/${asset?._id}`}>
+                        <DashBoardCardShell
+                          darkThemeBackgroundColor="var(--dark-secondary)"
+                          background={'#fff'}
+                          gradientColors={colors.gradient}
+                          className={cardStyle.cardInner}
+                          minHeight={false}
+                        >
+                          <DataPointsIcon colors={colors.iconGradient} className={`absolute -top-[23px] left-[18px]`} />
+                          <Typography variant="h6">{asset?.assetNumber}</Typography>
+                          <Typography variant="body2">{asset?.currentLocation?.optionLabel}</Typography>
+                        </DashBoardCardShell>
+                      </Link>
+                    </div>
+                  );
+                })}
+              </Box>
+            ) : (
+              <Box p={2} height={500}>
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
+              </Box>
+            )}
+          </>
         )}
       </CustomContainer>
     </div>
