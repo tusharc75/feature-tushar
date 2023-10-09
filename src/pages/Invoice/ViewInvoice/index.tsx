@@ -132,12 +132,12 @@ const ViewInvoice = ({ invoiceData, onClose, onSuccess }) => {
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = `${parent.type === 'product'
-          ? parent.productDetail?.productName
-          : parent.type === 'package'
-            ? parent.packageDetail?.packageName
-            : parent.type === 'serializedAsset'
-              ? parent.serializedAssetDetail?.assetNumber
-              : parent.serviceDetail?.serviceName
+        ? parent.productDetail?.productName
+        : parent.type === 'package'
+          ? parent.packageDetail?.packageName
+          : parent.type === 'serializedAsset'
+            ? parent.serializedAssetDetail?.assetNumber
+            : parent.serviceDetail?.serviceName
         }`;
       parent.description =
         parent.type === 'service'
@@ -171,12 +171,12 @@ const ViewInvoice = ({ invoiceData, onClose, onSuccess }) => {
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
       _subRow.detail = `${_subRow?.type === 'product'
-          ? _subRow?.productDetail?.productName
-          : _subRow?.type === 'package'
-            ? _subRow?.packageDetail?.packageName
-            : _subRow?.type === 'serializedAsset'
-              ? _subRow?.serializedAssetDetail?.assetNumber
-              : _subRow?.serviceDetail?.serviceName
+        ? _subRow?.productDetail?.productName
+        : _subRow?.type === 'package'
+          ? _subRow?.packageDetail?.packageName
+          : _subRow?.type === 'serializedAsset'
+            ? _subRow?.serializedAssetDetail?.assetNumber
+            : _subRow?.serviceDetail?.serviceName
         }`;
       _subRow.description =
         _subRow.type === 'service'
@@ -314,7 +314,7 @@ const ViewInvoice = ({ invoiceData, onClose, onSuccess }) => {
                       handleDownloadPdf();
                     }}
                   >
-                    {isMobile && !isTablet ? <IoMdDownload size={20} /> : isDownloadingPdf ? 'Please wait...' : 'Download All'}
+                    {isMobile && !isTablet ? <IoMdDownload size={20} /> : isDownloadingPdf ? 'Please wait...' : 'Download Invoice Tickets'}
                   </Button>
                 </Box>
               )}

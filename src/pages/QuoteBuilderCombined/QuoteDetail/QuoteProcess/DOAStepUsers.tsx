@@ -1,33 +1,42 @@
+import { Button, Collapse, Tooltip } from '@material-ui/core';
 import React, { FC, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import routes from 'src/components/Helpers/Routes';
-import { Collapse, Tooltip, Button } from '@material-ui/core';
+import { FcApproval } from 'react-icons/fc';
+import { Block, KeyboardArrowUp, WatchLater } from '@material-ui/icons';
 
-import { AiOutlineClockCircle, AiOutlineClose } from 'react-icons/ai';
-import { FcApproval, FcCancel } from 'react-icons/fc';
-import { GiSandsOfTime } from 'react-icons/gi';
-import { BsCheck2 } from 'react-icons/bs';
-import { KeyboardArrowUp } from '@material-ui/icons';
-import { Block } from '@material-ui/icons';
+import { DOAApproved, DOARejected, DOAPending } from 'src/assets/svg/svgIcons';
 
 const DEFAULT_DATA_COUNT = 3; // this value will change how many users will be displayed by default;
 
 const statusIconAndColorClassMap = {
-  approve: { icon: <BsCheck2 size={13} className="block" />, colorClasses: 'text-[#64B067]' },
-  pending: { icon: <GiSandsOfTime size={13} className="block" />, colorClasses: 'text-[#858B9D]' },
-  rejected: { icon: <AiOutlineClose size={13} className="block" />, colorClasses: 'text-[#EC6852]' }
+  approve: {
+    icon: <DOAApproved size={16} className="block" />,
+    colorClasses: 'text-[#64B067]',
+    text: 'Accepted'
+  },
+  pending: {
+    icon: <DOAPending size={16} className="block" />,
+    colorClasses: 'text-[#858B9D]',
+    text: 'Pending'
+  },
+  rejected: {
+    icon: <DOARejected size={16} className="block" />,
+    colorClasses: 'text-[#EC6852]',
+    text: 'Rejected'
+  }
 };
 
 const versionStatusIconMap = {
   'Sent for DOA': {
-    icon: <AiOutlineClockCircle size={20} />,
+    icon: <WatchLater className="[font-size:20px_!important]" />,
     lebel: 'DOA Sent',
-    colorClass: 'bg-[#00acc1] text-[white]'
+    colorClass: 'text-[#00acc1]'
   },
   'Rejected by DOA': {
     icon: <Block className="[font-size:20px_!important]" />,
     lebel: 'Rejected by DOA',
-    colorClass: 'bg-[#d60f0f]'
+    colorClass: 'text-[#d60f0f]'
   },
   'Accepted by DOA': {
     icon: <FcApproval size={20} />,
@@ -68,14 +77,16 @@ const DoaStepUsers: FC<TDoaStepUsersProps> = ({ DOAData, versionStatus, ...props
   const versionData = useMemo(() => versionStatusIconMap[versionStatus], [versionStatus]);
 
   return (
-    <div className="bg-[white] dark:bg-[var(--dark-primary)] min-w-[124px]" {...props}>
-      <div className={`flex items-center text-[12px] px-[7px] py-[4px] mb-[8px] gap-[7px] max-w-[133px] `}>
+    <div className="  min-w-[120px]" {...props}>
+      <div
+        className={`flex items-center text-[12px] px-[7px] py-[4px]  gap-[7px] [--width:177px] max-w-[var(--width)] bg-[white] dark:bg-[var(--dark-primary)]`}
+      >
         <div className={`${versionData?.colorClass} w-[20px] h-[20px] rounded-full`}>{versionData?.icon}</div>
-        <p title={versionData?.lebel} className=" line-clamp-1 text-[var(--primary-text)]">
+        <p title={versionData?.lebel} className=" line-clamp-1 text-[var(--primary-text)] text-[13px]">
           {versionData?.lebel}
         </p>
       </div>
-      <div className="step relative z-50 px-[4px] [--line-height:6px] py-[var(--line-height)]  max-w-[133px]">
+      <div className="step bg-[white] dark:bg-[var(--dark-primary)] pt-[12px] relative z-50 px-[4px] [--line-height:6px] py-[var(--line-height)]  max-w-[120px] ml-auto">
         {visibleData?.map((d, index) => {
           return <RenderUser userData={d} index={index} />;
         })}
@@ -120,21 +131,28 @@ const lineClassName =
 const RenderUser = ({ userData, index }: TRenderUserProps) => {
   const user = userData?.users?.[0];
   const icon = statusIconAndColorClassMap[userData?.status];
+
   const userFullName = `${user?.firstName} ${user?.lastName}`;
 
   return (
     <div key={user.id || index} className="grid grid-cols-[24px_85px] gap-[7px] items-center  mb-[var(--line-height)]">
       <div
         style={{ borderWidth: '1px', borderStyle: 'solid' }}
-        className={`status-icon w-[24px] h-[24px] rounded-full dark:border-[var(--common-border-color)] border-[var(--primary)] relative  ${icon.colorClasses} `}
+        className={`status-icon w-[24px] h-[24px] rounded-full dark:border-[var(--common-border-color)] border-[var(--primary)] relative transition-colors ${icon.colorClasses} `}
       >
         <div className={`${lineClassName} -top-[var(--line-height)]`} />
-        <Tooltip title={<span className=" capitalize">{userData.status}</span>} placement="top" arrow>
-          <span className="block absolute inset-0 m-auto max-w-[13px] max-h-[13px] ">{icon.icon}</span>
+        <Tooltip title={<span className=" capitalize">{icon.text}</span>} placement="top" arrow>
+          <span className="block absolute inset-0 m-auto max-w-[16px] max-h-[16px] cursor-pointer ">{icon.icon}</span>
         </Tooltip>
         <div className={`${lineClassName} -bottom-[var(--line-height)]`} />
       </div>
-      <Link title={userFullName} className="link text-[12px] font-normal max-w-[85px] line-clamp-1" to={`${routes.userDetail.path}/${user?.id}`}>
+      <Link
+        title={userFullName}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="link text-[12px] font-normal max-w-[85px] line-clamp-1"
+        to={`${routes.userDetail.path}/${user?.id}`}
+      >
         {userFullName}
       </Link>
     </div>

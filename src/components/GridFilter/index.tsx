@@ -83,7 +83,7 @@ function GridFilter({ resource, currentGridApi, handleClose, setSelectedFilter, 
             }
           });
           modifiedColumn = modifiedColumn?.filter((e) => e.fieldName !== 'lastName');
-        } else if (resource === sidebarResource.customerContact || resource === sidebarResource.supplierContact) {
+        } else if (resource === sidebarResource.customerContact || resource === sidebarResource.supplierContact || resource === sidebarResource.lead) {
           modifiedColumn?.forEach((e) => {
             if (e.fieldName === 'firstName') {
               e.fieldName = 'concatedName';
@@ -250,6 +250,15 @@ function GridFilter({ resource, currentGridApi, handleClose, setSelectedFilter, 
             filterType: 'text',
             type: 'contains',
             filter: formValues[fieldName] === true ? 'Yes' : 'No'
+          };
+        }
+      }
+      else if(col.type === 'location'){
+        if (formValues[fieldName]?.length >0) {
+          filterModel[fieldName] = {
+            filterType: 'text',
+            type: 'contains',
+            filter: formValues[fieldName]
           };
         }
       }

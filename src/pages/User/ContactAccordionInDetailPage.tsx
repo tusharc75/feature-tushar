@@ -155,6 +155,8 @@ export default function ContactAccordionInDetailPage({ contacts, type, expanded 
                                       className="ml-2"
                                       primary={
                                         <Link
+                                          target="_blank"
+                                          rel="noopener noreferrer"
                                           className="link"
                                           to={
                                             type === 'customer'
@@ -230,7 +232,7 @@ export default function ContactAccordionInDetailPage({ contacts, type, expanded 
           }}
           contactResource={type === 'customer' ? customerContact.contactResource : supplierContact.contactResource}
           contactApi={type === 'customer' ? customerContact.contactApi : supplierContact.contactApi}
-          referenceData={{ 'accountName': type === 'customer' ? customerAccount : supplierAccount }}
+          referenceData={{ accountName: type === 'customer' ? customerAccount : supplierAccount }}
           isClone={false}
           contactId={null}
         />

@@ -745,7 +745,8 @@ export default function QuoteDetail() {
                   )}
                   {currentVersion !== 1 && ifQuoteApproved.approved === false && (
                     <MenuItem
-                      disabled={!allowedToEdit}
+                      disabled={allowedToEdit && !['Sent for DOA', 'Sent to Customer']?.includes(quoteData?.versions[currentVersion]?.status) &&
+                        !quoteData?.versions[currentVersion]?.status?.includes('Accepted') ? false : true}
                       onClick={() => {
                         closeActions()
                         deleteVersion()

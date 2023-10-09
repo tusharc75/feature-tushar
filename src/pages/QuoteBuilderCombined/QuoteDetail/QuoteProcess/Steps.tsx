@@ -180,15 +180,15 @@ const Steps = (props) => {
         handlePrev={handleBack}
         setStepFullScreen={setStepFullScreen}
       />
-      {versionStatus.split(' ')[0] !== 'Rejected' ? null : <p>{versionStatus}</p>}
+      {/* {versionStatus.split(' ')[0] !== 'Rejected' ? null : <p>{versionStatus}</p>} */}
       {isMobile && !isTablet ? (
         <></>
       ) : (
         <>
-          <div className="absolute top-[64px] right-[25px] text-[20px] bg-[var(--dark-primary)] font-semibold rounded-bl-md">
+          <div className="absolute top-[64px] right-[25px] text-[20px]  font-semibold rounded-bl-md">
             {!versionStatus.includes('Accepted by Customer') && approvedQuote.approved && approvedQuote.versionApproved === version && (
               <div
-                className={`${approvedClasses} font-bold text d-flex align-items-center justify-content-center  px-2 py-[3px] max-w-max gap-1 rounded-bl-md`}
+                className={`${approvedClasses} font-bold text d-flex align-items-center justify-content-center bg-[var(--dark-primary)]  px-2 py-[3px] max-w-max gap-1 rounded-bl-md`}
               >
                 <h6>Quote version - {approvedQuote.versionApproved} of this quote has been Approved</h6>
               </div>
@@ -198,19 +198,25 @@ const Steps = (props) => {
               {versionStatus.split(' (')[0] === 'Accepted  by DOA' && <DoaStepUsers DOAData={DOAData} versionStatus={'Accepted by DOA'} />}
               {versionStatus.split(' (')[0] === 'Rejected by DOA' && <DoaStepUsers DOAData={DOAData} versionStatus={'Rejected by DOA'} />}
               {versionStatus === 'Sent to Customer' && (
-                <div className={`${classes.sent} d-flex align-items-center justify-content-center  px-2 py-[3px] max-w-max gap-1 rounded-bl-md`}>
+                <div
+                  className={`${classes.sent} d-flex align-items-center justify-content-center bg-[var(--dark-primary)]  px-2 py-[3px] max-w-max gap-1 rounded-bl-md`}
+                >
                   <AiOutlineClockCircle size={20} />
                   <h6>Quote has been sent to customer</h6>
                 </div>
               )}
               {versionStatus.includes('Accepted by Customer') && (
-                <div className={`${approvedClasses} d-flex align-items-center justify-content-center  px-2 py-[3px] max-w-max gap-1 rounded-bl-md`}>
+                <div
+                  className={`${approvedClasses} d-flex align-items-center justify-content-center bg-[var(--dark-primary)]  px-2 py-[3px] max-w-max gap-1 rounded-bl-md`}
+                >
                   <FcApproval size={20} />
                   <h6>Approved by Customer</h6>
                 </div>
               )}
               {versionStatus.includes('Rejected by Customer') && (
-                <div className={`${classes.rejected} d-flex align-items-center justify-content-center  px-2 py-[3px] max-w-max gap-1 rounded-bl-md`}>
+                <div
+                  className={`${classes.rejected} d-flex align-items-center justify-content-center bg-[var(--dark-primary)]  px-2 py-[3px] max-w-max gap-1 rounded-bl-md`}
+                >
                   <FcCancel size={20} />
                   <h6>Rejected by Customer</h6>
                 </div>
