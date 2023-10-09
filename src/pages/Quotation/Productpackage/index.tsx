@@ -62,6 +62,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
   const [leadTimeDialog, setLeadTimeDialog] = useState({ open: false, data: null });
   const [addAnchorEl, setAddAnchorEl] = useState(null);
   const [products, setProducts] = useState([]);
+  const [isRateRequired, setIsRateRequired] = useState(false);
   const versionId = quotationData?.versions[version]?._id || null;
 
   useEffect(() => {
@@ -184,6 +185,8 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
         }
       }
     ];
+    const isPriceRequired = data.filter((el) => el.fieldName === 'price' && el.required).length > 0;
+    setIsRateRequired(isPriceRequired);
     column = [...column, ...newColumns];
     column.push({
       accessor: 'action',
@@ -268,7 +271,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
-      parent.isValid = parent['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
+      parent.isValid = parent['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : !isRateRequired;
       parent.subRows = generateNestedData(data.material, parent);
 
     });
@@ -306,7 +309,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qtyDisplay = _subRow.qty;
-      _subRow.isValid = _subRow['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
+      _subRow.isValid = _subRow['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : !isRateRequired;
 
       if (_subRow.type === MATERIAL_TYPE.serializedAsset) {
         _subRow.isValid = true;
