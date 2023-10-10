@@ -1,44 +1,41 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { Box, Button, Grid, Paper, useMediaQuery } from '@material-ui/core';
+import { Box, Button, Grid } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
-import { useHistory, useParams } from 'react-router-dom';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPageHeader from '../../components/DetailsPageHeader';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import axiosInstance from './../../axios/axiosInstance';
-import routes from '../../components/Helpers/Routes';
-import { useData } from '../../StateProvider/Provider';
-import DeleteButton from '../../components/Helpers/DeleteButton';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import ManageOpportunityDialog from './ManageOpportunityDialog';
 import { cloneDeep } from 'lodash';
-import CustomMobileStepperOpportunities from '../../components/CustomMobileStepperOpportunities';
-import {
-  customerAccount,
-  supplierAccount,
-  yyyyMMDD,
-  stepsToIgnoreManualCompleteForOpportunity,
-  supplierContact,
-  customerContact,
-  getObjKeysWithValues,
-  processFieldName,
-  formatAmountWithCurrency
-} from '../../constants/helpers';
+import queryString from 'query-string';
+import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { opportunity, sidebarResource } from '../../constants/helpers';
-import OpportunityContacts from './OpportunityContacts';
-import AssignContactsDialog from './AssignContactsDialog';
+import { BiEdit } from 'react-icons/bi';
+import { MdDelete } from 'react-icons/md';
+import { useHistory, useParams } from 'react-router-dom';
+import { SVG } from '../../assets';
+import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import DeleteButton from '../../components/Helpers/DeleteButton';
 import MessageDialog from '../../components/Helpers/MessageDialog';
-import AssignSupplierContactsDialog from './AssignSupplierContactsDialog';
+import routes from '../../components/Helpers/Routes';
+import ProcessFlow from '../../components/ProcessFlow';
 import ProjectInAccordion from '../../components/ProjectInAccordion/ProjectInAccordion';
 import QuotesInAccordion from '../../components/QuotesInAccordion/QuotesInAccordion';
-import ProcessFlow from '../../components/ProcessFlow';
-import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
-import { SVG } from '../../assets';
-import queryString from 'query-string';
-import { MdDelete, MdEdit } from 'react-icons/md';
-import { BiEdit } from 'react-icons/bi';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import {
+  customerContact,
+  formatAmountWithCurrency,
+  getObjKeysWithValues,
+  opportunity,
+  processFieldName,
+  sidebarResource,
+  stepsToIgnoreManualCompleteForOpportunity,
+  supplierContact,
+  yyyyMMDD
+} from '../../constants/helpers';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from './../../axios/axiosInstance';
+import AssignContactsDialog from './AssignContactsDialog';
+import AssignSupplierContactsDialog from './AssignSupplierContactsDialog';
+import ManageOpportunityDialog from './ManageOpportunityDialog';
+import OpportunityContacts from './OpportunityContacts';
 
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import { stepIconInterface, StepIconType } from 'src/components/Steps/icons';
@@ -51,6 +48,7 @@ interface StepInterface extends stepIconInterface {
 }
 
 const recordsPerLine = 3;
+
 function OpportunityDetailsPage() {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
