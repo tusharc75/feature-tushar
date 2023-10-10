@@ -1110,6 +1110,10 @@ const routes = {
     title: storedRoutes && storedRoutes.flash && storedRoutes.flash.title ? storedRoutes.flash?.title : RESOURCE_LABEL.flash,
     path: '/flash/detail'
   },
+  subleaseInvoice: {
+    title: storedRoutes && storedRoutes.subleaseInvoice && storedRoutes.subleaseInvoice.title ? storedRoutes.subleaseInvoice?.title : RESOURCE_LABEL.subleaseInvoice,
+    path: '/sublease-invoice'
+  },
 };
 
 export default routes;
