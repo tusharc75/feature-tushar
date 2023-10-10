@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, Fragment } from 'react';
 import Grid from '@material-ui/core/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -247,8 +247,8 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
           <>
             {attachments.map((attachment, i) => {
               return (
-                <>
-                  <div className="max-w-[138px] flex-grow group border border-[var(--common-border-color)] min-h-[153px] relative rounded-[4px] p-[var(--gutter)] [--gutter:18px]">
+                <Fragment key={i}>
+                  <div className="w-[138px] max-w-[138px] basis-[138px] flex-grow group border border-[var(--common-border-color)] min-h-[153px] relative rounded-[4px] p-[var(--gutter)] [--gutter:18px]">
                     <div className="front  group-hover:hidden">
                       <div className="mx-auto h-[79px] mb-[11px]">
                         <img
@@ -328,7 +328,7 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
                       </div>
                     </div>
                   </div>
-                </>
+                </Fragment>
               );
             })}
           </>
