@@ -456,10 +456,12 @@ function Budget() {
                       field: 'year'
                     }
                   ]}
+                  onClone={(d) => {
+                    setShowManageBudgetDialog({ show: true, id: d._id, isClone: true });
+                  }}
                   owerCollaboratorInitialsOrImages=""
                   onCreate={() => setShowManageBudgetDialog({ show: true, id: null, isClone: null })}
-                  showClone={false}
-                  onClone={() => {}}
+                  showClone={true}
                   renderedFrom={renderedFrom}
                 />
               ) : (
