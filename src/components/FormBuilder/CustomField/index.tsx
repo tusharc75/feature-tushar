@@ -118,12 +118,12 @@ export const CustomField = ({}) => {
 
       <Box>
         <Grid spacing={1} container className={styles.custom_field}>
-          <Grid item xs={12} sm={6} md={6}>
+          <Grid item xs={12}>
             <label className={classes.acionBtn} onClick={handleOpenAddField}>
               Add Custom Field
             </label>
           </Grid>
-          <Grid container justify="flex-end" item xs={12} sm={6} md={6}>
+          <Grid container justify="flex-end" item xs={12}>
             <label htmlFor="importcustomField" className={`cursor-pointer ${classes.acionBtn}`}>
               Import Custom Field
               <input
