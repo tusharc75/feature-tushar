@@ -143,7 +143,7 @@ const QuotePdfTemplate: FC = () => {
   const ActionsRenderer = (params) => (
     <>
       <Tooltip title="Preview">
-        <IconButton size="small" aria-label="Clone" className="mr-2" onClick={() => previewPdfTemplate(params.data._id)}>
+        <IconButton size="small" aria-label="Clone" className="md:mr-2" onClick={() => previewPdfTemplate(params.data._id)}>
           <VisibilityIcon color="primary" />
         </IconButton>
       </Tooltip>
