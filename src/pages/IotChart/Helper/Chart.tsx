@@ -8,7 +8,8 @@ import ReactApexChart from 'react-apexcharts';
 import { ApexOptions } from 'apexcharts';
 import FilterAlertModel from './FilterAlertModel';
 
-const Chart = ({ dateFilters, assetId, dataPoints, customDataPoint = false }) => {
+const Chart = ({ dateFilters, assetId, dataPoints }) => {
+
   const toastConfig = useContext(CustomToastContext);
   const [chartData, setChartData] = useState(null);
   const [alert, setAlert] = useState(null);
@@ -79,20 +80,15 @@ const Chart = ({ dateFilters, assetId, dataPoints, customDataPoint = false }) =>
   }, [showHighLow]);
 
   const fetchData = () => {
-    let api = `/report/iot/`;
-    api += customDataPoint ? `custom-data-point` : `data-points`;
+    let api = `/report/iot/data-points`;
     let param = {
       asset: assetId,
       from_date: new Date(dateFilters.from).toISOString(),
       to_date: new Date(dateFilters.to).toISOString(),
       interval: dateFilters.intervals,
-      timezone: Intl?.DateTimeFormat()?.resolvedOptions()?.timeZone
+      timezone: Intl?.DateTimeFormat()?.resolvedOptions()?.timeZone,
+      dataPoints: dataPoints?.map((e) => e._id)?.toString()
     };
-    if (customDataPoint) {
-      param['customDataPoints'] = dataPoints?.map((e) => e._id)?.toString();
-    } else {
-      param['dataPoints'] = dataPoints?.map((e) => e._id)?.toString();
-    }
     axiosInstance()
       .get(api, { params: param })
       .then(({ data: { data } }) => {
