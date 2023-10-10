@@ -201,7 +201,15 @@ function GridFilter({ resource, currentGridApi, handleClose, setSelectedFilter, 
           type: 'contains',
           filter: formValues[fieldName]
         };
-      } else if (['multiSelect', 'dropDown'].includes(col.type) && col.lookup && formValues[fieldName]) {
+      }
+      if (['year']?.includes(col.type) && formValues[fieldName]) {
+        filterModel[fieldName] = {
+          filterType: 'text',
+          type: 'contains',
+          filter: moment(new Date(formValues[fieldName])).format('YYYY')
+        };
+      }
+      else if (['multiSelect', 'dropDown'].includes(col.type) && col.lookup && formValues[fieldName]) {
         const options = coloums?.find((item) => item.fieldName == fieldName)?.option || [];
         if (col.type === 'multiSelect' && formValues[fieldName]?.length > 0) {
           filterModel[fieldName] = {
@@ -253,8 +261,8 @@ function GridFilter({ resource, currentGridApi, handleClose, setSelectedFilter, 
           };
         }
       }
-      else if(col.type === 'location'){
-        if (formValues[fieldName]?.length >0) {
+      else if (col.type === 'location') {
+        if (formValues[fieldName]?.length > 0) {
           filterModel[fieldName] = {
             filterType: 'text',
             type: 'contains',

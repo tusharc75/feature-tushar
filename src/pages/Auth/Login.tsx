@@ -97,6 +97,14 @@ const Login = () => {
         const { data } = response;
         localStorage.setItem('token', data.token);
 
+        if(data.hasExistingSession){
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.existingSessionMessage
+          });
+        }
+
         dispatch({ type: SET_USER, payload: data });
         if (data?.role?.selectedEntity?._id) {
           dispatch({

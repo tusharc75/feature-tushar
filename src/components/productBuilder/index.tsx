@@ -111,6 +111,7 @@ const ProductBuilder = (props) => {
     if (gridApi) {
       gridApi.setRowData([]);
     }
+    setColumns(null);
     axiosInstance()
       .get(`/productbuilder/getproduct/${id}`)
       .then(({ data: { data } }) => {
