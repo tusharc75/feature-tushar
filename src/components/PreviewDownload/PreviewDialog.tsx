@@ -70,6 +70,7 @@ export const PreviewDialog = ({
     if (data && data.columns) {
       const columnsArray = data?.columns?.split(',')?.map((item) => item?.trim());
       setVisibleColumnsPdf(columnsArray?.map(e => { return allColumn.find(col => col.fieldName === e) }).filter(col => col !== undefined));
+      setVisibleColumnsExcel(columnsArray?.map(e => { return allColumn.find(col => col.fieldName === e) }).filter(col => col !== undefined));
     }
   };
 
@@ -137,13 +138,13 @@ export const PreviewDialog = ({
           {operation !== 'Send Email' &&
             <CustomButton
               onClick={() => {
-                setShowSaveViewDialog({ open: true, data: selectedPdfView });
+                setShowSaveViewDialog({ open: true, data: type === 'Excel' ? selectedExcelView : selectedPdfView });
               }}
               disabled={visibleColumnsPdf?.length == 0}
               size="small"
               className="yellow-button"
             >
-              {selectedPdfView ? 'Update View' : 'Save View'}
+              {type === 'Excel' ? selectedExcelView ? 'Update View' : 'Save View' : selectedPdfView ? 'Update View' : 'Save View'}
             </CustomButton>
           }
           {operation === 'Send Email' ?
@@ -194,7 +195,7 @@ export const PreviewDialog = ({
       </Dialog>
       {showSaveViewDialog.open && (
         <ViewDialog
-          columns={visibleColumnsPdf?.map((e) => e?.fieldName)}
+          columns={type === 'Excel' ? visibleColumnsExcel?.map((e) => e?.fieldName) : visibleColumnsPdf?.map((e) => e?.fieldName)}
           resource={resource}
           handleSucess={() => {
             setShowSaveViewDialog({ open: false, data: null });
