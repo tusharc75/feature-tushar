@@ -20,6 +20,7 @@ import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { camelCase } from 'lodash';
 import { IoIosArrowDropdown } from 'react-icons/io';
+import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -317,6 +318,7 @@ const PriceTemplate = () => {
 
   return (
     <Fragment>
+      <DeviceMessage />
       <Box className="main-container-v1">
         <Box className="headerbox-v1">
           <Box className="nav-v1">
