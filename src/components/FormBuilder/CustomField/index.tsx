@@ -124,18 +124,14 @@ export const CustomField = ({}) => {
             </label>
           </Grid>
           <Grid container justify="flex-end" item xs={12}>
-            <label htmlFor="importcustomField" className={`cursor-pointer ${classes.acionBtn}`}>
+            <label htmlFor="importcustomField" className={`cursor-pointer ${classes.acionBtn} relative`}>
               Import Custom Field
               <input
                 onClick={(e: any) => (e.target.value = null)}
                 id="importcustomField"
                 name="importcustomField"
+                className="sr-only"
                 onChange={handleImportFields}
-                style={{
-                  opacity: '0',
-                  position: 'absolute',
-                  zIndex: -1
-                }}
                 type="file"
               />
             </label>
