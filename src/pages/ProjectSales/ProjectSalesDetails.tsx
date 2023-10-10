@@ -37,6 +37,7 @@ import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import { Edit } from '@material-ui/icons';
 
 const ProjectSalesDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -306,7 +307,7 @@ const ProjectSalesDetails = () => {
                     className={'btn-outline-v1'}
                     onClick={handleOpenUpdateDialog}
                   >
-                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                    {isMobile && !isTablet ? <Edit /> : 'Edit'}
                   </Button>
                 ) : null}
                 {permissions?.projectSales?.isDelete && isManager ? (
@@ -317,11 +318,11 @@ const ProjectSalesDetails = () => {
                     }}
                   />
                 ) : null}
-                <ActivityButton 
-                  referenceId={projectSalesData?._id} 
-                  resource={projectSales?.projectSalesResource} 
+                <ActivityButton
+                  referenceId={projectSalesData?._id}
+                  resource={projectSales?.projectSalesResource}
                   resourceLabel={projectSalesData?.projectName}
-                  />
+                />
               </>
             )}
           </Box>

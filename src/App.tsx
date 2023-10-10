@@ -238,7 +238,7 @@ import DeviceTemplatesDetails from './pages/DeviceTemplates/DeviceTemplatesDetai
 import WorkStations from './pages/WorkStations';
 import WorkStationsDetail from './pages/WorkStations/WorkStationsDetail';
 import DeviceTemplatesAlert from './pages/DeviceTemplatesAlert';
-import DeviceTemplateAlertDetail from './pages/DeviceTemplatesAlert/DeviceTemplateAlertDetail'
+import DeviceTemplateAlertDetail from './pages/DeviceTemplatesAlert/DeviceTemplateAlertDetail';
 import ChartOfAccount from './pages/ChartOfAccount';
 import ChartOfAccountDetail from './pages/ChartOfAccount/ChartOfAccountDetail';
 import Flash from './pages/Flash';
@@ -297,7 +297,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) { }
+    } catch (e) {}
   }, [isOffline]);
 
   const getNotification = async () => {

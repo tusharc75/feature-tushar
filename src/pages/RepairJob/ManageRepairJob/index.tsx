@@ -17,7 +17,8 @@ import {
   yupSchema,
   repairJobProcessSteps,
   sidebarResource,
-  GenerateResourceLineNumber
+  GenerateResourceLineNumber,
+  REPAIR_JOB_STATUS
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import Dialog from '@material-ui/core/Dialog';
@@ -64,7 +65,6 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
             const filteredOption = e.fieldData?.option?.filter((obj) => obj?.optionValue === e?.fieldData?.defaultValue) || [];
             e.fieldData.option = filteredOption;
           }
-
         })
 
         const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
@@ -75,10 +75,10 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
             .get(`${repairJob.api}/` + repairJobId)
             .then(({ data: { data } }) => {
               if (isClone) {
-                const { _id, brand, createdBy, history, repairJobName, updatedBy, ...rest } = data;
+                const { _id, brand, createdBy, history, repairJobName, actualEndDate, expectedCompletionDate, updatedBy, ...rest } = data;
                 setTitle(`Clone - ${repairJobName}`);
                 rest.repairJobName = GenerateResourceLineNumber(fieldsDataForCreate);
-                rest.status = `New`;
+                rest.status = REPAIR_JOB_STATUS.new;
                 setInitialData({
                   fields: fieldsDataForCreate,
                   values: { ...getObjKeysWithValues(rest, fieldsDataForCreate) }
