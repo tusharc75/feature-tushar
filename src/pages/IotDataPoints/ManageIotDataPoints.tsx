@@ -45,14 +45,14 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, r
 
   const findIotDataoints = () => {
     axiosInstance()
-      .get(`${routes.iotDataPoints.path}`)
+      .get(`${routes.iotDataPoints.path}?deepFilter=${JSON.stringify([{ field: 'custom', term: 'no' }])}`)
       .then(
         ({
           data: {
             data: { data }
           }
         }) => {
-          setIotDataPoints(data?.map((d) => ({ optionLabel: d?.fieldLabel, optionValue: d?._id, optionName: d?.fieldName })));
+          setIotDataPoints(data?.map((d) => d?.fieldName));
         }
       );
   };
@@ -130,11 +130,9 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, r
   const handleCheckSyntax = (values) => {
     if (values['formula'] && values['formula'] !== '') {
       let dataPoints = {};
-      iotDataPoints
-        ?.filter((option) => values?.dataPoints?.includes(option.optionValue))
-        ?.forEach((_input) => {
-          dataPoints[_input.optionName] = 1;
-        });
+      values?.dataPoints?.forEach((_input) => {
+        dataPoints[_input] = 1;
+      });
       if (checkFormula(values['formula'], dataPoints)) {
         setFormulaError('Valid Formula');
       } else {
@@ -153,11 +151,9 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, r
         errors['formula'] = 'Please enter Formula';
       }
       let dataPoints = {};
-      iotDataPoints
-        ?.filter((option) => values?.dataPoints?.includes(option.optionValue))
-        .forEach((_input) => {
-          dataPoints[_input.optionName] = 1;
-        });
+      values?.dataPoints?.forEach((_input) => {
+        dataPoints[_input] = 1;
+      });
       if (!checkFormula(values.formula, dataPoints)) {
         errors['formula'] = 'Please enter valid formula';
       }
@@ -265,17 +261,16 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, r
                       <Box>
                         <Autocomplete
                           multiple
-                          disableCloseOnSelect={true}
                           options={iotDataPoints}
-                          value={iotDataPoints?.filter((option) => values?.dataPoints?.includes(option.optionValue))}
-                          getOptionLabel={(option) => option?.optionLabel}
+                          freeSolo
                           fullWidth
                           onChange={(e, newValues) => {
-                            setFieldValue(
-                              'dataPoints',
-                              newValues?.map((e) => e.optionValue)
-                            );
+                            setFieldValue('dataPoints', newValues);
                           }}
+                          value={values.dataPoints}
+                          renderTags={(value: readonly string[], getTagProps) =>
+                            value.map((option: string, index: number) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)
+                          }
                           size="small"
                           renderInput={(params) => (
                             <TextField
@@ -291,18 +286,16 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, r
                         />
                       </Box>
                       <Box pt={0.5} pb={0.5}>
-                        {iotDataPoints?.filter((option) => values?.dataPoints?.includes(option.optionValue))?.length > 0 && (
+                        {values?.dataPoints?.length > 0 && (
                           <Box pt={0.5} pb={0.5}>
-                            {iotDataPoints
-                              ?.filter((option) => values?.dataPoints?.includes(option.optionValue))
-                              ?.map((_dataPoint) => (
-                                <Chip
-                                  className="ml-1 cursor-pointer mb-1"
-                                  key={_dataPoint.optionValue}
-                                  label={`${_dataPoint.optionLabel}-${_dataPoint.optionName}`}
-                                  onClick={() => handleAddDataPoint(_dataPoint.optionLabel, values, setFieldValue)}
-                                />
-                              ))}
+                            {values?.dataPoints?.map((_dataPoint) => (
+                              <Chip
+                                className="ml-1 cursor-pointer mb-1"
+                                key={_dataPoint}
+                                label={`${_dataPoint}`}
+                                onClick={() => handleAddDataPoint(_dataPoint, values, setFieldValue)}
+                              />
+                            ))}
                           </Box>
                         )}
                       </Box>
