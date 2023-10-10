@@ -1,21 +1,20 @@
-import { useState, useEffect, useContext } from 'react';
-import { Grid, Box, Button } from '@material-ui/core';
-import { useParams, useHistory } from 'react-router-dom';
-import axiosInstance from '../../axios/axiosInstance';
-import routes from '../../components/Helpers/Routes';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import { useData } from '../../StateProvider/Provider';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { ACTIVITY_RESOURCE, sidebarResource } from '../../constants/helpers';
-import { BiEdit, BiFoodMenu } from 'react-icons/bi';
+import { Box, Button, Grid } from '@material-ui/core';
+import { Edit } from '@material-ui/icons';
+import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import DeleteButton from '../../components/Helpers/DeleteButton';
-import { Skeleton } from '@material-ui/lab';
-import ManageBudgetDialog from './ManageBudgetDialog';
+import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import DeleteButton from '../../components/Helpers/DeleteButton';
+import routes from '../../components/Helpers/Routes';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import { ACTIVITY_RESOURCE, sidebarResource } from '../../constants/helpers';
+import ManageBudgetDialog from './ManageBudgetDialog';
 
 const BudgetDetail = () => {
   const { id } = useParams();
@@ -103,24 +102,20 @@ const BudgetDetail = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-              <>
-                {permissions?.budget?.isUpdate && (
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    size="small"
-                    onClick={handleOpenUpdateDialog}
-                    className={'btn-outline-v1'}
-                  >
-                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                  </Button>
-                )}
-                {permissions?.budget?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-                <ActivityButton 
-                  referenceId={budgetData?._id} 
-                  resource={ACTIVITY_RESOURCE.budget} 
-                  resourceLabel={budgetData?.name}
-                  />
-              </>
+            <>
+              {permissions?.budget?.isUpdate && (
+                <Button
+                  variant={isMobile && !isTablet ? 'text' : 'contained'}
+                  size="small"
+                  onClick={handleOpenUpdateDialog}
+                  className={'btn-outline-v1'}
+                >
+                  {isMobile && !isTablet ? <Edit /> : 'Edit'}
+                </Button>
+              )}
+              {permissions?.budget?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+              <ActivityButton referenceId={budgetData?._id} resource={ACTIVITY_RESOURCE.budget} resourceLabel={budgetData?.name} />
+            </>
           </Box>
         </Box>
       </Box>
