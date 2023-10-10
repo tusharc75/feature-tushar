@@ -46,11 +46,10 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
     return (
       <div key={data[type]?.optionLabel} className=" shadow-[0px_4px_20px_rgba(0,_0,_0,_0.06)] my-3 rounded-md ">
         <div
-          className={`flex flex-wrap justify-between items-center cursor-pointer py-1 px-3 rounded-md transition-all duration-[300ms]  ${
-            compareCollapse(`${data[type]?.optionValue}`, type)
+          className={`flex flex-wrap justify-between items-center cursor-pointer py-1 px-3 rounded-md transition-all duration-[300ms]  ${compareCollapse(`${data[type]?.optionValue}`, type)
               ? 'bg-[var(--new-theme-color)] text-white'
               : 'hover:bg-gray-300 dark:hover:bg-gray-800'
-          }`}
+            }`}
           onClick={(e) => {
             e.stopPropagation();
             if (type === 'parentCategory') handleChange(`${data[type]?.optionValue}`);
@@ -78,19 +77,19 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
           <div className="pl-4 pr-2" key={data[type]?.optionLabel}>
             {type === 'parentCategory'
               ? uniqBy(
-                  allData?.filter((d) => d['category']?.parentCategory === data[type]?.optionValue),
-                  'category.optionValue'
-                )?.map((data) => {
-                  return (
-                    <TreeView
-                      data={data}
-                      type={'category'}
-                      allData={allData?.filter((d) => d['category']?.optionValue === data?.category?.optionValue)}
-                    />
-                  );
-                })
+                allData?.filter((d) => d['category']?.parentCategory === data[type]?.optionValue),
+                'category.optionValue'
+              )?.map((data) => {
+                return (
+                  <TreeView
+                    data={data}
+                    type={'category'}
+                    allData={allData?.filter((d) => d['category']?.optionValue === data?.category?.optionValue)}
+                  />
+                );
+              })
               : type === 'category'
-              ? allData
+                ? allData
                   ?.filter((d) => d[type]?.optionValue === data[type]?.optionValue)
                   ?.map((dataPoint) => {
                     return (
@@ -117,7 +116,7 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
                       </div>
                     );
                   })
-              : null}
+                : null}
           </div>
         </Collapse>
       </div>
@@ -167,7 +166,6 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
                     .filter((_k) => selected.dataPoints[_k])
                     ?.map((k) => dataPoints?.find((d) => d.fieldName === k))
                 }
-                customDataPoint={Object.keys(selected.dataPoints).filter((item) => selected.dataPoints[item]).length === 0}
               />
             ) : (
               <div className="text-center grid place-items-center text-xl font-semibold text-gray-400 dark:text-gray-300 min-h-[574px]">
