@@ -347,7 +347,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
   const checkUniqWarehouse = () => {
     if (selectedRecords.length === 0) {
       return true;
-    } else if (uniq(map(selectedRecords, 'warehouseId')).length === 1) {
+    } else if (uniq(map(selectedRecords, 'warehouse.optionValue')).length === 1) {
       return false;
     } else {
       return true;
@@ -357,7 +357,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
   const checkUniqSupplier = () => {
     if (selectedRecords.length === 0) {
       return true;
-    } else if (uniq(map(selectedRecords, 'currentOwnerId')).length === 1) {
+    } else if (uniq(map(selectedRecords, 'currentOwner.optionValue')).length === 1) {
       return false;
     } else {
       return true;
