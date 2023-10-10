@@ -150,7 +150,7 @@ const QuotePdfTemplate: FC = () => {
       {permissions?.quotePdfTemplate?.isCreate && (
         <Tooltip title="Clone">
           <IconButton size="small" aria-label="Clone" onClick={() => CreateNew(params.data.id, true)}>
-            <FileCopyIcon color="primary" />
+            <FileCopyIcon color="primary" className="max-[600px]:[font-size:20px_!important]" />
           </IconButton>
         </Tooltip>
       )}
