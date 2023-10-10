@@ -71,7 +71,7 @@ const ProductBuilder = () => {
 
   // useEffect(() => {
   //   fetchProductBuilder();
-  // }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
+  // }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]); //Need to uncomment this after api got fixed
 
   const NameRenderer = (params) => (
     <Link className="link" to={`${routes.productBuilder.path}/${params.data.id}`}>
