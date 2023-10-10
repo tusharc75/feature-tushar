@@ -215,7 +215,7 @@ import DynamicFormDetail from './pages/DynamicForm/DynamicFormDetail';
 import Competencies from './pages/Competencies';
 import CompetenciesDetail from './pages/Competencies/CompetenciesDetail';
 import MaterialHandling from './pages/MaterialHandling';
-import ScreenOrientationOverlay from './components/ScreenOrientationOverlay';
+import ScreenOrientationOverlay from './components/ScreenMessages/ScreenOrientationOverlay';
 import PadMaster from './pages/PadMaster';
 import PadMasterDetail from './pages/PadMaster/PadMasterDetail';
 import DriverMaster from './pages/DriverMaster';

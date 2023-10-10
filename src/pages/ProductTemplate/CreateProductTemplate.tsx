@@ -31,6 +31,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import TinyMce from './../../components/TinyMCE/index';
 import GeneralRemarkManagement from './ManageTemplate/GeneralRemarkManagement';
+import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
 
 const useStyles = makeStyles((theme) => ({
   tinyMCEContainer: {
@@ -317,6 +318,7 @@ const ProductTemplate = () => {
 
   return (
     <Fragment>
+      <DeviceMessage />
       <Box className="main-container-v1">
         <Box className="headerbox-v1">
           <div className="flex items-center justify-between w-full">

@@ -157,6 +157,7 @@ const QuotePdfTemplate: FC = () => {
       {permissions?.quotePdfTemplate?.isDelete ? (
         <Tooltip title="Delete">
           <IconButton
+            size="small"
             aria-label="Delete"
             onClick={() => {
               setDeleteRecord(params.data);
@@ -168,7 +169,7 @@ const QuotePdfTemplate: FC = () => {
         </Tooltip>
       ) : (
         <Tooltip className="cursor-stop" title={`You do not have permission to delete `}>
-          <IconButton aria-label="Delete">
+          <IconButton aria-label="Delete" size="small">
             <DeleteIcon fontSize="small" />
           </IconButton>
         </Tooltip>
@@ -231,7 +232,7 @@ const QuotePdfTemplate: FC = () => {
     if (isExport) {
       deepFilter = `?`;
     }
-    
+
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
@@ -421,13 +422,10 @@ const QuotePdfTemplate: FC = () => {
             dataRows={dataRows}
             selectedRecords={selectedRecords}
             dispatch={dispatch}
-            onEdit={(d) => {
-              history.push(`${routes.quotePdfTemplateDetail.path}/${d._id}`);
-            }}
             extraParamsToCheckDelete={true}
-            onDelete={(d) => {
-              setDeleteRecord(d);
-              setShowDeleteConfirmBox(true);
+            actionCol={(data) => {
+              const params = { data };
+              return <ActionsRenderer {...params} />;
             }}
             rowCount={rowCount}
             page={page}
