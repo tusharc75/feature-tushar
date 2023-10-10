@@ -250,11 +250,11 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
 
   const fetchRecords = async () => {
     var data: any = [];
-    const tickets = await axiosInstance().get(`${deliveryTicket.api}/typewise?referenceType=${sidebarResource.repairJob}&referenceId=${repairJobData._id}`);
-
     let allOnceReceivedInventories = []
 
     if (user.user?.brandPolicy?.repairJobSendSupplierRequired) {
+      const tickets = await axiosInstance().get(`${deliveryTicket.api}/typewise?referenceType=${sidebarResource.repairJob}&referenceId=${repairJobData._id}`);
+
       const receivedTickets = tickets?.data?.data?.filter((e) => e.status === DELIVERY_TICKET_STATUS.delivered && e.deliveryToType === DELIVERY_FROM_TO_TYPE.plant && e.pickupFromType === DELIVERY_FROM_TO_TYPE.supplier) || []
 
       allOnceReceivedInventories = receivedTickets?.reduce((acc, t) => {
