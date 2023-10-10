@@ -15,7 +15,8 @@ import {
   DELIVERY_TICKET_REFERENCE_TYPE,
   INVENTORY_OWNER_TYPE,
   sidebarResource,
-  CHILD_RESOURCE
+  CHILD_RESOURCE,
+  DELIVERY_TICKET_STATUS
 } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
@@ -35,6 +36,7 @@ import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { generateCustomTableColumns } from 'src/constants/columns';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
+import { useData } from 'src/StateProvider/Provider';
 
 const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatus, renderedFrom, allowedToEdit, allowUpdateStatus, stepFullScreen }) => {
 
@@ -51,6 +53,10 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
   const [repairAssetDialog, setRepairAssetDialog] = useState({ open: false, assetId: null, assetName: null, assetIds: [] });
 
   const [repairProcessDialog, setRepairProcessDialog] = useState({ open: false, assetId: null, assetNumber: null, repaired: false });
+
+  const {
+    state: { user, permissions }
+  }: any = useData();
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -220,8 +226,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
             <HtmlTooltip title="Repaired">
               <CheckCircleIcon color="primary" fontSize="small" />
             </HtmlTooltip>
-          ) : ![ASSET_STATUS.lost, ASSET_STATUS.scrap].includes(row?.original?.status) &&
-            row?.original?.currentOwnerType === INVENTORY_OWNER_TYPE.brand &&
+          ) : ![ASSET_STATUS.lost, ASSET_STATUS.scrap].includes(row?.original?.status) && row?.original?.canRepair &&
             !row?.original?.repairTypeId ? (
             <HtmlTooltip title="Repair Asset">
               <IconButton
@@ -245,6 +250,21 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
 
   const fetchRecords = async () => {
     var data: any = [];
+    const tickets = await axiosInstance().get(`${deliveryTicket.api}/typewise?referenceType=${sidebarResource.repairJob}&referenceId=${repairJobData._id}`);
+
+    let allOnceReceivedInventories = []
+
+    if (user.user?.brandPolicy?.repairJobSendSupplierRequired) {
+      const receivedTickets = tickets?.data?.data?.filter((e) => e.status === DELIVERY_TICKET_STATUS.delivered && e.deliveryToType === DELIVERY_FROM_TO_TYPE.plant && e.pickupFromType === DELIVERY_FROM_TO_TYPE.supplier) || []
+
+      allOnceReceivedInventories = receivedTickets?.reduce((acc, t) => {
+        if (t?.productInventory && t?.productInventory?.length > 0) {
+          let ids = t?.productInventory.map(inventory => inventory?.optionValue);
+          return acc.concat(ids);
+        }
+      }, []);
+    }
+
     const response = await axiosInstance().get(`${repairJob.api}/${repairJobData._id}/assets`)
     data = response?.data?.data;
     data.forEach((parent, i) => {
@@ -254,6 +274,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
       parent.productCategory = parent?.productCategory?.optionLabel
       parent.isValid = parent.status === ASSET_STATUS.scrap || parent.status === ASSET_STATUS.lost ? false : true
       parent.hideSelection = parent.status === ASSET_STATUS.lost;
+      parent.canRepair = user.user?.brandPolicy?.repairJobSendSupplierRequired ? allOnceReceivedInventories?.includes(parent.inventory) && !parent?.repaired : true;
     });
     setRowsData(data);
     setSelectedRecords([]);
@@ -405,6 +426,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                 size="small"
                 disabled={
                   selectedRecords.length === 0 ||
+                  selectedRecords.some((s) => !s?.canRepair || s.repairTypeId || [ASSET_STATUS.scrap].includes(s.status)) ||
                   selectedRecords.some((s) => s.repaired === true || s.repairTypeId || [ASSET_STATUS.scrap].includes(s.status)) ||
                   checkUniqcurrentOwnerType()
                 }
