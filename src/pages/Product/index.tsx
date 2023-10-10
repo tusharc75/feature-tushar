@@ -567,10 +567,11 @@ const Product = () => {
             },
             {
               title: 'Child Product Export',
-              api: `${product.api}/unknown/bom/template?export=true${getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
+              api: `${product.api}/unknown/bom/template?export=true${
+                getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
                   ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
                   : ''
-                }`,
+              }`,
               type: 'export'
             },
             {
@@ -585,10 +586,11 @@ const Product = () => {
             },
             {
               title: 'Service/Consumable Export',
-              api: `${product.api}/unknown/service-master/template?export=true${getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
+              api: `${product.api}/unknown/service-master/template?export=true${
+                getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
                   ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
                   : ''
-                }`,
+              }`,
               type: 'export'
             },
             {
@@ -603,10 +605,11 @@ const Product = () => {
             },
             {
               title: 'Service Package Export',
-              api: `${product.api}/unknown/package/template?export=true${getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
+              api: `${product.api}/unknown/package/template?export=true${
+                getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
                   ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
                   : ''
-                }`,
+              }`,
               type: 'export'
             },
             {
@@ -839,9 +842,21 @@ const Product = () => {
                 {
                   icon: <IoPricetagsSharp size={18} />,
                   field: 'mrp'
+                },
+                {
+                  field: 'productCategory'
                 }
               ]}
-              chips={[]}
+              chips={[
+                {
+                  label: 'Unit: ',
+                  field: 'unit'
+                },
+                {
+                  label: 'Pricing Method: ',
+                  field: 'pricingMethod'
+                }
+              ]}
               owerCollaboratorInitialsOrImages=""
               onCreate={() => {
                 OpenProduct(null);
