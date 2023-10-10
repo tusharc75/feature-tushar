@@ -65,7 +65,7 @@ export default function OpportunityContacts({
                         <Grid container className="detailCardHeader">
                           <Grid item xs={12} sm={12}>
                             {
-                              <Link className="link" to={`/${contactApi}/detail/${obj._id}`}>
+                              <Link className="link" target="_blank" rel="noopener noreferrer" to={`/${contactApi}/detail/${obj._id}`}>
                                 <Typography className="detailName">
                                   {' '}
                                   {`${obj.firstName || ''}  ${obj.lastName || ''}`}
@@ -82,7 +82,12 @@ export default function OpportunityContacts({
                           {supplierContact.contactApi === contactApi && (
                             <Grid item xs={12} md={6}>
                               {
-                                <Link className="link" to={`/${supplierAccount.accountApi}/detail/${obj.accountName}`}>
+                                <Link
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="link"
+                                  to={`/${supplierAccount.accountApi}/detail/${obj.accountName}`}
+                                >
                                   <DisplayData
                                     key="3"
                                     label="Supplier Account"

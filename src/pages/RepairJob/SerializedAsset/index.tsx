@@ -37,6 +37,7 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { generateCustomTableColumns } from 'src/constants/columns';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import { useData } from 'src/StateProvider/Provider';
+import HelpIcon from '@material-ui/icons/Help';
 
 const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatus, renderedFrom, allowedToEdit, allowUpdateStatus, stepFullScreen }) => {
 
@@ -250,14 +251,16 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
 
   const fetchRecords = async () => {
     var data: any = [];
-    let allOnceReceivedInventories = []
+    let assetSendedToSupplier = []
 
     if (user.user?.brandPolicy?.repairJobSendSupplierRequired) {
+
       const tickets = await axiosInstance().get(`${deliveryTicket.api}/typewise?referenceType=${sidebarResource.repairJob}&referenceId=${repairJobData._id}`);
 
-      const receivedTickets = tickets?.data?.data?.filter((e) => e.status === DELIVERY_TICKET_STATUS.delivered && e.deliveryToType === DELIVERY_FROM_TO_TYPE.plant && e.pickupFromType === DELIVERY_FROM_TO_TYPE.supplier) || []
+      const receivedTickets = tickets?.data?.data?.filter((e) => e.status === DELIVERY_TICKET_STATUS.delivered
+        && e.deliveryToType === DELIVERY_FROM_TO_TYPE.plant && e.pickupFromType === DELIVERY_FROM_TO_TYPE.supplier) || []
 
-      allOnceReceivedInventories = receivedTickets?.reduce((acc, t) => {
+      assetSendedToSupplier = receivedTickets?.reduce((acc, t) => {
         if (t?.productInventory && t?.productInventory?.length > 0) {
           let ids = t?.productInventory.map(inventory => inventory?.optionValue);
           return acc.concat(ids);
@@ -274,7 +277,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
       parent.productCategory = parent?.productCategory?.optionLabel
       parent.isValid = parent.status === ASSET_STATUS.scrap || parent.status === ASSET_STATUS.lost ? false : true
       parent.hideSelection = parent.status === ASSET_STATUS.lost;
-      parent.canRepair = user.user?.brandPolicy?.repairJobSendSupplierRequired ? allOnceReceivedInventories?.includes(parent.inventory) && !parent?.repaired : true;
+      parent.canRepair = user.user?.brandPolicy?.repairJobSendSupplierRequired ? assetSendedToSupplier?.includes(parent.inventory) && !parent?.repaired : true;
     });
     setRowsData(data);
     setSelectedRecords([]);
@@ -344,7 +347,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
   const checkUniqWarehouse = () => {
     if (selectedRecords.length === 0) {
       return true;
-    } else if (uniq(map(selectedRecords, 'warehouseId')).length === 1) {
+    } else if (uniq(map(selectedRecords, 'warehouse.optionValue')).length === 1) {
       return false;
     } else {
       return true;
@@ -354,7 +357,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
   const checkUniqSupplier = () => {
     if (selectedRecords.length === 0) {
       return true;
-    } else if (uniq(map(selectedRecords, 'currentOwnerId')).length === 1) {
+    } else if (uniq(map(selectedRecords, 'currentOwner.optionValue')).length === 1) {
       return false;
     } else {
       return true;
@@ -493,6 +496,11 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
               </Menu>
             </Fragment>
           )}
+          {user.user?.brandPolicy?.repairJobSendSupplierRequired &&
+            <HtmlTooltip title='To complete the repair, assets must be sent to the supplier and received back at the plant'>
+              <HelpIcon fontSize='small' color='primary' />
+            </HtmlTooltip>
+          }
         </Box>
       </Box>
       {columns && rowsData ? (<Box zIndex={5} width={'100%'}>

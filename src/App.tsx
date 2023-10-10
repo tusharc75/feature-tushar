@@ -215,7 +215,7 @@ import DynamicFormDetail from './pages/DynamicForm/DynamicFormDetail';
 import Competencies from './pages/Competencies';
 import CompetenciesDetail from './pages/Competencies/CompetenciesDetail';
 import MaterialHandling from './pages/MaterialHandling';
-import ScreenOrientationOverlay from './components/ScreenOrientationOverlay';
+import ScreenOrientationOverlay from './components/ScreenMessages/ScreenOrientationOverlay';
 import PadMaster from './pages/PadMaster';
 import PadMasterDetail from './pages/PadMaster/PadMasterDetail';
 import DriverMaster from './pages/DriverMaster';
@@ -238,7 +238,7 @@ import DeviceTemplatesDetails from './pages/DeviceTemplates/DeviceTemplatesDetai
 import WorkStations from './pages/WorkStations';
 import WorkStationsDetail from './pages/WorkStations/WorkStationsDetail';
 import DeviceTemplatesAlert from './pages/DeviceTemplatesAlert';
-import DeviceTemplateAlertDetail from './pages/DeviceTemplatesAlert/DeviceTemplateAlertDetail'
+import DeviceTemplateAlertDetail from './pages/DeviceTemplatesAlert/DeviceTemplateAlertDetail';
 import ChartOfAccount from './pages/ChartOfAccount';
 import ChartOfAccountDetail from './pages/ChartOfAccount/ChartOfAccountDetail';
 import Flash from './pages/Flash';
@@ -298,7 +298,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) { }
+    } catch (e) {}
   }, [isOffline]);
 
   const getNotification = async () => {

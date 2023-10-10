@@ -84,7 +84,7 @@ const TeamUsers = ({ data, permissions, managerId, removeUser }) => {
                           </div>
                         }
                         secondary={
-                          <div className="flex gap-2">
+                          <div className="flex gap-2 mr-2">
                             <span className=" line-clamp-1">{obj.email || ''}</span>
                             <CopyToClipboard textToCopy={obj.email || ''} />
                           </div>

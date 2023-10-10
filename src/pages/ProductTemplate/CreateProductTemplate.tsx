@@ -31,29 +31,14 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import TinyMce from './../../components/TinyMCE/index';
 import GeneralRemarkManagement from './ManageTemplate/GeneralRemarkManagement';
+import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
 
 const useStyles = makeStyles((theme) => ({
-  linksContainer: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    ['@media (max-width: 960px)']: {
-      display: 'none'
-    }
-  },
   tinyMCEContainer: {
     width: '100%'
   },
-  menuButtonList: {
-    alignItems: 'flex-start',
-    padding: '1px'
-  },
   delBtn: {
     color: 'red'
-  },
-  expandIcon: {
-    position: 'absolute',
-    right: '0',
-    color: 'white'
   }
 }));
 
@@ -333,9 +318,10 @@ const ProductTemplate = () => {
 
   return (
     <Fragment>
+      <DeviceMessage />
       <Box className="main-container-v1">
         <Box className="headerbox-v1">
-          <Box className="nav-v1">
+          <div className="flex items-center justify-between w-full">
             <CustomBreadCrumbs
               routes={[
                 { title: routes.productTemplate.title, path: routes.productTemplate.path },
@@ -351,11 +337,30 @@ const ProductTemplate = () => {
                 } else history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : path });
               }}
             />
-          </Box>
-          <Box className="controls-v1">
-            <Box className="control-buttons-v1">
-              <div className={classes.linksContainer}>
-                <label htmlFor="importField" className={`new-headerbox-button-v1`}>
+            <div className={`flex justify-end max-[960px]:hidden`}>
+              <label htmlFor="importField" className={`new-headerbox-button-v1`}>
+                Import Fields
+                <input
+                  onClick={(e: any) => (e.target.value = null)}
+                  id="importField"
+                  name="importField"
+                  onChange={handleImportFields}
+                  style={{
+                    opacity: '0',
+                    position: 'absolute',
+                    zIndex: -1
+                  }}
+                  type="file"
+                />
+              </label>
+              <label className={`new-headerbox-button-v1`} onClick={handleExportFields}>
+                Export Fields
+              </label>
+              <a id="downloadAnchorElem" style={{ display: 'none' }}></a>
+            </div>
+            <Menu id="importField" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
+              <MenuItem>
+                <label htmlFor="importField" className="cursor-pointer">
                   Import Fields
                   <input
                     onClick={(e: any) => (e.target.value = null)}
@@ -370,38 +375,15 @@ const ProductTemplate = () => {
                     type="file"
                   />
                 </label>
-                <label className={`new-headerbox-button-v1`} onClick={handleExportFields}>
-                  Export Fields
-                </label>
-                <a id="downloadAnchorElem" style={{ display: 'none' }}></a>
-              </div>
-              <Menu id="importField" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
-                <MenuItem>
-                  <label htmlFor="importField" className="cursor-pointer">
-                    Import Fields
-                    <input
-                      onClick={(e: any) => (e.target.value = null)}
-                      id="importField"
-                      name="importField"
-                      onChange={handleImportFields}
-                      style={{
-                        opacity: '0',
-                        position: 'absolute',
-                        zIndex: -1
-                      }}
-                      type="file"
-                    />
-                  </label>
-                </MenuItem>
-                <MenuItem onClick={handleExportFields}>Export Fields</MenuItem>
-              </Menu>
-              {isMobile && (
-                <IconButton onClick={handleClick} className={classes.menuButtonList}>
-                  <IoIosArrowDropdown className={classes.expandIcon} />
-                </IconButton>
-              )}
-            </Box>
-          </Box>
+              </MenuItem>
+              <MenuItem onClick={handleExportFields}>Export Fields</MenuItem>
+            </Menu>
+            {isMobile && (
+              <IconButton onClick={handleClick} style={{ padding: 2 }}>
+                <IoIosArrowDropdown />
+              </IconButton>
+            )}
+          </div>
         </Box>
         <Box className={`detail-container-v1`}>
           {initialValues && productCategory ? (

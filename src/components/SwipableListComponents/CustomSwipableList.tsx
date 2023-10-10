@@ -20,8 +20,8 @@ export default function CustomSwipableList({
   dataRows,
   selectedRecords,
   dispatch,
-  onEdit,
-  onDelete,
+  onEdit = null,
+  onDelete = null,
   extraParamsToCheckDelete,
   rowCount,
   page,
@@ -184,7 +184,7 @@ export default function CustomSwipableList({
                                   <FileCopyIcon size={18} className="text-[var(--primary-text)]" />
                                 </IconButton>
                               )}
-                              {permissions?.isUpdate && d.allowedToEdit && (
+                              {permissions?.isUpdate && d.allowedToEdit && onEdit && (
                                 <IconButton
                                   size="small"
                                   className="max-w-[20px] max-h-[20px] p-[1px_!important]"
@@ -194,7 +194,7 @@ export default function CustomSwipableList({
                                   <EditIcon fontSize="small" className="text-[var(--primary-text)] w-[18px] h-[18px]" />
                                 </IconButton>
                               )}
-                              {extraParamsToCheckDelete && permissions?.isDelete && d.canDelete && (
+                              {extraParamsToCheckDelete && permissions?.isDelete && d.canDelete && onDelete && (
                                 <IconButton size="small" aria-label="Clone" onClick={() => onDelete(d)}>
                                   <MdDelete size={18} style={{ color: 'var(--danger-light)' }} />
                                 </IconButton>
@@ -216,7 +216,8 @@ export default function CustomSwipableList({
                             <div className="flex flex-wrap gap-1 items-center">
                               <span className="flex items-center text-[#6B6B6B] dark:text-gray-300 max-w-[15px] max-h-[15px]">{a.icon}</span>
                               <h5 className="text-truncate font-medium text-[13px] dark:text-gray-300" style={{ paddingTop: '2px', fontWeight: 500 }}>
-                                {d[a.field]}
+                                {a.label ?? `${a.label || ''}`}
+                                {d[a.field] ?? ''}
                               </h5>
                             </div>
                           </div>
