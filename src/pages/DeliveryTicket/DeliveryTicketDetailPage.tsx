@@ -5,7 +5,7 @@ import { Skeleton } from '@material-ui/lab';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import DetailsPageHeader from '../../components/DetailsPageHeader';
 import queryString from 'query-string';
-import { yyyyMMDD, deliveryTicket, getObjKeysWithValues, dateTimeFormat, ACTIVITY_RESOURCE } from '../../constants/helpers';
+import { yyyyMMDD, deliveryTicket, getObjKeysWithValues, dateTimeFormat, ACTIVITY_RESOURCE, ASSET_STATUS, rentalManagement } from '../../constants/helpers';
 import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import routes from '../../components/Helpers/Routes';
@@ -47,6 +47,7 @@ import DeliveryTicketProduct from './DeliveryTicketProduct';
 import DeliveryTicketAdditionalCost from './DeliveryTicketAdditionalCost';
 import HideWhenOffline from 'src/components/HideWhenOffline';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import DateDialog from '../RentalManagement/LoadingTicket/DateDialog';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -107,6 +108,7 @@ export default function DeliveryTicketDetail(props) {
   const [downlodingFile, setDownlodingFile] = useState(false);
   const [locationKeys, setLocationKeys] = useState([]);
   const { isOffline } = useContext(CustomOfflineContext);
+  const [openDateDialog, setOpenDateDialog] = useState({ open: false, type: null, status: null, prevStatus: null, assets: [], loading: false });
 
   useEffect(() => {
     return history.listen((location) => {
@@ -331,7 +333,7 @@ export default function DeliveryTicketDetail(props) {
         if (signOffSignatures && signOffSignatures.length > 0) {
           setSignOffDate(moment(signOffSignatures[signOffSignatures.length - 1].date).format(dateTimeFormat));
         }
-        setCanEdit([...(data?.collaborator ?? []), data?.owner ?? {}].some((obj) => obj.optionValue === user.user._id));
+        setCanEdit([...(data?.collaborator ?? []), data?.owner ?? {}, data?.processor ?? {}].some((obj) => obj.optionValue === user.user._id));
         setSignatures(data?.signatures || []);
         if (data?.productInventory && data?.productInventory.length) {
           let ids = data?.productInventory.map((o) => o?.optionValue);
@@ -484,8 +486,8 @@ export default function DeliveryTicketDetail(props) {
       deliveryTicketData?.status === DELIVERY_TICKET_STATUS.new
         ? 'Sign-off - Dispatch'
         : deliveryTicketData?.status === 'In-Transit'
-        ? 'Sign-off - Delivery'
-        : '';
+          ? 'Sign-off - Delivery'
+          : '';
 
     const { type, sign: newSign, name } = signedData;
     const indexOfExistingSignature = signatures.findIndex((sign) => sign.type === type && sign.status === status);
@@ -580,6 +582,58 @@ export default function DeliveryTicketDetail(props) {
     }
   };
 
+  const handelProcessTickets = (date = new Date(), status = null) => {
+    setOpenDateDialog((prev) => ({ ...prev, loading: true }));
+    const data = {}
+    data['_ids'] = [deliveryTicketData._id]
+    data['status'] = DELIVERY_TICKET_STATUS.delivered;
+    data['signatures'] = [];
+    data['receiveDate'] = date;
+    axiosInstance()
+      .post(`${deliveryTicket.api}/updatebulk`, data)
+      .then(({ data: { data } }) => {
+        if (status) {
+          handleChangeStatusInUse(status, openDateDialog.prevStatus, date);
+        } else {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: `Delivered Successfully`
+          });
+          setOpenDateDialog({ open: false, type: null, status: null, prevStatus: null, assets: [], loading: false });
+          fetchDeliveryTicketData();
+        }
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const handleChangeStatusInUse = (status, prevStatus, date) => {
+    const assets = dataRows?.map((e) => e._id);
+    if (assets?.length) {
+      axiosInstance()
+        .put(`${rentalManagement.api}/${deliveryTicketData?.rentalJob?.optionValue}/assets-inuse-standby`, { assets, status: status, prevStatus: prevStatus, date: date })
+        .then(({ data }) => {
+          fetchDeliveryTicketData();
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          setOpenDateDialog({ open: false, type: null, status: null, prevStatus: null, assets: [], loading: false });
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+          setOpenDateDialog((prev) => ({ ...prev, loading: false }));
+        });
+    }
+    else {
+      fetchDeliveryTicketData();
+      setOpenDateDialog({ open: false, type: null, status: null, prevStatus: null, assets: [], loading: false });
+    }
+  };
+
   return (
     <>
       <Box className="main-container-v1">
@@ -589,6 +643,31 @@ export default function DeliveryTicketDetail(props) {
           </Box>
           <Box className="controls-v1">
             <Box className="control-buttons-v1">
+              {permissions?.deliveryTicket?.isUpdate &&
+                canEdit &&
+                deliveryTicketData?.type === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob &&
+                [DELIVERY_TICKET_STATUS.indTransit].includes(deliveryTicketData?.status) && [DELIVERY_TICKET_TYPE.loading, DELIVERY_TICKET_TYPE.receiving].includes(deliveryTicketData?.ticketType) && (<Button
+                  variant={isMobile && !isTablet ? 'text' : 'contained'}
+                  className="btn-outline-v1"
+                  size="small"
+                  onClick={() => {
+                    if (user?.user?.brandPolicy?.assetDeliveredStatus && deliveryTicketData?.ticketType === DELIVERY_TICKET_TYPE.loading) {
+                      setOpenDateDialog({
+                        open: true,
+                        type: 'changeStatus',
+                        status: ASSET_STATUS.delivered,
+                        prevStatus: ASSET_STATUS.delivered,
+                        assets: selectedRecords?.filter((e: any) => e.type === 'Asset')?.map((e) => e._id),
+                        loading: false
+                      });
+                    } else {
+                      handelProcessTickets();
+                    }
+                  }}
+                  style={isMobile && !isTablet ? { color: 'var(--teal)' } : {}}
+                >
+                  {deliveryTicketData?.ticketType === DELIVERY_TICKET_TYPE.loading ? 'Delivered to Customer' : 'Receive Item'}
+                </Button>)}
               {permissions?.deliveryTicket?.isUpdate &&
                 canEdit &&
                 ![DELIVERY_TICKET_STATUS.delivered, DELIVERY_TICKET_STATUS.cancelled].includes(deliveryTicketData?.status) && (
@@ -794,9 +873,9 @@ export default function DeliveryTicketDetail(props) {
                     dataRows={dataRows}
                     selectedRecords={selectedRecords}
                     dispatch={dispatch}
-                    onEdit={() => {}}
+                    onEdit={() => { }}
                     extraParamsToCheckDelete={true}
-                    onDelete={() => {}}
+                    onDelete={() => { }}
                     rowCount={rowCount}
                     page={page}
                     loading={loading}
@@ -811,7 +890,7 @@ export default function DeliveryTicketDetail(props) {
                     showClone={false}
                     fullHeight={true}
                     renderedFrom={renderedFrom}
-                    onClone={() => {}}
+                    onClone={() => { }}
                   />
                 ) : Object.keys(frameWorkComponent).length > 0 ? (
                   <CustomAgGrid
@@ -951,6 +1030,30 @@ export default function DeliveryTicketDetail(props) {
               deliveryTicketData?.type === DELIVERY_TICKET_REFERENCE_TYPE.transferAsset ? deliveryTicketData?.transferAsset?.optionValue : ''
             }
             notIn={deliveryTicketData.ticketType}
+          />
+        )}
+
+        {openDateDialog.open && (
+          <DateDialog
+            loading={openDateDialog.loading}
+            onClose={() => {
+              setOpenDateDialog({ open: false, type: null, status: null, prevStatus: '', assets: [], loading: false });
+            }}
+            handleSubmit={(date, status) => {
+              handelProcessTickets(date, status);
+
+              // if (openDateDialog.type === 'changeStatus' && [ASSET_STATUS.inUse, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable]?.includes(openDateDialog.status)) {
+              //   handleChangeStatusInUse(openDateDialog.status, openDateDialog.prevStatus, date);
+              // } else if (openDateDialog.type === 'changeStatus' && [ASSET_STATUS.delivered]?.includes(openDateDialog.status)) {
+              //   handelProcessTickets(date, status);
+              // } else if (openDateDialog.type === 'changeDate') {
+              //   handleChangeDate(date);
+              // }
+            }}
+            type={openDateDialog.type}
+            status={openDateDialog.status}
+            title={'Delivered Date'}
+            assets={[]}
           />
         )}
       </Box>
