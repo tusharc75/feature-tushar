@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
+import { Box, Button, Chip, CircularProgress, Dialog, Grid, TextField, Typography } from '@material-ui/core';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
@@ -16,9 +16,12 @@ import { CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
+import { Autocomplete } from '@material-ui/lab';
+import { checkFormula } from 'src/constants/formulaUtility';
 
 const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null }) => {
   const history = useHistory();
+  const inputRef = useRef<any>();
   const {
     state: { user }
   }: any = useData();
@@ -29,10 +32,30 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, r
   const [submitting, setSubmitting] = useState(false);
   const [cloneHeading, setCloneHeading] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [iotDataPoints, setIotDataPoints] = useState([]);
+  const [formulaError, setFormulaError] = useState(null);
 
   useEffect(() => {
     fetchFields();
   }, []);
+
+  useEffect(() => {
+    findIotDataoints();
+  }, []);
+
+  const findIotDataoints = () => {
+    axiosInstance()
+      .get(`${routes.iotDataPoints.path}?deepFilter=${JSON.stringify([{ field: 'custom', term: 'no' }])}`)
+      .then(
+        ({
+          data: {
+            data: { data }
+          }
+        }) => {
+          setIotDataPoints(data?.map((d) => d?.fieldName));
+        }
+      );
+  };
 
   const fetchFields = async () => {
     try {
@@ -62,9 +85,13 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, r
                 }
               });
             }
+
+            const tempInitialData: any = getObjKeysWithValues(tempData, fields);
+            tempInitialData.formula = tempData?.formula || '';
+            tempInitialData.dataPoints = tempData?.dataPoints || [];
             setInitialData({
               fields: fields,
-              values: getObjKeysWithValues(tempData, fields)
+              values: tempInitialData
             });
           })
           .catch((error) => {
@@ -81,9 +108,8 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, r
             }
           });
         }
-
-        tempInitialData.formula = ''
-
+        tempInitialData.formula = '';
+        tempInitialData.dataPoints = [];
         setInitialData({
           fields: fieldsDataForCreate,
           values: tempInitialData
@@ -94,8 +120,53 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, r
     }
   };
 
+  const handleAddDataPoint = (dataPoint, values, setFieldValue) => {
+    let pushPosition = inputRef.current.selectionStart;
+    let newFormula = [values['formula'].slice(0, pushPosition), dataPoint, values['formula'].slice(pushPosition)].join('');
+    setFieldValue('formula', newFormula);
+    inputRef.current.focus();
+  };
+
+  const handleCheckSyntax = (values) => {
+    if (values['formula'] && values['formula'] !== '') {
+      let dataPoints = {};
+      values?.dataPoints?.forEach((_input) => {
+        dataPoints[_input] = 1;
+      });
+      if (checkFormula(values['formula'], dataPoints)) {
+        setFormulaError('Valid Formula');
+      } else {
+        setFormulaError('Invalid Formula');
+      }
+    }
+  };
+
+  function validate(values) {
+    const errors = {};
+    if (values?.custom) {
+      if (!values.dataPoints?.length) {
+        errors['dataPoints'] = 'Please select Data Points';
+      }
+      if (values.formula === '') {
+        errors['formula'] = 'Please enter Formula';
+      }
+      let dataPoints = {};
+      values?.dataPoints?.forEach((_input) => {
+        dataPoints[_input] = 1;
+      });
+      if (!checkFormula(values.formula, dataPoints)) {
+        errors['formula'] = 'Please enter valid formula';
+      }
+    }
+    return errors;
+  }
+
   const handleSubmit = (values) => {
     setSubmitting(true);
+    if (!values?.custom) {
+      values.formula = '';
+      values.dataPoints = [];
+    }
     if (id && !isClone) {
       values._id = id;
       axiosInstance()
@@ -153,7 +224,7 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, r
       }}
     >
       {initialData.fields.length ? (
-        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit}>
+        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} validate={validate} onSubmit={handleSubmit}>
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
@@ -179,54 +250,88 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, r
                   <InputField
                     errors={errors}
                     values={values}
-                    // setFieldValue={setFieldValue}
-                    setFieldValue={(name, value) => {
-                      setFieldValue(name, value);
-                      if (name === 'custom' && value) {
-                        setInitialData({
-                          fields: [
-                            ...initialData?.fields,
-                            {
-                              _id: parseInt((Math.random() * 100000).toString()),
-                              fieldLabel: 'Formula',
-                              type: 'formula',
-                              multiline: true,
-                              rows: 4,
-                              fullWidth: true,
-                              required: true,
-                              isTooltip: false,
-                              tooltipMessage: '',
-                              editAble: true,
-                              deletAble: true,
-                              hiddenField: false,
-                              isDefaultValue: false,
-                              disableOnEdit: false,
-                              lookup: false,
-                              lookupResource: '',
-                              entityWiseLookup: false,
-                              isDropdown: false,
-                              isWarningTooltip: false,
-                              warningTooltipMessage: '',
-                              defaultValue: '',
-                              fieldName: 'formula',
-                              sectionName: 'IoT Information',
-                              resource: 'Iot Data Points'
-                            }
-                          ],
-                          values: initialData?.values
-                        });
-                      } else if (name === 'custom' && !value) {
-                        setInitialData({
-                          fields: initialData?.fields?.filter((f) => f?.fieldName !== 'formula'),
-                          values: initialData?.values
-                        });
-                      }
-                    }}
+                    setFieldValue={setFieldValue}
                     touched={touched}
                     fieldsData={initialData.fields}
                     size="small"
                     fullWidth
                   />
+                  {values?.custom && (
+                    <div className="conditions-container container-with-border p-2 sm:p-3 md:p-4 mb-2 sm:mb-3 md:mb-4">
+                      <Box>
+                        <Autocomplete
+                          multiple
+                          options={iotDataPoints}
+                          freeSolo
+                          fullWidth
+                          onChange={(e, newValues) => {
+                            setFieldValue('dataPoints', newValues);
+                          }}
+                          value={values.dataPoints}
+                          renderTags={(value: readonly string[], getTagProps) =>
+                            value.map((option: string, index: number) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)
+                          }
+                          size="small"
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              label="Data Points"
+                              margin="none"
+                              size="small"
+                              variant="outlined"
+                              error={touched?.dataPoints && Boolean(errors[`dataPoints`])}
+                              helperText={touched?.dataPoints && errors[`dataPoints`]}
+                            />
+                          )}
+                        />
+                      </Box>
+                      <Box pt={0.5} pb={0.5}>
+                        {values?.dataPoints?.length > 0 && (
+                          <Box pt={0.5} pb={0.5}>
+                            {values?.dataPoints?.map((_dataPoint) => (
+                              <Chip
+                                className="ml-1 cursor-pointer mb-1"
+                                key={_dataPoint}
+                                label={`${_dataPoint}`}
+                                onClick={() => handleAddDataPoint(_dataPoint, values, setFieldValue)}
+                              />
+                            ))}
+                          </Box>
+                        )}
+                      </Box>
+                      <Box>
+                        <TextField
+                          inputRef={inputRef}
+                          margin="dense"
+                          type="text"
+                          label="Formula"
+                          name="formula"
+                          placeholder="Formula (return field1 + field2)"
+                          fullWidth
+                          multiline
+                          required
+                          rows={4}
+                          variant="outlined"
+                          value={values['formula']}
+                          error={touched['formula'] && Boolean(errors['formula'])}
+                          helperText={touched['formula'] && errors['formula']}
+                          onChange={(e) => setFieldValue('formula', e.target.value)}
+                        />
+                      </Box>
+                      <Grid container>
+                        <Grid item xs={6}>
+                          {formulaError && (
+                            <Typography variant="caption" display="block">
+                              {formulaError}{' '}
+                            </Typography>
+                          )}
+                          <Button size="small" onClick={() => handleCheckSyntax(values)} color="primary">
+                            Check Syntax
+                          </Button>
+                        </Grid>
+                      </Grid>
+                    </div>
+                  )}
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>

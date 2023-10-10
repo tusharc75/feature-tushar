@@ -4174,3 +4174,8 @@ body {
     }
   }
 }
+.ag-react-container{
+  & > *{
+    max-width: 100%;
+  }
+}
