@@ -227,8 +227,9 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
             <HtmlTooltip title="Repaired">
               <CheckCircleIcon color="primary" fontSize="small" />
             </HtmlTooltip>
-          ) : ![ASSET_STATUS.lost, ASSET_STATUS.scrap].includes(row?.original?.status) && row?.original?.canRepair &&
-            !row?.original?.repairTypeId ? (
+          ) : ![ASSET_STATUS.lost, ASSET_STATUS.scrap].includes(row?.original?.status) && row?.original?.canRepair
+            && row?.original?.currentOwnerType === INVENTORY_OWNER_TYPE.brand
+            && !row?.original?.repairTypeId ? (
             <HtmlTooltip title="Repair Asset">
               <IconButton
                 size="small"
