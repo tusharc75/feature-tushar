@@ -22,15 +22,14 @@ const Chart = ({ dateFilters, assetId, dataPoints }) => {
   const [options, setOptions] = useState<ApexOptions>({
     theme: {
       mode: 'light',
-      palette: 'palette2',
-      monochrome: {
-        enabled: false,
-        color: '#255aee',
-        shadeTo: 'light',
-        shadeIntensity: 0.65
-      }
+      palette: 'palette2'
+    },
+    grid: {
+      show: true,
+      borderColor: 'var(--common-border-color)'
     },
     chart: {
+      background: 'transparent',
       stacked: false,
       zoom: {
         type: 'x',
