@@ -7,7 +7,6 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ReactApexChart from 'react-apexcharts';
 import { ApexOptions } from 'apexcharts';
 import FilterAlertModel from './FilterAlertModel';
-import './Chart.scss';
 import { useAppTheme } from 'src/constants/AppConfig';
 
 const Chart = ({ dateFilters, assetId, dataPoints }) => {
