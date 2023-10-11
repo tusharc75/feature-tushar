@@ -97,7 +97,7 @@ const Login = () => {
         const { data } = response;
         localStorage.setItem('token', data.token);
 
-        if(data.hasExistingSession){
+        if (data?.hasExistingSession) {
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
