@@ -25,6 +25,8 @@ function PreviewDownload({
   isExcelDownload = false,
   versionNumber = null,
   handleRefresh = null,
+  toEmails = [],
+  ccEmails = []
 }) {
   const toastConfig = useContext(CustomToastContext);
 
@@ -280,6 +282,8 @@ function PreviewDownload({
             showManimizeMaximize={true}
             referenceType={resource}
             versionNumber={versionNumber}
+            options={toEmails}
+            cc={ccEmails}
           />
         </Dialog>
       )}

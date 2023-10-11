@@ -18,6 +18,7 @@ import CustomContainer from 'src/components/CustomContainer';
 import styles from '../Leads/Header.module.scss';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import { ExpandMore } from '@material-ui/icons';
+import ViewAllInvoices from './ViewInvoice';
 
 const SubleaseInvoice = () => {
 
@@ -136,7 +137,8 @@ const SubleaseInvoice = () => {
 
   const ActionsRenderer = (params) => (
     <Fragment>
-      {params.data.status === SUBLEASE_STATUS.issued ? (
+      {params.data.status === SUBLEASE_STATUS.issued && (
+        <>
         <HtmlTooltip title="Create Invoice">
           <IconButton
             size="small"
@@ -147,17 +149,17 @@ const SubleaseInvoice = () => {
             <NoteAddIcon fontSize="small" color="primary" />
           </IconButton>
         </HtmlTooltip>
-      ) : (
         <HtmlTooltip title="View Invoice">
-          <IconButton
-            size="small"
-            onClick={() => {
-              setViewInvoiceDialog({ open: true, data: params.data });
-            }}
-          >
-            <VisibilityIcon fontSize="small" color="primary" />
-          </IconButton>
-        </HtmlTooltip>
+        <IconButton
+          size="small"
+          onClick={() => {
+            setViewInvoiceDialog({ open: true, data: params.data });
+          }}
+        >
+          <VisibilityIcon fontSize="small" color="primary" />
+        </IconButton>
+      </HtmlTooltip>
+      </>
       )}
     </Fragment>
   );
@@ -281,19 +283,17 @@ const SubleaseInvoice = () => {
             }}
           />
         )}
-        {/* {viewInvoiceDialog.open && (
-          <ViewInvoice
-            invoiceData={{ ...viewInvoiceDialog.data, invoiceNumber: viewInvoiceDialog?.data?.invoice, _id: viewInvoiceDialog?.data?.invoiceId }}
+        {viewInvoiceDialog.open && (
+          <ViewAllInvoices
+          subleaseData = {viewInvoiceDialog?.data}
+          subleaseId={viewInvoiceDialog?.data?._id}
+          subleaseName = {viewInvoiceDialog?.data?.subleaseName}
             onClose={() => {
               setViewInvoiceDialog({ open: false, data: null });
             }}
-            onSuccess={() => {
-              setViewInvoiceDialog({ open: false, data: null });
-              removeLocalStorage(localStorageSelectedRecords);
-              fetchSubleaseData();
-            }}
+            
           />
-        )} */}
+        )}
       </CustomContainer>
     </Fragment>
   );
