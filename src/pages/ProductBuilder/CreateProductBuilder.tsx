@@ -194,7 +194,6 @@ const CreateProductBuilder = () => {
                           refreshProducts={refreshProducts}
                           Editable={true}
                           stage="product"
-                          setColumnForPDFExcel={() => {}}
                         />
                       )}
                     </Box>
@@ -217,7 +216,6 @@ const CreateProductBuilder = () => {
                           refreshProducts={refreshProducts}
                           Editable={true}
                           stage="cost"
-                          setColumnForPDFExcel={() => {}}
                         />
                       )}
                     </Box>
@@ -268,7 +266,6 @@ const CreateProductBuilder = () => {
                           setIsAddExistingProduct={setIsAddExistingProduct}
                           refreshProducts={refreshProducts}
                           Editable={true}
-                          setColumnForPDFExcel={() => {}}
                         />
                       )}
                     </Box>
