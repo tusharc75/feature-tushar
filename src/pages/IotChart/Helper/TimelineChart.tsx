@@ -4,11 +4,46 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { Box } from '@material-ui/core';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ReactApexChart from 'react-apexcharts';
+import { useAppTheme } from 'src/constants/AppConfig';
+
+let chartOptions: any = {
+  theme: {
+    mode: 'light',
+    palette: 'palette2'
+  },
+  chart: {
+    background: 'transparent',
+    height: 350,
+    type: 'rangeBar'
+  },
+  plotOptions: {
+    bar: {
+      horizontal: true,
+      barHeight: '10%',
+      rangeBarGroupRows: true
+    }
+  },
+  grid: {
+    show: true,
+    borderColor: 'var(--common-border-color)'
+  },
+  colors: ['#00E396', '#FF0000'],
+  fill: {
+    type: 'solid'
+  },
+  xaxis: {
+    type: 'datetime'
+  },
+  legend: {
+    position: 'right'
+  }
+};
 
 const TimelineChart = ({ assetId, dateFilters, dataPoints }) => {
-
+  const [themeColor] = useAppTheme();
   const toastConfig = useContext(CustomToastContext);
   const [chartData, setChartData] = useState(null);
+  const [currentChartTheme, setCurrentChartTheme] = useState('light');
 
   useEffect(() => {
     fetchData();
@@ -22,7 +57,10 @@ const TimelineChart = ({ assetId, dateFilters, dataPoints }) => {
           from_date: new Date(dateFilters.from).toISOString(),
           to_date: new Date(dateFilters.to).toISOString(),
           interval: dateFilters.intervals,
-          dataPoints: dataPoints?.filter((e) => e.type === 'Digital')?.map((e) => e._id)?.toString(),
+          dataPoints: dataPoints
+            ?.filter((e) => e.type === 'Digital')
+            ?.map((e) => e._id)
+            ?.toString(),
           timezone: Intl?.DateTimeFormat()?.resolvedOptions()?.timeZone
         }
       })
@@ -91,40 +129,17 @@ const TimelineChart = ({ assetId, dateFilters, dataPoints }) => {
     }
   ];
 
-  let chartOptions: any = {
-    chart: {
-      height: 350,
-      type: 'rangeBar'
-    },
-    plotOptions: {
-      bar: {
-        horizontal: true,
-        barHeight: '10%',
-        rangeBarGroupRows: true
-      }
-    },
-    colors: ['#00E396', '#FF0000'],
-    fill: {
-      type: 'solid'
-    },
-    xaxis: {
-      type: 'datetime'
-    },
-    legend: {
-      position: 'right'
-    }
-  };
-
+  useEffect(() => {
+    const newOptions = { ...chartOptions };
+    newOptions.theme.mode = themeColor;
+    chartOptions = newOptions;
+    setCurrentChartTheme(themeColor);
+  }, [themeColor]);
 
   return (
     <>
       {chartData ? (
-        <ReactApexChart
-          options={chartOptions}
-          series={series}
-          type="rangeBar"
-          height={500}
-        />
+        <ReactApexChart key={currentChartTheme} options={chartOptions} series={series} type="rangeBar" height={500} />
       ) : (
         <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />

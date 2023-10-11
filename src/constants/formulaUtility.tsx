@@ -112,6 +112,7 @@ export const handleAutoCalculation = (fieldData, fields, values, name, currency,
         var newValue = value;
         if (fieldData?.type === 'currencyAmount') {
             newValue = parseFloat(value)
+            resultValues[name] = newValue;
         }
         loop_count = 0;
         if (fieldData.type !== 'currencyAmount' && (fieldData.type === 'converter' || fieldData.isConverter === true)) {
