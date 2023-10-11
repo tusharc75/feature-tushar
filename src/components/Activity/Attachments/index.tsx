@@ -215,7 +215,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
     if (attachmentId) {
       event.stopPropagation();
       axiosInstance()
-        .put('attachment/deletemany ', { ids: [attachmentId] })
+        .put('attachment/deletemany', { ids: [attachmentId] })
         .then(({ data }) => {
           setAnchorEl(null);
           toastConfig.setToastConfig({
@@ -234,7 +234,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
 
   const handleFolderDelete = (folderId) => {
     axiosInstance()
-      .put('attachment/folder/deletemany ', { ids: [folderId] })
+      .put('attachment/folder/deletemany', { ids: [folderId] })
       .then(({ data }) => {
         setAnchorEl(null);
         toastConfig.setToastConfig({
