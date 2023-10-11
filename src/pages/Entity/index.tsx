@@ -9,7 +9,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
-import AssignUsersDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
+import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
 import CustomContainer from '../../components/CustomContainer';
 import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
@@ -46,6 +46,7 @@ const Entity: FC = () => {
   const [deleteEntity, setDeleteEntity] = useState<any>({});
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
+  const [roleAccessOfLoggedInUser, setRoleAccessOfLoggedInUser] = useState([]);
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
@@ -78,6 +79,30 @@ const Entity: FC = () => {
       fetchEntity();
     }, millisec);
   }, [search]);
+
+  useEffect(() => {
+    fetchLoggedInUserRole()
+  }, []);
+
+  const fetchLoggedInUserRole = async () => {
+    let roleIds = [];
+    await axiosInstance()
+      .get(`/user/${user.user?._id}`)
+      .then(({ data: { data } }) => {
+        data.entities.map((item) => {
+          item.role.forEach((role) => {
+            if (roleIds.includes(role?._id)) {
+            } else {
+              roleIds.push(role?._id);
+            }
+          });
+        });
+        setRoleAccessOfLoggedInUser(roleIds);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
 
   useEffect(() => {
     if (renderCount > 0) {
@@ -340,7 +365,7 @@ const Entity: FC = () => {
               history.push(`${routes.entityDetail.path}/${d._id}`);
             }}
             extraParamsToCheckDelete={false}
-            onDelete={(d) => {}}
+            onDelete={(d) => { }}
             rowCount={rowCount}
             page={page}
             loading={loading}
@@ -370,7 +395,7 @@ const Entity: FC = () => {
             owerCollaboratorInitialsOrImages=""
             onCreate={false}
             showClone={false}
-            onClone={() => {}}
+            onClone={() => { }}
             renderedFrom={renderedFrom}
           />
         ) : Object.keys(frameWorkComponent).length > 0 ? (
@@ -406,7 +431,7 @@ const Entity: FC = () => {
         )}
         {usersDialogOpen && !usersDialogLoding && (
           <Dialog fullWidth maxWidth="sm" open={usersDialogOpen} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
-            <AssignUsersDialog
+            <AssignEntityDialog
               entitiesDialogOpen={usersDialogOpen}
               handleCloseDialog={handleCloseDialog}
               type="user"
@@ -417,6 +442,7 @@ const Entity: FC = () => {
                 setSelectedEntity(null);
                 handleCloseDialog();
               }}
+              roleAccessIds={roleAccessOfLoggedInUser}
             />
           </Dialog>
         )}

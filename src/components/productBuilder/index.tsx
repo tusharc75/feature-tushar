@@ -55,7 +55,6 @@ const ProductBuilder = (props) => {
     hasPermission,
     permissions,
     fromQuote,
-    setColumnForPDFExcel,
     setColumnData,
     fullScreen = false,
     quoteData = null,
@@ -163,9 +162,6 @@ const ProductBuilder = (props) => {
         setColumns([...columns]);
         if (setColumnData) {
           setColumnData([...columns]);
-        }
-        if (setColumnForPDFExcel) {
-          setColumnForPDFExcel([...columns].filter((d) => d.field !== 'index').map((d) => d.headerName));
         }
         setProductData(data);
         let rows = data.product.map((item, index) => {
