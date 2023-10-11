@@ -14,8 +14,8 @@ type TDevices = 'mobile' | 'tablet' | 'desktop';
 
 const DeviceMessage: FC<DeviceMessageProps> = ({
   devices = ['mobile'],
-  message = 'Kindly view this page on web version.',
-  description = `We don't support mobile devices yet. Please visit this page with a desktop browser for the best experience`
+  message = 'Mobile device not supported',
+  description = `Kindly open this page in Laptop/Desktop browser.`
 }) => {
   const history = useHistory();
   const [isVisible, setIsVisible] = useState(false);

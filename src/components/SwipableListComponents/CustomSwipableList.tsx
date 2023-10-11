@@ -135,7 +135,7 @@ export default function CustomSwipableList({
               {dataRows.map((d, index) => (
                 <div
                   className="shadow-[0px_3px_26px_0px_rgba(0,0,0,0.06)] mx-2 rounded-md my-2 px-3 py-2 [--left-gutter:20px] dark:bg-[var(--dark-secondary)]"
-                  key={d._id}
+                  key={`${d._id}${d.isChecked || ''}`}
                   style={{ border: '1px solid var(--common-border-color)' }}
                 >
                   <div className={`${checkError && checkError(d) ? 'red-data-row' : ''} flex gap-2 items-center`}>

@@ -243,6 +243,7 @@ import ChartOfAccount from './pages/ChartOfAccount';
 import ChartOfAccountDetail from './pages/ChartOfAccount/ChartOfAccountDetail';
 import Flash from './pages/Flash';
 import FlashDetailsPage from './pages/Flash/FlashDetailsPage';
+import SubleaseInvoice from './pages/SubleaseInvoice';
 
 var notificationInterval: any = null;
 
@@ -562,6 +563,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.subleaseDetail.path + '/:id'}>
               <SubleaseDetailsPage />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.subleaseInvoice.path}>
+              <SubleaseInvoice />
             </PrivateRoute>
             <PrivateRoute exact path={routes.productCategory.path}>
               <ProductCategory />

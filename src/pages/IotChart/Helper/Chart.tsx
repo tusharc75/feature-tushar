@@ -7,17 +7,28 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ReactApexChart from 'react-apexcharts';
 import { ApexOptions } from 'apexcharts';
 import FilterAlertModel from './FilterAlertModel';
+import { useAppTheme } from 'src/constants/AppConfig';
 
 const Chart = ({ dateFilters, assetId, dataPoints }) => {
-
   const toastConfig = useContext(CustomToastContext);
   const [chartData, setChartData] = useState(null);
   const [alert, setAlert] = useState(null);
   const [showHighLow, setShowHighLow] = useState(false);
   const [highLowData, setHighLowData] = useState([]);
+  const [currentChartTheme, setCurrentChartTheme] = useState('light');
+  const [themeColor] = useAppTheme();
 
   const [options, setOptions] = useState<ApexOptions>({
+    theme: {
+      mode: 'light',
+      palette: 'palette2'
+    },
+    grid: {
+      show: true,
+      borderColor: 'var(--common-border-color)'
+    },
     chart: {
+      background: 'transparent',
       stacked: false,
       zoom: {
         type: 'x',
@@ -78,6 +89,20 @@ const Chart = ({ dateFilters, assetId, dataPoints }) => {
       }
     });
   }, [showHighLow]);
+
+  useEffect(() => {
+    setOptions((prevOptions) => {
+      const newOptions = { ...prevOptions };
+      if (themeColor === 'dark') {
+        newOptions.theme.palette = 'palette2';
+      } else {
+        newOptions.theme.palette = 'palette1';
+      }
+      newOptions.theme.mode = themeColor;
+      return newOptions;
+    });
+    setCurrentChartTheme(themeColor);
+  }, [themeColor]);
 
   const fetchData = () => {
     let api = `/report/iot/data-points`;
@@ -225,7 +250,7 @@ const Chart = ({ dateFilters, assetId, dataPoints }) => {
             showHighLow={showHighLow}
             setShowHighLow={setShowHighLow}
           />
-          <ReactApexChart options={options} series={chartData} type="line" height={500} />
+          <ReactApexChart key={currentChartTheme} options={options} series={chartData} type="line" height={500} />
         </>
       ) : (
         <Box p={2} height={500}>
