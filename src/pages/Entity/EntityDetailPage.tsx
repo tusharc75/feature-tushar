@@ -14,7 +14,7 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { FaEye } from 'react-icons/fa';
 import { SET_USER, USER_LOADING, SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
-import AssignUserDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
+import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
 import AssignedUsers from './AssignedUsers';
 import ManageEntity from './ManageEntity';
 import NewStepper from '../../components/Helpers/NewStepper';
@@ -482,7 +482,7 @@ const EntityDetailsPage = () => {
       )}
       {showAssignUserDialog && (
         <Dialog fullWidth maxWidth="sm" open={showAssignUserDialog} onClose={userDialogClose} aria-labelledby="assign-roles-dialog">
-          <AssignUserDialog
+          <AssignEntityDialog
             entitiesDialogOpen={showAssignUserDialog}
             handleCloseDialog={userDialogClose}
             type="user"
