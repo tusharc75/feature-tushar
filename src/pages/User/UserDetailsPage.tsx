@@ -27,7 +27,7 @@ import {
   useMediaQuery
 } from '@material-ui/core';
 import DeleteButton from '../../components/Helpers/DeleteButton';
-import { ControlPoint } from '@material-ui/icons';
+import { ControlPoint, Edit } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory, useLocation, Link } from 'react-router-dom';
 import { startCase } from 'lodash';
@@ -75,7 +75,7 @@ import DateFnsUtils from '@date-io/date-fns';
 import { Line } from 'react-chartjs-2';
 import ResourceTransferDialog from '../../components/ResourceTransferDialog';
 import { BiReset, RiSettingsFill } from 'react-icons/all';
-import { BiEdit } from 'react-icons/bi';
+
 import { MdDelete } from 'react-icons/md';
 import QuotesInAccordion from 'src/components/QuotesInAccordion/QuotesInAccordion';
 import ActivityButton from 'src/components/Activity/ActivityButton';
@@ -621,7 +621,7 @@ const UserDetailsPage = () => {
                       : false
                   }
                 >
-                  {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                  {isMobile && !isTablet ? <Edit /> : 'Edit'}
                 </Button>
               ) : null}
               {permissions?.user?.isDelete ? (
