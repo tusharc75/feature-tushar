@@ -105,6 +105,7 @@ const DOASteps = [
     label: 'End'
   }
 ];
+
 const OtherSteps = [
   {
     key: 'New',
@@ -149,8 +150,7 @@ export default function QuoteDetail() {
   const [cloneQuoteWithVersionNumber, setCloneQuoteWithVersionNumber] = useState(0);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [isQuoteClone, setIsQuoteClone] = useState(false);
-  const [columnView, setColumnView] = useState([]);
-  const [columnViewExcel, setColumnViewExcel] = useState([]);
+
   const [steps, setSteps] = useState([]);
   const [productBuilderId, setProductBuilderId] = useState('');
   const [versionStatus, setVersionStatus] = useState('Building Quote');
@@ -203,13 +203,6 @@ export default function QuoteDetail() {
       fetchRelatedTo();
     }
   }, [id]);
-
-  useEffect(() => {
-    if (quoteData && (quoteData.versions[currentVersion]?.acceptedColumns || quoteData.versions[currentVersion]?.excelColumns)) {
-      setColumnView(quoteData.versions[currentVersion]?.acceptedColumns);
-      setColumnViewExcel(quoteData.versions[currentVersion]?.excelColumns);
-    }
-  }, [currentVersion]);
 
   const fetchDoaLimit = () => {
     axiosInstance()
@@ -316,6 +309,7 @@ export default function QuoteDetail() {
     setOpenUpdateDialog(true);
     setIsQuoteClone(true);
   };
+  
   const handleSetSteps = (steps) => {
     setSteps(steps);
   };
@@ -355,8 +349,6 @@ export default function QuoteDetail() {
               setProcessStatus(data.versions[keys[keys.length - 1]].processStatus);
               setProductBuilderId(data.versions[keys[keys.length - 1]].productBuilderId);
               setVersionStatus(data.versions[keys[keys.length - 1]].status);
-              setColumnView(data.versions[keys[keys.length - 1]].acceptedColumns || []);
-              setColumnViewExcel(data.versions[keys[keys.length - 1]].excelColumns || []);
               dispatch({ type: 'selection', selectedRecords: data.versions[keys[keys.length - 1]].TNC });
             } else {
               tempCurrentVersion = version;
@@ -364,8 +356,6 @@ export default function QuoteDetail() {
               setProcessStatus(data.versions[version].processStatus);
               setProductBuilderId(data.versions[version].productBuilderId);
               setVersionStatus(data.versions[version].status);
-              setColumnView(data.versions[version].acceptedColumns || []);
-              setColumnViewExcel(data.versions[version].excelColumns || []);
               dispatch({ type: 'selection', selectedRecords: data.versions[version].TNC });
             }
             setCustomizedRoutes([
@@ -438,7 +428,7 @@ export default function QuoteDetail() {
         });
 
         if (updateVersionStatus) {
-          handleVersionUpdate(columnView, columnViewExcel, versionStatus, selectedRows);
+          handleVersionUpdate(versionStatus, selectedRows);
         }
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -530,10 +520,9 @@ export default function QuoteDetail() {
     }
   };
 
-  const handleVersionUpdate = (Columns, columnViewExcel, versionStatus, selectedTermsAndConditions) => {
+  const handleVersionUpdate = (versionStatus, selectedTermsAndConditions) => {
+
     let body = {
-      acceptedColumns: Columns,
-      excelColumns: columnViewExcel,
       status: versionStatus,
       TNC: selectedTermsAndConditions
     };
@@ -858,7 +847,6 @@ export default function QuoteDetail() {
         <TabPanel value={tabValue} index={1}>
           {quoteData && (
             <QuoteProcess
-              updatingVersion={updatingVersion}
               handleVersionUpdate={handleVersionUpdate}
               state={state}
               dispatch={dispatch}
@@ -867,15 +855,10 @@ export default function QuoteDetail() {
               setProcessStatus={setProcessStatus}
               ifQuoteApproved={ifQuoteApproved}
               allowedToEdit={allowedToEdit}
-              handleOpenUpdateDialog={handleOpenUpdateDialog}
-              handleChangeVersion={handleChangeVersion}
               currentVersion={currentVersion}
               productBuilderId={productBuilderId}
               versionStatus={versionStatus}
               fetchQuoteData={fetchQuoteData}
-              columnView={columnView}
-              columnViewExcel={columnViewExcel}
-              fetchTNC={fetchTermsAndConditions}
               globalLoading={loading}
               DOASteps={DOASteps}
               OtherSteps={OtherSteps}
@@ -895,110 +878,101 @@ export default function QuoteDetail() {
           )}
         </TabPanel>
       </Box>
-      {
-        showConfirmBox && (
-          <ConfirmationDialog
-            open={showConfirmBox}
-            message={`Are you sure you want to delete this Quote?`}
-            onClose={() => setShowConfirmBox(false)}
-            onOk={handleDeleteQuote}
-          />
-        )
+      {showConfirmBox && (
+        <ConfirmationDialog
+          open={showConfirmBox}
+          message={`Are you sure you want to delete this Quote?`}
+          onClose={() => setShowConfirmBox(false)}
+          onOk={handleDeleteQuote}
+        />
+      )}
+      {openUpdateDialog && (
+        <ManageQuoteDialog
+          open={openUpdateDialog}
+          onSuccess={() => {
+            setIsQuoteClone(false);
+            setOpenUpdateDialog(false);
+            fetchQuoteData(currentVersion);
+            fetchRelatedTo();
+          }}
+          onClose={() => {
+            setOpenUpdateDialog(false);
+            setIsQuoteClone(false);
+          }}
+          isNew={false}
+          isClone={isQuoteClone}
+          dataToUpdate={quoteData}
+          resource={null}
+          isRedirectTodetailPage={false}
+          contactId={null}
+          opportunityId={null}
+          disableOwnerDropDown={true}
+          editCurrency={editCurrency}
+          quoteApproved={isQuoteClone ? false : ifQuoteApproved.approved}
+          cloneQuoteWithVersionNumber={cloneQuoteWithVersionNumber}
+          doaCollaboratorResources={user.user?.doa?.map((obj) => obj.user)}
+        />
+      )
       }
-
-      {
-        openUpdateDialog && (
-          <ManageQuoteDialog
-            open={openUpdateDialog}
-            onSuccess={() => {
-              setIsQuoteClone(false);
-              setOpenUpdateDialog(false);
-              fetchQuoteData(currentVersion);
-              fetchRelatedTo();
+      {reopenReasonDialog && (
+        <div className={classes.reasonDialog}>
+          <Dialog
+            maxWidth="xs"
+            open={reopenReasonDialog}
+            aria-labelledby="confirmation-dialog-title"
+            classes={{
+              paper: classes.paper
             }}
-            onClose={() => {
-              setOpenUpdateDialog(false);
-              setIsQuoteClone(false);
-            }}
-            isNew={false}
-            isClone={isQuoteClone}
-            dataToUpdate={quoteData}
-            resource={null}
-            isRedirectTodetailPage={false}
-            contactId={null}
-            opportunityId={null}
-            disableOwnerDropDown={true}
-            editCurrency={editCurrency}
-            quoteApproved={isQuoteClone ? false : ifQuoteApproved.approved}
-            cloneQuoteWithVersionNumber={cloneQuoteWithVersionNumber}
-            doaCollaboratorResources={user.user?.doa?.map((obj) => obj.user)}
-          />
-        )
+            id="confirmation-dialog"
+            keepMounted
+          >
+            <DialogTitle id="confirmation-dialog-title" className="text-white">
+              Reason for Re-Open
+            </DialogTitle>
+            <DialogContent dividers>
+              <TextField
+                fullWidth
+                id="outlined-multiline-static"
+                label="Reason"
+                multiline
+                value={reopenReason}
+                onChange={handleReopenReasonChange}
+                rows={4}
+                variant="outlined"
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button size="small" onClick={() => setReopenReasonDialog(false)} color="primary">
+                Close
+              </Button>
+              <Button size="small" disabled={reopenReason === ''} onClick={handleReOpenQuote} color="primary">
+                Save
+              </Button>
+            </DialogActions>
+          </Dialog>
+        </div>
+      )
       }
-      {
-        reopenReasonDialog && (
-          <div className={classes.reasonDialog}>
-            <Dialog
-              maxWidth="xs"
-              open={reopenReasonDialog}
-              aria-labelledby="confirmation-dialog-title"
-              classes={{
-                paper: classes.paper
-              }}
-              id="confirmation-dialog"
-              keepMounted
-            >
-              <DialogTitle id="confirmation-dialog-title" className="text-white">
-                Reason for Re-Open
-              </DialogTitle>
-              <DialogContent dividers>
-                <TextField
-                  fullWidth
-                  id="outlined-multiline-static"
-                  label="Reason"
-                  multiline
-                  value={reopenReason}
-                  onChange={handleReopenReasonChange}
-                  rows={4}
-                  variant="outlined"
-                />
-              </DialogContent>
-              <DialogActions>
-                <Button size="small" onClick={() => setReopenReasonDialog(false)} color="primary">
-                  Close
-                </Button>
-                <Button size="small" disabled={reopenReason === ''} onClick={handleReOpenQuote} color="primary">
-                  Save
-                </Button>
-              </DialogActions>
-            </Dialog>
-          </div>
-        )
-      }
-      {
-        showQuoteStatusChangeDialog && (
-          <DOAReasonDialog
-            reasonDialogOpen={showQuoteStatusChangeDialog}
-            handleCloseDialog={() => setShowQuoteStatusChangeDialog(false)}
-            QuoteStatusChange={QuoteStatusChange}
-            accepted={quoteStatusChangeData}
-          />
-        )
-      }
-      {
-        quoteData && showAllVersionStatus && (
-          <AllVersionStatus
-            open={showAllVersionStatus}
-            onClose={() => setShowAllVersionStatus(false)}
-            quoteId={id}
-            quoteData={quoteData}
-            quotePermissions={permissions[qbResource]}
-            fetchQuoteData={fetchQuoteData}
-            handleChangeVersionFromAllVersion={handleChangeVersionFromAllVersion}
-            handleCloneQuoteWithVersionFromAllVersion={handleCloneQuoteWithVersionFromAllVersion}
-          />
-        )
-      }
+      {showQuoteStatusChangeDialog && (
+        <DOAReasonDialog
+          reasonDialogOpen={showQuoteStatusChangeDialog}
+          handleCloseDialog={() => setShowQuoteStatusChangeDialog(false)}
+          QuoteStatusChange={QuoteStatusChange}
+          accepted={quoteStatusChangeData}
+        />
+      )}
+      {quoteData && showAllVersionStatus && (
+        <AllVersionStatus
+          open={showAllVersionStatus}
+          onClose={() => setShowAllVersionStatus(false)}
+          quoteId={id}
+          quoteData={quoteData}
+          quotePermissions={permissions[qbResource]}
+          fetchQuoteData={fetchQuoteData}
+          handleChangeVersionFromAllVersion={handleChangeVersionFromAllVersion}
+          handleCloneQuoteWithVersionFromAllVersion={handleCloneQuoteWithVersionFromAllVersion}
+        />
+      )}
     </Box >
   );
 }
