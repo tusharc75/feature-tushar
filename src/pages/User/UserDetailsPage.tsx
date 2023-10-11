@@ -27,7 +27,7 @@ import {
   useMediaQuery
 } from '@material-ui/core';
 import DeleteButton from '../../components/Helpers/DeleteButton';
-import { ControlPoint } from '@material-ui/icons';
+import { ControlPoint, Edit } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory, useLocation, Link } from 'react-router-dom';
 import { startCase } from 'lodash';
@@ -74,8 +74,8 @@ import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/picker
 import DateFnsUtils from '@date-io/date-fns';
 import { Line } from 'react-chartjs-2';
 import ResourceTransferDialog from '../../components/ResourceTransferDialog';
-import { BiReset } from 'react-icons/all';
-import { BiEdit } from 'react-icons/bi';
+import { BiReset, RiSettingsFill } from 'react-icons/all';
+
 import { MdDelete } from 'react-icons/md';
 import QuotesInAccordion from 'src/components/QuotesInAccordion/QuotesInAccordion';
 import ActivityButton from 'src/components/Activity/ActivityButton';
@@ -594,8 +594,8 @@ const UserDetailsPage = () => {
           <Box className="controls-v1">
             <Box className="control-buttons-v1">
               {permissions?.role?.isUpdate && permissions?.entity?.isUpdate && (
-                <Button variant="contained" className={`btn-outline-v1`} onClick={entityDialogOpen}>
-                  Assign Entity/Role
+                <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className={`btn-outline-v1`} onClick={entityDialogOpen}>
+                  {isMobile && !isTablet ? <RiSettingsFill /> : 'Assign Entity/Role'}
                 </Button>
               )}
               {permissions?.user?.isUpdate && (
@@ -621,7 +621,7 @@ const UserDetailsPage = () => {
                       : false
                   }
                 >
-                  {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                  {isMobile && !isTablet ? <Edit /> : 'Edit'}
                 </Button>
               ) : null}
               {permissions?.user?.isDelete ? (
