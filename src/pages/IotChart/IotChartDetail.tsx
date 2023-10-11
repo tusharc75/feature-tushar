@@ -22,7 +22,6 @@ const IotChartDetail = () => {
   const [tabValue, setTabValue] = useState(0);
   const [dataPoints, setDataPoints] = useState([]);
   const [openDataSimulationDialog, setOpenDataSimulationDialog] = useState(false);
-  const [customDataPoints, setCustomDataPoints] = useState([]);
   const [deviceTemplate, setDeviceTemplate] = useState(null);
 
   useEffect(() => {
@@ -37,16 +36,6 @@ const IotChartDetail = () => {
         .get(`${routes.iotDataPoints.path}?filterById=${JSON.stringify(query)}&deepFilter=${JSON.stringify(deepFilter)}&filterType=and`)
         .then(({ data: { data } }) => {
           setDataPoints(data?.data);
-        });
-    }
-  }, [deviceTemplate]);
-
-  useEffect(() => {
-    if (deviceTemplate) {
-      axiosInstance()
-        .get(`${routes?.deviceTemplates?.path}/custom-data-points?deviceTemplate=${deviceTemplate}`)
-        .then(({ data: { data } }) => {
-          setCustomDataPoints(data);
         });
     }
   }, [deviceTemplate]);
@@ -119,8 +108,8 @@ const IotChartDetail = () => {
             <Tab className={'tabLayout'} value={3} label={<div className="d-flex align-items-center tab-font">Status</div>} {...a11yProps(3)} />
           </Tabs>
           {tabValue === 0 && <Current assetId={assetId} />}
-          {tabValue === 1 && <Analysis assetId={assetId} dataPoints={dataPoints} customDataPoints={customDataPoints} />}
-          {tabValue === 2 && <PerformanceAnalysis assetId={assetId} dataPoints={dataPoints} customDataPoints={customDataPoints} />}
+          {tabValue === 1 && <Analysis assetId={assetId} dataPoints={dataPoints} />}
+          {tabValue === 2 && <PerformanceAnalysis assetId={assetId} dataPoints={dataPoints} />}
           {tabValue === 3 && <Status assetId={assetId} dataPoints={dataPoints} />}
         </Box>
       ) : (
