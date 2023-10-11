@@ -1,26 +1,15 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
+import { useState, useEffect, useContext, Fragment } from 'react';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
-import { Box, Checkbox, Chip, CircularProgress, Dialog, FormControlLabel, FormGroup, IconButton, Menu, MenuItem, Tooltip } from '@material-ui/core';
-import { useData } from 'src/StateProvider/Provider';
+import { Box, Dialog, IconButton } from '@material-ui/core';
 import { fetch_sublease_product_fields } from 'src/components/Sublease/helper';
 import { isMobile } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
-import moment from 'moment';
 import {
   CustomDialogTransition,
-  dateFormat,
-  deliveryTicket,
-  DELIVERY_TICKET_REFERENCE_TYPE,
-  DELIVERY_TICKET_TYPE,
-  formatAmountWithCurrency,
-  invoice,
-  pricingCondition,
-  rentalManagement,
-  MATERIAL_TYPE,
-  ASSET_STATUS
+  dateFormat
 } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -33,23 +22,17 @@ import MomentUtils from '@date-io/moment';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import styles from '../../Leads/Header.module.scss';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { startCase } from 'lodash';
-import InfoIcon from '@material-ui/icons/InfoOutlined';
-import EditIcon from '@material-ui/icons/Edit';
-// import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
+import { camelCase, startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { generateCustomTableColumns } from 'src/constants/columns';
 
 const CreateBillingDialog = ({ currencySymbol = null, invoiceData = null, onClose, onSuccess, subleaseData = null }) => {
   const toastConfig = useContext(CustomToastContext);
-  const {
-    state: { user, permissions }
-  }: any = useData();
 
   const [isUpdating, setUpdating] = useState(false);
 
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [material, setMaterial] = useState([]);
-  const [orginalMaterial, setOrginalMaterial] = useState([]);
 
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
@@ -58,7 +41,8 @@ const CreateBillingDialog = ({ currencySymbol = null, invoiceData = null, onClos
   const [allFields, setAllFields] = useState([]);
   const [appliedDate, setAppliedDate] = useState(false);
   const [rowsApplied, setRowsApplied] = useState([]);
-  const [isProductEdit, setIsProductEdit] = useState({ open: false, rowData: null });
+
+  const renderedFrom = `${camelCase(routes?.subleaseInvoice.title)}_create`;
 
   useEffect(() => {
     fetchFields();
@@ -76,8 +60,9 @@ const CreateBillingDialog = ({ currencySymbol = null, invoiceData = null, onClos
     data?.forEach((e) => {
       e.isColumnEditable = false;
     });
+    const newColumns = generateCustomTableColumns(data, currencySymbol, renderedFrom);
     setAllFields(JSON.parse(JSON.stringify(data)));
-    const coloum: any = [
+    let column: any = [
       {
         accessor: 'index',
         Header: 'Index',
@@ -158,114 +143,10 @@ const CreateBillingDialog = ({ currencySymbol = null, invoiceData = null, onClos
         }
       }
     ];
-    data
-      .filter((d) => !d.fieldName?.includes('estimate'))
-      .forEach((element) => {
-        if (element.type === 'date') {
-          coloum.push({
-            accessor: element.fieldName,
-            Header: element.fieldLabel,
-            disableFilters: true,
-            Cell: ({ row }) =>
-              row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName]).format(dateFormat)}</p> : <NoDataCell />
-          });
-        } else if (element.type === 'converter' || element.type === 'currencyAmount' || element.isConverter === true) {
-          if (element.type !== 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-            element.displayUnits.forEach((_unit) => {
-              let fieldName = element.fieldName + '_' + _unit.toLowerCase();
-              let fieldLabel = element.fieldLabel + ' ' + _unit;
-              coloum.push({
-                accessor: fieldName,
-                Header: fieldLabel,
-                Cell: ({ row }) => (row.original[fieldName] ? <p>{row.original[fieldName]}</p> : <NoDataCell />)
-              });
-            });
-          } else if (element.type === 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-            element.displayUnits.forEach((_unit) => {
-              element.displayCurrency.forEach((_currency) => {
-                let fieldName = element.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase();
-                let fieldLabel = element.fieldLabel + ' ' + _unit + '/' + _currency;
-                coloum.push({
-                  accessor: fieldName,
-                  Header: fieldLabel,
-                  Cell: ({ row }) =>
-                    row.original[fieldName] ? (
-                      <p>{formatAmountWithCurrency(subleaseData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-                    ) : (
-                      <NoDataCell />
-                    )
-                });
-              });
-            });
-          } else if (element.type === 'currencyAmount') {
-            element.displayCurrency.forEach((_currency) => {
-              let fieldName = element.fieldName + '_' + _currency.toLowerCase();
-              let fieldLabel = element.fieldLabel + ' ' + _currency;
-              coloum.push({
-                accessor: fieldName,
-                Header: fieldLabel,
-                Cell: ({ row }) =>
-                  row.original[fieldName] ? (
-                    <p>{formatAmountWithCurrency(subleaseData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-                  ) : (
-                    <NoDataCell />
-                  ),
-                Footer: (info) => {
-                  const total = info?.rows
-                    ?.filter((f) => f.original.parentId === null && f.values.hasOwnProperty(fieldName) && !isNaN(f.values[fieldName]))
-                    .reduce((sum, row) => row.values[fieldName] + sum, 0);
-                  return (
-                    <>
-                      {currencySymbol} {formatAmountWithCurrency(subleaseData?.currency, total)?.amountWithouCurrencyCode ?? total}
-                    </>
-                  );
-                }
-              });
-            });
-          }
-        } else {
-          if (element.fieldName === 'qty') {
-            element.fieldName = 'qtyDisplay';
-          }
-          coloum.push({
-            accessor: element.fieldName,
-            Header: element.fieldLabel,
-            Cell: ({ row }) =>
-              row.original[element.fieldName]?.optionLabel ? (
-                <p>{row.original[element.fieldName].optionLabel}</p>
-              ) : row.original[element.fieldName] ? (
-                <>
-                  {['Per Week', 'Per Month'].includes(row.original[element.fieldName]) && row.original.isAppliedBill ? (
-                    <Box display="flex" alignItems="center">
-                      <p>{row.original[element.fieldName]}</p>
-                      <Box ml={1} />
-                      <Tooltip title="Per Day Price is calculated">
-                        <InfoIcon fontSize="small" color="primary" />
-                      </Tooltip>
-                    </Box>
-                  ) : (
-                    <p>{row.original[element.fieldName]}</p>
-                  )}
-                </>
-              ) : (
-                <NoDataCell />
-              )
-          });
-        }
-      });
-    
-    coloum.forEach((element) => {
-      if (element.accessor === 'qtyDisplay') {
-        element['Footer'] = (info) => {
-          const qtyTotal = info.rows
-            .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
-            .reduce((sum, row) => row.values[element.accessor] + sum, 0);
-          return <>{qtyTotal}</>;
-        };
-      }
-    });
-    setColumns(coloum);
+    column = [...column, ...newColumns];
+    setColumns(column);
   };
+
 
   const fetchData = async () => {
     let data: any = {};
@@ -274,6 +155,7 @@ const CreateBillingDialog = ({ currencySymbol = null, invoiceData = null, onClos
     const response = await axiosInstance().get(`/sublease-invoice/material/${subleaseData._id}`);
     const invoiceResponse = await axiosInstance().get(`/sublease-invoice/${subleaseData?._id}/invoice/material-end-date-qty`);
     invoicedProducts = invoiceResponse?.data?.data?.material;
+    
     data = response?.data?.data;
 
   
@@ -295,31 +177,31 @@ const CreateBillingDialog = ({ currencySymbol = null, invoiceData = null, onClos
           values['manualEndDate'] = element?.actualEndDate;
           const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
           newMaterial.push({ ...element, ...calValues });
-
-          if (element?.type === 'product' && element?.productDetail?.serializedProduct) {
-            data?.inventory
-              ?.filter((d) => d._id === element?._id && !d.isReplaced && d?.manualStartDate)
-              ?.forEach((ele: any) => {
-                ele.parentId = element?._id;
-                ele.type = 'serializedAsset';
-                ele.qty = 1;
-                ele._id = ele?.inventoryDetail?._id;
-                ele.materialId = ele?.inventoryDetail?._id;
-                let values = { qty: 1 };
-                values['actualStartDate'] = ele?.manualStartDate;
-                values['actualEndDate'] = ele?.manualEndDate || element?.estimateEndDate;
-                const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
-                const { materialId, qty, type, _id, ...rest } = element;
-                newMaterial.push({ ...rest, ...ele, ...calValues });
-              });
-          }
       });
 
-
     data.material = newMaterial;
+    if (invoicedProducts?.length) {
+      data.material = data?.material
+        ?.map((e) => {
+          let materialData: any = { ...e };
+
+          let pMethod = materialData?.pricingMethod?.split(',') || [];
+          pMethod = pMethod.map((m) => m?.trim()).find((m) => !['Per Day', 'Per Week', 'Per Month'].includes(m));
+
+          const product = invoicedProducts?.find((p) => p._id === e._id);
+          if (product) {
+            const actualEndDate = new Date(product?.endDate)?.setDate(new Date(product?.endDate)?.getDate() + 1);
+            materialData.actualStartDate = actualEndDate;
+          } else {
+            materialData.actualStartDate = materialData.manualStartDate ? materialData.manualStartDate : new Date().setDate(new Date().getDate() + 1);
+          }
+        
+          return materialData;
+        })
+        .filter((d) => d.qty > 0);
+    }
 
     setMaterial(data?.material);
-    setOrginalMaterial(data?.material);
     initializeTable(data?.material);
   };
 
@@ -348,10 +230,6 @@ const CreateBillingDialog = ({ currencySymbol = null, invoiceData = null, onClos
                 ? parent?.description || ''
                 : '';
       parent.qtyDisplay = parent.qty;
-      parent.isEditable =
-        ['Per Day', 'Per Week', 'Per Month'].includes(parent?.pricingMethod) || parent.type === 'serializedAsset' || parent.type === 'additionalCost'
-          ? false
-          : true;
       parent.subRows = generateNestedData(material, parent);
     });
     setRowsData(rows);
@@ -381,23 +259,10 @@ const CreateBillingDialog = ({ currencySymbol = null, invoiceData = null, onClos
                 ? _subRow?.description || ''
                 : '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
-      _subRow.isEditable = ['Per Day', 'Per Week', 'Per Month'].includes(_subRow?.pricingMethod) ? false : true;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
     return subRows;
   };
-
-
-  const getParentIds = (_id, material, parentIds) => {
-    const parent = material?.find((e) => e._id === _id);
-    if (parent) {
-      parentIds.push(parent._id);
-      getParentIds(parent.parentId, material, parentIds)
-    }
-    else {
-      return false;
-    }
-  }
 
   const handleApplyDate = async () => {
     let tempValues: any = { actualEndDate: endDate };
@@ -515,7 +380,6 @@ const CreateBillingDialog = ({ currencySymbol = null, invoiceData = null, onClos
                         size="small"
                         variant="inline"
                         inputVariant="outlined"
-                        // minDate={endDate || new Date()}
                         value={endDate}
                         name="endDate"
                         label="End Date"
@@ -579,7 +443,7 @@ const CreateBillingDialog = ({ currencySymbol = null, invoiceData = null, onClos
                   onSelect={setSelectedProducts}
                   childrenProperty="subRows"
                   uniqueKey="_id"
-                  renderedFrom="sublease_create_billing"
+                  renderedFrom={renderedFrom}
                   isClientSideGrid={true}
                 />
               </Box>
