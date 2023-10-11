@@ -690,7 +690,7 @@ export default function QuoteProcess(props) {
                       </Tooltip>
                     </>
                   ) : null}
-                  {![QUOTE_PROCESS_STATUS.new, QUOTE_PROCESS_STATUS.priceBuilder].includes(processStatus) && allowedToEdit && (
+                  {![QUOTE_PROCESS_STATUS.new, QUOTE_PROCESS_STATUS.priceBuilder].includes(processStatus) && (
                     <PreviewDownload
                       resource={sidebarResource.quoteBuilder}
                       referenceId={quoteData?._id}
@@ -701,7 +701,7 @@ export default function QuoteProcess(props) {
                         processStatus === QUOTE_PROCESS_STATUS.sendToCustomer &&
                           versionStatus !== 'Send To Customer' &&
                           !ifQuoteApproved.approved &&
-                          !quoteData?.versions[currentVersion]?.offered
+                          !quoteData?.versions[currentVersion]?.offered && allowedToEdit
                           ? true
                           : false
                       }
