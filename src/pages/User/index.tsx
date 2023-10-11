@@ -67,7 +67,8 @@ const User: FC = () => {
   const [userList, setUserList] = useState<any[]>([]);
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
+    state;
   const columnState = JSON.parse(localStorage.getItem(renderedFrom));
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleteUser, setDeleteUser] = useState<any>([]);
@@ -359,15 +360,29 @@ const User: FC = () => {
 
           setUserList(tempUsers);
         }
-
-        dispatch({ type: 'initialize', data: rows, count: count });
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
+        if (appendRows) {
+          dispatch({
+            type: 'initialize',
+            data: [...dataRows, ...rows],
+            count: count
+          });
+        } else {
+          dispatch({
+            type: 'initialize',
+            data: rows,
+            count: count
+          });
+        }
+        // dispatch({ type: 'initialize', data: rows, count: count });
       })
       .catch((error) => {
         dispatch({ type: 'loading', loading: false });
         toastConfig.setToastConfig(error);
+      })
+      .finally(() => {
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
       });
     fetchAllUsers();
     // eslint-disable-next-line
