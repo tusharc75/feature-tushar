@@ -18,6 +18,8 @@ import ProductBuilder from '../../../../components/productBuilder';
 import {
   currencyCodeToSymbol,
   CustomDialogTransition,
+  customerAccount,
+  customerContact,
   formatAmountWithCurrency,
   QUOTE_PROCESS_STATUS,
   quoteBuilder,
@@ -158,6 +160,7 @@ export default function QuoteProcess(props) {
   const [nextStep, setNextStep] = useState(false);
   const [prevStep, setPrevStep] = useState(true);
   const [redCard, setRedCard] = useState(false);
+  const [userEmails, setUserEmails] = useState({ to: [], cc: [] });
 
   const [totalProfit, setTotalProfit] = useState({
     shortFormatAmount: '',
@@ -241,6 +244,7 @@ export default function QuoteProcess(props) {
   }, [currentVersion]);
 
   useEffect(() => {
+    fetchUserEmails()
     if (processStatus === QUOTE_PROCESS_STATUS.doaProcess) {
       const currentVersionStatus = quoteData?.versions[currentVersion]?.status;
       if (currentVersionStatus.includes('Accepted')) {
@@ -611,6 +615,40 @@ export default function QuoteProcess(props) {
       });
   };
 
+  const fetchUserEmails = () => {
+    let ownerCollaboratorEmails = [];
+    if (quoteData?.collaborator && quoteData.collaborator.length) {
+      ownerCollaboratorEmails = quoteData.collaborator.filter((o) => o?.email).map((o) => o?.email);
+    }
+    if (quoteData?.owner?.email) {
+      ownerCollaboratorEmails.push(quoteData.owner.email);
+    }
+    let toEmails = [];
+    if (quoteData?.customerContactName && quoteData?.customerContactName.length) {
+      toEmails = quoteData?.customerContactName.filter((o) => o?.email).map((o) => o.email);
+      setUserEmails({ cc: [...ownerCollaboratorEmails], to: [...toEmails] });
+    } else {
+      axiosInstance()
+        .get(`/${customerAccount.accountApi}/related/${quoteData?.customerAccountName?.optionValue}`)
+        .then(({ data: { data } }) => {
+          let relatedContacts =
+            data[sidebarResource[customerContact.contactResource]] && data[sidebarResource[customerContact.contactResource]]['Account_Name']
+              ? data[sidebarResource[customerContact.contactResource]]['Account_Name']
+              : [];
+          if (relatedContacts.length) {
+            toEmails = relatedContacts.map((o) => o?.email);
+          }
+          setUserEmails({
+            cc: [...ownerCollaboratorEmails],
+            to: [...toEmails]
+          });
+        })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+        });
+    }
+  };
+
   return (
     <>
       <div>
@@ -719,6 +757,8 @@ export default function QuoteProcess(props) {
                       handleRefresh={() => {
                         fetchQuoteData(currentVersion);
                       }}
+                      toEmails={userEmails?.to}
+                      ccEmails={userEmails?.cc ?? []}
                     />
                   )}
                   {[QUOTE_PROCESS_STATUS.sendToCustomer].includes(processStatus) && (
