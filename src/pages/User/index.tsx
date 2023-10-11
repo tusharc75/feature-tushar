@@ -185,13 +185,14 @@ const User: FC = () => {
         {permissions?.user?.isDelete ? (
           params.data.isBrandAdmin ? (
             <Tooltip className="cursor-stop" title="Brand Admin Can not be Deleted">
-              <IconButton aria-label="Delete">
+              <IconButton aria-label="Delete" size={'small'}>
                 <DeleteIcon fontSize="small" />
               </IconButton>
             </Tooltip>
           ) : (
             <Tooltip title="Delete">
               <IconButton
+                size={'small'}
                 aria-label="Delete"
                 onClick={() => {
                   setDeleteUser([params?.data]);
@@ -204,7 +205,7 @@ const User: FC = () => {
           )
         ) : (
           <Tooltip className="cursor-stop" title="You do not have permission to delete user">
-            <IconButton aria-label="Delete">
+            <IconButton aria-label="Delete" size={'small'}>
               <DeleteIcon fontSize="small" />
             </IconButton>
           </Tooltip>
@@ -758,14 +759,18 @@ const User: FC = () => {
               dataRows={dataRows}
               selectedRecords={selectedRecords}
               dispatch={dispatch}
-              onEdit={(d) => {
-                history.push(`${routes.userDetail.path}/${d._id}`);
+              actionCol={(data) => {
+                const params = { data };
+                return <ActionsRenderer {...params} />;
               }}
+              // onEdit={(d) => {
+              //   history.push(`${routes.userDetail.path}/${d._id}`);
+              // }}
               extraParamsToCheckDelete={true}
-              onDelete={(d) => {
-                setDeleteUser([d]);
-                setShowDeleteDialog(true);
-              }}
+              // onDelete={(d) => {
+              //   setDeleteUser([d]);
+              //   setShowDeleteDialog(true);
+              // }}
               rowCount={rowCount}
               page={page}
               loading={loading}

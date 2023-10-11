@@ -57,9 +57,7 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(1.5, 1.5, 1.5, 2)
     // borderBottom: `1px solid #daf5ff`
   },
-  currencyStyle: {
-    width: 400
-  },
+
   dialogTitle: {
     fontSize: '1.2rem'
   },
@@ -68,17 +66,17 @@ const useStyles = makeStyles((theme) => ({
   },
   doaBox: {
     background: '#eeeeee',
-    borderBottom: '2px solid lightgrey',
+    borderBottom: '2px solid var(--common-border-color)',
     padding: '10px'
   },
   doaHeader: {
-    background: '#f3f3f3',
+    background: 'var(--dark-secondary, #f1f5ff)',
     padding: '8px 14px',
     fontWeight: 'bold'
   },
   contentBox: {
     margin: '10px',
-    border: '1px solid #ded8d8',
+    border: '1px solid var(--common-border-color)',
     borderRadius: '4px',
     padding: '4px !important'
   }
@@ -347,7 +345,7 @@ const DoaDialog = ({
                         })}
                       </ToggleButtonGroup>
                     </Grid>
-                    <Grid item xs={6} md={3} sm={6}>
+                    <Grid item xs={12} md={3} sm={6}>
                       {selectedType === 2 && (
                         <>
                           <TextField
@@ -357,6 +355,7 @@ const DoaDialog = ({
                             variant="outlined"
                             type="text"
                             size="small"
+                            fullWidth
                             name="amount"
                             placeholder="Enter minimum DOA amount"
                             label={isMobile && !isTablet ? 'DOA amount' : 'Enter minimum DOA amount'}
@@ -371,32 +370,34 @@ const DoaDialog = ({
                         </>
                       )}
                     </Grid>
-                    <Grid item xs={6} md={3} sm={6}>
+                    <Grid item xs={12} md={3} sm={6}>
                       {selectedType === 2 && (
-                        <Autocomplete
-                          className={classes.currencyStyle}
-                          size="small"
-                          value={
-                            currencyData.filter((data) => data?.currencyCode === currency).length
-                              ? currencyData.filter((data) => data?.currencyCode === currency)[0]
-                              : ''
-                          }
-                          style={{ width: 200 }}
-                          options={currencyData}
-                          getOptionLabel={(option: any) =>
-                            option ? `${option.currencyCode} - ${option.currencyName} - (${option.symbolNative})` : ''
-                          }
-                          getOptionSelected={(option: any, val) => option?.currencyCode === val}
-                          onChange={(e, val) => {
-                            setCurrency(val?.currencyCode ? val?.currencyCode : '');
-                            setCurrencySymbol(val?.symbolNative);
-                          }}
-                          renderInput={(params) => <TextField {...params} variant="outlined" name={'currency'} label={'Currency'} />}
-                          renderOption={(option) => {
-                            const { currencyCode, currencyName, symbolNative } = option;
-                            return `${currencyCode} - ${currencyName} - (${symbolNative})`;
-                          }}
-                        />
+                        <div>
+                          <Autocomplete
+                            fullWidth
+                            className={`max-w-full`}
+                            size="small"
+                            value={
+                              currencyData.filter((data) => data?.currencyCode === currency).length
+                                ? currencyData.filter((data) => data?.currencyCode === currency)[0]
+                                : ''
+                            }
+                            options={currencyData}
+                            getOptionLabel={(option: any) =>
+                              option ? `${option.currencyCode} - ${option.currencyName} - (${option.symbolNative})` : ''
+                            }
+                            getOptionSelected={(option: any, val) => option?.currencyCode === val}
+                            onChange={(e, val) => {
+                              setCurrency(val?.currencyCode ? val?.currencyCode : '');
+                              setCurrencySymbol(val?.symbolNative);
+                            }}
+                            renderInput={(params) => <TextField {...params} fullWidth variant="outlined" name={'currency'} label={'Currency'} />}
+                            renderOption={(option) => {
+                              const { currencyCode, currencyName, symbolNative } = option;
+                              return `${currencyCode} - ${currencyName} - (${symbolNative})`;
+                            }}
+                          />
+                        </div>
                       )}
                     </Grid>
                   </Grid>
@@ -412,13 +413,13 @@ const DoaDialog = ({
                             <Grid container direction="row" justify="space-evenly" alignItems="center">
                               <Grid item md={12}>
                                 {values.users && values.users.length > 0 && (
-                                  <Box className={classes.doaHeader}>
+                                  <Box className={`${classes.doaHeader} max-[600px]:hidden`}>
                                     <Grid container spacing={2} direction="row" justify="flex-start" alignItems="center">
-                                      <Grid item md={1}>
+                                      <Grid item xs={1}>
                                         {' '}
                                         Index{' '}
                                       </Grid>
-                                      <Grid item md={5}>
+                                      <Grid item xs={11} sm={5} md={5}>
                                         {' '}
                                         {doaApprove == 0 ? 'User' : 'Role'}{' '}
                                       </Grid>
@@ -496,6 +497,7 @@ const DoaDialog = ({
                                                   )}
                                                 />
                                               </Grid>
+                                              <Grid item xs={1} sm={1} md={1} className="min-[600px]:hidden"></Grid>
                                               {selectedType === 2 && (
                                                 <Grid item xs={6} sm={3} md={3}>
                                                   {/* <Field
@@ -558,7 +560,7 @@ const DoaDialog = ({
                                                   )}
                                                 </Grid>
                                               )}
-                                              <Grid item xs={6} sm={3} md={3}>
+                                              <Grid item xs={5} sm={3} md={3}>
                                                 <ButtonGroup size="medium" aria-label="small outlined button group">
                                                   <IconButton
                                                     size="small"
