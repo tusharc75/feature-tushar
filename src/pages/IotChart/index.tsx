@@ -1,4 +1,4 @@
-import { Box, Grid, Typography } from '@material-ui/core';
+import { Box, Button, Grid, Typography } from '@material-ui/core';
 import { useContext, useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import styles from '../Leads/Header.module.scss';
@@ -15,6 +15,7 @@ import { getColors } from '../Home/helpers';
 import { DataPointsIcon } from 'src/assets/svg/svgIcons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import MyLocationIcon from '@material-ui/icons/MyLocation';
+import { MdChevronLeft } from 'react-icons/md';
 
 function IotChart() {
   const toastConfig = useContext(CustomToastContext);
@@ -110,7 +111,24 @@ function IotChart() {
         <CustomBreadCrumbs routes={[routes.iotChart]} />
       </div>
       <CustomContainer>
-        <div className="flex justify-end mb-3">
+        <div className="flex justify-between mb-3">
+          <div>
+            {showAsset && (
+              <Button
+                size="small"
+                variant="outlined"
+                color="primary"
+                disableElevation
+                onClick={() => {
+                  setShowAsset(null);
+                  setSearch('');
+                }}
+                startIcon={<MdChevronLeft />}
+              >
+                Go Back
+              </Button>
+            )}
+          </div>
           <SearchBox onChange={handleSearch} size="small" value={search} className="flex-grow md:flex-grow-0" />
         </div>
         {!showAsset ? (
