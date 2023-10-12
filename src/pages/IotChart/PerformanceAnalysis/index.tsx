@@ -5,6 +5,7 @@ import FilterModel from '../Helper/FilterModel';
 import Chart from '../Helper/Chart';
 import { uniqBy } from 'lodash';
 import { ExpandLess, ExpandMore } from '@material-ui/icons';
+import SearchBox from 'src/components/Helpers/SearchBox';
 
 const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
   const [dateFilters, setDateFilters] = useState({
@@ -17,6 +18,7 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
     dataPoints: {}
   });
 
+  const [searchValue, setSearchValue] = useState('');
   const [open, setOpen] = useState({});
   const [openChild, setOpenChild] = useState({});
 
@@ -46,10 +48,11 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
     return (
       <div key={data[type]?.optionLabel} className=" shadow-[0px_4px_20px_rgba(0,_0,_0,_0.06)] my-3 rounded-md ">
         <div
-          className={`flex flex-wrap justify-between items-center cursor-pointer py-1 px-3 rounded-md transition-all duration-[300ms]  ${compareCollapse(`${data[type]?.optionValue}`, type)
+          className={`flex flex-wrap justify-between items-center cursor-pointer py-1 px-3 rounded-md transition-all duration-[300ms]  ${
+            compareCollapse(`${data[type]?.optionValue}`, type)
               ? 'bg-[var(--new-theme-color)] text-white'
               : 'hover:bg-gray-300 dark:hover:bg-gray-800'
-            }`}
+          }`}
           onClick={(e) => {
             e.stopPropagation();
             if (type === 'parentCategory') handleChange(`${data[type]?.optionValue}`);
@@ -77,19 +80,19 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
           <div className="pl-4 pr-2" key={data[type]?.optionLabel}>
             {type === 'parentCategory'
               ? uniqBy(
-                allData?.filter((d) => d['category']?.parentCategory === data[type]?.optionValue),
-                'category.optionValue'
-              )?.map((data) => {
-                return (
-                  <TreeView
-                    data={data}
-                    type={'category'}
-                    allData={allData?.filter((d) => d['category']?.optionValue === data?.category?.optionValue)}
-                  />
-                );
-              })
+                  allData?.filter((d) => d['category']?.parentCategory === data[type]?.optionValue),
+                  'category.optionValue'
+                )?.map((data) => {
+                  return (
+                    <TreeView
+                      data={data}
+                      type={'category'}
+                      allData={allData?.filter((d) => d['category']?.optionValue === data?.category?.optionValue)}
+                    />
+                  );
+                })
               : type === 'category'
-                ? allData
+              ? allData
                   ?.filter((d) => d[type]?.optionValue === data[type]?.optionValue)
                   ?.map((dataPoint) => {
                     return (
@@ -116,7 +119,7 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
                       </div>
                     );
                   })
-                : null}
+              : null}
           </div>
         </Collapse>
       </div>
@@ -125,7 +128,20 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
 
   return (
     <>
-      <FilterModel dateFilters={dateFilters} setDateFilters={setDateFilters} />
+      <Grid direction="row" justifyContent="flex-end" alignItems="center" container spacing={2}>
+        <Grid>
+          <FilterModel dateFilters={dateFilters} setDateFilters={setDateFilters} />
+        </Grid>
+        <Grid item>
+          <SearchBox
+            onChange={(e) => {
+              setSearchValue(e.target.value);
+            }}
+            value={searchValue}
+            size="small"
+          />
+        </Grid>
+      </Grid>
       <Box mt={2}>
         <div className="grid gap-y-4 sm:gap-x-3 md:gap-x-4 grid-cols-1 sm:grid-cols-[5fr_9fr] md:grid-cols-[4fr_9fr] lg:grid-cols-[320px_1fr]">
           <div className="container-with-border">
@@ -141,14 +157,34 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
                       'parentCategory.optionValue'
                     )?.map((category: any) => {
                       return (
-                        <TreeView data={category} type={'parentCategory'} allData={dataPoints.filter((d) => d?.hasOwnProperty('parentCategory'))} />
+                        // <TreeView data={category} type={'parentCategory'} allData={dataPoints.filter((d) => d?.hasOwnProperty('parentCategory'))} />
+                        <TreeView
+                          data={category}
+                          type={'parentCategory'}
+                          allData={dataPoints?.filter((e) =>
+                            e?.hasOwnProperty('parentCategory') && searchValue?.trim() === ''
+                              ? true
+                              : e?.fieldLabel?.toLowerCase()?.includes(searchValue?.trim()?.toLowerCase())
+                          )}
+                        />
                       );
                     })}
                     {uniqBy(
                       dataPoints.filter((d) => !d?.hasOwnProperty('parentCategory')),
                       'category.optionValue'
                     )?.map((category: any) => {
-                      return <TreeView data={category} type={'category'} allData={dataPoints.filter((d) => !d?.hasOwnProperty('parentCategory'))} />;
+                      // return <TreeView data={category} type={'category'} allData={dataPoints.filter((d) => !d?.hasOwnProperty('parentCategory'))} />;
+                      return (
+                        <TreeView
+                          data={category}
+                          type={'category'}
+                          allData={dataPoints?.filter((e) =>
+                            !e?.hasOwnProperty('parentCategory') && searchValue?.trim() === ''
+                              ? true
+                              : e?.fieldLabel?.toLowerCase()?.includes(searchValue?.trim()?.toLowerCase())
+                          )}
+                        />
+                      );
                     })}
                   </>
                 )}
