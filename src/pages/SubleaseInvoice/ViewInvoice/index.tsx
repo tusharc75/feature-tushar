@@ -4,7 +4,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
 import CustomRenderCell from 'src/components/Helpers/CustomRenderCell';
 import routes from 'src/components/Helpers/Routes';
-import { gridLoadingTimeout, invoice, isObjectEmpty, prepareDataForGrid } from 'src/constants/helpers';
+import { gridLoadingTimeout, invoice, isObjectEmpty, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import useColumns, { checkStaticField, getFrameworkComponents, getStaticFields } from 'src/constants/useColumns';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -22,15 +22,13 @@ import VisibilityIcon from '@material-ui/icons/Visibility';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
-const ViewAllInvoices = ({ subleaseId, onClose, subleaseName, subleaseData }) => {
+const ViewAllInvoices = ({ subleaseId, onClose, subleaseName }) => {
   const renderedFrom = camelCase(routes?.invoice?.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const toastConfig = useContext(CustomToastContext);
 
-  const [viewBillDialog, setViewBillDialog] = useState({ open: false, invoiceData: null });
-  const [invoiceData, setInvoiceData] = useState(null);
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions }
   }: any = useData();
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -82,7 +80,6 @@ const ViewAllInvoices = ({ subleaseId, onClose, subleaseName, subleaseData }) =>
     let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
     tempFrameworkComponent = {
       ...tempFrameworkComponent,
-      invoiceMaterialRenderer: InvoiceMaterialRenderer,
       actionsRenderer: ActionsRenderer
     };
     setFrameworkComponent({ ...tempFrameworkComponent });
@@ -92,17 +89,6 @@ const ViewAllInvoices = ({ subleaseId, onClose, subleaseName, subleaseData }) =>
     });
     setColumns([...columns]);
   };
-
-  const InvoiceMaterialRenderer = (params) => (
-    <span
-      className="link"
-      onClick={() => {
-        setViewBillDialog({ open: true, invoiceData: params.data });
-      }}
-    >
-      <CustomRenderCell value={params?.value} />
-    </span>
-  );
 
   const ActionsRenderer = (params) => (
     <>
@@ -183,9 +169,7 @@ const ViewAllInvoices = ({ subleaseId, onClose, subleaseName, subleaseData }) =>
           finalObject['canDelete'] = permissions?.invoice?.isDelete && u?.canDelete;
           return finalObject;
         });
-        if (data?.length) {
-          setInvoiceData(data);
-        }
+       
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -268,6 +252,7 @@ const ViewAllInvoices = ({ subleaseId, onClose, subleaseName, subleaseData }) =>
             onSuccess={() => {
               setViewInvoiceDialog({ open: false, data: null });
             }}
+            resource = {sidebarResource.subleaseInvoice}
           />
         )}
         {isConfirmDialogVisible ? (

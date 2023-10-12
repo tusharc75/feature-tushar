@@ -304,6 +304,7 @@ const FieldTicketInvoice = () => {
               removeLocalStorage(localStorageSelectedRecords);
               fetchFieldTicketData();
             }}
+            resource = {sidebarResource.fieldTicketInvoice}
           />
         )}
       </CustomContainer>

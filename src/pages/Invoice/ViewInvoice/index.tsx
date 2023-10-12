@@ -21,7 +21,7 @@ import CommentDialog from 'src/components/CommentDialog';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import { IoMdDownload } from 'react-icons/io';
 
-const ViewInvoice = ({ invoiceData, onClose, onSuccess }) => {
+const ViewInvoice = ({ invoiceData, onClose, onSuccess, resource = null }) => {
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = `${camelCase(routes?.invoice.title)}_view`;
 
@@ -265,7 +265,7 @@ const ViewInvoice = ({ invoiceData, onClose, onSuccess }) => {
         <CustomDialogContent>
           <Fragment>
             <div className="flex flex-wrap gap-2 p-2">
-              {invoiceData && (
+              {invoiceData && resource !== sidebarResource.subleaseInvoice && (
                 <Box className="flex flex-wrap gap-2">
                   <PreviewDownload
                     fileName={`${routes.invoice.title}-${invoiceData?.invoiceNumber}`}
@@ -289,7 +289,7 @@ const ViewInvoice = ({ invoiceData, onClose, onSuccess }) => {
                       `tax_${invoiceData?.currency?.toLowerCase()}`,
                       `finalPrice_${invoiceData?.currency?.toLowerCase()}`
                     ]}
-                  />
+                  />                 
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'outlined'}
                     className="btn-outline-v1"
@@ -302,7 +302,7 @@ const ViewInvoice = ({ invoiceData, onClose, onSuccess }) => {
                     }}
                   >
                     {isMobile && !isTablet ? <IoMdDownload size={20} /> : isDownloadingZip ? 'Please wait...' : 'Save as Zip File'}
-                  </Button>
+                  </Button>                  
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'outlined'}
                     className="btn-outline-v1"
@@ -319,7 +319,7 @@ const ViewInvoice = ({ invoiceData, onClose, onSuccess }) => {
                 </Box>
               )}
               <div className="ml-auto">
-                {rowsData && rowsData?.length > 0 && <DeleteButton text="Cancel Invoice" onClick={() => setCommentDialog(true)} />}
+                {rowsData && rowsData?.length > 0 &&  resource !== sidebarResource.subleaseInvoice && <DeleteButton text="Cancel Invoice" onClick={() => setCommentDialog(true)} />}
               </div>
             </div>
             {columns && rowsData ? (
