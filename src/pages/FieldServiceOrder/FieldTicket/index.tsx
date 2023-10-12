@@ -46,17 +46,17 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
 
 
   const FieldTicketNumberRenderer = (params) => (
-    <div style={{ display: 'flex', alignItems: 'center' }}>
+    <>
       {params?.data?.allowedToEdit ?
         <span
-          className="link"
+          className="link line-clamp-1"
           onClick={() => {
             setOpenDialog({ open: true, isClone: false, id: params.data._id });
           }}
         >
           <CustomRenderCell value={params?.value} />
         </span> :
-        <p>{params?.value}</p>}
+        <p className='line-clamp-1'>{params?.value}</p>}
       <Box ml={1}>
         <IconButton
           size="small"
@@ -67,7 +67,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
           <OpenInNewIcon fontSize="small" color="primary" />
         </IconButton>
       </Box>
-    </div>
+    </>
   );
 
   const fetchGridColumns = () => {
@@ -87,7 +87,6 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
                 headerName: o?.fieldData?.fieldLabel,
                 show: true,
                 disabled: true,
-                width: 250,
                 cellRenderer: 'fieldTicketNumberRenderer'
               }
             ];
