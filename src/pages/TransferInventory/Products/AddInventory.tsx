@@ -241,7 +241,10 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
                 color="primary"
                 size="small"
               >
-                Add
+                Add{' '}
+                {[...getLocalStorageArrayData(localStorageSelectedRecords)].length > 0
+                  ? '(' + [...getLocalStorageArrayData(localStorageSelectedRecords)].length + ')'
+                  : ''}
               </Button>
             </Box>
           </Box>
