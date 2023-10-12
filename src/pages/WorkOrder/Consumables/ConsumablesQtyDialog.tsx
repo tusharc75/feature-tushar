@@ -334,7 +334,6 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
                     if (!Boolean(validate(values.products).consumedQty) && !Boolean(validate(values.products).storageLocation)) {
                       handleSubmit(values);
                     }
-                    console.log(!Boolean(validate(values.products).consumedQty));
                   }}
                   size="small"
                   variant="contained"
