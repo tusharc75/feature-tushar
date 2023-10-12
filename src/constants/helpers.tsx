@@ -320,6 +320,7 @@ export const sidebarResource = {
   planning: 'Planning',
   planningCalendar: 'Planning Calendar',
   fieldTicket: 'Field Ticket',
+  fieldTicketInvoice : 'Field Ticket Invoice',
   fieldServiceTechnician: `Field Service Technician`,
   rentalPlanningCalendar: `Rental Planning Calendar`,
   resourceLogs: `Resource Logs`,
