@@ -142,7 +142,7 @@ const ViewAllInvoices = ({ subleaseId, onClose, subleaseName, subleaseData }) =>
 
   const getQueryString = (isExport = false) => {
    
-    let deepFilter = `?page=${page}&limit=${limit}`;
+    let deepFilter = `?page=${page}&limit=${limit}&sublease=${subleaseId}`;
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
@@ -163,11 +163,6 @@ const ViewAllInvoices = ({ subleaseId, onClose, subleaseName, subleaseData }) =>
     if (search) {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
-    const applyFilter = [{
-        field: 'sublease',
-        term: subleaseName
-    }]
-    deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(applyFilter))}&filterType=and`;
 
     return deepFilter;
   };
