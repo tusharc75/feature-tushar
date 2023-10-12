@@ -25,7 +25,7 @@ const RenderChildCollapsible = ({
 }: {
   index: number;
   style: React.CSSProperties;
-  data: TDataPoints;
+  data: TDataPoints[];
   open: string | boolean;
   handleClick: (id: string, index: number) => void;
   dateFilters: any;
