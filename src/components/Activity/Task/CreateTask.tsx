@@ -260,6 +260,9 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
                                   label="Status"
                                   name="status"
                                   value={values['status']}
+                                  onChange={(e) => {
+                                    setFieldValue('status', e.target.value);
+                                  }}
                                 >
                                   {statusList.map((_status, index) => (
                                     <MenuItem key={index} value={_status.status}>

@@ -2,7 +2,6 @@ import { Box, Button, Grid, IconButton } from '@material-ui/core';
 import { useContext, useEffect, useReducer, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
-import CustomRenderCell from 'src/components/Helpers/CustomRenderCell';
 import routes from 'src/components/Helpers/Routes';
 import { gridLoadingTimeout, invoice, isObjectEmpty, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import useColumns, { checkStaticField, getFrameworkComponents, getStaticFields } from 'src/constants/useColumns';
