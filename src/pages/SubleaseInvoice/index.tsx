@@ -11,7 +11,6 @@ import { SUBLEASE_STATUS, gridLoadingTimeout, prepareDataForGrid, removeLocalSto
 import NoteAddIcon from '@material-ui/icons/NoteAdd';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import CreateInvoiceDialog from './CreateInvoice';
-import ViewInvoice from '../Invoice/ViewInvoice';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomContainer from 'src/components/CustomContainer';
@@ -285,13 +284,11 @@ const SubleaseInvoice = () => {
         )}
         {viewInvoiceDialog.open && (
           <ViewAllInvoices
-          subleaseData = {viewInvoiceDialog?.data}
-          subleaseId={viewInvoiceDialog?.data?._id}
-          subleaseName = {viewInvoiceDialog?.data?.subleaseName}
+            subleaseId={viewInvoiceDialog?.data?._id}
+            subleaseName = {viewInvoiceDialog?.data?.subleaseName}
             onClose={() => {
               setViewInvoiceDialog({ open: false, data: null });
             }}
-            
           />
         )}
       </CustomContainer>

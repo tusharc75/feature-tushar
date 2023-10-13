@@ -27,7 +27,6 @@ interface RoleProps {
 }
 
 const RoleEngine = (props: RoleProps) => {
-
   const { field, resource, setField, setResource, isDisable, style, tier = ROLE_TIER.tier1 } = props;
 
   const [isReadChecked, setIsReadChecked] = useState(false);
@@ -67,7 +66,6 @@ const RoleEngine = (props: RoleProps) => {
             return _field.isRead === false;
           });
       }
-
       if (_resource.isCreate === false && !_resource.isCreateDisabled && isAnyCreateFoundUnchecked === false) {
         field
           .filter((d) => d.fieldData.resource === _resource.name && !d.isCreateDisabled)
@@ -110,6 +108,13 @@ const RoleEngine = (props: RoleProps) => {
         isAnyHiddenFoundUnchecked = true;
       }
     });
+
+    if (tier === ROLE_TIER.tier3) {
+      isAnyCreateFoundUnchecked = true;
+      isAnyUpdateFoundUnchecked = true;
+      isAnyDeleteFoundUnchecked = true;
+      isAnyHiddenFoundUnchecked = true;
+    }
 
     setIsReadChecked(!isAnyReadFoundUnchecked);
     setIsCreateChecked(!isAnyCreateFoundUnchecked);
@@ -313,7 +318,6 @@ const RoleEngine = (props: RoleProps) => {
 
   const validateTier2 = (resource: any[], field: any[], selectedResource: any) => {
     if (tier === ROLE_TIER?.tier2) {
-
       let checkedResource = [];
       let unCheckedResource = [];
 
@@ -397,7 +401,7 @@ const RoleEngine = (props: RoleProps) => {
               <FormControlLabel
                 control={
                   <Checkbox
-                    disabled={isDisable || tier === ROLE_TIER.tier2}
+                    disabled={isDisable || tier === ROLE_TIER.tier2 || tier === ROLE_TIER.tier3}
                     checked={isCreateChecked}
                     onChange={(e) => {
                       setIsCreateChecked(e.target.checked);
@@ -417,7 +421,7 @@ const RoleEngine = (props: RoleProps) => {
               <FormControlLabel
                 control={
                   <Checkbox
-                    disabled={isDisable || tier === ROLE_TIER.tier2}
+                    disabled={isDisable || tier === ROLE_TIER.tier2 || tier === ROLE_TIER.tier3}
                     checked={isUpdateChecked}
                     onChange={(e) => {
                       setIsUpdateChecked(e.target.checked);
@@ -437,7 +441,7 @@ const RoleEngine = (props: RoleProps) => {
               <FormControlLabel
                 control={
                   <Checkbox
-                    disabled={isDisable || tier === ROLE_TIER.tier2}
+                    disabled={isDisable || tier === ROLE_TIER.tier2 || tier === ROLE_TIER.tier3}
                     checked={isDeleteChecked}
                     onChange={(e) => {
                       setIsDeleteChecked(e.target.checked);
@@ -457,7 +461,7 @@ const RoleEngine = (props: RoleProps) => {
               <FormControlLabel
                 control={
                   <Checkbox
-                    disabled={isDisable || tier === ROLE_TIER.tier2}
+                    disabled={isDisable || tier === ROLE_TIER.tier2 || tier === ROLE_TIER.tier3}
                     checked={isHiddenChecked}
                     onChange={(e) => {
                       setIsHiddenChecked(e.target.checked);

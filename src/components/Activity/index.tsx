@@ -306,11 +306,17 @@ const Activity = (props) => {
                               </HtmlTooltip>
                             </Box>
                           )}
-                          <Box mr={1}>
-                            <HtmlTooltip title={infoTitle[data]}>
+                          <HtmlTooltip title={infoTitle[data]} enterTouchDelay={0} arrow placement="top">
+                            <IconButton
+                              size="small"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                e.stopPropagation();
+                              }}
+                            >
                               <InfoOutlinedIcon style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#2A3042)' }} />
-                            </HtmlTooltip>
-                          </Box>
+                            </IconButton>
+                          </HtmlTooltip>
                           <IconButton size="small" onClick={(event) => handleCreateActivity(event, data)}>
                             <AddOutlinedIcon style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#2A3042)' }} />
                           </IconButton>
