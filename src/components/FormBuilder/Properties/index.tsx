@@ -1178,7 +1178,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                           />
                         </Box></>
                     )}
-                    {module !== 'price-template' && module !== 'product-template' ? (
+                    {module !== 'product-template' ? (
                       <FormControlLabel
                         disabled={values['required']}
                         control={
