@@ -112,7 +112,7 @@ export default function Current({ assetId }) {
         <Grid item lg={8} md={8} sm={12} xs={12}>
           {categories && currentData ? (
             currentData?.length ? (
-              <div className="grid gap-3 md:gap-4 ">
+              <div className="grid gap-3 md:gap-4">
                 {categories?.map((category: any, index) => (
                   <CustomAccordian
                     expandedAccordition={expandedAccordition}
