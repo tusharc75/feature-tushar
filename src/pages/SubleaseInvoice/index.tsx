@@ -285,9 +285,8 @@ const SubleaseInvoice = () => {
         )}
         {viewInvoiceDialog.open && (
           <ViewAllInvoices
-          subleaseData = {viewInvoiceDialog?.data}
-          subleaseId={viewInvoiceDialog?.data?._id}
-          subleaseName = {viewInvoiceDialog?.data?.subleaseName}
+            subleaseId={viewInvoiceDialog?.data?._id}
+            subleaseName = {viewInvoiceDialog?.data?.subleaseName}
             onClose={() => {
               setViewInvoiceDialog({ open: false, data: null });
             }}

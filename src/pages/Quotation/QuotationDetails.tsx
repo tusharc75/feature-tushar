@@ -138,31 +138,24 @@ const QuotationDetails = () => {
   const getQuotationFields = useMemo(() => {
     let tempQuotationFields = quotationFields;
     if (quotationData && quotationFields.length !== 0) {
-      if (quotationData['type'] === 'Rental Job') {
+      if (quotationData['type'] === QUOTATION_TYPE.rentalJob) {
         tempQuotationFields = tempQuotationFields.filter(
-          (d) =>
-            d?.fieldData?.fieldName !== 'expectedCustomerDeliveryDate' &&
-            d?.fieldData?.fieldName !== 'supplierSuggestedDeliveryDate' &&
-            d?.fieldData?.fieldName !== 'repairOrder' &&
-            d?.fieldData?.fieldName !== 'salesOrder'
+          (d) => !['expectedCustomerDeliveryDate', 'supplierSuggestedDeliveryDate', 'repairOrder', 'salesOrder', 'fieldJob']?.includes(d?.fieldData?.fieldName)
         );
       }
-      if (quotationData['type'] === 'Repair Order') {
+      if (quotationData['type'] === QUOTATION_TYPE.fieldJob) {
         tempQuotationFields = tempQuotationFields.filter(
-          (d) =>
-            d?.fieldData?.fieldName !== 'expectedCustomerDeliveryDate' &&
-            d?.fieldData?.fieldName !== 'supplierSuggestedDeliveryDate' &&
-            d?.fieldData?.fieldName !== 'rentalJob' &&
-            d?.fieldData?.fieldName !== 'salesOrder'
+          (d) => !['expectedCustomerDeliveryDate', 'supplierSuggestedDeliveryDate', 'repairOrder', 'salesOrder', 'rentalJob']?.includes(d?.fieldData?.fieldName)
         );
       }
-      if (quotationData['type'] === 'Sales Order') {
+      if (quotationData['type'] === QUOTATION_TYPE.repairOrder) {
         tempQuotationFields = tempQuotationFields.filter(
-          (d) =>
-            d?.fieldData?.fieldName !== 'estimateStartDate' &&
-            d?.fieldData?.fieldName !== 'estimateEndDate' &&
-            d?.fieldData?.fieldName !== 'repairOrder' &&
-            d?.fieldData?.fieldName !== 'rentalJob'
+          (d) => !['expectedCustomerDeliveryDate', 'supplierSuggestedDeliveryDate', 'salesOrder', 'fieldJob', 'rentalJob']?.includes(d?.fieldData?.fieldName)
+        );
+      }
+      if (quotationData['type'] === QUOTATION_TYPE.salesOrder) {
+        tempQuotationFields = tempQuotationFields.filter(
+          (d) => !['estimateStartDate', 'estimateEndDate', 'fieldJob', 'repairOrder', 'rentalJob']?.includes(d?.fieldData?.fieldName)
         );
       }
     }

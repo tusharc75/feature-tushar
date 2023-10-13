@@ -12,7 +12,6 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import SearchBox from 'src/components/Helpers/SearchBox';
 
 export default function Current({ assetId }) {
-
   const toastConfig = useContext(CustomToastContext);
 
   const [errorData, setErrorData] = useState(null);
@@ -22,7 +21,7 @@ export default function Current({ assetId }) {
   const [searchValue, setSearchValue] = useState('');
 
   useEffect(() => {
-    fetchCategory()
+    fetchCategory();
     fetchData();
     fetchErrorData();
   }, [assetId]);
@@ -36,21 +35,21 @@ export default function Current({ assetId }) {
       })
       .then(({ data: { data } }) => {
         const categoryData: any = data?.filter((e) => !e.parentCategory);
-        categoryData?.forEach(element => {
+        categoryData?.forEach((element) => {
           element.child = data?.filter((e) => e?.parentCategory?.optionValue === element?._id);
         });
-        setCategories(categoryData)
+        setCategories(categoryData);
         if (categoryData?.length) {
-          setExpandedAccordition({ [categoryData[0]._id]: true })
+          setExpandedAccordition({ [categoryData[0]._id]: true });
         }
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-  }
+  };
 
   const fetchData = async () => {
-    setCurrentData(null)
+    setCurrentData(null);
     axiosInstance()
       .get(`/report/iot/current-status`, {
         params: {
@@ -58,7 +57,7 @@ export default function Current({ assetId }) {
         }
       })
       .then(({ data: { data } }) => {
-        setCurrentData(data?.dataPointData || [])
+        setCurrentData(data?.dataPointData || []);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -66,7 +65,7 @@ export default function Current({ assetId }) {
   };
 
   const fetchErrorData = async () => {
-    setErrorData(null)
+    setErrorData(null);
     axiosInstance()
       .get(`/report/iot/asset-error-message`, {
         params: {
@@ -84,16 +83,15 @@ export default function Current({ assetId }) {
   return (
     <>
       <Box pb={2}>
-        <Grid direction="row"
-          justifyContent="flex-end"
-          alignItems="center" container spacing={2}>
+        <Grid direction="row" justifyContent="flex-end" alignItems="center" container spacing={2}>
           <Grid item>
             <SearchBox
               onChange={(e) => {
-                setSearchValue(e.target.value)
+                setSearchValue(e.target.value);
               }}
               value={searchValue}
-              size="small" />
+              size="small"
+            />
           </Grid>
           <Grid item>
             <HtmlTooltip title="Refresh">
@@ -112,20 +110,33 @@ export default function Current({ assetId }) {
       </Box>
       <Grid container spacing={2}>
         <Grid item lg={8} md={8} sm={12} xs={12}>
-          {(categories && currentData) ?
-            categories?.map((category: any, index) => (
-              <CustomAccordian
-                expandedAccordition={expandedAccordition}
-                setExpandedAccordition={setExpandedAccordition}
-                category={category}
-                currentData={searchValue?.trim() === '' ? currentData : currentData?.filter((e) => e?.fieldLabel?.toLowerCase()?.includes(searchValue?.trim()?.toLowerCase()))}
-              />
-            )) : <Box p={2} height={500}>
+          {categories && currentData ? (
+            currentData?.length ? (
+              categories?.map((category: any, index) => (
+                <CustomAccordian
+                  expandedAccordition={expandedAccordition}
+                  setExpandedAccordition={setExpandedAccordition}
+                  category={category}
+                  currentData={
+                    searchValue?.trim() === ''
+                      ? currentData
+                      : currentData?.filter((e) => e?.fieldLabel?.toLowerCase()?.includes(searchValue?.trim()?.toLowerCase()))
+                  }
+                />
+              ))
+            ) : (
+              <Box mt={5} textAlign="center">
+                <p>No Data Found</p>
+              </Box>
+            )
+          ) : (
+            <Box p={2} height={500}>
               <CommonSkeleton lenArray={[...Array(10).keys()]} />
-            </Box>}
+            </Box>
+          )}
         </Grid>
         <Grid item lg={4} md={4} sm={12} xs={12}>
-          {errorData ?
+          {errorData ? (
             <TableContainer id={`${Date.now()}`} style={{ height: 'calc(100vh - 200px)', width: 'auto' }}>
               <Table stickyHeader id={'table_' + '1'} aria-label="simple table">
                 <TableHead>
@@ -138,22 +149,26 @@ export default function Current({ assetId }) {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {errorData?.sort((a, b) => moment(a.time).diff(moment(b.time)))?.filter((e) => e?.message)?.map((data: any, index) => (
-                    <TableRow key={'row ' + index + 1}>
-                      <TableCell key={'cell ' + index + 1} align="left">
-                        {data?.message}
-                        <br />
-                        {moment(data?.time).format(dateTimeFormat)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {errorData
+                    ?.sort((a, b) => moment(a.time).diff(moment(b.time)))
+                    ?.filter((e) => e?.message)
+                    ?.map((data: any, index) => (
+                      <TableRow key={'row ' + index + 1}>
+                        <TableCell key={'cell ' + index + 1} align="left">
+                          {data?.message}
+                          <br />
+                          {moment(data?.time).format(dateTimeFormat)}
+                        </TableCell>
+                      </TableRow>
+                    ))}
                 </TableBody>
               </Table>
             </TableContainer>
-            : <Box p={2} height={500}>
+          ) : (
+            <Box p={2} height={500}>
               <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Box>
-          }
+          )}
         </Grid>
       </Grid>
     </>
