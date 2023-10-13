@@ -101,7 +101,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
       if (!values.disableOnEdit && module !== 'price-template' && module !== 'product-template') {
         values.disableOnEdit = false;
       }
-      if (!values.hiddenField && module !== 'price-template' && module !== 'product-template') {
+      if (!values.hiddenField) {
         values.hiddenField = false;
       }
       if (!values.addAdditionalOption && (fieldData.type === 'multiSelect' || fieldData.type === 'dropDown')) {
@@ -1178,22 +1178,20 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                           />
                         </Box></>
                     )}
-                    {module !== 'price-template' && module !== 'product-template' ? (
-                      <FormControlLabel
-                        disabled={values['required']}
-                        control={
-                          <Checkbox
-                            name="ishiddenField"
-                            checked={values['required'] ? false : values['hiddenField']}
-                            onChange={(e) => {
-                              setFieldValue('hiddenField', e.target.checked);
-                            }}
-                            color="primary"
-                          />
-                        }
-                        label="Hidden Field"
-                      />
-                    ) : null}
+                    <FormControlLabel
+                      disabled={values['required']}
+                      control={
+                        <Checkbox
+                          name="ishiddenField"
+                          checked={values['required'] ? false : values['hiddenField']}
+                          onChange={(e) => {
+                            setFieldValue('hiddenField', e.target.checked);
+                          }}
+                          color="primary"
+                        />
+                      }
+                      label="Hidden Field"
+                    />
                     {(fieldData.type === 'multiSelect' || fieldData.type === 'dropDown') && (
                       <FormControlLabel
                         control={
