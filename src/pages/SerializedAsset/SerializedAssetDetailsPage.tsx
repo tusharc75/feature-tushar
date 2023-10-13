@@ -442,9 +442,6 @@ const SerializedAssetDetailsPage = () => {
         <TabPanel value={tabValue} index={3}>
           <DepreciationHistory
             id={id}
-            canIssueCertificate={permissions?.serializedAsset?.isUpdate || permissions?.serializedAsset?.isCreate}
-            supplierAccount={null}
-            assetDetails={assetDetails}
           />
         </TabPanel>
       </Box>

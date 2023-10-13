@@ -9,9 +9,9 @@ import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridCo
 import { CommonRenderer, DateRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
 import { camelCase } from 'lodash';
 
-const DepreciationHistory = ({ id, canIssueCertificate, supplierAccount, assetDetails = null }) => {
+const DepreciationHistory = ({ id }) => {
     const toastConfig = useContext(CustomToastContext);
-    const renderedFrom = `${camelCase(routes?.serializedAsset.title)}_certificationHistory`;
+    const renderedFrom = `${camelCase(routes?.serializedAsset.title)}_depreciationHistory`;
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
@@ -34,15 +34,11 @@ const DepreciationHistory = ({ id, canIssueCertificate, supplierAccount, assetDe
             gridApi.setRowData([]);
         }
         var api = `${serializedAsset.api}/${id}/depreciation-history`;
-        if (supplierAccount) {
-            api = api + `?supplierAccount=${supplierAccount}`;
-        }
         axiosInstance()
             .get(api)
             .then(({ data: { data } }) => {
                 let rows = data?.map((u) => {
                     let finalObject: any = prepareDataForGrid(u);
-                    finalObject.attachmentId = u?.attachmentId;
                     return {
                         ...finalObject
                     };
@@ -84,6 +80,7 @@ const DepreciationHistory = ({ id, canIssueCertificate, supplierAccount, assetDe
                         limit={limit}
                         pageSizes={pageSizes}
                         page={page}
+                        allowAction={false}
                         allowSelection={false}
                         isClientSideGrid={true}
                         loading={loading}
