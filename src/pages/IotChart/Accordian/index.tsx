@@ -59,66 +59,61 @@ const AccordionDetails = withStyles((theme) => ({
 
 export default function CustomAccordian({ expandedAccordition, setExpandedAccordition, category, currentData }) {
 
-  return (
-    <Accordion
-      expanded={expandedAccordition[category?._id]}
-      className={`omsAccordian w-full`}
-      onChange={() => {
-        setExpandedAccordition((prev) => (
-          {
-            ...prev,
-            [category?._id]: expandedAccordition[category?._id] ? false : true
-          }
-        ));
-      }}>
-      <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
-        <Box display="flex">
-          <Box>
-            <IconButton size="small"> {expandedAccordition[category?._id] ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
-          </Box>
-          <Box padding="5px">
-            <Typography variant="subtitle2" style={{ fontSize: '14.2056px', fontWeight: 600 }}>
-              {category?.iotDataPointsCategoryName}
-            </Typography>
-          </Box>
-        </Box>
-      </AccordionSummary>
-      <AccordionDetails>
-        {expandedAccordition[category?._id] &&
-          <>
-            <Grid container spacing={1}>
-              {currentData?.filter((d) => d?.category?.optionValue === category?._id)?.map((data) => {
-                return (
-                  <Grid item xs={12} sm={6} lg={4} md={4}>
-                    <Box
-                      border="1px solid var(--common-border-color)"
-                      className="p-[10px] rounded-md min-h-full"
-                      title={`${data?.fieldLabel} : ${data?.value} ${data?.unit ? `(${data.unit})` : ''}`}
-                    >
-                      <p className="mb-2 flex flex-wrap justify-between text-[14px] text-[var(--primary-text)]">
-                        <strong className=" line-clamp-1">{data?.fieldLabel} : </strong>
-                        <span className=" font-medium">
-                          {data?.fieldValue}
-                          {data?.unit && `(${data?.unit})`}
-                        </span>
-                      </p>
-                      <span className="text-gray-500 dark:text-gray-300 text-[12px]">{moment(data?.time).format(dateTimeFormat)}</span>
-                    </Box>
-                  </Grid>
-                );
-              })}
-            </Grid>
-            {category?.child?.map((child: any) => (
-              <CustomAccordian
-                expandedAccordition={expandedAccordition}
-                setExpandedAccordition={setExpandedAccordition}
-                category={child}
-                currentData={currentData}
-              />
-            ))}
-          </>
+  return (<Accordion
+    expanded={expandedAccordition[category?._id]}
+    className={`omsAccordian w-full`}
+    onChange={() => {
+      setExpandedAccordition((prev) => (
+        {
+          ...prev,
+          [category?._id]: expandedAccordition[category?._id] ? false : true
         }
-      </AccordionDetails>
-    </Accordion>
+      ));
+    }}>
+    <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
+      <Box display="flex">
+        <Box>
+          <IconButton size="small"> {expandedAccordition[category?._id] ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
+        </Box>
+        <Box padding="5px">
+          <Typography variant="subtitle2" style={{ fontSize: '14.2056px', fontWeight: 600 }}>
+            {category?.iotDataPointsCategoryName}
+          </Typography>
+        </Box>
+      </Box>
+    </AccordionSummary>
+    <AccordionDetails>
+      {expandedAccordition[category?._id] &&
+        <>
+          <Grid container spacing={1}>
+            {currentData?.filter((d) => d?.category?.optionValue === category?._id)?.map((data) => {
+              return (
+                <Grid item xs={12} sm={6} lg={4} md={4}>
+                  <Box border="1px solid var(--common-border-color)" className="p-[10px] rounded-md min-h-full">
+                    <p className="mb-2 flex flex-wrap justify-between text-[14px] text-[var(--primary-text)]">
+                      <strong className=" line-clamp-1">{data?.fieldLabel} : </strong>
+                      <span className=" font-medium">
+                        {data?.fieldValue || 0}
+                        {data?.unit && `(${data?.unit})`}
+                      </span>
+                    </p>
+                    <span className="text-gray-500 dark:text-gray-300 text-[12px]">{moment(data?.time).format(dateTimeFormat)}</span>
+                  </Box>
+                </Grid>
+              );
+            })}
+          </Grid>
+          {category?.child?.map((child: any) => (
+            <CustomAccordian
+              expandedAccordition={expandedAccordition}
+              setExpandedAccordition={setExpandedAccordition}
+              category={child}
+              currentData={currentData}
+            />
+          ))}
+        </>
+      }
+    </AccordionDetails>
+  </Accordion>
   );
 }
