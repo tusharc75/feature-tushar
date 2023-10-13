@@ -84,7 +84,6 @@ const QuotationDetails = () => {
   const [showAllVersionStatus, setShowAllVersionStatus] = useState(false);
   const [currVersionId, setCurrVersionId] = useState(null);
   const [sentToCustomer, setSentToCustomer] = useState(false);
-  const [versionStatus, setVersionStatus] = useState(QUOTATION_STATUS.acceptByCustomer);
 
   const [convertConfirmBox, setConvertConfirmBox] = useState(false);
   const [renewal, setRenewal] = useState(false);
@@ -92,6 +91,7 @@ const QuotationDetails = () => {
 
   const [stepList, setStepList] = useState(quotationProcessSteps);
   const [stepNames, setStepNames] = useState(quotationProcessSteps.map((item) => item.name));
+  const [canConvert, setCanConvert] = useState(false);
 
   useEffect(() => {
     if (tabValue !== tab) {
@@ -178,6 +178,60 @@ const QuotationDetails = () => {
     }
   }, [id]);
 
+  useEffect(() => {
+    if (quotationData && quotationFields) {
+      if (quotationData?.type) {
+        if (quotationData?.type === QUOTATION_TYPE.rentalJob) {
+          var canAllowMultipleTimeConvert = false;
+          const rentalJobField = quotationFields?.find((e) => e?.fieldData?.fieldName === 'rentalJob')?.fieldData
+          if (rentalJobField) {
+            if (rentalJobField?.type === "multiSelect") {
+              canAllowMultipleTimeConvert = true
+            }
+          }
+          if (canAllowMultipleTimeConvert && [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.converted]?.includes(quotationData?.status)) {
+            var isAllowedToEdit = [...(quotationData.collaborator ?? []), quotationData.owner].some((d) => d?.optionValue === user?.user?._id);
+            if (user?.role?.selectedEntity?.superAdminAccess) {
+              isAllowedToEdit = true;
+            }
+            setAllowedToEdit(isAllowedToEdit)
+            setCanConvert(true)
+          }
+          else if (!quotationData?.rentalJob && [QUOTATION_STATUS.acceptByCustomer]?.includes(quotationData?.status)) {
+            setCanConvert(true)
+          }
+          else {
+            setCanConvert(false)
+          }
+        }
+        else if (quotationData?.type === QUOTATION_TYPE.salesOrder) {
+          if (!quotationData?.salesOrder && [QUOTATION_STATUS.acceptByCustomer]?.includes(quotationData?.status)) {
+            setCanConvert(true)
+          }
+          else {
+            setCanConvert(false)
+          }
+        }
+        else if (quotationData?.type === QUOTATION_TYPE.repairOrder) {
+          if (!quotationData?.repairOrder && [QUOTATION_STATUS.acceptByCustomer]?.includes(quotationData?.status)) {
+            setCanConvert(true)
+          }
+          else {
+            setCanConvert(false)
+          }
+        }
+        else if (quotationData?.type === QUOTATION_TYPE.fieldJob) {
+          if (!quotationData?.fieldJob && [QUOTATION_STATUS.acceptByCustomer]?.includes(quotationData?.status)) {
+            setCanConvert(true)
+          }
+          else {
+            setCanConvert(false)
+          }
+        }
+      }
+    }
+  }, [quotationData, quotationFields]);
+
   const fetchQuotationData = async (version: any = 0, loading = true) => {
     setLoading(loading);
     try {
@@ -212,7 +266,6 @@ const QuotationDetails = () => {
       }
       setCurrentVersion(versionIndex);
       setCurrVersionId(data.versions[versionIndex]?._id);
-      setVersionStatus(data.versions[versionIndex]?.status);
       setSentToCustomer(data.versions[versionIndex]?.status === QUOTATION_STATUS.sentToCustomer);
 
       if (data.versions[versionIndex]?.status === QUOTATION_STATUS.acceptByCustomer) {
@@ -453,28 +506,22 @@ const QuotationDetails = () => {
                       {isCloning ? <>Cloning Version-{currentVersion}</> : `Clone Version-${currentVersion}`}
                     </Button>
                   </MenuItem>
-                  {allowedToEdit &&
-                    quotationData?.type &&
-                    quotationData?.status === QUOTATION_STATUS.acceptByCustomer &&
-                    !quotationData?.rentalJob &&
-                    !quotationData?.repairOrder &&
-                    !quotationData?.salesOrder &&
-                    !quotationData?.fieldJob && (
-                      <MenuItem>
-                        <Button
-                          onClick={() => {
-                            setConvertConfirmBox(true);
-                            closeActionsAction();
-                          }}
-                          variant="text"
-                          type="button"
-                          size="small"
-                          startIcon={<CachedIcon />}
-                        >
-                          Convert to {quotationData?.type || ""}
-                        </Button>
-                      </MenuItem>
-                    )}
+                  {(allowedToEdit && canConvert) && (
+                    <MenuItem>
+                      <Button
+                        onClick={() => {
+                          setConvertConfirmBox(true);
+                          closeActionsAction();
+                        }}
+                        variant="text"
+                        type="button"
+                        size="small"
+                        startIcon={<CachedIcon />}
+                      >
+                        Convert to {quotationData?.type || ""}
+                      </Button>
+                    </MenuItem>
+                  )}
                   {permissions?.quotation?.isDelete && (
                     <MenuItem>
                       <Button
