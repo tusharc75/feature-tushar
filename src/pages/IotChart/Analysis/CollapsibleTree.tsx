@@ -112,7 +112,7 @@ const RenderParentCollapsible = ({
             <VariableSizeList
               ref={listRef}
               className="List"
-              height={800}
+              height={600}
               itemCount={category.dataPoints?.length}
               itemSize={(index) => {
                 return category.dataPoints[index]._id === childOpen ? 650 : 55;
@@ -139,7 +139,7 @@ const CollapsibleTree: FC<CollapsibleTreeProps> = ({ categories, dateFilters, as
   };
 
   return (
-    <div {...others} className={`${cssVariables}`}>
+    <div {...others} className={`${cssVariables} grid gap-3 md:gap-4 `}>
       {categories.map((category) => {
         return (
           <div key={category._id}>
