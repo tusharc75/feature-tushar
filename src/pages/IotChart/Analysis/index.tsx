@@ -20,7 +20,7 @@ const Analysis = ({ assetId, dataPoints }: { assetId: string; dataPoints: TDataP
   });
 
   const [searchValue, setSearchValue] = useState('');
-  const debouncedSearchValue = useDebounce(searchValue, 500);
+  const debouncedSearchValue = useDebounce<string>(searchValue, 500);
   const [categories, setCategories] = useState<TCategories[] | null>(null);
   // const [expandedAccordition, setExpandedAccordition] = useState({});
   // const [expandedAccorditionItem, setExpandedAccorditionItem] = useState(null);
