@@ -6,7 +6,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import axiosInstance from 'src/axios/axiosInstance';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { dateTimeFormat } from 'src/constants/helpers';
-import CustomAccordian from '../Accordian';
+import TreeView from './TreeView';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import SearchBox from 'src/components/Helpers/SearchBox';
@@ -112,9 +112,9 @@ export default function Current({ assetId }) {
         <Grid item lg={8} md={8} sm={12} xs={12}>
           {categories && currentData ? (
             currentData?.length ? (
-              <div className="grid gap-3 md:gap-4 ">
+              <div className="grid gap-3 md:gap-4">
                 {categories?.map((category: any, index) => (
-                  <CustomAccordian
+                  <TreeView
                     expandedAccordition={expandedAccordition}
                     setExpandedAccordition={setExpandedAccordition}
                     category={category}
