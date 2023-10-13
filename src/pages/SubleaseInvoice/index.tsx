@@ -240,7 +240,6 @@ const SubleaseInvoice = () => {
             onClose={() => {
               setViewInvoiceDialog({ open: false, data: null });
             }}
-            
           />
         )}
       </CustomContainer>

@@ -112,18 +112,20 @@ export default function Current({ assetId }) {
         <Grid item lg={8} md={8} sm={12} xs={12}>
           {categories && currentData ? (
             currentData?.length ? (
-              categories?.map((category: any, index) => (
-                <CustomAccordian
-                  expandedAccordition={expandedAccordition}
-                  setExpandedAccordition={setExpandedAccordition}
-                  category={category}
-                  currentData={
-                    searchValue?.trim() === ''
-                      ? currentData
-                      : currentData?.filter((e) => e?.fieldLabel?.toLowerCase()?.includes(searchValue?.trim()?.toLowerCase()))
-                  }
-                />
-              ))
+              <div className="grid gap-3 md:gap-4 ">
+                {categories?.map((category: any, index) => (
+                  <CustomAccordian
+                    expandedAccordition={expandedAccordition}
+                    setExpandedAccordition={setExpandedAccordition}
+                    category={category}
+                    currentData={
+                      searchValue?.trim() === ''
+                        ? currentData
+                        : currentData?.filter((e) => e?.fieldLabel?.toLowerCase()?.includes(searchValue?.trim()?.toLowerCase()))
+                    }
+                  />
+                ))}
+              </div>
             ) : (
               <Box mt={5} textAlign="center">
                 <p>No Data Found</p>
