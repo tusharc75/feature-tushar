@@ -65,8 +65,7 @@ const RenderParentCollapsible = ({
   open,
   handleClick,
   dateFilters,
-  assetId,
-  isOpen
+  assetId
 }: {
   category: any;
   open: string | boolean;
