@@ -47,8 +47,8 @@ const RenderChildCollapsible = ({
           </button>
         </div>
         <Collapse in={dataPoint._id === open} unmountOnExit>
-          <div className="m-3 md:m-4">
-            <div className="container-with-border w-100 sm:h-[calc(574px-48px)] h-[250px] px-4 overflow-auto py-1">
+          <div className="">
+            <div className="container-with-border rounded-[0_!important] w-100 sm:h-[591px] h-[250px] px-4 [overflow:auto_!important] py-1">
               <Chart dateFilters={dateFilters} assetId={assetId} dataPoints={[dataPoint]} />
             </div>
           </div>
@@ -115,7 +115,7 @@ const RenderParentCollapsible = ({
               height={800}
               itemCount={category.dataPoints?.length}
               itemSize={(index) => {
-                return category.dataPoints[index]._id === childOpen ? 600 : 42;
+                return category.dataPoints[index]._id === childOpen ? 650 : 55;
               }}
               itemData={category.dataPoints}
               width={'100%'}
