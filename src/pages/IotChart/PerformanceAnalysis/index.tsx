@@ -7,6 +7,7 @@ import SearchBox from 'src/components/Helpers/SearchBox';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import TreeViewNew from './TreeView';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
 
@@ -75,7 +76,7 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
             <div className="sm:h-[calc(574px-48px)] h-[250px] px-2 overflow-auto py-1">
               <FormGroup>
                 <div className="grid gap-2">
-                  {categories &&
+                  {categories ?
                     categories?.map((category: any, index) => (
                       <TreeViewNew
                         expandedAccordition={expandedAccordition}
@@ -90,6 +91,10 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
                         setSelected={setSelected}
                       />
                     ))
+                    :
+                    <Box p={2} height={500}>
+                      <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                    </Box>
                   }
                 </div>
               </FormGroup>
