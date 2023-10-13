@@ -101,18 +101,19 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
     ) {
       const resources = resource.map((r) => {
         const newData = { ...r };
-        delete newData.isCreateDisabled;
-        delete newData.isDeleteDisabled;
         delete newData.isReadDisabled;
         delete newData.isUpdateDisabled;
+        delete newData.isCreateDisabled;
+        delete newData.isDeleteDisabled;
         delete newData.isHiddenDisabled;
         return newData;
       });
       const fields = field.map((f) => {
         const newData = { ...f };
-        delete newData.isCreateDisabled;
         delete newData.isReadDisabled;
         delete newData.isUpdateDisabled;
+        delete newData.isCreateDisabled;
+        delete newData.isDeleteDisabled;
         delete newData.isHiddenDisabled;
         delete newData.isHidden;
         return newData;
