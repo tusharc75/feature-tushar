@@ -76,6 +76,13 @@ const RenderParentCollapsible = ({
   const listRef = useRef(null);
   const prevIndex = useRef(0);
   const [childOpen, setChildOpen] = useState<string | boolean>(false);
+  const [treeOpen, setTreeOpen] = useState<string | boolean>(false);
+
+  const handleTreeClick = (id: string, index = 1) => {
+    setTreeOpen((prev) => {
+      return prev === id ? false : id;
+    });
+  };
 
   const handleChildClick = (id: string, index = 1) => {
     setChildOpen((prev) => {
@@ -104,8 +111,8 @@ const RenderParentCollapsible = ({
               <RenderParentCollapsible
                 key={child._id}
                 category={child}
-                open={open}
-                handleClick={handleClick}
+                open={treeOpen}
+                handleClick={handleTreeClick}
                 dateFilters={dateFilters}
                 assetId={assetId}
               />
