@@ -1,7 +1,7 @@
 import { uniqBy } from 'lodash';
 import type { TCategories, TDataPoints } from './types';
 
-export const group = (dataPoints: TDataPoints[], seachKeyword = '') => {
+export const group = ({ dataPoints, seachKeyword = '' }: { dataPoints: TDataPoints[]; seachKeyword?: string }) => {
   if (!dataPoints || dataPoints.length === 0) return null;
 
   const data = dataPoints?.filter((e) =>

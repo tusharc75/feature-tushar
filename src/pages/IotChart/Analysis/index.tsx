@@ -26,7 +26,7 @@ const Analysis = ({ assetId, dataPoints }: { assetId: string; dataPoints: TDataP
   // const [expandedAccorditionItem, setExpandedAccorditionItem] = useState(null);
 
   useEffect(() => {
-    const categories = group(dataPoints, debouncedSearchValue);
+    const categories = group({ dataPoints: dataPoints, seachKeyword: debouncedSearchValue });
     setCategories(categories);
   }, [dataPoints, debouncedSearchValue]);
 
