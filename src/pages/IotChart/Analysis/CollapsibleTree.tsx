@@ -139,7 +139,7 @@ const CollapsibleTree: FC<CollapsibleTreeProps> = ({ categories, dateFilters, as
   };
 
   return (
-    <div {...others} className={`${cssVariables}`}>
+    <div {...others} className={`${cssVariables} grid gap-3 md:gap-4 `}>
       {categories.map((category) => {
         return (
           <div key={category._id}>

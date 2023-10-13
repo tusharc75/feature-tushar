@@ -4,13 +4,13 @@ import moment from 'moment';
 // import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 // import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 // import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
-import Chart from '../Helper/Chart';
 import FilterModel from '../Helper/FilterModel';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import type { TDataPoints, TCategories } from './types';
 import { group } from './utils';
 import CollapsibleTree from './CollapsibleTree';
+import { useDebounce } from 'src/hooks';
 
 const Analysis = ({ assetId, dataPoints }: { assetId: string; dataPoints: TDataPoints[] }) => {
   const [dateFilters, setDateFilters] = useState({
@@ -20,17 +20,15 @@ const Analysis = ({ assetId, dataPoints }: { assetId: string; dataPoints: TDataP
   });
 
   const [searchValue, setSearchValue] = useState('');
+  const debouncedSearchValue = useDebounce(searchValue, 500);
   const [categories, setCategories] = useState<TCategories[] | null>(null);
   // const [expandedAccordition, setExpandedAccordition] = useState({});
   // const [expandedAccorditionItem, setExpandedAccorditionItem] = useState(null);
 
   useEffect(() => {
-    // const categories = group(dataPoints);
-    const categories = group(
-      dataPoints?.filter((e) => (searchValue?.trim() === '' ? true : e?.fieldLabel?.toLowerCase()?.includes(searchValue?.trim()?.toLowerCase())))
-    );
+    const categories = group(dataPoints, debouncedSearchValue);
     setCategories(categories);
-  }, [dataPoints, searchValue]);
+  }, [dataPoints, debouncedSearchValue]);
 
   // const AccordianItem = ({ dataPoint, data }) => {
   //   return (

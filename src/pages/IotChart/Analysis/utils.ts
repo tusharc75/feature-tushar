@@ -1,8 +1,12 @@
 import { uniqBy } from 'lodash';
 import type { TCategories, TDataPoints } from './types';
 
-export const group = (data: TDataPoints[]) => {
-  if (!data || data.length === 0) return null;
+export const group = (dataPoints: TDataPoints[], seachKeyword = '') => {
+  if (!dataPoints || dataPoints.length === 0) return null;
+
+  const data = dataPoints?.filter((e) =>
+    seachKeyword?.trim() === '' ? true : e?.fieldLabel?.toLowerCase()?.includes(seachKeyword?.trim()?.toLowerCase())
+  );
 
   let uniqueCategories: TDataPoints[] = uniqBy(data, 'category.optionValue');
   let categories: TCategories[] = [];
