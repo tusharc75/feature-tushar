@@ -14,13 +14,17 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
 
   return (
     <>
-      <FilterModel dateFilters={dateFilters} setDateFilters={setDateFilters} />
-      <Box mt={2} >
-        <TimleineChart
-          assetId={assetId}
-          dateFilters={dateFilters}
-          dataPoints={dataPoints} />
-      </Box>
+      {dataPoints?.filter((e) => e.type === 'Digital')?.length ?
+        <>
+          <FilterModel dateFilters={dateFilters} setDateFilters={setDateFilters} />
+          <Box mt={2} >
+            <TimleineChart
+              assetId={assetId}
+              dateFilters={dateFilters}
+              dataPoints={dataPoints} />
+          </Box>
+        </>
+        : <span>Status Data Point Not Configured Yet</span>}
     </>
   );
 };

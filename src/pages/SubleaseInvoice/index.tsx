@@ -1,8 +1,8 @@
-import { Box, Button, Grid, IconButton, Menu, MenuItem } from '@material-ui/core';
-import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
+import { Box, Grid, IconButton} from '@material-ui/core';
+import { Fragment, useEffect, useReducer, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
-import { camelCase, map, uniq } from 'lodash';
+import { camelCase } from 'lodash';
 import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
 import { useData } from 'src/StateProvider/Provider';
 import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
@@ -12,11 +12,10 @@ import NoteAddIcon from '@material-ui/icons/NoteAdd';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import CreateInvoiceDialog from './CreateInvoice';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { isMobile, isTablet } from 'react-device-detect';
+import { isMobile } from 'react-device-detect';
 import CustomContainer from 'src/components/CustomContainer';
 import styles from '../Leads/Header.module.scss';
 import SearchBox from 'src/components/Helpers/SearchBox';
-import { ExpandMore } from '@material-ui/icons';
 import ViewAllInvoices from './ViewInvoice';
 
 const SubleaseInvoice = () => {
@@ -25,14 +24,13 @@ const SubleaseInvoice = () => {
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const {
-    state: { permissions, selectedEntity, user }
+    state: { selectedEntity }
   }: any = useData();
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [columns, setColumns] = useState([]);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [gridApi, setGridApi] = useState(null);
   const { getColumnData } = useColumns();
 
@@ -171,20 +169,9 @@ const SubleaseInvoice = () => {
     fetchSubleaseData();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
-  };
-
-  const checkUniqCreateInvoice = () => {
-   
   };
 
   return (
@@ -208,42 +195,6 @@ const SubleaseInvoice = () => {
                   size="small"
                   value={search}
                 />
-                <>
-                  <Button
-                    variant={'outlined'}
-                    color="default"
-                    size="small"
-                    onClick={openActions}
-                    disabled={selectedRecords.length ? false : true}
-                    aria-controls="action-menu"
-                    className={`new-dropdown-v1`}
-                    endIcon={<ExpandMore />}
-                  >
-                    Actions
-                  </Button>
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
-                    }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
-                  >
-                    <MenuItem
-                    //   disabled={checkUniqCreateInvoice()}
-                      onClick={() => {
-                        setCreateInvoiceDialog({ open: true, data: selectedRecords })
-                        closeActions();
-                      }}
-                    >
-                      Create Invoice
-                    </MenuItem>
-                  </Menu>
-                </>
               </Box>
             </Grid>
           </Grid>

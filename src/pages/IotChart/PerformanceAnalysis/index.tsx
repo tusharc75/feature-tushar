@@ -1,13 +1,18 @@
-import { useCallback, useState } from 'react';
-import { Box, Checkbox, FormControlLabel, FormGroup, Collapse, IconButton, TextField, Grid } from '@material-ui/core';
+import { useContext, useEffect, useState } from 'react';
+import { Box, FormGroup, Collapse, IconButton, TextField, Grid } from '@material-ui/core';
 import moment from 'moment';
 import FilterModel from '../Helper/FilterModel';
 import Chart from '../Helper/Chart';
-import { uniqBy } from 'lodash';
-import { ExpandLess, ExpandMore } from '@material-ui/icons';
 import SearchBox from 'src/components/Helpers/SearchBox';
+import axiosInstance from 'src/axios/axiosInstance';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import TreeViewNew from './TreeView';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
+
+  const toastConfig = useContext(CustomToastContext);
+
   const [dateFilters, setDateFilters] = useState({
     from: new Date(moment().subtract(8, 'days').startOf('day').toJSON()),
     to: new Date(),
@@ -18,112 +23,32 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
     dataPoints: {}
   });
 
+  const [expandedAccordition, setExpandedAccordition] = useState({});
+  const [categories, setCategories] = useState(null);
   const [searchValue, setSearchValue] = useState('');
-  const [open, setOpen] = useState({});
-  const [openChild, setOpenChild] = useState({});
 
-  const handleChange = (name: string) => {
-    setOpen((prev) => ({
-      ...prev,
-      [name]: open[name] ? false : true
-    }));
-  };
+  useEffect(() => {
+    fetchCategory();
+  }, [assetId]);
 
-  const handleChangeChild = (name: string) => {
-    setOpenChild((prev) => ({
-      ...prev,
-      [name]: openChild[name] ? false : true
-    }));
-  };
+  const fetchCategory = async () => {
+    axiosInstance()
+      .get(`/dynamic-form`, {
+        headers: {
+          Resource: 'Iot Data Points Category'
+        }
+      })
+      .then(({ data: { data } }) => {
+        const categoryData: any = data?.filter((e) => !e.parentCategory);
+        categoryData?.forEach((element) => {
+          element.child = data?.filter((e) => e?.parentCategory?.optionValue === element?._id);
+        });
+        setCategories(categoryData);
 
-  const compareCollapse = useCallback(
-    (name: string, type: string) => {
-      if (type === 'parentCategory') return open[name];
-      else if (type === 'category') return openChild[name];
-    },
-    [open, openChild]
-  );
-
-  const TreeView = ({ data, type, allData = [] }) => {
-    return (
-      <div key={data[type]?.optionLabel} className=" shadow-[0px_4px_20px_rgba(0,_0,_0,_0.06)] my-3 rounded-md ">
-        <div
-          className={`flex flex-wrap justify-between items-center cursor-pointer py-1 px-3 rounded-md transition-all duration-[300ms]  ${
-            compareCollapse(`${data[type]?.optionValue}`, type)
-              ? 'bg-[var(--new-theme-color)] text-white'
-              : 'hover:bg-gray-300 dark:hover:bg-gray-800'
-          }`}
-          onClick={(e) => {
-            e.stopPropagation();
-            if (type === 'parentCategory') handleChange(`${data[type]?.optionValue}`);
-            else if (type === 'category') handleChangeChild(`${data[type]?.optionValue}`);
-          }}
-        >
-          <h6 className=" line-clamp-1 text-sm">{data[type]?.optionLabel}</h6>
-          <IconButton
-            size="small"
-            className={`${compareCollapse(`${data[type]?.optionValue}`, type) ? 'text-white' : ''}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (type === 'parentCategory') handleChange(`${data[type]?.optionValue}`);
-              else if (type === 'category') handleChangeChild(`${data[type]?.optionValue}`);
-            }}
-          >
-            {compareCollapse(`${data[type]?.optionValue}`, type) ? (
-              <ExpandLess style={{ color: 'currentcolor' }} />
-            ) : (
-              <ExpandMore style={{ color: 'currentcolor' }} />
-            )}
-          </IconButton>
-        </div>
-        <Collapse in={compareCollapse(`${data[type]?.optionValue}`, type)} key={data[type]?.optionLabel} unmountOnExit>
-          <div className="pl-4 pr-2" key={data[type]?.optionLabel}>
-            {type === 'parentCategory'
-              ? uniqBy(
-                  allData?.filter((d) => d['category']?.parentCategory === data[type]?.optionValue),
-                  'category.optionValue'
-                )?.map((data) => {
-                  return (
-                    <TreeView
-                      data={data}
-                      type={'category'}
-                      allData={allData?.filter((d) => d['category']?.optionValue === data?.category?.optionValue)}
-                    />
-                  );
-                })
-              : type === 'category'
-              ? allData
-                  ?.filter((d) => d[type]?.optionValue === data[type]?.optionValue)
-                  ?.map((dataPoint) => {
-                    return (
-                      <div className="max-w-full">
-                        <FormControlLabel
-                          key={dataPoint?.fieldName}
-                          title={dataPoint?.fieldLabel}
-                          control={
-                            <Checkbox
-                              onChange={(e) => {
-                                setSelected({
-                                  dataPoints: { ...selected.dataPoints, [dataPoint?.fieldName]: e.target.checked }
-                                });
-                              }}
-                              checked={selected.dataPoints[dataPoint?.fieldName]}
-                              inputProps={{
-                                'aria-labelledby': `checkbox-list-label-select-all`
-                              }}
-                            />
-                          }
-                          className="  max-w-full [&>span+span]:max-w-full [&>span+span]:block [&>span+span]:line-clamp-1 "
-                          label={<div className="line-clamp-1 [overflow-wrap:anywhere] mt-2">{dataPoint?.fieldLabel}</div>}
-                        />
-                      </div>
-                    );
-                  })
-              : null}
-          </div>
-        </Collapse>
-      </div>
-    );
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   };
 
   return (
@@ -148,46 +73,30 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
             <p className=" font-semibold px-4 py-3 text-[16px]" style={{ borderBottom: '1px solid var(--common-border-color)' }}>
               Data Points
             </p>
-            <div className="sm:h-[calc(574px-48px)] h-[250px] px-4 overflow-auto py-1">
+            <div className="sm:h-[calc(574px-48px)] h-[250px] px-2 overflow-auto py-1">
               <FormGroup>
-                {Array.isArray(dataPoints) && (
-                  <>
-                    {uniqBy(
-                      dataPoints.filter((d) => d?.hasOwnProperty('parentCategory')),
-                      'parentCategory.optionValue'
-                    )?.map((category: any) => {
-                      return (
-                        // <TreeView data={category} type={'parentCategory'} allData={dataPoints.filter((d) => d?.hasOwnProperty('parentCategory'))} />
-                        <TreeView
-                          data={category}
-                          type={'parentCategory'}
-                          allData={dataPoints?.filter((e) =>
-                            e?.hasOwnProperty('parentCategory') && searchValue?.trim() === ''
-                              ? true
-                              : e?.fieldLabel?.toLowerCase()?.includes(searchValue?.trim()?.toLowerCase())
-                          )}
-                        />
-                      );
-                    })}
-                    {uniqBy(
-                      dataPoints.filter((d) => !d?.hasOwnProperty('parentCategory')),
-                      'category.optionValue'
-                    )?.map((category: any) => {
-                      // return <TreeView data={category} type={'category'} allData={dataPoints.filter((d) => !d?.hasOwnProperty('parentCategory'))} />;
-                      return (
-                        <TreeView
-                          data={category}
-                          type={'category'}
-                          allData={dataPoints?.filter((e) =>
-                            !e?.hasOwnProperty('parentCategory') && searchValue?.trim() === ''
-                              ? true
-                              : e?.fieldLabel?.toLowerCase()?.includes(searchValue?.trim()?.toLowerCase())
-                          )}
-                        />
-                      );
-                    })}
-                  </>
-                )}
+                <div className="grid gap-2">
+                  {categories ?
+                    categories?.map((category: any, index) => (
+                      <TreeViewNew
+                        expandedAccordition={expandedAccordition}
+                        setExpandedAccordition={setExpandedAccordition}
+                        category={category}
+                        currentData={
+                          searchValue?.trim() === ''
+                            ? dataPoints
+                            : dataPoints?.filter((e) => e?.fieldLabel?.toLowerCase()?.includes(searchValue?.trim()?.toLowerCase()))
+                        }
+                        selected={selected}
+                        setSelected={setSelected}
+                      />
+                    ))
+                    :
+                    <Box p={2} height={500}>
+                      <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                    </Box>
+                  }
+                </div>
               </FormGroup>
             </div>
           </div>
