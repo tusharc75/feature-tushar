@@ -19,7 +19,7 @@ const group = (categories, data, searchKeyword = '') => {
     const category = categories[index];
     const filteredDtaPoints = datapoints?.filter((d) => d?.category?.optionValue === category?._id);
     const obj = {
-      dataPoints: filteredDtaPoints,
+      dataPoints: filteredDtaPoints || [],
       ...category
     };
     newCategory.push(obj);

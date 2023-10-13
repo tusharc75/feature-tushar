@@ -112,7 +112,7 @@ const RenderParentCollapsible = ({
             ))
           ) : (
             <div>
-              {category.dataPoints.length > 0 ? (
+              {category?.dataPoints?.length > 0 ? (
                 <VariableSizeList
                   ref={listRef}
                   className="List"
