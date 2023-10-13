@@ -111,21 +111,27 @@ const RenderParentCollapsible = ({
               />
             ))
           ) : (
-            <VariableSizeList
-              ref={listRef}
-              className="List"
-              height={600}
-              itemCount={category.dataPoints?.length}
-              itemSize={(index) => {
-                return category.dataPoints[index]._id === childOpen ? 650 : 55;
-              }}
-              itemData={category.dataPoints}
-              width={'100%'}
-            >
-              {(props) => (
-                <RenderChildCollapsible {...props} open={childOpen} handleClick={handleChildClick} dateFilters={dateFilters} assetId={assetId} />
+            <div>
+              {category.dataPoints.length > 0 ? (
+                <VariableSizeList
+                  ref={listRef}
+                  className="List"
+                  height={600}
+                  itemCount={category.dataPoints?.length}
+                  itemSize={(index) => {
+                    return category.dataPoints[index]._id === childOpen ? 650 : 55;
+                  }}
+                  itemData={category.dataPoints}
+                  width={'100%'}
+                >
+                  {(props) => (
+                    <RenderChildCollapsible {...props} open={childOpen} handleClick={handleChildClick} dateFilters={dateFilters} assetId={assetId} />
+                  )}
+                </VariableSizeList>
+              ) : (
+                <p>No Data Found..</p>
               )}
-            </VariableSizeList>
+            </div>
           )}
         </div>
       </Collapse>
