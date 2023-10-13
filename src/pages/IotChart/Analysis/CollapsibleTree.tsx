@@ -125,7 +125,7 @@ const RenderParentCollapsible = ({
                 <VariableSizeList
                   ref={listRef}
                   className="List"
-                  height={600}
+                  height={650}
                   itemCount={category.dataPoints?.length}
                   itemSize={(index) => {
                     return category.dataPoints[index]._id === childOpen ? 650 : 55;
