@@ -27,7 +27,7 @@ const group = (categories, data, searchKeyword = '') => {
   return newCategory;
 };
 
-const Analysis = ({ assetId, dataPoints }: { assetId: string; dataPoints: TDataPoints[] }) => {
+const Analysis = ({ assetId, dataPoints }: { assetId: string; dataPoints: any[] }) => {
   const toastConfig = useContext(CustomToastContext);
   const [dateFilters, setDateFilters] = useState({
     from: new Date(moment().subtract(8, 'days').format('MM/DD/YYYY')),
