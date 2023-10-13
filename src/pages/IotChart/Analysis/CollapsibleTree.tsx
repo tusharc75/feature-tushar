@@ -107,16 +107,18 @@ const RenderParentCollapsible = ({
       <Collapse in={category._id === open} unmountOnExit>
         <div className="m-3 md:m-4">
           {category?.child?.length > 0 ? (
-            category.child.map((child) => (
-              <RenderParentCollapsible
-                key={child._id}
-                category={child}
-                open={treeOpen}
-                handleClick={handleTreeClick}
-                dateFilters={dateFilters}
-                assetId={assetId}
-              />
-            ))
+            <div className="grid gap-3">
+              {category.child.map((child) => (
+                <RenderParentCollapsible
+                  key={child._id}
+                  category={child}
+                  open={treeOpen}
+                  handleClick={handleTreeClick}
+                  dateFilters={dateFilters}
+                  assetId={assetId}
+                />
+              ))}
+            </div>
           ) : (
             <div>
               {category?.dataPoints?.length > 0 ? (
