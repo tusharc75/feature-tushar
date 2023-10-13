@@ -1,7 +1,7 @@
 import { uniqBy } from 'lodash';
 import type { TCategories, TDataPoints } from './types';
 
-export const group = ({ dataPoints, seachKeyword = '' }: { dataPoints: TDataPoints[]; seachKeyword?: string }) => {
+export const group = ({ dataPoints, seachKeyword = '' }: { dataPoints: TDataPoints[]; seachKeyword?: string }): TCategories[] => {
   if (!dataPoints || dataPoints.length === 0) return null;
 
   const data = dataPoints?.filter((e) =>
@@ -15,7 +15,7 @@ export const group = ({ dataPoints, seachKeyword = '' }: { dataPoints: TDataPoin
   for (let i = 0; i < uniqueCategories.length; i++) {
     const uCategory = uniqueCategories[i];
     if (uCategory?.child?.length) {
-      child = group(uCategory.child);
+      child = group({ dataPoints: uCategory.child, seachKeyword });
     }
     const dataPoints: TDataPoints[] = [];
     for (let index = 0; index < data?.length; index++) {
