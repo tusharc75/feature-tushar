@@ -10,17 +10,19 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const group = (categories, data, searchKeyword = '') => {
-  if (categories.length < 1 || data.length < 1) return [];
+  if (categories?.length === 0 || data?.length === 0 || !categories || !data) return [];
   const datapoints = data?.filter((e) =>
     searchKeyword?.trim() === '' ? true : e?.fieldLabel?.toLowerCase()?.includes(searchKeyword?.trim()?.toLowerCase())
   );
+
   const newCategory = [];
   for (let index = 0; index < categories.length; index++) {
     const category = categories[index];
     const filteredDtaPoints = datapoints?.filter((d) => d?.category?.optionValue === category?._id);
     const obj = {
+      ...category,
       dataPoints: filteredDtaPoints || [],
-      ...category
+      child: group(category.child, datapoints, searchKeyword)
     };
     newCategory.push(obj);
   }
