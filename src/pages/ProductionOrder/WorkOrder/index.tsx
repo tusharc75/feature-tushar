@@ -328,8 +328,6 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   };
 
   const handleDelete = () => {
-    console.log(deleteData, deleteData?.filter((e: any) => !e?.subRows?.length && e?.workOrder?.status !== WORK_ORDER_STATUS.completed)?.length, deleteData?.filter((e: any) => !e?.subRows?.length
-      && e?.workOrder?.status !== WORK_ORDER_STATUS.completed)?.map((e) => e.workOrder?._id))
     if (deleteData?.some((e) => e.type === 'service')) {
       let ids = [];
       let workOrderId = '';
