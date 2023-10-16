@@ -366,17 +366,20 @@ const AssignEntityDialog = ({
                     <SearchBox onChange={handleSearch} className="terms_header_search_bar" width="300px" value={search} />
                   </Grid>
                 </Grid>
-                <div className="grid gap-3 mt-3">
+                <div className="grid gap-[20px] mt-3">
                   {steps.map((label, index) => (
-                    <div key={label}>
-                      <h4 className="text-[14px] flex items-center gap-[18px] ml-[6px] text-[var(--primary-text)]">
+                    <div key={label} className="relative">
+                      <h4 className="text-[14px] flex items-center max-[600px]:ml-[6px] gap-[18px] text-[var(--primary-text)]">
                         <span className="rounded-full bg-[--primary] grid place-items-center text-white text-[12px] w-[20px] h-[20px]">
                           {activeStep > index ? <Check className="block" style={{ fontSize: 14 }} /> : index + 1}
                         </span>
                         <span>{label}</span>
                       </h4>
+                      {activeStep === index && (
+                        <div className="hidden min-[600px]:block w-[1px] bg-[var(--common-border-color)] h-full absolute left-[10px] top-[20px] transform -translate-x-1/2 -translate-y-1/2 z-10"></div>
+                      )}
                       <Collapse in={activeStep === index}>
-                        <div className="max-w-full">
+                        <div className="max-w-full  min-[600px]:ml-[35px]">
                           <div className="max-w-full">{getStepContent(index)}</div>
                           <div className={classes.actionsContainer}>
                             <div>
