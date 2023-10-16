@@ -35,6 +35,7 @@ import { Autocomplete } from '@material-ui/lab';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { get_activity_resource } from '../../../components/Activity/Helpers/utils';
 import { ViewEmail } from 'src/components/Activity/Email/ViewEmail';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
 const tabs = {
   Inbox: 1,
@@ -78,9 +79,24 @@ const Email = () => {
   const [resourceData, setResourceData] = useState(null);
   const [loadingResources, setLoadingResources] = useState(false);
   const [selectedResourceData, setSelectedResourceData] = useState(null);
+  
   const [columns] = useState([
-    { field: 'to', headerName: 'Recipient', show: true, disabled: true, cellRenderer: 'recipentRenderer' },
-    { field: 'relatedTo', headerName: 'Related To', show: true, disabled: true, cellRenderer: 'referenceRenderer' },
+    {
+      field: 'to',
+      headerName: 'Recipient',
+      show: true,
+      disabled: true,
+      cellRenderer: 'recipentRenderer'
+    },
+    {
+      field: 'relatedTo',
+      headerName: 'Related To',
+      show: true,
+      disabled: true,
+      filter: false,
+      sortable: false,
+      cellRenderer: 'referenceRenderer'
+    },
     {
       field: 'subject',
       headerName: 'Subject',
@@ -160,7 +176,7 @@ const Email = () => {
   }, [resource]);
 
   const redirectToResource = (type, id) => {
-    history.push(type === 'quote' ? `${routes['quoteBuilder'].path}/detail/${id}` : `${routes[type].path}/detail/${id}`);
+    window.open(type === 'quote' ? `${routes['quoteBuilder'].path}/detail/${id}` : `${routes[type].path}/detail/${id}`);
   };
 
   const fetchEmails = async () => {
@@ -276,12 +292,15 @@ const Email = () => {
       {params.value && params.value?.length > 0 ? (
         params.value.map((d) => {
           return (
-            <>
-              <Link className="link text-truncate" onClick={() => redirectToResource(d?.type, d?.referenceId)}>
+            <div style={{ display: 'flex', alignItems: 'center' }} key={d.name}>
+              <p>
                 {d?.salutation ? `${d?.saluation} ${d?.name}` : d?.name}
-              </Link>
+              </p>
+              <IconButton className="ml-3" size="small" onClick={() => redirectToResource(d?.type, d?.referenceId)}>
+                 <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
               <Chip className="ml-3" color="primary" label={`${routes[d?.type]?.title}`} />
-            </>
+            </div>
           );
         })
       ) : (

@@ -81,7 +81,7 @@ const Entity: FC = () => {
   }, [search]);
 
   useEffect(() => {
-    fetchLoggedInUserRole()
+    fetchLoggedInUserRole();
   }, []);
 
   const fetchLoggedInUserRole = async () => {
@@ -365,10 +365,14 @@ const Entity: FC = () => {
               history.push(`${routes.entityDetail.path}/${d._id}`);
             }}
             extraParamsToCheckDelete={false}
-            onDelete={(d) => { }}
+            onDelete={(d) => {}}
             rowCount={rowCount}
             page={page}
             loading={loading}
+            actionCol={(data) => {
+              const params = { data };
+              return <ActionsRenderer {...params} />;
+            }}
             additionalDetails={[
               {
                 icon: <FaSuitcase />,
@@ -395,7 +399,7 @@ const Entity: FC = () => {
             owerCollaboratorInitialsOrImages=""
             onCreate={false}
             showClone={false}
-            onClone={() => { }}
+            onClone={() => {}}
             renderedFrom={renderedFrom}
           />
         ) : Object.keys(frameWorkComponent).length > 0 ? (

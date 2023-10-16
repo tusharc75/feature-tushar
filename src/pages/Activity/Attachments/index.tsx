@@ -844,7 +844,7 @@ export default function Attachment() {
                     onClose={closeActions}
                   >
                     <MenuItem
-                      disabled={permissions.attachment.isDelete ? !selectedRecords.some((records) => records.canEdit) : true}
+                      disabled={permissions.attachment.isDelete ? !selectedRecords.every((records) => records.canEdit) : true}
                       onClick={() => {
                         showConfirmBox(null);
                         closeActions();

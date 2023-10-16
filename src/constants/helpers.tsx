@@ -2210,6 +2210,7 @@ export const IOT_REPORT_LIST = [
         lookup: true,
         type: 'dropDown',
         multiple: false,
+        required: true,
         _id: '3'
       },
       {
@@ -2225,6 +2226,7 @@ export const IOT_REPORT_LIST = [
         fieldName: 'date',
         fieldLabel: 'Date',
         type: 'date',
+        required: true,
         _id: '2'
       },
       {
@@ -2232,6 +2234,7 @@ export const IOT_REPORT_LIST = [
         fieldLabel: 'Interval',
         type: 'dropDown',
         options: INTERVALS,
+        required: true,
         _id: '4'
       }
     ]
