@@ -48,7 +48,7 @@ const RenderChildCollapsible = memo(
           </div>
           <Collapse in={dataPoint._id === open} unmountOnExit>
             <div className="">
-              <div className="container rounded-[0_!important] w-100 sm:h-[591px] h-[250px] px-4 sm:[overflow:hidden_!important] py-1">
+              <div className="container rounded-[0_!important] w-100 h-[591px] px-4 [overflow:hidden_!important] py-1">
                 <Chart dateFilters={dateFilters} assetId={assetId} dataPoints={[dataPoint]} />
               </div>
             </div>

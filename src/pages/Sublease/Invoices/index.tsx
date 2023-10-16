@@ -11,20 +11,14 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { camelCase } from 'lodash';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ViewInvoice from '../../Invoice/ViewInvoice';
-import {
-    CustomDialogTransition,
-  } from 'src/constants/helpers';
-import { Dialog } from '@material-ui/core';
-import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CustomRenderCell from 'src/components/Helpers/CustomRenderCell';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
-const ViewAllInvoices = ({ subleaseId, onClose, subleaseName }) => {
-  const renderedFrom = 'sublease_invoice_all';
+const ViewAllInvoices = ({ subleaseId }) => {
+  const renderedFrom = 'sublease_invoice';
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -240,9 +234,7 @@ const ViewAllInvoices = ({ subleaseId, onClose, subleaseName }) => {
 
   return (
     <>
-    <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
-        <CustomDialogHeader title={`Invoices : ${subleaseName}`} onClose={onClose} showRequiredLabel={false}></CustomDialogHeader>
-        <CustomDialogContent>     
+       
       <Grid item xs={12} md={12} sm={12} className="mt-3">
         {columns?.length ? (
           <CustomAgGrid
@@ -293,8 +285,6 @@ const ViewAllInvoices = ({ subleaseId, onClose, subleaseName }) => {
           onOk={handleDeleteInvoice}
         />
       ) : null}
-      </CustomDialogContent>
-      </Dialog>
     </>
   );
 };

@@ -26,6 +26,7 @@ import ContentFullScreen from 'src/components/ContentFullScreen';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import Steps, { getIndex } from 'src/components/Steps';
 import EditIcon from '@material-ui/icons/Edit';
+import ViewAllInvoices from './Invoices';
 
 const SubleaseDetailsPage = () => {
   const renderedFrom = camelCase(routes?.sublease.title);
@@ -214,6 +215,15 @@ const SubleaseDetailsPage = () => {
             }
             {...a11yProps(1)}
           />
+          <Tab
+            className={'tabLayout'}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                Invoices
+              </div>
+            }
+            {...a11yProps(3)}
+          />
         </Tabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -276,6 +286,17 @@ const SubleaseDetailsPage = () => {
           <Grid item xs={12} sm={12} md={12} lg={12}>
             {subleaseData ? (
               <Tickets subleaseId={id} renderedFrom={`${renderedFrom}_grid-3`} />
+            ) : (
+              <Grid container spacing={2} style={{ padding: '8px' }}>
+                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+              </Grid>
+            )}
+          </Grid>
+        </TabPanel>
+        <TabPanel value={tabValue} index={3}>
+          <Grid item xs={12} sm={12} md={12} lg={12}>
+            {subleaseData ? (
+              <ViewAllInvoices subleaseId={id} />
             ) : (
               <Grid container spacing={2} style={{ padding: '8px' }}>
                 <CommonSkeleton lenArray={[...Array(7).keys()]} />
