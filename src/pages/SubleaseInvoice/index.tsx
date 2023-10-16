@@ -7,7 +7,7 @@ import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser }
 import { useData } from 'src/StateProvider/Provider';
 import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { SUBLEASE_STATUS, gridLoadingTimeout, prepareDataForGrid, removeLocalStorage, sidebarResource } from 'src/constants/helpers';
+import { SUBLEASE_STATUS, gridLoadingTimeout, prepareDataForGrid, removeLocalStorage, sidebarResource, CustomDialogTransition } from 'src/constants/helpers';
 import NoteAddIcon from '@material-ui/icons/NoteAdd';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import CreateInvoiceDialog from './CreateInvoice';
@@ -16,7 +16,10 @@ import { isMobile } from 'react-device-detect';
 import CustomContainer from 'src/components/CustomContainer';
 import styles from '../Leads/Header.module.scss';
 import SearchBox from 'src/components/Helpers/SearchBox';
-import ViewAllInvoices from './ViewInvoice';
+import Invoices from './ViewInvoice';
+import { Dialog } from '@material-ui/core';
+import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 
 const SubleaseInvoice = () => {
 
@@ -238,13 +241,17 @@ const SubleaseInvoice = () => {
           />
         )}
         {viewInvoiceDialog.open && (
-          <ViewAllInvoices
-            subleaseId={viewInvoiceDialog?.data?._id}
-            subleaseName = {viewInvoiceDialog?.data?.subleaseName}
-            onClose={() => {
-              setViewInvoiceDialog({ open: false, data: null });
-            }}
-          />
+           <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
+            <CustomDialogHeader title={`Invoices : ${viewInvoiceDialog?.data?.subleaseName}`} onClose={() => {
+                setViewInvoiceDialog({ open: false, data: null });
+              }} showRequiredLabel={false}></CustomDialogHeader>
+            <CustomDialogContent>     
+              <Invoices
+                subleaseId={viewInvoiceDialog?.data?._id}
+                renderedFrom =  {`${renderedFrom}_allInvoices`}
+              />
+            </CustomDialogContent>
+          </Dialog>
         )}
       </CustomContainer>
     </Fragment>
