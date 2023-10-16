@@ -365,7 +365,7 @@ const CreateBillingDialog = ({ currencySymbol = null, invoiceData = null, onClos
   return (
     <Fragment>
       <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
-        <CustomDialogHeader title={`Create Billing `} onClose={onClose} showRequiredLabel={false}></CustomDialogHeader>
+        <CustomDialogHeader title={`Create Invoice`} onClose={onClose} showRequiredLabel={false}></CustomDialogHeader>
         <CustomDialogContent>
           <Fragment>
             <MuiPickersUtilsProvider utils={MomentUtils}>
@@ -486,7 +486,7 @@ const CreateBillingDialog = ({ currencySymbol = null, invoiceData = null, onClos
                   handleCreateBill();
                 }}
               >
-                Create Bill
+                Create Invoice
               </Button>
             </span>
           </HtmlTooltip>

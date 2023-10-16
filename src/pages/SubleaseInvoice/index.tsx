@@ -135,28 +135,32 @@ const SubleaseInvoice = () => {
   const ActionsRenderer = (params) => (
     <Fragment>
       {params.data.status === SUBLEASE_STATUS.issued && (
-        <>
-        <HtmlTooltip title="Create Invoice">
-          <IconButton
-            size="small"
-            onClick={() => {
-              setCreateInvoiceDialog({ open: true, data: [params.data] });
-            }}
-          >
-            <NoteAddIcon fontSize="small" color="primary" />
-          </IconButton>
-        </HtmlTooltip>
-        <HtmlTooltip title="View Invoice">
-        <IconButton
-          size="small"
-          onClick={() => {
-            setViewInvoiceDialog({ open: true, data: params.data });
-          }}
-        >
-          <VisibilityIcon fontSize="small" color="primary" />
-        </IconButton>
-      </HtmlTooltip>
-      </>
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <HtmlTooltip title="Create Invoice">
+            <IconButton
+              size="small"
+              onClick={() => {
+                setCreateInvoiceDialog({ open: true, data: [params.data] });
+              }}
+            >
+              <NoteAddIcon fontSize="small" color="primary" />
+            </IconButton>
+          </HtmlTooltip>
+  
+          {/* Add some space between the buttons */}
+          <div style={{ width: '16px' }} />
+  
+          <HtmlTooltip title="View Invoices">
+            <IconButton
+              size="small"
+              onClick={() => {
+                setViewInvoiceDialog({ open: true, data: params.data });
+              }}
+            >
+              <VisibilityIcon fontSize="small" color="primary" />
+            </IconButton>
+          </HtmlTooltip>
+        </div>
       )}
     </Fragment>
   );
@@ -214,10 +218,10 @@ const SubleaseInvoice = () => {
             loading={loading}
             renderedFrom={renderedFrom}
             refreshGrid={fetchSubleaseData}
-            showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
             actionWidth={120}
             resource={sidebarResource.sublease}
+            allowSelection = {false}
           />
         )
           : null}
