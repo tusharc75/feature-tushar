@@ -26,7 +26,7 @@ import ContentFullScreen from 'src/components/ContentFullScreen';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import Steps, { getIndex } from 'src/components/Steps';
 import EditIcon from '@material-ui/icons/Edit';
-import Invoices from '../SubleaseInvoice/ViewInvoice';
+import Invoices from './Invoices';
 
 const SubleaseDetailsPage = () => {
   const renderedFrom = camelCase(routes?.sublease.title);
@@ -79,8 +79,8 @@ const SubleaseDetailsPage = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${sublease.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
+      .then(({ data }) => { })
+      .catch((error) => { });
   };
 
   useEffect(() => {
@@ -219,6 +219,7 @@ const SubleaseDetailsPage = () => {
             className={'tabLayout'}
             label={
               <div className="d-flex align-items-center tab-font">
+                <GiAbstract055 className="mr-1" fontSize="inherit" />
                 Invoices
               </div>
             }
@@ -296,7 +297,7 @@ const SubleaseDetailsPage = () => {
         <TabPanel value={tabValue} index={3}>
           <Grid item xs={12} sm={12} md={12} lg={12}>
             {subleaseData ? (
-              <Invoices subleaseId={id} renderedFrom={`${renderedFrom}_allInvoices`}/>
+              <Invoices subleaseId={id} />
             ) : (
               <Grid container spacing={2} style={{ padding: '8px' }}>
                 <CommonSkeleton lenArray={[...Array(7).keys()]} />
