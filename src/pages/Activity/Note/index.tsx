@@ -69,7 +69,16 @@ const Note = () => {
 
   const columns = [
     { field: 'name', headerName: 'Title', show: true, disabled: true, primaryField: true, cellRenderer: 'nameRenderer' },
-    { field: 'relatedTo', headerName: 'Related To', show: true, disabled: true, primaryField: true, cellRenderer: 'referenceRenderer' },
+    {
+      field: 'relatedTo',
+      headerName: 'Related To',
+      show: true,
+      disabled: true,
+      primaryField: true,
+      filter: false,
+      sortable: false,
+      cellRenderer: 'referenceRenderer'
+    },
     { field: 'createdByDate', headerName: 'Created At', filter: false, sortable: false, show: true, cellRenderer: 'createdAtDateRenderer' },
     { field: 'updatedByDate', headerName: 'Updated At', filter: false, sortable: false, show: true, cellRenderer: 'updatedAtDateRenderer' }
   ];
@@ -455,7 +464,7 @@ const Note = () => {
             dataRows={dataRows}
             selectedRecords={selectedRecords}
             dispatch={dispatch}
-            onEdit={(data) => {}}
+            onEdit={(data) => { }}
             extraParamsToCheckDelete={true}
             onDelete={(data) => {
               showConfirmBox(selectedRecords);
@@ -472,7 +481,7 @@ const Note = () => {
             ]}
             onCreate={false}
             showClone={false}
-            onClone={() => {}}
+            onClone={() => { }}
             renderedFrom={'notesPage'}
           />
         ) : (
@@ -546,7 +555,7 @@ const Note = () => {
               setFullScreen((prevState) => !prevState);
             }}
             showManimizeMaximize={true}
-            // noteData={noteData}
+          // noteData={noteData}
           />
         </Dialog>
       )}
