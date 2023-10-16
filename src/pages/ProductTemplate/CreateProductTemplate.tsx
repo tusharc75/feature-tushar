@@ -19,7 +19,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import { extractFields, checkFormulaLoop } from '../../constants/formulaUtility';
 import { useData } from '../../StateProvider/Provider';
 import HistoryDialog from '../../components/Activity/History';
-import { CustomDialogTransition, productTemplate } from '../../constants/helpers';
+import { CustomDialogTransition, fieldLabelToFieldName, productTemplate } from '../../constants/helpers';
 import HistoryButton from '../../components/Helpers/HistoryButton';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { isEqual } from 'lodash';
@@ -238,7 +238,7 @@ const ProductTemplate = () => {
         let _field_data = _field;
         _field_data._id = _field_data._id.toString();
         if (!isNaN(_field._id)) {
-          _field_data.fieldName = camelCase(_field.fieldLabel.replace(/[^a-zA-Z0-9]/g, ''));
+          _field_data.fieldName = fieldLabelToFieldName(_field.fieldLabel);
         }
         _field_data.sectionName = _section.sectionName;
         _field_data.order = ++order;
@@ -515,8 +515,8 @@ const ProductTemplate = () => {
                           setFieldValue('entity', val && val?.map((d) => d._id));
                           val && val.length !== 0
                             ? setOwnerCollaboratorData(
-                                ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
-                              )
+                              ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
+                            )
                             : setOwnerCollaboratorData(ownerCollaboratorDataConst);
                         }}
                         renderInput={(params) => (
@@ -548,8 +548,8 @@ const ProductTemplate = () => {
                         onOpen={() =>
                           values['entity'] && values['entity'].length !== 0
                             ? setOwnerCollaboratorData(
-                                ownerCollaboratorDataConst.filter((data) => values['entity']?.some((d) => data.entities?.some((e) => e.entity === d)))
-                              )
+                              ownerCollaboratorDataConst.filter((data) => values['entity']?.some((d) => data.entities?.some((e) => e.entity === d)))
+                            )
                             : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                         }
                         renderInput={(params) => (
@@ -583,8 +583,8 @@ const ProductTemplate = () => {
                         onOpen={() =>
                           values['entity'] && values['entity'].length !== 0
                             ? setOwnerCollaboratorData(
-                                ownerCollaboratorDataConst.filter((data) => values['entity']?.some((d) => data.entities?.some((e) => e.entity === d)))
-                              )
+                              ownerCollaboratorDataConst.filter((data) => values['entity']?.some((d) => data.entities?.some((e) => e.entity === d)))
+                            )
                             : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                         }
                         renderInput={(params) => (

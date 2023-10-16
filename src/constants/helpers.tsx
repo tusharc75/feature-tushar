@@ -21,7 +21,7 @@ import moment from 'moment';
 import currencies from './currency_with_country.json';
 import { TransitionProps } from '@material-ui/core/transitions';
 import { Slide } from '@material-ui/core';
-import { kebabCase, lowerFirst, orderBy, uniqBy } from 'lodash';
+import { camelCase, kebabCase, lowerFirst, orderBy, uniqBy } from 'lodash';
 import { stepIconInterface } from 'src/components/Steps/icons';
 
 interface stepInterface extends stepIconInterface {
@@ -278,7 +278,7 @@ export const sidebarResource = {
   transferAsset: 'Transfer Asset',
   address: 'Address',
   sublease: 'Sublease',
-  subleaseInvoice : 'Sublease Invoice',
+  subleaseInvoice: 'Sublease Invoice',
   transferInventory: 'Transfer Inventory',
   zone: 'Zone',
   projectSales: 'Project Sales',
@@ -320,7 +320,7 @@ export const sidebarResource = {
   planning: 'Planning',
   planningCalendar: 'Planning Calendar',
   fieldTicket: 'Field Ticket',
-  fieldTicketInvoice : 'Field Ticket Invoice',
+  fieldTicketInvoice: 'Field Ticket Invoice',
   fieldServiceTechnician: `Field Service Technician`,
   rentalPlanningCalendar: `Rental Planning Calendar`,
   resourceLogs: `Resource Logs`,
@@ -410,7 +410,7 @@ export const RESOURCE_LABEL = {
   transferAsset: 'Transfer Assets',
   address: 'Addresses',
   sublease: 'Sublease',
-  subleaseInvoice : 'SubleaseInvoice',
+  subleaseInvoice: 'SubleaseInvoice',
   transferInventory: 'Transfer Inventory',
   zone: 'Zone',
   wellMaster: 'Well Master',
@@ -2791,4 +2791,9 @@ export const ROLE_TIER = {
   tier1: 'Tier 1',
   tier2: 'Tier 2',
   tier3: 'Tier 3'
+};
+
+
+export const fieldLabelToFieldName = (fieldLabel) => {
+  return camelCase(fieldLabel?.replace(/[^a-zA-Z0-9]/g, ''))?.substring(0, 60);
 };
