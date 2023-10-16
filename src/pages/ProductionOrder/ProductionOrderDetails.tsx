@@ -160,8 +160,8 @@ const ProductionOrderDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${productionOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
+      .then(({ data }) => { })
+      .catch((error) => { });
   };
 
   const handleStatusChange = (o) => {
@@ -340,6 +340,8 @@ const ProductionOrderDetails = () => {
                 setNextStep={setNextStep}
                 renderedFrom={`${renderedFrom}_grid-2`}
                 stepFullScreen={stepFullScreen}
+                allowedToEdit={allowedToEdit && permissions?.productionOrder?.isUpdate ? true : false}
+                setCurrentStep={setCurrentStep}
               />
             )}
           </ContentFullScreen>
