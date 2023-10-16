@@ -6,7 +6,7 @@ import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import { CHILD_RESOURCE, MATERIAL_TYPE, WORKORDER_SERVICE_STATUS, WORK_ORDER_STATUS, asyncForEach, productionOrder, workOrder } from '../../../constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, WORKORDER_SERVICE_STATUS, WORK_ORDER_STATUS, productionOrder, workOrder } from '../../../constants/helpers';
 import { startCase, uniq } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { generateCustomTableColumns } from 'src/constants/columns';
@@ -21,11 +21,9 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { AutoCompleteIcon } from 'src/assets/svg/svgIcons';
-import EditIcon from '@material-ui/icons/Edit';
-import UpdateWorkOrderDialog from './UpdateWorkOrderDialog';
 
 
-const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }) => {
+const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, setCurrentStep }) => {
   const {
     state: { user, permissions }
   }: any = useData();
@@ -45,23 +43,6 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   const [isCompleting, setCompleting] = useState(false);
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
-  const [updateDialog, setUpdateDialog] = useState({ open: false, data: null });
-  const [isBulkEdit, setIsBulkEdit] = useState(false);
-  const [isUpdating, setUpdating] = useState(false);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   useEffect(() => {
     fetchFields();
@@ -192,24 +173,6 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       Cell: ({ row }) => {
         return (
           <>
-            {row?.original?.type === 'service' && (
-              <HtmlTooltip title="Edit">
-                <IconButton
-                  size="small"
-                  aria-label="Edit"
-                  onClick={() => {
-                    setUpdateDialog({
-                      open: true,
-                      data: row.original
-                    });
-                    setIsBulkEdit(false);
-                  }}
-                  disabled={row?.original?.status === WORKORDER_SERVICE_STATUS?.completed ? true : false}
-                >
-                  <EditIcon color={row?.original?.status === WORKORDER_SERVICE_STATUS?.completed ? 'disabled' : 'primary'} />
-                </IconButton>
-              </HtmlTooltip>
-            )}
             {row?.original?.type === 'service' || row?.original?.type === 'package' ? (
               <>
                 <IconButton
@@ -365,7 +328,9 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   };
 
   const handleDelete = () => {
-    if (deleteData?.some((e) => e.type === 'service' || e.type === 'package')) {
+    console.log(deleteData, deleteData?.filter((e: any) => !e?.subRows?.length && e?.workOrder?.status !== WORK_ORDER_STATUS.completed)?.length, deleteData?.filter((e: any) => !e?.subRows?.length
+      && e?.workOrder?.status !== WORK_ORDER_STATUS.completed)?.map((e) => e.workOrder?._id))
+    if (deleteData?.some((e) => e.type === 'service')) {
       let ids = [];
       let workOrderId = '';
       if (deleteData.length > 0) {
@@ -394,8 +359,36 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
           setDeleting(false);
           toastConfig.setToastConfig(err);
         });
+    } else if (deleteData?.filter((e: any) => !e?.subRows?.length && e?.workOrder?.status !== WORK_ORDER_STATUS.completed)?.length) {
+      handleWorkOrderDelete(deleteData?.filter((e: any) => !e?.subRows?.length
+        && e?.workOrder?.status !== WORK_ORDER_STATUS.completed)?.map((e) => e.workOrder?._id));
     }
+
   };
+
+  const handleWorkOrderDelete = (ids) => {
+    axiosInstance()
+      .put(`${workOrder.api}/remove`, { ids: ids })
+      .then(({ data }) => {
+        setDeleting(false);
+        setShowConfirmBox(false);
+        setCurrentStep((prevStep) => {
+          const newStep = prevStep - 1;
+          return newStep;
+        });
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
+      })
+      .catch((err) => {
+        setShowConfirmBox(false);
+        setDeleting(false);
+        toastConfig.setToastConfig(err);
+      });
+  };
+
 
   const handleArrangeUpdate = (rows: any[], workOrderId) => {
     rows?.forEach((e: any) => {
@@ -456,28 +449,6 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   };
 
 
-  const handleSaveData = async (rows: any) => {
-    setUpdating(true);
-    const workOrderIds = uniq(rows?.map((e) => e?.workOrder?._id))
-    try {
-      await asyncForEach(workOrderIds, async (id: any) => {
-        const data: any = JSON.parse(JSON.stringify(rows?.filter((e) => e?.workOrder?._id === id)))
-        data?.forEach((e) => {
-          delete e.workOrder
-        })
-        await axiosInstance().put(`${productionOrder.api}/${productionOrderData._id}/work-order/${id}`, { material: data })
-      })
-    } catch (error) {
-      setUpdating(false);
-      toastConfig.setToastConfig(error);
-    }
-    finally {
-      setUpdating(false);
-      fetchData();
-      setIsBulkEdit(false);
-      setUpdateDialog({ open: false, data: null });
-    }
-  };
 
 
 
@@ -685,19 +656,6 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
             setCompleteConfirmBox(false);
           }}
           onOk={handleAutoComplete}
-        />
-      )}
-      {updateDialog.open && (
-        <UpdateWorkOrderDialog
-          onClose={() => {
-            setUpdateDialog({ open: false, data: null });
-            setIsBulkEdit(false);
-          }}
-          materialData={updateDialog.data}
-          handleUpdate={handleSaveData}
-          loadingEdit={isUpdating}
-          productionOrderData={productionOrderData}
-          isBulkEdit={isBulkEdit}
         />
       )}
     </Fragment>

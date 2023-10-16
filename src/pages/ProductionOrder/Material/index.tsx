@@ -374,7 +374,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
                   setAddDialog({ open: true, type: 'product', parentId: null });
                 }}
               >
-                Add Products
+                Add Existing Products
               </MenuItem>
               <MenuItem
                 onClick={() => {
@@ -390,7 +390,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
                   setAddDialog({ open: true, type: 'package', parentId: null });
                 }}
               >
-                Add Packages
+                Add Existing Packages
               </MenuItem>
             </Menu>
           </Box>
