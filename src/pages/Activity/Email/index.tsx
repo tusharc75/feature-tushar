@@ -1,6 +1,4 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import Box from '@material-ui/core/Box';
-import Grid from '@material-ui/core/Grid';
+import { useState, useEffect, useContext, useReducer } from 'react';
 import { SearchFilter } from '../../../components/Activity/Report/SearchFilter';
 import { useHistory } from 'react-router-dom';
 import queryString from 'query-string';
@@ -20,7 +18,6 @@ import { HiOutlineMail } from 'react-icons/hi';
 import Dialog from '@material-ui/core/Dialog';
 import { CreateEmail } from '../../../components/Activity/Email/CreateEmail';
 import { isObjectEmpty, sidebarResource } from '../../../constants/helpers';
-import styles from '../../Leads/Header.module.scss';
 import emailStyles from './email.module.scss';
 import './email.scss';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -29,7 +26,6 @@ import CustomAgGrid, { reducer, intialState } from '../../../components/AgGridCo
 import { AddOutlined } from '@material-ui/icons';
 import { displayDate } from '../../../constants/helpers';
 import routes from '../../../components/Helpers/Routes';
-import { AiFillCrown, MdAdd } from 'react-icons/all';
 import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
 import { Autocomplete } from '@material-ui/lab';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
@@ -68,19 +64,23 @@ const Email = () => {
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
-  const columnState = JSON.parse(localStorage.getItem('emailPage'));
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [fullScreenViewEmail, setFullScreenViewEmail] = useState(true);
-  const [isAllChecked, setIsAllChecked] = useState(false);
-  const [clonedData, setClonedData] = useState([]);
   const localStorageSelectedRecords = 'emailPage_selected';
   const [resource, setResource] = useState(null);
   const [resourceData, setResourceData] = useState(null);
   const [loadingResources, setLoadingResources] = useState(false);
   const [selectedResourceData, setSelectedResourceData] = useState(null);
-  
+
   const [columns] = useState([
+    {
+      field: 'subject',
+      headerName: 'Subject',
+      show: true,
+      primaryField: true,
+      cellRenderer: 'subjectRenderer'
+    },
     {
       field: 'to',
       headerName: 'Recipient',
@@ -98,31 +98,14 @@ const Email = () => {
       cellRenderer: 'referenceRenderer'
     },
     {
-      field: 'subject',
-      headerName: 'Subject',
-      show: true,
-      primaryField: true,
-      cellRenderer: 'subjectRenderer'
-    },
-    {
       field: 'createdBy',
-      headerName: 'Created At',
+      headerName: 'Created By',
       show: true,
       filter: false,
       sortable: false,
-      cellRenderer: 'createdByDate'
+      cellRenderer: 'createdByRenderer'
     }
   ]);
-
-  if (columnState) {
-    columns.forEach((item) => {
-      columnState.forEach((d) => {
-        if (d.colId === item.field) {
-          item.show = !d.hide;
-        }
-      });
-    });
-  }
 
   const [resourceOptions, setResourceOptions] = useState([]);
 
@@ -202,8 +185,6 @@ const Email = () => {
             isChecked: false
           };
           inboxEmailsData.push(currentObject);
-          // if (isCreatedByMe) sentEmails.push(currentObject);
-          // else inboxEmailsData.push(currentObject);
         });
         dispatch({
           type: 'initialize',
@@ -227,7 +208,7 @@ const Email = () => {
   };
 
   const getToEmailList = (toList) => {
-    return (currentTab === tabs.Sent ? 'To: ' : '') + toList.map((email) => (email === user?.user?.email ? 'me' : email)).join(',');
+    return (currentTab === tabs.Sent ? 'To: ' : '') + toList.map((email) => (email === user?.user?.email ? 'me' : email)).join(', ');
   };
 
   const transform = (node, index) => {
@@ -256,6 +237,16 @@ const Email = () => {
   );
 
   const RecipentRenderer = (params) => (
+    <span>
+      {typeof params.data.to === 'string' ? (
+        <span> {params.data.to}</span>
+      ) : (
+        <span>{getToEmailList(params.data.to)}</span>
+      )}
+    </span>
+  );
+
+  const SubjectRenderer = (params) => (
     <span
       className="link cursor-pointer"
       onClick={(e) => {
@@ -265,18 +256,10 @@ const Email = () => {
         }
       }}
     >
-      {typeof params.data.to === 'string' ? (
-        <span> {params.data.to}</span>
-      ) : (
-        <span>{params.data?.isCreatedByMe ? getToEmailList(params.data.to) : params.data?.mailbox ?? ''}</span>
-      )}
+      <div className={emailStyles.emailMessageConatiner}>
+        <Typography> {params.data?.subject ?? '(no subject) '} </Typography>
+      </div>
     </span>
-  );
-
-  const SubjectRenderer = (params) => (
-    <div className={emailStyles.emailMessageConatiner}>
-      <Typography> {params.data?.subject ?? '(no subject) '} </Typography>
-    </div>
   );
 
   const MessageRenderer = (params) => (
@@ -297,7 +280,7 @@ const Email = () => {
                 {d?.salutation ? `${d?.saluation} ${d?.name}` : d?.name}
               </p>
               <IconButton className="ml-3" size="small" onClick={() => redirectToResource(d?.type, d?.referenceId)}>
-                 <OpenInNewIcon fontSize="small" color="primary" />
+                <OpenInNewIcon fontSize="small" color="primary" />
               </IconButton>
               <Chip className="ml-3" color="primary" label={`${routes[d?.type]?.title}`} />
             </div>
@@ -309,14 +292,19 @@ const Email = () => {
     </>
   );
 
-  const CreatedByDateRenderer = (params) => <span className={emailStyles.emailCreatedAt}>{displayDate(params.data?.createdByDate)}</span>;
+  const CreatedByRenderer = (params) => (
+    <p>
+      {params?.data?.createdByUser?.concatedName}
+      <span className="createdAtTime badge-date">{displayDate(params?.data?.createdByDate)}</span>
+    </p>
+  )
 
   const frameworkComponents = {
     recipentRenderer: RecipentRenderer,
     referenceRenderer: ReferenceRenderer,
     subjectRenderer: SubjectRenderer,
     messageRenderer: MessageRenderer,
-    createdByDate: CreatedByDateRenderer,
+    createdByRenderer: CreatedByRenderer,
     actionsRenderer: ActionsRenderer
   };
 
