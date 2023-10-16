@@ -12,7 +12,7 @@ import CustomContainer from '../../../components/CustomContainer';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { GoNote } from 'react-icons/go';
 import { ExpandMore } from '@material-ui/icons';
-import { Button, Chip, Dialog, Link, Menu, MenuItem, TextField } from '@material-ui/core';
+import { Button, Chip, Dialog, IconButton, Link, Menu, MenuItem, TextField } from '@material-ui/core';
 import { AddOutlined } from '@material-ui/icons';
 import { CreateNote } from '../../../components/Activity/Note/CreateNote';
 import { CustomDialogTransition, gridLoadingTimeout, sidebarResource } from '../../../constants/helpers';
@@ -23,6 +23,7 @@ import CustomAgGrid, { reducer, intialState } from '../../../components/AgGridCo
 import { displayDate } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import GridDeleteIcon from '../../../components/Helpers/GridDeleteIcon';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
@@ -163,12 +164,13 @@ const Note = () => {
       {params.value && params.value?.length > 0 ? (
         params.value.map((d) => {
           return (
-            <>
-              <Link className="link text-truncate" onClick={() => history.push(`${routes[d?.type].path}/detail/${d?.referenceId}`)}>
-                {d.name}
-              </Link>
+            <div style={{ display: 'flex', alignItems: 'center' }} key={d.name}>
+              <p> {d.name}</p>
+              <IconButton className="ml-3" size="small" onClick={() => window.open(`${routes[d?.type].path}/detail/${d?.referenceId}`)}>
+                    <OpenInNewIcon fontSize="small" color="primary" />
+                  </IconButton>
               <Chip className="ml-3" color="primary" label={`${routes[d?.type]?.title}`} />
-            </>
+            </div>
           );
         })
       ) : (
