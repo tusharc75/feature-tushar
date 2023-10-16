@@ -10,7 +10,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition, setFieldsInAscendingOrder, GenerateResourceLineNumber } from 'src/constants/helpers';
+import { CustomDialogTransition, setFieldsInAscendingOrder, GenerateResourceLineNumber, PLANNING_STATUS } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { FaDiceOne } from 'react-icons/fa';
@@ -55,6 +55,7 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
               rest.planningNumber = GenerateResourceLineNumber(fieldsDataForCreate);
               setCloneHeading(planningNumber);
               tempData = rest;
+              tempData.status = PLANNING_STATUS.open;
             }
             setInitialData({
               fields: fields,
