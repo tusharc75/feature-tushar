@@ -227,7 +227,8 @@ const Note = () => {
             createdByDate: u.createdBy?.date,
             updatedBy: u.updatedBy?.user?.concatedName,
             updatedByDate: u.updatedBy?.date,
-            isChecked: false
+            isChecked: false,
+            canDelete: permissions?.note?.isDelete ? u.createdBy?.user === user?.user?._id : false
           };
           return res;
         });
@@ -439,7 +440,7 @@ const Note = () => {
                         showConfirmBox(selectedRecords);
                         closeActions();
                       }}
-                      disabled={!permissions?.note?.isDelete}
+                      disabled={permissions?.note?.isDelete ? !selectedRecords.every((records) => records.canDelete) : true}
                     >
                       Delete
                     </MenuItem>
