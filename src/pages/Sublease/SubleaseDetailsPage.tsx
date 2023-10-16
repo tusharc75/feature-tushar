@@ -26,7 +26,7 @@ import ContentFullScreen from 'src/components/ContentFullScreen';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import Steps, { getIndex } from 'src/components/Steps';
 import EditIcon from '@material-ui/icons/Edit';
-import ViewAllInvoices from './Invoices';
+import Invoices from '../SubleaseInvoice/ViewInvoice';
 
 const SubleaseDetailsPage = () => {
   const renderedFrom = camelCase(routes?.sublease.title);
@@ -296,7 +296,7 @@ const SubleaseDetailsPage = () => {
         <TabPanel value={tabValue} index={3}>
           <Grid item xs={12} sm={12} md={12} lg={12}>
             {subleaseData ? (
-              <ViewAllInvoices subleaseId={id} />
+              <Invoices subleaseId={id} renderedFrom={`${renderedFrom}_allInvoices`}/>
             ) : (
               <Grid container spacing={2} style={{ padding: '8px' }}>
                 <CommonSkeleton lenArray={[...Array(7).keys()]} />
