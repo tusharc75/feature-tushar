@@ -1,5 +1,6 @@
 import { uniq } from "lodash";
 import { camelCase } from "lodash";
+import { fieldLabelToFieldName } from "./helpers";
 
 const removeBracket = (string) => {
     return string.replace(/{/g, '').replace(/}/g, '')
@@ -737,7 +738,7 @@ export const checkFieldDependency = (fieldId, sectionId, section) => {
             }
         }
         else {
-            fieldNames.push(fieldData.fieldName ? fieldData.fieldName : camelCase(fieldData.fieldLabel.replace(/[^a-zA-Z0-9]/g, '')))
+            fieldNames.push(fieldData.fieldName ? fieldData.fieldName : fieldLabelToFieldName(fieldData.fieldLabel))
         }
         var used_Fields = []
         section.forEach((row) => {
