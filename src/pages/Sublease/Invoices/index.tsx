@@ -15,9 +15,12 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CustomRenderCell from 'src/components/Helpers/CustomRenderCell';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { camelCase } from 'lodash';
 
-const Invoices = ({ subleaseId, renderedFrom }) => {
-  
+const Invoices = ({ subleaseId }) => {
+
+  const renderedFrom = `${camelCase(routes.sublease?.title)}_invoice`
+
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -33,7 +36,7 @@ const Invoices = ({ subleaseId, renderedFrom }) => {
   const [columns, setColumns] = useState(null);
   const [deleteRecord, setDeleteRecord] = useState<any>({});
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
-  const [viewInvoiceDialog, setViewInvoiceDialog] = useState({open:false, data:null})
+  const [viewInvoiceDialog, setViewInvoiceDialog] = useState({ open: false, data: null })
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
@@ -75,7 +78,7 @@ const Invoices = ({ subleaseId, renderedFrom }) => {
     tempFrameworkComponent = {
       ...tempFrameworkComponent,
       actionsRenderer: ActionsRenderer,
-      invoiceMaterialRenderer : InvoiceMaterialRenderer
+      invoiceMaterialRenderer: InvoiceMaterialRenderer
     };
     setFrameworkComponent({ ...tempFrameworkComponent });
     let staticFields = getStaticFields();
@@ -87,15 +90,15 @@ const Invoices = ({ subleaseId, renderedFrom }) => {
 
   const InvoiceMaterialRenderer = (params) => (
     <>
-    <span
-      className="link"
-      onClick={() => {
-        setViewInvoiceDialog({ open: true, data: params.data });
-      }}
-    >
-      <CustomRenderCell value={params?.value} />
-    </span>
-    <Box ml={1}>
+      <span
+        className="link"
+        onClick={() => {
+          setViewInvoiceDialog({ open: true, data: params.data });
+        }}
+      >
+        <CustomRenderCell value={params?.value} />
+      </span>
+      <Box ml={1}>
         <IconButton
           size="small"
           onClick={() => {
@@ -112,15 +115,15 @@ const Invoices = ({ subleaseId, renderedFrom }) => {
     <>
       {
         <HtmlTooltip title="View Invoice">
-        <IconButton
-          size="small"
-          onClick={() => {
-            setViewInvoiceDialog({ open: true, data: params.data });
-          }}
-        >
-          <VisibilityIcon fontSize="small" color="primary" />
-        </IconButton>
-      </HtmlTooltip>
+          <IconButton
+            size="small"
+            onClick={() => {
+              setViewInvoiceDialog({ open: true, data: params.data });
+            }}
+          >
+            <VisibilityIcon fontSize="small" color="primary" />
+          </IconButton>
+        </HtmlTooltip>
       }
       {params?.data?.canDelete && (
         <HtmlTooltip title="Delete">
@@ -145,7 +148,7 @@ const Invoices = ({ subleaseId, renderedFrom }) => {
 
 
   const getQueryString = (isExport = false) => {
-   
+
     let deepFilter = `?page=${page}&limit=${limit}&sublease=${subleaseId}`;
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
@@ -187,7 +190,7 @@ const Invoices = ({ subleaseId, renderedFrom }) => {
           finalObject['canDelete'] = permissions?.invoice?.isDelete && u?.canDelete;
           return finalObject;
         });
-       
+
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -232,7 +235,7 @@ const Invoices = ({ subleaseId, renderedFrom }) => {
   };
 
   return (
-    <>  
+    <>
       <Grid item xs={12} md={12} sm={12} className="mt-3">
         {columns?.length ? (
           <CustomAgGrid
@@ -251,7 +254,7 @@ const Invoices = ({ subleaseId, renderedFrom }) => {
             allowSelection={false}
             allowAction={true}
             isClientSideGrid={true}
-            refreshGrid = {fetchBilling}
+            refreshGrid={fetchBilling}
           />
         ) : (
           <Box p={2} height={500}>
@@ -260,18 +263,18 @@ const Invoices = ({ subleaseId, renderedFrom }) => {
         )}
       </Grid>
       {viewInvoiceDialog.open && (
-          <ViewInvoice
-            invoiceData={{ ...viewInvoiceDialog.data, invoiceNumber: viewInvoiceDialog?.data?.invoiceNumber, _id: viewInvoiceDialog?.data?._id }}
-            onClose={() => {
-              setViewInvoiceDialog({ open: false, data: null });
-            }}
-            onSuccess={() => {
-              setViewInvoiceDialog({ open: false, data: null });
-            }}
-            resource = {sidebarResource.subleaseInvoice}
-          />
-        )}
-        {isConfirmDialogVisible ? (
+        <ViewInvoice
+          invoiceData={{ ...viewInvoiceDialog.data, invoiceNumber: viewInvoiceDialog?.data?.invoiceNumber, _id: viewInvoiceDialog?.data?._id }}
+          onClose={() => {
+            setViewInvoiceDialog({ open: false, data: null });
+          }}
+          onSuccess={() => {
+            setViewInvoiceDialog({ open: false, data: null });
+          }}
+          resource={sidebarResource.subleaseInvoice}
+        />
+      )}
+      {isConfirmDialogVisible ? (
         <ConfirmationDialog
           open={isConfirmDialogVisible}
           message={`Are you sure you want to delete ${routes?.invoice?.title?.toLowerCase()} ${deleteRecord?.invoice || ''} ?`}

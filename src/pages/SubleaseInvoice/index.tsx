@@ -1,4 +1,4 @@
-import { Box, Grid, IconButton} from '@material-ui/core';
+import { Box, Grid, IconButton } from '@material-ui/core';
 import { Fragment, useEffect, useReducer, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
@@ -7,7 +7,7 @@ import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser }
 import { useData } from 'src/StateProvider/Provider';
 import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { SUBLEASE_STATUS, gridLoadingTimeout, prepareDataForGrid, removeLocalStorage, sidebarResource, CustomDialogTransition } from 'src/constants/helpers';
+import { SUBLEASE_STATUS, gridLoadingTimeout, prepareDataForGrid, removeLocalStorage, sidebarResource } from 'src/constants/helpers';
 import NoteAddIcon from '@material-ui/icons/NoteAdd';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import CreateInvoiceDialog from './CreateInvoice';
@@ -16,14 +16,11 @@ import { isMobile } from 'react-device-detect';
 import CustomContainer from 'src/components/CustomContainer';
 import styles from '../Leads/Header.module.scss';
 import SearchBox from 'src/components/Helpers/SearchBox';
-import Invoices from './ViewInvoice';
-import { Dialog } from '@material-ui/core';
-import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
+import InvoiceDialog from './InvoiceDialog';
 
 const SubleaseInvoice = () => {
 
-  const renderedFrom = `${camelCase(routes?.subleaseInvoice.title)}_invoice`;
+  const renderedFrom = `${camelCase(routes?.subleaseInvoice.title)}`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const {
@@ -149,20 +146,18 @@ const SubleaseInvoice = () => {
               <NoteAddIcon fontSize="small" color="primary" />
             </IconButton>
           </HtmlTooltip>
-  
-          {/* Add some space between the buttons */}
-          <div style={{ width: '16px' }} />
-  
-          <HtmlTooltip title="View Invoices">
-            <IconButton
-              size="small"
-              onClick={() => {
-                setViewInvoiceDialog({ open: true, data: params.data });
-              }}
-            >
-              <VisibilityIcon fontSize="small" color="primary" />
-            </IconButton>
-          </HtmlTooltip>
+          <Box ml={1}>
+            <HtmlTooltip title="View Invoices">
+              <IconButton
+                size="small"
+                onClick={() => {
+                  setViewInvoiceDialog({ open: true, data: params.data });
+                }}
+              >
+                <VisibilityIcon fontSize="small" color="primary" />
+              </IconButton>
+            </HtmlTooltip>
+          </Box>
         </div>
       )}
     </Fragment>
@@ -224,14 +219,14 @@ const SubleaseInvoice = () => {
             showFilters={true}
             actionWidth={120}
             resource={sidebarResource.sublease}
-            allowSelection = {false}
+            allowSelection={false}
           />
         )
           : null}
         {createInvoiceDialog.open && (
           <CreateInvoiceDialog
             subleaseData={createInvoiceDialog?.data[0]}
-            currencySymbol = {createInvoiceDialog?.data[0]?.currency}
+            currencySymbol={createInvoiceDialog?.data[0]?.currency}
             onClose={() => setCreateInvoiceDialog({ open: false, data: null })}
             onSuccess={() => {
               setCreateInvoiceDialog({ open: false, data: null });
@@ -241,17 +236,13 @@ const SubleaseInvoice = () => {
           />
         )}
         {viewInvoiceDialog.open && (
-           <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
-            <CustomDialogHeader title={`Invoices : ${viewInvoiceDialog?.data?.subleaseName}`} onClose={() => {
-                setViewInvoiceDialog({ open: false, data: null });
-              }} showRequiredLabel={false}></CustomDialogHeader>
-            <CustomDialogContent>     
-              <Invoices
-                subleaseId={viewInvoiceDialog?.data?._id}
-                renderedFrom =  {`${renderedFrom}_allInvoices`}
-              />
-            </CustomDialogContent>
-          </Dialog>
+          <InvoiceDialog
+            subleaseId={viewInvoiceDialog?.data?._id}
+            subleaseName={viewInvoiceDialog?.data?.subleaseName}
+            handleClose={() => {
+              setViewInvoiceDialog({ open: false, data: null });
+            }}
+          />
         )}
       </CustomContainer>
     </Fragment>
