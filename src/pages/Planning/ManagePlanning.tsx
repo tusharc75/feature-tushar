@@ -55,6 +55,7 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
               rest.planningNumber = GenerateResourceLineNumber(fieldsDataForCreate);
               setCloneHeading(planningNumber);
               tempData = rest;
+              tempData.status = 'Open';
             }
             setInitialData({
               fields: fields,
