@@ -3,6 +3,7 @@ import {
   Button,
   Checkbox,
   CircularProgress,
+  Collapse,
   FormControl,
   FormControlLabel,
   Grid,
@@ -27,6 +28,7 @@ import StepContent from '@material-ui/core/StepContent';
 import { roleTypes } from '../../constants/helpers';
 import SearchBox from '../Helpers/SearchBox';
 import { useData } from '../../StateProvider/Provider';
+import { Check, CheckCircle } from '@material-ui/icons';
 
 const useStyles = makeStyles((theme) => ({
   button: {
@@ -248,9 +250,12 @@ const AssignEntityDialog = ({
     switch (step) {
       case 0:
         return (
-          <ul>
+          <ul key={0}>
             {data.map((d) => (
-              <li className="flex gap-2 px-2 py-2 md:px-[15px]" style={{ borderBottom: '1px solid var(--common-border-color)' }}>
+              <li
+                className="flex gap-2 px-2 py-2 md:px-[15px] text-[var(--primary-text)]"
+                style={{ borderBottom: '1px solid var(--common-border-color)' }}
+              >
                 <div>
                   <Checkbox
                     edge="start"
@@ -266,7 +271,9 @@ const AssignEntityDialog = ({
                   />
                 </div>
                 <div>
-                  <h6 className="line-clamp-1 MuiTypography-body1 text-[16px]">{type === 'entity' ? d.entityName : d.concatedName}</h6>
+                  <h6 className="line-clamp-1 MuiTypography-body1 text-[16px] font-[500_!important]">
+                    {type === 'entity' ? d.entityName : d.concatedName}
+                  </h6>
                   <p className="line-clamp-1 MuiTypography-body2">{type === 'user' ? d.email : d?.address?.optionLabel || d?.address || ''}</p>
                 </div>
               </li>
@@ -275,9 +282,12 @@ const AssignEntityDialog = ({
         );
       case 1:
         return (
-          <ul style={{ padding: 0 }}>
+          <ul style={{ padding: 0 }} key={1}>
             {role.map((d) => (
-              <li className="flex gap-2 px-2 py-2 md:px-[15px]" style={{ borderBottom: '1px solid var(--common-border-color)' }}>
+              <li
+                className="flex gap-2 px-2 py-2 md:px-[15px] text-[var(--primary-text)]"
+                style={{ borderBottom: '1px solid var(--common-border-color)' }}
+              >
                 <div>
                   <Checkbox
                     edge="start"
@@ -292,7 +302,7 @@ const AssignEntityDialog = ({
                   />
                 </div>
                 <div>
-                  <h6 className="line-clamp-1 MuiTypography-body1 text-[16px]">{d.name || ''}</h6>
+                  <h6 className="line-clamp-1 MuiTypography-body1 text-[16px] font-[500_!important]">{d.name || ''}</h6>
                   <p className="line-clamp-1 MuiTypography-body2">{d.description || ''}</p>
                 </div>
               </li>
@@ -359,29 +369,36 @@ const AssignEntityDialog = ({
                 <div className="grid gap-3 mt-3">
                   {steps.map((label, index) => (
                     <div key={label}>
-                      <h4 className="text-[18px]">{label}</h4>
-                      <div className="max-w-full">
-                        <div className="max-w-full">{getStepContent(index)}</div>
-                        <div className={classes.actionsContainer}>
-                          <div>
-                            <Button size="small" disabled={activeStep === 0} onClick={handleBack} className={classes.button}>
-                              Back
-                            </Button>
-                            {activeStep !== steps.length - 1 && (
-                              <Button
-                                variant="contained"
-                                color="primary"
-                                size="small"
-                                onClick={handleNext}
-                                disabled={selectedData.length === 0}
-                                className={classes.button}
-                              >
-                                Next
+                      <h4 className="text-[14px] flex items-center gap-[18px] ml-[6px] text-[var(--primary-text)]">
+                        <span className="rounded-full bg-[--primary] grid place-items-center text-white text-[12px] w-[20px] h-[20px]">
+                          {activeStep > index ? <Check className="block" style={{ fontSize: 14 }} /> : index + 1}
+                        </span>
+                        <span>{label}</span>
+                      </h4>
+                      <Collapse in={activeStep === index}>
+                        <div className="max-w-full">
+                          <div className="max-w-full">{getStepContent(index)}</div>
+                          <div className={classes.actionsContainer}>
+                            <div>
+                              <Button size="small" disabled={activeStep === 0} onClick={handleBack} className={classes.button}>
+                                Back
                               </Button>
-                            )}
+                              {activeStep !== steps.length - 1 && (
+                                <Button
+                                  variant="contained"
+                                  color="primary"
+                                  size="small"
+                                  onClick={handleNext}
+                                  disabled={selectedData.length === 0}
+                                  className={classes.button}
+                                >
+                                  Next
+                                </Button>
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </div>
+                      </Collapse>
                     </div>
                   ))}
                 </div>
