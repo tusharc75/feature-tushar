@@ -293,7 +293,6 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       if (_subRow?.status === WORKORDER_SERVICE_STATUS.completed) {
         _subRow.hideSelection = true;
       }
-      _subRow.subRows = generateNestedData(material, _subRow);
     });
     return subRows;
   };
