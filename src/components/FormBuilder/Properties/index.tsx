@@ -25,7 +25,7 @@ import { SignatureUser } from '../AddField/signatureUser';
 import { DecimalPlaces } from '../AddField/decimalPlaces';
 import { MultipleFormula } from '../AddField/multipleformula';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition } from '../../../constants/helpers';
+import { CustomDialogTransition, fieldLabelToFieldName } from '../../../constants/helpers';
 import { Autocomplete } from '@material-ui/lab';
 import FormTypes from '../../Helpers/FormTypes';
 import { camelCase, isEqual } from 'lodash';
@@ -167,7 +167,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
     _section.field.forEach((_field) => {
       let ele = { ..._field };
       if (!ele.fieldName) {
-        ele.fieldName = camelCase(ele.fieldLabel.replace(/[^a-zA-Z0-9]/g, ''));
+        ele.fieldName = fieldLabelToFieldName(ele.fieldLabel);
       }
       if (ele.type === 'converter' || ele.type === 'currencyAmount' || ele.isConverter === true) {
         if (ele.type !== 'currencyAmount' && (ele.type === 'converter' || ele.isConverter === true)) {
@@ -532,7 +532,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         fullWidth
                         margin="dense"
                         disabled={true}
-                        value={values['fieldName'] ? values['fieldName'] : camelCase(values['fieldLabel'].replace(/[^a-zA-Z0-9]/g, ''))}
+                        value={values['fieldName'] ? values['fieldName'] : fieldLabelToFieldName(values['fieldLabel'])}
                       />
                       {/* <FormControlLabel
                         control={
