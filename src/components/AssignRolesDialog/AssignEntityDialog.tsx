@@ -376,7 +376,10 @@ const AssignEntityDialog = ({
                         <span>{label}</span>
                       </h4>
                       {activeStep === index && (
-                        <div className="hidden min-[600px]:block w-[1px] bg-[var(--common-border-color)] h-full absolute left-[10px] top-[20px] transform -translate-x-1/2 -translate-y-1/2 z-10"></div>
+                        <div
+                          style={{ borderLeft: '1px dashed var(--common-border-color)' }}
+                          className="hidden min-[600px]:block w-[2px]  h-full absolute left-[10px] top-[20px] transform -translate-x-1/2 -translate-y-1/2 z-10"
+                        ></div>
                       )}
                       <Collapse in={activeStep === index}>
                         <div className="max-w-full  min-[600px]:ml-[35px]">
