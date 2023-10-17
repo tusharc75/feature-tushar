@@ -26,6 +26,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { isMobile, isTablet } from 'react-device-detect';
 import DashboardModal, { ModalHead } from 'src/components/DashboardModal';
 import { Background } from 'react-flow-renderer';
+import routes from 'src/components/Helpers/Routes';
 
 interface CssObj {
   [index: string]: React.CSSProperties;
@@ -140,7 +141,7 @@ const QuotationSummeryDialog = ({ quotationData, versionId, onClose }) => {
           maxWidth: 'sm'
         }}
         modalHead={{
-          title: 'Quotation Summary',
+          title: `${routes.quotation.title} Summary`,
           icon: <GiReceiveMoney />,
           fullScreenOption: true
         }}
