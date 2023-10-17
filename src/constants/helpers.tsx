@@ -74,7 +74,8 @@ export const purchaseRequisitionSteps = ['Add Products'];
 
 export const productionOrderSteps: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },
-  { name: 'Work Order', title: 'Work Order', icon: 'workOrder' }
+  { name: 'Work Order', title: 'Work Order', icon: 'workOrder' },
+  { name: 'Loading Ticket', title: 'Loading', icon: 'ticket' },
 ];
 
 export const jobProcessSteps: stepInterface[] = [
@@ -1981,7 +1982,8 @@ export const DELIVERY_TICKET_REFERENCE_TYPE = {
   salesOrder: 'Sales Order',
   sublease: 'Sublease',
   transferInventory: 'Transfer Inventory',
-  repairOrder: 'Repair Order'
+  repairOrder: 'Repair Order',
+  productionOrder: 'Production Order',
 };
 
 export const DELIVERY_FROM_TO_TYPE = {
