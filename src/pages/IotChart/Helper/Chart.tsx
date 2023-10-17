@@ -61,8 +61,13 @@ const Chart = ({ dateFilters, assetId, dataPoints }) => {
     tooltip: {
       shared: true,
       y: {
-        formatter: function (val) {
-          return typeof val === 'number' ? val.toFixed(2) : parseFloat(val).toFixed(2);
+        formatter: function (val, { seriesIndex, w }) {
+          const dataPoint = dataPoints?.find((d) => d?.fieldLabel === w?.globals?.seriesNames[seriesIndex]);
+          const value =
+            typeof val === 'number'
+              ? `${val.toFixed(parseInt(dataPoint?.decimalPlaces))}`
+              : parseFloat(val).toFixed(parseInt(dataPoint?.decimalPlaces));
+          return dataPoint?.unit ? `${value} (${dataPoint?.unit})` : `${value}`;
         }
       }
     },
