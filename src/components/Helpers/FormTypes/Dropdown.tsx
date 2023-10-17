@@ -814,7 +814,9 @@ function Dropdown({
                             default: true,
                             optionLabel: data.accountName,
                             optionValue: data._id,
-                            order: option.length
+                            order: option.length,
+                            billingAddress: data?.billingAddress || [],
+                            shippingAddress: data?.shippingAddress || []
                           };
                           setOptionsList([tempNewOption, ...option]);
                           handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
@@ -853,7 +855,9 @@ function Dropdown({
                           default: true,
                           optionLabel: data.accountName,
                           optionValue: data._id,
-                          order: option.length
+                          order: option.length,
+                          billingAddress: data?.billingAddress || [],
+                          shippingAddress: data?.shippingAddress || []
                         };
                         setOptionsList([tempNewOption, ...option]);
                         handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
