@@ -160,7 +160,7 @@ const UserDetailsPage = () => {
       fetchUserRelatedDetail();
       setCurrentTabIndex(0);
     }
-    userSetup === 'true' && setShowSetupUserDialog(true);
+    // userSetup === 'true' && setShowSetupUserDialog(true);
     // eslint-disable-next-line
   }, [id]);
 
@@ -169,6 +169,12 @@ const UserDetailsPage = () => {
     fetchLoggedInUserEntities();
     fetchLoggedInUserRole();
   }, []);
+
+  useEffect(() => {
+    if (roleAccessOfLoggedInUser?.length && userSetup === 'true') {
+      setShowSetupUserDialog(true);
+    }
+  }, [id, roleAccessOfLoggedInUser]);
 
   useEffect(() => {
     switch (timeFrame) {
