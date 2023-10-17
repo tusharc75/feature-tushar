@@ -12,6 +12,7 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import { CircularProgress } from '@material-ui/core';
 import IconButton from '@material-ui/core/IconButton';
 import SwitchCameraIcon from '@material-ui/icons/SwitchCamera';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const DocumentScanner = ({ open, onClose, setFieldValue, onUploadFile }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -106,12 +107,18 @@ const DocumentScanner = ({ open, onClose, setFieldValue, onUploadFile }) => {
             ))}
         </CustomDialogContent>
         <CustomDialogFooter>
-          <Button type="button" variant="outlined" color="primary" size="small" onClick={onClose}>
+          <Button
+            type="button"
+            color="primary"
+            size="small"
+            onClick={onClose}>
             Cancel
           </Button>
-          <IconButton title="Switch Camera" onClick={switchCamera} disabled={cameraCount < 2}>
-            <SwitchCameraIcon />
-          </IconButton>
+          <HtmlTooltip title='Switch Camera'>
+            <IconButton size="small" onClick={switchCamera} disabled={cameraCount < 2}>
+              <SwitchCameraIcon color="primary" />
+            </IconButton>
+          </HtmlTooltip>
           <CustomButton
             variant="contained"
             color="primary"
@@ -123,7 +130,7 @@ const DocumentScanner = ({ open, onClose, setFieldValue, onUploadFile }) => {
             {isScanning ? 'Scanning...' : 'Capture'}
           </CustomButton>
         </CustomDialogFooter>
-      </Dialog>
+      </Dialog >
     </>
   );
 };

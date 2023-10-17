@@ -247,32 +247,40 @@ export default function ManageAttachment({
                     </Grid>
                     {type === 'file' && (
                       <Grid container item xs={12}>
-                        <Grid item xs={6} sm={4} md={2}>
-                          <FormTypes
-                            label="File"
-                            name="fileUrl"
-                            required={true}
-                            type="fileUpload"
-                            values={values}
-                            canEdit={canEdit}
-                            errors={errors}
-                            touched={touched}
-                            size="small"
-                            setFieldValue={(fname, file) => {
-                              setFieldValue('fileUrl', file);
-                              onUploadFile(file);
-                            }}
-                            doNotShowUploadedFile={true}
-                            imageOrFileUploadCompletePercentage={(completePercentage) => {
-                              setUploadingImageOrFileProgress(completePercentage);
-                            }}
-                          />
-                        </Grid>
-                        <Grid item xs={6} sm={4} md={2}>
-                          <CustomButton variant="contained" color="primary" onClick={() => setDocumentScanDialog(true)}>
-                            {' '}
-                            Scan Document
-                          </CustomButton>
+                        <Grid item xs={12}>
+                          <div style={{ width: '100%' }}>
+                            <Box display="flex" flexDirection="row">
+                              <Box >
+                                <FormTypes
+                                  label="File"
+                                  name="fileUrl"
+                                  required={true}
+                                  type="fileUpload"
+                                  values={values}
+                                  canEdit={canEdit}
+                                  errors={errors}
+                                  touched={touched}
+                                  size="small"
+                                  setFieldValue={(fname, file) => {
+                                    setFieldValue('fileUrl', file);
+                                    onUploadFile(file);
+                                  }}
+                                  doNotShowUploadedFile={true}
+                                  imageOrFileUploadCompletePercentage={(completePercentage) => {
+                                    setUploadingImageOrFileProgress(completePercentage);
+                                  }}
+                                />
+                              </Box>
+                              <Box pl={2}>
+                                <CustomButton
+                                  variant="contained"
+                                  color="primary"
+                                  onClick={() => setDocumentScanDialog(true)}>
+                                  Scan Document
+                                </CustomButton>
+                              </Box>
+                            </Box>
+                          </div>
                         </Grid>
                         <Grid item xs={12}>
                           <AttachmentThumbnail attachments={otherAttachments} handleDeleteAttachment={handleDeleteAttachment} canEdit={canEdit} />
