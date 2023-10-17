@@ -82,7 +82,7 @@ const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, rende
             deliveryTicketList?.map((obj) => {
                 if (obj.ticketType === DELIVERY_TICKET_TYPE.loading) {
                     rows.map((d, index) => {
-                        if (obj?.products?.some((p) => d?._id === p?.product)) {
+                        if (obj?.products?.some((p) => d?.materialId === p?.product)) {
                             rows[index]['loadingTicket'] = obj?.ticketName;
                             rows[index]['loadingTicketId'] = obj?._id;
                             rows[index]['loadingTicketStatus'] = obj?.status;
@@ -180,6 +180,11 @@ const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, rende
                         </Box>
                     </div>
                     : <NoDataCell />
+            }, {
+                accessor: 'loadingTicketStatus',
+                Header: 'Loading Ticket Status',
+                width: 200,
+                Cell: ({ row }) => row?.original?.loadingTicketStatus ? <p className="text-truncate">{row?.original?.loadingTicketStatus}</p> : <NoDataCell />
             }
         ];
         coloum = [...coloum, ...newColumns];
@@ -330,7 +335,7 @@ const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, rende
                     referenceData={showTicketDialog.data}
                     onClose={() => setShowTicketDialog({ open: false, data: {} })}
                     productInventory={[]}
-                    products={selectedRecords}
+                    products={selectedRecords?.map((e) => ({ ...e, _id: e?.materialId }))}
                     onSuccess={() => {
                         setShowTicketDialog({ open: false, data: {} });
                         fetchRecords();

@@ -267,6 +267,22 @@ export default function DeliveryTicketDetail(props) {
             return false;
           }
         }
+        if (ticket?.type === DELIVERY_TICKET_REFERENCE_TYPE.productionOrder) {
+          if (
+            [
+              'rentalJob',
+              'repairJob',
+              'transferAsset',
+              'salesOrder',
+              'repairOrder',
+              'productInventory',
+              'sublease',
+              'transferInventory'
+            ].includes(fields.fieldData.fieldName)
+          ) {
+            return false;
+          }
+        }
         if (fields.fieldData.sectionName.includes('Fields')) {
           return false;
         }
@@ -788,7 +804,7 @@ export default function DeliveryTicketDetail(props) {
             )}
           </Tabs>
           <TabPanel value={tabValue} index={0}>
-            {deliveryTicketData && deliveryTicketFields.length > 0 ? (
+            {deliveryTicketData && deliveryTicketFields.length > 0 && !loading ? (
               <DetailsPage
                 data={{
                   ...deliveryTicketData,
@@ -825,7 +841,9 @@ export default function DeliveryTicketDetail(props) {
                   }
                 ]}
               />
-            ) : null}
+            ) : (<Grid container spacing={2} style={{ padding: '8px' }}>
+              <CommonSkeleton lenArray={[...Array(7).keys()]} />
+            </Grid>)}
           </TabPanel>
           <TabPanel value={tabValue} index={1}>
             <Grid container spacing={1} className="p-2">
