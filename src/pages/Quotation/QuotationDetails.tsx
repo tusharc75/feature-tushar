@@ -518,22 +518,23 @@ const QuotationDetails = () => {
                       </Button>
                     </MenuItem>
                   )}
-                  {currentVersion !== 1 && permissions?.quotation?.isDelete && (
-                    <MenuItem>
-                      <Button
-                        variant="text"
-                        size="small"
-                        disabled={!allowedToEdit || loading}
-                        startIcon={<MdDelete className={isMobile ? 'mr-1' : ''} />}
-                        onClick={() => {
-                          deleteVersion();
-                          closeActionsAction();
-                        }}
-                      >
-                        Delete Version-{currentVersion}
-                      </Button>
-                    </MenuItem>
-                  )}
+                  {currentVersion !== 1 && permissions?.quotation?.isDelete
+                    && quotationData?.versions[currentVersion]?.status !== QUOTATION_STATUS.acceptByCustomer && (
+                      <MenuItem>
+                        <Button
+                          variant="text"
+                          size="small"
+                          disabled={!allowedToEdit || loading}
+                          startIcon={<MdDelete className={isMobile ? 'mr-1' : ''} />}
+                          onClick={() => {
+                            deleteVersion();
+                            closeActionsAction();
+                          }}
+                        >
+                          Delete Version-{currentVersion}
+                        </Button>
+                      </MenuItem>
+                    )}
                   {permissions?.quotation?.isDelete && (
                     <MenuItem>
                       <Button
