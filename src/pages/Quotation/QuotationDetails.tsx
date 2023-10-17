@@ -184,7 +184,8 @@ const QuotationDetails = () => {
               canAllowMultipleTimeConvert = true
             }
           }
-          if (canAllowMultipleTimeConvert && [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.converted]?.includes(quotationData?.status)) {
+          if (canAllowMultipleTimeConvert && [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.converted]?.includes(quotationData?.status)
+            && quotationData.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer) {
             var isAllowedToEdit = [...(quotationData.collaborator ?? []), quotationData.owner].some((d) => d?.optionValue === user?.user?._id);
             if (user?.role?.selectedEntity?.superAdminAccess) {
               isAllowedToEdit = true;
