@@ -276,7 +276,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   };
 
   const generateNestedData = (material, parent) => {
-    const subRows: any = material.filter((e) => e.parentId === parent._id);
+    const subRows: any = material.filter((e) => e?.workOrder === parent?.workOrder?._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
       _subRow.detail = _subRow.type === MATERIAL_TYPE.service ?
@@ -293,7 +293,6 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       if (_subRow?.status === WORKORDER_SERVICE_STATUS.completed) {
         _subRow.hideSelection = true;
       }
-      _subRow.subRows = generateNestedData(material, _subRow);
     });
     return subRows;
   };

@@ -1,4 +1,4 @@
-import { Box, Grid, IconButton} from '@material-ui/core';
+import { Box, Grid, IconButton } from '@material-ui/core';
 import { Fragment, useEffect, useReducer, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
@@ -16,11 +16,11 @@ import { isMobile } from 'react-device-detect';
 import CustomContainer from 'src/components/CustomContainer';
 import styles from '../Leads/Header.module.scss';
 import SearchBox from 'src/components/Helpers/SearchBox';
-import ViewAllInvoices from './ViewInvoice';
+import InvoiceDialog from './InvoiceDialog';
 
 const SubleaseInvoice = () => {
 
-  const renderedFrom = `${camelCase(routes?.subleaseInvoice.title)}_invoice`;
+  const renderedFrom = `${camelCase(routes?.subleaseInvoice.title)}`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const {
@@ -135,28 +135,30 @@ const SubleaseInvoice = () => {
   const ActionsRenderer = (params) => (
     <Fragment>
       {params.data.status === SUBLEASE_STATUS.issued && (
-        <>
-        <HtmlTooltip title="Create Invoice">
-          <IconButton
-            size="small"
-            onClick={() => {
-              setCreateInvoiceDialog({ open: true, data: [params.data] });
-            }}
-          >
-            <NoteAddIcon fontSize="small" color="primary" />
-          </IconButton>
-        </HtmlTooltip>
-        <HtmlTooltip title="View Invoice">
-        <IconButton
-          size="small"
-          onClick={() => {
-            setViewInvoiceDialog({ open: true, data: params.data });
-          }}
-        >
-          <VisibilityIcon fontSize="small" color="primary" />
-        </IconButton>
-      </HtmlTooltip>
-      </>
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <HtmlTooltip title="Create Invoice">
+            <IconButton
+              size="small"
+              onClick={() => {
+                setCreateInvoiceDialog({ open: true, data: [params.data] });
+              }}
+            >
+              <NoteAddIcon fontSize="small" color="primary" />
+            </IconButton>
+          </HtmlTooltip>
+          <Box ml={1}>
+            <HtmlTooltip title="View Invoices">
+              <IconButton
+                size="small"
+                onClick={() => {
+                  setViewInvoiceDialog({ open: true, data: params.data });
+                }}
+              >
+                <VisibilityIcon fontSize="small" color="primary" />
+              </IconButton>
+            </HtmlTooltip>
+          </Box>
+        </div>
       )}
     </Fragment>
   );
@@ -214,17 +216,17 @@ const SubleaseInvoice = () => {
             loading={loading}
             renderedFrom={renderedFrom}
             refreshGrid={fetchSubleaseData}
-            showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
             actionWidth={120}
             resource={sidebarResource.sublease}
+            allowSelection={false}
           />
         )
           : null}
         {createInvoiceDialog.open && (
           <CreateInvoiceDialog
             subleaseData={createInvoiceDialog?.data[0]}
-            currencySymbol = {createInvoiceDialog?.data[0]?.currency}
+            currencySymbol={createInvoiceDialog?.data[0]?.currency}
             onClose={() => setCreateInvoiceDialog({ open: false, data: null })}
             onSuccess={() => {
               setCreateInvoiceDialog({ open: false, data: null });
@@ -234,10 +236,10 @@ const SubleaseInvoice = () => {
           />
         )}
         {viewInvoiceDialog.open && (
-          <ViewAllInvoices
+          <InvoiceDialog
             subleaseId={viewInvoiceDialog?.data?._id}
-            subleaseName = {viewInvoiceDialog?.data?.subleaseName}
-            onClose={() => {
+            subleaseName={viewInvoiceDialog?.data?.subleaseName}
+            handleClose={() => {
               setViewInvoiceDialog({ open: false, data: null });
             }}
           />

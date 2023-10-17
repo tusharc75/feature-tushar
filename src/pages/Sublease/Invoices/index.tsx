@@ -1,4 +1,4 @@
-import { Box, Button, Grid, IconButton } from '@material-ui/core';
+import { Box, Grid, IconButton } from '@material-ui/core';
 import { useContext, useEffect, useReducer, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
@@ -8,21 +8,19 @@ import useColumns, { checkStaticField, getFrameworkComponents, getStaticFields }
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { camelCase } from 'lodash';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ViewInvoice from '../../Invoice/ViewInvoice';
-import {
-    CustomDialogTransition,
-  } from 'src/constants/helpers';
-import { Dialog } from '@material-ui/core';
-import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import CustomRenderCell from 'src/components/Helpers/CustomRenderCell';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { camelCase } from 'lodash';
 
-const ViewAllInvoices = ({ subleaseId, onClose, subleaseName }) => {
-  const renderedFrom = camelCase(routes?.invoice?.title);
+const Invoices = ({ subleaseId }) => {
+
+  const renderedFrom = `${camelCase(routes.sublease?.title)}_invoice`
+
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -38,7 +36,7 @@ const ViewAllInvoices = ({ subleaseId, onClose, subleaseName }) => {
   const [columns, setColumns] = useState(null);
   const [deleteRecord, setDeleteRecord] = useState<any>({});
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
-  const [viewInvoiceDialog, setViewInvoiceDialog] = useState({open:false, data:null})
+  const [viewInvoiceDialog, setViewInvoiceDialog] = useState({ open: false, data: null })
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
@@ -79,7 +77,8 @@ const ViewAllInvoices = ({ subleaseId, onClose, subleaseName }) => {
     let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
     tempFrameworkComponent = {
       ...tempFrameworkComponent,
-      actionsRenderer: ActionsRenderer
+      actionsRenderer: ActionsRenderer,
+      invoiceMaterialRenderer: InvoiceMaterialRenderer
     };
     setFrameworkComponent({ ...tempFrameworkComponent });
     let staticFields = getStaticFields();
@@ -89,19 +88,42 @@ const ViewAllInvoices = ({ subleaseId, onClose, subleaseName }) => {
     setColumns([...columns]);
   };
 
+  const InvoiceMaterialRenderer = (params) => (
+    <>
+      <span
+        className="link"
+        onClick={() => {
+          setViewInvoiceDialog({ open: true, data: params.data });
+        }}
+      >
+        <CustomRenderCell value={params?.value} />
+      </span>
+      <Box ml={1}>
+        <IconButton
+          size="small"
+          onClick={() => {
+            window.open(`${routes.invoiceDetail.path}/${params?.data?._id}`);
+          }}
+        >
+          <OpenInNewIcon fontSize="small" color="primary" />
+        </IconButton>
+      </Box>
+    </>
+  );
+
   const ActionsRenderer = (params) => (
     <>
       {
         <HtmlTooltip title="View Invoice">
-        <IconButton
-          size="small"
-          onClick={() => {
-            setViewInvoiceDialog({ open: true, data: params.data });
-          }}
-        >
-          <VisibilityIcon fontSize="small" color="primary" />
-        </IconButton>
-      </HtmlTooltip>
+          <IconButton
+            size="small"
+            onClick={() => {
+              setViewInvoiceDialog({ open: true, data: params.data });
+            }}
+          >
+            <VisibilityIcon fontSize="small" color="primary" />
+          </IconButton>
+        </HtmlTooltip>
       }
       {params?.data?.canDelete && (
         <HtmlTooltip title="Delete">
@@ -126,7 +148,7 @@ const ViewAllInvoices = ({ subleaseId, onClose, subleaseName }) => {
 
 
   const getQueryString = (isExport = false) => {
-   
+
     let deepFilter = `?page=${page}&limit=${limit}&sublease=${subleaseId}`;
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
@@ -168,7 +190,7 @@ const ViewAllInvoices = ({ subleaseId, onClose, subleaseName }) => {
           finalObject['canDelete'] = permissions?.invoice?.isDelete && u?.canDelete;
           return finalObject;
         });
-       
+
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -214,9 +236,6 @@ const ViewAllInvoices = ({ subleaseId, onClose, subleaseName }) => {
 
   return (
     <>
-    <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
-        <CustomDialogHeader title={`All Invoices for ${subleaseName} `} onClose={onClose} showRequiredLabel={false}></CustomDialogHeader>
-        <CustomDialogContent>     
       <Grid item xs={12} md={12} sm={12} className="mt-3">
         {columns?.length ? (
           <CustomAgGrid
@@ -235,6 +254,7 @@ const ViewAllInvoices = ({ subleaseId, onClose, subleaseName }) => {
             allowSelection={false}
             allowAction={true}
             isClientSideGrid={true}
+            refreshGrid={fetchBilling}
           />
         ) : (
           <Box p={2} height={500}>
@@ -243,18 +263,18 @@ const ViewAllInvoices = ({ subleaseId, onClose, subleaseName }) => {
         )}
       </Grid>
       {viewInvoiceDialog.open && (
-          <ViewInvoice
-            invoiceData={{ ...viewInvoiceDialog.data, invoiceNumber: viewInvoiceDialog?.data?.invoiceNumber, _id: viewInvoiceDialog?.data?._id }}
-            onClose={() => {
-              setViewInvoiceDialog({ open: false, data: null });
-            }}
-            onSuccess={() => {
-              setViewInvoiceDialog({ open: false, data: null });
-            }}
-            resource = {sidebarResource.subleaseInvoice}
-          />
-        )}
-        {isConfirmDialogVisible ? (
+        <ViewInvoice
+          invoiceData={{ ...viewInvoiceDialog.data, invoiceNumber: viewInvoiceDialog?.data?.invoiceNumber, _id: viewInvoiceDialog?.data?._id }}
+          onClose={() => {
+            setViewInvoiceDialog({ open: false, data: null });
+          }}
+          onSuccess={() => {
+            setViewInvoiceDialog({ open: false, data: null });
+          }}
+          resource={sidebarResource.subleaseInvoice}
+        />
+      )}
+      {isConfirmDialogVisible ? (
         <ConfirmationDialog
           open={isConfirmDialogVisible}
           message={`Are you sure you want to delete ${routes?.invoice?.title?.toLowerCase()} ${deleteRecord?.invoice || ''} ?`}
@@ -266,9 +286,7 @@ const ViewAllInvoices = ({ subleaseId, onClose, subleaseName }) => {
           onOk={handleDeleteInvoice}
         />
       ) : null}
-      </CustomDialogContent>
-      </Dialog>
     </>
   );
 };
-export default ViewAllInvoices;
+export default Invoices;
