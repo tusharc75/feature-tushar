@@ -24,6 +24,8 @@ const Steps = ({
   handlePrev = null,
   className = '',
   showExtraStep = false,
+  nextStepToolTip = null,
+  prevStepToolTip = null,
   ...others
 }) => {
   let activeStep = currentStep;
@@ -85,11 +87,10 @@ const Steps = ({
     <div>
       {isMobile && !isTablet ? (
         <MobileSteps
-          stepName={`${
-            activeStep + 1 > steps.length || isStepEnded
-              ? 'Completed'
-              : `${activeStep + 1}/${steps.length} ${steps[currentStep]?.title ? steps[currentStep]?.title : ''}`
-          }`}
+          stepName={`${activeStep + 1 > steps.length || isStepEnded
+            ? 'Completed'
+            : `${activeStep + 1}/${steps.length} ${steps[currentStep]?.title ? steps[currentStep]?.title : ''}`
+            }`}
           nextButton={
             <Button
               size="small"
@@ -122,13 +123,17 @@ const Steps = ({
           <Box className={styles.mainContainer}>
             {isStepEnded || (
               <Box className={styles.iconButton}>
-                <IconButton
-                  style={{ opacity: currentStep === 0 && '0' }}
-                  disabled={currentStep === steps.length || currentStep === 0 || isStepEnded || !isPrevStep}
-                  onClick={goPrev}
-                >
-                  <LeftIcon />
-                </IconButton>
+                <HtmlTooltip title={prevStepToolTip || ''}>
+                  <span>
+                    <IconButton
+                      style={{ opacity: currentStep === 0 && '0' }}
+                      disabled={currentStep === steps.length || currentStep === 0 || isStepEnded || !isPrevStep}
+                      onClick={goPrev}
+                    >
+                      <LeftIcon />
+                    </IconButton>
+                  </span>
+                </HtmlTooltip>
               </Box>
             )}
             <div
@@ -186,22 +191,26 @@ const Steps = ({
                 );
               })}
             </div>
-
             {!isStepEnded && (
               <Box className={styles.iconButton}>
-                <IconButton
-                  style={{ opacity: showExtraStep ? currentStep - 1 === steps.length && '0' : currentStep === steps.length - 1 && '0' }}
-                  disabled={isNextButtonDisabled}
-                  onClick={goNext}
-                >
-                  <RightIcon />
-                </IconButton>
+                <HtmlTooltip title={nextStepToolTip || ''}>
+                  <span>
+                    <IconButton
+                      style={{ opacity: showExtraStep ? currentStep - 1 === steps.length && '0' : currentStep === steps.length - 1 && '0' }}
+                      disabled={isNextButtonDisabled}
+                      onClick={goNext}
+                    >
+                      <RightIcon />
+                    </IconButton>
+                  </span>
+                </HtmlTooltip>
               </Box>
             )}
           </Box>
         </Box>
-      )}
-    </div>
+      )
+      }
+    </div >
   );
 };
 
