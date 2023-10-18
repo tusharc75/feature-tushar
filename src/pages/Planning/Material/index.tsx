@@ -459,7 +459,12 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
           }
         </Box>
         <Box display="flex">
-          <PreviewDownload resource={sidebarResource.planning} referenceId={planningData._id} columns={columns} isSendEmail={true} />
+          <PreviewDownload
+            fileName={`${routes.planning.title}-${planningData?.planningNumber}`}
+            resource={sidebarResource.planning}
+            referenceId={planningData._id}
+            columns={columns}
+            isSendEmail={true} />
           <Box mr={1} />
           {allowedToEdit &&
             <>

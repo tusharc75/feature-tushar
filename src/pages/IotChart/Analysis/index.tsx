@@ -1,115 +1,101 @@
-import { useState, useCallback } from 'react';
-import { Box, IconButton, Grid, Typography } from '@material-ui/core';
+import { useState, useEffect, useContext, useCallback } from 'react';
+import { Box, Grid } from '@material-ui/core';
 import moment from 'moment';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
-import Chart from '../Helper/Chart';
 import FilterModel from '../Helper/FilterModel';
 import SearchBox from 'src/components/Helpers/SearchBox';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import CollapsibleTree from './CollapsibleTree';
+import { useDebounce } from 'src/hooks';
+import axiosInstance from 'src/axios/axiosInstance';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-const Analysis = ({ assetId, dataPoints, customDataPoints }) => {
-  
+const group = (categories, data, searchKeyword = '') => {
+  if (categories?.length === 0 || data?.length === 0 || !categories || !data) return [];
+  const datapoints = data?.filter((e) =>
+    searchKeyword?.trim() === '' ? true : e?.fieldLabel?.toLowerCase()?.includes(searchKeyword?.trim()?.toLowerCase())
+  );
+
+  const newCategory = [];
+  for (let index = 0; index < categories.length; index++) {
+    const category = categories[index];
+    const filteredDtaPoints = datapoints?.filter((d) => d?.category?.optionValue === category?._id);
+    const obj = {
+      ...category,
+      dataPoints: filteredDtaPoints || [],
+      child: group(category.child, datapoints, searchKeyword)
+    };
+    newCategory.push(obj);
+  }
+  return newCategory;
+};
+
+const Analysis = ({ assetId, dataPoints }: { assetId: string; dataPoints: any[] }) => {
+  const toastConfig = useContext(CustomToastContext);
   const [dateFilters, setDateFilters] = useState({
-    from: new Date(moment().subtract(8, 'days').format('MM-DD-YYYY')),
+    from: new Date(moment().subtract(8, 'days').format('MM/DD/YYYY')),
     to: new Date(),
     intervals: '1hour'
   });
 
   const [searchValue, setSearchValue] = useState('');
-  const [expandedAccordition, setExpandedAccordition] = useState(null);
+  const debouncedSearchValue = useDebounce<string>(searchValue, 500);
+  const [categories, setCategories] = useState<any[] | null>(null);
+  const [categoriesWihtFilteredData, setCategoriesWihtFilteredData] = useState([]);
 
-  const handleChange = useCallback((id: string) => {
-    setExpandedAccordition((prev) => (!prev ? id : prev === id ? null : id));
+  const fetchCategory = useCallback(async () => {
+    axiosInstance()
+      .get(`/dynamic-form`, {
+        headers: {
+          Resource: 'Iot Data Points Category'
+        }
+      })
+      .then(({ data: { data } }) => {
+        const categoryData: any = data?.filter((e) => !e.parentCategory);
+        categoryData?.forEach((element) => {
+          element.child = data?.filter((e) => e?.parentCategory?.optionValue === element?._id);
+        });
+        setCategories(categoryData);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }, [toastConfig]);
+
+  useEffect(() => {
+    fetchCategory();
   }, []);
+
+  useEffect(() => {
+    if (categories && dataPoints) {
+      const groupedData = group(categories, dataPoints, debouncedSearchValue);
+      setCategoriesWihtFilteredData(groupedData);
+    }
+  }, [debouncedSearchValue, categories, dataPoints]);
 
   return (
     <>
-      <Grid direction="row"
-        justifyContent="flex-end"
-        alignItems="center" container spacing={2}>
+      <Grid direction="row" justifyContent="flex-end" alignItems="center" container spacing={2}>
         <Grid>
           <FilterModel dateFilters={dateFilters} setDateFilters={setDateFilters} />
         </Grid>
         <Grid item>
           <SearchBox
             onChange={(e) => {
-              setSearchValue(e.target.value)
+              setSearchValue(e.target.value);
             }}
             value={searchValue}
-            size="small" />
+            size="small"
+          />
         </Grid>
       </Grid>
       <Box mt={2}>
-        {dataPoints?.filter((e) => searchValue?.trim() === '' ? true :
-          e?.fieldLabel?.toLowerCase()?.includes(searchValue?.trim()?.toLowerCase()))?.map((dataPoint) => {
-            return (
-              <Box mt={2}>
-                <Accordion
-                  expanded={expandedAccordition === dataPoint?._id}
-                  className={`omsAccordian`}
-                  onChange={() => {
-                    handleChange(dataPoint?._id);
-                  }}
-                >
-                  <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
-                    <Box display="flex">
-                      <Box>
-                        <IconButton size="small"> {expandedAccordition === dataPoint?._id ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
-                      </Box>
-                      <Box padding="5px">
-                        <Typography variant="subtitle2" style={{ fontSize: '14.2056px', fontWeight: 600 }}>
-                          {dataPoint?.fieldLabel}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    {expandedAccordition === dataPoint?._id && (
-                      <div className="container-with-border w-100 sm:h-[calc(574px-48px)] h-[250px] px-4 overflow-auto py-1">
-                        <Chart dateFilters={dateFilters} assetId={assetId} dataPoints={[dataPoint]} />
-                      </div>
-                    )}
-                  </AccordionDetails>
-                </Accordion>
-              </Box>
-            );
-          })}
-      </Box>
-      <Box mt={2}>
-        {customDataPoints?.map((customDataPoint) => {
-          return (
-            <Box mt={2}>
-              <Accordion
-                expanded={expandedAccordition === customDataPoint?._id}
-                className={`omsAccordian`}
-                onChange={() => {
-                  handleChange(customDataPoint?._id);
-                }}
-              >
-                <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
-                  <Box display="flex">
-                    <Box>
-                      <IconButton size="small"> {expandedAccordition === customDataPoint?._id ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
-                    </Box>
-                    <Box padding="5px">
-                      <Typography variant="subtitle2" style={{ fontSize: '14.2056px', fontWeight: 600 }}>
-                        {customDataPoint?.fieldLabel}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </AccordionSummary>
-                <AccordionDetails>
-                  {expandedAccordition === customDataPoint?._id && (
-                    <div className="container-with-border w-100 sm:h-[calc(574px-48px)] h-[250px] px-4 overflow-auto py-1">
-                      <Chart dateFilters={dateFilters} assetId={assetId} dataPoints={[customDataPoint]} customDataPoint={true} />
-                    </div>
-                  )}
-                </AccordionDetails>
-              </Accordion>
-            </Box>
-          );
-        })}
+        {categories ? (
+          <CollapsibleTree categories={categoriesWihtFilteredData} dateFilters={dateFilters} assetId={assetId} />
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
       </Box>
     </>
   );

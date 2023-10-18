@@ -216,6 +216,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
           </Box>
         )}
         <PreviewDownload
+          fileName={`${routes.sublease.title}-${subleaseData?.subleaseName}`}
           resource={sidebarResource.sublease}
           referenceId={subleaseData?._id}
           hideDetailButton={true}
@@ -258,9 +259,9 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
               </Fragment>
             )} */}
             {selectedRecords.length > 0 &&
-            selectedRecords.filter((e) => e.currentOwnerType === INVENTORY_OWNER_TYPE.brand).length === selectedRecords.length &&
-            checkUniqWarehouse() &&
-            currentStep === 1 ? (
+              selectedRecords.filter((e) => e.currentOwnerType === INVENTORY_OWNER_TYPE.brand).length === selectedRecords.length &&
+              checkUniqWarehouse() &&
+              currentStep === 1 ? (
               <Fragment>
                 <Tooltip title="Send to Supplier">
                   <Button
@@ -351,7 +352,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={() => {}}
+              onClone={() => { }}
               renderedFrom={renderedFrom}
             />
           ) : (

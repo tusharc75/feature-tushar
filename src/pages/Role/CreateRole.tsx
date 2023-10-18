@@ -8,7 +8,7 @@ import CustomDialogContent from '../../components/CustomDialog/CustomDialogConte
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import Loader from '../../components/Loader';
 import RoleEngine from '../../components/Shared/RoleEngine';
-import { roleTier, roleTypes } from '../../constants/helpers';
+import { ROLE_TIER, roleTypes } from '../../constants/helpers';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useData } from '../../StateProvider/Provider';
@@ -44,7 +44,7 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
       const {
         data: { data }
       } = await axiosInstance().get(`/role/${roleId}`);
-      setValues({ name: '', description: data.description, tier: data?.tier || roleTier.tier1 });
+      setValues({ name: '', description: data.description, tier: data?.tier || ROLE_TIER.tier1 });
       setCloneHeading(data.name);
       setField(data.field);
       setResource(data.resource);
@@ -101,18 +101,19 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
     ) {
       const resources = resource.map((r) => {
         const newData = { ...r };
-        delete newData.isCreateDisabled;
-        delete newData.isDeleteDisabled;
         delete newData.isReadDisabled;
         delete newData.isUpdateDisabled;
+        delete newData.isCreateDisabled;
+        delete newData.isDeleteDisabled;
         delete newData.isHiddenDisabled;
         return newData;
       });
       const fields = field.map((f) => {
         const newData = { ...f };
-        delete newData.isCreateDisabled;
         delete newData.isReadDisabled;
         delete newData.isUpdateDisabled;
+        delete newData.isCreateDisabled;
+        delete newData.isDeleteDisabled;
         delete newData.isHiddenDisabled;
         delete newData.isHidden;
         return newData;
@@ -213,7 +214,7 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
                 />
                 <Autocomplete
                   id={`roleTier`}
-                  options={Object.values(roleTier)}
+                  options={Object.values(ROLE_TIER)}
                   autoHighlight
                   disableClearable
                   fullWidth
@@ -234,7 +235,12 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
                 ) : (
                   field.length &&
                   resource.length && (
-                    <RoleEngine field={field} resource={resource} setField={setField} setResource={setResource} tier={values?.tier} />
+                    <RoleEngine
+                      field={field}
+                      resource={resource}
+                      setField={setField}
+                      setResource={setResource}
+                      tier={values?.tier} />
                   )
                 )}
               </Paper>

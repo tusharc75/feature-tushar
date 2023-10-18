@@ -7,16 +7,28 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ReactApexChart from 'react-apexcharts';
 import { ApexOptions } from 'apexcharts';
 import FilterAlertModel from './FilterAlertModel';
+import { useAppTheme } from 'src/constants/AppConfig';
 
-const Chart = ({ dateFilters, assetId, dataPoints, customDataPoint = false }) => {
+const Chart = ({ dateFilters, assetId, dataPoints }) => {
   const toastConfig = useContext(CustomToastContext);
   const [chartData, setChartData] = useState(null);
   const [alert, setAlert] = useState(null);
   const [showHighLow, setShowHighLow] = useState(false);
   const [highLowData, setHighLowData] = useState([]);
+  const [currentChartTheme, setCurrentChartTheme] = useState('light');
+  const [themeColor] = useAppTheme();
 
   const [options, setOptions] = useState<ApexOptions>({
+    theme: {
+      mode: 'light',
+      palette: 'palette2'
+    },
+    grid: {
+      show: true,
+      borderColor: 'var(--common-border-color)'
+    },
     chart: {
+      background: 'transparent',
       stacked: false,
       zoom: {
         type: 'x',
@@ -49,8 +61,13 @@ const Chart = ({ dateFilters, assetId, dataPoints, customDataPoint = false }) =>
     tooltip: {
       shared: true,
       y: {
-        formatter: function (val) {
-          return typeof val === 'number' ? val.toFixed(2) : parseFloat(val).toFixed(2);
+        formatter: function (val, { seriesIndex, w }) {
+          const dataPoint = dataPoints?.find((d) => d?.fieldLabel === w?.globals?.seriesNames[seriesIndex]);
+          const value =
+            typeof val === 'number'
+              ? `${val.toFixed(parseInt(dataPoint?.decimalPlaces))}`
+              : parseFloat(val).toFixed(parseInt(dataPoint?.decimalPlaces));
+          return dataPoint?.unit ? `${value} (${dataPoint?.unit})` : `${value}`;
         }
       }
     },
@@ -78,21 +95,30 @@ const Chart = ({ dateFilters, assetId, dataPoints, customDataPoint = false }) =>
     });
   }, [showHighLow]);
 
+  useEffect(() => {
+    setOptions((prevOptions) => {
+      const newOptions = { ...prevOptions };
+      if (themeColor === 'dark') {
+        newOptions.theme.palette = 'palette2';
+      } else {
+        newOptions.theme.palette = 'palette1';
+      }
+      newOptions.theme.mode = themeColor;
+      return newOptions;
+    });
+    setCurrentChartTheme(themeColor);
+  }, [themeColor]);
+
   const fetchData = () => {
-    let api = `/report/iot/`;
-    api += customDataPoint ? `custom-data-point` : `data-points`;
+    let api = `/report/iot/data-points`;
     let param = {
       asset: assetId,
       from_date: new Date(dateFilters.from).toISOString(),
       to_date: new Date(dateFilters.to).toISOString(),
       interval: dateFilters.intervals,
-      timezone: Intl?.DateTimeFormat()?.resolvedOptions()?.timeZone
+      timezone: Intl?.DateTimeFormat()?.resolvedOptions()?.timeZone,
+      dataPoints: dataPoints?.map((e) => e._id)?.toString()
     };
-    if (customDataPoint) {
-      param['customDataPoints'] = dataPoints?.map((e) => e._id)?.toString();
-    } else {
-      param['dataPoints'] = dataPoints?.map((e) => e._id)?.toString();
-    }
     axiosInstance()
       .get(api, { params: param })
       .then(({ data: { data } }) => {
@@ -229,7 +255,7 @@ const Chart = ({ dateFilters, assetId, dataPoints, customDataPoint = false }) =>
             showHighLow={showHighLow}
             setShowHighLow={setShowHighLow}
           />
-          <ReactApexChart options={options} series={chartData} type="line" height={500} />
+          <ReactApexChart key={currentChartTheme} options={options} series={chartData} type="line" height={500} />
         </>
       ) : (
         <Box p={2} height={500}>

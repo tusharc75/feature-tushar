@@ -15,7 +15,8 @@ import {
   DELIVERY_TICKET_REFERENCE_TYPE,
   INVENTORY_OWNER_TYPE,
   sidebarResource,
-  CHILD_RESOURCE
+  CHILD_RESOURCE,
+  DELIVERY_TICKET_STATUS
 } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
@@ -35,6 +36,8 @@ import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { generateCustomTableColumns } from 'src/constants/columns';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
+import { useData } from 'src/StateProvider/Provider';
+import HelpIcon from '@material-ui/icons/Help';
 
 const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatus, renderedFrom, allowedToEdit, allowUpdateStatus, stepFullScreen }) => {
 
@@ -51,6 +54,10 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
   const [repairAssetDialog, setRepairAssetDialog] = useState({ open: false, assetId: null, assetName: null, assetIds: [] });
 
   const [repairProcessDialog, setRepairProcessDialog] = useState({ open: false, assetId: null, assetNumber: null, repaired: false });
+
+  const {
+    state: { user, permissions }
+  }: any = useData();
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -220,9 +227,9 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
             <HtmlTooltip title="Repaired">
               <CheckCircleIcon color="primary" fontSize="small" />
             </HtmlTooltip>
-          ) : ![ASSET_STATUS.lost, ASSET_STATUS.scrap].includes(row?.original?.status) &&
-            row?.original?.currentOwnerType === INVENTORY_OWNER_TYPE.brand &&
-            !row?.original?.repairTypeId ? (
+          ) : ![ASSET_STATUS.lost, ASSET_STATUS.scrap].includes(row?.original?.status) && row?.original?.canRepair
+            && row?.original?.currentOwnerType === INVENTORY_OWNER_TYPE.brand
+            && !row?.original?.repairTypeId ? (
             <HtmlTooltip title="Repair Asset">
               <IconButton
                 size="small"
@@ -245,6 +252,23 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
 
   const fetchRecords = async () => {
     var data: any = [];
+    let assetSendedToSupplier = []
+
+    if (user.user?.brandPolicy?.repairJobSendSupplierRequired) {
+
+      const tickets = await axiosInstance().get(`${deliveryTicket.api}/typewise?referenceType=${sidebarResource.repairJob}&referenceId=${repairJobData._id}`);
+
+      const receivedTickets = tickets?.data?.data?.filter((e) => e.status === DELIVERY_TICKET_STATUS.delivered
+        && e.deliveryToType === DELIVERY_FROM_TO_TYPE.plant && e.pickupFromType === DELIVERY_FROM_TO_TYPE.supplier) || []
+
+      assetSendedToSupplier = receivedTickets?.reduce((acc, t) => {
+        if (t?.productInventory && t?.productInventory?.length > 0) {
+          let ids = t?.productInventory.map(inventory => inventory?.optionValue);
+          return acc.concat(ids);
+        }
+      }, []);
+    }
+
     const response = await axiosInstance().get(`${repairJob.api}/${repairJobData._id}/assets`)
     data = response?.data?.data;
     data.forEach((parent, i) => {
@@ -254,6 +278,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
       parent.productCategory = parent?.productCategory?.optionLabel
       parent.isValid = parent.status === ASSET_STATUS.scrap || parent.status === ASSET_STATUS.lost ? false : true
       parent.hideSelection = parent.status === ASSET_STATUS.lost;
+      parent.canRepair = user.user?.brandPolicy?.repairJobSendSupplierRequired ? assetSendedToSupplier?.includes(parent.inventory) && !parent?.repaired : true;
     });
     setRowsData(data);
     setSelectedRecords([]);
@@ -323,7 +348,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
   const checkUniqWarehouse = () => {
     if (selectedRecords.length === 0) {
       return true;
-    } else if (uniq(map(selectedRecords, 'warehouseId')).length === 1) {
+    } else if (uniq(map(selectedRecords, 'warehouse.optionValue')).length === 1) {
       return false;
     } else {
       return true;
@@ -333,7 +358,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
   const checkUniqSupplier = () => {
     if (selectedRecords.length === 0) {
       return true;
-    } else if (uniq(map(selectedRecords, 'currentOwnerId')).length === 1) {
+    } else if (uniq(map(selectedRecords, 'currentOwner.optionValue')).length === 1) {
       return false;
     } else {
       return true;
@@ -345,6 +370,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
       <Box display="flex" justifyContent="flex-end" m={1}>
         <Box display="flex" alignItems="center" gridGap={'8px'} className="isolate">
           <PreviewDownload
+            fileName={`${routes.repairJob.title}-${repairJobData?.repairJobName}`}
             resource={sidebarResource.repairJob}
             referenceId={repairJobData?._id}
             columns={columns}
@@ -404,6 +430,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                 size="small"
                 disabled={
                   selectedRecords.length === 0 ||
+                  selectedRecords.some((s) => !s?.canRepair || s.repairTypeId || [ASSET_STATUS.scrap].includes(s.status)) ||
                   selectedRecords.some((s) => s.repaired === true || s.repairTypeId || [ASSET_STATUS.scrap].includes(s.status)) ||
                   checkUniqcurrentOwnerType()
                 }
@@ -470,6 +497,11 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
               </Menu>
             </Fragment>
           )}
+          {user.user?.brandPolicy?.repairJobSendSupplierRequired &&
+            <HtmlTooltip title='To complete the repair, assets must be sent to the supplier and received back at the plant'>
+              <HelpIcon fontSize='small' color='primary' />
+            </HtmlTooltip>
+          }
         </Box>
       </Box>
       {columns && rowsData ? (<Box zIndex={5} width={'100%'}>

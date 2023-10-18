@@ -21,7 +21,7 @@ import CommentDialog from 'src/components/CommentDialog';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import { IoMdDownload } from 'react-icons/io';
 
-const ViewInvoice = ({ invoiceData, onClose, onSuccess }) => {
+const ViewInvoice = ({ invoiceData, onClose, onSuccess, resource }) => {
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = `${camelCase(routes?.invoice.title)}_view`;
 
@@ -131,25 +131,24 @@ const ViewInvoice = ({ invoiceData, onClose, onSuccess }) => {
     const rows = data.material.filter((e) => !e.parentId);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === 'product'
-          ? parent.productDetail?.productName
-          : parent.type === 'package'
+      parent.detail = `${parent.type === 'product'
+        ? parent.productDetail?.productName
+        : parent.type === 'package'
           ? parent.packageDetail?.packageName
           : parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail?.assetNumber
-          : parent.serviceDetail?.serviceName
-      }`;
+            ? parent.serializedAssetDetail?.assetNumber
+            : parent.serviceDetail?.serviceName
+        }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDescription || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail?.product?.productDescription || ''
-          : '';
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : parent.type === 'serializedAsset'
+                ? parent.serializedAssetDetail?.product?.productDescription || ''
+                : '';
       parent.qtyDisplay = parent.qty;
       parent.subRows = generateNestedData(data.material, parent);
     });
@@ -171,25 +170,24 @@ const ViewInvoice = ({ invoiceData, onClose, onSuccess }) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${
-        _subRow?.type === 'product'
-          ? _subRow?.productDetail?.productName
-          : _subRow?.type === 'package'
+      _subRow.detail = `${_subRow?.type === 'product'
+        ? _subRow?.productDetail?.productName
+        : _subRow?.type === 'package'
           ? _subRow?.packageDetail?.packageName
           : _subRow?.type === 'serializedAsset'
-          ? _subRow?.serializedAssetDetail?.assetNumber
-          : _subRow?.serviceDetail?.serviceName
-      }`;
+            ? _subRow?.serializedAssetDetail?.assetNumber
+            : _subRow?.serviceDetail?.serviceName
+        }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : _subRow.type === 'serializedAsset'
-          ? _subRow.serializedAssetDetail?.product?.productDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : _subRow.type === 'serializedAsset'
+                ? _subRow.serializedAssetDetail?.product?.productDescription || ''
+                : '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
@@ -270,6 +268,7 @@ const ViewInvoice = ({ invoiceData, onClose, onSuccess }) => {
               {invoiceData && (
                 <Box className="flex flex-wrap gap-2">
                   <PreviewDownload
+                    fileName={`${routes.invoice.title}-${invoiceData?.invoiceNumber}`}
                     resource={sidebarResource.invoice}
                     referenceId={invoiceData?._id}
                     columns={columns}
@@ -291,36 +290,41 @@ const ViewInvoice = ({ invoiceData, onClose, onSuccess }) => {
                       `finalPrice_${invoiceData?.currency?.toLowerCase()}`
                     ]}
                   />
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                    className="btn-outline-v1"
-                    type="button"
-                    size="small"
-                    disabled={isDownloadingZip ? true : false}
-                    startIcon={isMobile ? '' : <IoMdDownload />}
-                    onClick={(e) => {
-                      handleDownloadZip();
-                    }}
-                  >
-                    {isMobile && !isTablet ? <IoMdDownload size={20} /> : isDownloadingZip ? 'Please wait...' : 'Save as Zip File'}
-                  </Button>
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                    className="btn-outline-v1"
-                    type="button"
-                    size="small"
-                    disabled={isDownloadingPdf ? true : false}
-                    startIcon={isMobile ? '' : <IoMdDownload />}
-                    onClick={(e) => {
-                      handleDownloadPdf();
-                    }}
-                  >
-                    {isMobile && !isTablet ? <IoMdDownload size={20} /> : isDownloadingPdf ? 'Please wait...' : 'Download All'}
-                  </Button>
+                  {resource === sidebarResource.fieldTicketInvoice &&
+                    <>
+                      <Button
+                        variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                        className="btn-outline-v1"
+                        type="button"
+                        size="small"
+                        disabled={isDownloadingZip ? true : false}
+                        startIcon={isMobile ? '' : <IoMdDownload />}
+                        onClick={(e) => {
+                          handleDownloadZip();
+                        }}
+                      >
+                        {isMobile && !isTablet ? <IoMdDownload size={20} /> : isDownloadingZip ? 'Please wait...' : 'Save as Zip File'}
+                      </Button>
+                      <Button
+                        variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                        className="btn-outline-v1"
+                        type="button"
+                        size="small"
+                        disabled={isDownloadingPdf ? true : false}
+                        startIcon={isMobile ? '' : <IoMdDownload />}
+                        onClick={(e) => {
+                          handleDownloadPdf();
+                        }}
+                      >
+                        {isMobile && !isTablet ? <IoMdDownload size={20} /> : isDownloadingPdf ? 'Please wait...' : 'Download Invoice Tickets'}
+                      </Button>
+                    </>
+                  }
                 </Box>
               )}
               <div className="ml-auto">
-                {rowsData && rowsData?.length > 0 && <DeleteButton text="Cancel Invoice" onClick={() => setCommentDialog(true)} />}
+                {rowsData && rowsData?.length > 0 && resource === sidebarResource.fieldTicketInvoice &&
+                  <DeleteButton text="Cancel Invoice" onClick={() => setCommentDialog(true)} />}
               </div>
             </div>
             {columns && rowsData ? (
@@ -329,7 +333,7 @@ const ViewInvoice = ({ invoiceData, onClose, onSuccess }) => {
                   height={'calc(100vh - 200px)'}
                   columns={columns}
                   data={rowsData}
-                  onSelect={() => {}}
+                  onSelect={() => { }}
                   childrenProperty="subRows"
                   uniqueKey="_id"
                   hideSelection={true}

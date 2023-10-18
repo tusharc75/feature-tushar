@@ -37,11 +37,12 @@ import AssignUserDialog from '../../components/AssignRolesDialog/AssignUserDialo
 import AssignRegionalRolesUserDialog from '../../components/AssignRolesDialog/AssignRegionalRolesUserDialog';
 import { SET_USER, USER_LOADING, SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import { PERMISSION } from '../../constants/Roles';
-import { roleTier, roleTypes, sidebarResource } from '../../constants/helpers';
+import { ROLE_TIER, roleTypes, sidebarResource } from '../../constants/helpers';
 import { startCase, camelCase } from 'lodash';
 import PolicyResources from './PolicyResources';
 import DashboardResources from './DashboardResources';
 import DefaultResources from './DefaultResources';
+import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
 
 const RoleDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -252,15 +253,7 @@ const RoleDetailsPage = () => {
         data: { data }
       } = await axiosInstance().get(`/role/${id}`);
       setRoleData(data);
-      setValues({ name: data.name, description: data.description, tier: data?.tier || roleTier?.tier1 });
-      // if (data?.tier === roleTier.tier2) {
-      //   validateTier2(data.resource, data.field, data?.tier, {
-      //     id: data.resource?.filter?.((_r) => _r?.isRead || _r?.isCreate || _r?.isUpdate || _r?.isDelete || _r?.isHidden)[0]?.resourceId || '',
-      //     type: 'resource'
-      //   });
-      // } else {
-      //   validateRoleAndField(data.resource, data.field, data?.tier || roleTier?.tier1, true);
-      // }
+      setValues({ name: data.name, description: data.description, tier: data?.tier || ROLE_TIER?.tier1 });
       setResource(data.resource);
       setField(data.field);
       const current = {
@@ -340,20 +333,20 @@ const RoleDetailsPage = () => {
 
     const resources = resource.map((r) => {
       const newData = { ...r };
-      delete newData.isCreateDisabled;
-      delete newData.isDeleteDisabled;
       delete newData.isReadDisabled;
       delete newData.isUpdateDisabled;
+      delete newData.isCreateDisabled;
+      delete newData.isDeleteDisabled;
       delete newData.isHiddenDisabled;
       return newData;
     });
 
     const fields = field.map((r) => {
       const newData = { ...r };
-      delete newData.isCreateDisabled;
-      delete newData.isDeleteDisabled;
       delete newData.isReadDisabled;
       delete newData.isUpdateDisabled;
+      delete newData.isCreateDisabled;
+      delete newData.isDeleteDisabled;
       delete newData.isHiddenDisabled;
       return newData;
     });
@@ -491,180 +484,182 @@ const RoleDetailsPage = () => {
   const isEditDeleteDisable = [PERMISSION.superAdmin, PERMISSION.brandAdmin].indexOf(roleData?.permission) >= 0;
 
   return (
-    <Box className="main-container-v1">
-      <Box className="headerbox-v1">
-        <Box className="nav-v1">
-          <CustomBreadCrumbs routes={customizedRoutes} />
-        </Box>
-        <Box className="controls-v1">
-          <Box className="control-buttons-v1">
-            {roleData ? (
-              <>
-                {permissions?.role.isUpdate && !isEdit && (
-                  <Button variant="contained" color="primary" size="medium" onClick={() => setIsEdit(true)}>
-                    Edit
-                  </Button>
-                )}
-                {permissions?.role.isUpdate && isEdit && (
-                  <Button
-                    disabled={isUpdating || checkError() || !isEdit}
-                    variant="contained"
-                    color="primary"
-                    size="medium"
-                    onClick={handleUpdateRole}
-                  >
-                    {isUpdating ? <CircularProgress size={22} /> : 'Update'}
-                  </Button>
-                )}
-                {permissions?.role.isDelete && !isEditDeleteDisable && (
-                  <DeleteButton
-                    text="Delete"
-                    onClick={() => {
-                      setRoleDeleteRec(id);
-                      setShowConfirmBox(true);
-                    }}
-                  />
-                )}
-              </>
-            ) : (
-              <Skeleton variant="text" width="150px" height="32px" />
-            )}
+    <>
+      <DeviceMessage />
+      <Box className="main-container-v1">
+        <Box className="headerbox-v1">
+          <Box className="nav-v1">
+            <CustomBreadCrumbs routes={customizedRoutes} />
+          </Box>
+          <Box className="controls-v1">
+            <Box className="control-buttons-v1">
+              {roleData ? (
+                <>
+                  {permissions?.role.isUpdate && !isEdit && (
+                    <Button variant="contained" color="primary" size="medium" onClick={() => setIsEdit(true)}>
+                      Edit
+                    </Button>
+                  )}
+                  {permissions?.role.isUpdate && isEdit && (
+                    <Button
+                      disabled={isUpdating || checkError() || !isEdit}
+                      variant="contained"
+                      color="primary"
+                      size="medium"
+                      onClick={handleUpdateRole}
+                    >
+                      {isUpdating ? <CircularProgress size={22} /> : 'Update'}
+                    </Button>
+                  )}
+                  {permissions?.role.isDelete && !isEditDeleteDisable && (
+                    <DeleteButton
+                      text="Delete"
+                      onClick={() => {
+                        setRoleDeleteRec(id);
+                        setShowConfirmBox(true);
+                      }}
+                    />
+                  )}
+                </>
+              ) : (
+                <Skeleton variant="text" width="150px" height="32px" />
+              )}
+            </Box>
           </Box>
         </Box>
-      </Box>
-      <Box className={`detail-container-v1`}>
-        <Grid container spacing={3}>
-          <Grid item xs={12} sm={12} md={8} lg={8}>
-            <div className="mb-4">
-              <Grid container spacing={1}>
-                <Grid item lg={5} md={5} sm={12} xs={12}>
-                  <TextField
-                    disabled={roleData?.type && roleData?.permission ? true : !permissions?.role?.isUpdate || !isEdit}
-                    required
-                    variant="outlined"
-                    size="small"
-                    fullWidth
-                    label="Role Name"
-                    value={values.name}
-                    onChange={(e) => setValues({ ...values, name: e.target.value.trimStart() })}
-                  />
-                </Grid>
-                <Grid item lg={5} md={5} sm={12} xs={12}>
-                  <TextField
-                    disabled={roleData?.type && roleData?.permission ? true : !permissions?.role?.isUpdate || !isEdit}
-                    required
-                    variant="outlined"
-                    size="small"
-                    fullWidth
-                    label="Role Description"
-                    value={values.description}
-                    onChange={(e) => setValues({ ...values, description: e.target.value.trimStart() })}
-                  />
-                </Grid>
-                <Grid item lg={2} md={2} sm={12} xs={12}>
-                  <Autocomplete
-                    id={`roleTier`}
-                    disabled={roleData?.type && roleData?.permission ? true : !permissions?.role?.isUpdate || !isEdit}
-                    options={Object.values(roleTier)}
-                    autoHighlight
-                    disableClearable
-                    renderOption={(option) => option || ''}
-                    onChange={(event: any, newValue: any) => {
-                      setValues({ ...values, tier: newValue });
-                    }}
-                    getOptionLabel={(option) => option || ''}
-                    value={values?.tier}
-                    renderInput={(params) => <TextField {...params} label="Tier" margin="none" size="small" variant="outlined" />}
-                  />
-                </Grid>
-              </Grid>
-            </div>
-            <div>
-              {loading ? (
-                <div className="d-flex align-items-center justify-content-center" style={{ minHeight: 200, height: '70vh' }}>
-                  <Loader style={{ height: '100%' }} text="Loading..." />
-                </div>
-              ) : (
-                field.length &&
-                resource.length && (
-                  <>
-                    <RoleEngine
-                      style={{ height: '603px', boxShadow: '0px 20.3165px 40.6331px rgba(0, 0, 0, 0.03)' }}
-                      field={field}
-                      resource={resource}
-                      setField={setField}
-                      setResource={setResource}
-                      isDisable={permissions?.role.isUpdate ? (isEditDeleteDisable || !isEdit ? true : false) : true}
-                      tier={values?.tier}
+        <Box className={`detail-container-v1`}>
+          <Grid container spacing={3}>
+            <Grid item xs={12} sm={12} md={8} lg={8}>
+              <div className="mb-4">
+                <Grid container spacing={1}>
+                  <Grid item lg={5} md={5} sm={12} xs={12}>
+                    <TextField
+                      disabled={roleData?.type && roleData?.permission ? true : !permissions?.role?.isUpdate || !isEdit}
+                      required
+                      variant="outlined"
+                      size="small"
+                      fullWidth
+                      label="Role Name"
+                      value={values.name}
+                      onChange={(e) => setValues({ ...values, name: e.target.value.trimStart() })}
                     />
-                    {isPolicyTableVisible() && (
-                      <PolicyResources
-                        policyResources={policyResources}
-                        fieldOfPolicyResources={fieldOfPolicyResources}
-                        resourceCheckbox={resourceCheckbox}
-                        policyFieldCheckBox={policyFieldCheckBox}
-                        isPolicyCheckBoxChecked={isPolicyCheckBoxChecked}
-                        handlePolicyCheckBox={handlePolicyCheckBox}
-                        open={open}
-                        setOpen={setOpen}
-                        permissions={permissions}
+                  </Grid>
+                  <Grid item lg={5} md={5} sm={12} xs={12}>
+                    <TextField
+                      disabled={roleData?.type && roleData?.permission ? true : !permissions?.role?.isUpdate || !isEdit}
+                      required
+                      variant="outlined"
+                      size="small"
+                      fullWidth
+                      label="Role Description"
+                      value={values.description}
+                      onChange={(e) => setValues({ ...values, description: e.target.value.trimStart() })}
+                    />
+                  </Grid>
+                  <Grid item lg={2} md={2} sm={12} xs={12}>
+                    <Autocomplete
+                      id={`roleTier`}
+                      disabled={roleData?.type && roleData?.permission ? true : !permissions?.role?.isUpdate || !isEdit}
+                      options={Object.values(ROLE_TIER)}
+                      autoHighlight
+                      disableClearable
+                      renderOption={(option) => option || ''}
+                      onChange={(event: any, newValue: any) => {
+                        setValues({ ...values, tier: newValue });
+                      }}
+                      getOptionLabel={(option) => option || ''}
+                      value={values?.tier}
+                      renderInput={(params) => <TextField {...params} label="Tier" margin="none" size="small" variant="outlined" />}
+                    />
+                  </Grid>
+                </Grid>
+              </div>
+              <div>
+                {loading ? (
+                  <div className="d-flex align-items-center justify-content-center" style={{ minHeight: 200, height: '70vh' }}>
+                    <Loader style={{ height: '100%' }} text="Loading..." />
+                  </div>
+                ) : (
+                  field.length &&
+                  resource.length && (
+                    <>
+                      <RoleEngine
+                        style={{ height: '603px', boxShadow: '0px 20.3165px 40.6331px rgba(0, 0, 0, 0.03)' }}
+                        field={field}
+                        resource={resource}
+                        setField={setField}
+                        setResource={setResource}
+                        isDisable={permissions?.role.isUpdate ? (isEditDeleteDisable || !isEdit ? true : false) : true}
+                        tier={values?.tier}
+                      />
+                      {isPolicyTableVisible() && (
+                        <PolicyResources
+                          policyResources={policyResources}
+                          fieldOfPolicyResources={fieldOfPolicyResources}
+                          resourceCheckbox={resourceCheckbox}
+                          policyFieldCheckBox={policyFieldCheckBox}
+                          isPolicyCheckBoxChecked={isPolicyCheckBoxChecked}
+                          handlePolicyCheckBox={handlePolicyCheckBox}
+                          open={open}
+                          setOpen={setOpen}
+                          permissions={permissions}
+                          isEdit={isEdit}
+                        />
+                      )}
+                      {dashBoardOption?.length > 0 && (
+                        <DashboardResources
+                          dashboardList={dashBoardOption}
+                          dashboardName={dashboardName}
+                          setDashboardName={setDashboardName}
+                          isEdit={isEdit}
+                        />
+                      )}
+                      <DefaultResources
+                        resourceList={resourceOption}
+                        resourceName={defaultResourceName}
+                        setResourceName={setDefaultResourceName}
                         isEdit={isEdit}
                       />
-                    )}
-                    {dashBoardOption?.length > 0 && (
-                      <DashboardResources
-                        dashboardList={dashBoardOption}
-                        dashboardName={dashboardName}
-                        setDashboardName={setDashboardName}
-                        isEdit={isEdit}
-                      />
-                    )}
-                    <DefaultResources
-                      resourceList={resourceOption}
-                      resourceName={defaultResourceName}
-                      setResourceName={setDefaultResourceName}
-                      isEdit={isEdit}
-                    />
-                    {!isEditDeleteDisable && (
-                      <Box p={1}>
+                      {!isEditDeleteDisable && (
+                        <Box p={1}>
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                name="canAssignByAnyuser"
+                                checked={canAssignByAnyuser}
+                                onChange={(e) => {
+                                  setCanAssignByAnyuser(e.target.checked);
+                                }}
+                                color="primary"
+                                disabled={!isEdit}
+                              />
+                            }
+                            label="Can Assign By Anyuser"
+                          />
+                        </Box>
+                      )}
+                      <Box p={1} pb={2}>
                         <FormControlLabel
                           control={
                             <Checkbox
-                              name="canAssignByAnyuser"
-                              checked={canAssignByAnyuser}
+                              name="superAdminAccess"
+                              checked={superAdminAccess}
                               onChange={(e) => {
-                                setCanAssignByAnyuser(e.target.checked);
+                                setSuperAdminAccess(e.target.checked);
                               }}
                               color="primary"
                               disabled={!isEdit}
                             />
                           }
-                          label="Can Assign By Anyuser"
+                          label="Super Admin Access"
                         />
                       </Box>
-                    )}
-                    <Box p={1} pb={2}>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            name="superAdminAccess"
-                            checked={superAdminAccess}
-                            onChange={(e) => {
-                              setSuperAdminAccess(e.target.checked);
-                            }}
-                            color="primary"
-                            disabled={!isEdit}
-                          />
-                        }
-                        label="Super Admin Access"
-                      />
-                    </Box>
-                  </>
-                )
-              )}
-            </div>
-            <Box marginY={2} />
-            {/* {roleData && roleData.type === 2 && (
+                    </>
+                  )
+                )}
+              </div>
+              <Box marginY={2} />
+              {/* {roleData && roleData.type === 2 && (
                 <div>
                   <Box
                     padding={1}
@@ -748,129 +743,130 @@ const RoleDetailsPage = () => {
                   </Box>
                 </div>
               )} */}
-          </Grid>
-          <Grid item xs={12} sm={12} md={4} lg={4}>
-            <Box className="single-form-v1 ">
-              <Box className="form-head-v1">
-                <Typography component={'h3'}>Assigned Users ({roleUsers.length || 0})</Typography>
+            </Grid>
+            <Grid item xs={12} sm={12} md={4} lg={4}>
+              <Box className="single-form-v1 ">
+                <Box className="form-head-v1">
+                  <Typography component={'h3'}>Assigned Users ({roleUsers.length || 0})</Typography>
 
-                {permissions?.role.isUpdate && (
-                  <IconButton className="float-right-button-v1" title="Assign users" color="primary" size="small" onClick={userDialogOpen}>
-                    <ControlPoint />
-                  </IconButton>
-                )}
+                  {permissions?.role.isUpdate && (
+                    <IconButton className="float-right-button-v1" title="Assign users" color="primary" size="small" onClick={userDialogOpen}>
+                      <ControlPoint />
+                    </IconButton>
+                  )}
+                </Box>
+                <Box className="formdata-v1">
+                  {roleUsers && (
+                    <Box>
+                      {loading ? (
+                        [1, 2].map((i) => (
+                          <BoxWithBorder
+                            key={i}
+                            style={{
+                              margin: '8px'
+                            }}
+                          >
+                            <Box padding={1}>
+                              <Skeleton variant="text" width="100px" height="20px" />
+                              <Box marginTop={1} />
+                              <Skeleton variant="text" width="100%" height="15px" />
+                            </Box>
+                          </BoxWithBorder>
+                        ))
+                      ) : roleUsers.length ? (
+                        <>
+                          <AssignedUsers
+                            permissions={permissions}
+                            unassignRole={handleUnassignUser}
+                            data={roleUsers && roleUsers.slice(0, showUsers)}
+                            currentUser={user?.user._id}
+                            type={roleData?.type}
+                          />
+                          {roleUsers.length > showRecordsBeforeViewAll && (
+                            <>
+                              <Box marginY={2} />
+                              <Button
+                                variant="outlined"
+                                className="accordion-outlined-button"
+                                startIcon={<FaEye />}
+                                onClick={() =>
+                                  history.push(`/user`, {
+                                    id: roleData._id,
+                                    name: roleData.name,
+                                    type: roleData.type === roleTypes.find((d) => d.key === 'Global')?.value ? 'globalRole' : 'regionalRole',
+                                    text:
+                                      roleData.type === roleTypes.find((d) => d.key === 'Global')?.value
+                                        ? 'Company wide role'
+                                        : 'Region wide functional role'
+                                  })
+                                }
+                              >
+                                View All
+                              </Button>
+                            </>
+                          )}
+                        </>
+                      ) : (
+                        <Box textAlign="center" padding={2}>
+                          <Typography>No users has been assigned </Typography>
+                        </Box>
+                      )}
+                    </Box>
+                  )}
+                </Box>
               </Box>
-              <Box className="formdata-v1">
-                {roleUsers && (
-                  <Box>
-                    {loading ? (
-                      [1, 2].map((i) => (
-                        <BoxWithBorder
-                          key={i}
-                          style={{
-                            margin: '8px'
-                          }}
-                        >
-                          <Box padding={1}>
-                            <Skeleton variant="text" width="100px" height="20px" />
-                            <Box marginTop={1} />
-                            <Skeleton variant="text" width="100%" height="15px" />
-                          </Box>
-                        </BoxWithBorder>
-                      ))
-                    ) : roleUsers.length ? (
-                      <>
-                        <AssignedUsers
-                          permissions={permissions}
-                          unassignRole={handleUnassignUser}
-                          data={roleUsers && roleUsers.slice(0, showUsers)}
-                          currentUser={user?.user._id}
-                          type={roleData?.type}
-                        />
-                        {roleUsers.length > showRecordsBeforeViewAll && (
-                          <>
-                            <Box marginY={2} />
-                            <Button
-                              variant="outlined"
-                              className="accordion-outlined-button"
-                              startIcon={<FaEye />}
-                              onClick={() =>
-                                history.push(`/user`, {
-                                  id: roleData._id,
-                                  name: roleData.name,
-                                  type: roleData.type === roleTypes.find((d) => d.key === 'Global')?.value ? 'globalRole' : 'regionalRole',
-                                  text:
-                                    roleData.type === roleTypes.find((d) => d.key === 'Global')?.value
-                                      ? 'Company wide role'
-                                      : 'Region wide functional role'
-                                })
-                              }
-                            >
-                              View All
-                            </Button>
-                          </>
-                        )}
-                      </>
-                    ) : (
-                      <Box textAlign="center" padding={2}>
-                        <Typography>No users has been assigned </Typography>
-                      </Box>
-                    )}
-                  </Box>
-                )}
-              </Box>
-            </Box>
+            </Grid>
           </Grid>
-        </Grid>
+        </Box>
+        {showAssignUserDialog &&
+          (roleData?.type === roleTypes.find((d) => d.key === 'Global')?.value ? (
+            <AssignUserDialog
+              usersDialogOpen={showAssignUserDialog}
+              handleCloseDialog={userDialogClose}
+              roleIds={[id]}
+              assignedUsers={roleUsers}
+              onSuccess={() => {
+                fetchRoleData();
+                userDialogClose();
+              }}
+              selectedEntity={selectedEntity || ''}
+            />
+          ) : (
+            <AssignRegionalRolesUserDialog
+              entitiesDialogOpen={showAssignUserDialog}
+              handleCloseDialog={userDialogClose}
+              ids={[id]}
+              assignedUsers={roleUsers}
+              onSuccess={() => {
+                fetchRoleData();
+                userDialogClose();
+              }}
+              entityAccessIds={entityAccess}
+            />
+          ))}
+        {showConfirmBox && (
+          <ConfirmationDialog
+            open={showConfirmBox}
+            message={
+              roleDeleteRec
+                ? `Are you sure you want to delete this Role ?`
+                : userDeleteRec
+                ? `Are you sure you want to unassign ${userDeleteRec.firstName} from this Role?`
+                : entityDeleteRec
+                ? `Are you sure you want to unassign ${entityDeleteRec.entityName} from this Role?`
+                : ''
+            }
+            onClose={() => {
+              setShowConfirmBox(false);
+              setUserDeleteRec(null);
+              setRoleDeleteRec(null);
+              setEntityDeleteRec(null);
+            }}
+            onOk={roleDeleteRec ? handleDeleteRole : entityDeleteRec ? unassignEntity : unassignUserRole}
+          />
+        )}
       </Box>
-      {showAssignUserDialog &&
-        (roleData?.type === roleTypes.find((d) => d.key === 'Global')?.value ? (
-          <AssignUserDialog
-            usersDialogOpen={showAssignUserDialog}
-            handleCloseDialog={userDialogClose}
-            roleIds={[id]}
-            assignedUsers={roleUsers}
-            onSuccess={() => {
-              fetchRoleData();
-              userDialogClose();
-            }}
-            selectedEntity={selectedEntity || ''}
-          />
-        ) : (
-          <AssignRegionalRolesUserDialog
-            entitiesDialogOpen={showAssignUserDialog}
-            handleCloseDialog={userDialogClose}
-            ids={[id]}
-            assignedUsers={roleUsers}
-            onSuccess={() => {
-              fetchRoleData();
-              userDialogClose();
-            }}
-            entityAccessIds={entityAccess}
-          />
-        ))}
-      {showConfirmBox && (
-        <ConfirmationDialog
-          open={showConfirmBox}
-          message={
-            roleDeleteRec
-              ? `Are you sure you want to delete this Role ?`
-              : userDeleteRec
-              ? `Are you sure you want to unassign ${userDeleteRec.firstName} from this Role?`
-              : entityDeleteRec
-              ? `Are you sure you want to unassign ${entityDeleteRec.entityName} from this Role?`
-              : ''
-          }
-          onClose={() => {
-            setShowConfirmBox(false);
-            setUserDeleteRec(null);
-            setRoleDeleteRec(null);
-            setEntityDeleteRec(null);
-          }}
-          onOk={roleDeleteRec ? handleDeleteRole : entityDeleteRec ? unassignEntity : unassignUserRole}
-        />
-      )}
-    </Box>
+    </>
   );
 };
 

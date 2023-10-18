@@ -32,6 +32,44 @@ const ManageFlash = ({ isClone = false, flashId = null, onClose, onSuccess }) =>
   const [formsData, setFormsData] = useState([]);
   const [flashData, setFlashData] = useState(null);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  
+  const fieldConfigurations = {
+    Bankrupt: [
+      'date',
+      'caseNumber',
+      'chapter'
+    ],
+    'Credit card refused': [
+      'deniedBecause'
+    ],
+    'Final demand': [
+      'date',
+      'amount',
+      'disputed'
+    ],
+    NSF: [
+      'date',
+      'amount',
+      'returned'
+    ],
+    'Past due': [
+      'daysPastDue',
+      'amount',
+      'holdingOrders'
+    ],
+    'Placed for Collections': [
+      'date',
+      'amount',
+      'disputed'
+    ],
+    'Terms Withdrawn': [
+      'termsWithdrawn'
+    ],
+    Comment : [
+      'comment'
+    ]
+  };
+
 
   useEffect(() => {
     axiosInstance()
@@ -67,12 +105,32 @@ const ManageFlash = ({ isClone = false, flashId = null, onClose, onSuccess }) =>
         toastConfig.setToastConfig(error);
       });
   }, [flashId]);
+
   useEffect(() => {
-    setFormsData(setFieldsInAscendingOrder(initialData.fields));
+    const filteredFields = initialData.fields.filter((d) => {
+      if (d?.sectionName === "Other Information") {
+        return d?.fieldName === 'comment';
+      }
+      return true;
+    });
+    setFormsData(setFieldsInAscendingOrder(filteredFields));
   }, [initialData.fields]);
 
-  const handleSubmit = (values) => {
+  const handleTypeChange = (data) => {
+    const selectedFieldNames = new Set(fieldConfigurations[data] || []);
+    selectedFieldNames.add('comment');
   
+    const filteredFields = initialData.fields.filter((d) => {
+      if (d?.sectionName === "Other Information") {
+        return selectedFieldNames.has(d.fieldName);
+      }
+      return true;
+    });
+  
+    setFormsData(setFieldsInAscendingOrder(filteredFields));
+  }; 
+
+  const handleSubmit = (values) => {
     setLoading(true);
     if (flashId && isClone === false) {
       values._id = flashId;
@@ -112,16 +170,52 @@ const ManageFlash = ({ isClone = false, flashId = null, onClose, onSuccess }) =>
   };
 
   const handleScroll = (errors) => {
-    const err = Object.keys(errors);
+    const getCurrentDisplayedFields = [
+      ...formsData?.map((d) =>
+        d?.sectionFields?.map((m) => m?.fieldName)
+      )
+    ].flat();
+    
+    const err = Object.keys(errors).filter((key) =>
+      getCurrentDisplayedFields.includes(key)
+    );
     if (err.length) {
       const input = document.querySelector(`input[name=${err[0]}]`);
-      input.scrollIntoView({
+      input?.scrollIntoView({
         behavior: 'smooth',
         block: 'center',
         inline: 'start'
       });
     }
   };
+
+  const fixErrors = (errors) => {
+    const getCurrentDisplayedFields = [
+      ...formsData?.map((d) =>
+        d?.sectionFields?.map((m) => m?.fieldName)
+      )
+    ].flat();
+  
+    const err = Object.keys(errors).filter((key) =>
+      getCurrentDisplayedFields.includes(key)
+    );
+  
+    // Create a new object with only the keys present in err
+    const filteredErrors = {};
+    err?.forEach((key) => {
+      filteredErrors[key] = errors[key];
+    });    
+    // Now, filteredErrors contains only the keys present in err
+    return filteredErrors;
+  };
+
+  const transFormData = (formsData)=>{
+    return [
+      ...formsData?.map((d) =>
+        d?.sectionFields?.map((m) => m)
+      )
+    ].flat();
+  }
 
   return (
     <Dialog
@@ -141,7 +235,7 @@ const ManageFlash = ({ isClone = false, flashId = null, onClose, onSuccess }) =>
         <Formik
           innerRef={ref}
           initialValues={initialData.values}
-          validationSchema={yupSchema(initialData.fields)}
+          validationSchema={yupSchema(transFormData(formsData))}
           validateOnMount
           onSubmit={handleSubmit}
         >
@@ -181,7 +275,7 @@ const ManageFlash = ({ isClone = false, flashId = null, onClose, onSuccess }) =>
                                   fieldData={field}
                                   disabled={Boolean(flashId) && field.disableOnEdit && !isClone}
                                   values={values}
-                                  errors={errors}
+                                  errors={fixErrors(errors)}
                                   touched={touched}
                                   label={field.fieldLabel}
                                   name={field.fieldName}
@@ -189,6 +283,9 @@ const ManageFlash = ({ isClone = false, flashId = null, onClose, onSuccess }) =>
                                   options={field.option}
                                   setFieldValue={(name, value) => {
                                     setFieldValue(name, value);
+                                    if (field.fieldName === 'flashType') {
+                                      handleTypeChange(value);
+                                    }
                                   }}
                                   required={field.required}
                                   fullWidth

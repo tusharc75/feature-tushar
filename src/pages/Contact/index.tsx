@@ -1,4 +1,4 @@
-import { Box, Button, Chip, Dialog, Grid, Menu, MenuItem } from '@material-ui/core';
+import { Box, Button, Chip, Collapse, Dialog, Grid, Menu, MenuItem } from '@material-ui/core';
 import IconButton from '@material-ui/core/IconButton';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -438,14 +438,15 @@ export default function Contact(props) {
             console.error('Error in getting selected records from local storage');
           }
         }
-
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
         dispatch({ type: 'loading', loading: false });
+      })
+      .finally(() => {
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
       });
   };
 
@@ -821,12 +822,9 @@ export default function Contact(props) {
                 {
                   label: 'Email : ',
                   field: 'email'
-                },
-                {
-                  label: 'Entity',
-                  field: 'entity'
                 }
               ]}
+              renderExtraChip={(data) => <RenderExtraChip data={data} />}
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={true}
@@ -979,3 +977,55 @@ export default function Contact(props) {
     </section>
   );
 }
+
+const RenderExtraChip = ({ data }) => {
+  const [open, setOpen] = useState(false);
+
+  const chip = (text: string) => (
+    <>
+      <span
+        className={`${
+          text && text !== ''
+            ? ' line-clamp-1 block px-3 py-[3px] font-semibold transition-all text-[12px] bg-[#F2F6FF] dark:bg-[var(--dark-primary)] dark:border-[var(--common-border-color)_!important]'
+            : ''
+        } ${open ? 'py-2 rounded-[5px]' : 'rounded-full'}`}
+      >
+        {text && text !== '' ? `Entity : ${text}` : null}
+        {data?.restentity?.length > 0 ? (
+          <>
+            <Collapse in={open} unmountOnExit>
+              {data?.restentity?.map((o) => (
+                <span key={o._id} className="block line-clamp-1">
+                  {o.optionLabel}
+                </span>
+              ))}
+            </Collapse>
+          </>
+        ) : null}
+      </span>
+    </>
+  );
+
+  if (data?.entityId && data?.entity) {
+    return (
+      <div className="flex items-start gap-2">
+        <Link to={`${routes.entityDetail.path}/${data.entityId}`} target="_blank">
+          {chip(data.entity)}
+        </Link>
+        {data?.restentity?.length > 0 ? (
+          <Button
+            size="small"
+            variant="outlined"
+            className="no-shadow"
+            onClick={() => setOpen((prev) => !prev)}
+            style={{ padding: '0px 5px', background: 'var(--dark-primary)', color: 'var(--primary-text)' }}
+          >
+            {open ? 'Hide' : `+${data.restentity.length} more.`}
+          </Button>
+        ) : null}
+      </div>
+    );
+  }
+
+  return <>{chip(data?.entity)}</>;
+};

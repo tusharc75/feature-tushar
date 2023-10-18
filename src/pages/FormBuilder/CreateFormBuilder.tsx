@@ -22,6 +22,8 @@ import History from './History';
 import Tabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { defaultStepper } from 'src/components/FormBuilder/Stepper/stepHelper';
 import Stepper from 'src/components/FormBuilder/Stepper';
+import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
+import { fieldLabelToFieldName } from 'src/constants/helpers';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -179,7 +181,7 @@ const CreateFormBuilder = () => {
         _field_data._id = _field_data._id.toString();
         _field_data.sectionName = _section.sectionName;
         if (!isNaN(_field._id)) {
-          _field_data.fieldName = camelCase(_field.fieldLabel.replace(/[^a-zA-Z0-9]/g, ''));
+          _field_data.fieldName = fieldLabelToFieldName(_field.fieldLabel);
         }
         _field_data.order = ++order;
         if (!_field_data.roleType) {
@@ -196,7 +198,7 @@ const CreateFormBuilder = () => {
           .then(({ data: { data } }) => {
             otherField = data;
           })
-          .catch((error) => {});
+          .catch((error) => { });
         const result = checkUniqueValidation(data, otherField);
         if (result.error) {
           toastConfig.setToastConfig({
@@ -265,6 +267,7 @@ const CreateFormBuilder = () => {
 
   return (
     <Fragment>
+      <DeviceMessage />
       <Box className="main-container-v1">
         <Box className="headerbox-v1">
           <Box className="nav-v1">

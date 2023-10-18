@@ -256,6 +256,7 @@ const WorkOrderDetails = () => {
                     </div>
                   )}
                 <PreviewDownload
+                  fileName={`${routes.workOrder.title}-${workOrderData?.workOrderNumber}`}
                   resource={sidebarResource.workOrder}
                   referenceId={id}
                   columns={user?.user?.brandPolicy?.servicePrePost ? columns : columns?.filter((e) => e.accessor !== 'serviceType')}

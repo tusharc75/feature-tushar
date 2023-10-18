@@ -4,7 +4,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import axiosInstance from 'src/axios/axiosInstance';
-import { serviceMaster } from 'src/constants/helpers';
+import { fieldLabelToFieldName, serviceMaster } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { camelCase } from 'lodash';
 import { FormBuilder } from '../../../components/FormBuilder';
@@ -76,7 +76,7 @@ const FieldDialog = ({ handleClose, handleSucess, serviceId, steps, stepIds, ref
         _field_data._id = _field_data._id.toString();
         _field_data.sectionName = _section.sectionName;
         if (!isNaN(_field._id)) {
-          _field_data.fieldName = camelCase(_field.fieldLabel.replace(/[^a-zA-Z0-9]/g, ''));
+          _field_data.fieldName = fieldLabelToFieldName(_field.fieldLabel);
         }
         _field_data.order = ++order;
         if (!_field_data.roleType) {

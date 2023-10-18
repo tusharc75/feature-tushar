@@ -17,27 +17,21 @@ import ConfirmationDialog from '../Helpers/ConfirmationDialog';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import ImportExportLinks from '../Product/ImportExportLinks';
-import { orderBy, sortBy, uniq, map } from 'lodash';
+import { sortBy, uniq, map, camelCase } from 'lodash';
 import CustomAgGridEditable, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGridEditable';
 import { CommonRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import BulkEditDialog from './BulkEditDialog';
-import Loader from '../Loader';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { handleAutoCalculation, extractFields } from '../../constants/formulaUtility';
-import { CustomDialogTransition, QUOTE_PROCESS_STATUS, gridLoadingTimeout, supplierContact } from '../../constants/helpers';
+import { QUOTE_PROCESS_STATUS, gridLoadingTimeout, supplierContact } from '../../constants/helpers';
 import routes from '../../components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
 import { AiTwotoneEdit } from 'react-icons/ai';
 import CustomSwipableList from '../SwipableListComponents/CustomSwipableList';
-import CustomDialogContent from '../CustomDialog/CustomDialogContent';
-import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
-import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
-import CustomButton from '../Helpers/CustomButton';
 import { prepareDataForGrid } from '../../constants/helpers';
 import SupplierAskPrice from './SupplierAskPrice';
-import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
-import { Link, useHistory } from 'react-router-dom';
-import MuiPickersUtilsProvider from '@material-ui/pickers/MuiPickersUtilsProvider';
+import useColumns, { getFrameworkComponents } from '../../constants/useColumns';
+import { Link } from 'react-router-dom';
 import AskSupplierPriceDialog from './AskSupplierPriceDialog';
 import { useData } from './../../StateProvider/Provider';
 import ViewSupplierPriceDialog from './ViewSupplierPriceDialog';
@@ -61,13 +55,15 @@ const ProductBuilder = (props) => {
     hasPermission,
     permissions,
     fromQuote,
-    setColumnForPDFExcel,
     setColumnData,
     fullScreen = false,
     quoteData = null,
     processStatus,
     setNextStep
   } = props;
+
+
+  const renderedFrom = `${camelCase(`${routes?.quote.title}_Product`)}`;
 
   const toastConfig = useContext(CustomToastContext);
 
@@ -89,8 +85,6 @@ const ProductBuilder = (props) => {
   const [supplierContactData, setSupplierContactData] = useState([]);
   const [supplierData, setSupplierData] = useState(null);
   const { getColumnData } = useColumns();
-  // const [showProductNumberOrProductNameUpdate, setShowProductNumberOrProductNameUpdate] =
-  //   useState({ open: false, title: "", property: "", value: "", indexOfRecord: -1, record: null })
 
   const [dataToShowForMobile, setDataToShowForMobile] = useState([]);
   const [priceTemplateField, setPriceTemplateField] = useState(null);
@@ -116,6 +110,7 @@ const ProductBuilder = (props) => {
     if (gridApi) {
       gridApi.setRowData([]);
     }
+    setColumns(null);
     axiosInstance()
       .get(`/productbuilder/getproduct/${id}`)
       .then(({ data: { data } }) => {
@@ -167,9 +162,6 @@ const ProductBuilder = (props) => {
         setColumns([...columns]);
         if (setColumnData) {
           setColumnData([...columns]);
-        }
-        if (setColumnForPDFExcel) {
-          setColumnForPDFExcel([...columns].filter((d) => d.field !== 'index').map((d) => d.headerName));
         }
         setProductData(data);
         let rows = data.product.map((item, index) => {
@@ -414,7 +406,7 @@ const ProductBuilder = (props) => {
             });
             rendererNames.push('productTypeRenderer');
           } else {
-            let currentColumn: any = getColumnData(routes.productBuilder.title, ele, routes.productBuilder.path);
+            let currentColumn: any = getColumnData(renderedFrom, ele, routes.productBuilder.path);
             if (ele.type === 'decimal' || ele.type === 'percent' || ele.type === 'singleLine' || ele.type === 'multiLine') {
               if (!ele.isFormula && !ele.isUneditable && Editable) {
                 if (ele.type === 'decimal' || ele.type === 'percent') {
@@ -431,6 +423,15 @@ const ProductBuilder = (props) => {
         }
       }
     });
+
+    //Only For Product Builder Quote
+    let gridMetaData: any = localStorage.getItem('gridMetaData');
+    gridMetaData = gridMetaData == 'undefined' ? {} : JSON.parse(gridMetaData);
+    if (gridMetaData && gridMetaData[renderedFrom] && gridMetaData[renderedFrom]?.hide) {
+      column?.forEach((ele) => {
+        ele.show = gridMetaData[renderedFrom]?.hide?.indexOf(ele?.field) >= 0 ? false : true
+      })
+    }
   };
 
   const openProductModel = (id) => {
@@ -854,7 +855,7 @@ const ProductBuilder = (props) => {
               setIsClone(true);
             }}
             fullHeight={true}
-            renderedFrom={routes.productBuilder.title}
+            renderedFrom={renderedFrom}
           />
         ) : columns && frameWorkComponent ? (
           <CustomAgGridEditable
@@ -877,7 +878,7 @@ const ProductBuilder = (props) => {
             onCellValueChanged={onCellValueChanged}
             loading={loading}
             className={!fullScreen ? 'product-builder-edit-grid' : 'ag-grid-listing-grid'}
-            renderedFrom={routes.productBuilder.title}
+            renderedFrom={renderedFrom}
             saveColumnOptions={true}
             priceTemplateField={priceTemplateField}
           />

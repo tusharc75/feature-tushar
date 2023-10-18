@@ -105,6 +105,7 @@ const DOASteps = [
     label: 'End'
   }
 ];
+
 const OtherSteps = [
   {
     key: 'New',
@@ -149,8 +150,7 @@ export default function QuoteDetail() {
   const [cloneQuoteWithVersionNumber, setCloneQuoteWithVersionNumber] = useState(0);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [isQuoteClone, setIsQuoteClone] = useState(false);
-  const [columnView, setColumnView] = useState([]);
-  const [columnViewExcel, setColumnViewExcel] = useState([]);
+
   const [steps, setSteps] = useState([]);
   const [productBuilderId, setProductBuilderId] = useState('');
   const [versionStatus, setVersionStatus] = useState('Building Quote');
@@ -203,13 +203,6 @@ export default function QuoteDetail() {
       fetchRelatedTo();
     }
   }, [id]);
-
-  useEffect(() => {
-    if (quoteData && (quoteData.versions[currentVersion]?.acceptedColumns || quoteData.versions[currentVersion]?.excelColumns)) {
-      setColumnView(quoteData.versions[currentVersion]?.acceptedColumns);
-      setColumnViewExcel(quoteData.versions[currentVersion]?.excelColumns);
-    }
-  }, [currentVersion]);
 
   const fetchDoaLimit = () => {
     axiosInstance()
@@ -316,6 +309,7 @@ export default function QuoteDetail() {
     setOpenUpdateDialog(true);
     setIsQuoteClone(true);
   };
+  
   const handleSetSteps = (steps) => {
     setSteps(steps);
   };
@@ -355,8 +349,6 @@ export default function QuoteDetail() {
               setProcessStatus(data.versions[keys[keys.length - 1]].processStatus);
               setProductBuilderId(data.versions[keys[keys.length - 1]].productBuilderId);
               setVersionStatus(data.versions[keys[keys.length - 1]].status);
-              setColumnView(data.versions[keys[keys.length - 1]].acceptedColumns || []);
-              setColumnViewExcel(data.versions[keys[keys.length - 1]].excelColumns || []);
               dispatch({ type: 'selection', selectedRecords: data.versions[keys[keys.length - 1]].TNC });
             } else {
               tempCurrentVersion = version;
@@ -364,8 +356,6 @@ export default function QuoteDetail() {
               setProcessStatus(data.versions[version].processStatus);
               setProductBuilderId(data.versions[version].productBuilderId);
               setVersionStatus(data.versions[version].status);
-              setColumnView(data.versions[version].acceptedColumns || []);
-              setColumnViewExcel(data.versions[version].excelColumns || []);
               dispatch({ type: 'selection', selectedRecords: data.versions[version].TNC });
             }
             setCustomizedRoutes([
@@ -438,7 +428,7 @@ export default function QuoteDetail() {
         });
 
         if (updateVersionStatus) {
-          handleVersionUpdate(columnView, columnViewExcel, versionStatus, selectedRows);
+          handleVersionUpdate(versionStatus, selectedRows);
         }
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -530,10 +520,9 @@ export default function QuoteDetail() {
     }
   };
 
-  const handleVersionUpdate = (Columns, columnViewExcel, versionStatus, selectedTermsAndConditions) => {
+  const handleVersionUpdate = (versionStatus, selectedTermsAndConditions) => {
+
     let body = {
-      acceptedColumns: Columns,
-      excelColumns: columnViewExcel,
       status: versionStatus,
       TNC: selectedTermsAndConditions
     };
@@ -693,7 +682,10 @@ export default function QuoteDetail() {
                   onClose={closeActions}
                 >
                   {allowedToEdit && (
-                    <MenuItem onClick={handleOpenUpdateDialog}>
+                    <MenuItem onClick={() => {
+                      closeActions()
+                      handleOpenUpdateDialog()
+                    }}>
                       <div className="flex gap-3 items-center">
                         <HiPencil />
                         <Typography variant="inherit">Edit Quote</Typography>
@@ -702,7 +694,8 @@ export default function QuoteDetail() {
                   )}
                   <MenuItem
                     onClick={() => {
-                      cloneVersion();
+                      closeActions()
+                      cloneVersion()
                     }}
                     disabled={!allowedToEdit || isCloning || loading || ifQuoteApproved.approved}
                   >
@@ -714,7 +707,12 @@ export default function QuoteDetail() {
                     </div>
                   </MenuItem>
                   {allowedToEdit && ifQuoteApproved.approved && (
-                    <MenuItem disabled={quoteReOpening} onClick={() => setReopenReasonDialog(true)}>
+                    <MenuItem
+                      disabled={quoteReOpening}
+                      onClick={() => {
+                        closeActions()
+                        setReopenReasonDialog(true)
+                      }}>
                       <div className="flex gap-3 items-center">
                         <VscIssueReopened />
                         <Typography variant="inherit">Re-Open</Typography>
@@ -724,6 +722,7 @@ export default function QuoteDetail() {
                   {allowedToEdit && ifQuoteApproved.approved && (
                     <MenuItem
                       onClick={() => {
+                        closeActions()
                         setOpenUpdateDialog(true);
                       }}
                     >
@@ -735,15 +734,12 @@ export default function QuoteDetail() {
                   )}
                   {currentVersion !== 1 && ifQuoteApproved.approved === false && (
                     <MenuItem
-                      disabled={
-                        !allowedToEdit ||
-                        deletingDOA ||
-                        loading ||
-                        (DOAneeded
-                          ? DOASteps.findIndex((d) => d?.key === processStatus) > 1
-                          : OtherSteps.findIndex((d) => d?.key === processStatus) > 1)
-                      }
-                      onClick={deleteVersion}
+                      disabled={allowedToEdit && !['Sent for DOA', 'Sent to Customer']?.includes(quoteData?.versions[currentVersion]?.status) &&
+                        !quoteData?.versions[currentVersion]?.status?.includes('Accepted') ? false : true}
+                      onClick={() => {
+                        closeActions()
+                        deleteVersion()
+                      }}
                     >
                       <div className="flex gap-3 items-center">
                         <MdDelete />
@@ -756,7 +752,11 @@ export default function QuoteDetail() {
                     quoteData?.owner.optionValue &&
                     user?.user?._id &&
                     quoteData.owner.optionValue === user.user._id && (
-                      <MenuItem onClick={() => setShowConfirmBox(true)}>
+                      <MenuItem onClick={() => {
+                        closeActions()
+                        setShowConfirmBox(true)
+                      }
+                      }>
                         <div className="flex gap-3 items-center">
                           <MdDelete />
                           <Typography variant="inherit">Delete Quote</Typography>
@@ -847,7 +847,6 @@ export default function QuoteDetail() {
         <TabPanel value={tabValue} index={1}>
           {quoteData && (
             <QuoteProcess
-              updatingVersion={updatingVersion}
               handleVersionUpdate={handleVersionUpdate}
               state={state}
               dispatch={dispatch}
@@ -856,15 +855,10 @@ export default function QuoteDetail() {
               setProcessStatus={setProcessStatus}
               ifQuoteApproved={ifQuoteApproved}
               allowedToEdit={allowedToEdit}
-              handleOpenUpdateDialog={handleOpenUpdateDialog}
-              handleChangeVersion={handleChangeVersion}
               currentVersion={currentVersion}
               productBuilderId={productBuilderId}
               versionStatus={versionStatus}
               fetchQuoteData={fetchQuoteData}
-              columnView={columnView}
-              columnViewExcel={columnViewExcel}
-              fetchTNC={fetchTermsAndConditions}
               globalLoading={loading}
               DOASteps={DOASteps}
               OtherSteps={OtherSteps}
@@ -892,7 +886,6 @@ export default function QuoteDetail() {
           onOk={handleDeleteQuote}
         />
       )}
-
       {openUpdateDialog && (
         <ManageQuoteDialog
           open={openUpdateDialog}
@@ -919,7 +912,8 @@ export default function QuoteDetail() {
           cloneQuoteWithVersionNumber={cloneQuoteWithVersionNumber}
           doaCollaboratorResources={user.user?.doa?.map((obj) => obj.user)}
         />
-      )}
+      )
+      }
       {reopenReasonDialog && (
         <div className={classes.reasonDialog}>
           <Dialog
@@ -957,7 +951,8 @@ export default function QuoteDetail() {
             </DialogActions>
           </Dialog>
         </div>
-      )}
+      )
+      }
       {showQuoteStatusChangeDialog && (
         <DOAReasonDialog
           reasonDialogOpen={showQuoteStatusChangeDialog}
@@ -978,6 +973,6 @@ export default function QuoteDetail() {
           handleCloneQuoteWithVersionFromAllVersion={handleCloneQuoteWithVersionFromAllVersion}
         />
       )}
-    </Box>
+    </Box >
   );
 }

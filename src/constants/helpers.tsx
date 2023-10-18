@@ -21,7 +21,7 @@ import moment from 'moment';
 import currencies from './currency_with_country.json';
 import { TransitionProps } from '@material-ui/core/transitions';
 import { Slide } from '@material-ui/core';
-import { kebabCase, lowerFirst, orderBy, uniqBy } from 'lodash';
+import { camelCase, kebabCase, lowerFirst, orderBy, uniqBy } from 'lodash';
 import { stepIconInterface } from 'src/components/Steps/icons';
 
 interface stepInterface extends stepIconInterface {
@@ -74,7 +74,8 @@ export const purchaseRequisitionSteps = ['Add Products'];
 
 export const productionOrderSteps: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },
-  { name: 'Work Order', title: 'Work Order', icon: 'workOrder' }
+  { name: 'Work Order', title: 'Work Order', icon: 'workOrder' },
+  { name: 'Loading Ticket', title: 'Loading', icon: 'ticket' },
 ];
 
 export const jobProcessSteps: stepInterface[] = [
@@ -278,6 +279,7 @@ export const sidebarResource = {
   transferAsset: 'Transfer Asset',
   address: 'Address',
   sublease: 'Sublease',
+  subleaseInvoice: 'Sublease Invoice',
   transferInventory: 'Transfer Inventory',
   zone: 'Zone',
   projectSales: 'Project Sales',
@@ -319,6 +321,7 @@ export const sidebarResource = {
   planning: 'Planning',
   planningCalendar: 'Planning Calendar',
   fieldTicket: 'Field Ticket',
+  fieldTicketInvoice: 'Field Ticket Invoice',
   fieldServiceTechnician: `Field Service Technician`,
   rentalPlanningCalendar: `Rental Planning Calendar`,
   resourceLogs: `Resource Logs`,
@@ -408,6 +411,7 @@ export const RESOURCE_LABEL = {
   transferAsset: 'Transfer Assets',
   address: 'Addresses',
   sublease: 'Sublease',
+  subleaseInvoice: 'SubleaseInvoice',
   transferInventory: 'Transfer Inventory',
   zone: 'Zone',
   wellMaster: 'Well Master',
@@ -1016,21 +1020,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-            .required(`${input.fieldLabel} is required`)
+          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+          .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-            .matches(
-              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-              'Enter valid URL'
-            )
-            .required(`${input.fieldLabel} is required`)
-        : string().matches(
+          .matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          );
+          )
+          .required(`${input.fieldLabel} is required`)
+        : string().matches(
+          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+          'Enter valid URL'
+        );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
@@ -1978,7 +1982,8 @@ export const DELIVERY_TICKET_REFERENCE_TYPE = {
   salesOrder: 'Sales Order',
   sublease: 'Sublease',
   transferInventory: 'Transfer Inventory',
-  repairOrder: 'Repair Order'
+  repairOrder: 'Repair Order',
+  productionOrder: 'Production Order',
 };
 
 export const DELIVERY_FROM_TO_TYPE = {
@@ -2207,6 +2212,7 @@ export const IOT_REPORT_LIST = [
         lookup: true,
         type: 'dropDown',
         multiple: false,
+        required: true,
         _id: '3'
       },
       {
@@ -2222,6 +2228,7 @@ export const IOT_REPORT_LIST = [
         fieldName: 'date',
         fieldLabel: 'Date',
         type: 'date',
+        required: true,
         _id: '2'
       },
       {
@@ -2229,6 +2236,7 @@ export const IOT_REPORT_LIST = [
         fieldLabel: 'Interval',
         type: 'dropDown',
         options: INTERVALS,
+        required: true,
         _id: '4'
       }
     ]
@@ -2781,8 +2789,13 @@ export const GenerateResourceLineNumber = (fields) => {
   return lineNumber;
 };
 
-export const roleTier = {
+export const ROLE_TIER = {
   tier1: 'Tier 1',
   tier2: 'Tier 2',
   tier3: 'Tier 3'
+};
+
+
+export const fieldLabelToFieldName = (fieldLabel) => {
+  return camelCase(fieldLabel?.replace(/[^a-zA-Z0-9]/g, ''))?.substring(0, 60);
 };

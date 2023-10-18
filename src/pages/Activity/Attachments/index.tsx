@@ -37,6 +37,8 @@ import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import SendIcon from '@material-ui/icons/Send';
 import { CreateEmail } from 'src/components/Activity/Email/CreateEmail';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import mime from 'mime';
+
 
 function reducer(state, action) {
   switch (action.type) {
@@ -461,20 +463,29 @@ export default function Attachment() {
         });
     }
   };
-
+  
   const handleMail = (data) => {
-    const file = data?.file;
-    axiosInstance()
-      .get(`user/download?fileName=${file[0].url}`, {
-        responseType: 'blob'
-      })
-      .then(({ data }) => {
-        const tempfile = new Blob([data], { type: 'application/pdf' });
-        generateBase64forFile(tempfile, file[0].name, `.${file[0].name.split('.')?.pop()}`);
-      })
-      .catch((err) => {
+    const attachments: any = []
+    Promise.all(data?.file.map(async file => {
+      await axiosInstance().get(`user/download?fileName=${file?.url}`, { responseType: 'blob' }).then(({ data }) => {
+        let reader = new FileReader();
+        reader.readAsDataURL(new Blob([data], { type: mime.getType(file.url.split('.')?.pop()) }));
+        reader.onloadend = function () {
+          let base64data: any = reader.result;
+          attachments.push({
+            base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
+            contentType: base64data.split(';')[0].split(':')[1],
+            extension: `.${file.url.split('.')?.pop()}`,
+            name: file.name
+          })
+        };
+      }).catch((err) => {
         toastConfig.setToastConfig(err);
       });
+    })).finally(() => {
+      setEmailAttachment(attachments);
+      setSendMail(true);
+    });
   };
 
   const handleMailForFolder = (_id, name) => {
@@ -719,7 +730,7 @@ export default function Attachment() {
           permissions={permissions?.attachment}
           module="Attachment"
           api={`/attachment`}
-          afterImportCompleted={() => {}}
+          afterImportCompleted={() => { }}
           total={rowCount}
           onlyExport={true}
           additionalParams={`&relatedTo=${JSON.stringify(filter)}${getQueryString(true)}`}
@@ -833,7 +844,7 @@ export default function Attachment() {
                     onClose={closeActions}
                   >
                     <MenuItem
-                      disabled={permissions.attachment.isDelete ? !selectedRecords.some((records) => records.canEdit) : true}
+                      disabled={permissions.attachment.isDelete ? !selectedRecords.every((records) => records.canEdit) : true}
                       onClick={() => {
                         showConfirmBox(null);
                         closeActions();
@@ -861,7 +872,7 @@ export default function Attachment() {
               childrenProperty="subRows"
               uniqueKey="_id"
               expander={true}
-              setWholeRowsCellColor={() => {}}
+              setWholeRowsCellColor={() => { }}
               renderedFrom={'attachment_render'}
               isClientSideGrid={false}
               rowCount={rowCount}
@@ -951,8 +962,8 @@ export default function Attachment() {
                   referenceId: open.parentResource
                     ? open.parentResource?.referenceId
                     : resource && selectedResourceData
-                    ? selectedResourceData.optionValue
-                    : user?.user?._id,
+                      ? selectedResourceData.optionValue
+                      : user?.user?._id,
                   access: true
                 }
               ]}

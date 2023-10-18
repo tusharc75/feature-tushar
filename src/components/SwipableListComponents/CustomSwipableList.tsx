@@ -20,8 +20,8 @@ export default function CustomSwipableList({
   dataRows,
   selectedRecords,
   dispatch,
-  onEdit,
-  onDelete,
+  onEdit = null,
+  onDelete = null,
   extraParamsToCheckDelete,
   rowCount,
   page,
@@ -36,7 +36,8 @@ export default function CustomSwipableList({
   renderedFrom,
   additionalDetails = [],
   owerCollaboratorInitialsOrImages = null,
-  actionCol = null
+  actionCol = null,
+  renderExtraChip = null
 }) {
   const [themeColor] = useAppTheme();
   const [isAllChecked, setIsAllChecked] = useState(false);
@@ -110,6 +111,7 @@ export default function CustomSwipableList({
             </div>
           </div>
         ) : null}
+
         <div style={{ overflowY: 'auto', height: fullHeight === true ? 'auto' : 'calc(100vh - 215px)' }} id="scrollableDiv" className="-mx-2">
           <div>
             <InfiniteScroll
@@ -133,7 +135,7 @@ export default function CustomSwipableList({
               {dataRows.map((d, index) => (
                 <div
                   className="shadow-[0px_3px_26px_0px_rgba(0,0,0,0.06)] mx-2 rounded-md my-2 px-3 py-2 [--left-gutter:20px] dark:bg-[var(--dark-secondary)]"
-                  key={d._id}
+                  key={`${d._id}${d.isChecked || ''}`}
                   style={{ border: '1px solid var(--common-border-color)' }}
                 >
                   <div className={`${checkError && checkError(d) ? 'red-data-row' : ''} flex gap-2 items-center`}>
@@ -161,8 +163,8 @@ export default function CustomSwipableList({
                     <div className="flex-grow">
                       <div className="heading-with-icon">
                         {primaryField && (
-                          <h4 className="quote-name text-truncate">
-                            <span onClick={() => onClick(d)} className="link quote-name text-truncate">
+                          <h4 className="quote-name line-clamp-1">
+                            <span onClick={() => onClick(d)} className="link quote-name line-clamp-1">
                               {d[primaryField.field]}
                             </span>
                           </h4>
@@ -182,7 +184,7 @@ export default function CustomSwipableList({
                                   <FileCopyIcon size={18} className="text-[var(--primary-text)]" />
                                 </IconButton>
                               )}
-                              {permissions?.isUpdate && d.allowedToEdit && (
+                              {permissions?.isUpdate && d.allowedToEdit && onEdit && (
                                 <IconButton
                                   size="small"
                                   className="max-w-[20px] max-h-[20px] p-[1px_!important]"
@@ -192,7 +194,7 @@ export default function CustomSwipableList({
                                   <EditIcon fontSize="small" className="text-[var(--primary-text)] w-[18px] h-[18px]" />
                                 </IconButton>
                               )}
-                              {extraParamsToCheckDelete && permissions?.isDelete && d.canDelete && (
+                              {extraParamsToCheckDelete && permissions?.isDelete && d.canDelete && onDelete && (
                                 <IconButton size="small" aria-label="Clone" onClick={() => onDelete(d)}>
                                   <MdDelete size={18} style={{ color: 'var(--danger-light)' }} />
                                 </IconButton>
@@ -214,20 +216,22 @@ export default function CustomSwipableList({
                             <div className="flex flex-wrap gap-1 items-center">
                               <span className="flex items-center text-[#6B6B6B] dark:text-gray-300 max-w-[15px] max-h-[15px]">{a.icon}</span>
                               <h5 className="text-truncate font-medium text-[13px] dark:text-gray-300" style={{ paddingTop: '2px', fontWeight: 500 }}>
-                                {d[a.field]}
+                                {a.label ?? `${a.label || ''}`}
+                                {d[a.field] ?? ''}
                               </h5>
                             </div>
                           </div>
                         )
                     )}
                   </div>
+
                   {chips.length > 0 && (
                     <div className="mt-1 pt-2" style={{ borderTop: '1px solid var(--common-border-color)' }}>
                       <div className=" d-flex gap-1 flex-wrap">
                         {[
                           ...chips.map((c) =>
                             c.forceShow === true || d[c.field] ? (
-                              <div>
+                              <div key={c.field}>
                                 <span
                                   title={`${c.label} ${(c.fieldType === 'date' ? moment(d[c.field]).format(dateFormat) : d[c.field]) ?? ''}`}
                                   style={{ border: '1px solid #B8CCFE' }}
@@ -257,6 +261,7 @@ export default function CustomSwipableList({
                             )
                           )
                         ]}
+                        {renderExtraChip && renderExtraChip(d, index)}
                       </div>
                     </div>
                   )}

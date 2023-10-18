@@ -19,7 +19,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import { extractFields, checkFormulaLoop } from '../../constants/formulaUtility';
 import { useData } from '../../StateProvider/Provider';
 import HistoryDialog from '../../components/Activity/History';
-import { CustomDialogTransition, productTemplate } from '../../constants/helpers';
+import { CustomDialogTransition, fieldLabelToFieldName, productTemplate } from '../../constants/helpers';
 import HistoryButton from '../../components/Helpers/HistoryButton';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { isEqual } from 'lodash';
@@ -31,29 +31,14 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import TinyMce from './../../components/TinyMCE/index';
 import GeneralRemarkManagement from './ManageTemplate/GeneralRemarkManagement';
+import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
 
 const useStyles = makeStyles((theme) => ({
-  linksContainer: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    ['@media (max-width: 960px)']: {
-      display: 'none'
-    }
-  },
   tinyMCEContainer: {
     width: '100%'
   },
-  menuButtonList: {
-    alignItems: 'flex-start',
-    padding: '1px'
-  },
   delBtn: {
     color: 'red'
-  },
-  expandIcon: {
-    position: 'absolute',
-    right: '0',
-    color: 'white'
   }
 }));
 
@@ -253,7 +238,7 @@ const ProductTemplate = () => {
         let _field_data = _field;
         _field_data._id = _field_data._id.toString();
         if (!isNaN(_field._id)) {
-          _field_data.fieldName = camelCase(_field.fieldLabel.replace(/[^a-zA-Z0-9]/g, ''));
+          _field_data.fieldName = fieldLabelToFieldName(_field.fieldLabel);
         }
         _field_data.sectionName = _section.sectionName;
         _field_data.order = ++order;
@@ -333,9 +318,10 @@ const ProductTemplate = () => {
 
   return (
     <Fragment>
+      <DeviceMessage />
       <Box className="main-container-v1">
         <Box className="headerbox-v1">
-          <Box className="nav-v1">
+          <div className="flex items-center justify-between w-full">
             <CustomBreadCrumbs
               routes={[
                 { title: routes.productTemplate.title, path: routes.productTemplate.path },
@@ -351,11 +337,30 @@ const ProductTemplate = () => {
                 } else history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : path });
               }}
             />
-          </Box>
-          <Box className="controls-v1">
-            <Box className="control-buttons-v1">
-              <div className={classes.linksContainer}>
-                <label htmlFor="importField" className={`new-headerbox-button-v1`}>
+            <div className={`flex justify-end max-[960px]:hidden`}>
+              <label htmlFor="importField" className={`new-headerbox-button-v1`}>
+                Import Fields
+                <input
+                  onClick={(e: any) => (e.target.value = null)}
+                  id="importField"
+                  name="importField"
+                  onChange={handleImportFields}
+                  style={{
+                    opacity: '0',
+                    position: 'absolute',
+                    zIndex: -1
+                  }}
+                  type="file"
+                />
+              </label>
+              <label className={`new-headerbox-button-v1`} onClick={handleExportFields}>
+                Export Fields
+              </label>
+              <a id="downloadAnchorElem" style={{ display: 'none' }}></a>
+            </div>
+            <Menu id="importField" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
+              <MenuItem>
+                <label htmlFor="importField" className="cursor-pointer">
                   Import Fields
                   <input
                     onClick={(e: any) => (e.target.value = null)}
@@ -370,38 +375,15 @@ const ProductTemplate = () => {
                     type="file"
                   />
                 </label>
-                <label className={`new-headerbox-button-v1`} onClick={handleExportFields}>
-                  Export Fields
-                </label>
-                <a id="downloadAnchorElem" style={{ display: 'none' }}></a>
-              </div>
-              <Menu id="importField" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
-                <MenuItem>
-                  <label htmlFor="importField" className="cursor-pointer">
-                    Import Fields
-                    <input
-                      onClick={(e: any) => (e.target.value = null)}
-                      id="importField"
-                      name="importField"
-                      onChange={handleImportFields}
-                      style={{
-                        opacity: '0',
-                        position: 'absolute',
-                        zIndex: -1
-                      }}
-                      type="file"
-                    />
-                  </label>
-                </MenuItem>
-                <MenuItem onClick={handleExportFields}>Export Fields</MenuItem>
-              </Menu>
-              {isMobile && (
-                <IconButton onClick={handleClick} className={classes.menuButtonList}>
-                  <IoIosArrowDropdown className={classes.expandIcon} />
-                </IconButton>
-              )}
-            </Box>
-          </Box>
+              </MenuItem>
+              <MenuItem onClick={handleExportFields}>Export Fields</MenuItem>
+            </Menu>
+            {isMobile && (
+              <IconButton onClick={handleClick} style={{ padding: 2 }}>
+                <IoIosArrowDropdown />
+              </IconButton>
+            )}
+          </div>
         </Box>
         <Box className={`detail-container-v1`}>
           {initialValues && productCategory ? (
@@ -533,8 +515,8 @@ const ProductTemplate = () => {
                           setFieldValue('entity', val && val?.map((d) => d._id));
                           val && val.length !== 0
                             ? setOwnerCollaboratorData(
-                                ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
-                              )
+                              ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
+                            )
                             : setOwnerCollaboratorData(ownerCollaboratorDataConst);
                         }}
                         renderInput={(params) => (
@@ -566,8 +548,8 @@ const ProductTemplate = () => {
                         onOpen={() =>
                           values['entity'] && values['entity'].length !== 0
                             ? setOwnerCollaboratorData(
-                                ownerCollaboratorDataConst.filter((data) => values['entity']?.some((d) => data.entities?.some((e) => e.entity === d)))
-                              )
+                              ownerCollaboratorDataConst.filter((data) => values['entity']?.some((d) => data.entities?.some((e) => e.entity === d)))
+                            )
                             : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                         }
                         renderInput={(params) => (
@@ -601,8 +583,8 @@ const ProductTemplate = () => {
                         onOpen={() =>
                           values['entity'] && values['entity'].length !== 0
                             ? setOwnerCollaboratorData(
-                                ownerCollaboratorDataConst.filter((data) => values['entity']?.some((d) => data.entities?.some((e) => e.entity === d)))
-                              )
+                              ownerCollaboratorDataConst.filter((data) => values['entity']?.some((d) => data.entities?.some((e) => e.entity === d)))
+                            )
                             : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                         }
                         renderInput={(params) => (

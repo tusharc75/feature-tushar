@@ -188,11 +188,12 @@ const DOAApproval = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ title: 'DOA Requests', path: '/doa-request' }, { title: QData ? `${QData?.quoteName} (${versionData?.versionNumber})` : '' }]} />
+          <CustomBreadCrumbs routes={[{ title: 'DOA Requests', path: '/doa-request' }, { title: QData ? `${QData?.quoteName} (V-${versionData?.versionNumber})` : '' }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <PreviewDownload
+              fileName={`${`Quote-${quoteData?.quoteName}-V(${versionData?.versionNumber})`}`}
               resource={sidebarResource.quoteBuilder}
               referenceId={quoteData?._id}
               columns={columns}
