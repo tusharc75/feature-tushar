@@ -25,7 +25,8 @@ import {
   DELIVERY_FROM_TO_TYPE,
   COLOUR_MASTER,
   REPAIR_JOB_STATUS,
-  repairOrder
+  repairOrder,
+  sidebarResource
 } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
@@ -1216,24 +1217,19 @@ const ReceivingTicket = ({
               onClick={() => {
                 setDownlodingFile(true);
                 axiosInstance()
-                  .post(`/delivery-ticket/pdf`, { ids: uniqueReceivingTicket })
+                  .get(`pdf/multiple?resource=${sidebarResource.deliveryTicket}&ids=${uniqueReceivingTicket}`, {
+                    responseType: 'blob'
+                  })
                   .then(({ data }) => {
-                    axiosInstance()
-                      .get(`user/download?fileName=${data.data.fileName}`, {
-                        responseType: 'blob'
-                      })
-                      .then(({ data }) => {
-                        const file = new Blob([data], { type: 'application/pdf' });
-                        const fileURL = URL.createObjectURL(file);
-                        const pdfWindow = window.open();
-                        pdfWindow.location.href = fileURL;
-                        toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
-                        setDownlodingFile(false);
-                      })
-                      .catch((err) => {
-                        toastConfig.setToastConfig(err);
-                        setDownlodingFile(false);
-                      });
+                    const file = new Blob([data], { type: 'application/pdf' });
+                    const fileURL = URL.createObjectURL(file);
+                    const link = document.createElement('a');
+                    link.href = fileURL;
+                    link.target = '_blank';
+                    link.style.display = 'none';
+                    link.click();
+                    toastConfig.setToastConfig({ open: true, type: 'success', message: 'File Previewed Successfully.' });
+                    setDownlodingFile(false);
                   })
                   .catch((err) => {
                     toastConfig.setToastConfig(err);
