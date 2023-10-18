@@ -1,12 +1,9 @@
 import { useContext, useEffect, useMemo, useState, useReducer, Fragment } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import { Paper, Box, Grid, Button, Typography, IconButton, Tooltip, Tabs, Tab, useMediaQuery } from '@material-ui/core';
-import { Skeleton } from '@material-ui/lab';
+import { Box, Grid, Button, IconButton, Tooltip, Tabs, Tab } from '@material-ui/core';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPageHeader from '../../components/DetailsPageHeader';
 import queryString from 'query-string';
 import {
-  yyyyMMDD,
   deliveryTicket,
   getObjKeysWithValues,
   dateTimeFormat,
@@ -23,7 +20,6 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import ManageDeliveryTicket from './ManageDeliveryTicket';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import { serializedAsset, gridLoadingTimeout } from '../../constants/helpers';
-import { IoMdDownload } from 'react-icons/io';
 import { isMobile, isTablet } from 'react-device-detect';
 import SignatureDialog from '../../components/Helpers/SignatureDialog';
 import ViewSignsDialog from './ViewSignsDialog';
@@ -31,7 +27,7 @@ import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
 import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
 import moment from 'moment';
 import AddSerializedAsset from '../RentalManagement/SerializedAsset/AddSerializedAsset';
-import { FaFileSignature, FaMailchimp, FaSignature, FaWpforms } from 'react-icons/fa';
+import { FaSignature, FaWpforms } from 'react-icons/fa';
 import { BiFoodMenu } from 'react-icons/bi';
 import EditIcon from '@material-ui/icons/Edit';
 import {
@@ -46,14 +42,12 @@ import {
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { AiFillFilePdf } from 'react-icons/ai';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import { objectStore, findOne, findAll } from '../../constants/indexdbhelper';
 import { updateSignatureOffline } from './deliveryTicketOfflineHelper';
 import { camelCase } from 'lodash';
 import DeliveryTicketProduct from './DeliveryTicketProduct';
 import DeliveryTicketAdditionalCost from './DeliveryTicketAdditionalCost';
-import HideWhenOffline from 'src/components/HideWhenOffline';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import DateDialog from '../RentalManagement/LoadingTicket/DateDialog';
 import PreviewDownload from 'src/components/PreviewDownload';
@@ -114,7 +108,6 @@ export default function DeliveryTicketDetail(props) {
   const [isAdding, setIsAdding] = useState(false);
 
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
-  const [downlodingFile, setDownlodingFile] = useState(false);
   const [locationKeys, setLocationKeys] = useState([]);
   const { isOffline } = useContext(CustomOfflineContext);
   const [openDateDialog, setOpenDateDialog] = useState({ open: false, type: null, status: null, prevStatus: null, assets: [], loading: false });
@@ -439,16 +432,6 @@ export default function DeliveryTicketDetail(props) {
     }
   };
 
-  const getMainPoints = useMemo(() => {
-    let mainPoint = {};
-    if (deliveryTicketData) {
-      mainPoint['Pick-Up Date:'] = yyyyMMDD(deliveryTicketData?.['pickUpDate']) || '';
-      mainPoint['Delivery Date'] = yyyyMMDD(deliveryTicketData?.deliveryDate) || '';
-      mainPoint['Processor'] = deliveryTicketData?.deliveryPerson?.optionLabel || '';
-    }
-    return mainPoint;
-  }, [deliveryTicketData?.ticketName, deliveryTicketData?.deliveryPerson, deliveryTicketData?.deliveryDate]);
-
   const handleDeleteLoadingTicket = () => {
     if (deliveryTicketData?._id) {
       axiosInstance()
@@ -504,8 +487,8 @@ export default function DeliveryTicketDetail(props) {
       deliveryTicketData?.status === DELIVERY_TICKET_STATUS.new
         ? 'Sign-off - Dispatch'
         : deliveryTicketData?.status === 'In-Transit'
-        ? 'Sign-off - Delivery'
-        : '';
+          ? 'Sign-off - Delivery'
+          : '';
 
     const { type, sign: newSign, name } = signedData;
     const indexOfExistingSignature = signatures.findIndex((sign) => sign.type === type && sign.status === status);
@@ -548,55 +531,6 @@ export default function DeliveryTicketDetail(props) {
             setSubmittingSign(false);
           });
       }
-    }
-  };
-
-  const handleViewPdf = (download) => {
-    axiosInstance()
-      .get(`${deliveryTicket.api}/${id}/pdf`)
-      .then(({ data }) => {
-        axiosInstance()
-          .get(`user/download?fileName=${data.data.fileName}`, {
-            responseType: 'blob'
-          })
-          .then(({ data }) => {
-            if (download) {
-              const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
-              const link = document.createElement('a');
-              link.href = url;
-              link.setAttribute('download', `LoadingTicket-${deliveryTicketData.ticketName || ''}.pdf`);
-              document.body.appendChild(link);
-              link.click();
-            } else {
-              const file = new Blob([data], { type: 'application/pdf' });
-              const fileURL = URL.createObjectURL(file);
-              const pdfWindow = window.open();
-              pdfWindow.location.href = fileURL;
-              toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
-            }
-            setDownlodingFile(false);
-          })
-          .catch((err) => {
-            toastConfig.setToastConfig(err);
-            setDownlodingFile(false);
-          });
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        setDownlodingFile(false);
-      });
-  };
-
-  const handleReceiveCustomerSign = () => {
-    if (deliveryTicketData?.customerAccount?.optionValue) {
-      axiosInstance()
-        .post(`${deliveryTicket.api}/receive-customer-sign`, { id: deliveryTicketData.customerAccount.optionValue, deliveryTicketId: id })
-        .then(({ data: { data } }) => {
-          toastConfig.setToastConfig({ open: true, type: 'success', message: data });
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
     }
   };
 
@@ -719,58 +653,13 @@ export default function DeliveryTicketDetail(props) {
                   {isMobile && !isTablet ? <FaSignature size={20} /> : 'View Signatures'}
                 </Button>
               ) : null}
-              {/* {permissions?.deliveryTicket?.isRead && !isMobile && (
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                  className="btn-outline-v1"
-                  color="primary"
-                  type="button"
-                  size="small"
-                  style={isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
-                  startIcon={isMobile && !isTablet ? '' : <AiFillFilePdf />}
-                  disabled={downlodingFile || isOffline}
-                  onClick={() => {
-                    handleViewPdf(false);
-                  }}
-                >
-                  {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : downlodingFile ? 'Please wait...' : 'Preview'}
-                </Button>
-              )}
-              {permissions?.deliveryTicket?.isRead && (
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                  color="primary"
-                  type="button"
-                  className="btn-outline-v1"
-                  size="small"
-                  style={isMobile && !isTablet ? { color: 'var(--warning-darken)' } : {}}
-                  startIcon={isMobile && !isTablet ? '' : <IoMdDownload />}
-                  disabled={downlodingFile || isOffline}
-                  onClick={() => {
-                    handleViewPdf(true);
-                  }}
-                >
-                  {isMobile && !isTablet ? <IoMdDownload size={20} /> : downlodingFile ? 'Please wait...' : 'Download'}
-                </Button>
-              )} */}
-              {permissions?.deliveryTicket?.isRead && (
-                <PreviewDownload
-                  resource={sidebarResource.deliveryTicket}
-                  referenceId={deliveryTicketData?._id}
-                  fileName={`${routes.deliveryTicket.title}-${deliveryTicketData?.ticketName}`}
-                  columns={columns
-                    ?.map((col) => {
-                      if (col.field === 'description') {
-                        return { ...col, field: 'productDescription' };
-                      } else if (col.field === 'productName') {
-                        return { ...col, field: 'product' };
-                      } else {
-                        return col;
-                      }
-                    })
-                    .filter((e) => ['assetNumber', 'status', 'productDescription', 'product', 'warehouse'].includes(e.field))}
-                />
-              )}
+              <PreviewDownload
+                resource={sidebarResource.deliveryTicket}
+                referenceId={deliveryTicketData?._id}
+                hideDetailButton={true}
+                fileName={`${routes.deliveryTicket.title}-${deliveryTicketData?.ticketName}`}
+                columns={columns?.filter((e) => ['assetNumber', 'product', 'productDescription'].includes(e.field))}
+              />
               <ActivityButton
                 referenceId={deliveryTicketData?._id}
                 resource={ACTIVITY_RESOURCE.deliveryTicket}
@@ -823,7 +712,7 @@ export default function DeliveryTicketDetail(props) {
                 className={'tabLayout'}
                 label={
                   <div className="d-flex align-items-center tab-font">
-                    <BiFoodMenu className="mr-1" fontSize="inherit" /> Services and Consumables
+                    <BiFoodMenu className="mr-1" fontSize="inherit" /> Add-On
                   </div>
                 }
                 {...a11yProps(0)}
@@ -920,9 +809,9 @@ export default function DeliveryTicketDetail(props) {
                     dataRows={dataRows}
                     selectedRecords={selectedRecords}
                     dispatch={dispatch}
-                    onEdit={() => {}}
+                    onEdit={() => { }}
                     extraParamsToCheckDelete={true}
-                    onDelete={() => {}}
+                    onDelete={() => { }}
                     rowCount={rowCount}
                     page={page}
                     loading={loading}
@@ -937,7 +826,7 @@ export default function DeliveryTicketDetail(props) {
                     showClone={false}
                     fullHeight={true}
                     renderedFrom={renderedFrom}
-                    onClone={() => {}}
+                    onClone={() => { }}
                   />
                 ) : Object.keys(frameWorkComponent).length > 0 ? (
                   <CustomAgGrid
@@ -1079,7 +968,6 @@ export default function DeliveryTicketDetail(props) {
             notIn={deliveryTicketData.ticketType}
           />
         )}
-
         {openDateDialog.open && (
           <DateDialog
             loading={openDateDialog.loading}
@@ -1088,14 +976,6 @@ export default function DeliveryTicketDetail(props) {
             }}
             handleSubmit={(date, status) => {
               handelProcessTickets(date, status);
-
-              // if (openDateDialog.type === 'changeStatus' && [ASSET_STATUS.inUse, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable]?.includes(openDateDialog.status)) {
-              //   handleChangeStatusInUse(openDateDialog.status, openDateDialog.prevStatus, date);
-              // } else if (openDateDialog.type === 'changeStatus' && [ASSET_STATUS.delivered]?.includes(openDateDialog.status)) {
-              //   handelProcessTickets(date, status);
-              // } else if (openDateDialog.type === 'changeDate') {
-              //   handleChangeDate(date);
-              // }
             }}
             type={openDateDialog.type}
             status={openDateDialog.status}
