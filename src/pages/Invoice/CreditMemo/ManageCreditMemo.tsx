@@ -13,6 +13,7 @@ import {
     CHILD_RESOURCE,
     CustomDialogTransition,
     getObjKeys,
+    getObjKeysWithValues,
     invoice,
     setFieldsInAscendingOrder,
     yupSchema
@@ -25,7 +26,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 
-const ManageCreditMemoDialog = ({ invoiceData, onClose, onSuccess, open }) => {
+const ManageCreditMemoDialog = ({ invoiceData, memoId, onClose, onSuccess, open }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const [submitting, setSubmitting] = useState(false);
@@ -45,14 +46,25 @@ const ManageCreditMemoDialog = ({ invoiceData, onClose, onSuccess, open }) => {
 
     const fetchFields = async () => {
         try {
-            let data;
+            let fields;
             const response: any = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.invoiceCreditMemo}`);
-            data = response?.data?.data;
-            data = CURReplaceByCurrencySingle(data, invoiceData?.currency ? invoiceData?.currency : "USD");
-            setInitialData({
-                fields: data,
-                values: getObjKeys('', data)
-            });
+            fields = response?.data?.data;
+            fields = CURReplaceByCurrencySingle(fields, invoiceData?.currency ? invoiceData?.currency : "USD");
+            if (memoId) {
+                let data;
+                const response: any = await axiosInstance().get(`${invoice.api}/credit-memo/${invoiceData._id}/${memoId}`);
+                data = response?.data?.data;
+                setInitialData({
+                    fields: fields,
+                    values: getObjKeysWithValues(data, fields)
+                });
+
+            } else {
+                setInitialData({
+                    fields: fields,
+                    values: getObjKeys('', fields)
+                });
+            }
 
         } catch (error) {
             toastConfig.setToastConfig(error);
@@ -62,22 +74,40 @@ const ManageCreditMemoDialog = ({ invoiceData, onClose, onSuccess, open }) => {
     const handleSubmit = (values: any) => {
         const newValues = { ...values };
         setSubmitting(true);
-        axiosInstance()
-            .post(`${invoice.api}/credit-memo/${invoiceData._id}`, newValues)
-            .then(({ data: { data, message } }) => {
-                setSubmitting(false);
-                onSuccess(data);
-                toastConfig.setToastConfig({
-                    open: true,
-                    type: 'success',
-                    message: message
+        if (memoId) {
+            newValues._id = memoId;
+            axiosInstance()
+                .put(`${invoice.api}/credit-memo/${invoiceData._id}`, newValues)
+                .then(({ data }) => {
+                    setSubmitting(false);
+                    onSuccess();
+                    toastConfig.setToastConfig({
+                        open: true,
+                        type: 'success',
+                        message: data.message
+                    });
+                })
+                .catch((error) => {
+                    setSubmitting(false);
+                    toastConfig.setToastConfig(error);
                 });
-            })
-            .catch((error) => {
-                setSubmitting(false);
-                toastConfig.setToastConfig(error);
-            });
-
+        } else {
+            axiosInstance()
+                .post(`${invoice.api}/credit-memo/${invoiceData._id}`, newValues)
+                .then(({ data: { data, message } }) => {
+                    setSubmitting(false);
+                    onSuccess(data);
+                    toastConfig.setToastConfig({
+                        open: true,
+                        type: 'success',
+                        message: message
+                    });
+                })
+                .catch((error) => {
+                    setSubmitting(false);
+                    toastConfig.setToastConfig(error);
+                });
+        }
     };
 
     const handleScroll = (errors) => {
