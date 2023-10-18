@@ -656,8 +656,6 @@ export default function DeliveryTicketDetail(props) {
     }
   };
 
-  console.log(columns);
-
   return (
     <>
       <Box className="main-container-v1">
