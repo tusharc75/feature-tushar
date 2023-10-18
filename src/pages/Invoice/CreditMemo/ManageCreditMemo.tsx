@@ -1,13 +1,13 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
 import { Formik, Form } from 'formik';
 import { Box, Button, Grid } from '@material-ui/core';
-import { CustomToastContext } from '../../../../StateProvider/CustomToastContext/CustomToastContext';
-import CustomDialogHeader from '../../../../components/CustomDialog/CustomDialogHeader';
-import FormTypes from '../../../../components/Helpers/FormTypes';
-import CustomButton from '../../../../components/Helpers/CustomButton';
-import CustomDialogContent from '../../../../components/CustomDialog/CustomDialogContent';
-import CustomDialogFooter from '../../../../components/CustomDialog/CustomDialogFooter';
-import { useData } from '../../../../StateProvider/Provider';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
+import FormTypes from '../../../components/Helpers/FormTypes';
+import CustomButton from '../../../components/Helpers/CustomButton';
+import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
+import { useData } from '../../../StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
 import {
     CHILD_RESOURCE,
@@ -16,26 +16,27 @@ import {
     invoice,
     setFieldsInAscendingOrder,
     yupSchema
-} from '../../../../constants/helpers';
-import axiosInstance from '../../../../axios/axiosInstance';
+} from '../../../constants/helpers';
+import axiosInstance from '../../../axios/axiosInstance';
 import Dialog from '@material-ui/core/Dialog';
-import ConfirmCancelDialog from '../../../../components/ConfirmCancelDialog';
-import { useHistory } from 'react-router-dom';
+import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { FaDiceOne } from 'react-icons/fa';
-import CommonSkeleton from '../../../../components/Helpers/CommonSkeleton';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 
 const ManageCreditMemoDialog = ({ invoiceData, onClose, onSuccess, open }) => {
+
     const toastConfig = useContext(CustomToastContext);
     const [submitting, setSubmitting] = useState(false);
-    const [initialData, setInitialData] = useState({ fields: [], values: {} });
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-    const [formsData, setFormsData] = useState([]);
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
+    const [initialData, setInitialData] = useState({ fields: [], values: {} });
+    const [fields, setFields] = useState([]);
+
     useEffect(() => {
-        setFormsData(setFieldsInAscendingOrder(initialData.fields));
+        setFields(setFieldsInAscendingOrder(initialData.fields));
     }, [initialData.fields]);
 
     useEffect(() => {
@@ -47,9 +48,7 @@ const ManageCreditMemoDialog = ({ invoiceData, onClose, onSuccess, open }) => {
             let data;
             const response: any = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.invoiceCreditMemo}`);
             data = response?.data?.data;
-            console.log(data, invoiceData?.currency)
             data = CURReplaceByCurrencySingle(data, invoiceData?.currency ? invoiceData?.currency : "USD");
-            console.log(data)
             setInitialData({
                 fields: data,
                 values: getObjKeys('', data)
@@ -59,7 +58,6 @@ const ManageCreditMemoDialog = ({ invoiceData, onClose, onSuccess, open }) => {
             toastConfig.setToastConfig(error);
         }
     };
-
 
     const handleSubmit = (values: any) => {
         const newValues = { ...values };
@@ -108,7 +106,7 @@ const ManageCreditMemoDialog = ({ invoiceData, onClose, onSuccess, open }) => {
             }}
             open={open}
         >
-            {formsData && formsData?.length ? (
+            {fields && fields?.length ? (
                 <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} validateOnMount onSubmit={handleSubmit}>
                     {({ values, errors, touched, setFieldValue, handleSubmit }) => (
                         <Fragment>
@@ -126,38 +124,67 @@ const ManageCreditMemoDialog = ({ invoiceData, onClose, onSuccess, open }) => {
                             />
                             <CustomDialogContent>
                                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                                    {formsData.map((form, i) => (
+                                    {fields && fields.map((section, i) => (
                                         <div key={i}>
-                                            <div className={'detail-box-content'}>
-                                                <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                                                <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
+                                            <div className={'detail-box-content detail-product-box'}>
+                                                <div className={'product-form-layout'}>
+                                                    <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
+                                                    <h2 className={`${'form-label-style'} ${'form-label-product'}`}>{section.name}</h2>
+                                                </div>
                                             </div>
                                             <Box marginY={2}>
                                                 <Grid spacing={3} container>
-                                                    {form.sectionFields.map((field, index2) => (
-                                                        <Grid key={index2} item xs={12} sm={6} md={6}>
-                                                            <FormTypes
-                                                                {...field}
-                                                                fields={initialData.fields}
-                                                                fieldData={field}
-                                                                values={values}
-                                                                errors={errors}
-                                                                touched={touched}
-                                                                label={field.fieldLabel}
-                                                                name={field.fieldName}
-                                                                type={field.type}
-                                                                options={field.option}
-                                                                setFieldValue={(name, value) => {
-                                                                    setFieldValue(name, value);
-                                                                }}
-                                                                required={field.required}
-                                                                fullWidth
-                                                                isTooltip={field.isTooltip}
-                                                                tooltipMessage={field.tooltipMessage}
-                                                                size="small"
-                                                            />
-                                                        </Grid>
-                                                    ))}
+                                                    {section.sectionFields &&
+                                                        section.sectionFields.map((field) =>
+                                                            field.type === 'converter' || field.type === 'currencyAmount' || field.isConverter ? (
+                                                                <FormTypes
+                                                                    fields={initialData.fields}
+                                                                    fieldData={{ ...field, hideConverter: true }}
+                                                                    values={values}
+                                                                    errors={errors}
+                                                                    touched={touched}
+                                                                    label={field.fieldLabel}
+                                                                    name={field.fieldName}
+                                                                    type={field.type}
+                                                                    options={field.option}
+                                                                    setFieldValue={(name, value) => {
+                                                                        setFieldValue(name, value);
+                                                                    }}
+                                                                    required={field.required}
+                                                                    fullWidth
+                                                                    isTooltip={field.isTooltip}
+                                                                    tooltipMessage={field.tooltipMessage}
+                                                                    size="small"
+                                                                />
+                                                            ) : (
+                                                                <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                                                    <Box display="flex">
+                                                                        <Box flexGrow={1}>
+                                                                            <FormTypes
+                                                                                {...field}
+                                                                                fields={initialData.fields}
+                                                                                fieldData={field}
+                                                                                values={values}
+                                                                                errors={errors}
+                                                                                touched={touched}
+                                                                                label={field.fieldLabel}
+                                                                                name={field.fieldName}
+                                                                                type={field.type}
+                                                                                options={field.option}
+                                                                                setFieldValue={(name, value) => {
+                                                                                    setFieldValue(name, value);
+                                                                                }}
+                                                                                required={field.required}
+                                                                                fullWidth
+                                                                                isTooltip={field.isTooltip}
+                                                                                tooltipMessage={field.tooltipMessage}
+                                                                                size="small"
+                                                                            />
+                                                                        </Box>
+                                                                    </Box>
+                                                                </Grid>
+                                                            )
+                                                        )}
                                                 </Grid>
                                             </Box>
                                         </div>
