@@ -883,6 +883,7 @@ export const CURReplaceByCurrencySingle = (fields: any, currency: any) => {
                 _c.displayCurrency[0] = currency;
             }
         }
+        _c.hideConverter = true;
     });
     return fields;
 };

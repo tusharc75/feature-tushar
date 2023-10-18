@@ -2,7 +2,7 @@ import { useState, useEffect, useContext, Fragment } from 'react';
 import Button from '@material-ui/core/Button';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
-import { Box, Grid, Dialog, IconButton } from '@material-ui/core';
+import { Box, Grid, Dialog, IconButton, Tabs, Tab } from '@material-ui/core';
 import { isMobile, isTablet } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
 import { CustomDialogTransition, INVOICE_STATUS, invoice, sidebarResource } from 'src/constants/helpers';
@@ -12,16 +12,19 @@ import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
 import { camelCase, startCase } from 'lodash';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import PreviewDownload from 'src/components/PreviewDownload';
-import { generateCustomTableColumns } from 'src/constants/columns';
-import CommentDialog from 'src/components/CommentDialog';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import { IoMdDownload } from 'react-icons/io';
+import TabPanel from 'src/components/TabPanel';
+import CreditMemo from '../CreditMemo';
+import CommentDialog from 'src/components/CommentDialog';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
+import { generateCustomTableColumns } from 'src/constants/columns';
 
 const ViewInvoice = ({ invoiceData, onClose, onSuccess, resource }) => {
+
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = `${camelCase(routes?.invoice.title)}_view`;
 
@@ -31,6 +34,12 @@ const ViewInvoice = ({ invoiceData, onClose, onSuccess, resource }) => {
 
   const [isDownloadingZip, setIsDownloadingZip] = useState(false);
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
+
+  const [tabValue, setTabValue] = useState(0);
+
+  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+    setTabValue(newValue);
+  };
 
   useEffect(() => {
     fetchFields();
@@ -44,7 +53,7 @@ const ViewInvoice = ({ invoiceData, onClose, onSuccess, resource }) => {
         e.isColumnEditable = false;
       });
       const newColumns = generateCustomTableColumns(data, invoiceData?.currency, renderedFrom);
-      let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
+      let qtyIndex = newColumns?.findIndex((d) => d.accessor === 'qty');
       if (qtyIndex > -1) {
         newColumns[qtyIndex].accessor = 'qtyDisplay';
       }
@@ -194,26 +203,6 @@ const ViewInvoice = ({ invoiceData, onClose, onSuccess, resource }) => {
     return subRows;
   };
 
-  const handleCancelInvoice = async (data) => {
-    axiosInstance()
-      .patch(`${routes?.fieldTicketInvoice.path}/invoice/cancle`, {
-        invoice: invoiceData?._id,
-        fieldTicket: invoiceData?.id,
-        comment: data
-      })
-      .then(({ data }) => {
-        onSuccess();
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  };
-
   const handleDownloadZip = () => {
     setIsDownloadingZip(true);
     axiosInstance()
@@ -258,13 +247,33 @@ const ViewInvoice = ({ invoiceData, onClose, onSuccess, resource }) => {
       });
   };
 
+  const handleCancelInvoice = async (data) => {
+    axiosInstance()
+      .patch(`${routes?.fieldTicketInvoice.path}/invoice/cancle`, {
+        invoice: invoiceData?._id,
+        fieldTicket: invoiceData?.id,
+        comment: data
+      })
+      .then(({ data }) => {
+        onSuccess();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   return (
     <Fragment>
       <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
         <CustomDialogHeader title={`Invoice Number : ${invoiceData?.invoiceNumber}`} onClose={onClose} showRequiredLabel={false}></CustomDialogHeader>
         <CustomDialogContent>
           <Fragment>
-            <div className="flex flex-wrap gap-2 p-2">
+            <div className="flex flex-wrap gap-2 mb-2">
               {invoiceData && (
                 <Box className="flex flex-wrap gap-2">
                   <PreviewDownload
@@ -327,27 +336,71 @@ const ViewInvoice = ({ invoiceData, onClose, onSuccess, resource }) => {
                   <DeleteButton text="Cancel Invoice" onClick={() => setCommentDialog(true)} />}
               </div>
             </div>
-            {columns && rowsData ? (
-              <Box zIndex={5} width={'100%'} height={'calc(100vh - 285px)'} p={1}>
-                <CustomReactTable
-                  height={'calc(100vh - 200px)'}
-                  columns={columns}
-                  data={rowsData}
-                  onSelect={() => { }}
-                  childrenProperty="subRows"
-                  uniqueKey="_id"
-                  hideSelection={true}
-                  hideAction={true}
-                  renderedFrom={renderedFrom}
-                  isClientSideGrid={true}
-                  hideExpander={true}
+            <Box pt={2}>
+              <Tabs
+                className="new-tab-container-v1"
+                value={tabValue}
+                onChange={handleMainTabChange}
+                textColor="primary"
+                TabIndicatorProps={{
+                  style: {
+                    height: 0
+                  }
+                }}
+              >
+                <Tab
+                  className={'tabLayout'}
+                  label={
+                    <div className="d-flex align-items-center tab-font">
+                      Details
+                    </div>
+                  }
+                  value={0}
+                  aria-controls="a11y-tabpanel-0"
+                  id="a11y-tab-0"
                 />
-              </Box>
-            ) : (
-              <Box p={2} height={500}>
-                <CommonSkeleton lenArray={[...Array(10).keys()]} />
-              </Box>
-            )}
+                <Tab
+                  className={'tabLayout'}
+                  label={
+                    <div className="d-flex align-items-center tab-font">
+                      Credit Memo
+                    </div>
+                  }
+                  value={1}
+                  aria-controls="a11y-tabpanel-1"
+                  id="a11y-tab-1"
+                />
+              </Tabs>
+              <TabPanel value={tabValue} index={0}>
+                <Fragment>
+                  {columns && rowsData ? (
+                    <Box zIndex={5} width={'100%'} height={'calc(100vh - 285px)'} pt={1}>
+                      <CustomReactTable
+                        height={'calc(100vh - 200px)'}
+                        columns={columns}
+                        data={rowsData}
+                        onSelect={() => { }}
+                        childrenProperty="subRows"
+                        uniqueKey="_id"
+                        hideSelection={true}
+                        hideAction={true}
+                        renderedFrom={renderedFrom}
+                        isClientSideGrid={true}
+                        hideExpander={true}
+                      />
+                    </Box>
+                  ) : (
+                    <Box p={2} height={500}>
+                      <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                    </Box>
+                  )}
+
+                </Fragment>
+              </TabPanel>
+              <TabPanel value={tabValue} index={1}>
+                <CreditMemo invoiceData={invoiceData} />
+              </TabPanel>
+            </Box>
           </Fragment>
         </CustomDialogContent>
         <CustomDialogFooter>
@@ -364,7 +417,6 @@ const ViewInvoice = ({ invoiceData, onClose, onSuccess, resource }) => {
           </Button>
         </CustomDialogFooter>
       </Dialog>
-
       {commentDialog && (
         <CommentDialog
           required={true}

@@ -30,8 +30,9 @@ import { AssetAvailabilityIcon } from 'src/assets/svg/svgIcons';
 import { ExpandMore } from '@material-ui/icons';
 import ManagePackageDialog from 'src/pages/Packages/ManagePackageDialog';
 import EditIcon from '@material-ui/icons/Edit';
+import { rentalManagementMessage } from 'src/constants/messageHelpers';
 
-const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }) => {
+const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip, renderedFrom, stepFullScreen, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -253,6 +254,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
 
   const fetchProductInventory = async () => {
     setNextStep(false);
+    setNextStepToolTip(null)
     var data: any = [];
     var inventory: any = [];
     var nonSerializeAsset: any = [];
@@ -303,8 +305,10 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
 
     if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
       setNextStep(false);
+      setNextStepToolTip(rentalManagementMessage.addProductPackage)
     } else {
       setNextStep(true);
+      setNextStepToolTip(null)
     }
     setRowsData(rows);
     setSelectedProducts([]);
