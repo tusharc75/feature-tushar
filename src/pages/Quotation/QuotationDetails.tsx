@@ -679,6 +679,7 @@ const QuotationDetails = () => {
                 <AdditionalCost
                   quotationData={quotationData}
                   setNextStep={setNextStep}
+                  setPrevStep={setPrevStep}
                   renderedFrom={renderedFrom}
                   version={currentVersion}
                   allowedToEdit={allowedToEdit}
