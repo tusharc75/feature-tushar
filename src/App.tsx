@@ -244,6 +244,7 @@ import ChartOfAccountDetail from './pages/ChartOfAccount/ChartOfAccountDetail';
 import Flash from './pages/Flash';
 import FlashDetailsPage from './pages/Flash/FlashDetailsPage';
 import SubleaseInvoice from './pages/SubleaseInvoice';
+import RentalManagementInvoice from './pages/RentalMangementInvoice';
 
 var notificationInterval: any = null;
 
@@ -557,6 +558,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.rentalManagementDetail.path + '/:id'}>
               <RentalManagementDetailsPage />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.rentalManagementInvoice.path}>
+              <RentalManagementInvoice />
             </PrivateRoute>
             <PrivateRoute exact path={routes.sublease.path}>
               <Sublease />
