@@ -25,7 +25,7 @@
   --warning-light: #ffc766;
   --black: #000;
   --success-light: #5dd879;
-  --success-dark: #1e7e34;
+
   --skin: #ff937a;
   --text: #fff;
   --lightgray: #a5a3a3;
@@ -114,7 +114,6 @@
   --dark-primary-text: #fff;
   --dark-secondary-text: #b8b8b8;
 
-  --dark-error: rgb(174 88 88);
   --dark-gray: #6b3835;
   --dark-green: #234623;
   --dark-yellow: #53401c;
@@ -145,6 +144,9 @@
   --chip-background-pending: rgb(214 161 0);
 
   --task-color: #587adc;
+
+  --success-dark: #1c592a;
+  --error-dark: #5e1c23;
 }
 [data-mode='dark'] {
   .MuiOutlinedInput-notchedOutline {
@@ -1700,7 +1702,7 @@ body::-webkit-scrollbar-thumb {
 }
 
 .red-data-row {
-  background-color: var(--dark-error, #ffcccb) !important;
+  background-color: var(--error-dark, #ffcccb) !important;
 }
 
 .scrap-data-row {
@@ -1708,7 +1710,7 @@ body::-webkit-scrollbar-thumb {
 }
 
 .light-red-data-row {
-  background-color: var(--dark-error, #feb1b1) !important;
+  background-color: var(--error-dark, #feb1b1) !important;
 }
 
 .light-yellow-data-row {
