@@ -61,10 +61,12 @@ function PreviewDownload({
     let api = '';
     if (type === 'Excel') {
       api = `/excel/${referenceId}?resource=${resource}&columns=${showColumns}`;
-    } else if (subType === 'Detail') {
-      api = `/pdf/${referenceId}/detail?resource=${resource}&columns=${showColumns}`;
     } else {
-      api = `/pdf/${referenceId}?resource=${resource}&columns=${showColumns}`;
+      if (subType === 'Detail') {
+        api = `/pdf/${referenceId}/detail?resource=${resource}&columns=${showColumns}`;
+      } else {
+        api = `/pdf/${referenceId}?resource=${resource}&columns=${showColumns}`;
+      }
     }
     if (extraQueryParams) {
       for (const key in extraQueryParams) {
