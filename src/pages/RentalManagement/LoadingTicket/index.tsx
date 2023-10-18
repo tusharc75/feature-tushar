@@ -54,7 +54,6 @@ import { useData } from 'src/StateProvider/Provider';
 import DateDialog from './DateDialog';
 import Edit from '@material-ui/icons/Edit';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import PreviewDownload from 'src/components/PreviewDownload';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -839,40 +838,24 @@ const LoadingTicket = ({
     <>
       <Box display="flex" justifyContent="flex-end" m={1}>
         <Box display="flex" alignItems="center" gridGap={'8px'} flexWrap={'wrap'}>
-          <PreviewDownload resource={sidebarResource.deliveryTicket}
-           columns={columns?.map(col => {
-            if (col.field === 'description') {
-              return {...col, field: 'productDescription'};
-            } else if (col.field === 'productName') {
-              return {...col, field: 'product'};
-            } else {
-              return col;
-            }
-          }).filter(e => ['assetNumber', 'status', 'productDescription', 'product', 'warehouse'].includes(e.field))}
-           ids={uniqueLoadingTicket} multiple={true} />
-          {/* {!isMobile && (
+          {!isMobile && (
             <Button
               onClick={() => {
                 setDownlodingFile(true);
                 axiosInstance()
-                  .post(`/delivery-ticket/pdf`, { ids: uniqueLoadingTicket })
+                  .get(`pdf/multiple?resource=${sidebarResource.deliveryTicket}&ids=${uniqueLoadingTicket}`, {
+                    responseType: 'blob'
+                  })
                   .then(({ data }) => {
-                    axiosInstance()
-                      .get(`user/download?fileName=${data.data.fileName}`, {
-                        responseType: 'blob'
-                      })
-                      .then(({ data }) => {
-                        const file = new Blob([data], { type: 'application/pdf' });
-                        const fileURL = URL.createObjectURL(file);
-                        const pdfWindow = window.open();
-                        pdfWindow.location.href = fileURL;
-                        toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
-                        setDownlodingFile(false);
-                      })
-                      .catch((err) => {
-                        toastConfig.setToastConfig(err);
-                        setDownlodingFile(false);
-                      });
+                    const file = new Blob([data], { type: 'application/pdf' });
+                    const fileURL = URL.createObjectURL(file);
+                    const link = document.createElement('a');
+                    link.href = fileURL;
+                    link.target = '_blank';
+                    link.style.display = 'none';
+                    link.click();
+                    toastConfig.setToastConfig({ open: true, type: 'success', message: 'File Previewed Successfully.' });
+                    setDownlodingFile(false);
                   })
                   .catch((err) => {
                     toastConfig.setToastConfig(err);
@@ -888,7 +871,7 @@ const LoadingTicket = ({
             >
               {downlodingFile ? 'Please wait...' : 'Preview'}
             </Button>
-          )} */}
+          )}
           {allowedToEdit && (
             <Button
               variant={'outlined'}

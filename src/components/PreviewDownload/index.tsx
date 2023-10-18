@@ -12,7 +12,7 @@ import { PreviewDialog } from './PreviewDialog';
 
 function PreviewDownload({
   resource,
-  referenceId = '',
+  referenceId,
   columns,
   fileName,
   isSendEmail = false,
@@ -23,8 +23,6 @@ function PreviewDownload({
   extraQueryParams = null,
   subject = '',
   isExcelDownload = false,
-  ids = [],
-  multiple = false,
   versionNumber = null,
   handleRefresh = null,
   toEmails = [],
@@ -64,13 +62,9 @@ function PreviewDownload({
     if (type === 'Excel') {
       api = `/excel/${referenceId}?resource=${resource}&columns=${showColumns}`;
     } else if (subType === 'Detail') {
-      api = multiple
-        ? `pdf/multiple/detail?resource=${resource}&ids=${ids}&columns=${showColumns}`
-        : `/pdf/${referenceId}/detail?resource=${resource}&columns=${showColumns}`;
+      api = `/pdf/${referenceId}/detail?resource=${resource}&columns=${showColumns}`;
     } else {
-      api = multiple
-        ? `pdf/multiple?resource=${resource}&ids=${ids}&columns=${showColumns}`
-        : `/pdf/${referenceId}?resource=${resource}&columns=${showColumns}`;
+      api = `/pdf/${referenceId}?resource=${resource}&columns=${showColumns}`;
     }
     if (extraQueryParams) {
       for (const key in extraQueryParams) {

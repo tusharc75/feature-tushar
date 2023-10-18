@@ -5,7 +5,15 @@ import { Skeleton } from '@material-ui/lab';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import DetailsPageHeader from '../../components/DetailsPageHeader';
 import queryString from 'query-string';
-import { yyyyMMDD, deliveryTicket, getObjKeysWithValues, dateTimeFormat, ACTIVITY_RESOURCE, ASSET_STATUS, rentalManagement } from '../../constants/helpers';
+import {
+  yyyyMMDD,
+  deliveryTicket,
+  getObjKeysWithValues,
+  dateTimeFormat,
+  ACTIVITY_RESOURCE,
+  ASSET_STATUS,
+  rentalManagement
+} from '../../constants/helpers';
 import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import routes from '../../components/Helpers/Routes';
@@ -48,6 +56,7 @@ import DeliveryTicketAdditionalCost from './DeliveryTicketAdditionalCost';
 import HideWhenOffline from 'src/components/HideWhenOffline';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import DateDialog from '../RentalManagement/LoadingTicket/DateDialog';
+import PreviewDownload from 'src/components/PreviewDownload';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -269,16 +278,9 @@ export default function DeliveryTicketDetail(props) {
         }
         if (ticket?.type === DELIVERY_TICKET_REFERENCE_TYPE.productionOrder) {
           if (
-            [
-              'rentalJob',
-              'repairJob',
-              'transferAsset',
-              'salesOrder',
-              'repairOrder',
-              'productInventory',
-              'sublease',
-              'transferInventory'
-            ].includes(fields.fieldData.fieldName)
+            ['rentalJob', 'repairJob', 'transferAsset', 'salesOrder', 'repairOrder', 'productInventory', 'sublease', 'transferInventory'].includes(
+              fields.fieldData.fieldName
+            )
           ) {
             return false;
           }
@@ -502,8 +504,8 @@ export default function DeliveryTicketDetail(props) {
       deliveryTicketData?.status === DELIVERY_TICKET_STATUS.new
         ? 'Sign-off - Dispatch'
         : deliveryTicketData?.status === 'In-Transit'
-          ? 'Sign-off - Delivery'
-          : '';
+        ? 'Sign-off - Delivery'
+        : '';
 
     const { type, sign: newSign, name } = signedData;
     const indexOfExistingSignature = signatures.findIndex((sign) => sign.type === type && sign.status === status);
@@ -600,8 +602,8 @@ export default function DeliveryTicketDetail(props) {
 
   const handelProcessTickets = (date = new Date(), status = null) => {
     setOpenDateDialog((prev) => ({ ...prev, loading: true }));
-    const data = {}
-    data['_ids'] = [deliveryTicketData._id]
+    const data = {};
+    data['_ids'] = [deliveryTicketData._id];
     data['status'] = DELIVERY_TICKET_STATUS.delivered;
     data['signatures'] = [];
     data['receiveDate'] = date;
@@ -629,7 +631,12 @@ export default function DeliveryTicketDetail(props) {
     const assets = dataRows?.map((e) => e._id);
     if (assets?.length) {
       axiosInstance()
-        .put(`${rentalManagement.api}/${deliveryTicketData?.rentalJob?.optionValue}/assets-inuse-standby`, { assets, status: status, prevStatus: prevStatus, date: date })
+        .put(`${rentalManagement.api}/${deliveryTicketData?.rentalJob?.optionValue}/assets-inuse-standby`, {
+          assets,
+          status: status,
+          prevStatus: prevStatus,
+          date: date
+        })
         .then(({ data }) => {
           fetchDeliveryTicketData();
           toastConfig.setToastConfig({
@@ -643,12 +650,13 @@ export default function DeliveryTicketDetail(props) {
           toastConfig.setToastConfig(error);
           setOpenDateDialog((prev) => ({ ...prev, loading: false }));
         });
-    }
-    else {
+    } else {
       fetchDeliveryTicketData();
       setOpenDateDialog({ open: false, type: null, status: null, prevStatus: null, assets: [], loading: false });
     }
   };
+
+  console.log(columns);
 
   return (
     <>
@@ -662,28 +670,31 @@ export default function DeliveryTicketDetail(props) {
               {permissions?.deliveryTicket?.isUpdate &&
                 canEdit &&
                 deliveryTicketData?.type === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob &&
-                [DELIVERY_TICKET_STATUS.indTransit].includes(deliveryTicketData?.status) && [DELIVERY_TICKET_TYPE.loading, DELIVERY_TICKET_TYPE.receiving].includes(deliveryTicketData?.ticketType) && (<Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  className="btn-outline-v1"
-                  size="small"
-                  onClick={() => {
-                    if (user?.user?.brandPolicy?.assetDeliveredStatus && deliveryTicketData?.ticketType === DELIVERY_TICKET_TYPE.loading) {
-                      setOpenDateDialog({
-                        open: true,
-                        type: 'changeStatus',
-                        status: ASSET_STATUS.delivered,
-                        prevStatus: ASSET_STATUS.delivered,
-                        assets: selectedRecords?.filter((e: any) => e.type === 'Asset')?.map((e) => e._id),
-                        loading: false
-                      });
-                    } else {
-                      handelProcessTickets();
-                    }
-                  }}
-                  style={isMobile && !isTablet ? { color: 'var(--teal)' } : {}}
-                >
-                  {deliveryTicketData?.ticketType === DELIVERY_TICKET_TYPE.loading ? 'Delivered to Customer' : 'Receive Item'}
-                </Button>)}
+                [DELIVERY_TICKET_STATUS.indTransit].includes(deliveryTicketData?.status) &&
+                [DELIVERY_TICKET_TYPE.loading, DELIVERY_TICKET_TYPE.receiving].includes(deliveryTicketData?.ticketType) && (
+                  <Button
+                    variant={isMobile && !isTablet ? 'text' : 'contained'}
+                    className="btn-outline-v1"
+                    size="small"
+                    onClick={() => {
+                      if (user?.user?.brandPolicy?.assetDeliveredStatus && deliveryTicketData?.ticketType === DELIVERY_TICKET_TYPE.loading) {
+                        setOpenDateDialog({
+                          open: true,
+                          type: 'changeStatus',
+                          status: ASSET_STATUS.delivered,
+                          prevStatus: ASSET_STATUS.delivered,
+                          assets: selectedRecords?.filter((e: any) => e.type === 'Asset')?.map((e) => e._id),
+                          loading: false
+                        });
+                      } else {
+                        handelProcessTickets();
+                      }
+                    }}
+                    style={isMobile && !isTablet ? { color: 'var(--teal)' } : {}}
+                  >
+                    {deliveryTicketData?.ticketType === DELIVERY_TICKET_TYPE.loading ? 'Delivered to Customer' : 'Receive Item'}
+                  </Button>
+                )}
               {permissions?.deliveryTicket?.isUpdate &&
                 canEdit &&
                 ![DELIVERY_TICKET_STATUS.delivered, DELIVERY_TICKET_STATUS.cancelled].includes(deliveryTicketData?.status) && (
@@ -710,7 +721,7 @@ export default function DeliveryTicketDetail(props) {
                   {isMobile && !isTablet ? <FaSignature size={20} /> : 'View Signatures'}
                 </Button>
               ) : null}
-              {permissions?.deliveryTicket?.isRead && !isMobile && (
+              {/* {permissions?.deliveryTicket?.isRead && !isMobile && (
                 <Button
                   variant={isMobile && !isTablet ? 'text' : 'outlined'}
                   className="btn-outline-v1"
@@ -743,6 +754,24 @@ export default function DeliveryTicketDetail(props) {
                 >
                   {isMobile && !isTablet ? <IoMdDownload size={20} /> : downlodingFile ? 'Please wait...' : 'Download'}
                 </Button>
+              )} */}
+              {permissions?.deliveryTicket?.isRead && (
+                <PreviewDownload
+                  resource={sidebarResource.deliveryTicket}
+                  referenceId={deliveryTicketData?._id}
+                  fileName={`${routes.deliveryTicket.title}-${deliveryTicketData?.ticketName}`}
+                  columns={columns
+                    ?.map((col) => {
+                      if (col.field === 'description') {
+                        return { ...col, field: 'productDescription' };
+                      } else if (col.field === 'productName') {
+                        return { ...col, field: 'product' };
+                      } else {
+                        return col;
+                      }
+                    })
+                    .filter((e) => ['assetNumber', 'status', 'productDescription', 'product', 'warehouse'].includes(e.field))}
+                />
               )}
               <ActivityButton
                 referenceId={deliveryTicketData?._id}
@@ -841,9 +870,11 @@ export default function DeliveryTicketDetail(props) {
                   }
                 ]}
               />
-            ) : (<Grid container spacing={2} style={{ padding: '8px' }}>
-              <CommonSkeleton lenArray={[...Array(7).keys()]} />
-            </Grid>)}
+            ) : (
+              <Grid container spacing={2} style={{ padding: '8px' }}>
+                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+              </Grid>
+            )}
           </TabPanel>
           <TabPanel value={tabValue} index={1}>
             <Grid container spacing={1} className="p-2">
@@ -891,9 +922,9 @@ export default function DeliveryTicketDetail(props) {
                     dataRows={dataRows}
                     selectedRecords={selectedRecords}
                     dispatch={dispatch}
-                    onEdit={() => { }}
+                    onEdit={() => {}}
                     extraParamsToCheckDelete={true}
-                    onDelete={() => { }}
+                    onDelete={() => {}}
                     rowCount={rowCount}
                     page={page}
                     loading={loading}
@@ -908,7 +939,7 @@ export default function DeliveryTicketDetail(props) {
                     showClone={false}
                     fullHeight={true}
                     renderedFrom={renderedFrom}
-                    onClone={() => { }}
+                    onClone={() => {}}
                   />
                 ) : Object.keys(frameWorkComponent).length > 0 ? (
                   <CustomAgGrid
