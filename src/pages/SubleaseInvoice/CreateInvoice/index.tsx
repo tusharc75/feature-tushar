@@ -25,6 +25,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { camelCase, startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { generateCustomTableColumns } from 'src/constants/columns';
+import moment from 'moment';
 
 const CreateBillingDialog = ({ currencySymbol = null, invoiceData = null, onClose, onSuccess, subleaseData = null }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -151,14 +152,14 @@ const CreateBillingDialog = ({ currencySymbol = null, invoiceData = null, onClos
   const fetchData = async () => {
     let data: any = {};
     let invoicedProducts: any = [];
-    
+
     const response = await axiosInstance().get(`/sublease-invoice/material/${subleaseData._id}`);
     const invoiceResponse = await axiosInstance().get(`/sublease-invoice/${subleaseData?._id}/invoice/material-end-date-qty`);
     invoicedProducts = invoiceResponse?.data?.data?.material;
-    
+
     data = response?.data?.data;
 
-  
+
     let newMaterial: any = [];
     data?.material?.forEach((d) => {
       if (d?.type === 'service' && d?.parentId === null && !d?.actualStartDate) {
@@ -172,11 +173,11 @@ const CreateBillingDialog = ({ currencySymbol = null, invoiceData = null, onClos
     data?.material
       ?.filter((d) => d.actualStartDate)
       ?.forEach((element) => {
-          let values: any = {};
-          values['actualEndDate'] = element?.actualEndDate || element?.estimateEndDate;
-          values['manualEndDate'] = element?.actualEndDate;
-          const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
-          newMaterial.push({ ...element, ...calValues });
+        let values: any = {};
+        values['actualEndDate'] = element?.actualEndDate || element?.estimateEndDate;
+        values['manualEndDate'] = element?.actualEndDate;
+        const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
+        newMaterial.push({ ...element, ...calValues });
       });
 
     data.material = newMaterial;
@@ -195,7 +196,7 @@ const CreateBillingDialog = ({ currencySymbol = null, invoiceData = null, onClos
           } else {
             materialData.actualStartDate = materialData.manualStartDate ? materialData.manualStartDate : new Date().setDate(new Date().getDate() + 1);
           }
-        
+
           return materialData;
         })
         .filter((d) => d.qty > 0);
@@ -392,27 +393,13 @@ const CreateBillingDialog = ({ currencySymbol = null, invoiceData = null, onClos
                         }}
                         margin="dense"
                       />
-                      <Box style={{ display: 'flex', gap: '5px' }}>
-                        <HtmlTooltip
-                          title={
-                            !Boolean(
-                              selectedProducts && selectedProducts.length && (endDate || selectedProducts.every((d) => d.type === 'additionalCost'))
-                            )
-                              ? 'Please select product to apply'
-                              : ''
-                          }
-                        >
+                      <Box>
+                        <HtmlTooltip title={selectedProducts?.length ? '' : 'Please select items to apply'}  >
                           <span>
                             <Button
                               variant="contained"
                               color="primary"
-                              disabled={
-                                !Boolean(
-                                  selectedProducts &&
-                                  selectedProducts.length &&
-                                  (endDate || selectedProducts.every((d) => d.type === 'additionalCost'))
-                                )
-                              }
+                              disabled={selectedProducts?.length && moment(endDate)?.isValid() ? false : true}
                               size="small"
                               onClick={() => {
                                 handleApplyDate();
@@ -423,7 +410,6 @@ const CreateBillingDialog = ({ currencySymbol = null, invoiceData = null, onClos
                           </span>
                         </HtmlTooltip>
                       </Box>
-                    
                     </Grid>
                   </Box>
                 </Grid>
@@ -492,7 +478,7 @@ const CreateBillingDialog = ({ currencySymbol = null, invoiceData = null, onClos
           </HtmlTooltip>
         </CustomDialogFooter>
       </Dialog>
-     
+
     </Fragment>
   );
 };
