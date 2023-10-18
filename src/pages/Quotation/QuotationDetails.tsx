@@ -489,7 +489,9 @@ const QuotationDetails = () => {
                   )}
                   <MenuItem>
                     <Button
-                      disabled={!allowedToEdit || isCloning || loading}
+                      disabled={!allowedToEdit || isCloning || loading
+                        || quotationData?.versions[currentVersion]?.status !== QUOTATION_STATUS.acceptByCustomer
+                        || [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.converted]?.includes(quotationData?.status)}
                       variant="text"
                       type="button"
                       size="small"
