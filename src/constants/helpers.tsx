@@ -2216,15 +2216,6 @@ export const IOT_REPORT_LIST = [
         _id: '3'
       },
       {
-        fieldName: 'dataPoints',
-        fieldLabel: 'Iot Data Points',
-        resource: sidebarResource.iotDataPoints,
-        lookup: true,
-        type: 'dropDown',
-        multiple: true,
-        _id: '1'
-      },
-      {
         fieldName: 'date',
         fieldLabel: 'Date',
         type: 'date',
@@ -2238,7 +2229,25 @@ export const IOT_REPORT_LIST = [
         options: INTERVALS,
         required: true,
         _id: '4'
-      }
+      },
+      {
+        fieldName: 'dataPointsCategory',
+        fieldLabel: 'Iot Data Points Category',
+        resource: sidebarResource.iotDataPointsCategory,
+        lookup: true,
+        type: 'dropDown',
+        multiple: true,
+        _id: '5'
+      },
+      {
+        fieldName: 'dataPoints',
+        fieldLabel: 'Iot Data Points',
+        resource: sidebarResource.iotDataPoints,
+        lookup: true,
+        type: 'dropDown',
+        multiple: true,
+        _id: '1'
+      },
     ]
   }
 ];
