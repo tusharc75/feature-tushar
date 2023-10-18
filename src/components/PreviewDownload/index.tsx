@@ -12,7 +12,7 @@ import { PreviewDialog } from './PreviewDialog';
 
 function PreviewDownload({
   resource,
-  referenceId='',
+  referenceId = '',
   columns,
   fileName,
   isSendEmail = false,
@@ -56,7 +56,6 @@ function PreviewDownload({
   const [emailAttachments, setEmailAttachments] = useState([]);
 
   const handleView = (type, operation, subType, visibleColumns) => {
-
     setLoadingType(subType);
 
     let showColumns = visibleColumns?.map((e) => e?.fieldName)?.toString();
@@ -65,11 +64,14 @@ function PreviewDownload({
     if (type === 'Excel') {
       api = `/excel/${referenceId}?resource=${resource}&columns=${showColumns}`;
     } else if (subType === 'Detail') {
-      api = `/pdf/${referenceId}/detail?resource=${resource}&columns=${showColumns}`;
+      api = multiple
+        ? `pdf/multiple/detail?resource=${resource}&ids=${ids}&columns=${showColumns}`
+        : `/pdf/${referenceId}/detail?resource=${resource}&columns=${showColumns}`;
     } else {
-      api = `/pdf/${referenceId}?resource=${resource}&columns=${showColumns}`;
+      api = multiple
+        ? `pdf/multiple?resource=${resource}&ids=${ids}&columns=${showColumns}`
+        : `/pdf/${referenceId}?resource=${resource}&columns=${showColumns}`;
     }
-
     if (extraQueryParams) {
       for (const key in extraQueryParams) {
         api = `${api}&${key}=${extraQueryParams[key]}`;
@@ -78,7 +80,8 @@ function PreviewDownload({
 
     const responseType = type === 'Excel' ? 'arraybuffer' : 'blob';
 
-    axiosInstance().get(api, { responseType: responseType })
+    axiosInstance()
+      .get(api, { responseType: responseType })
       .then((response) => {
         setLoadingType(null);
         setLoading(false);
@@ -86,12 +89,12 @@ function PreviewDownload({
 
         let newFileName = fileName;
         if (subType !== '' && !hideDetailButton) {
-          newFileName = `${newFileName}-${subType === 'Regular' ? button1Title : button2Title}`
+          newFileName = `${newFileName}-${subType === 'Regular' ? button1Title : button2Title}`;
         }
-        const contentType = type === 'PDF' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        const extension = type === 'PDF' ? 'pdf' : 'xlsx'
+        const contentType = type === 'PDF' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+        const extension = type === 'PDF' ? 'pdf' : 'xlsx';
 
-        if (type === 'PDF' && operation === "Preview") {
+        if (type === 'PDF' && operation === 'Preview') {
           const blobData = new Blob([response.data], { type: contentType });
           const fileURL = URL.createObjectURL(blobData);
           const link = document.createElement('a');
@@ -100,8 +103,7 @@ function PreviewDownload({
           link.style.display = 'none';
           link.click();
           toastConfig.setToastConfig({ open: true, type: 'success', message: 'File Previewed Successfully.' });
-        }
-        else if (operation === "Download") {
+        } else if (operation === 'Download') {
           const blobData = new Blob([response.data], { type: contentType });
           const url = window.URL.createObjectURL(blobData);
           const link = document.createElement('a');
@@ -109,8 +111,7 @@ function PreviewDownload({
           link.setAttribute('download', `${newFileName}.${extension}`);
           link.click();
           toastConfig.setToastConfig({ open: true, type: 'success', message: 'File Downloaded Successfully.' });
-        }
-        else if (operation === 'base64') {
+        } else if (operation === 'base64') {
           const blobData = new Blob([response.data], { type: contentType });
           generateBase64forFile(blobData, newFileName, extension);
         }
@@ -213,17 +214,21 @@ function PreviewDownload({
           handleView={(subType, visibleColumnsPdf, visibleColumnsExcel) => {
             if (showColumnsDialog.operation === 'Send Email') {
               setLoadingType('email');
-              handleView("PDF", "base64", 'Regular', visibleColumnsPdf);
+              handleView('PDF', 'base64', 'Regular', visibleColumnsPdf);
               if (!hideDetailButton) {
-                handleView("PDF", "base64", 'Detail', visibleColumnsPdf);
+                handleView('PDF', 'base64', 'Detail', visibleColumnsPdf);
               }
               if (isExcelDownload) {
-                handleView("Excel", "base64", '', visibleColumnsExcel);
+                handleView('Excel', 'base64', '', visibleColumnsExcel);
               }
               setSendEmail(true);
-            }
-            else {
-              handleView(showColumnsDialog.type, showColumnsDialog.operation, subType, showColumnsDialog.type === 'Excel' ? visibleColumnsExcel : visibleColumnsPdf);
+            } else {
+              handleView(
+                showColumnsDialog.type,
+                showColumnsDialog.operation,
+                subType,
+                showColumnsDialog.type === 'Excel' ? visibleColumnsExcel : visibleColumnsPdf
+              );
             }
           }}
           loadingType={loadingType}
@@ -265,7 +270,7 @@ function PreviewDownload({
               setSendEmail(false);
               setEmailAttachments([]);
               if (handleRefresh) {
-                handleRefresh()
+                handleRefresh();
               }
             }}
             id={referenceId}
