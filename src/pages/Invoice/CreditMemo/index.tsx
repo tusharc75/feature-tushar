@@ -1,5 +1,5 @@
-import { Box, Button, IconButton } from '@material-ui/core';
-import { camelCase } from 'lodash';
+import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { camelCase, set } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react'
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -14,6 +14,9 @@ import ManageCreditMemoDialog from './ManageCreditMemo';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+
 
 
 function CreditMemo({ invoiceData }) {
@@ -24,7 +27,20 @@ function CreditMemo({ invoiceData }) {
     const [columns, setColumns] = useState(null);
     const [rowsData, setRowsData] = useState(null);
 
-    const [createCreditMemoDialog, setCreateCreditMemoDialog] = useState(false);
+    const [selectedRecords, setSelectedRecords] = useState([]);
+
+    const [createCreditMemoDialog, setCreateCreditMemoDialog] = useState({
+        open: false,
+        memoId: null
+    });
+    const [anchorActionEl, setAnchorActionEl] = useState(null);
+
+    const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState({
+        open: false,
+        ids: [],
+    })
+    const [isDeleting, setIsDeleting] = useState(false);
+
 
     useEffect(() => {
         fetchFields();
@@ -53,7 +69,10 @@ function CreditMemo({ invoiceData }) {
                                 size="small"
                                 aria-label="Delete"
                                 onClick={() => {
-
+                                    setCreateCreditMemoDialog({
+                                        open: true,
+                                        memoId: row.original._id
+                                    });
                                 }}
                             >
                                 <EditIcon fontSize="small" color={'primary'} />
@@ -63,7 +82,10 @@ function CreditMemo({ invoiceData }) {
                             size="small"
                             aria-label="Details"
                             onClick={() => {
-                                handleDelete([row.original._id]);
+                                setShowDeleteConfirmBox({
+                                    open: true,
+                                    ids: [row.original._id],
+                                });
                             }}
                         >
                             <DeleteIcon fontSize="small" color="error" />
@@ -85,33 +107,96 @@ function CreditMemo({ invoiceData }) {
     };
 
     const handleDelete = async (ids) => {
+        setIsDeleting(true);
         try {
-            await axiosInstance().put(`${invoice.api}/credit-memo/${invoiceData._id}/delete`, {
+            const data = await axiosInstance().put(`${invoice.api}/credit-memo/${invoiceData._id}/delete`, {
                 ids: [...ids],
+            });
+            setIsDeleting(false);
+            setShowDeleteConfirmBox({
+                open: false,
+                ids: [],
             });
             toastConfig.setToastConfig({
                 open: true,
-                message: 'Credit Memo Deleted Successfully',
+                message: data?.data?.message || 'Deleted successfully',
                 severity: 'success',
             });
             fetchData();
         } catch (error) {
+            setIsDeleting(false);
             toastConfig.setToastConfig(error);
         }
     };
 
+
+    const handleClick = (event) => {
+        setAnchorActionEl(event.currentTarget);
+    };
+
+    const handleClose = () => {
+        setAnchorActionEl(null);
+    };
+
+
+
     return (
         <Fragment>
-            <Box pb={2}>
+            <Box pb={2} justifyContent={"space-between"} className='flex gap-2'>
                 <Button
                     variant={'outlined'}
                     color="primary"
                     size="small"
                     startIcon={<Add />}
-                    onClick={() => setCreateCreditMemoDialog(true)}
+                    onClick={() => setCreateCreditMemoDialog({
+                        open: true,
+                        memoId: null
+                    })}
                 >
                     Create
                 </Button>
+                <Button
+                    variant={'outlined'}
+                    color="primary"
+                    aria-controls="simple-menu"
+                    aria-haspopup="true"
+                    disabled={selectedRecords.length === 0}
+                    size="small"
+                    onClick={handleClick}
+                    endIcon={<ArrowDropDownIcon />}
+                    className="new-dropdown-v1"
+                >
+                    {'Actions'}
+                </Button>
+                <Menu
+                    anchorEl={anchorActionEl}
+                    keepMounted
+                    open={Boolean(anchorActionEl)}
+                    onClose={handleClose}
+                    getContentAnchorEl={null}
+                    anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'right'
+                    }}
+                    transformOrigin={{
+                        vertical: 'top',
+                        horizontal: 'right'
+                    }}
+                >
+                    <MenuItem
+                        disabled={selectedRecords.length === 0 || isDeleting}
+                        onClick={() => {
+                            setShowDeleteConfirmBox({
+                                open: true,
+                                ids: selectedRecords.map((item) => item._id),
+                            });
+                            handleClose();
+                        }}
+                    >
+                        Delete
+                    </MenuItem>
+                </Menu>
+
             </Box>
             {columns && rowsData ? (
                 <Box zIndex={5} width={'100%'} height={'calc(100vh - 285px)'} pt={1}>
@@ -119,10 +204,10 @@ function CreditMemo({ invoiceData }) {
                         height={'calc(100vh - 200px)'}
                         columns={columns}
                         data={rowsData}
-                        onSelect={() => { }}
+                        onSelect={setSelectedRecords}
                         childrenProperty="subRows"
                         uniqueKey="_id"
-                        hideSelection={true}
+                        hideSelection={false}
                         hideAction={false}
                         renderedFrom={renderedFrom}
                         isClientSideGrid={true}
@@ -134,14 +219,38 @@ function CreditMemo({ invoiceData }) {
                     <CommonSkeleton lenArray={[...Array(10).keys()]} />
                 </Box>
             )}
-            {createCreditMemoDialog && (
+            {createCreditMemoDialog.open && (
                 <ManageCreditMemoDialog
+                    open={createCreditMemoDialog.open}
                     invoiceData={invoiceData}
-                    onClose={() => setCreateCreditMemoDialog(false)}
-                    open={createCreditMemoDialog}
+                    memoId={createCreditMemoDialog.memoId}
+                    onClose={() => setCreateCreditMemoDialog({
+                        open: false,
+                        memoId: null
+                    })}
                     onSuccess={() => {
-                        setCreateCreditMemoDialog(false);
+                        setCreateCreditMemoDialog({
+                            open: false,
+                            memoId: null
+                        });
                         fetchData();
+                    }}
+                />
+            )}
+            {showDeleteConfirmBox.open && (
+                <ConfirmationDialog
+                    open={showDeleteConfirmBox.open}
+                    message={`Are you sure you want to delete the memo${showDeleteConfirmBox.ids.length > 1 ? '(s)' : ''}
+                     ?`}
+                    onClose={() => {
+                        setShowDeleteConfirmBox({
+                            open: false,
+                            ids: [],
+                        });
+                    }}
+                    okBtnLoading={isDeleting}
+                    onOk={() => {
+                        handleDelete(showDeleteConfirmBox.ids);
                     }}
                 />
             )}
