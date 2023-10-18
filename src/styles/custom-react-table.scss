@@ -88,7 +88,7 @@ $isAppliedBillDark: #234623;
     }
 
     .td.error[data-sticky-td='true'] {
-      background: var(--dark-error, #efcccc) !important;
+      background: var(--error-dark, #efcccc) !important;
     }
 
     .td.isAppliedBill[data-sticky-td='true'] {
@@ -272,7 +272,7 @@ $isAppliedBillDark: #234623;
         }
 
         td.error {
-          background: var(--dark-error, #efcccc);
+          background: var(--error-dark, #efcccc);
         }
       }
 
