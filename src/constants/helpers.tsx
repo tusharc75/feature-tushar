@@ -508,7 +508,8 @@ export const CHILD_RESOURCE = {
   demandOrderDetail: 'Demand Order Detail',
   productionOrderDetail: 'Production Order Detail',
   invoiceCost: 'Invoice Cost',
-  serializedAssetsCertification: 'Serialized Assets Certificate'
+  serializedAssetsCertification: 'Serialized Assets Certificate',
+  invoiceCreditMemo: 'Invoice Credit Memo'
 };
 
 export const sidebarResourceObjectFromValues = () => {
