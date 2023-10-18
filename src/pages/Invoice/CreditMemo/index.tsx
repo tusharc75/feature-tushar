@@ -17,8 +17,6 @@ import EditIcon from '@material-ui/icons/Edit';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
-
-
 function CreditMemo({ invoiceData }) {
 
     const toastConfig = useContext(CustomToastContext);
@@ -29,18 +27,11 @@ function CreditMemo({ invoiceData }) {
 
     const [selectedRecords, setSelectedRecords] = useState([]);
 
-    const [createCreditMemoDialog, setCreateCreditMemoDialog] = useState({
-        open: false,
-        memoId: null
-    });
+    const [createCreditMemoDialog, setCreateCreditMemoDialog] = useState({ open: false, creditMemoId: null });
     const [anchorActionEl, setAnchorActionEl] = useState(null);
 
-    const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState({
-        open: false,
-        ids: [],
-    })
+    const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState({ open: false, ids: [] })
     const [isDeleting, setIsDeleting] = useState(false);
-
 
     useEffect(() => {
         fetchFields();
@@ -71,7 +62,7 @@ function CreditMemo({ invoiceData }) {
                                 onClick={() => {
                                     setCreateCreditMemoDialog({
                                         open: true,
-                                        memoId: row.original._id
+                                        creditMemoId: row.original._id
                                     });
                                 }}
                             >
@@ -129,7 +120,6 @@ function CreditMemo({ invoiceData }) {
         }
     };
 
-
     const handleClick = (event) => {
         setAnchorActionEl(event.currentTarget);
     };
@@ -137,8 +127,6 @@ function CreditMemo({ invoiceData }) {
     const handleClose = () => {
         setAnchorActionEl(null);
     };
-
-
 
     return (
         <Fragment>
@@ -150,7 +138,7 @@ function CreditMemo({ invoiceData }) {
                     startIcon={<Add />}
                     onClick={() => setCreateCreditMemoDialog({
                         open: true,
-                        memoId: null
+                        creditMemoId: null
                     })}
                 >
                     Create
@@ -223,16 +211,10 @@ function CreditMemo({ invoiceData }) {
                 <ManageCreditMemoDialog
                     open={createCreditMemoDialog.open}
                     invoiceData={invoiceData}
-                    memoId={createCreditMemoDialog.memoId}
-                    onClose={() => setCreateCreditMemoDialog({
-                        open: false,
-                        memoId: null
-                    })}
+                    creditMemoId={createCreditMemoDialog.creditMemoId}
+                    onClose={() => setCreateCreditMemoDialog({ open: false, creditMemoId: null })}
                     onSuccess={() => {
-                        setCreateCreditMemoDialog({
-                            open: false,
-                            memoId: null
-                        });
+                        setCreateCreditMemoDialog({ open: false, creditMemoId: null });
                         fetchData();
                     }}
                 />
@@ -240,13 +222,10 @@ function CreditMemo({ invoiceData }) {
             {showDeleteConfirmBox.open && (
                 <ConfirmationDialog
                     open={showDeleteConfirmBox.open}
-                    message={`Are you sure you want to delete the memo${showDeleteConfirmBox.ids.length > 1 ? '(s)' : ''}
+                    message={`Are you sure you want to delete the credit memo ${showDeleteConfirmBox.ids.length > 1 ? '(s)' : ''}
                      ?`}
                     onClose={() => {
-                        setShowDeleteConfirmBox({
-                            open: false,
-                            ids: [],
-                        });
+                        setShowDeleteConfirmBox({ open: false, ids: [] });
                     }}
                     okBtnLoading={isDeleting}
                     onOk={() => {

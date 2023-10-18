@@ -26,7 +26,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 
-const ManageCreditMemoDialog = ({ invoiceData, memoId, onClose, onSuccess, open }) => {
+const ManageCreditMemoDialog = ({ invoiceData, creditMemoId, onClose, onSuccess, open }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const [submitting, setSubmitting] = useState(false);
@@ -50,9 +50,9 @@ const ManageCreditMemoDialog = ({ invoiceData, memoId, onClose, onSuccess, open 
             const response: any = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.invoiceCreditMemo}`);
             fields = response?.data?.data;
             fields = CURReplaceByCurrencySingle(fields, invoiceData?.currency ? invoiceData?.currency : "USD");
-            if (memoId) {
+            if (creditMemoId) {
                 let data;
-                const response: any = await axiosInstance().get(`${invoice.api}/credit-memo/${invoiceData._id}/${memoId}`);
+                const response: any = await axiosInstance().get(`${invoice.api}/credit-memo/${invoiceData._id}/${creditMemoId}`);
                 data = response?.data?.data;
                 setInitialData({
                     fields: fields,
@@ -74,8 +74,8 @@ const ManageCreditMemoDialog = ({ invoiceData, memoId, onClose, onSuccess, open 
     const handleSubmit = (values: any) => {
         const newValues = { ...values };
         setSubmitting(true);
-        if (memoId) {
-            newValues._id = memoId;
+        if (creditMemoId) {
+            newValues._id = creditMemoId;
             axiosInstance()
                 .put(`${invoice.api}/credit-memo/${invoiceData._id}`, newValues)
                 .then(({ data }) => {
@@ -141,7 +141,7 @@ const ManageCreditMemoDialog = ({ invoiceData, memoId, onClose, onSuccess, open 
                     {({ values, errors, touched, setFieldValue, handleSubmit }) => (
                         <Fragment>
                             <CustomDialogHeader
-                                title={'Create'}
+                                title={creditMemoId ? 'Update' : 'Create'}
                                 onClose={(e, reason) => {
                                     if (isEqual(initialData.values, values)) onClose();
                                     else setShowConfirmDialog(true);
