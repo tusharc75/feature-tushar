@@ -506,6 +506,10 @@ const ReceivingTicket = ({
 
       productAssets = [...productAssets?.filter((e) => !e.isReplaced), ...productAssets?.filter((e) => e.isReplaced)];
 
+      productAssets?.forEach((e, index) => {
+        e.index = index + 1;
+      })
+      
       dispatch({ type: 'initialize', data: productAssets, count: productAssets.length });
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
@@ -736,6 +740,7 @@ const ReceivingTicket = ({
   };
 
   const columns = [
+    { field: 'index', headerName: 'Index', show: true, disabled: true, cellRenderer: 'commonRenderer', width: 100 },
     {
       field: 'assetNumber',
       headerName: 'Details',
