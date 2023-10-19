@@ -45,6 +45,7 @@ import { GrFormClose } from 'react-icons/gr';
 import { CgSearch } from 'react-icons/cg';
 import GridHeader from './GridHeader';
 import SwipableListForMobile from 'src/components/SwipableListForMobile';
+import Pagination from './Pagination';
 
 interface CustomCheckBoxProps extends CheckboxProps {
   indeterminate: any;
@@ -405,6 +406,7 @@ function CustomReactTable({
     toggleAllRowsExpanded,
     setColumnOrder,
     setCellState,
+    toggleAllRowsSelected,
     state: { rowState, pageIndex, sortBy, selectedRowIds, columnOrder }
   } = useTable(
     {
@@ -607,6 +609,8 @@ function CustomReactTable({
     setCellValue('');
   };
 
+  const mobileSelectAllHeader: any | null = React.useMemo(() => allColumns?.find((item) => item.id === 'selection') || null, [allColumns]);
+
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="custom-react-table custom-react-table-v1 vertical-center">
@@ -630,6 +634,14 @@ function CustomReactTable({
               </>
             }
           >
+            {/* Select All For Mobile */}
+            {isMobileView && !hideSelection && mobileSelectAllHeader && (
+              <>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  {mobileSelectAllHeader.render('Header')} <span>Select All</span>
+                </label>
+              </>
+            )}
             <CustomReactTableHeaderOptions
               renderedFrom={renderedFrom}
               dispatchTable={dispatch}
@@ -637,6 +649,8 @@ function CustomReactTable({
               selectedRecords={selectedFlatRows?.length}
             />
           </GridHeader>
+
+          {/* Table */}
           {!isMobileView && (
             <div
               style={{
@@ -672,7 +686,7 @@ function CustomReactTable({
                     <React.Fragment key={index}>
                       <TableRow {...headerGroup.getHeaderGroupProps()} className="tr">
                         {headerGroup.headers.map((column, index) => (
-                          <>
+                          <React.Fragment key={column.id}>
                             <DraggableHeader
                               key={column.id}
                               column={column}
@@ -682,7 +696,7 @@ function CustomReactTable({
                               dispatch={dispatch}
                               isClientSideGrid={isClientSideGrid}
                             />
-                          </>
+                          </React.Fragment>
                         ))}
                       </TableRow>
                     </React.Fragment>
@@ -748,7 +762,27 @@ function CustomReactTable({
             </div>
           )}
         </div>
-        {!isMobileView && allowPagination && !loading && (
+
+        {isMobileView ? (
+          <SwipableListForMobile
+            key={pageIndex}
+            prepareRow={prepareRow}
+            allColumns={allColumns}
+            allowSelection={!hideSelection}
+            dataRows={rows}
+            dispatch={dispatch}
+            loading={loading}
+            page={currentPage}
+            rowCount={rowCount}
+            expander={expander}
+            backgroundColor={setWholeRowsCellColor}
+            renderedFrom={renderedFrom}
+            handleCellSelection={handleCellSelection}
+            IndeterminateCheckbox={IndeterminateCheckbox}
+            toggleAllRowsSelected={toggleAllRowsSelected}
+          />
+        ) : null}
+        {/* {allowPagination && (
           <TablePagination
             component="div"
             count={rowCount}
@@ -763,25 +797,23 @@ function CustomReactTable({
             }}
             rowsPerPageOptions={gridPageSizes}
           />
-        )}
-
-        {isMobileView ? (
-          <SwipableListForMobile
-            prepareRow={prepareRow}
-            allColumns={allColumns}
-            allowSelection={!hideSelection}
-            dataRows={rows}
-            dispatch={dispatch}
-            loading={loading}
-            page={currentPage}
-            rowCount={rowCount}
-            expander={expander}
-            backgroundColor={setWholeRowsCellColor}
-            renderedFrom={renderedFrom}
-            handleCellSelection={handleCellSelection}
-            IndeterminateCheckbox={IndeterminateCheckbox}
+        )} */}
+        {allowPagination && (
+          <Pagination
+            count={rowCount}
+            page={pageIndex}
+            onPageChange={(event, newPage) => {
+              gotoPage(newPage);
+              dispatch({ type: 'pageChange', page: newPage });
+            }}
+            rowsPerPage={limit}
+            onRowsPerPageChange={(event, value) => {
+              dispatch({ type: 'pageSizeChange', limit: value });
+            }}
+            rowsPerPageOptions={gridPageSizes}
+            disabled={loading}
           />
-        ) : null}
+        )}
       </div>
     </DndProvider>
   );
