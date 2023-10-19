@@ -408,6 +408,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                 }}
               >
                 <MenuItem
+                  disabled={checkUniqcurrentOwnerType()}
                   onClick={() => {
                     setAnchorEl(null);
                     setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.scrap, message: '' });

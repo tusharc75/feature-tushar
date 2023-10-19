@@ -56,7 +56,7 @@ export default function ArrangeView({ columns, setColumns }) {
 
   return (
     <>
-      <HtmlTooltip title="Arrange View" placement="top" arrow>
+      <HtmlTooltip title="Arrange Columns" placement="top" arrow>
         <IconButton
           aria-describedby="columnSelection"
           size="small"
@@ -72,7 +72,7 @@ export default function ArrangeView({ columns, setColumns }) {
       {open && (
         <Dialog open onClose={onClose} maxWidth="sm" fullWidth fullScreen={fullScreen || isMobile || isTablet}>
           <CustomDialogHeader
-            title="Arrange View"
+            title="Arrange Columns"
             onClose={onClose}
             isMinimized={!fullScreen}
             onMinimizeMaximize={() => {

@@ -685,6 +685,7 @@ const QuotationDetails = () => {
                   renderedFrom={renderedFrom}
                   version={currentVersion}
                   allowedToEdit={allowedToEdit}
+                  stepFullScreen={stepFullScreen}
                 />
               )}
               {stepNames[currentStep] === 'Quote Builder' && quotationData && (

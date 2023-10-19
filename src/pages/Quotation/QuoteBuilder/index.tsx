@@ -303,14 +303,10 @@ const QuoteBuilder = ({
       <Box m={1} display="flex" justifyContent="space-between">
         <Box display="flex">
           <SendEmail
-            versionData={versionData}
             quotationData={quotationData}
-            columns={columns}
             versionId={versionData?._id}
-            allColumn={allColumn}
-            isSendEmail={true}
-            allowedToEdit={allowedToEdit}
             currentVersion={version}
+            columns={columns}
             hideSummary={true}
             hideVersions={true}
           />
