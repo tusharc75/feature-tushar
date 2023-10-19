@@ -519,12 +519,8 @@ const WorkOrder = ({
       }
     } else {
       if (
-        data?.material?.filter(
-          (e) =>
-            e?.type === 'service' &&
-            e?.serviceDetail?.preWork &&
-            [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress]?.sort()?.includes(e?.status)
-        )?.length
+        data?.material?.filter((e) => e?.type === 'service' && e?.serviceDetail?.preWork
+          && [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress]?.sort()?.includes(e?.status))?.length
       ) {
         setNextStep(false);
       } else {
