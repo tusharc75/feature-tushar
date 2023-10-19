@@ -124,7 +124,7 @@ const DocumentScanner = ({ open, onClose, setFieldValue, onUploadFile }) => {
             color="primary"
             onClick={handleCapture}
             size="small"
-            disabled={cameraPermission !== 'granted' || isScanning}
+            disabled={isScanning}
             startIcon={isScanning && <CircularProgress size={15} />}
           >
             {isScanning ? 'Scanning...' : 'Capture'}
