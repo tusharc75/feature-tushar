@@ -31,7 +31,7 @@ export default function CustomSwipableList({
   permissions,
   onCreate,
   showClone,
-  onClone,
+  onClone = null,
   fullHeight = false,
   renderedFrom,
   additionalDetails = [],
@@ -225,7 +225,7 @@ export default function CustomSwipableList({
                     )}
                   </div>
 
-                  {chips.length > 0 && (
+                  {chips.length > 0 && chips.some((c) => d[c.field]) && (
                     <div className="mt-1 pt-2" style={{ borderTop: '1px solid var(--common-border-color)' }}>
                       <div className=" d-flex gap-1 flex-wrap">
                         {[
@@ -239,22 +239,6 @@ export default function CustomSwipableList({
                                   key={c.field}
                                   onClick={c.onClick ? () => c.onClick(d, index) : null}
                                 >{`${c.label} ${(c.fieldType === 'date' ? moment(d[c.field]).format(dateFormat) : d[c.field]) ?? ''}`}</span>
-                                {/* <Chip
-                                  className="overflow-hidden "
-                                  key={c.field}
-                                  onClick={c.onClick ? () => c.onClick(d, index) : null}
-                                  size="small"
-                                  // icon={c.icon}
-                                  color={c.color}
-                                  label={`${c.label} ${(c.fieldType === 'date' ? moment(d[c.field]).format(dateFormat) : d[c.field]) ?? ''}`}
-                                  style={
-                                    c.setBackground && c.setBackground(d)
-                                      ? c.setBackground(d)
-                                      : c.chipColorVariable
-                                      ? generateChipStyle(c.chipColorVariable, d[c.field]?.toLowerCase())
-                                      : {}
-                                  }
-                                /> */}
                               </div>
                             ) : (
                               <Fragment key={c.field}></Fragment>

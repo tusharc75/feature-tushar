@@ -239,6 +239,7 @@ const TransferAsset = () => {
 
   const handleFilter = (event, newFilter) => {
     if (newFilter != null) {
+      dispatch({ type: 'setPage', page: 0 });
       setFilter(newFilter);
       handleTransferAssetTypeSel(TransferAssetType.find((d) => d.key === newFilter).value);
     }
@@ -322,6 +323,18 @@ const TransferAsset = () => {
     fetchTransferAsset();
   };
 
+  const toggleInner = TransferAssetType && (
+    <ToggleButtonGroup size="small" value={TransferAssetType[selectedType - 1].key} exclusive onChange={handleFilter}>
+      {TransferAssetType.map((k, index) => {
+        return (
+          <ToggleButton value={k.key} key={index}>
+            {k.key}
+          </ToggleButton>
+        );
+      })}
+    </ToggleButtonGroup>
+  );
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -351,77 +364,57 @@ const TransferAsset = () => {
       <div className="main-container">
         <div className="header-panel">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className={'d-flex align-items-center gap-1'}>
-              <div className="d-flex align-items-center">
-                <GiStockpiles size={20} style={{ paddingBottom: '3px' }} className="headerLogo" />
-                <span className="listingHeader">{routes.transferAsset?.title} </span>
-              </div>
+            <div className={'d-flex align-items-center gap-1 w-full'}>
               {isMobile && !isTablet ? (
-                <div className="d-flex ml-auto gap-2 ">
-                  <IconButton
-                    onClick={handleClickOpen}
-                    id="demo-customized-button"
-                    aria-controls="demo-customized-menu"
-                    aria-haspopup="true"
-                    // aria-expanded={open ? 'true' : undefined}
-                    className={'mobileIconButton secondary'}
-                    size="small"
-                  >
-                    <TbArrowsSort className="rotate-90" size={16} />
-                  </IconButton>
-                  <MobileSortDialog
-                    isOpen={open}
-                    handleClose={handleClickClose}
-                    contentPart={null}
-                    secHeading={['Sort Transfer Assests']}
-                    columns={columns}
-                    dispatch={dispatch}
-                  />
-                  <IconButton
-                    id="demo-customized-button"
-                    aria-controls="demo-customized-menu"
-                    aria-haspopup="true"
-                    // aria-expanded={open ? 'true' : undefined}
-                    className={'mobileIconButton secondary'}
-                    size="small"
-                    onClick={handleOpen}
-                  >
-                    <MdOutlineFilterAlt size={16} />
-                  </IconButton>
-                  <MobileFilterDialog
-                    isOpen={isOpenDialog}
-                    handleClose={handleClose}
-                    contentPart={null}
-                    columns={columns}
-                    dispatch={dispatch}
-                    title={routes?.transferAsset?.title}
-                    filters={filters}
-                    resource={sidebarResource.transferAsset}
-                  />
-                </div>
-              ) : (
-                <HideWhenOffline>
-                  <div className={`align-items-center gap-1 layout-for-mobile `}>
-                    {TransferAssetType && (
-                      <ToggleButtonGroup
-                        size="small"
-                        className="ml-2"
-                        value={TransferAssetType[selectedType - 1].key}
-                        exclusive
-                        onChange={handleFilter}
-                      >
-                        {TransferAssetType.map((k, index) => {
-                          return (
-                            <ToggleButton value={k.key} key={index}>
-                              {k.key}
-                            </ToggleButton>
-                          );
-                        })}
-                      </ToggleButtonGroup>
-                    )}
+                <div className="d-flex flex-wrap items-center justify-between w-full">
+                  <div>
+                    <HideWhenOffline>{toggleInner}</HideWhenOffline>
                   </div>
-                </HideWhenOffline>
-              )}
+                  <div className="flex flex-wrap items-center gap-1 justify-end">
+                    <IconButton
+                      onClick={handleClickOpen}
+                      id="demo-customized-button"
+                      aria-controls="demo-customized-menu"
+                      aria-haspopup="true"
+                      // aria-expanded={open ? 'true' : undefined}
+                      className={'mobileIconButton secondary'}
+                      size="small"
+                    >
+                      <TbArrowsSort className="rotate-90" size={16} />
+                    </IconButton>
+                    <MobileSortDialog
+                      isOpen={open}
+                      handleClose={handleClickClose}
+                      contentPart={null}
+                      secHeading={['Sort Transfer Assests']}
+                      columns={columns}
+                      dispatch={dispatch}
+                    />
+                    <IconButton
+                      id="demo-customized-button"
+                      aria-controls="demo-customized-menu"
+                      aria-haspopup="true"
+                      // aria-expanded={open ? 'true' : undefined}
+                      className={'mobileIconButton secondary'}
+                      size="small"
+                      onClick={handleOpen}
+                    >
+                      <MdOutlineFilterAlt size={16} />
+                    </IconButton>
+                    <MobileFilterDialog
+                      isOpen={isOpenDialog}
+                      handleClose={handleClose}
+                      contentPart={null}
+                      columns={columns}
+                      dispatch={dispatch}
+                      title={routes?.transferAsset?.title}
+                      filters={filters}
+                      resource={sidebarResource.transferAsset}
+                    />
+                  </div>
+                </div>
+              ) : null}
+              {!isMobile && <HideWhenOffline>{toggleInner}</HideWhenOffline>}
               {referenceType && <Chip className="ml-3" color="primary" label={`Rental Job : ${referenceType}`} onDelete={updateQueryParams} />}
             </div>
             <div className="flex flex-wrap gap-[8px]  justify-end">
@@ -461,12 +454,16 @@ const TransferAsset = () => {
                 dataRows={dataRows}
                 selectedRecords={selectedRecords}
                 dispatch={dispatch}
-                onEdit={() => {}}
-                extraParamsToCheckDelete={true}
-                onDelete={(data) => {
-                  setDeleteRecord(data);
-                  setShowDeleteConfirmBox(true);
+                actionCol={(data) => {
+                  const params = { data };
+                  return <ActionsRenderer {...params} />;
                 }}
+                extraParamsToCheckDelete={false}
+                // onEdit={() => {}}
+                // onDelete={(data) => {
+                //   setDeleteRecord(data);
+                //   setShowDeleteConfirmBox(true);
+                // }}
                 rowCount={rowCount}
                 page={page}
                 loading={loading}
@@ -500,10 +497,10 @@ const TransferAsset = () => {
                 ]}
                 owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
                 onCreate={false}
-                showClone={true}
-                onClone={(data) => {
-                  setShowManageTransferAssetDialog({ open: true, isClone: true, idToClone: data._id });
-                }}
+                showClone={false}
+                // onClone={(data) => {
+                //   setShowManageTransferAssetDialog({ open: true, isClone: true, idToClone: data._id });
+                // }}
                 renderedFrom={renderedFrom}
               />
             ) : (

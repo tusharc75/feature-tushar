@@ -108,6 +108,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
         Header: 'Details',
         minWidth: 300,
         width: 300,
+        disabled: true,
         Cell: ({ row, rows }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {row.original.type === MATERIAL_TYPE.serializedAsset ?
@@ -223,17 +224,19 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
                   <DateRangeIcon fontSize="small" color="primary" />
                 </IconButton>
                 }
-                <IconButton
-                  size="small"
-                  aria-label="Details"
-                  onClick={() => {
-                    const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                    getNestedSubRows(obj, row.original);
-                    setDeleteData(obj);
-                  }}
-                >
-                  <DeleteIcon fontSize="small" color="error" />
-                </IconButton>
+                <HtmlTooltip title={'Delete'}>
+                  <IconButton
+                    size="small"
+                    aria-label="Delete"
+                    onClick={() => {
+                      const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                      getNestedSubRows(obj, row.original);
+                      setDeleteData(obj);
+                    }}
+                  >
+                    <DeleteIcon fontSize="small" color="error" />
+                  </IconButton>
+                </HtmlTooltip>
               </>
             )
           }

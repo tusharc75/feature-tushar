@@ -351,16 +351,16 @@ const QuotationDetails = () => {
           message: `Converted Successfully`
         });
         if (quotationData?.type === QUOTATION_TYPE.rentalJob) {
-          history.push(`${routes.rentalManagementDetail.path}/${data?._id}`);
+          window.open(`${routes.rentalManagementDetail.path}/${data?._id}`)
         }
         if (quotationData?.type === QUOTATION_TYPE.salesOrder) {
-          history.push(`${routes.salesOrderDetail.path}/${data?._id}`);
+          window.open(`${routes.salesOrderDetail.path}/${data?._id}`)
         }
         if (quotationData?.type === QUOTATION_TYPE.repairOrder) {
-          history.push(`${routes.repairOrderDetail.path}/${data?._id}`);
+          window.open(`${routes.repairOrderDetail.path}/${data?._id}`)
         }
         if (quotationData?.type === QUOTATION_TYPE.fieldJob) {
-          history.push(`${routes.fieldServiceOrderDetail.path}/${data?._id}`);
+          window.open(`${routes.fieldServiceOrderDetail.path}/${data?._id}`)
         }
       })
       .catch((error) => {
@@ -489,7 +489,9 @@ const QuotationDetails = () => {
                   )}
                   <MenuItem>
                     <Button
-                      disabled={!allowedToEdit || isCloning || loading}
+                      disabled={!allowedToEdit || isCloning || loading
+                        || quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer
+                        || [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.converted]?.includes(quotationData?.status)}
                       variant="text"
                       type="button"
                       size="small"
@@ -683,6 +685,7 @@ const QuotationDetails = () => {
                   renderedFrom={renderedFrom}
                   version={currentVersion}
                   allowedToEdit={allowedToEdit}
+                  stepFullScreen={stepFullScreen}
                 />
               )}
               {stepNames[currentStep] === 'Quote Builder' && quotationData && (

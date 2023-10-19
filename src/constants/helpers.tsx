@@ -346,7 +346,8 @@ export const sidebarResource = {
   deviceTemplateAlert: 'Device Template Alert',
   chartOfAccount: 'Chart Of Account',
   flash: 'Flash',
-  rentalManagementInvoice : 'Rental Management Invoice'
+  rentalManagementInvoice : 'Rental Management Invoice',
+  creditMemo: 'Credit Memo'
 };
 
 export const primaryFields = {
@@ -478,7 +479,8 @@ export const RESOURCE_LABEL = {
   deviceTemplateAlert: 'Device Template Alert',
   chartOfAccount: 'Chart Of Account',
   flash: 'Flash',
-  accountsReceivable: 'Accounts Receivable'
+  accountsReceivable: 'Accounts Receivable',
+  creditMemo: 'Credit Memo'
 };
 
 export const CHILD_RESOURCE = {
@@ -510,7 +512,8 @@ export const CHILD_RESOURCE = {
   demandOrderDetail: 'Demand Order Detail',
   productionOrderDetail: 'Production Order Detail',
   invoiceCost: 'Invoice Cost',
-  serializedAssetsCertification: 'Serialized Assets Certificate'
+  serializedAssetsCertification: 'Serialized Assets Certificate',
+  invoiceCreditMemo: 'Invoice Credit Memo'
 };
 
 export const sidebarResourceObjectFromValues = () => {
@@ -2218,15 +2221,6 @@ export const IOT_REPORT_LIST = [
         _id: '3'
       },
       {
-        fieldName: 'dataPoints',
-        fieldLabel: 'Iot Data Points',
-        resource: sidebarResource.iotDataPoints,
-        lookup: true,
-        type: 'dropDown',
-        multiple: true,
-        _id: '1'
-      },
-      {
         fieldName: 'date',
         fieldLabel: 'Date',
         type: 'date',
@@ -2240,7 +2234,25 @@ export const IOT_REPORT_LIST = [
         options: INTERVALS,
         required: true,
         _id: '4'
-      }
+      },
+      {
+        fieldName: 'dataPointsCategory',
+        fieldLabel: 'Iot Data Points Category',
+        resource: sidebarResource.iotDataPointsCategory,
+        lookup: true,
+        type: 'dropDown',
+        multiple: true,
+        _id: '5'
+      },
+      {
+        fieldName: 'dataPoints',
+        fieldLabel: 'Iot Data Points',
+        resource: sidebarResource.iotDataPoints,
+        lookup: true,
+        type: 'dropDown',
+        multiple: true,
+        _id: '1'
+      },
     ]
   }
 ];

@@ -49,7 +49,7 @@ const CustomFilter = ({ field, setFilterQuery, showGrid, setShowGrid, loadingDat
 
   useEffect(() => {
     setDefaultResource();
-  }, [field]);
+  }, []);
 
   //selectedResources represents the main filter array
   //selectedData is an object with keys as the filter and value as the sub filter values
