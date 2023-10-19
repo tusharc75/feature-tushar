@@ -176,8 +176,8 @@ const Note = () => {
             <div style={{ display: 'flex', alignItems: 'center' }} key={d.name}>
               <p> {d.name}</p>
               <IconButton className="ml-3" size="small" onClick={() => window.open(`${routes[d?.type].path}/detail/${d?.referenceId}`)}>
-                    <OpenInNewIcon fontSize="small" color="primary" />
-                  </IconButton>
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
               <Chip className="ml-3" color="primary" label={`${routes[d?.type]?.title}`} />
             </div>
           );
@@ -466,11 +466,15 @@ const Note = () => {
             dataRows={dataRows}
             selectedRecords={selectedRecords}
             dispatch={dispatch}
-            onEdit={(data) => { }}
+            onEdit={(data) => {}}
             extraParamsToCheckDelete={true}
-            onDelete={(data) => {
-              showConfirmBox(selectedRecords);
-              closeActions();
+            // onDelete={(data) => {
+            //   showConfirmBox(selectedRecords);
+            //   closeActions();
+            // }}
+            actionCol={(data) => {
+              const param = { data };
+              return <ActionsRenderer {...param} />;
             }}
             rowCount={rowCount}
             page={page}
@@ -483,7 +487,7 @@ const Note = () => {
             ]}
             onCreate={false}
             showClone={false}
-            onClone={() => { }}
+            onClone={() => {}}
             renderedFrom={'notesPage'}
           />
         ) : (
@@ -557,7 +561,7 @@ const Note = () => {
               setFullScreen((prevState) => !prevState);
             }}
             showManimizeMaximize={true}
-          // noteData={noteData}
+            // noteData={noteData}
           />
         </Dialog>
       )}

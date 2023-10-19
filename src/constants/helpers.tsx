@@ -74,7 +74,8 @@ export const purchaseRequisitionSteps = ['Add Products'];
 
 export const productionOrderSteps: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },
-  { name: 'Work Order', title: 'Work Order', icon: 'workOrder' }
+  { name: 'Work Order', title: 'Work Order', icon: 'workOrder' },
+  { name: 'Loading Ticket', title: 'Loading', icon: 'ticket' },
 ];
 
 export const jobProcessSteps: stepInterface[] = [
@@ -509,7 +510,8 @@ export const CHILD_RESOURCE = {
   demandOrderDetail: 'Demand Order Detail',
   productionOrderDetail: 'Production Order Detail',
   invoiceCost: 'Invoice Cost',
-  serializedAssetsCertification: 'Serialized Assets Certificate'
+  serializedAssetsCertification: 'Serialized Assets Certificate',
+  invoiceCreditMemo: 'Invoice Credit Memo'
 };
 
 export const sidebarResourceObjectFromValues = () => {
@@ -1983,7 +1985,8 @@ export const DELIVERY_TICKET_REFERENCE_TYPE = {
   salesOrder: 'Sales Order',
   sublease: 'Sublease',
   transferInventory: 'Transfer Inventory',
-  repairOrder: 'Repair Order'
+  repairOrder: 'Repair Order',
+  productionOrder: 'Production Order',
 };
 
 export const DELIVERY_FROM_TO_TYPE = {
@@ -2216,15 +2219,6 @@ export const IOT_REPORT_LIST = [
         _id: '3'
       },
       {
-        fieldName: 'dataPoints',
-        fieldLabel: 'Iot Data Points',
-        resource: sidebarResource.iotDataPoints,
-        lookup: true,
-        type: 'dropDown',
-        multiple: true,
-        _id: '1'
-      },
-      {
         fieldName: 'date',
         fieldLabel: 'Date',
         type: 'date',
@@ -2238,7 +2232,25 @@ export const IOT_REPORT_LIST = [
         options: INTERVALS,
         required: true,
         _id: '4'
-      }
+      },
+      {
+        fieldName: 'dataPointsCategory',
+        fieldLabel: 'Iot Data Points Category',
+        resource: sidebarResource.iotDataPointsCategory,
+        lookup: true,
+        type: 'dropDown',
+        multiple: true,
+        _id: '5'
+      },
+      {
+        fieldName: 'dataPoints',
+        fieldLabel: 'Iot Data Points',
+        resource: sidebarResource.iotDataPoints,
+        lookup: true,
+        type: 'dropDown',
+        multiple: true,
+        _id: '1'
+      },
     ]
   }
 ];

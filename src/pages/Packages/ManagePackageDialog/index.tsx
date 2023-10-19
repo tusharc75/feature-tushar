@@ -86,8 +86,10 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isR
       } else {
         let initialData = getObjKeys('', fieldsDataForCreate);
         if (referenceData) {
-          if (referenceData?.packageType && fieldsDataForCreate?.find((e) => e.fieldName === 'packageType')) {
-            initialData['packageType'] = referenceData?.packageType;
+          for (const key in referenceData) {
+            if (referenceData[key] && fieldsDataForCreate?.some((e) => e.fieldName === key)) {
+              initialData[key] = referenceData[key];
+            }
           }
         }
         setInitialData({

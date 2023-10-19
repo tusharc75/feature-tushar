@@ -85,6 +85,8 @@ const RentalManagementDetailsPage = () => {
   const [anchorEl, setAnchorEl] = useState(null);
 
   const [nextStep, setNextStep] = useState(false);
+  const [nextStepToolTip, setNextStepToolTip] = useState(null);
+
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [locationKeys, setLocationKeys] = useState([]);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
@@ -216,7 +218,7 @@ const RentalManagementDetailsPage = () => {
           });
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   useEffect(() => {
@@ -339,8 +341,8 @@ const RentalManagementDetailsPage = () => {
     } else {
       axiosInstance()
         .put(`${rentalManagement.api}/${id}/process-status`, { processStatus: processStatus })
-        .then(({ data }) => {})
-        .catch((error) => {});
+        .then(({ data }) => { })
+        .catch((error) => { });
     }
   };
 
@@ -618,6 +620,7 @@ const RentalManagementDetailsPage = () => {
             <Steps
               isNextStep={false}
               nextStep={nextStep}
+              nextStepToolTip={nextStepToolTip}
               steps={rentalSteps}
               currentStep={currentStep}
               setCurrentStep={setCurrentStep}
@@ -643,6 +646,7 @@ const RentalManagementDetailsPage = () => {
                 <Productpackage
                   rentalManagementData={rentalManagementData}
                   setNextStep={setNextStep}
+                  setNextStepToolTip={setNextStepToolTip}
                   renderedFrom={`${renderedFrom}_grid-1`}
                   stepFullScreen={stepFullScreen}
                   allowedToEdit={
@@ -721,7 +725,7 @@ const RentalManagementDetailsPage = () => {
                 <SerializedAsset
                   rentalManagementData={rentalManagementData}
                   setNextStep={setNextStep}
-                  currencySymbol={currencySymbol}
+                  setNextStepToolTip={setNextStepToolTip}
                   stepFullScreen={stepFullScreen}
                   allowedToEdit={allowedToEdit}
                 />

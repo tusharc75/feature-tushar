@@ -9,7 +9,7 @@ import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Add from '@material-ui/icons/Add';
-import { quotation, pricingCondition, supplierContact, QUOTATION_TYPE, MATERIAL_TYPE, ASSET_STATUS } from '../../../constants/helpers';
+import { quotation, pricingCondition, supplierContact, QUOTATION_TYPE, MATERIAL_TYPE, ASSET_STATUS, SERVICE_TYPE } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import QuotationQtyDialog from './QuotationQtyDialog';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
@@ -108,6 +108,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
         Header: 'Details',
         minWidth: 300,
         width: 300,
+        disabled: true,
         Cell: ({ row, rows }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {row.original.type === MATERIAL_TYPE.serializedAsset ?
@@ -223,17 +224,19 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
                   <DateRangeIcon fontSize="small" color="primary" />
                 </IconButton>
                 }
-                <IconButton
-                  size="small"
-                  aria-label="Details"
-                  onClick={() => {
-                    const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                    getNestedSubRows(obj, row.original);
-                    setDeleteData(obj);
-                  }}
-                >
-                  <DeleteIcon fontSize="small" color="error" />
-                </IconButton>
+                <HtmlTooltip title={'Delete'}>
+                  <IconButton
+                    size="small"
+                    aria-label="Delete"
+                    onClick={() => {
+                      const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                      getNestedSubRows(obj, row.original);
+                      setDeleteData(obj);
+                    }}
+                  >
+                    <DeleteIcon fontSize="small" color="error" />
+                  </IconButton>
+                </HtmlTooltip>
               </>
             )
           }
@@ -581,14 +584,16 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
             >
               Add Existing Products
             </MenuItem>
-            <MenuItem
-              onClick={() => {
-                closeAddActions();
-                setAddDialog({ open: true, type: 'package', parentId: null });
-              }}
-            >
-              Add Existing Packages
-            </MenuItem>
+            {quotationData?.type !== QUOTATION_TYPE.fieldJob &&
+              <MenuItem
+                onClick={() => {
+                  closeAddActions();
+                  setAddDialog({ open: true, type: 'package', parentId: null });
+                }}
+              >
+                Add Existing Packages
+              </MenuItem>
+            }
             <MenuItem
               onClick={() => {
                 closeAddActions();
@@ -766,7 +771,6 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
       {addDialog.open && addDialog.type === 'product' && (
         <AssignProductDialog
           reference={'quotation'}
-          serialized={null}
           productsDialogOpen={addDialog.open}
           productId={null}
           handleCloseDialog={() => setAddDialog({ open: false, type: '', parentId: null })}
@@ -774,6 +778,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
           onSuccess={(d) => {
             handleAdd(d);
           }}
+          serialized={quotationData?.type === QUOTATION_TYPE.fieldJob ? false : null}
         />
       )}
       {addDialog.open && addDialog.type === MATERIAL_TYPE.serializedAsset && (
@@ -817,6 +822,8 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
           onSuccess={(rows) => {
             handleAdd(rows);
           }}
+          extraStaticFilter={quotationData?.type === QUOTATION_TYPE.fieldJob ? [{ field: 'serviceType', term: SERVICE_TYPE.fieldService }]
+            : []}
         />
       )}
       {addDialog.open && addDialog.type === 'package' && (
@@ -900,14 +907,16 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
             >
               Add Existing Products
             </MenuItem>
-            <MenuItem
-              onClick={() => {
-                setAddDialog({ open: true, type: 'package', parentId: addchildDialog.parentId });
-                setAddchildDialog({ open: false, parentId: null, parentType: null, serializedProduct: false, top: null, bottom: null });
-              }}
-            >
-              Add Existing Packages
-            </MenuItem>
+            {quotationData?.type !== QUOTATION_TYPE.fieldJob &&
+              <MenuItem
+                onClick={() => {
+                  setAddDialog({ open: true, type: 'package', parentId: addchildDialog.parentId });
+                  setAddchildDialog({ open: false, parentId: null, parentType: null, serializedProduct: false, top: null, bottom: null });
+                }}
+              >
+                Add Existing Packages
+              </MenuItem>
+            }
             <MenuItem
               onClick={() => {
                 setAddDialog({ open: true, type: 'service', parentId: addchildDialog.parentId });

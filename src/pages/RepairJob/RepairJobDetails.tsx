@@ -297,10 +297,8 @@ const RepairJobDetails = () => {
                   repairJobData={repairJobData}
                   setNextStep={setNextStep}
                   updateJobStatus={updateJobStatus}
-                  repairedAssetStatus={repairedAssetStatus}
                   renderedFrom={`${renderedFrom}_grid-1`}
                   allowedToEdit={allowedToEdit}
-                  allowUpdateStatus={allowUpdateStatus}
                   stepFullScreen={stepFullScreen}
                 />
               )}

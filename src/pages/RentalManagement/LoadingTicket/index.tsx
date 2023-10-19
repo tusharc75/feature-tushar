@@ -231,10 +231,10 @@ const LoadingTicket = ({
             element.type === 'service'
               ? element?.serviceDetail?.serviceDescription || ''
               : element.type === 'product'
-              ? element?.productDetail?.productDescription || ''
-              : element.type === 'package'
-              ? element?.packageDetail?.packageDescription || ''
-              : '';
+                ? element?.productDetail?.productDescription || ''
+                : element.type === 'package'
+                  ? element?.packageDetail?.packageDescription || ''
+                  : '';
           obj.assetNumber = element?.productDetail?.productName;
           obj.productName = element?.productDetail?.productName;
           obj.productId = element?.productDetail?._id;
@@ -265,10 +265,10 @@ const LoadingTicket = ({
             element.type === 'service'
               ? element?.serviceDetail?.serviceDescription || ''
               : element.type === 'product'
-              ? element?.productDetail?.productDescription || ''
-              : element.type === 'package'
-              ? element?.packageDetail?.packageDescription || ''
-              : '';
+                ? element?.productDetail?.productDescription || ''
+                : element.type === 'package'
+                  ? element?.packageDetail?.packageDescription || ''
+                  : '';
           obj.parentId = element?.parentId;
           obj.parentName = element?.parentName;
           obj.assetNumber = element?.productDetail?.productName;
@@ -318,6 +318,10 @@ const LoadingTicket = ({
       setUniqueLoadingTicket([...new Set(productAssets.filter((d) => d.loadingTicketId !== undefined).map((d) => d.loadingTicketId))]);
 
       productAssets = [...productAssets?.filter((e) => !e.isReplaced), ...productAssets?.filter((e) => e.isReplaced)];
+
+      productAssets?.forEach((e, index) => {
+        e.index = index + 1;
+      })
 
       dispatch({ type: 'initialize', data: productAssets, count: productAssets.length });
       setTimeout(() => {
@@ -417,14 +421,16 @@ const LoadingTicket = ({
   const ProductNameRenderer = (params) => (
     <>
       <p className="text-truncate">{params.value}</p>
-      <IconButton
-        size="small"
-        onClick={() => {
-          window.open(`${routes.productDetail.path}/${params.data?.productId}`);
-        }}
-      >
-        <OpenInNewIcon fontSize="small" color="primary" />
-      </IconButton>
+      <Box ml={1}>
+        <IconButton
+          size="small"
+          onClick={() => {
+            window.open(`${routes.productDetail.path}/${params.data?.productId}`);
+          }}
+        >
+          <OpenInNewIcon fontSize="small" color="primary" />
+        </IconButton>
+      </Box>
     </>
   );
 
@@ -432,10 +438,10 @@ const LoadingTicket = ({
 
   const ActionRenderer = (params) =>
     user?.user?.brandPolicy?.assetDeliveredStatus &&
-    [RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy, RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable]?.includes(
-      params?.data?.rentalAssetStatus
-    ) &&
-    params?.data?.type === 'Asset' ? (
+      [RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy, RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable]?.includes(
+        params?.data?.rentalAssetStatus
+      ) &&
+      params?.data?.type === 'Asset' ? (
       <HtmlTooltip title={'Change Date'}>
         <span>
           <IconButton
@@ -498,6 +504,7 @@ const LoadingTicket = ({
   };
 
   const columns = [
+    { field: 'index', headerName: 'Index', show: true, disabled: true, cellRenderer: 'commonRenderer', width: 100 },
     {
       field: 'assetNumber',
       headerName: 'Details',
@@ -843,24 +850,19 @@ const LoadingTicket = ({
               onClick={() => {
                 setDownlodingFile(true);
                 axiosInstance()
-                  .post(`/delivery-ticket/pdf`, { ids: uniqueLoadingTicket })
+                  .get(`pdf/multiple?resource=${sidebarResource.deliveryTicket}&ids=${uniqueLoadingTicket}`, {
+                    responseType: 'blob'
+                  })
                   .then(({ data }) => {
-                    axiosInstance()
-                      .get(`user/download?fileName=${data.data.fileName}`, {
-                        responseType: 'blob'
-                      })
-                      .then(({ data }) => {
-                        const file = new Blob([data], { type: 'application/pdf' });
-                        const fileURL = URL.createObjectURL(file);
-                        const pdfWindow = window.open();
-                        pdfWindow.location.href = fileURL;
-                        toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
-                        setDownlodingFile(false);
-                      })
-                      .catch((err) => {
-                        toastConfig.setToastConfig(err);
-                        setDownlodingFile(false);
-                      });
+                    const file = new Blob([data], { type: 'application/pdf' });
+                    const fileURL = URL.createObjectURL(file);
+                    const link = document.createElement('a');
+                    link.href = fileURL;
+                    link.target = '_blank';
+                    link.style.display = 'none';
+                    link.click();
+                    toastConfig.setToastConfig({ open: true, type: 'success', message: 'File Previewed Successfully.' });
+                    setDownlodingFile(false);
                   })
                   .catch((err) => {
                     toastConfig.setToastConfig(err);
@@ -1094,8 +1096,8 @@ const LoadingTicket = ({
                   </Box>
                 )}
                 {selectedRecords.length > 0 &&
-                selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit)
-                  ?.length === selectedRecords?.length ? (
+                  selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit)
+                    ?.length === selectedRecords?.length ? (
                   <Box>
                     <MenuItem
                       onClick={() => {
@@ -1116,17 +1118,17 @@ const LoadingTicket = ({
                   </Box>
                 ) : null}
                 {selectedRecords.length > 0 &&
-                selectedRecords.filter(
-                  (e: any) =>
-                    e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered &&
-                    (([ASSET_STATUS.inUse, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable]?.includes(e?.status) &&
-                      [
-                        RENTAL_INTERNAL_ASSET_STATUS.inUse,
-                        RENTAL_INTERNAL_ASSET_STATUS.standBy,
-                        RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable
-                      ]?.includes(e?.rentalAssetStatus)) ||
-                      e?.type === 'Product')
-                ).length === selectedRecords?.length ? (
+                  selectedRecords.filter(
+                    (e: any) =>
+                      e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered &&
+                      (([ASSET_STATUS.inUse, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable]?.includes(e?.status) &&
+                        [
+                          RENTAL_INTERNAL_ASSET_STATUS.inUse,
+                          RENTAL_INTERNAL_ASSET_STATUS.standBy,
+                          RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable
+                        ]?.includes(e?.rentalAssetStatus)) ||
+                        e?.type === 'Product')
+                  ).length === selectedRecords?.length ? (
                   <MenuItem
                     onClick={() => {
                       closeActions();
@@ -1170,7 +1172,7 @@ const LoadingTicket = ({
                   )}
               </Menu>
               {selectedRecords.length &&
-              selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
+                selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
                 selectedRecords?.length ? (
                 <Box>
                   <Tooltip title="Remove Assets From Loading Ticket(s)">
@@ -1246,7 +1248,7 @@ const LoadingTicket = ({
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={() => {}}
+              onClone={() => { }}
               renderedFrom={renderedFrom}
             />
           ) : (

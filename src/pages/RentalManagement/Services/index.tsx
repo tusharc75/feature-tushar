@@ -691,7 +691,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
       {addExistingProductDialog.open && addExistingProductDialog.type === 'newPackage' && (
         <ManagePackageDialog
           isClone={false}
-          referenceData={{ packageType: 'Service' }}
+          referenceData={{ packageType: 'Service', customerAccount: rentalManagementData?.customerAccount?.optionValue }}
           open={addExistingProductDialog.open}
           packageId={null}
           onClose={() => setAddExistingProductDialog({ open: false, type: '', parentId: null })}

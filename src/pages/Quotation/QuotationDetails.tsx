@@ -184,7 +184,8 @@ const QuotationDetails = () => {
               canAllowMultipleTimeConvert = true
             }
           }
-          if (canAllowMultipleTimeConvert && [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.converted]?.includes(quotationData?.status)) {
+          if (canAllowMultipleTimeConvert && [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.converted]?.includes(quotationData?.status)
+            && quotationData.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer) {
             var isAllowedToEdit = [...(quotationData.collaborator ?? []), quotationData.owner].some((d) => d?.optionValue === user?.user?._id);
             if (user?.role?.selectedEntity?.superAdminAccess) {
               isAllowedToEdit = true;
@@ -488,7 +489,9 @@ const QuotationDetails = () => {
                   )}
                   <MenuItem>
                     <Button
-                      disabled={!allowedToEdit || isCloning || loading}
+                      disabled={!allowedToEdit || isCloning || loading
+                        || quotationData?.versions[currentVersion]?.status !== QUOTATION_STATUS.acceptByCustomer
+                        || [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.converted]?.includes(quotationData?.status)}
                       variant="text"
                       type="button"
                       size="small"
@@ -517,22 +520,23 @@ const QuotationDetails = () => {
                       </Button>
                     </MenuItem>
                   )}
-                  {currentVersion !== 1 && permissions?.quotation?.isDelete && (
-                    <MenuItem>
-                      <Button
-                        variant="text"
-                        size="small"
-                        disabled={!allowedToEdit || loading}
-                        startIcon={<MdDelete className={isMobile ? 'mr-1' : ''} />}
-                        onClick={() => {
-                          deleteVersion();
-                          closeActionsAction();
-                        }}
-                      >
-                        Delete Version-{currentVersion}
-                      </Button>
-                    </MenuItem>
-                  )}
+                  {currentVersion !== 1 && permissions?.quotation?.isDelete
+                    && quotationData?.versions[currentVersion]?.status !== QUOTATION_STATUS.acceptByCustomer && (
+                      <MenuItem>
+                        <Button
+                          variant="text"
+                          size="small"
+                          disabled={!allowedToEdit || loading}
+                          startIcon={<MdDelete className={isMobile ? 'mr-1' : ''} />}
+                          onClick={() => {
+                            deleteVersion();
+                            closeActionsAction();
+                          }}
+                        >
+                          Delete Version-{currentVersion}
+                        </Button>
+                      </MenuItem>
+                    )}
                   {permissions?.quotation?.isDelete && (
                     <MenuItem>
                       <Button
@@ -677,9 +681,11 @@ const QuotationDetails = () => {
                 <AdditionalCost
                   quotationData={quotationData}
                   setNextStep={setNextStep}
+                  setPrevStep={setPrevStep}
                   renderedFrom={renderedFrom}
                   version={currentVersion}
                   allowedToEdit={allowedToEdit}
+                  stepFullScreen={stepFullScreen}
                 />
               )}
               {stepNames[currentStep] === 'Quote Builder' && quotationData && (

@@ -8,7 +8,7 @@ import Button from '@material-ui/core/Button';
 import { AiFillFilePdf } from 'react-icons/ai';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { gridLoadingTimeout, deliveryTicket, serializedAsset } from '../../constants/helpers';
+import { gridLoadingTimeout, deliveryTicket, serializedAsset, sidebarResource } from '../../constants/helpers';
 import { useHistory } from 'react-router-dom';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from '../SwipableListComponents/CustomSwipableList';
@@ -101,26 +101,19 @@ const TypewiseTickets = ({ referenceType, referenceId, renderedFrom }) => {
             onClick={() => {
               setDownlodingFile(true);
               axiosInstance()
-                .post(`/delivery-ticket/pdf`, {
-                  ids: selectedRecords.length > 0 ? selectedRecords.map((s) => s._id) : dataRows.map((d) => d._id)
+                .get(`pdf/multiple?resource=${sidebarResource.deliveryTicket}&ids=${selectedRecords.length > 0 ? selectedRecords.map((s) => s._id) : dataRows.map((d) => d._id)}`, {
+                  responseType: 'blob'
                 })
                 .then(({ data }) => {
-                  axiosInstance()
-                    .get(`user/download?fileName=${data.data.fileName}`, {
-                      responseType: 'blob'
-                    })
-                    .then(({ data }) => {
-                      const file = new Blob([data], { type: 'application/pdf' });
-                      const fileURL = URL.createObjectURL(file);
-                      const pdfWindow = window.open();
-                      pdfWindow.location.href = fileURL;
-                      toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
-                      setDownlodingFile(false);
-                    })
-                    .catch((err) => {
-                      toastConfig.setToastConfig(err);
-                      setDownlodingFile(false);
-                    });
+                  const file = new Blob([data], { type: 'application/pdf' });
+                  const fileURL = URL.createObjectURL(file);
+                  const link = document.createElement('a');
+                  link.href = fileURL;
+                  link.target = '_blank';
+                  link.style.display = 'none';
+                  link.click();
+                  toastConfig.setToastConfig({ open: true, type: 'success', message: 'File Previewed Successfully.' });
+                  setDownlodingFile(false);
                 })
                 .catch((err) => {
                   toastConfig.setToastConfig(err);
@@ -176,7 +169,7 @@ const TypewiseTickets = ({ referenceType, referenceId, renderedFrom }) => {
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={() => {}}
+              onClone={() => { }}
               renderedFrom={renderedFrom}
             />
           ) : (
