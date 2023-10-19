@@ -175,7 +175,7 @@ export const PreviewDialog = ({
               >
                 {type === 'Excel' ? 'Export' : hideDetailButton ? `${operation}` : `${button1Title} ${operation}`}
               </CustomButton>
-              {hideDetailButton ? null : (
+              {hideDetailButton || type === 'Excel' ? null : (
                 <CustomButton
                   variant="contained"
                   color="primary"
