@@ -31,7 +31,7 @@ export default function CustomSwipableList({
   permissions,
   onCreate,
   showClone,
-  onClone,
+  onClone = null,
   fullHeight = false,
   renderedFrom,
   additionalDetails = [],
