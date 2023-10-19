@@ -173,7 +173,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
             ) : (
               <div className=" absolute inset-0 flex items-center justify-center bg-[rgba(255,255,255,0.54)] dark:bg-[rgba(5,9,19,0.54)] backdrop-blur-[10px]">
                 <div className="bg-[white] dark:bg-[var(--dark-secondary)] px-10 py-5 rounded-lg">
-                  <p className="-ml-[3px]">No Data Found.</p>
+                  <p>No Data Found.</p>
                 </div>
               </div>
             )}
