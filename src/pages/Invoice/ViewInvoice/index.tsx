@@ -336,8 +336,8 @@ const ViewInvoice = ({ invoiceData, onClose, onSuccess, resource }) => {
                   <DeleteButton text="Cancel Invoice" onClick={() => setCommentDialog(true)} />}
               </div>
             </div>
-            <Box pt={2}>
-              <Tabs
+            <Box pt={1}>
+              {/* <Tabs
                 className="new-tab-container-v1"
                 value={tabValue}
                 onChange={handleMainTabChange}
@@ -370,36 +370,37 @@ const ViewInvoice = ({ invoiceData, onClose, onSuccess, resource }) => {
                   aria-controls="a11y-tabpanel-1"
                   id="a11y-tab-1"
                 />
-              </Tabs>
-              <TabPanel value={tabValue} index={0}>
-                <Fragment>
-                  {columns && rowsData ? (
-                    <Box zIndex={5} width={'100%'} height={'calc(100vh - 285px)'} pt={1}>
-                      <CustomReactTable
-                        height={'calc(100vh - 200px)'}
-                        columns={columns}
-                        data={rowsData}
-                        onSelect={() => { }}
-                        childrenProperty="subRows"
-                        uniqueKey="_id"
-                        hideSelection={true}
-                        hideAction={true}
-                        renderedFrom={renderedFrom}
-                        isClientSideGrid={true}
-                        hideExpander={true}
-                      />
-                    </Box>
-                  ) : (
-                    <Box p={2} height={500}>
-                      <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                    </Box>
-                  )}
+              </Tabs> */}
+              <Fragment>
+                {columns && rowsData ? (
+                  <Box zIndex={5} width={'100%'} height={'calc(100vh - 285px)'} pt={1}>
+                    <CustomReactTable
+                      height={'calc(100vh - 200px)'}
+                      columns={columns}
+                      data={rowsData}
+                      onSelect={() => { }}
+                      childrenProperty="subRows"
+                      uniqueKey="_id"
+                      hideSelection={true}
+                      hideAction={true}
+                      renderedFrom={renderedFrom}
+                      isClientSideGrid={true}
+                      hideExpander={true}
+                    />
+                  </Box>
+                ) : (
+                  <Box p={2} height={500}>
+                    <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                  </Box>
+                )}
 
-                </Fragment>
+              </Fragment>
+              {/* <TabPanel value={tabValue} index={0}>
+
               </TabPanel>
               <TabPanel value={tabValue} index={1}>
                 <CreditMemo invoiceData={invoiceData} />
-              </TabPanel>
+              </TabPanel> */}
             </Box>
           </Fragment>
         </CustomDialogContent>
