@@ -505,16 +505,12 @@ const Quotation = ({
       >
         <Box display="flex">
           <SendEmail
-            versionData={quotationData?.versions[currentVersion]}
             quotationData={quotationData}
-            allowedToEdit={allowedToEdit}
             versionId={quotationData?.versions[currentVersion]?._id}
+            currentVersion={currentVersion}
             columns={columns}
-            allColumn={allColumn}
             setShowAllVersionStatus={setShowAllVersionStatus}
             setShowQuotationSummaryDialog={setShowQuotationSummaryDialog}
-            currentVersion={currentVersion}
-            isSendEmail={true}
           />
         </Box>
         {isMobile ? (
