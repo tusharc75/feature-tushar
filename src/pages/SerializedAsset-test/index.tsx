@@ -12,7 +12,7 @@ import { Box, Chip, Menu, MenuItem, TextField } from '@material-ui/core';
 import SearchBox from '../../components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import routes from '../../components/Helpers/Routes';
-import  { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
+import { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import {
   serializedAsset,
   isObjectEmpty,
@@ -20,7 +20,7 @@ import {
   product,
   warehouse as warehouseHelper,
   ASSET_STATUS,
-  COLOUR_MASTER,
+  COLOUR_MASTER
 } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { useData } from '../../StateProvider/Provider';
@@ -236,21 +236,12 @@ const SerializedAssetTest = () => {
             ...finalObject
           };
         });
-        if (appendRows) {
-          dispatch({
-            type: 'initialize',
-            data: [...dataRows, ...rows],
-            count: data.data.count,
-            selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
-          });
-        } else {
-          dispatch({
-            type: 'initialize',
-            data: rows,
-            count: data.count,
-            selectedRecords: rows.filter((f) => f.isChecked === true)
-          });
-        }
+        dispatch({
+          type: 'initialize',
+          data: rows,
+          count: data.count,
+          selectedRecords: rows.filter((f) => f.isChecked === true)
+        });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
@@ -404,7 +395,8 @@ const SerializedAssetTest = () => {
           total={rowCount}
           recordsToExport={selectedRecords.length}
           ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
-          onExportToExcelSuccess={() => { fetchProductInventory();
+          onExportToExcelSuccess={() => {
+            fetchProductInventory();
           }}
           additionalParams={getQueryString(true)}
         />
