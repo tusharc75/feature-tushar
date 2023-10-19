@@ -1114,6 +1114,18 @@ const routes = {
     title: storedRoutes && storedRoutes.subleaseInvoice && storedRoutes.subleaseInvoice.title ? storedRoutes.subleaseInvoice?.title : RESOURCE_LABEL.subleaseInvoice,
     path: '/sublease-invoice'
   },
+  creditMemo: {
+    title: storedRoutes && storedRoutes.creditMemo && storedRoutes.creditMemo?.title ? storedRoutes.creditMemo?.title
+      : RESOURCE_LABEL.creditMemo,
+    path: '/credit-memo'
+  },
+  creditMemoDetail: {
+    title:
+      storedRoutes && storedRoutes.creditMemo && storedRoutes.creditMemo.title
+        ? storedRoutes.creditMemo?.title
+        : RESOURCE_LABEL.creditMemo,
+    path: '/credit-memo/detail'
+  },
 };
 
 export default routes;
