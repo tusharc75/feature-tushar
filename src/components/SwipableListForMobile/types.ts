@@ -1,6 +1,7 @@
 import { Dispatch, ReactNode } from 'react';
 
 export type TSwipableListInputProps = {
+  toggleAllRowsSelected: (value?: boolean) => void;
   dispatch: Dispatch<any>;
   allowSelection: boolean;
   dataRows: any[];
