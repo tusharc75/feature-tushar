@@ -88,8 +88,8 @@ const Pagination: FC<PaginationProps> = ({
 
   return (
     <div className={`${className} pagination py-3`} {...others}>
-      <div className="flex flex-wrap justify-center sm:justify-end items-center sm:gap-3 gap-2">
-        <div className="rows-per-page flex items-center gap-2 basis-1/2 sm:basis-[unset]">
+      <div className="flex flex-wrap justify-between sm:justify-end items-center sm:gap-3 gap-2">
+        <div className="rows-per-page flex items-center gap-2 justify-center sm:justify-[unset] basis-full sm:basis-[unset]">
           <span>Rows Per Page:</span>
           <FormControl size="small" margin="none" style={{ width: 'max-content' }} disabled={disabled}>
             <Select labelId="label" id="select" value={rowsPerPage || rowsPerPageOptions[0]} variant="outlined" onChange={handleRowsPerPageChange}>
@@ -102,7 +102,7 @@ const Pagination: FC<PaginationProps> = ({
           </FormControl>
         </div>
 
-        <span className="basis-1/2 sm:basis-[unset] block">{visibleDataText}</span>
+        <span className="block">{visibleDataText}</span>
 
         <div className="flex gap-2 items-center">
           <IconButton disabled={disabled || page <= 0} onClick={(e) => gotToPrevPage(e)} size={'small'}>

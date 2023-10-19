@@ -89,6 +89,7 @@ const QuoteBuilder = ({
         Header: 'Details',
         minWidth: 300,
         width: 300,
+        disabled: true,
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p className="text-truncate" title={row.original?.detail}>

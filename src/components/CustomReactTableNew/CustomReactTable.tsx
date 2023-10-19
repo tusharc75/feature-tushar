@@ -643,7 +643,7 @@ function CustomReactTable({
             {/* Select All For Mobile */}
             {isMobileView && !hideSelection && mobileSelectAllHeader && (
               <>
-                <label className="flex items-center gap-2 cursor-pointer">
+                <label className="flex items-center gap-2 cursor-pointer -ml-2">
                   {mobileSelectAllHeader.render('Header')} <span>Select All</span>
                 </label>
               </>
