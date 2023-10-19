@@ -36,6 +36,7 @@ const Pagination: FC<PaginationProps> = ({
     const target = e.target as HTMLInputElement;
     const value = parseInt(target.value);
     if (onRowsPerPageChange) onRowsPerPageChange(e, value);
+    setTextFieldValue(1);
   };
 
   const visibleDataText = useMemo(() => {
