@@ -114,24 +114,22 @@ const CreateBillingDialog = ({ currencySymbol = null, invoiceData = null, onClos
                 {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : ''}
               </span>
             </Box>
-            {row.original['type'] !== 'additionalCost' && (
-              <IconButton
-                size="small"
-                onClick={() => {
-                  if (row.original.type === 'service') {
-                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === 'product') {
-                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === 'serializedAsset') {
-                    window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
-                  } else {
-                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                  }
-                }}
-              >
-                <OpenInNewIcon fontSize="small" color="primary" />
-              </IconButton>
-            )}
+            <IconButton
+              size="small"
+              onClick={() => {
+                if (row.original.type === 'service') {
+                  window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                } else if (row.original.type === 'product') {
+                  window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                } else if (row.original.type === 'serializedAsset') {
+                  window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
+                } else {
+                  window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                }
+              }}
+            >
+              <OpenInNewIcon fontSize="small" color="primary" />
+            </IconButton>
           </div>
         )
       },
@@ -217,9 +215,7 @@ const CreateBillingDialog = ({ currencySymbol = null, invoiceData = null, onClos
             ? parent?.serviceDetail?.serviceName
             : parent.type === 'serializedAsset'
               ? parent?.inventoryDetail?.assetNumber
-              : parent.type === 'additionalCost'
-                ? parent?.costType
-                : parent.packageDetail?.packageName;
+              : parent.packageDetail?.packageName;
       parent.description =
         parent.type === 'product'
           ? parent?.productDetail?.productDescription || ''
@@ -273,54 +269,40 @@ const CreateBillingDialog = ({ currencySymbol = null, invoiceData = null, onClos
 
     let rows: any = [];
     selectedProducts.forEach((element) => {
-      if (element.type === 'additionalCost') {
-        element.isAppliedBill = true;
-        rows.push(element);
-      } else {
-        element.invalidDate = false;
 
-        const product = invoicedProducts?.material?.find((p) => p._id === element._id);
+      element.invalidDate = false;
 
-        const productStartDateTime = new Date(new Date(element.actualStartDate).toLocaleDateString()).getTime();
-        const selectedEndDateTime = new Date(new Date(endDate).toLocaleDateString()).getTime();
+      const product = invoicedProducts?.material?.find((p) => p._id === element._id);
 
-        if (selectedEndDateTime < productStartDateTime) {
+      const productStartDateTime = new Date(new Date(element.actualStartDate).toLocaleDateString()).getTime();
+      const selectedEndDateTime = new Date(new Date(endDate).toLocaleDateString()).getTime();
+
+      if (selectedEndDateTime < productStartDateTime) {
+        element.invalidDate = true;
+      } else if (product) {
+        const productEndDateTime = new Date(new Date(product?.endDate).toLocaleDateString()).getTime();
+        if (selectedEndDateTime < productEndDateTime) {
           element.invalidDate = true;
-        } else if (product) {
-          const productEndDateTime = new Date(new Date(product?.endDate).toLocaleDateString()).getTime();
-          if (selectedEndDateTime < productEndDateTime) {
-            element.invalidDate = true;
-          } else {
-            element.invalidDate = false;
-          }
-        }
-
-        if (element?.manualEndDate) {
-          const productManualEndDate = new Date(new Date(element?.manualEndDate).toLocaleDateString()).getTime();
-          if (selectedEndDateTime > productManualEndDate) {
-            tempValues.actualEndDate = element?.manualEndDate;
-          }
-          if (productManualEndDate < productStartDateTime) {
-            element.invalidDate = true;
-          }
-        }
-
-        let calValues: any;
-        let values = JSON.parse(JSON.stringify(tempValues));
-
-
-        if (element.pricingMethod === 'Per Week') {
-          calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
-          calValues['pricingMethod'] = 'Per Week';
-        } else if (element.pricingMethod === 'Per Month') {
-          calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
-          calValues['pricingMethod'] = 'Per Month';
         } else {
-          calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
+          element.invalidDate = false;
         }
-        element.isAppliedBill = true;
-        rows.push({ ...element, ...calValues });
       }
+
+      if (element?.manualEndDate) {
+        const productManualEndDate = new Date(new Date(element?.manualEndDate).toLocaleDateString()).getTime();
+        if (selectedEndDateTime > productManualEndDate) {
+          tempValues.actualEndDate = element?.manualEndDate;
+        }
+        if (productManualEndDate < productStartDateTime) {
+          element.invalidDate = true;
+        }
+      }
+      let calValues: any;
+      tempValues.pricingMethod = element?.pricingMethod;
+      let values = JSON.parse(JSON.stringify(tempValues));
+      calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
+      element.isAppliedBill = true;
+      rows.push({ ...element, ...calValues });
     });
 
     let tempRows = material?.map((obj) => rows.find((o) => o._id === obj._id) || obj);
@@ -351,7 +333,7 @@ const CreateBillingDialog = ({ currencySymbol = null, invoiceData = null, onClos
     setUpdating(true);
     axiosInstance()
       .post(`/sublease-invoice/${subleaseData._id}/progressive-billing`, {
-        material: rowsApplied.filter((d) => d.type !== 'additionalCost'),
+        material: rowsApplied,
       })
       .then(() => {
         setUpdating(false);

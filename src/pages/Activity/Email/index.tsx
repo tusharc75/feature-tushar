@@ -256,19 +256,10 @@ const Email = () => {
         }
       }}
     >
-      <div className={emailStyles.emailMessageConatiner}>
-        <Typography> {params.data?.subject ?? '(no subject) '} </Typography>
-      </div>
+      <p> {params.data?.subject ?? '(no subject) '} </p>
     </span>
   );
 
-  const MessageRenderer = (params) => (
-    <div className={emailStyles.emailMessageConatiner}>
-      <Typography display="inline" className={emailStyles.emailMessage}>
-        {params.data.message ? reactHtmlparser(params.data.message, { transform }) : null}
-      </Typography>
-    </div>
-  );
 
   const ReferenceRenderer = (params) => (
     <>
@@ -277,7 +268,7 @@ const Email = () => {
           return (
             <div style={{ display: 'flex', alignItems: 'center' }} key={d.name}>
               <p>
-                {d?.salutation ? `${d?.saluation} ${d?.name}` : d?.name}
+                {d?.name}
               </p>
               <IconButton className="ml-3" size="small" onClick={() => redirectToResource(d?.type, d?.referenceId)}>
                 <OpenInNewIcon fontSize="small" color="primary" />
@@ -303,7 +294,6 @@ const Email = () => {
     recipentRenderer: RecipentRenderer,
     referenceRenderer: ReferenceRenderer,
     subjectRenderer: SubjectRenderer,
-    messageRenderer: MessageRenderer,
     createdByRenderer: CreatedByRenderer,
     actionsRenderer: ActionsRenderer
   };
