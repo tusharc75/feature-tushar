@@ -73,7 +73,10 @@ const Quotation = ({
   }, [repairOrderData]);
 
   useEffect(() => {
-    if (invoiceStep && ![REPAIR_ORDER_STATUS.invoiced, REPAIR_ORDER_STATUS.readyToInvoice, REPAIR_ORDER_STATUS.completed]?.includes(repairOrderData?.status)) {
+    if (
+      invoiceStep &&
+      ![REPAIR_ORDER_STATUS.invoiced, REPAIR_ORDER_STATUS.readyToInvoice, REPAIR_ORDER_STATUS.completed]?.includes(repairOrderData?.status)
+    ) {
       updateOrderStatus(REPAIR_ORDER_STATUS.readyToInvoice);
     }
   }, [invoiceStep]);
@@ -88,7 +91,9 @@ const Quotation = ({
     setNextStep(false);
     setColumns(null);
 
-    const quotationResponse = await axiosInstance().get(`${repairOrder.api}/${repairOrderData?._id}/check-create/quotation?approval=${repairOrderData?.addQuotationStep ? 1 : 0}`);
+    const quotationResponse = await axiosInstance().get(
+      `${repairOrder.api}/${repairOrderData?._id}/check-create/quotation?approval=${repairOrderData?.addQuotationStep ? 1 : 0}`
+    );
     const quotationInfo: any = quotationResponse?.data?.data;
 
     setQuotationData(quotationInfo);
@@ -99,8 +104,7 @@ const Quotation = ({
 
     if (repairOrderData?.addQuotationStep) {
       setNextStep(quotationInfo?.versions[tempCurrentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? true : false);
-    }
-    else {
+    } else {
       setNextStep(true);
     }
 
@@ -142,9 +146,9 @@ const Quotation = ({
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row, rows }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+            {[QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
               quotationInfo?.versions[tempCurrentVersion]?.status
-            ) || invoiceStep) ? (
+            ) || invoiceStep ? (
               <p> {row.original.detail}</p>
             ) : (
               <p
@@ -185,9 +189,11 @@ const Quotation = ({
         primaryField: true,
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {row.original?.productName ?
+            {row.original?.productName ? (
               <>
-                <p className="text-truncate" title={row.original?.productName}>{row.original?.productName}</p>
+                <p className="text-truncate" title={row.original?.productName}>
+                  {row.original?.productName}
+                </p>
                 <Box pl={1}>
                   <IconButton
                     size="small"
@@ -199,9 +205,9 @@ const Quotation = ({
                   </IconButton>
                 </Box>
               </>
-              :
+            ) : (
               <NoDataCell />
-            }
+            )}
           </div>
         )
       },
@@ -237,22 +243,30 @@ const Quotation = ({
               <HtmlTooltip title="Edit">
                 <IconButton
                   size="small"
-                  disabled={([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                    quotationInfo?.versions[tempCurrentVersion]?.status
-                  ) || invoiceStep)}
+                  disabled={
+                    [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                      quotationInfo?.versions[tempCurrentVersion]?.status
+                    ) || invoiceStep
+                  }
                   aria-label="Edit"
                   onClick={() => {
                     handleOpen(row, rows);
                   }}
                 >
-                  <EditIcon color={([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                    quotationInfo?.versions[tempCurrentVersion]?.status
-                  ) || invoiceStep) ? "disabled" : "primary"} />
+                  <EditIcon
+                    color={
+                      [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                        quotationInfo?.versions[tempCurrentVersion]?.status
+                      ) || invoiceStep
+                        ? 'disabled'
+                        : 'primary'
+                    }
+                  />
                 </IconButton>
               </HtmlTooltip>
             )}
           </>
-        )
+        );
       }
     });
 
@@ -393,7 +407,7 @@ const Quotation = ({
             rowIndex = data?.findIndex((d) => d._id === rows[0]?._id);
           }
           setIsProductEdit({ open: true, isBulkedit: false, showSaveAndNext: rowIndex + 1 < data?.length - 1 ? true : false });
-          setRecordToUpdate(data[rowIndex + 1])
+          setRecordToUpdate(data[rowIndex + 1]);
         } else {
           setIsProductEdit({ open: false, isBulkedit: false, showSaveAndNext: false });
         }
@@ -424,9 +438,12 @@ const Quotation = ({
   const handleOpen = (rowData, rows) => {
     let saveAndNext = true;
     if (rowData.depth === 0) {
-      saveAndNext = rowData?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && rowData?.depth === 0 ? true : false
+      saveAndNext = rowData?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && rowData?.depth === 0 ? true : false;
     } else if (rowData.depth === 1) {
-      saveAndNext = rowData?.index < rows?.filter((e) => e?.depth === 1 && e.original.parentId === rowData.original.parentId)?.length - 1 && rowData?.depth === 1 ? true : false
+      saveAndNext =
+        rowData?.index < rows?.filter((e) => e?.depth === 1 && e.original.parentId === rowData.original.parentId)?.length - 1 && rowData?.depth === 1
+          ? true
+          : false;
     }
     setIsProductEdit({
       open: true,
@@ -513,10 +530,13 @@ const Quotation = ({
     });
 
     if (requiredItems.length > 0) {
-      handleOpen({
-        ...updatedData,
-        detail: updatedData.type === 'product' ? updatedData?.productDetail?.productName : updatedData?.packageDetail?.packageName
-      }, []);
+      handleOpen(
+        {
+          ...updatedData,
+          detail: updatedData.type === 'product' ? updatedData?.productDetail?.productName : updatedData?.packageDetail?.packageName
+        },
+        []
+      );
     } else {
       onConfirmSave(inputField, updatedData);
     }
@@ -545,34 +565,43 @@ const Quotation = ({
 
   return (
     <Fragment>
-      {invoiceStep ?
-        <Box p={2} >
+      {invoiceStep ? (
+        <Box p={2}>
           <PreviewDownload
+            fileName={`${routes.repairOrder.title}-${repairOrderData?.repairOrderNumber}`}
             resource={sidebarResource.repairOrder}
             referenceId={repairOrderData?._id}
             columns={columns}
-            isSendEmail={true}
-          />
+            isSendEmail={true} />
         </Box>
-        : <Box display="flex" m={1} my={1} className={`flex-wrap`}
+      ) : (
+        <Box
+          display="flex"
+          m={1}
+          my={1}
+          className={`flex-wrap`}
           style={{ gap: isMobileScreen ? '5px' : 0, justifyContent: isMobileScreen ? 'center' : 'space-between' }}
         >
-          {repairOrderData?.addQuotationStep ? <Box display="flex">
-            <SendEmail
-              versionData={quotationData?.versions[currentVersion]}
-              quotationData={quotationData}
-              allowedToEdit={allowedToEdit}
-              versionId={quotationData?.versions[currentVersion]?._id}
-              columns={columns}
-              allColumn={allColumn}
-              setShowAllVersionStatus={setShowAllVersionStatus}
-              setShowQuotationSummaryDialog={setShowQuotationSummaryDialog}
-              currentVersion={currentVersion}
-              isSendEmail={true}
-              hideSummary={true}
-              hideVersions={false}
-            />
-          </Box> : <div />}
+          {repairOrderData?.addQuotationStep ? (
+            <Box display="flex">
+              <SendEmail
+                versionData={quotationData?.versions[currentVersion]}
+                quotationData={quotationData}
+                allowedToEdit={allowedToEdit}
+                versionId={quotationData?.versions[currentVersion]?._id}
+                columns={columns}
+                allColumn={allColumn}
+                setShowAllVersionStatus={setShowAllVersionStatus}
+                setShowQuotationSummaryDialog={setShowQuotationSummaryDialog}
+                currentVersion={currentVersion}
+                isSendEmail={true}
+                hideSummary={true}
+                hideVersions={false}
+              />
+            </Box>
+          ) : (
+            <div />
+          )}
           {!isMobileScreen && repairOrderData?.addQuotationStep && (
             <Box display="flex">
               {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
@@ -595,49 +624,52 @@ const Quotation = ({
           )}
           {allowedToEdit && (
             <Box display={'flex'} gridGap={8}>
-              {repairOrderData?.addQuotationStep && (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
-                quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
-                <Button
-                  disabled={material
-                    .filter((e) => e.parentId === null)
-                    .some(
-                      (d) =>
-                        d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === 0 ||
-                        d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === null ||
-                        d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === undefined
-                    )}
-                  onClick={handleSendToCustomer}
-                  variant="contained"
-                  size="small"
-                  color="primary"
-                >
-                  Process Quote
-                </Button>
-              ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
-                <Button
-                  onClick={() => {
-                    setCustomerAcceptable(true);
-                  }}
-                  variant="contained"
-                  size="small"
-                  className="mx-1"
-                  color="primary"
-                >
-                  Accept / Reject
-                </Button>
-              ) : [QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.acceptByCustomer].includes(quotationData?.versions[currentVersion]?.status) ? (
-                <Button
-                  onClick={() => {
-                    cloneVersion();
-                  }}
-                  variant="contained"
-                  size="small"
-                  className="mx-1"
-                  color="primary"
-                >
-                  Create New Version
-                </Button>
-              ) : null)}
+              {repairOrderData?.addQuotationStep &&
+                (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
+                  quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
+                  <Button
+                    disabled={material
+                      .filter((e) => e.parentId === null)
+                      .some(
+                        (d) =>
+                          d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === 0 ||
+                          d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === null ||
+                          d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === undefined
+                      )}
+                    onClick={handleSendToCustomer}
+                    variant="contained"
+                    size="small"
+                    color="primary"
+                  >
+                    Process Quote
+                  </Button>
+                ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
+                  <Button
+                    onClick={() => {
+                      setCustomerAcceptable(true);
+                    }}
+                    variant="contained"
+                    size="small"
+                    className="mx-1"
+                    color="primary"
+                  >
+                    Accept / Reject
+                  </Button>
+                ) : [QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.acceptByCustomer].includes(
+                  quotationData?.versions[currentVersion]?.status
+                ) ? (
+                  <Button
+                    onClick={() => {
+                      cloneVersion();
+                    }}
+                    variant="contained"
+                    size="small"
+                    className="mx-1"
+                    color="primary"
+                  >
+                    Create New Version
+                  </Button>
+                ) : null)}
               {![QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
                 quotationData?.versions[currentVersion]?.status
               ) && (
@@ -698,8 +730,7 @@ const Quotation = ({
             </Box>
           )}
         </Box>
-      }
-
+      )}
 
       {columns && rowsData ? (
         <Box zIndex={5} width={'100%'}>
@@ -707,7 +738,12 @@ const Quotation = ({
             height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
             columns={columns}
             data={rowsData}
-            setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
+            setWholeRowsCellColor={(rowData) => {
+              if (rowData.type === 'service') {
+                return 'isService';
+              }
+              return '';
+            }}
             onSelect={setSelectedProducts}
             childrenProperty="subRows"
             uniqueKey="_id"

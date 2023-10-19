@@ -1,29 +1,28 @@
-import React, { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, Typography, IconButton, Dialog } from '@material-ui/core';
-import { ControlPoint } from '@material-ui/icons';
+import { Box, Button, Dialog, Grid, IconButton, Typography } from '@material-ui/core';
+import { ControlPoint, Edit } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
-import { useParams, useHistory } from 'react-router-dom';
-import axiosInstance from '../../axios/axiosInstance';
-import routes from '../../components/Helpers/Routes';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import { useData } from '../../StateProvider/Provider';
-import BoxWithBorder from '../../components/BoxWithBorder';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
 import { FaEye } from 'react-icons/fa';
-import { SET_USER, USER_LOADING, SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
-import AssignUserDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
+import { MdDelete } from 'react-icons/md';
+import { useHistory, useParams } from 'react-router-dom';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import { SET_SELECTED_ENTITY, SET_USER, USER_LOADING } from '../../StateProvider/actionTypes';
+import axiosInstance from '../../axios/axiosInstance';
+import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
+import BoxWithBorder from '../../components/BoxWithBorder';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import DeleteButton from '../../components/Helpers/DeleteButton';
+import NewStepper from '../../components/Helpers/NewStepper';
+import routes from '../../components/Helpers/Routes';
+import ResourceTransferDialog from '../../components/ResourceTransferDialog';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import DoaDialog from '../DoaSetup/ManageDoa/ManageDoaDialog';
 import AssignedUsers from './AssignedUsers';
 import ManageEntity from './ManageEntity';
-import NewStepper from '../../components/Helpers/NewStepper';
-import DoaDialog from '../DoaSetup/ManageDoa/ManageDoaDialog';
-import DeleteButton from '../../components/Helpers/DeleteButton';
-import ResourceTransferDialog from '../../components/ResourceTransferDialog';
-import { isMobile, isTablet } from 'react-device-detect';
-import { BiEdit } from 'react-icons/bi';
-import { MdDelete } from 'react-icons/md';
 
 const EntityDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -315,7 +314,7 @@ const EntityDetailsPage = () => {
                     size="small"
                     onClick={handleOpenUpdateDialog}
                   >
-                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                    {isMobile && !isTablet ? <Edit /> : 'Edit'}
                   </Button>
                 )}
                 {permissions?.entity?.isDelete && (
@@ -482,7 +481,7 @@ const EntityDetailsPage = () => {
       )}
       {showAssignUserDialog && (
         <Dialog fullWidth maxWidth="sm" open={showAssignUserDialog} onClose={userDialogClose} aria-labelledby="assign-roles-dialog">
-          <AssignUserDialog
+          <AssignEntityDialog
             entitiesDialogOpen={showAssignUserDialog}
             handleCloseDialog={userDialogClose}
             type="user"

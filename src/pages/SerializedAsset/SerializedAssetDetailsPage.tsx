@@ -32,6 +32,7 @@ import TabPanel from 'src/components/TabPanel';
 import SyncIcon from '@material-ui/icons/Sync';
 import BuildIcon from '@material-ui/icons/Build';
 import { RiExchangeBoxFill } from 'react-icons/ri';
+import DepreciationHistory from './DepreciationHistory';
 
 const SerializedAssetDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -208,7 +209,7 @@ const SerializedAssetDetailsPage = () => {
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
       .post(`${repairJob.api}/${repairJobId}/assets`, { assets: [{ _id: id, currentStatus: assetDetails.status }] })
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -274,6 +275,18 @@ const SerializedAssetDetailsPage = () => {
           <Box className="control-buttons-v1">
             {assetDetails ? (
               <>
+                {permissions?.iotChart?.isRead && (
+                  <Button
+                    variant="outlined"
+                    className={'btn-outline-v1'}
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes.iotChart.path}/${assetDetails?._id}`);
+                    }}
+                  >
+                    View Data
+                  </Button>
+                )}
                 {permissions?.serializedAsset?.isUpdate && assetDetails.active && (
                   <>
                     {permissions?.repairJob?.isCreate &&
@@ -390,6 +403,9 @@ const SerializedAssetDetailsPage = () => {
           {user?.user?.brandPolicy?.serializedAssetCertification && (
             <Tab className={'tabLayout'} label={<div className="d-flex align-items-center tab-font">Certification History</div>} {...a11yProps(2)} />
           )}
+          {user?.user?.brandPolicy?.serializedAssetDepreciation && (
+            <Tab className={'tabLayout'} label={<div className="d-flex align-items-center tab-font">Depreciation History</div>} {...a11yProps(3)} />
+          )}
         </Tabs>
         <TabPanel value={tabValue} index={0}>
           {assetDetails && <DetailsPageHeader heading={headingLbl} mainPoints={mainPoints} showHeading={true}></DetailsPageHeader>}
@@ -421,6 +437,11 @@ const SerializedAssetDetailsPage = () => {
             canIssueCertificate={permissions?.serializedAsset?.isUpdate || permissions?.serializedAsset?.isCreate}
             supplierAccount={null}
             assetDetails={assetDetails}
+          />
+        </TabPanel>
+        <TabPanel value={tabValue} index={3}>
+          <DepreciationHistory
+            id={id}
           />
         </TabPanel>
       </Box>

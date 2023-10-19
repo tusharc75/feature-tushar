@@ -48,7 +48,7 @@ const DeliveryTicket = () => {
   let renderedFrom = camelCase(routes?.deliveryTicket.title);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
-  let { type, referenceId, referenceType  }: any = queryString.parse(history.location.search);
+  let { type, referenceId, referenceType }: any = queryString.parse(history.location.search);
   const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
   const [filter, setFilter] = useState(`All ${routes.deliveryTicket.title}`);
   const {
@@ -215,7 +215,7 @@ const DeliveryTicket = () => {
     if (isExport) {
       deepFilter = `?`;
     }
-    
+
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
     }
@@ -259,12 +259,13 @@ const DeliveryTicket = () => {
   };
 
   const handleDeliveryTicketTypeSel = (filterValues) => {
+    dispatch({ type: 'setPage', page: 0 });
     setSelectedType(filterValues);
-    if(referenceId && referenceType) {
+    if (referenceId && referenceType) {
       history.push(`?type=${filterValues}&referenceType=${referenceType}&referenceId=${referenceId}`);
-      } else {
-        history.push(`?type=${filterValues}`);
-      }
+    } else {
+      history.push(`?type=${filterValues}`);
+    }
   };
 
   const handleFilter = (event, newFilter) => {
@@ -338,16 +339,16 @@ const DeliveryTicket = () => {
   };
 
   const updateQueryParams = () => {
-    const queryParams = new URLSearchParams(history.location.search)
-    queryParams.delete('referenceId')
-    queryParams.delete('referenceType')
+    const queryParams = new URLSearchParams(history.location.search);
+    queryParams.delete('referenceId');
+    queryParams.delete('referenceType');
     referenceId = queryParams.get('referenceId');
     referenceType = queryParams.get('referenceType');
     history.replace({
-      search: queryParams.toString(),
-    })
+      search: queryParams.toString()
+    });
     fetchDeliveryTicket();
-  }
+  };
 
   return (
     <>
@@ -387,14 +388,7 @@ const DeliveryTicket = () => {
                 <div className="flex flex-wrap">
                   <GiAbstract055 className="headerLogo" />
                   <span className="listingHeader">{routes.deliveryTicket.title} </span>
-                  {referenceType && (
-                    <Chip
-                      className="ml-3"
-                      color="primary"
-                      label={`Rental : ${referenceType}`}
-                      onDelete={updateQueryParams}
-                    />
-                  )}
+                  {referenceType && <Chip className="ml-3" color="primary" label={`Rental : ${referenceType}`} onDelete={updateQueryParams} />}
                 </div>
                 {isMobile && !isTablet ? (
                   <>
@@ -511,6 +505,7 @@ const DeliveryTicket = () => {
 
           {isMobile && !isTablet ? (
             <CustomSwipableList
+              key={selectedType}
               allowSelection={true}
               allowSwipe={true}
               permissions={permissions.deliveryTicket}

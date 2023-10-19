@@ -72,6 +72,7 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
         });
       }
     });
+
     data.products = products;
     data.referenceId = referenceId;
     data.referenceType = referenceType;
@@ -148,6 +149,9 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
         //     errors.consumedQty = `Consume Qty is limited to Qty.`;
         //   }
         // }
+        if (d.consumedQty < 1) {
+          errors.consumedQty = `Consume Qty cannot be 0`;
+        }
       });
     }
     return errors;
@@ -286,7 +290,8 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
                                       label={consumeRequest ? 'Request Qty' : 'Consume Qty'}
                                       placeholder={consumeRequest ? 'Request Qty' : 'Consume Qty'}
                                       helperText={
-                                        validate([value])?.consumedQty ? `${consumeRequest ? 'Request' : 'Consume'} Qty is limited to Qty.` : ''
+                                        // validate([value])?.consumedQty ? `${consumeRequest ? 'Request' : 'Consume'} Qty is limited to Qty.` : ''
+                                        validate([value])?.consumedQty ?? ''
                                       }
                                     />
                                   </TableCell>

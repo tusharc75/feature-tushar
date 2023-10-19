@@ -267,6 +267,7 @@ const Roles: FC = () => {
     setIsOpen({ open: false, isClone: false, idToClone: null });
   };
   const handleRoleTypeSelect = (filteredValue) => {
+    dispatch({ type: 'setPage', page: 0 });
     setSelectedType(filteredValue);
   };
 
@@ -344,6 +345,7 @@ const Roles: FC = () => {
 
           {isMobile && !isTablet ? (
             <CustomSwipableList
+              key={selectedType}
               allowSelection={true}
               allowSwipe={true}
               permissions={permissions.role}
@@ -402,7 +404,7 @@ const Roles: FC = () => {
               isClientSideGrid={true}
               refreshGrid={fetchRoles}
               renderedFrom={renderedFrom}
-              showOnlyShowFilteredRecordSwitch={true}
+              showOnlyShowFilteredRecordSwitch={false}
               showFilters={false}
               resource={sidebarResource.role}
             />

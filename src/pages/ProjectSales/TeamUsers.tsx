@@ -21,7 +21,9 @@ const useStyles = makeStyles((theme) => ({
   },
   list: {
     width: '100%',
-    padding: 0
+    padding: 0,
+    alignItems: 'start',
+    gap: 5
   },
   '@media only screen and (max-width: 560px)': {
     title: {
@@ -39,24 +41,23 @@ const TeamUsers = ({ data, permissions, managerId, removeUser }) => {
         <Grid container>
           {data && data.length
             ? data.map((obj) => (
-                <Grid item xs={isMobile ? 12 : 6}>
+                <Grid item xs={isMobile ? 12 : 6} key={obj._id}>
                   <BoxWithBorder key={obj._id} style={{ margin: '8px' }}>
                     <ListItem disableGutters className={classes.list}>
                       <ListItemText
                         primary={
-                          <Typography className={`${classes.title} ""`}>
-                            <p className="link text-truncate" onClick={() => window.open(`/user/detail/${obj._id}`)}>
+                          <div className={`flex gap-2 justify-between max-w-full mb-1 min-h-[30px] items-center`}>
+                            <p className="link line-clamp-1" onClick={() => window.open(`/user/detail/${obj._id}`)}>
                               {`${obj.firstName} ${obj.lastName}` || ''}
                             </p>
                             {managerId === obj._id && (
                               <>
-                                <Box mr={1} title="Project" />
                                 <span
                                   style={{
                                     display: 'inline-block',
                                     fontWeight: 600
                                   }}
-                                  className="truncate max-w-full dark:bg-[rgb(70,70,108)] bg-[#EFFBF9] text-sm text-[#298B88] dark:text-white rounded-[4px] p-[1px_6px]"
+                                  className=" max-w-full dark:bg-[rgb(70,70,108)] bg-[#EFFBF9] text-sm text-[#298B88] dark:text-white rounded-[4px] p-[1px_6px]"
                                 >
                                   Manager
                                 </span>
@@ -68,23 +69,27 @@ const TeamUsers = ({ data, permissions, managerId, removeUser }) => {
                                 /> */}
                               </>
                             )}
-                          </Typography>
+                            {permissions?.projectSales?.isUpdate && managerId !== obj._id && (
+                              <IconButton
+                                title={`Remove ${obj.firstName}`}
+                                size="small"
+                                edge="end"
+                                aria-label="delete"
+                                style={{ margin: 0 }}
+                                onClick={() => removeUser(obj)}
+                              >
+                                <Delete color="error" />
+                              </IconButton>
+                            )}
+                          </div>
                         }
                         secondary={
-                          <>
-                            {obj.email || ''}
+                          <div className="flex gap-2 mr-2">
+                            <span className=" line-clamp-1">{obj.email || ''}</span>
                             <CopyToClipboard textToCopy={obj.email || ''} />
-                          </>
+                          </div>
                         }
                       />
-
-                      {permissions?.projectSales?.isUpdate && managerId !== obj._id && (
-                        <ListItemSecondaryAction>
-                          <IconButton title={`Remove ${obj.firstName}`} size="small" edge="end" aria-label="delete" onClick={() => removeUser(obj)}>
-                            <Delete color="error" />
-                          </IconButton>
-                        </ListItemSecondaryAction>
-                      )}
                     </ListItem>
                   </BoxWithBorder>
                 </Grid>

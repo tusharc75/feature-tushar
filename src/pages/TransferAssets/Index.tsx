@@ -54,7 +54,8 @@ const TransferAsset = () => {
   const [columns, setColumns] = useState([]);
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { dataRows, appendRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } =
+    state;
   const [open, setOpen] = React.useState(false);
   const [isOpenDialog, setisOpenDialog] = useState(false);
   const history = useHistory();
@@ -124,8 +125,21 @@ const TransferAsset = () => {
         data.data = data.data?.map((u, i) => ({
           ...prepareDataForGrid(u, user)
         }));
+        if (appendRows) {
+          dispatch({
+            type: 'initialize',
+            data: [...dataRows, ...rows],
+            count: data.count
+          });
+        } else {
+          dispatch({
+            type: 'initialize',
+            data: rows,
+            count: data.count
+          });
+        }
 
-        dispatch({ type: 'initialize', data: rows, count: data.count });
+        // dispatch({ type: 'initialize', data: rows, count: data.count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
@@ -146,7 +160,7 @@ const TransferAsset = () => {
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
     }
-    
+
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (referenceId) {
@@ -214,6 +228,7 @@ const TransferAsset = () => {
       });
   };
   const handleTransferAssetTypeSel = (filterValues) => {
+    dispatch({ type: 'setPage', page: 0 });
     setSelectedType(filterValues);
     if (referenceId && referenceType) {
       history.push(`?type=${filterValues}&referenceType=${referenceType}&referenceId=${referenceId}`);
@@ -435,6 +450,7 @@ const TransferAsset = () => {
           Object.keys(frameWorkComponent).length > 0 ? (
             isMobile && !isTablet ? (
               <CustomSwipableList
+                key={selectedType}
                 allowSelection={true}
                 allowSwipe={true}
                 permissions={permissions?.transferAsset}

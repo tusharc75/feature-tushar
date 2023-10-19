@@ -64,8 +64,7 @@ const EntityHeader = (props) => {
         </div>
         {isMobile && (
           <div className="d-flex flex-wrap items-center justify-between w-full">
-            <div></div>
-            <Grid style={{ display: 'inline-flex' }}>
+            <div className="flex gap-1 ml-auto">
               <IconButton
                 onClick={handleClickOpen}
                 id="demo-customized-button"
@@ -108,7 +107,7 @@ const EntityHeader = (props) => {
                 filters={filters}
                 resource={resource}
               />
-            </Grid>
+            </div>
           </div>
         )}
       </div>

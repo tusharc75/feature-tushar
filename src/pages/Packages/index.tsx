@@ -228,7 +228,20 @@ const PackageList = () => {
           ...finalObject
         };
       });
-      dispatch({ type: 'initialize', data: rows, count: count });
+      if (appendRows) {
+        dispatch({
+          type: 'initialize',
+          data: [...dataRows, ...rows],
+          count: count
+        });
+      } else {
+        dispatch({
+          type: 'initialize',
+          data: rows,
+          count: count
+        });
+      }
+      // dispatch({ type: 'initialize', data: rows, count: count });
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
       }, gridLoadingTimeout);
@@ -243,6 +256,7 @@ const PackageList = () => {
   };
 
   const handlePackageTypeSel = (filterValues) => {
+    dispatch({ type: 'setPage', page: 0 });
     setSelectedType(filterValues);
   };
 
@@ -389,6 +403,7 @@ const PackageList = () => {
           {Object.keys(frameWorkComponent).length > 0 ? (
             isMobile && !isTablet ? (
               <CustomSwipableList
+                key={selectedType}
                 allowSelection={true}
                 allowSwipe={true}
                 permissions={permissions?.packages}

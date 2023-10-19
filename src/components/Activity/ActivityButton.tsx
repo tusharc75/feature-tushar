@@ -6,7 +6,7 @@ import HideWhenOffline from '../HideWhenOffline';
 import Activity from '.';
 import { useData } from 'src/StateProvider/Provider';
 
-const ActivityButton = ({ referenceId, resource, resourceLabel = '', handleClose = null }) => {
+const ActivityButton = ({ referenceId, resource, resourceLabel = '', extraRelatedTo = null, handleClose = null }) => {
   const [showActivity, setActivityShow] = useState(false);
 
   useEffect(() => {
@@ -55,8 +55,17 @@ const ActivityButton = ({ referenceId, resource, resourceLabel = '', handleClose
                       access: true
                     }
                   ]}
+                  extraRelatedTo={
+                    extraRelatedTo
+                      ? {
+                          type: extraRelatedTo?.resource,
+                          referenceId: extraRelatedTo?.referenceId,
+                          access: true
+                        }
+                      : null
+                  }
                   close={() => setActivityShow(false)}
-                  handleActivityRefresh={() => { }}
+                  handleActivityRefresh={() => {}}
                   emails={[]}
                 />
               )}

@@ -20,6 +20,7 @@ import routes from '../../components/Helpers/Routes';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { gridLoadingTimeout, prepareDataForGrid } from '../../constants/helpers';
 import CreateNewDialog from './CreateNewDialog';
+import { gridFilterParser } from 'src/constants/useColumns';
 
 const ProductBuilder = () => {
   const renderedFrom = camelCase(routes?.productBuilder.title);
@@ -42,7 +43,9 @@ const ProductBuilder = () => {
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
+  const { dataRows, appendRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } =
+    state;
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const columns = [
     {
@@ -65,6 +68,10 @@ const ProductBuilder = () => {
   useEffect(() => {
     fetchProductBuilder();
   }, []);
+
+  // useEffect(() => {
+  //   fetchProductBuilder();
+  // }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]); //Need to uncomment this after api got fixed
 
   const NameRenderer = (params) => (
     <Link className="link" to={`${routes.productBuilder.path}/${params.data.id}`}>
@@ -91,15 +98,45 @@ const ProductBuilder = () => {
     );
   };
 
+  const getQueryString = () => {
+    let deepFilter = `?page=${page}&limit=${limit}`;
+
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
+
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    }
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
+    }
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
+    }
+
+    if (sorting.length > 0) {
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+    }
+
+    if (search) {
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
+    }
+    if (showFilteredRecordsOnly) {
+      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+    }
+    return deepFilter;
+  };
+
   const fetchProductBuilder = () => {
     dispatch({ type: 'loading', loading: true });
 
+    const queryString = getQueryString();
     if (gridApi) {
       gridApi.setRowData([]);
     }
 
     axiosInstance()
-      .get(`/productbuilder`)
+      .get(`/productbuilder${queryString}`)
       .then(({ data: { data } }) => {
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u);
@@ -111,14 +148,32 @@ const ProductBuilder = () => {
           };
         });
 
-        dispatch({ type: 'initialize', data: rows, count: data.length });
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
+        if (appendRows) {
+          dispatch({
+            type: 'initialize',
+            data: [...dataRows, ...rows],
+            count: data.length
+            // selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
+          });
+        } else {
+          dispatch({
+            type: 'initialize',
+            data: rows,
+            count: data.length
+            // selectedRecords: rows.filter((f) => f.isChecked === true)
+          });
+        }
+
+        // dispatch({ type: 'initialize', data: rows, count: data.length });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
         dispatch({ type: 'loading', loading: false });
+      })
+      .finally(() => {
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
       });
   };
 

@@ -112,30 +112,26 @@ export const CustomField = ({}) => {
 
   return (
     <Fragment>
-      <Box mt={1} mb={1}>
+      <Box mt={1} mb={1} className="pr-2">
         <Divider />
       </Box>
 
-      <Box>
+      <Box className="pr-2">
         <Grid spacing={1} container className={styles.custom_field}>
-          <Grid item xs={12} sm={6} md={6}>
+          <Grid item xs={12}>
             <label className={classes.acionBtn} onClick={handleOpenAddField}>
               Add Custom Field
             </label>
           </Grid>
-          <Grid container justify="flex-end" item xs={12} sm={6} md={6}>
-            <label htmlFor="importcustomField" className={`cursor-pointer ${classes.acionBtn}`}>
+          <Grid container justify="flex-end" item xs={12}>
+            <label htmlFor="importcustomField" className={`cursor-pointer ${classes.acionBtn} relative`}>
               Import Custom Field
               <input
                 onClick={(e: any) => (e.target.value = null)}
                 id="importcustomField"
                 name="importcustomField"
+                className="sr-only"
                 onChange={handleImportFields}
-                style={{
-                  opacity: '0',
-                  position: 'absolute',
-                  zIndex: -1
-                }}
                 type="file"
               />
             </label>

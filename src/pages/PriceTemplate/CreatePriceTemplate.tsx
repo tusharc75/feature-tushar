@@ -15,11 +15,12 @@ import { extractFields, checkFormulaLoop } from '../../constants/formulaUtility'
 import { useData } from '../../StateProvider/Provider';
 import HistoryButton from '../../components/Helpers/HistoryButton';
 import HistoryDialog from '../../components/Activity/History';
-import { priceTemplate } from '../../constants/helpers';
+import { fieldLabelToFieldName, priceTemplate } from '../../constants/helpers';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { camelCase } from 'lodash';
 import { IoIosArrowDropdown } from 'react-icons/io';
+import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -236,7 +237,7 @@ const PriceTemplate = () => {
         _field_data._id = _field_data._id.toString();
         _field_data.sectionName = _section.sectionName;
         if (!isNaN(_field._id)) {
-          _field_data.fieldName = camelCase(_field.fieldLabel.replace(/[^a-zA-Z0-9]/g, ''));
+          _field_data.fieldName = fieldLabelToFieldName(_field.fieldLabel);
         }
         _field_data.order = ++order;
         fields.push(_field_data);
@@ -317,6 +318,7 @@ const PriceTemplate = () => {
 
   return (
     <Fragment>
+      <DeviceMessage />
       <Box className="main-container-v1">
         <Box className="headerbox-v1">
           <Box className="nav-v1">
@@ -509,8 +511,8 @@ const PriceTemplate = () => {
                               setFieldValue('entity', val && val?.map((d) => d._id));
                               val && val.length !== 0
                                 ? setOwnerCollaboratorData(
-                                    ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
-                                  )
+                                  ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
+                                )
                                 : setOwnerCollaboratorData(ownerCollaboratorDataConst);
                             }}
                             renderInput={(params) => (
@@ -545,10 +547,10 @@ const PriceTemplate = () => {
                             onOpen={() =>
                               values['entity'] && values['entity'].length !== 0
                                 ? setOwnerCollaboratorData(
-                                    ownerCollaboratorDataConst.filter((data) =>
-                                      values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
-                                    )
+                                  ownerCollaboratorDataConst.filter((data) =>
+                                    values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
                                   )
+                                )
                                 : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                             }
                             renderInput={(params) => (
@@ -586,10 +588,10 @@ const PriceTemplate = () => {
                             onOpen={() =>
                               values['entity'] && values['entity'].length !== 0
                                 ? setOwnerCollaboratorData(
-                                    ownerCollaboratorDataConst.filter((data) =>
-                                      values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
-                                    )
+                                  ownerCollaboratorDataConst.filter((data) =>
+                                    values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
                                   )
+                                )
                                 : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                             }
                             renderInput={(params) => (

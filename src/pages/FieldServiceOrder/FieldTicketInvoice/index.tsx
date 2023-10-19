@@ -4,7 +4,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
 import CustomRenderCell from 'src/components/Helpers/CustomRenderCell';
 import routes from 'src/components/Helpers/Routes';
-import { gridLoadingTimeout, invoice, isObjectEmpty, prepareDataForGrid, fieldServiceOrder } from 'src/constants/helpers';
+import { gridLoadingTimeout, invoice, isObjectEmpty, prepareDataForGrid, fieldServiceOrder, sidebarResource } from 'src/constants/helpers';
 import useColumns, { checkStaticField, getFrameworkComponents, getStaticFields } from 'src/constants/useColumns';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -90,9 +90,9 @@ const FieldTicketInvoice = ({ fieldServiceOrderData, renderedFrom }) => {
   };
 
   const InvoiceMaterialRenderer = (params) => (
-    <div style={{ display: 'flex', alignItems: 'center' }}>
+    <>
       <span
-        className="link"
+        className="link line-clamp-1"
         onClick={() => {
           setViewBillDialog({ open: true, invoiceData: params.data });
         }}
@@ -109,7 +109,7 @@ const FieldTicketInvoice = ({ fieldServiceOrderData, renderedFrom }) => {
           <OpenInNewIcon fontSize="small" color="primary" />
         </IconButton>
       </Box>
-    </div>
+    </>
   );
 
   const ActionsRenderer = (params) => (
@@ -334,6 +334,7 @@ const FieldTicketInvoice = ({ fieldServiceOrderData, renderedFrom }) => {
             setViewBillDialog({ open: false, invoiceData: null });
             fetchBilling();
           }}
+          resource={sidebarResource.fieldTicketInvoice}
         />
       )}
       {isConfirmDialogVisible ? (

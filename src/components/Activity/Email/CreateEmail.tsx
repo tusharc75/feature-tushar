@@ -23,7 +23,7 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import { CircularProgress, IconButton } from '@material-ui/core';
 import { useAccount, useMsal } from '@azure/msal-react';
 import getAzureAcessToken from '../../Azure/getAzureAccessToken';
-import { purchaseOrder, validations, rentalManagement } from '../../../constants/helpers';
+import { purchaseOrder, validations, rentalManagement, sidebarResource } from '../../../constants/helpers';
 import DeleteIcon from '@material-ui/icons/Delete';
 import GetAppIcon from '@material-ui/icons/GetApp';
 import { GoArrowDown } from 'react-icons/go';
@@ -89,7 +89,7 @@ export const CreateEmail = ({
   fetchData = null,
   cc = [],
   id = null,
-  version = null,
+  versionNumber = null,
   qouteBuilderAttachments = [],
   subject = '',
   showESign = false,
@@ -145,7 +145,7 @@ export const CreateEmail = ({
   }, [qouteBuilderAttachments]);
 
   useEffect(() => {
-      fetchEmailDetail(); 
+    fetchEmailDetail();
   }, []);
 
   const checkImageUrl = (url) => {
@@ -252,12 +252,12 @@ export const CreateEmail = ({
             toastConfig.setToastConfig(err);
           });
       }
-    } catch (e) {}
+    } catch (e) { }
   };
 
-  const handleSendQuoteEmail = async (values) => {
+  const handleSendEmail = async (values) => {
     setSending(true);
-    relatedTo=[
+    relatedTo = [
       {
         'type': referenceType,
         'referenceId': id,
@@ -266,7 +266,7 @@ export const CreateEmail = ({
     ]
     const body = {
       email: values.to,
-      version: version,
+      versionNumber: versionNumber,
       emailBody: values.content.toString('html'),
       emailSubject: values.subject,
       cc: values.cc,
@@ -279,7 +279,7 @@ export const CreateEmail = ({
       body['graphToken'] = await getAzureAcessToken(instance);
       body['mailbox'] = azureAccount.username;
     }
-    const api = referenceType === 'quote' ? `/quote-builder/sendQuoteEmail` : '/send-email';
+    const api = referenceType === sidebarResource.quoteBuilder ? `/quote-builder/sendQuoteEmail` : '/send-email';
     axiosInstance()
       .post(api, body)
       .then(() => {
@@ -297,7 +297,6 @@ export const CreateEmail = ({
       event.preventDefault();
     }
   };
-
 
   const handleUploadImage = (event) => {
     if (event.target.files && event.target.files.length) {
@@ -413,7 +412,7 @@ export const CreateEmail = ({
         <Formik
           initialValues={initialValues}
           validationSchema={EmailSchema}
-          onSubmit={isQuoteBuilder ? handleSendQuoteEmail : handleSave}
+          onSubmit={isQuoteBuilder ? handleSendEmail : handleSave}
           onKeyPress={onKeyPress}
         >
           {({ submitForm, touched, errors, setFieldValue, values }) => (

@@ -222,7 +222,6 @@ const ServiceOrder = () => {
   );
 
   const getQueryString = (isExport = false) => {
-    
     let deepFilter = `?page=${page}&limit=${limit}`;
 
     if (isExport) {
@@ -296,6 +295,7 @@ const ServiceOrder = () => {
   };
 
   const handleServiceOrderTypeSel = (filterValues) => {
+    dispatch({ type: 'setPage', page: 0 });
     setSelectedType(filterValues);
     history.push(`?type=${filterValues}`);
   };
@@ -410,6 +410,7 @@ const ServiceOrder = () => {
         {Object.keys(frameworkComponents).length > 0 ? (
           isMobile && !isTablet ? (
             <CustomSwipableList
+              key={selectedType}
               allowSelection={true}
               allowSwipe={true}
               permissions={permissions?.fieldServiceOrder}

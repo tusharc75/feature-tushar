@@ -134,6 +134,8 @@ export default function AccountAccordionDetail({ accounts, type, expanded = true
                             <Grid container className="detailCardHeader">
                               <Grid item xs={12} sm={12}>
                                 <Link
+                                  target="_blank"
+                                  rel="noopener noreferrer"
                                   className="link"
                                   to={
                                     type === 'customer'

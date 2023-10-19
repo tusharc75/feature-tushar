@@ -175,7 +175,12 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, statusOptions, 
   return (
     <Fragment>
       <Box p={1}>
-        <PreviewDownload resource={sidebarResource.salesOrder} referenceId={salesOrderData._id} columns={columns} isSendEmail={true} />
+        <PreviewDownload
+          fileName={`${routes.salesOrder.title}-${salesOrderData?.salesOrderNo}`}
+          resource={sidebarResource.salesOrder}
+          referenceId={salesOrderData._id}
+          columns={columns}
+          isSendEmail={true} />
       </Box>
       <Grid item xs={12} md={12} sm={12}>
         {columns && rowsData ? (

@@ -9,9 +9,8 @@ import MessageDialog from '../../components/Helpers/MessageDialog';
 import { useData } from '../../StateProvider/Provider';
 import CreateProjectSales from './CreateProjectSales';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { customerAccount, gridLoadingTimeout, gridPageSizes, isObjectEmpty, supplierAccount } from '../../constants/helpers';
+import { customerAccount, getLocalStorageArrayData, gridLoadingTimeout, gridPageSizes, isObjectEmpty, removeLocalStorage, supplierAccount } from '../../constants/helpers';
 import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
-import CustomAgGrid from '../../components/AgGridComponents/CustomAgGrid';
 import './style.scss';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import EntitySelectionsDialog from '../../components/EntitySelections';
@@ -24,104 +23,18 @@ import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { useHistory } from 'react-router-dom';
 import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField, gridFilterParser } from '../../constants/useColumns';
-import { StayPrimaryPortraitSharp } from '@material-ui/icons';
 import { BiDollar } from 'react-icons/bi';
 import { SiMarketo, AiFillFileMarkdown, GiArrowScope, FaPercentage, FaAward, SiStatuspage, GoVersions } from 'react-icons/all';
 import { camelCase } from 'lodash';
+import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 
-function reducer(state, action) {
-  switch (action.type) {
-    case 'loading':
-      return {
-        ...state,
-        loading: action.loading
-      };
-
-    case 'initialize':
-      return {
-        ...state,
-        dataRows: action.data,
-        rowCount: action.count
-      };
-
-    case 'selection':
-      return {
-        ...state,
-        selectedRecords: action.selectedRecords
-      };
-
-    case 'update':
-      return {
-        ...state,
-        dataRows: action.data,
-        loading: false
-      };
-
-    case 'filter':
-      return {
-        ...state,
-        loading: true,
-        filters: action.filters,
-        page: 0
-      };
-
-    case 'sort':
-      return {
-        ...state,
-        sorting: action.sorting,
-        loading: true
-      };
-
-    case 'search':
-      return {
-        ...state,
-        search: action.search,
-        loading: true
-      };
-
-    case 'pageChange':
-      return {
-        ...state,
-        page: action.page
-      };
-
-    case 'pageSizeChange':
-      return {
-        ...state,
-        limit: action.limit,
-        page: 0,
-        loading: true
-      };
-
-    case 'complete':
-      return {
-        ...state,
-        loading: false
-      };
-
-    default:
-      break;
-  }
-
-  return state;
-}
-
-const intialState = {
-  dataRows: [],
-  rowCount: 0,
-  loading: false,
-  page: 0,
-  limit: 25,
-  pageSizes: gridPageSizes,
-  search: '',
-  filters: {},
-  sorting: [],
-  selectedRecords: []
-};
 
 let projectSalesTimeout;
 const ProjectSales: FC = () => {
+
   const renderedFrom = camelCase(routes?.projectSales.title);
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
+
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
@@ -134,7 +47,6 @@ const ProjectSales: FC = () => {
   const [selectedType, setselectedType] = useState(1);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState({ show: false, isDelete: false });
-  const [renderCount, setRenderCount] = useState(0);
   const [projectSalesId, setProjectSalesId] = useState(null);
   const [showEntityDialog, setShowEntityDialog] = useState(false);
   const [gridApi, setGridApi] = useState(null);
@@ -148,12 +60,15 @@ const ProjectSales: FC = () => {
     resource: history.location?.state?.resource
   });
 
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
   const columnState = JSON.parse(localStorage.getItem(renderedFrom));
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [clonedData, setClonedData] = useState([]);
-  const localStorageSelectedRecords = `${routes.projectSales.title}_selected`;
+
+  const [state, dispatch] = useReducer(reducer, intialState);
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
+    state;
+
+
 
   useEffect(() => {
     fetchGridColumns();
@@ -213,10 +128,8 @@ const ProjectSales: FC = () => {
   }, [search]);
 
   useEffect(() => {
-    if (renderCount > 0) {
-      fetchProjects();
-    } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting, selectedEntity, referenceDetails]);
+    fetchProjects();
+  }, [page, limit, selectedType, filters, sorting, selectedEntity, referenceDetails, showFilteredRecordsOnly]);
 
   const ActionsRenderer = (params) => (
     <>
@@ -286,7 +199,7 @@ const ProjectSales: FC = () => {
     if (isExport) {
       deepFilter = `?`;
     }
-    
+
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
     }
@@ -326,80 +239,67 @@ const ProjectSales: FC = () => {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
 
+    if (showFilteredRecordsOnly) {
+      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+    }
+
     return deepFilter;
   };
 
   const fetchProjects = async () => {
-    if (selectedEntity) {
-      dispatch({ type: 'loading', loading: true });
-      const queryString = getQueryString();
-
-      if (gridApi) {
-        gridApi.setRowData([]);
-      }
-
-      axiosInstance()
-        .get(`/project-sales${queryString}`)
-        .then(({ data: { data, count } }) => {
-          let rows = data.map((project) => {
-            let finalObject = prepareDataForGrid(project, user);
-            finalObject['canDelete'] = finalObject['projectManagerId'] === user?.user._id;
-            finalObject['isChecked'] = selectedRecords.some((s) => s._id === project._id);
-            finalObject['allowedToEdit'] = finalObject['projectManagerId'] === user?.user._id;
-
-            finalObject['owerCollaboratorInitialsOrImages'] = [{ initials: finalObject['projectManager'] }];
-            return {
-              ...finalObject,
-              isManager: user.user._id === project?.projectManager?.optionValue,
-              isTeamMember: Boolean(data.staticData?.user.find((u) => u._id === user.user._id))
-            };
-          });
-          setIsAllChecked(false);
-          setClonedData(data);
-          if (appendRows) {
-            dispatch({
-              type: 'initialize',
-              data: [...dataRows, ...rows],
-              count: count,
-              selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
-            });
-          } else {
-            dispatch({
-              type: 'initialize',
-              data: rows,
-              count: count,
-              selectedRecords: rows.filter((f) => f.isChecked === true)
-            });
-          }
-
-          if (gridApi) {
-            try {
-              let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords)
-                ? JSON.parse(localStorage.getItem(localStorageSelectedRecords))
-                : [];
-              if (oldSelectedRecords.length > 0) {
-                gridApi.forEachNode(function (node) {
-                  node.setSelected(oldSelectedRecords.some((o) => o === node.data._id));
-                });
-              }
-            } catch (ex) {
-              console.error('Error in getting selected records from local storage');
-            }
-          }
-
-          dispatch({ type: 'initialize', data: rows, count: count });
-          setTimeout(() => {
-            dispatch({ type: 'loading', loading: false });
-          }, gridLoadingTimeout);
-        })
-        .catch((err) => {
-          toastConfig.setToastConfig(err);
-          dispatch({ type: 'loading', loading: false });
-        });
+    dispatch({ type: 'loading', loading: true });
+    const queryString = getQueryString();
+    if (gridApi) {
+      gridApi.setRowData([]);
     }
+    axiosInstance()
+      .get(`/project-sales${queryString}`)
+      .then(({ data: { data, count } }) => {
+        let rows = data.map((project) => {
+          let finalObject = prepareDataForGrid(project, user);
+          finalObject['canDelete'] = finalObject['projectManagerId'] === user?.user._id;
+          finalObject['isChecked'] = selectedRecords.some((s) => s._id === project._id);
+          finalObject['allowedToEdit'] = finalObject['projectManagerId'] === user?.user._id;
+
+          finalObject['owerCollaboratorInitialsOrImages'] = [{ initials: finalObject['projectManager'] }];
+          return {
+            ...finalObject,
+            isManager: user.user._id === project?.projectManager?.optionValue,
+            isTeamMember: Boolean(data.staticData?.user.find((u) => u._id === user.user._id))
+          };
+        });
+        setIsAllChecked(false);
+        setClonedData(data);
+        if (appendRows) {
+          dispatch({
+            type: 'initialize',
+            data: [...dataRows, ...rows],
+            count: count,
+            selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
+          });
+        } else {
+          dispatch({
+            type: 'initialize',
+            data: rows,
+            count: count,
+            selectedRecords: rows.filter((f) => f.isChecked === true)
+          });
+        }
+        dispatch({ type: 'initialize', data: rows, count: count });
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        dispatch({ type: 'loading', loading: false });
+      });
+
   };
 
   const handleProjectFilter = (filterValues) => {
+    dispatch({ type: 'setPage', page: 0 });
     setselectedType(filterValues);
   };
 
@@ -436,6 +336,7 @@ const ProjectSales: FC = () => {
       axiosInstance()
         .put(`/project-sales/remove`, { ids: [...recs] })
         .then(({ data }) => {
+          removeLocalStorage(localStorageSelectedRecords);
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
@@ -489,8 +390,12 @@ const ProjectSales: FC = () => {
             }}
             isExportAllOrSomeFeature={true}
             total={rowCount}
-            recordsToExport={selectedRecords.length}
-            ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+            recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+            ids={
+              getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+                ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+                : []
+            }
             onExportToExcelSuccess={() => {
               if (gridApi) gridApi.deselectAll();
               else fetchProjects();
@@ -523,13 +428,12 @@ const ProjectSales: FC = () => {
                 <Chip
                   className="ml-3"
                   color="primary"
-                  label={`${
-                    referenceDetails.resource === customerAccount.accountResource
-                      ? routes.customerAccount.title
-                      : referenceDetails.resource === supplierAccount.accountResource
+                  label={`${referenceDetails.resource === customerAccount.accountResource
+                    ? routes.customerAccount.title
+                    : referenceDetails.resource === supplierAccount.accountResource
                       ? routes.supplierAccount.title
                       : routes.opportunity.title
-                  } : ${referenceDetails.referenceName}`}
+                    } : ${referenceDetails.referenceName}`}
                   onDelete={() => {
                     setReferenceDetails({ referenceId: null, referenceName: null, resource: null });
                   }}
@@ -541,6 +445,7 @@ const ProjectSales: FC = () => {
           {Object.keys(frameWorkComponent).length > 0 ? (
             isMobile && !isTablet ? (
               <CustomSwipableList
+                key={selectedType}
                 allowSelection={true}
                 allowSwipe={true}
                 permissions={permissions?.projectSales}
@@ -615,6 +520,7 @@ const ProjectSales: FC = () => {
                 showFilters={true}
                 resource={sidebarResource.projectSales}
               />
+
             )
           ) : null}
         </div>

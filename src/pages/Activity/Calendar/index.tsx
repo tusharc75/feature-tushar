@@ -144,33 +144,18 @@ const BigCalendar = () => {
                       <>
                         <Box
                           key={item}
-                          // bgcolor={
-                          // item === 'Event'
-                          //   ? 'var(--dark-primary,rgba(255, 232, 204, 1))'
-                          //   : item === 'Task'
-                          //   ? 'var(--dark-primary,rgba(234, 239, 254, 1))'
-                          //   : 'var(--dark-primary,rgba(253, 220, 228, 1))'
-                          // }
-                          className={`${classes.indicators} flex items-center gap-1`}
-                          style={{
-                            color: `${
-                              item === 'Event'
-                                ? 'rgba(236, 85, 0, 1)'
-                                : item === 'Task'
-                                ? 'var(--dark-secondary-text,rgba(4, 50, 161, 1))'
-                                : 'rgba(165, 4, 43, 1)'
-                            }`
-                          }}
+                          className={`${classes.indicators} flex items-center gap-1 
+                          ${item === 'Event' ? 'text-[rgba(236,_85,_0,_1))] ' : ''}
+                          ${item === 'Task' ? 'text-[var(--task-color,_rgba(4,_50,_161,_1))] ' : ''}
+                          ${item === 'Case' ? 'text-[rgba(165,_4,_43,_1)] ' : ''}
+                          `}
                         >
                           <Box
-                            className="w-[12px] h-[12px]"
-                            bgcolor={
-                              item === 'Event'
-                                ? 'rgba(236, 85, 0, 1)'
-                                : item === 'Task'
-                                ? 'var(--dark-secondary-text,rgba(4, 50, 161, 1))'
-                                : 'rgba(165, 4, 43, 1)'
-                            }
+                            className={`w-[12px] h-[12px] 
+                            ${item === 'Event' ? 'bg-[rgba(236,_85,_0,_1)] ' : ''}
+                            ${item === 'Task' ? 'bg-[var(--task-color,_rgba(4,_50,_161,_1))] ' : ''}
+                            ${item === 'Case' ? 'bg-[rgba(165,_4,_43,_1)] ' : ''}
+                            `}
                           />
                           {item}
                         </Box>

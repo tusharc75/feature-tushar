@@ -23,6 +23,7 @@ import CustomButton from 'src/components/Helpers/CustomButton';
 import { GiReceiveMoney } from 'react-icons/gi';
 import { VscVersions } from 'react-icons/vsc';
 import PreviewDownload from 'src/components/PreviewDownload';
+import routes from 'src/components/Helpers/Routes';
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -103,6 +104,7 @@ const SendEmail = ({
               {isMobile && !isTablet ? <AiOutlineFileExcel size={20} /> : `Excel Download`}
             </Button>
             <PreviewDownload
+              fileName={`${routes.quotation.title}-${quotationData?.quotationNumber}`}
               resource={sidebarResource.quotation}
               referenceId={quotationData?._id}
               columns={columns}

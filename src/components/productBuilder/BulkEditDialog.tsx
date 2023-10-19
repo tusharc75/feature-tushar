@@ -130,7 +130,7 @@ const BulkEditDialog = ({ productDataList, productBuilderId, handleClose, handle
       }
       element.fields = fields;
       element.fieldChanges = fieldChanges;
-      delete element.srno;
+      delete element.index;
     });
     handleSaveProduct(products);
   };
