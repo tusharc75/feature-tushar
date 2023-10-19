@@ -634,6 +634,12 @@ function CustomReactTable({
               </>
             }
           >
+            <CustomReactTableHeaderOptions
+              renderedFrom={renderedFrom}
+              dispatchTable={dispatch}
+              showOnlyShowFilteredRecordSwitch={showOnlyShowFilteredRecordSwitch}
+              selectedRecords={selectedFlatRows?.length}
+            />
             {/* Select All For Mobile */}
             {isMobileView && !hideSelection && mobileSelectAllHeader && (
               <>
@@ -642,12 +648,6 @@ function CustomReactTable({
                 </label>
               </>
             )}
-            <CustomReactTableHeaderOptions
-              renderedFrom={renderedFrom}
-              dispatchTable={dispatch}
-              showOnlyShowFilteredRecordSwitch={showOnlyShowFilteredRecordSwitch}
-              selectedRecords={selectedFlatRows?.length}
-            />
           </GridHeader>
 
           {/* Table */}

@@ -110,10 +110,16 @@ const Pagination: FC<PaginationProps> = ({
           </IconButton>
           <div className="flex items-center">
             <input
+              placeholder="Page"
+              title={'Page'}
               disabled={disabled}
               value={textFieldvalue}
               style={{ maxWidth: 30 }}
               onChange={handleTextFieldValue}
+              onClick={(e) => {
+                const target = e.target as HTMLInputElement;
+                target.select();
+              }}
               className="bg-transparent appearance-none text-[var(--primary-text)] shadow-none border-none h-[30px] text-center"
             />
             <span>
