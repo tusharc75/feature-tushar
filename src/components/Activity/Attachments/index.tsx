@@ -30,6 +30,7 @@ import { ViewAll } from '../Helpers/ViewAll';
 import ManageAttachment from './ManageAttachment';
 import type { TNestedTree } from './helper';
 import { sortFileStructure, unflatten } from './helper';
+import mime from 'mime';
 
 export default function Attachments({ relatedTo, handleActivityRefresh, onSetCount }) {
   const [open, setOpen] = useState({ open: false, type: 'file', parentFolder: null, purpose: 'add' });
@@ -214,7 +215,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
     if (attachmentId) {
       event.stopPropagation();
       axiosInstance()
-        .put('attachment/deletemany ', { ids: [attachmentId] })
+        .put('attachment/deletemany', { ids: [attachmentId] })
         .then(({ data }) => {
           setAnchorEl(null);
           toastConfig.setToastConfig({
@@ -233,7 +234,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
 
   const handleFolderDelete = (folderId) => {
     axiosInstance()
-      .put('attachment/folder/deletemany ', { ids: [folderId] })
+      .put('attachment/folder/deletemany', { ids: [folderId] })
       .then(({ data }) => {
         setAnchorEl(null);
         toastConfig.setToastConfig({
@@ -257,19 +258,29 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
   };
 
   const handleMail = (data) => {
-    const file = data?.file;
-    axiosInstance()
-      .get(`user/download?fileName=${file[0].url}`, {
-        responseType: 'blob'
-      })
-      .then(({ data }) => {
-        const tempfile = new Blob([data], { type: 'application/pdf' });
-        generateBase64forFile(tempfile, file[0].name, `.${file[0].name.split('.')?.pop()}`);
-      })
-      .catch((err) => {
+    const attachments: any = []
+    Promise.all(data?.file.map(async file => {
+      await axiosInstance().get(`user/download?fileName=${file?.url}`, { responseType: 'blob' }).then(({ data }) => {
+        let reader = new FileReader();
+        reader.readAsDataURL(new Blob([data], { type: mime.getType(file.url.split('.')?.pop()) }));
+        reader.onloadend = function () {
+          let base64data: any = reader.result;
+          attachments.push({
+            base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
+            contentType: base64data.split(';')[0].split(':')[1],
+            extension: `.${file.url.split('.')?.pop()}`,
+            name: file.name
+          })
+        };
+      }).catch((err) => {
         toastConfig.setToastConfig(err);
       });
+    })).finally(() => {
+      setEmailAttachment(attachments);
+      setSendMail(true);
+    });
   };
+
   const handleMailForFolder = (data) => {
     const folderId = data?._id;
     const folderName = data?.name;
@@ -567,7 +578,7 @@ const RenderTree: React.FC<TRenderTreeProps> = ({ tree, folderButtons, fileIconB
             />
           );
         }
-        if (node.type === 'file') {
+        if (node.type === 'file' || !node.type) {
           return <RenderFiles key={node._id} iconButtons={() => fileIconButtons(node)} node={node} onFileClick={onFileClick} relatedTo={relatedTo} />;
         }
         return null;

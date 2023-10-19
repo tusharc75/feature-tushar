@@ -89,6 +89,7 @@ const QuoteBuilder = ({
         Header: 'Details',
         minWidth: 300,
         width: 300,
+        disabled: true,
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p className="text-truncate" title={row.original?.detail}>
@@ -162,12 +163,12 @@ const QuoteBuilder = ({
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = `${parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail?.assetNumber
-          : parent.type === 'product'
-            ? parent.productDetail?.productName
-            : parent.type === 'service'
-              ? parent.serviceDetail?.serviceName
-              : parent.packageDetail?.packageName
+        ? parent.serializedAssetDetail?.assetNumber
+        : parent.type === 'product'
+          ? parent.productDetail?.productName
+          : parent.type === 'service'
+            ? parent.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName
         }`;
       parent.description =
         parent.type === 'service'
@@ -238,12 +239,12 @@ const QuoteBuilder = ({
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
       _subRow.detail = `${_subRow.type === 'serializedAsset'
-          ? _subRow.serializedAssetDetail?.assetNumber
-          : _subRow.type === 'product'
-            ? _subRow.productDetail?.productName
-            : _subRow.type === 'service'
-              ? _subRow.serviceDetail?.serviceName
-              : _subRow.packageDetail?.packageName
+        ? _subRow.serializedAssetDetail?.assetNumber
+        : _subRow.type === 'product'
+          ? _subRow.productDetail?.productName
+          : _subRow.type === 'service'
+            ? _subRow.serviceDetail?.serviceName
+            : _subRow.packageDetail?.packageName
         }`;
       _subRow.description =
         _subRow.type === 'service'
@@ -274,7 +275,7 @@ const QuoteBuilder = ({
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: sendMail ? 'Sent to Customer Sucessfully' : 'Processed Quote Successfully'
+          message: sendMail ? 'Sent to Customer Sucessfully' : 'Processed Successfully'
         });
       })
       .catch((error) => {
@@ -303,14 +304,10 @@ const QuoteBuilder = ({
       <Box m={1} display="flex" justifyContent="space-between">
         <Box display="flex">
           <SendEmail
-            versionData={versionData}
             quotationData={quotationData}
-            columns={columns}
-            versionId={versionData._id}
-            allColumn={allColumn}
-            isSendEmail={true}
-            allowedToEdit={allowedToEdit}
+            versionId={versionData?._id}
             currentVersion={version}
+            columns={columns}
             hideSummary={true}
             hideVersions={true}
           />
@@ -318,7 +315,7 @@ const QuoteBuilder = ({
           {permissions?.quotation?.isUpdate &&
             (user?.user?._id === quotationData?.owner?.optionValue ||
               quotationData?.collaborator?.some((d) => d?.optionValue === user?.user?._id)) && (
-              <Tooltip title="Edit Quote PDF Template">
+              <Tooltip title="Edit PDF Template">
                 <Button
                   onClick={() => {
                     quotationData?.pdfTemplate?.optionValue &&
@@ -334,7 +331,7 @@ const QuoteBuilder = ({
                   color="primary"
                 >
                   {isMobile && !isTablet ? <AiFillEdit size={20} /> : ''}
-                  {isMobile && !isTablet ? '' : 'Quote Template'}
+                  {isMobile && !isTablet ? '' : 'PDF Template'}
                 </Button>
               </Tooltip>
             )}
@@ -350,7 +347,7 @@ const QuoteBuilder = ({
                 handleSendToCustomer(false);
               }}
             >
-              Process Quote
+              {`Process ${routes.quotation.title}`}
             </Button>
             <Box p={1} />
             <Button

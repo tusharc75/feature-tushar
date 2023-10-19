@@ -113,51 +113,23 @@ const FormBuilder = () => {
           </Grid>
         </Grid>
         {arrangeViewOpen && <ArrangeView open={arrangeViewOpen} close={closeHandler} resourceData={resource} />}
-        {isMobile && !isTablet ? (
-          <CustomSwipableList
-            allowSelection={false}
-            allowSwipe={false}
-            permissions={null}
-            primaryField={columns?.find((d) => d.field === 'resource')}
-            onClick={(d) => {
-              history.push(`${routes.formBuilder.path}/${d.resource}`);
-            }}
-            dataRows={dataRows}
-            selectedRecords={[]}
-            dispatch={dispatch}
-            onEdit={(d) => {}}
-            extraParamsToCheckDelete={true}
-            onDelete={(d) => {}}
-            rowCount={rowCount}
-            page={page}
-            loading={loading}
-            additionalDetails={[]}
-            chips={[]}
-            owerCollaboratorInitialsOrImages=""
-            onCreate={() => {}}
-            showClone={false}
-            onClone={() => {}}
-            renderedFrom={renderedFrom}
-          />
-        ) : (
-          <CustomAgGrid
-            columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameworkComponents}
-            setGridApi={setGridApi}
-            dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            allowAction={false}
-            allowSelection={false}
-            isClientSideGrid={true}
-            loading={loading}
-            refreshGrid={fetchGetBrandResource}
-            renderedFrom={renderedFrom}
-          />
-        )}
+        <CustomAgGrid
+          columns={columns}
+          dataRows={dataRows}
+          frameworkComponents={frameworkComponents}
+          setGridApi={setGridApi}
+          dispatch={dispatch}
+          rowCount={rowCount}
+          limit={limit}
+          pageSizes={pageSizes}
+          page={page}
+          allowAction={false}
+          allowSelection={false}
+          isClientSideGrid={true}
+          loading={loading}
+          refreshGrid={fetchGetBrandResource}
+          renderedFrom={renderedFrom}
+        />
       </CustomContainer>
     </section>
   );

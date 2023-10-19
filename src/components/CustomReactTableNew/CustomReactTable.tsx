@@ -45,6 +45,7 @@ import { GrFormClose } from 'react-icons/gr';
 import { CgSearch } from 'react-icons/cg';
 import GridHeader from './GridHeader';
 import SwipableListForMobile from 'src/components/SwipableListForMobile';
+import Pagination from './Pagination';
 
 interface CustomCheckBoxProps extends CheckboxProps {
   indeterminate: any;
@@ -70,17 +71,6 @@ const IndeterminateCheckbox = React.forwardRef(({ indeterminate, from, style, ..
     />
   );
 });
-
-/*
-Understanding How Filter Works:
-Firstly on each render filters in table is synced with customFilters(globalState)
-Now when user types something we capture the id of that column and do the setFilters in TempFilter component
-=> Whenever filters gets updated we use dispatch for updating globalFilters which makes new request to backend
-Data rows gets updated and filters gets updated from custom Filters again on re-render
-
-Purpose for removing filters from useTable :
-It filters the data again that comes from backend and client side filtering needs to be avoided
-*/
 
 function TempFilter({ filterValue, id, setFilters, customFilters }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -210,12 +200,10 @@ const EditableCell = ({ value: initialValue, row: { index }, column: { id }, upd
     setValue(e.target.value);
   };
 
-  // We'll only update the external data when the input is blurred
   const onBlur = () => {
     updateData(index, id, value);
   };
 
-  // If the initialValue is changed external, sync it up with our state
   React.useEffect(() => {
     setValue(initialValue);
   }, [initialValue]);
@@ -227,9 +215,7 @@ function CustomReactTable({
   columns,
   data,
   onSelect,
-  setWholeRowsCellColor = null, // Use this prop when you want to change whole row's cell color.
-  childrenProperty,
-  uniqueKey,
+  setWholeRowsCellColor = null,
   height = '100%',
   hideSelection = false,
   renderedFrom,
@@ -250,10 +236,8 @@ function CustomReactTable({
   const isMobileView = isMobile && !isTablet;
   const defaultColumn = {
     Cell: EditableCell,
-    // When using the useFlexLayout:
-    minWidth: 80, // minWidth is only used as a limit for resizing
-    width: 150, // width is used for both the flex-basis and flex-grow
-    // maxWidth: 250, // maxWidth is only used as a limit for resizing
+    minWidth: 80,
+    width: 150,
     Filter: DefaultColumnFilter
   };
 
@@ -261,8 +245,6 @@ function CustomReactTable({
   const [isCellEditing, setIsCellEditing] = React.useState(false);
   const [currentRowEditing, setCurrentRowEditing] = React.useState(null);
   const [baseColumns, setBaseColumns] = React.useState([]);
-  const [render, setRender] = React.useState(false);
-  const [mobileAllColumns, setMobileAllColumns] = React.useState([]);
 
   useEffect(() => {
     setBaseColumns(columns);
@@ -299,7 +281,7 @@ function CustomReactTable({
       expander
         ? [
             {
-              id: 'expander', // Make sure it has an ID
+              id: 'expander',
               Header: ({ isAllRowsExpanded }) => (
                 <span
                   style={{
@@ -329,7 +311,6 @@ function CustomReactTable({
               sticky: 'left',
               width: isMobile && !isTablet ? 40 : 70,
               minWidth: isMobile && !isTablet ? 40 : 70,
-              //maxWidth: 70,
               canDrag: false,
               Cell: ({ row }) =>
                 row.original.type === 'folder' ? (
@@ -346,10 +327,8 @@ function CustomReactTable({
                     ) : (
                       <FaAngleRight
                         onClick={async () => {
-                          setRender(false);
                           const subRows = await fetchChildAttachment(row.original.id);
                           row.original.subRows = subRows;
-                          setRender(true);
                         }}
                       />
                     )}
@@ -426,18 +405,9 @@ function CustomReactTable({
     toggleRowExpanded,
     toggleAllRowsExpanded,
     setColumnOrder,
-    setRowState,
     setCellState,
-    state: {
-      rowState,
-      pageIndex,
-      filters,
-      sortBy,
-      // pageSize,
-      selectedRowIds,
-      columnOrder
-      // expanded,
-    }
+    toggleAllRowsSelected,
+    state: { rowState, pageIndex, sortBy, selectedRowIds, columnOrder }
   } = useTable(
     {
       columns: newColumns,
@@ -480,16 +450,14 @@ function CustomReactTable({
     useResizeColumns,
     useFilters,
     useSortBy,
-    useExpanded, // Use the useExpanded plugin hook
+    useExpanded,
     usePagination,
     useRowSelect,
     useSticky,
     useRowState
   );
 
-  //this would be used to sync column order as set in local storage on first render
   useEffect(() => {
-    //  Suggested by aman - 16-Nov-2021 - PO-174
     rows.forEach((d) => {
       if (d.subRows && d.subRows.length < 20) {
         toggleAllRowsExpanded(true);
@@ -601,7 +569,7 @@ function CustomReactTable({
 
   useEffect(() => {
     if (!allColumns || !Array.isArray(allColumns)) {
-      return; // Exit early if conditions are not met
+      return;
     }
     const timeout = setTimeout(() => {
       const newColumnState = allColumns.map((column) => {
@@ -641,7 +609,8 @@ function CustomReactTable({
     setCellValue('');
   };
 
-  // Render the UI for your table
+  const mobileSelectAllHeader: any | null = React.useMemo(() => allColumns?.find((item) => item.id === 'selection') || null, [allColumns]);
+
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="custom-react-table custom-react-table-v1 vertical-center">
@@ -666,23 +635,22 @@ function CustomReactTable({
             }
           >
             <CustomReactTableHeaderOptions
-              columns={baseColumns}
-              // setSelectedReportView={setSelectedReportView}
-              // selectedReportView={selectedReportView}
-              // columns={columns}
-              // setColumns={setColumns}
-              // columnApi={columnApi}
-              // refreshGrid={refreshGrid}
               renderedFrom={renderedFrom}
-              isClientSideGrid={isClientSideGrid}
               dispatchTable={dispatch}
               showOnlyShowFilteredRecordSwitch={showOnlyShowFilteredRecordSwitch}
               selectedRecords={selectedFlatRows?.length}
-              setHiddenColumns={setHiddenColumns}
-              getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
-              setColumnOrder={setColumnOrder}
             />
+            {/* Select All For Mobile */}
+            {isMobileView && !hideSelection && mobileSelectAllHeader && (
+              <>
+                <label className="flex items-center gap-2 cursor-pointer -ml-2">
+                  {mobileSelectAllHeader.render('Header')} <span>Select All</span>
+                </label>
+              </>
+            )}
           </GridHeader>
+
+          {/* Table */}
           {!isMobileView && (
             <div
               style={{
@@ -718,7 +686,7 @@ function CustomReactTable({
                     <React.Fragment key={index}>
                       <TableRow {...headerGroup.getHeaderGroupProps()} className="tr">
                         {headerGroup.headers.map((column, index) => (
-                          <>
+                          <React.Fragment key={column.id}>
                             <DraggableHeader
                               key={column.id}
                               column={column}
@@ -728,7 +696,7 @@ function CustomReactTable({
                               dispatch={dispatch}
                               isClientSideGrid={isClientSideGrid}
                             />
-                          </>
+                          </React.Fragment>
                         ))}
                       </TableRow>
                     </React.Fragment>
@@ -750,25 +718,6 @@ function CustomReactTable({
                         {row.cells.map((cell, index2) => {
                           return (
                             <TableCell
-                              onDoubleClick={() => {
-                                // setRowState(row.id, { ...row, original: { ...row.original, isEditing: true } });
-                                // Object.keys(rowState).forEach((k) => {
-                                //   if (row.id !== k) {
-                                //     setRowState(k, { ...rowState[k], original: { ...rowState[k].original, isEditing: false } });
-                                //   }
-                                // });
-                                // setCellValue(cell?.value || '');
-                                // setIsCellEditing(true);
-                                // setCurrentRowEditing(row);
-                                // setCellState(row.id, cell.column.id, { isEditing: true });
-                                // Object.keys(rowState).forEach((rowId) => {
-                                //   Object.keys(rowState[rowId].cellState).forEach((colId) => {
-                                //     if (rowState[rowId]?.cellState[colId] !== cell.column?.id && rowState[rowId]?.cellState[colId]?.isEditing) {
-                                //       setCellState(rowId, colId, { isEditing: false });
-                                //     }
-                                //   });
-                                // });
-                              }}
                               key={index2}
                               {...cell.getCellProps()}
                               className={`td   ${cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''}    ${
@@ -813,7 +762,27 @@ function CustomReactTable({
             </div>
           )}
         </div>
-        {!isMobileView && allowPagination && !loading && (
+
+        {isMobileView ? (
+          <SwipableListForMobile
+            key={pageIndex}
+            prepareRow={prepareRow}
+            allColumns={allColumns}
+            allowSelection={!hideSelection}
+            dataRows={rows}
+            dispatch={dispatch}
+            loading={loading}
+            page={currentPage}
+            rowCount={rowCount}
+            expander={expander}
+            backgroundColor={setWholeRowsCellColor}
+            renderedFrom={renderedFrom}
+            handleCellSelection={handleCellSelection}
+            IndeterminateCheckbox={IndeterminateCheckbox}
+            toggleAllRowsSelected={toggleAllRowsSelected}
+          />
+        ) : null}
+        {/* {allowPagination && (
           <TablePagination
             component="div"
             count={rowCount}
@@ -828,25 +797,23 @@ function CustomReactTable({
             }}
             rowsPerPageOptions={gridPageSizes}
           />
-        )}
-
-        {isMobileView ? (
-          <SwipableListForMobile
-            prepareRow={prepareRow}
-            allColumns={allColumns}
-            allowSelection={!hideSelection}
-            dataRows={rows}
-            dispatch={dispatch}
-            loading={loading}
-            page={currentPage}
-            rowCount={rowCount}
-            expander={expander}
-            backgroundColor={setWholeRowsCellColor}
-            renderedFrom={renderedFrom}
-            handleCellSelection={handleCellSelection}
-            IndeterminateCheckbox={IndeterminateCheckbox}
+        )} */}
+        {allowPagination && (
+          <Pagination
+            count={rowCount}
+            page={pageIndex}
+            onPageChange={(event, newPage) => {
+              gotoPage(newPage);
+              dispatch({ type: 'pageChange', page: newPage });
+            }}
+            rowsPerPage={limit}
+            onRowsPerPageChange={(event, value) => {
+              dispatch({ type: 'pageSizeChange', limit: value });
+            }}
+            rowsPerPageOptions={gridPageSizes}
+            disabled={loading}
           />
-        ) : null}
+        )}
       </div>
     </DndProvider>
   );
@@ -947,7 +914,6 @@ const DraggableHeader: React.FC<DraggableHeaderProps> = ({ column, index, reorde
             />
           ) : null}
         </div>
-        {/* <div>{column.canFilter ? column.render('Filter') : null}</div> */}
       </div>
       <div {...column.getResizerProps()} className="resizer" />
     </TableCell>

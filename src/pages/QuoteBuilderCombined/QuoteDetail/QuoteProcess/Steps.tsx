@@ -15,6 +15,7 @@ import CustomDialogFooter from '../../../../components/CustomDialog/CustomDialog
 import CustomDialogContent from '../../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../../../../components/CustomDialog/CustomDialogHeader';
 import { isMobile, isTablet } from 'react-device-detect';
+import DoaStepUsers from './DOAStepUsers';
 
 import Steps1 from 'src/components/Steps';
 
@@ -28,17 +29,15 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: 'bold',
     background: '#bdf7ff'
   },
-  approved: {
-    color: '#6ca826',
-    fontWeight: 'bold',
-    background: '#d8ffaa'
-  },
+
   rejectedByDoa: {
     color: '#d60f0f',
     background: '#fcd4d4',
     fontWeight: 'bold'
   }
 }));
+
+const approvedClasses = `text-[#6ca826] bg-[#d8ffaa] dark:text-[#294c00] dark:bg-[#c2ee8f]`;
 
 const Steps = (props) => {
   const {
@@ -52,7 +51,6 @@ const Steps = (props) => {
     loading,
     approvedQuote,
     handleVersionUpdate,
-    handleViewPdf,
     allowedToEdit,
     DOAData = null,
     quoteData,
@@ -77,7 +75,6 @@ const Steps = (props) => {
   const handleNext = () => {
     if (currentStep === 2) {
       handleVersionUpdate();
-      handleViewPdf();
     }
     axiosInstance()
       .post(`quote-builder/updateprocess/${id}?version=${version}`, {
@@ -158,28 +155,19 @@ const Steps = (props) => {
     <div>
       <Steps1
         currentStep={currentStep}
-        isNextStepEnabled={
-          !loading &&
-          !globalLoading &&
-          nextStep
-        }
+        nextStep={!loading && !globalLoading && nextStep}
         isPrevStep={
-          currentStep >= 0 &&
-          !loading &&
-          !globalLoading &&
-          isPrevStep
+          currentStep >= 0 && !loading && !globalLoading && isPrevStep
           // allowedToEdit &&
           // !versionStatus.includes('Rejected by Customer') &&
           // !(steps.length === 5 && currentStep > 3) &&
           // !versionStatus.includes('Sent for DOA') &&
           // !(steps.length === 6 && currentStep >= 4) &&
           // !versionStatus.includes('Sent to Customer') &&
-
         }
         isStepEnded={isStepEnded || currentStep === steps.length}
         steps={steps}
-        nextStep={steps[currentStep + 1]}
-        setCurrentStep={() => { }}
+        setCurrentStep={() => {}}
         handleNext={() => {
           if (versionStatus.includes('Sent to Customer') && steps[currentStep]?.key === 'Send To Customer') {
             setShowManualCustomerActionDialog(true);
@@ -190,71 +178,43 @@ const Steps = (props) => {
         handlePrev={handleBack}
         setStepFullScreen={setStepFullScreen}
       />
-      {versionStatus.split(' ')[0] !== 'Rejected' ? null : <p>{versionStatus}</p>}
+      {/* {versionStatus.split(' ')[0] !== 'Rejected' ? null : <p>{versionStatus}</p>} */}
       {isMobile && !isTablet ? (
         <></>
       ) : (
         <>
-          <div className="absolute top-[63px] right-[25px] text-[20px] bg-[var(--dark-primary)] font-semibold rounded-bl-md">
+          <div className="absolute top-[64px] right-[25px] text-[20px]  font-semibold rounded-bl-md">
             {!versionStatus.includes('Accepted by Customer') && approvedQuote.approved && approvedQuote.versionApproved === version && (
-              <div className={`${classes.approved} d-flex align-items-center justify-content-center  px-2 py-[3px] max-w-max gap-1 rounded-bl-md`}>
+              <div
+                className={`${approvedClasses} font-bold text d-flex align-items-center justify-content-center bg-[var(--dark-primary)]  px-2 py-[3px] max-w-max gap-1 rounded-bl-md`}
+              >
                 <h6>Quote version - {approvedQuote.versionApproved} of this quote has been Approved</h6>
               </div>
             )}
             <>
-              {versionStatus === 'Sent for DOA' && (
-                <>
-                  {DOAData && (
-                    <>
-                      <NewStepper heading={' '} quoteDOA={DOAData} />
-                      <div
-                        className={`${classes.sent} d-flex align-items-center justify-content-center  px-2 py-[3px] max-w-max gap-1 rounded-bl-md`}
-                      >
-                        <AiOutlineClockCircle size={20} />
-                        <h6>DOA Sent</h6>
-                      </div>
-                    </>
-                  )}
-                </>
-              )}
-              {versionStatus.split(' (')[0] === 'Accepted  by DOA' && (
-                <>
-                  {DOAData && <NewStepper heading={' '} quoteDOA={DOAData} />}
-
-                  <div
-                    className={`${classes.approved} d-flex align-items-center justify-content-center  px-2 py-[3px] max-w-max gap-1 rounded-bl-md`}
-                  >
-                    <FcApproval size={20} />
-                    <h6>Approved by DOA</h6>
-                  </div>
-                </>
-              )}
-              {versionStatus.split(' (')[0] === 'Rejected by DOA' && (
-                <>
-                  {DOAData && <NewStepper heading={' '} quoteDOA={DOAData} />}
-
-                  <div
-                    className={`${classes.rejectedByDoa} d-flex align-items-center justify-content-center  px-2 py-[3px] max-w-max gap-1 rounded-bl-md`}
-                  >
-                    <FcCancel size={20} />
-                    <h6>Rejected by DOA</h6>
-                  </div>
-                </>
-              )}
+              {versionStatus === 'Sent for DOA' && <DoaStepUsers DOAData={DOAData} versionStatus={'Sent for DOA'} />}
+              {versionStatus.split(' (')[0] === 'Accepted  by DOA' && <DoaStepUsers DOAData={DOAData} versionStatus={'Accepted by DOA'} />}
+              {versionStatus.split(' (')[0] === 'Rejected by DOA' && <DoaStepUsers DOAData={DOAData} versionStatus={'Rejected by DOA'} />}
               {versionStatus === 'Sent to Customer' && (
-                <div className={`${classes.sent} d-flex align-items-center justify-content-center  px-2 py-[3px] max-w-max gap-1 rounded-bl-md`}>
+                <div
+                  className={`${classes.sent} d-flex align-items-center justify-content-center bg-[var(--dark-primary)]  px-2 py-[3px] max-w-max gap-1 rounded-bl-md`}
+                >
                   <AiOutlineClockCircle size={20} />
                   <h6>Quote has been sent to customer</h6>
                 </div>
               )}
               {versionStatus.includes('Accepted by Customer') && (
-                <div className={`${classes.approved} d-flex align-items-center justify-content-center  px-2 py-[3px] max-w-max gap-1 rounded-bl-md`}>
+                <div
+                  className={`${approvedClasses} d-flex align-items-center justify-content-center bg-[var(--dark-primary)]  px-2 py-[3px] max-w-max gap-1 rounded-bl-md`}
+                >
                   <FcApproval size={20} />
                   <h6>Approved by Customer</h6>
                 </div>
               )}
               {versionStatus.includes('Rejected by Customer') && (
-                <div className={`${classes.rejected} d-flex align-items-center justify-content-center  px-2 py-[3px] max-w-max gap-1 rounded-bl-md`}>
+                <div
+                  className={`${classes.rejected} d-flex align-items-center justify-content-center bg-[var(--dark-primary)]  px-2 py-[3px] max-w-max gap-1 rounded-bl-md`}
+                >
                   <FcCancel size={20} />
                   <h6>Rejected by Customer</h6>
                 </div>

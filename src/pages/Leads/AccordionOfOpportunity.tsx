@@ -74,7 +74,12 @@ export default function AccordionOfOpportunity({ opportunity, expanded = true, r
                           <CardContent className="card-link">
                             <div className="mb-2">
                               {opportunity.entity === selectedEntity ? (
-                                <Link className="link" to={`${routes.opportunityDetail.path}/${opportunity._id}`}>
+                                <Link
+                                  className="link"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  to={`${routes.opportunityDetail.path}/${opportunity._id}`}
+                                >
                                   <Typography>{opportunity?.opportunityName}</Typography>
                                 </Link>
                               ) : (

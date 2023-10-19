@@ -10,13 +10,13 @@
 
 .price {
   font-size: 18px !important;
-  color: #163340;
+  color: var(--dark-primary-text, #163340);
   font-weight: bold !important;
 }
 
 .sub_price {
   font-size: 16px !important;
-  color: #163340;
+  color: var(--dark-primary-text, #163340);
   font-weight: bold !important;
 }
 

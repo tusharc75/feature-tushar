@@ -352,9 +352,12 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
             </Menu>
           </Box>
           <Box display="flex">
-            <PreviewDownload resource={sidebarResource.purchaseRequisition} referenceId={purchaseRequisitionData?._id} columns={columns} />
+            <PreviewDownload
+              fileName={`${routes.purchaseRequisition.title}-${purchaseRequisitionData?.purchaseRequisitionNumber}`}
+              resource={sidebarResource.purchaseRequisition}
+              referenceId={purchaseRequisitionData?._id}
+              columns={columns} />
             <Box ml={1} />
-
             <Button
               disabled={selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true}
               variant={isMobile ? 'text' : 'outlined'}

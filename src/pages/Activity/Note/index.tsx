@@ -12,7 +12,7 @@ import CustomContainer from '../../../components/CustomContainer';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { GoNote } from 'react-icons/go';
 import { ExpandMore } from '@material-ui/icons';
-import { Button, Chip, Dialog, Link, Menu, MenuItem, TextField } from '@material-ui/core';
+import { Button, Chip, Dialog, IconButton, Link, Menu, MenuItem, TextField } from '@material-ui/core';
 import { AddOutlined } from '@material-ui/icons';
 import { CreateNote } from '../../../components/Activity/Note/CreateNote';
 import { CustomDialogTransition, gridLoadingTimeout, sidebarResource } from '../../../constants/helpers';
@@ -23,6 +23,7 @@ import CustomAgGrid, { reducer, intialState } from '../../../components/AgGridCo
 import { displayDate } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import GridDeleteIcon from '../../../components/Helpers/GridDeleteIcon';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
@@ -69,7 +70,16 @@ const Note = () => {
 
   const columns = [
     { field: 'name', headerName: 'Title', show: true, disabled: true, primaryField: true, cellRenderer: 'nameRenderer' },
-    { field: 'relatedTo', headerName: 'Related To', show: true, disabled: true, primaryField: true, cellRenderer: 'referenceRenderer' },
+    {
+      field: 'relatedTo',
+      headerName: 'Related To',
+      show: true,
+      disabled: true,
+      primaryField: true,
+      filter: false,
+      sortable: false,
+      cellRenderer: 'referenceRenderer'
+    },
     { field: 'createdByDate', headerName: 'Created At', filter: false, sortable: false, show: true, cellRenderer: 'createdAtDateRenderer' },
     { field: 'updatedByDate', headerName: 'Updated At', filter: false, sortable: false, show: true, cellRenderer: 'updatedAtDateRenderer' }
   ];
@@ -163,12 +173,13 @@ const Note = () => {
       {params.value && params.value?.length > 0 ? (
         params.value.map((d) => {
           return (
-            <>
-              <Link className="link text-truncate" onClick={() => history.push(`${routes[d?.type].path}/detail/${d?.referenceId}`)}>
-                {d.name}
-              </Link>
+            <div style={{ display: 'flex', alignItems: 'center' }} key={d.name}>
+              <p> {d.name}</p>
+              <IconButton className="ml-3" size="small" onClick={() => window.open(`${routes[d?.type].path}/detail/${d?.referenceId}`)}>
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
               <Chip className="ml-3" color="primary" label={`${routes[d?.type]?.title}`} />
-            </>
+            </div>
           );
         })
       ) : (
@@ -218,7 +229,8 @@ const Note = () => {
             createdByDate: u.createdBy?.date,
             updatedBy: u.updatedBy?.user?.concatedName,
             updatedByDate: u.updatedBy?.date,
-            isChecked: false
+            isChecked: false,
+            canDelete: permissions?.note?.isDelete ? u.createdBy?.user === user?.user?._id : false
           };
           return res;
         });
@@ -430,7 +442,7 @@ const Note = () => {
                         showConfirmBox(selectedRecords);
                         closeActions();
                       }}
-                      disabled={!permissions?.note?.isDelete}
+                      disabled={permissions?.note?.isDelete ? !selectedRecords.every((records) => records.canDelete) : true}
                     >
                       Delete
                     </MenuItem>
@@ -456,9 +468,13 @@ const Note = () => {
             dispatch={dispatch}
             onEdit={(data) => {}}
             extraParamsToCheckDelete={true}
-            onDelete={(data) => {
-              showConfirmBox(selectedRecords);
-              closeActions();
+            // onDelete={(data) => {
+            //   showConfirmBox(selectedRecords);
+            //   closeActions();
+            // }}
+            actionCol={(data) => {
+              const param = { data };
+              return <ActionsRenderer {...param} />;
             }}
             rowCount={rowCount}
             page={page}

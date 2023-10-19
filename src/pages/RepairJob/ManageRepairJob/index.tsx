@@ -17,7 +17,8 @@ import {
   yupSchema,
   repairJobProcessSteps,
   sidebarResource,
-  GenerateResourceLineNumber
+  GenerateResourceLineNumber,
+  REPAIR_JOB_STATUS
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import Dialog from '@material-ui/core/Dialog';
@@ -56,7 +57,15 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
     axiosInstance()
       .get(`/field?resource=${sidebarResource.repairJob}`)
       .then(({ data: { data } }) => {
-        data = data.filter((obj) => obj?.fieldData?.fieldName !== 'rentalJob');
+        const hideFields = ['rentalJob', 'actualEndDate']
+        data = data.filter((obj) => !hideFields?.includes(obj?.fieldData?.fieldName));
+
+        data?.forEach((e) => {
+          if (e?.fieldData?.fieldName === 'chartOfAccount' && e?.fieldData?.isDefaultValue && e?.fieldData?.defaultValue) {
+            const filteredOption = e.fieldData?.option?.filter((obj) => obj?.optionValue === e?.fieldData?.defaultValue) || [];
+            e.fieldData.option = filteredOption;
+          }
+        })
 
         const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
         const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
@@ -66,10 +75,10 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
             .get(`${repairJob.api}/` + repairJobId)
             .then(({ data: { data } }) => {
               if (isClone) {
-                const { _id, brand, createdBy, history, repairJobName, updatedBy, ...rest } = data;
+                const { _id, brand, createdBy, history, repairJobName, actualEndDate, expectedCompletionDate, updatedBy, ...rest } = data;
                 setTitle(`Clone - ${repairJobName}`);
                 rest.repairJobName = GenerateResourceLineNumber(fieldsDataForCreate);
-                rest.status = `New`;
+                rest.status = REPAIR_JOB_STATUS.new;
                 setInitialData({
                   fields: fieldsDataForCreate,
                   values: { ...getObjKeysWithValues(rest, fieldsDataForCreate) }

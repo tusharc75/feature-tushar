@@ -33,12 +33,7 @@ const MyCalendar = (props: Props) => {
               : obj.type === 'Task'
               ? 'var(--dark-secondary,rgba(234, 239, 254, 1))'
               : 'var(--dark-secondary,rgba(253, 220, 228, 1))',
-          color:
-            obj.type === 'Event'
-              ? 'rgba(236, 85, 0, 1)'
-              : obj.type === 'Task'
-              ? 'var(--dark-secondary-text,rgba(4, 50, 161, 1))'
-              : 'rgba(165, 4, 43, 1)',
+          color: obj.type === 'Event' ? 'rgba(236, 85, 0, 1)' : obj.type === 'Task' ? 'var(--task-color,rgba(4, 50, 161, 1))' : 'rgba(165, 4, 43, 1)',
           borderRadius: '4px',
           border: 'none',
           padding: '8px 16px'

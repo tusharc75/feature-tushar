@@ -18,7 +18,7 @@ import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { customerAccount, gridLoadingTimeout, opportunity, prepareDataForGrid, sidebarResource, supplierAccount } from '../../constants/helpers';
+import { customerAccount, gridLoadingTimeout, opportunity, prepareDataForGrid, sidebarResource, supplierAccount, getLocalStorageArrayData, removeLocalStorage } from '../../constants/helpers';
 import useColumns, { checkStaticField, getFrameworkComponents, getStaticFields, gridFilterParser } from '../../constants/useColumns';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
@@ -77,21 +77,10 @@ const Opportunities = () => {
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
-  const columnState = JSON.parse(localStorage.getItem(opportunityResource));
-  const [isAllChecked, setIsAllChecked] = useState(false);
-  const [clonedData, setClonedData] = useState([]);
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
+
   const localStorageSelectedRecords = `${opportunityResource}_selected`;
 
-  if (columnState) {
-    columns.map((item) => {
-      columnState.map((d) => {
-        if (d.colId === item.field) {
-          item.show = !d.hide;
-        }
-      });
-    });
-  }
 
   //  Grid Variables - End
   useEffect(() => {
@@ -169,7 +158,7 @@ const Opportunities = () => {
     if (renderCount > 0) {
       fetchOpportunities();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting, selectedEntity, accountDetails]);
+  }, [page, limit, selectedType, filters, sorting, selectedEntity, accountDetails, showFilteredRecordsOnly]);
 
   const handleSingleDeleteOpportunity = async () => {
     dispatch({ type: 'loading', loading: true });
@@ -244,6 +233,11 @@ const Opportunities = () => {
 
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
+    }
+
+    if (showFilteredRecordsOnly) {
+      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
 
     if (selectedEntity) {
@@ -321,8 +315,7 @@ const Opportunities = () => {
             };
             return res;
           });
-          setIsAllChecked(false);
-          setClonedData(data);
+         
           if (appendRows) {
             dispatch({
               type: 'initialize',
@@ -337,21 +330,6 @@ const Opportunities = () => {
               count: count,
               selectedRecords: rows.filter((f) => f.isChecked === true)
             });
-          }
-
-          if (gridApi) {
-            try {
-              let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords)
-                ? JSON.parse(localStorage.getItem(localStorageSelectedRecords))
-                : [];
-              if (oldSelectedRecords.length > 0) {
-                gridApi.forEachNode(function (node) {
-                  node.setSelected(oldSelectedRecords.some((o) => o === node.data._id));
-                });
-              }
-            } catch (ex) {
-              console.error('Error in getting selected records from local storage');
-            }
           }
 
           dispatch({ type: 'initialize', data: rows, count: count });
@@ -371,6 +349,7 @@ const Opportunities = () => {
   };
 
   const handleOpportunityTypeChange = (filterValues) => {
+    dispatch({ type: 'setPage', page: 0 });
     setSelectedType(filterValues);
   };
 
@@ -421,6 +400,7 @@ const Opportunities = () => {
             type: 'success',
             message: data.message
           });
+          removeLocalStorage(localStorageSelectedRecords);
           setIsConformDialogVisible(false);
           setDeleteLoading(false);
           if (deleteRecord) setDeleteRecord({});
@@ -447,8 +427,12 @@ const Opportunities = () => {
           }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
-          recordsToExport={selectedRecords.length}
-          ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+          recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+          ids={
+            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+              ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+              : []
+          }
           onExportToExcelSuccess={() => {
             if (gridApi) gridApi.deselectAll();
             else fetchOpportunities();
@@ -483,8 +467,9 @@ const Opportunities = () => {
               <Chip
                 className="ml-3"
                 color="primary"
-                label={`${accountDetails.resource === customerAccount.accountResource ? 'Customer' : 'Supplier'} Account: ${accountDetails.accountName
-                  }`}
+                label={`${accountDetails.resource === customerAccount.accountResource ? 'Customer' : 'Supplier'} Account: ${
+                  accountDetails.accountName
+                }`}
                 onDelete={() => {
                   setAccountDetails({ accountId: null, accountName: null, resource: null });
                 }}
@@ -496,6 +481,7 @@ const Opportunities = () => {
         {Object.keys(frameWorkComponent).length > 0 ? (
           isMobile && !isTablet ? (
             <CustomSwipableList
+              key={selectedType}
               allowSelection={true}
               allowSwipe={true}
               permissions={permissions[opportunityResource]}
@@ -583,8 +569,9 @@ const Opportunities = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.opportunityName ? 'Opportunity' : 'Opportunities'}   ${deleteRecord.opportunityName || ''
-              }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.opportunityName ? 'Opportunity' : 'Opportunities'}   ${
+              deleteRecord.opportunityName || ''
+            }?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
               setIsConformDialogVisible(false);

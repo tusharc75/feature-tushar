@@ -20,16 +20,11 @@ import Productpackage from './Productpackage';
 import { isMobile, isTablet } from 'react-device-detect';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import {
-  FcClock,
-  FcOk,
-  FcCancel,
   GiReceiveMoney,
   IoArrowDownCircleSharp,
   MdDelete,
-  MdDeleteSweep,
   RiFlowChart,
   VscVersions,
-  FcApproval,
   MdAutorenew,
   SiSemanticrelease
 } from 'react-icons/all';
@@ -84,7 +79,6 @@ const QuotationDetails = () => {
   const [showAllVersionStatus, setShowAllVersionStatus] = useState(false);
   const [currVersionId, setCurrVersionId] = useState(null);
   const [sentToCustomer, setSentToCustomer] = useState(false);
-  const [versionStatus, setVersionStatus] = useState(QUOTATION_STATUS.acceptByCustomer);
 
   const [convertConfirmBox, setConvertConfirmBox] = useState(false);
   const [renewal, setRenewal] = useState(false);
@@ -92,6 +86,7 @@ const QuotationDetails = () => {
 
   const [stepList, setStepList] = useState(quotationProcessSteps);
   const [stepNames, setStepNames] = useState(quotationProcessSteps.map((item) => item.name));
+  const [canConvert, setCanConvert] = useState(false);
 
   useEffect(() => {
     if (tabValue !== tab) {
@@ -138,31 +133,24 @@ const QuotationDetails = () => {
   const getQuotationFields = useMemo(() => {
     let tempQuotationFields = quotationFields;
     if (quotationData && quotationFields.length !== 0) {
-      if (quotationData['type'] === 'Rental Job') {
+      if (quotationData['type'] === QUOTATION_TYPE.rentalJob) {
         tempQuotationFields = tempQuotationFields.filter(
-          (d) =>
-            d?.fieldData?.fieldName !== 'expectedCustomerDeliveryDate' &&
-            d?.fieldData?.fieldName !== 'supplierSuggestedDeliveryDate' &&
-            d?.fieldData?.fieldName !== 'repairOrder' &&
-            d?.fieldData?.fieldName !== 'salesOrder'
+          (d) => !['expectedCustomerDeliveryDate', 'supplierSuggestedDeliveryDate', 'repairOrder', 'salesOrder', 'fieldJob']?.includes(d?.fieldData?.fieldName)
         );
       }
-      if (quotationData['type'] === 'Repair Order') {
+      if (quotationData['type'] === QUOTATION_TYPE.fieldJob) {
         tempQuotationFields = tempQuotationFields.filter(
-          (d) =>
-            d?.fieldData?.fieldName !== 'expectedCustomerDeliveryDate' &&
-            d?.fieldData?.fieldName !== 'supplierSuggestedDeliveryDate' &&
-            d?.fieldData?.fieldName !== 'rentalJob' &&
-            d?.fieldData?.fieldName !== 'salesOrder'
+          (d) => !['expectedCustomerDeliveryDate', 'supplierSuggestedDeliveryDate', 'repairOrder', 'salesOrder', 'rentalJob']?.includes(d?.fieldData?.fieldName)
         );
       }
-      if (quotationData['type'] === 'Sales Order') {
+      if (quotationData['type'] === QUOTATION_TYPE.repairOrder) {
         tempQuotationFields = tempQuotationFields.filter(
-          (d) =>
-            d?.fieldData?.fieldName !== 'estimateStartDate' &&
-            d?.fieldData?.fieldName !== 'estimateEndDate' &&
-            d?.fieldData?.fieldName !== 'repairOrder' &&
-            d?.fieldData?.fieldName !== 'rentalJob'
+          (d) => !['expectedCustomerDeliveryDate', 'supplierSuggestedDeliveryDate', 'salesOrder', 'fieldJob', 'rentalJob']?.includes(d?.fieldData?.fieldName)
+        );
+      }
+      if (quotationData['type'] === QUOTATION_TYPE.salesOrder) {
+        tempQuotationFields = tempQuotationFields.filter(
+          (d) => !['estimateStartDate', 'estimateEndDate', 'fieldJob', 'repairOrder', 'rentalJob']?.includes(d?.fieldData?.fieldName)
         );
       }
     }
@@ -184,6 +172,61 @@ const QuotationDetails = () => {
       fetchQuotationData();
     }
   }, [id]);
+
+  useEffect(() => {
+    if (quotationData && quotationFields) {
+      if (quotationData?.type) {
+        if (quotationData?.type === QUOTATION_TYPE.rentalJob) {
+          var canAllowMultipleTimeConvert = false;
+          const rentalJobField = quotationFields?.find((e) => e?.fieldData?.fieldName === 'rentalJob')?.fieldData
+          if (rentalJobField) {
+            if (rentalJobField?.type === "multiSelect") {
+              canAllowMultipleTimeConvert = true
+            }
+          }
+          if (canAllowMultipleTimeConvert && [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.converted]?.includes(quotationData?.status)
+            && quotationData.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer) {
+            var isAllowedToEdit = [...(quotationData.collaborator ?? []), quotationData.owner].some((d) => d?.optionValue === user?.user?._id);
+            if (user?.role?.selectedEntity?.superAdminAccess) {
+              isAllowedToEdit = true;
+            }
+            setAllowedToEdit(isAllowedToEdit)
+            setCanConvert(true)
+          }
+          else if (!quotationData?.rentalJob && [QUOTATION_STATUS.acceptByCustomer]?.includes(quotationData?.status)) {
+            setCanConvert(true)
+          }
+          else {
+            setCanConvert(false)
+          }
+        }
+        else if (quotationData?.type === QUOTATION_TYPE.salesOrder) {
+          if (!quotationData?.salesOrder && [QUOTATION_STATUS.acceptByCustomer]?.includes(quotationData?.status)) {
+            setCanConvert(true)
+          }
+          else {
+            setCanConvert(false)
+          }
+        }
+        else if (quotationData?.type === QUOTATION_TYPE.repairOrder) {
+          if (!quotationData?.repairOrder && [QUOTATION_STATUS.acceptByCustomer]?.includes(quotationData?.status)) {
+            setCanConvert(true)
+          }
+          else {
+            setCanConvert(false)
+          }
+        }
+        else if (quotationData?.type === QUOTATION_TYPE.fieldJob) {
+          if (!quotationData?.fieldJob && [QUOTATION_STATUS.acceptByCustomer]?.includes(quotationData?.status)) {
+            setCanConvert(true)
+          }
+          else {
+            setCanConvert(false)
+          }
+        }
+      }
+    }
+  }, [quotationData, quotationFields]);
 
   const fetchQuotationData = async (version: any = 0, loading = true) => {
     setLoading(loading);
@@ -219,7 +262,6 @@ const QuotationDetails = () => {
       }
       setCurrentVersion(versionIndex);
       setCurrVersionId(data.versions[versionIndex]?._id);
-      setVersionStatus(data.versions[versionIndex]?.status);
       setSentToCustomer(data.versions[versionIndex]?.status === QUOTATION_STATUS.sentToCustomer);
 
       if (data.versions[versionIndex]?.status === QUOTATION_STATUS.acceptByCustomer) {
@@ -309,16 +351,16 @@ const QuotationDetails = () => {
           message: `Converted Successfully`
         });
         if (quotationData?.type === QUOTATION_TYPE.rentalJob) {
-          history.push(`${routes.rentalManagementDetail.path}/${data?._id}`);
+          window.open(`${routes.rentalManagementDetail.path}/${data?._id}`)
         }
         if (quotationData?.type === QUOTATION_TYPE.salesOrder) {
-          history.push(`${routes.salesOrderDetail.path}/${data?._id}`);
+          window.open(`${routes.salesOrderDetail.path}/${data?._id}`)
         }
         if (quotationData?.type === QUOTATION_TYPE.repairOrder) {
-          history.push(`${routes.repairOrderDetail.path}/${data?._id}`);
+          window.open(`${routes.repairOrderDetail.path}/${data?._id}`)
         }
         if (quotationData?.type === QUOTATION_TYPE.fieldJob) {
-          history.push(`${routes.fieldServiceOrderDetail.path}/${data?._id}`);
+          window.open(`${routes.fieldServiceOrderDetail.path}/${data?._id}`)
         }
       })
       .catch((error) => {
@@ -374,7 +416,7 @@ const QuotationDetails = () => {
                       Release
                     </Button>
                   </HtmlTooltip></>}
-                <HtmlTooltip title="Quote Summary">
+                <HtmlTooltip title={`${routes.quotation.title} Summary`}>
                   <Button
                     onClick={() => {
                       setShowQuotationSummaryDialog(true);
@@ -441,13 +483,15 @@ const QuotationDetails = () => {
                           closeActionsAction();
                         }}
                       >
-                        Edit Quote
+                        Edit
                       </Button>
                     </MenuItem>
                   )}
                   <MenuItem>
                     <Button
-                      disabled={!allowedToEdit || isCloning || loading}
+                      disabled={!allowedToEdit || isCloning || loading
+                        || quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer
+                        || [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.converted]?.includes(quotationData?.status)}
                       variant="text"
                       type="button"
                       size="small"
@@ -460,25 +504,36 @@ const QuotationDetails = () => {
                       {isCloning ? <>Cloning Version-{currentVersion}</> : `Clone Version-${currentVersion}`}
                     </Button>
                   </MenuItem>
-                  {allowedToEdit &&
-                    quotationData?.type &&
-                    quotationData?.status === QUOTATION_STATUS.acceptByCustomer &&
-                    !quotationData?.rentalJob &&
-                    !quotationData?.repairOrder &&
-                    !quotationData?.salesOrder &&
-                    !quotationData?.fieldJob && (
+                  {(allowedToEdit && canConvert) && (
+                    <MenuItem>
+                      <Button
+                        onClick={() => {
+                          setConvertConfirmBox(true);
+                          closeActionsAction();
+                        }}
+                        variant="text"
+                        type="button"
+                        size="small"
+                        startIcon={<CachedIcon />}
+                      >
+                        Convert to {quotationData?.type || ""}
+                      </Button>
+                    </MenuItem>
+                  )}
+                  {currentVersion !== 1 && permissions?.quotation?.isDelete
+                    && quotationData?.versions[currentVersion]?.status !== QUOTATION_STATUS.acceptByCustomer && (
                       <MenuItem>
                         <Button
+                          variant="text"
+                          size="small"
+                          disabled={!allowedToEdit || loading}
+                          startIcon={<MdDelete className={isMobile ? 'mr-1' : ''} />}
                           onClick={() => {
-                            setConvertConfirmBox(true);
+                            deleteVersion();
                             closeActionsAction();
                           }}
-                          variant="text"
-                          type="button"
-                          size="small"
-                          startIcon={<CachedIcon />}
                         >
-                          Convert to {quotationData?.type || ""}
+                          Delete Version-{currentVersion}
                         </Button>
                       </MenuItem>
                     )}
@@ -493,26 +548,11 @@ const QuotationDetails = () => {
                           closeActionsAction();
                         }}
                       >
-                        Delete Quote
+                        Delete
                       </Button>
                     </MenuItem>
                   )}
-                  {currentVersion !== 1 && permissions?.quotation?.isDelete && (
-                    <MenuItem>
-                      <Button
-                        variant="text"
-                        size="small"
-                        disabled={!allowedToEdit || loading}
-                        startIcon={<MdDeleteSweep className={isMobile ? 'mr-1' : ''} />}
-                        onClick={() => {
-                          deleteVersion();
-                          closeActionsAction();
-                        }}
-                      >
-                        Delete Version-{currentVersion}
-                      </Button>
-                    </MenuItem>
-                  )}
+
                 </Menu>
               </>
             ) : (
@@ -641,9 +681,11 @@ const QuotationDetails = () => {
                 <AdditionalCost
                   quotationData={quotationData}
                   setNextStep={setNextStep}
+                  setPrevStep={setPrevStep}
                   renderedFrom={renderedFrom}
                   version={currentVersion}
                   allowedToEdit={allowedToEdit}
+                  stepFullScreen={stepFullScreen}
                 />
               )}
               {stepNames[currentStep] === 'Quote Builder' && quotationData && (

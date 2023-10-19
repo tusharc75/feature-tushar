@@ -25,6 +25,7 @@ import { ACTIVITY_RESOURCE, PRODUCTION_ORDER_STATUS, productionOrder, production
 import ManageProductionOrder from './ManageProductionOrder';
 import Material from './Material';
 import WorkOrder from './WorkOrder';
+import LoadingTicket from './LoadingTicket';
 
 function a11yProps(index: any) {
   return {
@@ -127,6 +128,9 @@ const ProductionOrderDetails = () => {
         if (user?.role?.selectedEntity?.superAdminAccess) {
           isAllowedToEdit = true;
         }
+        if (!data?.customerAccount) {
+          setProductionOrderProcessSteps(productionOrderSteps.filter((o) => o.name !== 'Loading Ticket'));
+        }
         setAllowedToEdit(isAllowedToEdit);
         setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
         setProductionOrderData({ ...data });
@@ -160,8 +164,8 @@ const ProductionOrderDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${productionOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
+      .then(({ data }) => { })
+      .catch((error) => { });
   };
 
   const handleStatusChange = (o) => {
@@ -340,8 +344,21 @@ const ProductionOrderDetails = () => {
                 setNextStep={setNextStep}
                 renderedFrom={`${renderedFrom}_grid-2`}
                 stepFullScreen={stepFullScreen}
+                allowedToEdit={allowedToEdit && permissions?.productionOrder?.isUpdate ? true : false}
+                setCurrentStep={setCurrentStep}
               />
             )}
+            {productionOrderProcessStepsNames[currentStep] === 'Loading Ticket' && productionOrderData && (
+              <LoadingTicket
+                productionOrderData={productionOrderData}
+                setNextStep={setNextStep}
+                renderedFrom={`${renderedFrom}_grid-2`}
+                stepFullScreen={stepFullScreen}
+                allowedToEdit={allowedToEdit && permissions?.productionOrder?.isUpdate ? true : false}
+                setCurrentStep={setCurrentStep}
+              />
+            )}
+
           </ContentFullScreen>
         </TabPanel>
       </Box>

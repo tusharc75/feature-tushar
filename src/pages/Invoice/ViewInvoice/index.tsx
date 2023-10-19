@@ -2,7 +2,7 @@ import { useState, useEffect, useContext, Fragment } from 'react';
 import Button from '@material-ui/core/Button';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
-import { Box, Grid, Dialog, IconButton } from '@material-ui/core';
+import { Box, Grid, Dialog, IconButton, Tabs, Tab } from '@material-ui/core';
 import { isMobile, isTablet } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
 import { CustomDialogTransition, INVOICE_STATUS, invoice, sidebarResource } from 'src/constants/helpers';
@@ -12,27 +12,34 @@ import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
 import { camelCase, startCase } from 'lodash';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import PreviewDownload from 'src/components/PreviewDownload';
-import { generateCustomTableColumns } from 'src/constants/columns';
-import CommentDialog from 'src/components/CommentDialog';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import { IoMdDownload } from 'react-icons/io';
+import TabPanel from 'src/components/TabPanel';
+import CreditMemo from '../CreditMemo';
+import CommentDialog from 'src/components/CommentDialog';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
+import { generateCustomTableColumns } from 'src/constants/columns';
 
-const ViewInvoice = ({ invoiceData, onClose, onSuccess }) => {
+const ViewInvoice = ({ invoiceData, onClose, onSuccess, resource }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = `${camelCase(routes?.invoice.title)}_view`;
 
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
-  const [commentDialog, setCommentDialog] = useState(false)
-
+  const [commentDialog, setCommentDialog] = useState(false);
 
   const [isDownloadingZip, setIsDownloadingZip] = useState(false);
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
+
+  const [tabValue, setTabValue] = useState(0);
+
+  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+    setTabValue(newValue);
+  };
 
   useEffect(() => {
     fetchFields();
@@ -46,7 +53,7 @@ const ViewInvoice = ({ invoiceData, onClose, onSuccess }) => {
         e.isColumnEditable = false;
       });
       const newColumns = generateCustomTableColumns(data, invoiceData?.currency, renderedFrom);
-      let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
+      let qtyIndex = newColumns?.findIndex((d) => d.accessor === 'qty');
       if (qtyIndex > -1) {
         newColumns[qtyIndex].accessor = 'qtyDisplay';
       }
@@ -196,25 +203,6 @@ const ViewInvoice = ({ invoiceData, onClose, onSuccess }) => {
     return subRows;
   };
 
-  const handleCancelInvoice = async (data) => {
-    axiosInstance().patch(`${routes?.fieldTicketInvoice.path}/invoice/cancle`, {
-      invoice: invoiceData?._id,
-      fieldTicket: invoiceData?.id,
-      comment: data,
-    })
-      .then(({ data }) => {
-        onSuccess();
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  }
-
   const handleDownloadZip = () => {
     setIsDownloadingZip(true);
     axiosInstance()
@@ -225,7 +213,7 @@ const ViewInvoice = ({ invoiceData, onClose, onSuccess }) => {
         const url = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement('a');
         link.href = url;
-        const filename = response.headers["content-disposition"].split("filename=")[1];
+        const filename = response.headers['content-disposition'].split('filename=')[1];
         link.setAttribute('download', filename);
         document.body.appendChild(link);
         link.click();
@@ -247,7 +235,7 @@ const ViewInvoice = ({ invoiceData, onClose, onSuccess }) => {
         const url = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement('a');
         link.href = url;
-        const filename = response.headers["content-disposition"].split("filename=")[1];
+        const filename = response.headers['content-disposition'].split('filename=')[1];
         link.setAttribute('download', filename);
         document.body.appendChild(link);
         link.click();
@@ -259,97 +247,161 @@ const ViewInvoice = ({ invoiceData, onClose, onSuccess }) => {
       });
   };
 
+  const handleCancelInvoice = async (data) => {
+    axiosInstance()
+      .patch(`${routes?.fieldTicketInvoice.path}/invoice/cancle`, {
+        invoice: invoiceData?._id,
+        fieldTicket: invoiceData?.id,
+        comment: data
+      })
+      .then(({ data }) => {
+        onSuccess();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   return (
     <Fragment>
       <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
         <CustomDialogHeader title={`Invoice Number : ${invoiceData?.invoiceNumber}`} onClose={onClose} showRequiredLabel={false}></CustomDialogHeader>
         <CustomDialogContent>
           <Fragment>
-            <Grid container spacing={2} >
-              <Grid item xs={12} sm={6} md={6}>
-                {invoiceData &&
-                  <Box display="flex" p={1}>
-                    <PreviewDownload
-                      resource={sidebarResource.invoice}
-                      referenceId={invoiceData?._id}
-                      columns={columns}
-                      hideDetailButton={true}
-                      isSendEmail={true}
-                      defaultColumns={[
-                        'type',
-                        'detail',
-                        'fieldTicket',
-                        'qty',
-                        'unit',
-                        'pricingMethod',
-                        'actualStartDate',
-                        'actualEndDate',
-                        `price_${invoiceData?.currency?.toLowerCase()}`,
-                        `totalPrice_${invoiceData?.currency?.toLowerCase()}`,
-                        `taxPercentage`,
-                        `tax_${invoiceData?.currency?.toLowerCase()}`,
-                        `finalPrice_${invoiceData?.currency?.toLowerCase()}`
-                      ]}
-                    />
-                    <Button
-                      variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                      className="btn-outline-v1 ml-3"
-                      type="button"
-                      size="small"
-                      disabled={isDownloadingZip ? true : false}
-                      startIcon={isMobile ? '' : <IoMdDownload />}
-                      onClick={(e) => {
-                        handleDownloadZip();
-                      }}
-                    >
-                      {isMobile && !isTablet ? <IoMdDownload size={20} /> : isDownloadingZip ? 'Please wait...' : 'Save as Zip File'}
-                    </Button>
-                    <Button
-                      variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                      className="btn-outline-v1 ml-3"
-                      type="button"
-                      size="small"
-                      disabled={isDownloadingPdf ? true : false}
-                      startIcon={isMobile ? '' : <IoMdDownload />}
-                      onClick={(e) => {
-                        handleDownloadPdf();
-                      }}
-                    >
-                      
-                      {isMobile && !isTablet ? <IoMdDownload size={20} /> : isDownloadingPdf ? 'Please wait...' : 'Download All'}
-                    </Button>
-                  </Box>
-                }
-              </Grid>
-              <Grid item xs={12} sm={6} md={6}>
-                <Box display="flex" justifyContent={'end'} p={1}>
-                  {(rowsData && rowsData?.length > 0) &&
-                    <DeleteButton text="Cancel Invoice" onClick={() => setCommentDialog(true)} />
+            <div className="flex flex-wrap gap-2 mb-2">
+              {invoiceData && (
+                <Box className="flex flex-wrap gap-2">
+                  <PreviewDownload
+                    fileName={`${routes.invoice.title}-${invoiceData?.invoiceNumber}`}
+                    resource={sidebarResource.invoice}
+                    referenceId={invoiceData?._id}
+                    columns={columns}
+                    hideDetailButton={true}
+                    isSendEmail={true}
+                    defaultColumns={[
+                      'type',
+                      'detail',
+                      'fieldTicket',
+                      'qty',
+                      'unit',
+                      'pricingMethod',
+                      'actualStartDate',
+                      'actualEndDate',
+                      `price_${invoiceData?.currency?.toLowerCase()}`,
+                      `totalPrice_${invoiceData?.currency?.toLowerCase()}`,
+                      `taxPercentage`,
+                      `tax_${invoiceData?.currency?.toLowerCase()}`,
+                      `finalPrice_${invoiceData?.currency?.toLowerCase()}`
+                    ]}
+                  />
+                  {resource === sidebarResource.fieldTicketInvoice &&
+                    <>
+                      <Button
+                        variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                        className="btn-outline-v1"
+                        type="button"
+                        size="small"
+                        disabled={isDownloadingZip ? true : false}
+                        startIcon={isMobile ? '' : <IoMdDownload />}
+                        onClick={(e) => {
+                          handleDownloadZip();
+                        }}
+                      >
+                        {isMobile && !isTablet ? <IoMdDownload size={20} /> : isDownloadingZip ? 'Please wait...' : 'Save as Zip File'}
+                      </Button>
+                      <Button
+                        variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                        className="btn-outline-v1"
+                        type="button"
+                        size="small"
+                        disabled={isDownloadingPdf ? true : false}
+                        startIcon={isMobile ? '' : <IoMdDownload />}
+                        onClick={(e) => {
+                          handleDownloadPdf();
+                        }}
+                      >
+                        {isMobile && !isTablet ? <IoMdDownload size={20} /> : isDownloadingPdf ? 'Please wait...' : 'Download Invoice Tickets'}
+                      </Button>
+                    </>
                   }
                 </Box>
-              </Grid>
-            </Grid>
-            {columns && rowsData ? (
-              <Box zIndex={5} width={'100%'} height={'calc(100vh - 285px)'} p={1}>
-                <CustomReactTable
-                  height={'calc(100vh - 200px)'}
-                  columns={columns}
-                  data={rowsData}
-                  onSelect={() => { }}
-                  childrenProperty="subRows"
-                  uniqueKey="_id"
-                  hideSelection={true}
-                  hideAction={true}
-                  renderedFrom={renderedFrom}
-                  isClientSideGrid={true}
-                  hideExpander={true}
+              )}
+              <div className="ml-auto">
+                {rowsData && rowsData?.length > 0 && resource === sidebarResource.fieldTicketInvoice &&
+                  <DeleteButton text="Cancel Invoice" onClick={() => setCommentDialog(true)} />}
+              </div>
+            </div>
+            <Box pt={1}>
+              {/* <Tabs
+                className="new-tab-container-v1"
+                value={tabValue}
+                onChange={handleMainTabChange}
+                textColor="primary"
+                TabIndicatorProps={{
+                  style: {
+                    height: 0
+                  }
+                }}
+              >
+                <Tab
+                  className={'tabLayout'}
+                  label={
+                    <div className="d-flex align-items-center tab-font">
+                      Details
+                    </div>
+                  }
+                  value={0}
+                  aria-controls="a11y-tabpanel-0"
+                  id="a11y-tab-0"
                 />
-              </Box>
-            ) : (
-              <Box p={2} height={500}>
-                <CommonSkeleton lenArray={[...Array(10).keys()]} />
-              </Box>
-            )}
+                <Tab
+                  className={'tabLayout'}
+                  label={
+                    <div className="d-flex align-items-center tab-font">
+                      Credit Memo
+                    </div>
+                  }
+                  value={1}
+                  aria-controls="a11y-tabpanel-1"
+                  id="a11y-tab-1"
+                />
+              </Tabs> */}
+              <Fragment>
+                {columns && rowsData ? (
+                  <Box zIndex={5} width={'100%'} height={'calc(100vh - 285px)'} pt={1}>
+                    <CustomReactTable
+                      height={'calc(100vh - 200px)'}
+                      columns={columns}
+                      data={rowsData}
+                      onSelect={() => { }}
+                      childrenProperty="subRows"
+                      uniqueKey="_id"
+                      hideSelection={true}
+                      hideAction={true}
+                      renderedFrom={renderedFrom}
+                      isClientSideGrid={true}
+                      hideExpander={true}
+                    />
+                  </Box>
+                ) : (
+                  <Box p={2} height={500}>
+                    <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                  </Box>
+                )}
+
+              </Fragment>
+              {/* <TabPanel value={tabValue} index={0}>
+
+              </TabPanel>
+              <TabPanel value={tabValue} index={1}>
+                <CreditMemo invoiceData={invoiceData} />
+              </TabPanel> */}
+            </Box>
           </Fragment>
         </CustomDialogContent>
         <CustomDialogFooter>
@@ -366,16 +418,15 @@ const ViewInvoice = ({ invoiceData, onClose, onSuccess }) => {
           </Button>
         </CustomDialogFooter>
       </Dialog>
-
       {commentDialog && (
         <CommentDialog
           required={true}
           handleSubmit={(data) => {
-            handleCancelInvoice(data)
-            setCommentDialog(false)
+            handleCancelInvoice(data);
+            setCommentDialog(false);
           }}
           handleClose={() => {
-            setCommentDialog(false)
+            setCommentDialog(false);
           }}
         />
       )}

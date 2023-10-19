@@ -1,8 +1,6 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import AddIcon from '@material-ui/icons/Add';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -14,7 +12,7 @@ import { Box, Chip, Menu, MenuItem, TextField } from '@material-ui/core';
 import SearchBox from '../../components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import routes from '../../components/Helpers/Routes';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
+import { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import {
   serializedAsset,
   isObjectEmpty,
@@ -22,8 +20,7 @@ import {
   product,
   warehouse as warehouseHelper,
   ASSET_STATUS,
-  COLOUR_MASTER,
-  getLocalStorageArrayData
+  COLOUR_MASTER
 } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { useData } from '../../StateProvider/Provider';
@@ -34,9 +31,7 @@ import HtmlTooltip from '../../components/CustomTooltipTitle';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import useColumns, { getStaticFields } from '../../components/CustomReactTableNew/useColumnsReactTable';
 import { prepareDataForGrid } from '../../constants/helpers';
-import { AiFillCrown, MdAdd } from 'react-icons/all';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { isMobile, isTablet } from 'react-device-detect';
+import { isMobile } from 'react-device-detect';
 import { Autocomplete } from '@material-ui/lab';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
@@ -53,14 +48,10 @@ const SerializedAssetTest = () => {
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [gridApi, setGridApi] = useState(null);
   const [columns, setColumns] = useState(null);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
-  const [isAllChecked, setIsAllChecked] = useState(false);
-  const [clonedData, setClonedData] = useState([]);
   const [productCategoryList, setProductCategoryList] = useState([]);
   const [productFilterList, setProductFilterList] = useState([]);
   const [productCategory, setProductCategory] = useState(null);
@@ -224,13 +215,6 @@ const SerializedAssetTest = () => {
             };
           }
         });
-        // let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        // tempFrameworkComponent = {
-        //   ...tempFrameworkComponent,
-        //   assetNumberRenderer: AssetNumberRenderer,
-        //   actionsRenderer: ActionsRenderer
-        // };
-        // setFrameWorkComponent({ ...tempFrameworkComponent });
         columns = [...columns, ...getStaticFields(), ActionsRenderer];
         setColumns([...columns]);
       });
@@ -238,9 +222,6 @@ const SerializedAssetTest = () => {
 
   const fetchProductInventory = () => {
     dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
     const queryString = getQueryString();
     axiosInstance()
       .get(`${serializedAsset.api}${queryString}`)
@@ -255,24 +236,12 @@ const SerializedAssetTest = () => {
             ...finalObject
           };
         });
-        setIsAllChecked(false);
-        setClonedData(data.data);
-        if (appendRows) {
-          dispatch({
-            type: 'initialize',
-            data: [...dataRows, ...rows],
-            count: data.data.count,
-            selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
-          });
-        } else {
-          dispatch({
-            type: 'initialize',
-            data: rows,
-            count: data.count,
-            selectedRecords: rows.filter((f) => f.isChecked === true)
-          });
-        }
-        // dispatch({ type: "initialize", data: rows, count: data.count });
+        dispatch({
+          type: 'initialize',
+          data: rows,
+          count: data.count,
+          selectedRecords: rows.filter((f) => f.isChecked === true)
+        });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
@@ -371,9 +340,6 @@ const SerializedAssetTest = () => {
         reference: { _id: '', type: 'Inventory' }
       })
       .then(() => {
-        if (gridApi) {
-          gridApi.deselectAll();
-        }
         fetchProductInventory();
         setAnchorEl(null);
         toastConfig.setToastConfig({
@@ -430,8 +396,7 @@ const SerializedAssetTest = () => {
           recordsToExport={selectedRecords.length}
           ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
           onExportToExcelSuccess={() => {
-            if (gridApi) gridApi.deselectAll();
-            else fetchProductInventory();
+            fetchProductInventory();
           }}
           additionalParams={getQueryString(true)}
         />
@@ -676,68 +641,6 @@ const SerializedAssetTest = () => {
           </div>
         </div>
         {columns ? (
-          // isMobile && !isTablet ? (
-          //   <CustomSwipableList
-          //     allowSelection={true}
-          //     allowSwipe={true}
-          //     permissions={permissions?.serializedAsset}
-          //     primaryField={columns?.find((d) => d.field === 'assetNumber')}
-          //     onClick={(d) => {
-          //       history.push(`${routes.serializedAssetDetail.path}/${d._id}`);
-          //     }}
-          //     dataRows={dataRows}
-          //     selectedRecords={selectedRecords}
-          //     dispatch={dispatch}
-          //     onEdit={(d) => {
-          //       history.push(`${routes.serializedAssetDetail.path}/${d._id}`);
-          //     }}
-          //     extraParamsToCheckDelete={false}
-          //     onDelete={(d) => {
-          //       setDeleteRecord(d);
-          //       setShowDeleteConfirmBox(true);
-          //     }}
-          //     rowCount={rowCount}
-          //     page={page}
-          //     loading={loading}
-          //     additionalDetails={[]}
-          //     chips={[
-          //       {
-          //         label: 'Serial Number : ',
-          //         field: 'serialNumber'
-          //       }
-          //     ]}
-          //     owerCollaboratorInitialsOrImages=""
-          //     onCreate={false}
-          //     showClone={true}
-          //     onClone={(data) => {
-          //       setShowManageProductInventoryDialog({ open: true, isClone: true, idToClone: data._id });
-          //     }}
-          //     renderedFrom={renderedFrom}
-          //   />
-          // ) : (
-          //   <CustomReactTable
-          //     height={'calc(100vh - 200px)'}
-          //     columns={columns}
-          //     data={dataRows}
-          //     currentPage={page}
-          //     onSelect={(newSelectedRecords) => {
-          //       // dispatch({ type: "selection", selectedRecords: newSelectedRecords })
-          //     }}
-          //     dispatch={dispatch}
-          //     childrenProperty="subRows"
-          //     uniqueKey="_id"
-          //     setWholeRowsCellColor={() => {}}
-          //     renderedFrom={renderedFrom}
-          //     isClientSideGrid={false}
-          //     rowCount={rowCount}
-          //     limit={limit}
-          //     customFilters={filters}
-          //     sorting={sorting}
-          //     refreshGrid={fetchProductInventory}
-          //     loading={loading}
-          //     showOnlyShowFilteredRecordSwitch={true}
-          //   />
-          // )
           <>
             <CustomReactTable
               height={'calc(100vh - 200px)'}
@@ -748,8 +651,6 @@ const SerializedAssetTest = () => {
                 // dispatch({ type: "selection", selectedRecords: newSelectedRecords })
               }}
               dispatch={dispatch}
-              childrenProperty="subRows"
-              uniqueKey="_id"
               setWholeRowsCellColor={() => {}}
               renderedFrom={renderedFrom}
               isClientSideGrid={false}

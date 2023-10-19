@@ -78,7 +78,8 @@ const Quotation = () => {
   });
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
+    state;
 
   const { getColumnData } = useColumns();
   const [frameworkComponent, setFrameworkComponent] = useState({});
@@ -256,7 +257,7 @@ const Quotation = () => {
     if (isExport) {
       deepFilter = `?`;
     }
-    
+
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
     }
@@ -321,7 +322,20 @@ const Quotation = () => {
           finalObject['canDelete'] = permissions?.quotation?.isDelete;
           return finalObject;
         });
-        dispatch({ type: 'initialize', data: rows, count: count });
+        if (appendRows) {
+          dispatch({
+            type: 'initialize',
+            data: [...dataRows, ...rows],
+            count: count
+          });
+        } else {
+          dispatch({
+            type: 'initialize',
+            data: rows,
+            count: count
+          });
+        }
+        // dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
@@ -337,6 +351,7 @@ const Quotation = () => {
   };
 
   const handleQuotationTypeSel = (filterValues) => {
+    dispatch({ type: 'setPage', page: 0 });
     setSelectedType(filterValues);
   };
 
@@ -461,6 +476,7 @@ const Quotation = () => {
         {Object.keys(frameworkComponent).length > 0 && columns ? (
           isMobile && !isTablet ? (
             <CustomSwipableList
+              key={selectedType}
               allowSelection={true}
               allowSwipe={true}
               permissions={permissions?.quotation}

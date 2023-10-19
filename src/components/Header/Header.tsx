@@ -28,7 +28,7 @@ import { SET_CHATTER, SET_SELECTED_ENTITY, SET_START_TOUR, SET_USER, SET_SEARCH,
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomNotificationCountContext } from '../../StateProvider/CustomNotificationCountContext/CustomNotificationCountContext';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import routes from '../Helpers/Routes';``
+import routes from '../Helpers/Routes';
 import { useAccount, useMsal } from '@azure/msal-react';
 import { isEmpty } from 'lodash';
 import { FiCheckCircle } from 'react-icons/fi';
@@ -161,10 +161,12 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
     axiosInstance()
       .put(`/user/save-selected-entity?selectedEntity=${selectedEntity}`)
       .then(({ data }) => {
-        axiosInstance().get('/user/me').then(({ data: response }) => {
-          const { data } = response;
-          dispatch({ type: SET_USER, payload: data });
-        })
+        axiosInstance()
+          .get('/user/me')
+          .then(({ data: response }) => {
+            const { data } = response;
+            dispatch({ type: SET_USER, payload: data });
+          })
           .catch((err) => {
             localStorage.setItem('token', '');
           });
@@ -436,8 +438,8 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
     id === selectedEntity
       ? history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
       : hasAccessToEntity(id)
-        ? handleEntityChange(id) && history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
-        : '';
+      ? handleEntityChange(id) && history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
+      : '';
 
   function handleListKeyDown(event) {
     if (event.key === 'Tab') {
@@ -560,7 +562,7 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
                         toggle: true,
                         notificationId: d.notificationId
                       })
-                      .then(() => { })
+                      .then(() => {})
                       .catch((error) => {
                         toastConfig.setToastConfig(error);
                       });
@@ -680,7 +682,7 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
                         toggle: true,
                         notificationId: d.notificationId
                       })
-                      .then(() => { })
+                      .then(() => {})
                       .catch((error) => {
                         toastConfig.setToastConfig(error);
                       });
@@ -742,20 +744,20 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
     >
       {user?.entity && user.entity.length
         ? user.entity.map((curEntity) => (
-          <MenuItem
-            title={curEntity.entityName}
-            key={curEntity._id}
-            selected={selectedEntity === curEntity._id}
-            onClick={() => {
-              handleSelectedEnity(curEntity._id);
-              closeEntitiesMenu();
-            }}
-          >
-            <Typography className={classes.entityName}>{curEntity.entityName}</Typography>
-            <Box component="span" marginX={1} />
-            {selectedEntity === curEntity._id && <Chip size="small" label="Current" color="primary" />}
-          </MenuItem>
-        ))
+            <MenuItem
+              title={curEntity.entityName}
+              key={curEntity._id}
+              selected={selectedEntity === curEntity._id}
+              onClick={() => {
+                handleSelectedEnity(curEntity._id);
+                closeEntitiesMenu();
+              }}
+            >
+              <Typography className={classes.entityName}>{curEntity.entityName}</Typography>
+              <Box component="span" marginX={1} />
+              {selectedEntity === curEntity._id && <Chip size="small" label="Current" color="primary" />}
+            </MenuItem>
+          ))
         : null}
     </Menu>
   );
@@ -786,7 +788,7 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
 
       {/* Remove below false to show chat notification icon */}
 
-      <MenuItem onClick={mobileScreenChatNotificationAnchorEl === null ? handleMobileScreenChatNotificationClick : () => { }}>
+      <MenuItem onClick={mobileScreenChatNotificationAnchorEl === null ? handleMobileScreenChatNotificationClick : () => {}}>
         <Badge
           variant="dot"
           overlap="circular"
@@ -823,7 +825,7 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
         </Popover>
       </MenuItem>
 
-      <MenuItem onClick={mobileScreenNotificationAnchorEl === null ? handleMobileScreenNotificationClick : () => { }}>
+      <MenuItem onClick={mobileScreenNotificationAnchorEl === null ? handleMobileScreenNotificationClick : () => {}}>
         <Badge
           variant="dot"
           overlap="circular"

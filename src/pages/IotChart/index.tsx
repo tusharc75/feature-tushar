@@ -1,4 +1,4 @@
-import { Box, Grid, Typography } from '@material-ui/core';
+import { Box, Button, Grid, Typography } from '@material-ui/core';
 import { useContext, useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import styles from '../Leads/Header.module.scss';
@@ -14,17 +14,24 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { getColors } from '../Home/helpers';
 import { DataPointsIcon } from 'src/assets/svg/svgIcons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import MyLocationIcon from '@material-ui/icons/MyLocation';
+import { MdChevronLeft } from 'react-icons/md';
 
 function IotChart() {
-
   const toastConfig = useContext(CustomToastContext);
 
   const [rowsData, setRowsData] = useState(null);
-  const [search, setSearch] = useState();
+  const [assetLocation, setAssetLocation] = useState(null);
+  const [search, setSearch] = useState('');
+  const [showAsset, setShowAsset] = useState(null);
 
   useEffect(() => {
-    fetchData();
-  }, [search]);
+    if (showAsset) {
+      fetchData();
+    } else {
+      fetchAssetLocation();
+    }
+  }, [search, showAsset]);
 
   const fetchData = () => {
     const queryString = getQueryString();
@@ -38,11 +45,38 @@ function IotChart() {
       });
   };
 
+  const fetchAssetLocation = () => {
+    let api = `/iot-chart${serializedAsset.api}-location`;
+    if (search) {
+      api = `${api}?search=${encodeURIComponent(search)}`;
+    }
+    axiosInstance()
+      .get(api)
+      .then(({ data }) => {
+        setAssetLocation(data.data);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   const getQueryString = () => {
+    const filterByIds = [];
     let deepFilter = `?page=${0}&limit=${100}`;
     if (search) {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
+    if (showAsset) {
+      filterByIds.push({
+        field: 'currentLocation',
+        term: { $in: [showAsset] }
+      });
+    }
+
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    }
+
     return `${deepFilter}&filterType=and&filterByIdType=and`;
   };
 
@@ -68,7 +102,8 @@ function IotChart() {
       icon: ['#FAC94B', '#FF9B04'],
       iconGradient: ['#FAC94B', '#FF9B04', '#FAC94B'],
       gradient: ['#FAC94B', '#FF9B04']
-    }]
+    }
+  ];
 
   return (
     <div className="main-container-v1">
@@ -76,10 +111,55 @@ function IotChart() {
         <CustomBreadCrumbs routes={[routes.iotChart]} />
       </div>
       <CustomContainer>
-        <div className="flex justify-end mb-3">
+        <div className="flex justify-between mb-3">
+          <div>
+            {showAsset && (
+              <Button
+                size="small"
+                variant="outlined"
+                color="primary"
+                disableElevation
+                onClick={() => {
+                  setShowAsset(null);
+                  setSearch('');
+                }}
+                startIcon={<MdChevronLeft />}
+              >
+                Go Back
+              </Button>
+            )}
+          </div>
           <SearchBox onChange={handleSearch} size="small" value={search} className="flex-grow md:flex-grow-0" />
         </div>
-        {rowsData ? (
+        {!showAsset ? (
+          assetLocation ? (
+            <Box className={cardStyle.reportGrid}>
+              {assetLocation?.map((location) => {
+                return (
+                  <div key={location?._id} className={cardStyle.singleCard}>
+                    <DashBoardCardShell
+                      darkThemeBackgroundColor="var(--dark-secondary)"
+                      background={'#fff'}
+                      className={cardStyle.cardInner}
+                      minHeight={false}
+                      onClick={() => {
+                        setShowAsset(location?._id);
+                        setSearch('');
+                      }}
+                    >
+                      <MyLocationIcon className={`absolute -top-[10px] left-[18px]`} />
+                      <Typography variant="h6">{location?.currentLocation}</Typography>
+                    </DashBoardCardShell>
+                  </div>
+                );
+              })}
+            </Box>
+          ) : (
+            <Box p={2} height={500}>
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Box>
+          )
+        ) : rowsData ? (
           <Box className={cardStyle.reportGrid}>
             {rowsData?.map((asset, i) => {
               var colors = colours[0];

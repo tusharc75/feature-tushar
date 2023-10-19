@@ -21,7 +21,7 @@ import moment from 'moment';
 import currencies from './currency_with_country.json';
 import { TransitionProps } from '@material-ui/core/transitions';
 import { Slide } from '@material-ui/core';
-import { kebabCase, lowerFirst, orderBy, uniqBy } from 'lodash';
+import { camelCase, kebabCase, lowerFirst, orderBy, uniqBy } from 'lodash';
 import { stepIconInterface } from 'src/components/Steps/icons';
 
 interface stepInterface extends stepIconInterface {
@@ -74,7 +74,8 @@ export const purchaseRequisitionSteps = ['Add Products'];
 
 export const productionOrderSteps: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },
-  { name: 'Work Order', title: 'Work Order', icon: 'workOrder' }
+  { name: 'Work Order', title: 'Work Order', icon: 'workOrder' },
+  { name: 'Loading Ticket', title: 'Loading', icon: 'ticket' },
 ];
 
 export const jobProcessSteps: stepInterface[] = [
@@ -278,6 +279,7 @@ export const sidebarResource = {
   transferAsset: 'Transfer Asset',
   address: 'Address',
   sublease: 'Sublease',
+  subleaseInvoice: 'Sublease Invoice',
   transferInventory: 'Transfer Inventory',
   zone: 'Zone',
   projectSales: 'Project Sales',
@@ -319,6 +321,7 @@ export const sidebarResource = {
   planning: 'Planning',
   planningCalendar: 'Planning Calendar',
   fieldTicket: 'Field Ticket',
+  fieldTicketInvoice: 'Field Ticket Invoice',
   fieldServiceTechnician: `Field Service Technician`,
   rentalPlanningCalendar: `Rental Planning Calendar`,
   resourceLogs: `Resource Logs`,
@@ -336,11 +339,13 @@ export const sidebarResource = {
   driverMaster: 'Driver Master',
   trailerMaster: 'Trailer Master',
   iotDataPoints: 'Iot Data Points',
+  accountsReceivable: 'Accounts Receivable',
   iotDataPointsCategory: 'Iot Data Points Category',
   deviceTemplates: 'Device Templates',
   workStations: 'Work Stations',
   deviceTemplateAlert: 'Device Template Alert',
   chartOfAccount: 'Chart Of Account',
+  flash: 'Flash'
 };
 
 export const primaryFields = {
@@ -406,6 +411,7 @@ export const RESOURCE_LABEL = {
   transferAsset: 'Transfer Assets',
   address: 'Addresses',
   sublease: 'Sublease',
+  subleaseInvoice: 'SubleaseInvoice',
   transferInventory: 'Transfer Inventory',
   zone: 'Zone',
   wellMaster: 'Well Master',
@@ -469,6 +475,8 @@ export const RESOURCE_LABEL = {
   workStations: 'Work Stations',
   deviceTemplateAlert: 'Device Template Alert',
   chartOfAccount: 'Chart Of Account',
+  flash: 'Flash',
+  accountsReceivable: 'Accounts Receivable'
 };
 
 export const CHILD_RESOURCE = {
@@ -500,7 +508,8 @@ export const CHILD_RESOURCE = {
   demandOrderDetail: 'Demand Order Detail',
   productionOrderDetail: 'Production Order Detail',
   invoiceCost: 'Invoice Cost',
-  serializedAssetsCertification: 'Serialized Assets Certificate'
+  serializedAssetsCertification: 'Serialized Assets Certificate',
+  invoiceCreditMemo: 'Invoice Credit Memo'
 };
 
 export const sidebarResourceObjectFromValues = () => {
@@ -847,6 +856,13 @@ export const workOrder = {
   api: '/work-order'
 };
 
+export const flash = {
+  api: '/flash',
+  route: '/flash',
+  permission: 'Flash',
+  resource: 'Flash'
+};
+
 export const profileMenuItems = {
   profile: 1,
   notification: 2,
@@ -1092,7 +1108,7 @@ export const isObjectEmpty = (obj) => {
 
 export const currencyCodeToSymbol = (currencyCode) => {
   if (!currencyCode) {
-    return "";
+    return '';
   }
   return currencies.filter((obj) => obj.currencyCode === currencyCode)[0].symbolNative;
 };
@@ -1671,20 +1687,16 @@ export const graphOptions = {
     // size: 13,
     borderWidth: 1.5,
     borderWidthSelected: 2,
-    // font: {
-    //   size: 15,
-    //   align: "center",
-    //   bold: {
-    //     color: "#bbbdc0",
-    //     size: 15,
-    //     vadjust: 0,
-    //     mod: "bold",
-    //   },
-    // },
+    font: {
+      size: 15,
+      align: 'center',
+      color: '#163340'
+    },
     shadow: true
   },
   edges: {
     width: 0.01,
+    color: '#fff',
     // color: {
     //   color: "#D3D3D3",
     //   highlight: "#797979",
@@ -1971,7 +1983,8 @@ export const DELIVERY_TICKET_REFERENCE_TYPE = {
   salesOrder: 'Sales Order',
   sublease: 'Sublease',
   transferInventory: 'Transfer Inventory',
-  repairOrder: 'Repair Order'
+  repairOrder: 'Repair Order',
+  productionOrder: 'Production Order',
 };
 
 export const DELIVERY_FROM_TO_TYPE = {
@@ -2025,6 +2038,13 @@ export const REPAIR_PROCESS_STATUS = {
   failed: 'Failed'
 } as const;
 
+
+export const PLANNING_STATUS = {
+  open: 'Open',
+  converted: 'Converted'
+} as const;
+
+
 export const asyncForEach = async (array: any[], callback: (arrayIndex: any, i: number, array: any[]) => Promise<any>) => {
   for (let index = 0; index < array.length; index++) {
     await callback(array[index], index, array);
@@ -2075,7 +2095,8 @@ export const ACTIVITY_RESOURCE = {
   user: 'user',
   marketSegment: 'marketSegment',
   budget: 'budget',
-  irtTicket: 'irtTicket'
+  irtTicket: 'irtTicket',
+  accountsReceivable: 'accountsReceivable'
 };
 
 export const LOG_RESOURCE = {
@@ -2192,7 +2213,32 @@ export const IOT_REPORT_LIST = [
         lookup: true,
         type: 'dropDown',
         multiple: false,
+        required: true,
         _id: '3'
+      },
+      {
+        fieldName: 'date',
+        fieldLabel: 'Date',
+        type: 'date',
+        required: true,
+        _id: '2'
+      },
+      {
+        fieldName: 'interval',
+        fieldLabel: 'Interval',
+        type: 'dropDown',
+        options: INTERVALS,
+        required: true,
+        _id: '4'
+      },
+      {
+        fieldName: 'dataPointsCategory',
+        fieldLabel: 'Iot Data Points Category',
+        resource: sidebarResource.iotDataPointsCategory,
+        lookup: true,
+        type: 'dropDown',
+        multiple: true,
+        _id: '5'
       },
       {
         fieldName: 'dataPoints',
@@ -2203,19 +2249,6 @@ export const IOT_REPORT_LIST = [
         multiple: true,
         _id: '1'
       },
-      {
-        fieldName: 'date',
-        fieldLabel: 'Date',
-        type: 'date',
-        _id: '2'
-      },
-      {
-        fieldName: 'interval',
-        fieldLabel: 'Interval',
-        type: 'dropDown',
-        options: INTERVALS,
-        _id: '4'
-      }
     ]
   }
 ];
@@ -2460,7 +2493,7 @@ export const QUOTATION_TYPE = {
   salesOrder: 'Sales Order',
   rentalJob: 'Rental Job',
   repairOrder: 'Repair Order',
-  fieldJob: 'Field Job',
+  fieldJob: 'Field Job'
 };
 
 export const WORKORDER_SERVICE_COLOR = {
@@ -2666,6 +2699,15 @@ export const SERVICE_TYPE = {
   fieldService: 'Field Service'
 };
 
+export const QUOTE_PROCESS_STATUS = {
+  new: 'New',
+  priceBuilder: 'Price Builder',
+  quoteBuilder: 'Quote Builder',
+  doaProcess: 'DOA Process',
+  sendToCustomer: 'Send To Customer',
+  end: 'End'
+};
+
 export const convertMsToTime = (milliseconds: any) => {
   function padTo2Digits(num) {
     num = num - Math.floor(num) !== 0 ? num.toFixed(1) : num;
@@ -2755,4 +2797,15 @@ export const GenerateResourceLineNumber = (fields) => {
     }
   }
   return lineNumber;
+};
+
+export const ROLE_TIER = {
+  tier1: 'Tier 1',
+  tier2: 'Tier 2',
+  tier3: 'Tier 3'
+};
+
+
+export const fieldLabelToFieldName = (fieldLabel) => {
+  return camelCase(fieldLabel?.replace(/[^a-zA-Z0-9]/g, ''))?.substring(0, 60);
 };

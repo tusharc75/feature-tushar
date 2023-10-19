@@ -263,6 +263,7 @@ const DemandOrder = () => {
   };
 
   const handleSalesOrderTypeSel = (filterValues) => {
+    dispatch({ type: 'setPage', page: 0 });
     setSelectedType(filterValues);
     history.push(`?type=${filterValues}`);
   };
@@ -331,7 +332,7 @@ const DemandOrder = () => {
           permissions={permissions?.demandOrder}
           module="demandOrder"
           api={demandOrder.api}
-          afterImportCompleted={() => { }}
+          afterImportCompleted={() => {}}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
@@ -374,6 +375,7 @@ const DemandOrder = () => {
         {Object.keys(frameworkComponent).length > 0 && columns ? (
           isMobile && !isTablet ? (
             <CustomSwipableList
+              key={selectedType}
               allowSelection={true}
               allowSwipe={true}
               permissions={permissions?.demandOrder}

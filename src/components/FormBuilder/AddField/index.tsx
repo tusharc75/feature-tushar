@@ -22,7 +22,7 @@ import { Converter } from "./converter";
 import { Currency } from "./currency";
 import { Option } from "../AddField/option";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition } from "../../../constants/helpers";
+import { CustomDialogTransition, fieldLabelToFieldName } from "../../../constants/helpers";
 import axiosInstance from "../../../axios/axiosInstance";
 import { checkFormula } from "../../../constants/formulaUtility";
 import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
@@ -81,7 +81,7 @@ export const AddField = (props) => {
     }
     data.type = values.type
     data.fieldLabel = values.fieldLabel
-    data.fieldName = camelCase(values.fieldLabel.replace(/[^a-zA-Z0-9]/g, ''))
+    data.fieldName = fieldLabelToFieldName(values.fieldLabel)
 
     if (refrence !== "custom") {
       if (fields.filter((t) => t.fieldName === data.fieldName).length) {
@@ -209,7 +209,7 @@ export const AddField = (props) => {
         errors["vlookupInputFields"] = "Please select input parameters";
       }
     }
- 
+
     return errors;
   }
 

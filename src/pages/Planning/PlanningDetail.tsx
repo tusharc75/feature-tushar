@@ -17,7 +17,7 @@ import Material from './Material';
 import { camelCase } from 'lodash';
 import ManagePlanning from './ManagePlanning';
 import { FaWpforms } from 'react-icons/fa';
-import { ACTIVITY_RESOURCE } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, PLANNING_STATUS } from 'src/constants/helpers';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 
 const PlanningDetail = () => {
@@ -33,6 +33,7 @@ const PlanningDetail = () => {
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const [showConverConfirmBox, setShowConverConfirmBox] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [tabValue, setTabValue] = useState(0);
@@ -65,6 +66,9 @@ const PlanningDetail = () => {
       if (user?.role?.selectedEntity?.superAdminAccess) {
         isAllowedToEdit = true;
       }
+      if (data?.status === PLANNING_STATUS.converted) {
+        isAllowedToEdit = false;
+      }
       setAllowedToEdit(isAllowedToEdit);
       setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
       setPlanningData(data);
@@ -96,6 +100,23 @@ const PlanningDetail = () => {
     }
   };
 
+  const handleConvert = () => {
+    axiosInstance()
+      .post(`${routes?.planning?.path}/convert-planning`, { id: planningData?._id })
+      .then(({ data }) => {
+        setShowConverConfirmBox(false);
+        fetchData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
   };
@@ -117,6 +138,15 @@ const PlanningDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <>
+              {permissions?.planning?.isUpdate && allowedToEdit && planningData?.status != PLANNING_STATUS.converted && (
+                <Button
+                  variant={isMobile && !isTablet ? 'text' : 'contained'}
+                  className="btn-outline-v1"
+                  onClick={() => { setShowConverConfirmBox(true) }}
+                >
+                  {'Convert'}
+                </Button>
+              )}
               {permissions?.planning?.isUpdate && allowedToEdit && (
                 <Button
                   variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -126,13 +156,13 @@ const PlanningDetail = () => {
                   {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                 </Button>
               )}
-              {permissions?.planning?.isDelete && allowedToDelete && (
+              {permissions?.planning?.isDelete && allowedToDelete && planningData?.canDelete && (
                 <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
               )}
-            <ActivityButton 
-              referenceId={planningData?._id} 
-              resource={ACTIVITY_RESOURCE.planning} 
-              resourceLabel={planningData?.planningNumber}
+              <ActivityButton
+                referenceId={planningData?._id}
+                resource={ACTIVITY_RESOURCE.planning}
+                resourceLabel={planningData?.planningNumber}
               />
             </>
           </Box>
@@ -202,6 +232,14 @@ const PlanningDetail = () => {
             setShowConfirmBox(false);
           }}
           onOk={handleDelete}
+        />
+      )}
+      {showConverConfirmBox && (
+        <ConfirmationDialog
+          open={true}
+          message={`Are you sure you want to convert planning  ${planningData?.planningNumber} ?`}
+          onClose={() => { setShowConverConfirmBox(false) }}
+          onOk={handleConvert}
         />
       )}
       {openUpdateDialog && (
