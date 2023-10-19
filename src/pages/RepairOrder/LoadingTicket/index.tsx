@@ -61,11 +61,13 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
     await axiosInstance()
       .put(`${repairOrder.api}/loading-ticket/${repairOrderData._id}`)
       .then(({ data: { data } }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: `Loading Ticket Created Successfully`
-        });
+        if (data?.length) {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: `Loading Ticket Created Successfully`
+          });
+        }
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
