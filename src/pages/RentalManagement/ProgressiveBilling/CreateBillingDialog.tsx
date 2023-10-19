@@ -39,7 +39,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
-const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData, onClose, onSuccess, isCalledDirectly = false }) => {
+const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData, onClose, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -299,6 +299,10 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
     invoicedProducts = invoiceResponse?.data?.data?.material;
     additionalCost = invoiceResponse?.data?.data?.additionalCost;
 
+    const queryString = `?rentalJob=${rentalManagementData._id}`
+    const tempInvoiceData = await axiosInstance().get(`${invoice.api}${queryString}`)
+    invoiceData = tempInvoiceData?.data?.data
+
     const responseAdditionalCostData = await axiosInstance().get(`${rentalManagement.api}/additionalcost/${rentalManagementData._id}`);
     let additionalCostData = responseAdditionalCostData?.data?.data;
     if (additionalCost?.length > 0) {
@@ -395,11 +399,6 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
 
     data.material = newMaterial;
 
-    if(isCalledDirectly){
-      const queryString = `?rentalJob=${rentalManagementData._id}`
-      const result = await axiosInstance().get(`${invoice.api}${queryString}`)
-      invoiceData = result?.data?.data
-    }
     if (invoiceData) {
       data.material = data?.material
         ?.map((e) => {

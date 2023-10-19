@@ -7,7 +7,7 @@ import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser }
 import { useData } from 'src/StateProvider/Provider';
 import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { SUBLEASE_STATUS, gridLoadingTimeout, prepareDataForGrid, removeLocalStorage, sidebarResource, DELIVERY_TICKET_REFERENCE_TYPE, DELIVERY_TICKET_TYPE } from 'src/constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, removeLocalStorage, sidebarResource, DELIVERY_TICKET_REFERENCE_TYPE, DELIVERY_TICKET_TYPE } from 'src/constants/helpers';
 import NoteAddIcon from '@material-ui/icons/NoteAdd';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 // import CreateInvoiceDialog from './CreateInvoice';
@@ -65,79 +65,49 @@ const RentalManagementInvoice = () => {
     setColumns([...columns]);
   };
 
-  const checkProgressiveBilling = async (id) => {
-    let result = false;
-    if (user?.user?.brandPolicy?.rentalProgressiveBilling) {
-      const { data: { data } } = await axiosInstance().get(
-        `${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}&referenceId=${id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`
-      );
-      if (data.length > 0) {
-        result = true;
-      }
-    }
-    return result;
-  };
-  
   const fetchRentalData = async () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     if (gridApi) {
       gridApi.setRowData([]);
     }
-  
-    // Fetch all of the rows.
-    const { data: { data, count } } = await axiosInstance().get(
-      `${rentalManagement.api}${queryString}`
-    );
-  
-    // Create an empty array to store the visible rows.
-    const visibleRows = [];
-  
-    // Iterate over the fetched rows and check if each row should be visible.
-    for (const row of data) {
-      // Wait for the `checkProgressiveBilling` function to finish executing
-      // before moving on to the next row.
-      const isRowVisible = await checkProgressiveBilling(row._id);
-      if (isRowVisible) {
-        visibleRows.push(row);
-      }
-    }
-    let rows = visibleRows?.map((u: any) => {
-        let finalObject: any = prepareDataForGrid(u);
-        finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-        return {
-          ...finalObject
-        };
+    axiosInstance()
+      .get(`/rental-management-invoice/invoices-data${queryString}`)
+      .then(({ data: { data, count } }) => {
+
+        let rows = data?.map((u: any) => {
+          let finalObject: any = prepareDataForGrid(u);
+          finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
+          return {
+            ...finalObject
+          };
+        });
+       
+        if (appendRows) {
+          dispatch({
+            type: 'initialize',
+            data: [...dataRows, ...rows],
+            count: count,
+            selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
+          });
+        } else {
+          dispatch({
+            type: 'initialize',
+            data: rows,
+            count: count,
+            selectedRecords: rows.filter((f) => f.isChecked === true)
+          });
+        }
+        dispatch({ type: 'initialize', data: rows, count: count });
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
       });
-      if (appendRows) {
-        dispatch({
-          type: 'initialize',
-          data: [...dataRows, ...rows],
-          count: count,
-          selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
-        });
-      } else {
-        dispatch({
-          type: 'initialize',
-          data: rows,
-          count: count,
-          selectedRecords: rows.filter((f) => f.isChecked === true)
-        });
-      }
-      dispatch({ type: 'initialize', data: rows, count: count });
-      setTimeout(() => {
-        dispatch({ type: 'loading', loading: false });
-      }, gridLoadingTimeout);
-  };
-  
-  
+  }
+
 
   const getQueryString = (isExport = false) => {
     let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
-
-    if (selectedEntity) {
-      deepFilter = `${deepFilter}&entity=${selectedEntity}`;
-    }
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
@@ -250,7 +220,7 @@ const RentalManagementInvoice = () => {
             refreshGrid={fetchRentalData}
             showFilters={true}
             actionWidth={120}
-            resource={sidebarResource.sublease}
+            resource={sidebarResource.rentalManagementInvoice}
             allowSelection={false}
           />
         )
@@ -260,7 +230,6 @@ const RentalManagementInvoice = () => {
           rentalManagementData={createInvoiceDialog.data}
           currencySymbol={createInvoiceDialog.data.currency}
           invoiceData={null}
-          isCalledDirectly={true}
           onClose={() => {
             setCreateInvoiceDialog({ open: false, data:null });
           }}

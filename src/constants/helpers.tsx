@@ -345,7 +345,8 @@ export const sidebarResource = {
   workStations: 'Work Stations',
   deviceTemplateAlert: 'Device Template Alert',
   chartOfAccount: 'Chart Of Account',
-  flash: 'Flash'
+  flash: 'Flash',
+  rentalManagementInvoice : 'Rental Management Invoice'
 };
 
 export const primaryFields = {
