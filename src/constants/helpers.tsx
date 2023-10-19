@@ -345,7 +345,8 @@ export const sidebarResource = {
   workStations: 'Work Stations',
   deviceTemplateAlert: 'Device Template Alert',
   chartOfAccount: 'Chart Of Account',
-  flash: 'Flash'
+  flash: 'Flash',
+  creditMemo: 'Credit Memo'
 };
 
 export const primaryFields = {
@@ -476,7 +477,8 @@ export const RESOURCE_LABEL = {
   deviceTemplateAlert: 'Device Template Alert',
   chartOfAccount: 'Chart Of Account',
   flash: 'Flash',
-  accountsReceivable: 'Accounts Receivable'
+  accountsReceivable: 'Accounts Receivable',
+  creditMemo: 'Credit Memo'
 };
 
 export const CHILD_RESOURCE = {
