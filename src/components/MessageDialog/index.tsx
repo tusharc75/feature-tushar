@@ -23,7 +23,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 interface MessageList {
-  index: number;
+  index?: number;
   message: string;
 }
 

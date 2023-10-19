@@ -844,16 +844,27 @@ const LoadingTicket = ({
     }
   };
 
-  const checkMessage = () => {
+  const checkMessage = (type) => {
     const err = [];
-    selectedRecords?.forEach((r) => {
-      if (r.hasOwnProperty('loadingTicketId')) {
-        err.push({
-          index: r?.index,
-          message: rentalManagementMessage.loadingTicketAlreadyCreated
-        });
-      }
-    });
+    if (type === 'Create Loading Ticket') {
+      selectedRecords?.forEach((r) => {
+        if (r.hasOwnProperty('loadingTicketId')) {
+          err.push({
+            index: r?.index,
+            message: rentalManagementMessage.loadingTicketAlreadyCreated
+          });
+        }
+      });
+    } else if (type === 'Delivered to Customer') {
+      selectedRecords?.forEach((r) => {
+        if (r?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.indTransit ) {
+          err.push({
+            index: r?.index,
+            message: rentalManagementMessage.statusInTranist
+          });
+        }
+      });
+    }
     if (err?.length) {
       setOpenMessageDialog({ open: true, messageList: err });
       return true;
@@ -981,7 +992,7 @@ const LoadingTicket = ({
                 <MenuItem
                   onClick={() => {
                     closeActions();
-                    if (!checkMessage()) {
+                    if (!checkMessage('Create Loading Ticket')) {
                       if (checkMTRValidation && selectedRecords?.some((e) => e.type === 'Asset' && e.mtrAttached !== true)) {
                         setMtrConfirmBox(true);
                       } else {
@@ -995,22 +1006,24 @@ const LoadingTicket = ({
                 </MenuItem>
 
                 <MenuItem
-                  disabled={
-                    selectedRecords.length === 0 ||
-                    selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !== selectedRecords.length
-                  }
+                  // disabled={
+                  //   selectedRecords.length === 0 ||
+                  //   selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !== selectedRecords.length
+                  // }
                   onClick={() => {
-                    if (user?.user?.brandPolicy?.assetDeliveredStatus) {
-                      setOpenDateDialog({
-                        open: true,
-                        type: 'changeStatus',
-                        status: ASSET_STATUS.delivered,
-                        prevStatus: ASSET_STATUS.delivered,
-                        assets: selectedRecords?.filter((e: any) => e.type === 'Asset')?.map((e) => e._id),
-                        loading: false
-                      });
-                    } else {
-                      handelProcessTickets();
+                    if (!checkMessage('Delivered to Customer')) {
+                      if (user?.user?.brandPolicy?.assetDeliveredStatus) {
+                        setOpenDateDialog({
+                          open: true,
+                          type: 'changeStatus',
+                          status: ASSET_STATUS.delivered,
+                          prevStatus: ASSET_STATUS.delivered,
+                          assets: selectedRecords?.filter((e: any) => e.type === 'Asset')?.map((e) => e._id),
+                          loading: false
+                        });
+                      } else {
+                        handelProcessTickets();
+                      }
                     }
                     closeActions();
                   }}
