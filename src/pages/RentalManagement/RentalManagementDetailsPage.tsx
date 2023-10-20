@@ -49,7 +49,6 @@ import { updateRentalProcessStatus } from './rentalOfflineHelper';
 import Quotation from './Quotation';
 import ProgressiveBilling from './ProgressiveBilling';
 import Services from './Services';
-import Consumables from './Consumables';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import { IoMdDownload } from 'react-icons/io';
 import Steps, { getIndex } from 'src/components/Steps';
@@ -77,7 +76,6 @@ const RentalManagementDetailsPage = () => {
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [rentalManagementFields, setRentalManagementFields] = useState([]);
   const [currentStep, setCurrentStep] = useState(null);
-  const [currencySymbol, setCurrencySymbol] = useState(null);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [isProcessor, setIsProcessor] = useState(false);
 
@@ -251,7 +249,6 @@ const RentalManagementDetailsPage = () => {
         setCurrentStep(getIndex(data?.processStatus, steps));
       }
       setLoadingDetails(false);
-      setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
       let isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
       if (user?.role?.selectedEntity?.superAdminAccess) {
         isAllowedToEdit = true;
@@ -679,16 +676,7 @@ const RentalManagementDetailsPage = () => {
                   }
                 />
               )}
-              {/* {rentalSteps[currentStep]?.name === 'Add Consumables' && rentalManagementData && (
-                      <Consumables
-                        rentalManagementData={rentalManagementData}
-                        setNextStep={setNextStep}
-                        currencySymbol={currencySymbol}
-                        renderedFrom={`${renderedFrom}_grid-2`}
-                        stepFullScreen={stepFullScreen}
-                        allowedToEdit={allowedToEdit}
-                      />
-                    )} */}
+
               {rentalSteps[currentStep]?.name === 'Add-on' && rentalManagementData && (
                 <AdditionalCost
                   rentalManagementData={rentalManagementData}
@@ -711,7 +699,6 @@ const RentalManagementDetailsPage = () => {
                 <Quotation
                   rentalManagementData={rentalManagementData}
                   setNextStep={setNextStep}
-                  currencySymbol={currencySymbol}
                   stepFullScreen={stepFullScreen}
                   allowedToEdit={allowedToEdit}
                   allowedToDelete={allowedToDelete}
@@ -773,7 +760,6 @@ const RentalManagementDetailsPage = () => {
                 <ProgressiveBilling
                   rentalId={id}
                   rentalManagementData={rentalManagementData}
-                  currencySymbol={currencySymbol}
                   allowCreateInvoice={true}
                 />
               ) : (

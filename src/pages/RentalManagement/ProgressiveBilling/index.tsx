@@ -15,8 +15,9 @@ import { camelCase } from 'lodash';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import VisibilityIcon from '@material-ui/icons/Visibility';
 
-const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol, allowCreateInvoice }) => {
+const ProgressiveBilling = ({ rentalId, rentalManagementData, allowCreateInvoice }) => {
 
   const renderedFrom = camelCase(routes?.invoice?.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
@@ -106,24 +107,35 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol, al
 
   const ActionsRenderer = (params) => (
     <>
-      {params?.data?.canDelete && (
+      <HtmlTooltip title="View Invoice">
+        <IconButton
+          size="small"
+          onClick={() => {
+            setViewBillDialog({ open: true, invoiceData: params.data });
+          }}
+        >
+          <VisibilityIcon fontSize="small" color="primary" />
+        </IconButton>
+      </HtmlTooltip>
+      <Box ml={1}>
         <HtmlTooltip title="Delete">
           <IconButton
             size="small"
             aria-label="Delete"
+            disabled={params?.data?.canDelete ? false : true}
             onClick={() => {
               setDeleteRecord(params.data);
               setIsConformDialogVisible(true);
             }}
           >
-            <DeleteIcon color="error" />
+            <DeleteIcon fontSize="small" color={params?.data?.canDelete ? "error" : "disabled"} />
           </IconButton>
         </HtmlTooltip>
-      )}
+      </Box>
     </>
   );
 
-  const getQueryString = (isExport = false) => {
+  const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}&rentalJob=${rentalId}`;
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
@@ -230,7 +242,7 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol, al
             limit={limit}
             pageSizes={pageSizes}
             page={page}
-            actionWidth={100}
+            actionWidth={120}
             loading={loading}
             renderedFrom={renderedFrom}
             allowSelection={false}
@@ -247,7 +259,6 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol, al
       {createBillDialog.open && (
         <CreateBillingDialog
           rentalManagementData={rentalManagementData}
-          currencySymbol={currencySymbol}
           onClose={() => {
             setCreateBillDialog({ open: false });
           }}
@@ -261,8 +272,6 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol, al
         <ViewBillingDialog
           rentalManagementData={rentalManagementData}
           invoiceData={viewBillDialog?.invoiceData}
-          currencySymbol={currencySymbol}
-          estimateStartDate={null}
           onClose={() => {
             setViewBillDialog({ open: false, invoiceData: null });
           }}

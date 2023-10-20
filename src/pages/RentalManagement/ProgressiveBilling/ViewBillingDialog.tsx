@@ -17,14 +17,16 @@ import { Add, Delete, Edit, ExpandMore } from '@material-ui/icons';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
-import { startCase } from 'lodash';
+import { camelCase, startCase } from 'lodash';
 import EditIcon from '@material-ui/icons/Edit';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import PreviewDownload from 'src/components/PreviewDownload';
 import { generateCustomTableColumns } from 'src/constants/columns';
 
-const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, estimateStartDate, onClose, onSuccess }) => {
+const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSuccess }) => {
+
+  const renderedFrom = `${camelCase(routes?.rentalManagementInvoice.title)}_view_invoice`;
 
   const toastConfig = useContext(CustomToastContext);
 
@@ -34,7 +36,6 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
   const [rowsData, setRowsData] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
 
-  const [allFields, setAllFields] = useState([]);
   const [isLoadingUpdate, setIsLoadingUpdate] = useState(false);
   const [isProductEdit, setIsProductEdit] = useState({ open: false, rowData: null });
   const [viewBillDialogConfirm, setViewBillDialogConfirm] = useState({ open: false, rows: [] });
@@ -53,8 +54,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
       data?.forEach((e) => {
         e.isColumnEditable = false;
       });
-      setAllFields(JSON.parse(JSON.stringify(data)));
-      const newColumns = generateCustomTableColumns(data, invoiceData?.currency, 'rental_management_view_billing');
+      const newColumns = generateCustomTableColumns(data, invoiceData?.currency, renderedFrom);
       let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
       if (qtyIndex > -1) {
         newColumns[qtyIndex].accessor = 'qtyDisplay';
@@ -330,7 +330,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
                   size="small"
                   onClick={handleClick}
                   aria-controls="action-menu"
-                  disabled={selectedProducts?.length ? false : true}
+                  disabled={selectedProducts?.length && invoiceData?.isLatestInvoice ? false : true}
                   endIcon={<ExpandMore />}
                   className="new-dropdown-v1"
                 >
@@ -371,9 +371,9 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
               </Box>
             </Box>
             {columns && rowsData ? (
-              <Box zIndex={5} width={'100%'} height={'calc(100vh - 285px)'} p={1}>
+              <Box zIndex={5} width={'100%'} height={'calc(100vh - 200px)'} p={1}>
                 <CustomReactTable
-                  height={'calc(100vh - 285px)'}
+                  height={'calc(100vh - 200px)'}
                   columns={columns}
                   data={rowsData}
                   onSelect={setSelectedProducts}
@@ -381,7 +381,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
                   uniqueKey="_id"
                   hideSelection={false}
                   hideAction={false}
-                  renderedFrom="rental_management_view_billing"
+                  renderedFrom={renderedFrom}
                   isClientSideGrid={true}
                 />
               </Box>
@@ -421,7 +421,6 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
           isQtyOnly={true}
         />
       )}
-
       {viewBillDialogConfirm.open ? (
         <ConfirmationDialog
           open={viewBillDialogConfirm.open}
