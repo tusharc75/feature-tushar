@@ -21,7 +21,7 @@ import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import LeadTimeDialog from './LeadTimeDialog';
 import DateRangeIcon from '@material-ui/icons/DateRange';
 
-const AdditionalCost = ({ quotationData, setNextStep, setPrevStep, renderedFrom, version, allowedToEdit, stepFullScreen }) => {
+const AdditionalCost = ({ quotationData, setNextStep, renderedFrom, version, allowedToEdit, stepFullScreen }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -128,14 +128,12 @@ const AdditionalCost = ({ quotationData, setNextStep, setPrevStep, renderedFrom,
   const fetchData = async () => {
     try {
       setNextStep(false);
-      setPrevStep(false);
       const response = await axiosInstance().get(`${quotation.api}/additionalcost/${quotationData._id}/${versionId}`);
       let rows = response?.data?.data;
       rows?.forEach((parent, i) => {
         parent.index = i + 1;
       });
       setNextStep(true);
-      setPrevStep(true);
       setRowsData(rows);
     } catch (error) {
       toastConfig.setToastConfig(error);

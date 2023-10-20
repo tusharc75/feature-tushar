@@ -1,9 +1,7 @@
-import React, { FC } from 'react';
 import { Collapse, IconButton } from '@material-ui/core';
-import { Fragment, useState } from 'react';
-import InfiniteScroll from 'react-infinite-scroll-component';
+import { KeyboardArrowDown, KeyboardArrowUp } from '@material-ui/icons';
+import React, { FC, useState } from 'react';
 import type { TSwipableListInputProps } from './types';
-import { KeyboardArrowUp, KeyboardArrowDown } from '@material-ui/icons';
 
 const DEFAULT_DATA_COUNT = 4;
 
@@ -77,6 +75,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
             {dataRows.length
               ? dataRows?.map((row, index) => {
                   prepareRow(row);
+                  if (row.depth !== 0) return null;
                   return (
                     <div
                       className={`shadow-[0px_3px_26px_0px_rgba(0,0,0,0.06)] rounded-md my-2 px-3 py-2 [--left-gutter:20px] dark:bg-[var(--dark-secondary)] ${backgroundColor(
@@ -141,6 +140,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                                 <RenderSubCard
                                   key={row?.original?._id || index}
                                   {...{
+                                    depth: 1,
                                     dispatch,
                                     allowSelection,
                                     dataRows: row.subRows || [],
@@ -203,8 +203,10 @@ const RenderSubCard = ({
   collapsibleFields,
   IndeterminateCheckbox,
   handleCellSelection,
-  row
+  row,
+  depth = 1
 }: any) => {
+  if (row.depth !== depth) return null;
   return (
     <div
       className={`shadow-[0px_3px_26px_0px_rgba(0,0,0,0.06)] rounded-md my-2 px-3 py-2 [--left-gutter:20px] dark:bg-[var(--dark-secondary)] ${backgroundColor(
@@ -269,6 +271,7 @@ const RenderSubCard = ({
                 <RenderSubCard
                   key={row?.original?._id || index}
                   {...{
+                    depth: depth + 1,
                     dispatch,
                     allowSelection,
                     dataRows: row.subRows || [],
