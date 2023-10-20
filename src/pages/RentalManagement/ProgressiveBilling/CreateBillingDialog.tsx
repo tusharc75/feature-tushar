@@ -39,7 +39,8 @@ import EditIcon from '@material-ui/icons/Edit';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
-const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData, onClose, onSuccess }) => {
+const CreateBillingDialog = ({ rentalManagementData, currencySymbol, onClose, onSuccess }) => {
+
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -300,8 +301,8 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
     additionalCost = invoiceResponse?.data?.data?.additionalCost;
 
     const queryString = `?rentalJob=${rentalManagementData._id}`
-    const tempInvoiceData = await axiosInstance().get(`${invoice.api}${queryString}`)
-    invoiceData = tempInvoiceData?.data?.data
+    const invoiceDataResponce = await axiosInstance().get(`${invoice.api}${queryString}`)
+    const invoiceData = invoiceDataResponce?.data?.data
 
     const responseAdditionalCostData = await axiosInstance().get(`${rentalManagement.api}/additionalcost/${rentalManagementData._id}`);
     let additionalCostData = responseAdditionalCostData?.data?.data;
@@ -793,9 +794,9 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
               </Grid>
             </MuiPickersUtilsProvider>
             {columns && rowsData ? (
-              <Box zIndex={5} width={'100%'} height={'calc(100vh - 285px)'} p={1}>
+              <Box zIndex={5} width={'100%'} height={'calc(100vh - 200px)'} p={1}>
                 <CustomReactTable
-                  height={'calc(100vh - 285px)'}
+                  height={'calc(100vh - 200px)'}
                   columns={columns}
                   data={rowsData}
                   setWholeRowsCellColor={(rowData) => {

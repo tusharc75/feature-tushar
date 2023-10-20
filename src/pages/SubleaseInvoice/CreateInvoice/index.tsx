@@ -27,7 +27,8 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { generateCustomTableColumns } from 'src/constants/columns';
 import moment from 'moment';
 
-const CreateBillingDialog = ({ currencySymbol = null, invoiceData = null, onClose, onSuccess, subleaseData = null }) => {
+const CreateInvoiceDialog = ({ currencySymbol = null, onClose, onSuccess, subleaseData = null }) => {
+
   const toastConfig = useContext(CustomToastContext);
 
   const [isUpdating, setUpdating] = useState(false);
@@ -465,4 +466,4 @@ const CreateBillingDialog = ({ currencySymbol = null, invoiceData = null, onClos
   );
 };
 
-export default CreateBillingDialog;
+export default CreateInvoiceDialog;
