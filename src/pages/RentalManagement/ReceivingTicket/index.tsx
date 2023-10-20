@@ -1647,9 +1647,9 @@ const ReceivingTicket = ({
 
             <MenuItem
               onClick={() => {
-                if (!checkMessage(`Transfer to another ${routes.rentalManagement.title}`)) {
-                  // setIsExistingRentalJob(true);
-                }
+                // if (!checkMessage(`Transfer to another ${routes.rentalManagement.title}`)) {
+                  setIsExistingRentalJob(true);
+                // }
                 closeActions();
               }}
               disabled={isOffline || !checkTransferValid()}
