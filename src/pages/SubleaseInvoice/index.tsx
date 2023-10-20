@@ -226,7 +226,6 @@ const SubleaseInvoice = () => {
         {createInvoiceDialog.open && (
           <CreateInvoiceDialog
             subleaseData={createInvoiceDialog?.data[0]}
-            currencySymbol={createInvoiceDialog?.data[0]?.currency}
             onClose={() => setCreateInvoiceDialog({ open: false, data: null })}
             onSuccess={() => {
               setCreateInvoiceDialog({ open: false, data: null });

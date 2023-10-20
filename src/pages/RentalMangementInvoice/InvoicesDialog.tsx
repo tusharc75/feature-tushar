@@ -23,7 +23,6 @@ const InvoiceDialog = ({ rentalManagementData, rentalId, rentalJobName, handleCl
           <ProgressiveBilling
             rentalId={rentalId}
             rentalManagementData={rentalManagementData}
-            currencySymbol={null}
             allowCreateInvoice={false}
           />
         </CustomDialogContent>
