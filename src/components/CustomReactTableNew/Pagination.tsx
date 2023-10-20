@@ -120,8 +120,9 @@ const Pagination: FC<PaginationProps> = ({
                 const target = e.target as HTMLInputElement;
                 target.select();
               }}
-              className="bg-transparent appearance-none text-[var(--primary-text)] shadow-none border-none h-[30px] text-center"
+              className={`bg-transparent appearance-none text-[var(--primary-text)] shadow-none border-none h-[30px] text-center [border:1px_solid_var(--common-border-color)] rounded-md focus-within:outline-[var(--new-theme-color)]`}
             />
+            &nbsp;
             <span>
               - &nbsp;
               {possibleMaxPage}
