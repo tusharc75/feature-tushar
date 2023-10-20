@@ -74,8 +74,7 @@ export default function Version({ onClose, quotationId, handleChangeVersion, ref
   const ActionsRenderer = (params) => (
     <>
       {permissions?.quotation?.isCreate && (
-
-        <Tooltip title="Clone">
+        <Tooltip title={`Clone Version to ${routes.quotation.title}`}>
           <IconButton
             size="small"
             aria-label="Clone"

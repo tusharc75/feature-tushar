@@ -20,7 +20,6 @@ import { flattenArray, generateCustomTableColumns } from 'src/constants/columns'
 import GridDeleteIcon from 'src/components/Helpers/GridDeleteIcon';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import ManageAssetDialog from './ManageAssetDialog';
-import AssetScrapRepairDialog from 'src/components/AssetScrapRepairDialog/AssetScrapRepairDialog';
 import { Edit } from '@material-ui/icons';
 import Tooltip from 'src/components/CustomTooltipTitle';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
@@ -29,9 +28,8 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { calculateRowsFieldNew } from 'src/components/RentalManagment/helper';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 
-const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repairedAssetStatus, renderedFrom, allowedToEdit, allowUpdateStatus, stepFullScreen }) => {
+const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, renderedFrom, allowedToEdit, stepFullScreen }) => {
 
-  const [anchorEl, setAnchorEl] = useState(null);
   const [anchorElAction, setAnchorElAction] = useState(null);
   const toastConfig = useContext(CustomToastContext);
 
@@ -49,7 +47,6 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
   const [showEditAssetDialog, setShowEditAssetDialog] = useState({ open: false, isBulkedit: false, data: null, selectedRecords: [], showSaveAndNext: false });
 
   const [showAssetRemoveConfirmationDialog, setShowAssetRemoveConfirmationDialog] = useState({ open: false, id: null, ids: [] });
-  const [statusToUpdate, setStatusToUpdate] = useState({ open: false, isUpdating: false, status: '', message: '' });
   const [isRateRequired, setIsRateRequired] = useState(false);
 
   useEffect(() => {
@@ -61,14 +58,6 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
   useEffect(() => {
     fetchRecords();
   }, [columns]);
-
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
 
   const handleClickAction = (event) => {
     setAnchorElAction(event.currentTarget);
@@ -354,54 +343,6 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
             </Button>
           </Box>
           <Box display="flex" gridGap={2} >
-            {repairJobData && repairJobData['status'] !== REPAIR_JOB_STATUS.completed && (
-              <Button
-                variant={'outlined'}
-                color="primary"
-                aria-controls="simple-menu"
-                aria-haspopup="true"
-                className='mr-2'
-                disabled={selectedRecords.length === 0 || !allowUpdateStatus}
-                size="small"
-                onClick={handleClick}
-                endIcon={<ArrowDropDownIcon />}
-              >
-                {'Change Status'}
-              </Button>
-            )}
-            <Menu
-              id="simple-menu"
-              anchorEl={anchorEl}
-              keepMounted
-              open={Boolean(anchorEl)}
-              onClose={handleClose}
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'right'
-              }}
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right'
-              }}
-            >
-              <MenuItem
-                onClick={() => {
-                  setAnchorEl(null);
-                  setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.scrap, message: '' });
-                }}
-              >
-                {ASSET_STATUS.scrap}
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  setAnchorEl(null);
-                  setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.lost, message: '' });
-                }}
-              >
-                {ASSET_STATUS.lost}
-              </MenuItem>
-            </Menu>
             <Button
               variant={'outlined'}
               color="primary"
@@ -537,21 +478,6 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, repaired
           data={showEditAssetDialog.data}
           selectedRecords={showEditAssetDialog.selectedRecords}
           showSaveAndNext={showEditAssetDialog.showSaveAndNext}
-        />
-      )}
-      {statusToUpdate.open && (
-        <AssetScrapRepairDialog
-          statusToUpdate={statusToUpdate}
-          setStatusToUpdate={setStatusToUpdate}
-          selectedRecords={selectedRecords}
-          id={repairJobData._id}
-          onClose={() => {
-            setStatusToUpdate((prevState) => ({ ...prevState, open: false }));
-          }}
-          onSuccess={() => {
-            fetchRecords();
-            repairedAssetStatus([]);
-          }}
         />
       )}
     </Fragment>

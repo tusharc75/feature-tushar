@@ -89,6 +89,7 @@ const QuoteBuilder = ({
         Header: 'Details',
         minWidth: 300,
         width: 300,
+        disabled: true,
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p className="text-truncate" title={row.original?.detail}>
@@ -303,14 +304,10 @@ const QuoteBuilder = ({
       <Box m={1} display="flex" justifyContent="space-between">
         <Box display="flex">
           <SendEmail
-            versionData={versionData}
             quotationData={quotationData}
-            columns={columns}
             versionId={versionData?._id}
-            allColumn={allColumn}
-            isSendEmail={true}
-            allowedToEdit={allowedToEdit}
             currentVersion={version}
+            columns={columns}
             hideSummary={true}
             hideVersions={true}
           />

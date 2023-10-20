@@ -345,7 +345,9 @@ export const sidebarResource = {
   workStations: 'Work Stations',
   deviceTemplateAlert: 'Device Template Alert',
   chartOfAccount: 'Chart Of Account',
-  flash: 'Flash'
+  flash: 'Flash',
+  rentalManagementInvoice : 'Rental Management Invoice',
+  creditMemo: 'Credit Memo'
 };
 
 export const primaryFields = {
@@ -400,6 +402,7 @@ export const RESOURCE_LABEL = {
   marketSegment: 'Market Segments',
   quotePdfTemplate: 'PDF Templates',
   rentalManagement: 'Rental Job',
+  rentalManagementInvoice : 'Rental Management Invoice',
   deliveryTicket: 'Delivery Tickets',
   pricingCondition: 'Pricing Setup',
   repairJob: 'Repair Jobs',
@@ -476,7 +479,8 @@ export const RESOURCE_LABEL = {
   deviceTemplateAlert: 'Device Template Alert',
   chartOfAccount: 'Chart Of Account',
   flash: 'Flash',
-  accountsReceivable: 'Accounts Receivable'
+  accountsReceivable: 'Accounts Receivable',
+  creditMemo: 'Credit Memo'
 };
 
 export const CHILD_RESOURCE = {
