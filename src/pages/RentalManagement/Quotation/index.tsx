@@ -1,18 +1,9 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
 import {
-  Grid,
   Box,
   Button,
-  Chip,
   Typography,
-  Menu,
-  MenuItem,
   IconButton,
-  Dialog,
-  FormControl,
-  Checkbox,
-  TextField,
-  Tooltip
 } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
@@ -20,17 +11,11 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import moment from 'moment';
 import {
-  rentalManagement,
-  dateFormat,
-  formatAmountWithCurrency,
   QUOTATION_STATUS,
   pricingCondition,
-  CustomDialogTransition
 } from '../../../constants/helpers';
-import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
-import { isMobile, isTablet } from 'react-device-detect';
+import { isMobile } from 'react-device-detect';
 import { FcCancel, FcClock, FcOk } from 'react-icons/fc';
 import { useData } from 'src/StateProvider/Provider';
 import { quotation } from '../../../constants/helpers';
@@ -44,11 +29,11 @@ import { orderBy, startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
 import SendEmail from 'src/pages/Quotation/SendEmail';
+import { generateCustomTableColumns } from 'src/constants/columns';
 
 const Quotation = ({
   rentalManagementData,
   setNextStep,
-  currencySymbol,
   stepFullScreen,
   allowedToEdit,
   allowedToDelete,
@@ -64,22 +49,19 @@ const Quotation = ({
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
   const [customerAcceptable, setCustomerAcceptable] = useState(false);
-  const [isUpdating, setUpdating] = useState(false);
   const [showQuotationSummaryDialog, setShowQuotationSummaryDialog] = useState(false);
   const [showAllVersionStatus, setShowAllVersionStatus] = useState(false);
   const [material, setMaterial] = useState([]);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [recordToUpdate, setRecordToUpdate] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
   const [deleteData, setDeleteData] = useState(null);
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [leadTimeDialog, setLeadTimeDialog] = useState({ open: false, data: null });
   const [isProductEdit, setIsProductEdit] = useState({ open: false, isBulkedit: false });
-  const [allColumn, setAllColumn] = useState([]);
 
   useEffect(() => {
     if (quotationData && quotationData?.versions[currentVersion]?._id) {
-      fetchFields(quotationData?.currency);
+      fetchFields();
       fetchProductInventory();
     } else {
       fetchQuotationData(null, true);
@@ -88,7 +70,7 @@ const Quotation = ({
 
   useEffect(() => {
     if (quotationData && quotationData?.versions[currentVersion]?._id) {
-      fetchFields(quotationData?.currency);
+      fetchFields();
       fetchProductInventory();
     }
     if (
@@ -103,10 +85,12 @@ const Quotation = ({
   }, [quotationData?.versions[currentVersion]?._id]);
 
 
-  const fetchFields = async (currency) => {
+  const fetchFields = async () => {
     // setNextStep(false)
     var data = await fetch_quotation_product_fields(rentalManagementData?.currency);
-    const coloum: any = [
+    let newColumns = generateCustomTableColumns(data, rentalManagementData?.currency, 'quotation_product_package_quotation');
+
+    let coloum: any = [
       {
         accessor: 'index',
         Header: 'Index',
@@ -188,99 +172,8 @@ const Quotation = ({
       }
     ];
 
-    data.forEach((element) => {
-      if (element.type === 'date') {
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          disableFilters: true,
-          Cell: ({ row }) =>
-            row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
-        });
-      } else if (element.type === 'converter' || element.type === 'currencyAmount' || element.isConverter === true) {
-        if (element.type !== 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            let fieldName = element.fieldName + '_' + _unit.toLowerCase();
-            let fieldLabel = element.fieldLabel + ' ' + _unit;
-            coloum.push({
-              accessor: fieldName,
-              Header: fieldLabel,
-              Cell: ({ row }) => (row.original[fieldName] ? <p>{row.original[fieldName]}</p> : <NoDataCell />)
-            });
-          });
-        } else if (element.type === 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            element.displayCurrency.forEach((_currency) => {
-              let fieldName = element.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase();
-              let fieldLabel = element.fieldLabel + ' ' + _unit + '/' + _currency;
-              coloum.push({
-                accessor: fieldName,
-                Header: fieldLabel,
-                Cell: ({ row }) =>
-                  row.original[fieldName] ? (
-                    <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-                  ) : (
-                    <NoDataCell />
-                  )
-              });
-            });
-          });
-        } else if (element.type === 'currencyAmount') {
-          element.displayCurrency.forEach((_currency) => {
-            let fieldName = element.fieldName + '_' + _currency.toLowerCase();
-            let fieldLabel = element.fieldLabel + ' ' + _currency;
-            coloum.push({
-              accessor: fieldName,
-              Header: fieldLabel,
-              Cell: ({ row }) =>
-                row.original[fieldName] ? (
-                  <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-                ) : (
-                  <NoDataCell />
-                ),
-              Footer: (info) => {
-                const total = info?.rows
-                  ?.filter((f) => f.original.parentId === null && f.values.hasOwnProperty(fieldName) && !isNaN(f.values[fieldName]))
-                  .reduce((sum, row) => row.values[fieldName] + sum, 0);
-                return (
-                  <>
-                    {currencySymbol} {formatAmountWithCurrency(rentalManagementData?.currency, total)?.amountWithouCurrencyCode ?? total}
-                  </>
-                );
-              }
-            });
-          });
-        }
-      } else {
-        if (element.fieldName === 'qty') {
-          element.fieldName = 'qtyDisplay';
-        }
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          Cell: ({ row }) =>
-            row.original[element.fieldName]?.optionLabel ? (
-              <p>{row.original[element.fieldName].optionLabel}</p>
-            ) : row.original[element.fieldName] ? (
-              <p>{row.original[element.fieldName]}</p>
-            ) : (
-              <NoDataCell />
-            )
-        });
-      }
-    });
-    coloum.forEach((element) => {
-      if (element.accessor === 'qtyDisplay') {
-        element['Footer'] = (info) => {
-          const qtyTotal = info.rows
-            .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
-            .reduce((sum, row) => row.values[element.accessor] + sum, 0);
-          return <>{qtyTotal}</>;
-        };
-      }
-    });
+    coloum = [...coloum, ...newColumns];
     setColumns(coloum);
-    setAllColumn(coloum.map((d) => d.Header));
   };
 
   const generateNestedData = (material, inventory, parent) => {
@@ -387,14 +280,6 @@ const Quotation = ({
       });
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
-
   const handleDelete = (rows) => {
     setNextStep(false);
     setDeleting(true);
@@ -456,18 +341,15 @@ const Quotation = ({
       delete element.serviceDetail;
       delete element.subRows;
     });
-    setUpdating(true);
     axiosInstance()
       .put(`${quotation.api}/productpackage/${quotationData._id}/${quotationData?.versions[currentVersion]?._id}`, { material: rows })
       .then(() => {
-        setUpdating(false);
         setIsProductEdit({ open: false, isBulkedit: false });
         fetchProductInventory();
         setNextStep(true);
       })
       .catch((error) => {
         setNextStep(true);
-        setUpdating(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -657,59 +539,6 @@ const Quotation = ({
                       {`Clone Version-${currentVersion}`}
                     </Button>
                   ) : null}
-                  {/* <Button
-                variant="outlined"
-                color="default"
-                size="small"
-                onClick={openActions}
-                aria-controls="action-menu"
-                disabled={selectedProducts.length === 0}
-                endIcon={<ExpandMore />}
-              >
-                Actions
-              </Button>
-              <Menu
-                anchorEl={anchorEl}
-                keepMounted
-                getContentAnchorEl={null}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'left'
-                }}
-                id="action-menu"
-                open={Boolean(anchorEl)}
-                onClose={closeActions}
-              >
-                <MenuItem
-                  onClick={() => {
-                    closeActions();
-                    setIsProductEdit({ open: true, isBulkedit: true });
-                  }}
-                >
-                  Bulk Edit
-                </MenuItem>
-                {allowedToDelete && (
-                  <MenuItem
-                    onClick={() => {
-                      closeActions();
-                      const dataToDelete =
-                        selectedProducts &&
-                        selectedProducts
-                          .filter((e) => !e.hideSelection)
-                          .map((rec: any) => {
-                            const obj: any = {};
-                            obj.id = rec._id;
-                            obj.type = rec?.type;
-                            obj.materialId = rec?.materialId;
-                            return obj;
-                          });
-                      setDeleteData(dataToDelete);
-                    }}
-                  >
-                    Delete
-                  </MenuItem>
-                )}
-              </Menu> */}
                 </div>
               )}
             </Box>
