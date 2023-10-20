@@ -346,6 +346,7 @@ export const sidebarResource = {
   deviceTemplateAlert: 'Device Template Alert',
   chartOfAccount: 'Chart Of Account',
   flash: 'Flash',
+  rentalManagementInvoice : 'Rental Management Invoice',
   creditMemo: 'Credit Memo'
 };
 
@@ -401,6 +402,7 @@ export const RESOURCE_LABEL = {
   marketSegment: 'Market Segments',
   quotePdfTemplate: 'PDF Templates',
   rentalManagement: 'Rental Job',
+  rentalManagementInvoice : 'Rental Management Invoice',
   deliveryTicket: 'Delivery Tickets',
   pricingCondition: 'Pricing Setup',
   repairJob: 'Repair Jobs',

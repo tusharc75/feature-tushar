@@ -299,6 +299,10 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
     invoicedProducts = invoiceResponse?.data?.data?.material;
     additionalCost = invoiceResponse?.data?.data?.additionalCost;
 
+    const queryString = `?rentalJob=${rentalManagementData._id}`
+    const tempInvoiceData = await axiosInstance().get(`${invoice.api}${queryString}`)
+    invoiceData = tempInvoiceData?.data?.data
+
     const responseAdditionalCostData = await axiosInstance().get(`${rentalManagement.api}/additionalcost/${rentalManagementData._id}`);
     let additionalCostData = responseAdditionalCostData?.data?.data;
     if (additionalCost?.length > 0) {
@@ -394,6 +398,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
     }
 
     data.material = newMaterial;
+
     if (invoiceData) {
       data.material = data?.material
         ?.map((e) => {

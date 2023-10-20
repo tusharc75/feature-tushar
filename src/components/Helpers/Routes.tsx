@@ -280,6 +280,13 @@ const routes = {
         : RESOURCE_LABEL.rentalManagement,
     path: '/rental-management'
   },
+  rentalManagementInvoice: {
+    title:
+      storedRoutes && storedRoutes.rentalManagementInvoice && storedRoutes.rentalManagementInvoice
+        ? storedRoutes.rentalManagementInvoice.title
+        : RESOURCE_LABEL.rentalManagementInvoice,
+    path: '/rental-management-invoice'
+  },
   rentalManagementDetail: {
     title:
       storedRoutes && storedRoutes.rentalManagement && storedRoutes.rentalManagement
