@@ -76,7 +76,6 @@ const RentalManagementDetailsPage = () => {
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [rentalManagementFields, setRentalManagementFields] = useState([]);
   const [currentStep, setCurrentStep] = useState(null);
-  const [currencySymbol, setCurrencySymbol] = useState(null);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [isProcessor, setIsProcessor] = useState(false);
 
@@ -250,7 +249,6 @@ const RentalManagementDetailsPage = () => {
         setCurrentStep(getIndex(data?.processStatus, steps));
       }
       setLoadingDetails(false);
-      setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
       let isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
       if (user?.role?.selectedEntity?.superAdminAccess) {
         isAllowedToEdit = true;
@@ -701,7 +699,6 @@ const RentalManagementDetailsPage = () => {
                 <Quotation
                   rentalManagementData={rentalManagementData}
                   setNextStep={setNextStep}
-                  currencySymbol={currencySymbol}
                   stepFullScreen={stepFullScreen}
                   allowedToEdit={allowedToEdit}
                   allowedToDelete={allowedToDelete}
