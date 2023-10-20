@@ -223,7 +223,6 @@ const RentalManagementInvoice = () => {
         {createInvoiceDialog.open && (
           <CreateBillingDialog
             rentalManagementData={createInvoiceDialog.data}
-            currencySymbol={createInvoiceDialog.data.currency}
             onClose={() => {
               setCreateInvoiceDialog({ open: false, data: null });
             }}

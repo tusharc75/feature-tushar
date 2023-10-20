@@ -3,7 +3,7 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
-import { Box, Checkbox, Chip, CircularProgress, Dialog, FormControlLabel, FormGroup, IconButton, Menu, MenuItem, Tooltip } from '@material-ui/core';
+import { Box, Checkbox, Dialog, FormControlLabel, FormGroup, IconButton } from '@material-ui/core';
 import { useData } from 'src/StateProvider/Provider';
 import { fetch_rental_product_fields } from 'src/components/RentalManagment/helper';
 import { isMobile } from 'react-device-detect';
@@ -15,9 +15,7 @@ import {
   deliveryTicket,
   DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_TYPE,
-  formatAmountWithCurrency,
   invoice,
-  pricingCondition,
   rentalManagement,
   MATERIAL_TYPE,
   ASSET_STATUS
@@ -28,12 +26,12 @@ import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { MuiPickersUtilsProvider, KeyboardDatePicker, KeyboardTimePicker } from '@material-ui/pickers';
+import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
 import MomentUtils from '@date-io/moment';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import styles from '../../Leads/Header.module.scss';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { startCase } from 'lodash';
+import { camelCase, startCase } from 'lodash';
 import InfoIcon from '@material-ui/icons/InfoOutlined';
 import EditIcon from '@material-ui/icons/Edit';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
@@ -41,6 +39,9 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { generateCustomTableColumns } from 'src/constants/columns';
 
 const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
+
+
+  const renderedFrom = `${camelCase(routes?.rentalManagementInvoice.title)}_create_invoice`;
 
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -80,7 +81,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
       e.isColumnEditable = false;
     });
     setAllFields(JSON.parse(JSON.stringify(data)));
-    let newColumns = generateCustomTableColumns(data, rentalManagementData?.currency, '');
+
+    let newColumns = generateCustomTableColumns(data, rentalManagementData?.currency, renderedFrom);
 
     let coloum: any = [
       {
@@ -165,15 +167,15 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     ];
 
     //remove all fields have 'estimate'
-    newColumns = newColumns?.filter((d)=>!d?.accessor?.includes('estimate'))
-    const pricingMethodColumn = newColumns?.find(obj => obj.accessor === "pricingMethod");
+    newColumns = newColumns?.filter((d) => !d?.accessor?.includes('estimate'))
 
+    const pricingMethodColumn = newColumns?.find(obj => obj.accessor === "pricingMethod");
     if (pricingMethodColumn) {
-      pricingMethodColumn.Cell = ({ row }) => pricingMethodRenderer(row, pricingMethodColumn);
+      pricingMethodColumn.Cell = ({ row }) => pricingMethodRenderer(row);
     }
 
     coloum = [...coloum, ...newColumns];
-   
+
     coloum.push({
       accessor: 'action',
       Header: 'Actions',
@@ -195,32 +197,29 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           </IconButton>
         )
     });
+
     setColumns(coloum);
   };
 
-  const pricingMethodRenderer = (row, element) => {
-
-    return row.original[element.accessor]?.optionLabel ? (
-      <p>{row.original[element.accessor].optionLabel}</p>
-    ) : row.original[element.accessor] ? (
-      <>
-        {['Per Week', 'Per Month'].includes(row.original[element.accessor]) && proRata && row.original.isAppliedBill ? (
-          <Box display="flex" alignItems="center">
-            <p>{row.original[element.accessor]}</p>
-            <Box ml={1} />
-            <Tooltip title="Per Day Price is calculated">
-              <InfoIcon fontSize="small" color="primary" />
-            </Tooltip>
-          </Box>
-        ) : (
-          <p>{row.original[element.accessor]}</p>
-        )}
+  const pricingMethodRenderer = (row) => {
+    return row.original['pricingMethod'] ? (
+      <>  {['Per Week', 'Per Month'].includes(row.original['pricingMethod']) && proRata && row.original.isAppliedBill ? (
+        <Box display="flex" alignItems="center">
+          <p>{row.original['pricingMethod']}</p>
+          <Box ml={1} />
+          <HtmlTooltip title="Per Day Price is calculated">
+            <InfoIcon fontSize="small" color="primary" />
+          </HtmlTooltip>
+        </Box>
+      ) : (
+        <p>{row.original['pricingMethod']}</p>
+      )}
       </>
     ) : (
       <NoDataCell />
     );
   }
-  
+
 
   const fetchData = async () => {
     let data: any = {};
@@ -740,7 +739,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                   onSelect={setSelectedProducts}
                   childrenProperty="subRows"
                   uniqueKey="_id"
-                  renderedFrom="rental_management_create_billing"
+                  renderedFrom={renderedFrom}
                   isClientSideGrid={true}
                 />
               </Box>
