@@ -95,10 +95,16 @@ export const bulkAssetCreationSteps: stepInterface[] = [
   { name: 'Serialized Asset', title: 'Asset', icon: 'serializedAssets' }
 ];
 
-export const subleaseSteps: stepInterface[] = [
+export const sublease_Vendor_Steps: stepInterface[] = [
   { name: 'Add Products', title: 'Add', icon: 'add' },
   { name: 'Start Sublease', title: 'Sublease', icon: 'startSublease' },
   { name: 'End Sublease', title: 'End', icon: 'end' }
+];
+export const sublease_InterCompany_Steps: stepInterface[] = [
+  { name: 'Add Products', title: 'Add', icon: 'add' },
+  { name: 'Serialized Asset', title: 'Asset', icon: 'serializedAssets' },
+  { name: 'Loading Ticket', title: 'Loading', icon: 'ticket' },
+  { name: 'Receiving Ticket', title: 'Receiving', icon: 'receivingTicket' },
 ];
 
 export const quotationProcessSteps: stepInterface[] = [
@@ -2701,6 +2707,11 @@ export const SERVICE_TYPE = {
   shopService: 'Shop Service',
   fieldService: 'Field Service'
 };
+
+export const SUBLEASE_TYPE = {
+  vendor: 'Vender',
+  interCompany: 'Inter Company'
+}
 
 export const QUOTE_PROCESS_STATUS = {
   new: 'New',

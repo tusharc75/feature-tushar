@@ -11,7 +11,7 @@ import CustomReactTable from '../../../components/CustomReactTable/CustomReactTa
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { sublease, pricingCondition, SUBLEASE_STATUS } from '../../../constants/helpers';
+import { sublease, pricingCondition, SUBLEASE_STATUS, SUBLEASE_TYPE } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import QtyDialog from './QtyDialog';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
@@ -236,8 +236,11 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
         parent.subRows = subRows;
       }
     });
-    if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0 || inventory.length === 0) {
-      setNextStep(false);
+    if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
+      if (inventory.length === 0 && subleaseData?.type === SUBLEASE_TYPE.interCompany) {
+        setNextStep(true);
+      } else
+        setNextStep(false);
     } else {
       setNextStep(true);
     }
@@ -445,7 +448,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
             )}
           </div>
           <div className="flex flex-wrap gap-2">
-            {material?.length && !isIssued && !rowsData?.some((f) => !f.isValid) ? (
+            {material?.length && !isIssued && !rowsData?.some((f) => !f.isValid) && subleaseData?.type !== SUBLEASE_TYPE.interCompany ? (
               <Fragment>
                 <HtmlTooltip title={'Start Sublease'}>
                   <Button
