@@ -43,8 +43,18 @@ const DocumentScanner = ({ open, onClose, setFieldValue, onUploadFile }) => {
       });
   }, [cameraPermission]);
 
+  const captureImageFromStream = () => {
+    const video = webcamRef.current.video;
+    const canvas = document.createElement("canvas");
+    canvas.width = 1920;
+    canvas.height = 1080;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    return canvas.toDataURL("image/png");
+  };
+
   const handleCapture = () => {
-    const imageSrc = webcamRef.current.getScreenshot();
+    const imageSrc = captureImageFromStream();
     setPicture(imageSrc);
     setIsScanning(true);
     axiosInstance()
