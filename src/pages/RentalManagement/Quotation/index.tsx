@@ -25,7 +25,7 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import QuotationQtyDialog from 'src/pages/Quotation/Productpackage/QuotationQtyDialog';
 import ManualReponseDialog from 'src/pages/Quotation/ManualRespondDialog';
 import QuotationSummeryDialog from 'src/pages/Quotation/QuotationSummeryDialog';
-import { orderBy, startCase } from 'lodash';
+import { camelCase, orderBy, startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
 import SendEmail from 'src/pages/Quotation/SendEmail';
@@ -42,22 +42,21 @@ const Quotation = ({
   currentVersion,
   setCurrentVersion
 }) => {
+
+  const renderedFrom = `${camelCase(routes?.rentalManagement.title)}_quotation`;
+
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
   }: any = useData();
+  
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
   const [customerAcceptable, setCustomerAcceptable] = useState(false);
   const [showQuotationSummaryDialog, setShowQuotationSummaryDialog] = useState(false);
   const [showAllVersionStatus, setShowAllVersionStatus] = useState(false);
   const [material, setMaterial] = useState([]);
-  const [recordToUpdate, setRecordToUpdate] = useState(null);
-  const [isDeleting, setDeleting] = useState(false);
-  const [deleteData, setDeleteData] = useState(null);
   const [selectedProducts, setSelectedProducts] = useState([]);
-  const [leadTimeDialog, setLeadTimeDialog] = useState({ open: false, data: null });
-  const [isProductEdit, setIsProductEdit] = useState({ open: false, isBulkedit: false });
 
   useEffect(() => {
     if (quotationData && quotationData?.versions[currentVersion]?._id) {
@@ -73,10 +72,8 @@ const Quotation = ({
       fetchFields();
       fetchProductInventory();
     }
-    if (
-      quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
-      quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice
-    ) {
+    if (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote
+      || quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice) {
       setNextStep(false);
     }
     if (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer) {
@@ -86,9 +83,11 @@ const Quotation = ({
 
 
   const fetchFields = async () => {
-    // setNextStep(false)
     var data = await fetch_quotation_product_fields(rentalManagementData?.currency);
-    let newColumns = generateCustomTableColumns(data, rentalManagementData?.currency, 'quotation_product_package_quotation');
+    data?.forEach((e) => {
+      e.isColumnEditable = false;
+    });
+    let newColumns = generateCustomTableColumns(data, rentalManagementData?.currency, renderedFrom);
 
     let coloum: any = [
       {
@@ -181,12 +180,12 @@ const Quotation = ({
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
       _subRow.detail = `${_subRow.type === 'serializedAsset'
-          ? _subRow?.serializedAssetDetail?.assetNumber
-          : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productName
-            : _subRow.type === 'service'
-              ? _subRow?.serviceDetail?.serviceName
-              : _subRow?.packageDetail?.packageName
+        ? _subRow?.serializedAssetDetail?.assetNumber
+        : _subRow.type === 'product'
+          ? _subRow?.productDetail?.productName
+          : _subRow.type === 'service'
+            ? _subRow?.serviceDetail?.serviceName
+            : _subRow?.packageDetail?.packageName
         }`;
       _subRow.description =
         _subRow.type === 'service'
@@ -240,14 +239,14 @@ const Quotation = ({
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = `${parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail?.assetNumber
-          : parent.type === 'product'
-            ? parent.productDetail?.productName
-            : parent.type === 'service'
-              ? parent.serviceDetail?.serviceName
-              : parent.type === 'package'
-                ? parent.packageDetail?.packageName
-                : parent.detail
+        ? parent.serializedAssetDetail?.assetNumber
+        : parent.type === 'product'
+          ? parent.productDetail?.productName
+          : parent.type === 'service'
+            ? parent.serviceDetail?.serviceName
+            : parent.type === 'package'
+              ? parent.packageDetail?.packageName
+              : parent.detail
         }`;
       parent.description =
         parent.type === 'service'
@@ -276,80 +275,6 @@ const Quotation = ({
         fetchQuotationData();
       })
       .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  };
-
-  const handleDelete = (rows) => {
-    setNextStep(false);
-    setDeleting(true);
-    axiosInstance()
-      .put(`${quotation.api}/productpackage/${quotationData?._id}/${quotationData?.versions[currentVersion]?._id}/delete`, { ids: rows })
-      .then(() => {
-        setDeleting(false);
-        fetchProductInventory();
-        setDeleteData(null);
-        setNextStep(true);
-      })
-      .catch((error) => {
-        setDeleting(false);
-        toastConfig.setToastConfig(error);
-        setDeleteData(null);
-        setNextStep(true);
-      });
-  };
-
-  const calculatePrice = (arr: any[]) => {
-    if (quotationData) {
-      const data: any = {};
-      data.conditionType = ['Rent'];
-      data.material = arr.map((ele) => ({
-        materialId: ele?.materialId,
-        materialType: ele?.type,
-        qty: ele?.qty,
-        pricingMethod: ele?.pricingMethod,
-        unit: ele?.unit,
-        currency: quotationData?.currency
-      }));
-      data.supplier = [];
-      data.customer = [quotationData?.customerAccount?.optionValue];
-      data.warehouse = [quotationData?.warehouse?.optionValue];
-      return new Promise((resolve, reject) => {
-        axiosInstance()
-          .post(pricingCondition.api + `/calculatePrice`, data)
-          .then(({ data: { data } }) => {
-            resolve(data);
-          })
-          .catch((err) => {
-            reject(err);
-          });
-      });
-    }
-  };
-
-  const handleSaveData = async (rows: any) => {
-    setNextStep(false);
-    rows.forEach((element) => {
-      delete element.index;
-      delete element.detail;
-      delete element.qtyDisplay;
-      delete element.isValid;
-      delete element.hideSelection;
-      delete element.assetQty;
-      delete element.productDetail;
-      delete element.packageDetail;
-      delete element.serviceDetail;
-      delete element.subRows;
-    });
-    axiosInstance()
-      .put(`${quotation.api}/productpackage/${quotationData._id}/${quotationData?.versions[currentVersion]?._id}`, { material: rows })
-      .then(() => {
-        setIsProductEdit({ open: false, isBulkedit: false });
-        fetchProductInventory();
-        setNextStep(true);
-      })
-      .catch((error) => {
-        setNextStep(true);
         toastConfig.setToastConfig(error);
       });
   };
@@ -557,7 +482,7 @@ const Quotation = ({
             uniqueKey="_id"
             hideSelection={true}
             hideAction={true}
-            renderedFrom="quotation_product_package_quotation"
+            renderedFrom={renderedFrom}
             isClientSideGrid={true}
           />
         </Box>
@@ -565,44 +490,6 @@ const Quotation = ({
         <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
-      )}
-      {deleteData && (
-        <ConfirmationDialog
-          open={true}
-          message={`Are you sure you want to delete the record(s)?`}
-          onClose={() => setDeleteData(null)}
-          onOk={() => handleDelete(deleteData)}
-          okBtnLoading={isDeleting}
-        />
-      )}
-      {isProductEdit.open && (
-        <QuotationQtyDialog
-          calculatePrice={calculatePrice}
-          onClose={() => {
-            setIsProductEdit({ open: false, isBulkedit: false });
-            setRecordToUpdate(null);
-          }}
-          isBulkedit={isProductEdit.isBulkedit}
-          handleSaveData={handleSaveData}
-          quotationData={quotationData}
-          rowData={recordToUpdate}
-          material={material}
-          selectedProducts={selectedProducts}
-        />
-      )}
-      {leadTimeDialog.open && (
-        <LeadTimeDialog
-          quotationId={quotationData._id}
-          data={leadTimeDialog?.data}
-          versionId={quotationData?.versions[currentVersion]?._id}
-          onClose={() => {
-            setLeadTimeDialog({ open: false, data: null });
-          }}
-          handleSucess={() => {
-            setLeadTimeDialog({ open: false, data: null });
-            fetchProductInventory();
-          }}
-        />
       )}
       {quotationData && showAllVersionStatus && (
         <Versions
