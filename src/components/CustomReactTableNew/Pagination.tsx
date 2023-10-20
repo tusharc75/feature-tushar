@@ -124,7 +124,7 @@ const Pagination: FC<PaginationProps> = ({
             />
             &nbsp;
             <span>
-              - &nbsp;
+              -&nbsp;
               {possibleMaxPage}
             </span>
           </div>
