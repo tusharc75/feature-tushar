@@ -12,7 +12,6 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import {
   fieldServiceOrder,
   ACTIVITY_RESOURCE,
-  getUniqueCurrencies,
   serviceOrderSteps,
   SERVICE_ORDER_STATUS,
   sidebarResource,
@@ -34,12 +33,9 @@ import TechnicianDispatch from './TechnicianDispatch';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ServiceOrderViews from './RoadMapViews';
-import { ExpandMore } from '@material-ui/icons';
-import { GrStatusInfo } from 'react-icons/gr';
 import FieldTicket from './FieldTicket';
 import FieldTicketInvoice from './FieldTicketInvoice';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
-import CloseIcon from '@material-ui/icons/Close';
 import ButtonWithPulse from 'src/components/ButtonWithPulse';
 
 const ServiceOrderDetailsPage = () => {
@@ -68,10 +64,8 @@ const ServiceOrderDetailsPage = () => {
   const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [nextStep, setNextStep] = useState(false);
-  const [currencySymbol, setCurrencySymbol] = useState(null);
   const [currentStep, setCurrentStep] = useState(null);
   const [statusOptions, setStatusOptions] = useState([]);
-  const [anchorEl, setAnchorEl] = useState(null);
 
   const [steps, setSteps] = useState([]);
   const [showClosedConfirmBox, setShowClosedConfirmBox] = useState(false);
@@ -134,7 +128,6 @@ const ServiceOrderDetailsPage = () => {
       setAllowedToEdit(permissions?.fieldServiceOrder?.isUpdate && isAllowedToEdit && ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status));
       setAllowedToDelete(permissions?.fieldServiceOrder?.isDelete && data.owner.optionValue === user?.user?._id && data.canDelete && ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status));
       setServiceOrderData(data);
-      setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
       setCurrentStep(steps.map((s) => s.name).indexOf(data?.processStatus) !== -1 ? steps.map((s) => s.name).indexOf(data?.processStatus) : 0);
     } catch (error) {
       setLoadingDetails(false);
@@ -344,7 +337,6 @@ const ServiceOrderDetailsPage = () => {
               <Technician
                 serviceOrderData={serviceOrderData}
                 setNextStep={setNextStep}
-                currencySymbol={currencySymbol}
                 renderedFrom={`${renderedFrom}_grid-3`}
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={allowedToEdit}
@@ -363,7 +355,6 @@ const ServiceOrderDetailsPage = () => {
               <Technician
                 serviceOrderData={serviceOrderData}
                 setNextStep={setNextStep}
-                currencySymbol={currencySymbol}
                 renderedFrom={`${renderedFrom}_grid-5`}
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={allowedToEdit}

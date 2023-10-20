@@ -49,7 +49,6 @@ import { updateRentalProcessStatus } from './rentalOfflineHelper';
 import Quotation from './Quotation';
 import ProgressiveBilling from './ProgressiveBilling';
 import Services from './Services';
-import Consumables from './Consumables';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import { IoMdDownload } from 'react-icons/io';
 import Steps, { getIndex } from 'src/components/Steps';
@@ -679,16 +678,7 @@ const RentalManagementDetailsPage = () => {
                   }
                 />
               )}
-              {/* {rentalSteps[currentStep]?.name === 'Add Consumables' && rentalManagementData && (
-                      <Consumables
-                        rentalManagementData={rentalManagementData}
-                        setNextStep={setNextStep}
-                        currencySymbol={currencySymbol}
-                        renderedFrom={`${renderedFrom}_grid-2`}
-                        stepFullScreen={stepFullScreen}
-                        allowedToEdit={allowedToEdit}
-                      />
-                    )} */}
+
               {rentalSteps[currentStep]?.name === 'Add-on' && rentalManagementData && (
                 <AdditionalCost
                   rentalManagementData={rentalManagementData}
@@ -773,7 +763,6 @@ const RentalManagementDetailsPage = () => {
                 <ProgressiveBilling
                   rentalId={id}
                   rentalManagementData={rentalManagementData}
-                  currencySymbol={currencySymbol}
                   allowCreateInvoice={true}
                 />
               ) : (
