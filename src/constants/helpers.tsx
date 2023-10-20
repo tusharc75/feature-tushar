@@ -558,8 +558,7 @@ export const quoteBuilder = {
 
 export const rentalManagement = {
   api: '/rental-management',
-  rentalManagementResource: 'rentalManagement',
-  resource: 'rental-management'
+  resource: 'Rental Management'
 };
 
 export const deliveryTicket = {

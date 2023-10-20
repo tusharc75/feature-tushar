@@ -1,11 +1,11 @@
 
 import { CustomDialogTransition, rentalManagement } from 'src/constants/helpers';
-import Invoices from './Invoices';
+import ProgressiveBilling from '../RentalManagement/ProgressiveBilling';
 import { Dialog } from '@material-ui/core';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 
-const InvoiceDialog = ({rentalManagementData, rentalId, rentalName, handleClose }) => {
+const InvoiceDialog = ({ rentalManagementData, rentalId, rentalJobName, handleClose }) => {
   return (
     <>
       <Dialog
@@ -14,15 +14,17 @@ const InvoiceDialog = ({rentalManagementData, rentalId, rentalName, handleClose 
         aria-labelledby="customized-dialog-title"
         open={true}>
         <CustomDialogHeader
-          title={`Invoices : ${rentalName}`}
+          title={`Invoices : ${rentalJobName}`}
           onClose={() => {
             handleClose()
           }}
           showRequiredLabel={false} />
         <CustomDialogContent>
-          <Invoices
+          <ProgressiveBilling
             rentalId={rentalId}
-            rentalManagementData = {rentalManagementData}
+            rentalManagementData={rentalManagementData}
+            currencySymbol={null}
+            allowCreateInvoice={false}
           />
         </CustomDialogContent>
       </Dialog>

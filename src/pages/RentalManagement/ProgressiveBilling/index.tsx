@@ -16,7 +16,8 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
-const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol }) => {
+const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol, allowCreateInvoice }) => {
+
   const renderedFrom = camelCase(routes?.invoice?.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -24,12 +25,12 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol }) 
 
   const [createBillDialog, setCreateBillDialog] = useState({ open: false });
   const [viewBillDialog, setViewBillDialog] = useState({ open: false, invoiceData: null });
-  const [invoiceData, setInvoiceData] = useState(null);
-  const {
-    state: { user, permissions, selectedEntity }
-  }: any = useData();
+
+  const { state: { user, permissions, selectedEntity } }: any = useData();
+
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
+
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   const { getColumnData } = useColumns();
@@ -38,6 +39,10 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol }) 
   const [deleteRecord, setDeleteRecord] = useState<any>({});
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+
+  useEffect(() => {
+    fetchData();
+  }, [page, limit, filters, sorting]);
 
   useEffect(() => {
     fetchGridColumns();
@@ -118,11 +123,6 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol }) 
     </>
   );
 
-  useEffect(() => {
-    fetchBilling();
-  }, [page, limit, filters, sorting]);
-
-
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}&rentalJob=${rentalId}`;
     if (showFilteredRecordsOnly) {
@@ -148,7 +148,7 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol }) 
     return deepFilter;
   };
 
-  const fetchBilling = async () => {
+  const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     if (gridApi) {
@@ -164,9 +164,6 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol }) 
           finalObject['canDelete'] = permissions?.invoice?.isDelete && u?.canDelete;
           return finalObject;
         });
-        if (data?.length) {
-          setInvoiceData(data);
-        }
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -200,7 +197,7 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol }) 
           setIsConformDialogVisible(false);
           setDeleteLoading(false);
           if (deleteRecord) setDeleteRecord({});
-          fetchBilling();
+          fetchData();
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -212,13 +209,15 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol }) 
 
   return (
     <>
-      <Box display="flex" justifyContent="flex-end">
-        <Box display="flex" alignItems="center" pt={2} pr={2}>
-          <Button variant="contained" color="primary" size="small" onClick={() => setCreateBillDialog({ open: true })} aria-controls="action-menu">
-            Create Billing
-          </Button>
+      {allowCreateInvoice &&
+        <Box display="flex" justifyContent="flex-end">
+          <Box display="flex" alignItems="center" pt={2} pr={2}>
+            <Button variant="contained" color="primary" size="small" onClick={() => setCreateBillDialog({ open: true })} aria-controls="action-menu">
+              Create Billing
+            </Button>
+          </Box>
         </Box>
-      </Box>
+      }
       <Grid item xs={12} md={12} sm={12} className="mt-3">
         {columns?.length ? (
           <CustomAgGrid
@@ -237,6 +236,7 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol }) 
             allowSelection={false}
             allowAction={true}
             isClientSideGrid={true}
+            refreshGrid={fetchData}
           />
         ) : (
           <Box p={2} height={500}>
@@ -248,13 +248,12 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol }) 
         <CreateBillingDialog
           rentalManagementData={rentalManagementData}
           currencySymbol={currencySymbol}
-          invoiceData={invoiceData}
           onClose={() => {
             setCreateBillDialog({ open: false });
           }}
           onSuccess={() => {
             setCreateBillDialog({ open: false });
-            fetchBilling();
+            fetchData();
           }}
         />
       )}
@@ -269,7 +268,7 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol }) 
           }}
           onSuccess={() => {
             setViewBillDialog({ open: false, invoiceData: null });
-            fetchBilling();
+            fetchData();
           }}
         />
       )}
@@ -288,4 +287,5 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol }) 
     </>
   );
 };
+
 export default ProgressiveBilling;
