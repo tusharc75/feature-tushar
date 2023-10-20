@@ -1658,6 +1658,7 @@ const FormTypes = (props) => {
         >
           <Autocomplete
             {...rest}
+            disabled={fieldData?.isUneditable || rest?.disabled}
             fullWidth
             value={
               currencyData.filter((data) => data.currencyCode === values[name]).length

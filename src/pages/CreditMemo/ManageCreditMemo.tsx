@@ -17,7 +17,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 
-const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, id = null }) => {
+const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null, isRedirectToDetailPage = true }) => {
   const history = useHistory();
   const {
     state: { user }
@@ -64,6 +64,18 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, id = null }) =>
           });
       } else {
         const tempInitialData: any = getObjKeys('', fieldsDataForCreate);
+        if (referenceData) {
+          for (const key in referenceData) {
+            if (referenceData[key] && fieldsDataForCreate?.some((e) => e.fieldName === key)) {
+              tempInitialData[key] = referenceData[key];
+              const field = fieldsDataForCreate?.find((f) => f?.fieldName === key);
+              if (field) {
+                field.disableOnEdit = true;
+                field.isUneditable = true;
+              }
+            }
+          }
+        }
         setInitialData({
           fields: fieldsDataForCreate,
           values: tempInitialData
@@ -98,7 +110,9 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, id = null }) =>
         .post(`${routes.creditMemo?.path}`, values)
         .then(({ data: { data, message } }: any) => {
           setLoading(false);
-          history.push(`${routes.creditMemoDetail.path}/${data._id}`);
+          if (isRedirectToDetailPage) {
+            history.push(`${routes.creditMemoDetail.path}/${data._id}`);
+          }
           onSuccess(data);
           setSubmitting(true);
           toastConfig.setToastConfig({
