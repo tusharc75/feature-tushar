@@ -506,7 +506,7 @@ const Quotation = ({
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: 'Processed Quote Successfully'
+          message: 'Processed Successfully'
         });
       })
       .catch((error) => {
@@ -603,17 +603,17 @@ const Quotation = ({
               {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
                 <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
                   <FcClock size={25} />
-                  <Typography style={{ color: '#00acc1', fontWeight: 'bold' }}>Quote has been sent to customer</Typography>
+                  <Typography style={{ color: '#00acc1', fontWeight: 'bold' }}>Quotation has been sent to customer</Typography>
                 </div>
               ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? (
                 <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
                   <FcOk size={25} />
-                  <Typography style={{ color: '#28a745', fontWeight: 'bold' }}>Quote has been accepted by customer</Typography>
+                  <Typography style={{ color: '#28a745', fontWeight: 'bold' }}>Quotation has been accepted by customer</Typography>
                 </div>
               ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
                 <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
                   <FcCancel size={25} />
-                  <Typography style={{ color: '#dc3545', fontWeight: 'bold' }}>Quote has been rejected by customer</Typography>
+                  <Typography style={{ color: '#dc3545', fontWeight: 'bold' }}>Quotation has been rejected by customer</Typography>
                 </div>
               ) : null}
             </Box>
@@ -637,7 +637,7 @@ const Quotation = ({
                     size="small"
                     color="primary"
                   >
-                    Process Quote
+                    Process Quotation
                   </Button>
                 ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
                   <Button
@@ -710,17 +710,17 @@ const Quotation = ({
               {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
                 <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
                   <FcClock size={25} />
-                  <Typography style={{ color: '#00acc1', fontWeight: 'bold' }}>Quote has been sent to customer</Typography>
+                  <Typography style={{ color: '#00acc1', fontWeight: 'bold' }}>Quotation has been sent to customer</Typography>
                 </div>
               ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? (
                 <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
                   <FcOk size={25} />
-                  <Typography style={{ color: '#28a745', fontWeight: 'bold' }}>Quote has been accepted by customer</Typography>
+                  <Typography style={{ color: '#28a745', fontWeight: 'bold' }}>Quotation has been accepted by customer</Typography>
                 </div>
               ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
                 <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
                   <FcCancel size={25} />
-                  <Typography style={{ color: '#dc3545', fontWeight: 'bold' }}>Quote has been rejected by customer</Typography>
+                  <Typography style={{ color: '#dc3545', fontWeight: 'bold' }}>Quotation has been rejected by customer</Typography>
                 </div>
               ) : null}
             </Box>

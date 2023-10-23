@@ -36,7 +36,7 @@ const Invoices = ({ subleaseId }) => {
   const [columns, setColumns] = useState(null);
   const [deleteRecord, setDeleteRecord] = useState<any>({});
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
-  const [viewInvoiceDialog, setViewInvoiceDialog] = useState({ open: false, data: null })
+  const [viewInvoiceDialog, setViewInvoiceDialog] = useState({ open: false, invoice: null })
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
@@ -93,7 +93,7 @@ const Invoices = ({ subleaseId }) => {
       <span
         className="link"
         onClick={() => {
-          setViewInvoiceDialog({ open: true, data: params.data });
+          setViewInvoiceDialog({ open: true, invoice: params.data.invoiceId });
         }}
       >
         <CustomRenderCell value={params?.value} />
@@ -264,12 +264,12 @@ const Invoices = ({ subleaseId }) => {
       </Grid>
       {viewInvoiceDialog.open && (
         <ViewInvoice
-          invoiceData={{ ...viewInvoiceDialog.data, invoiceNumber: viewInvoiceDialog?.data?.invoiceNumber, _id: viewInvoiceDialog?.data?._id }}
+          invoiceId={viewInvoiceDialog.invoice}
           onClose={() => {
-            setViewInvoiceDialog({ open: false, data: null });
+            setViewInvoiceDialog({ open: false, invoice: null });
           }}
           onSuccess={() => {
-            setViewInvoiceDialog({ open: false, data: null });
+            setViewInvoiceDialog({ open: false, invoice: null });
           }}
           resource={sidebarResource.subleaseInvoice}
         />

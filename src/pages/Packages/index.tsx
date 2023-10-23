@@ -8,7 +8,6 @@ import { BiPackage } from 'react-icons/bi';
 import { GoDeviceMobile } from 'react-icons/go';
 import { MdDescription } from 'react-icons/md';
 import { useHistory } from 'react-router-dom';
-import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -46,7 +45,6 @@ const PackageList = () => {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
-  const [showProductAssignDialog, setShowProductAssignDialog] = useState(false);
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [columns, setColumns] = useState([]);
   const [deleteRecord, setDeleteRecord] = useState<any>({});
@@ -63,7 +61,6 @@ const PackageList = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
-  const [selectedPackageProducts, setSelectedPackageProducts] = useState([]);
 
   useEffect(() => {
     fetchGridColumns();
@@ -315,43 +312,6 @@ const PackageList = () => {
     }
   };
 
-  const openAssingToProduct = async () => {
-    if (selectedRecords.length > 0) {
-      await axiosInstance()
-        .post(`${packages.api}/material/alreadyAssigned`, {
-          ids: selectedRecords.map((d) => d._id)
-        })
-        .then(({ data }) => {
-          setSelectedPackageProducts(data?.data);
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
-      setShowProductAssignDialog(true);
-    }
-  };
-
-  const handleAdd = async (rows) => {
-    axiosInstance()
-    .post(`${packages.api}/material`, {
-      ids: [...selectedRecords.map((d) => d._id)],
-      products: rows.map((d: any) => ({ product: d.id, qty: Number(d.qty) }))
-    })
-    .then(({data}) => {
-      fetchPackages();
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: data.message
-      });
-      setShowProductAssignDialog(false);
-    })
-    .catch((err) => {
-      toastConfig.setToastConfig(err);
-      setShowProductAssignDialog(false);
-    });
-  }
-
   return (
     <>
       <section className="main-container-v1">
@@ -381,11 +341,10 @@ const PackageList = () => {
               },
               {
                 title: 'Sub-Package Export',
-                api: `${packages.api}/unknown/package/template?export=true${
-                  getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
-                    ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
-                    : ''
-                }`,
+                api: `${packages.api}/unknown/package/template?export=true${getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
+                  ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
+                  : ''
+                  }`,
                 type: 'export'
               },
               {
@@ -413,12 +372,11 @@ const PackageList = () => {
               icon={<BiPackage className="headerLogo" />}
               heading={routes.packages.title}
               showTransferEntityDialog={handleTransferEntityDialog}
-              openAssingToProduct={openAssingToProduct}
               filters={filters}
               resource={sidebarResource.packages}
-              // showClonepackagesDialog={() => {
-              //   handleShowClonepackagesDialog()
-              // }}
+            // showClonepackagesDialog={() => {
+            //   handleShowClonepackagesDialog()
+            // }}
             ></PackageHeader>
           </div>
           {Object.keys(frameWorkComponent).length > 0 ? (
@@ -535,18 +493,6 @@ const PackageList = () => {
           ) : null}
         </CustomContainer>
       </section>
-      {showProductAssignDialog && (
-        <AssignProductDialog
-          reference="package"
-          productsDialogOpen={true}
-          productId={[...selectedRecords.map((d) => d._id)]}
-          handleCloseDialog={() => setShowProductAssignDialog(false)}
-          assignedProducts={selectedPackageProducts}
-          onSuccess={(rows) => {
-            handleAdd(rows);
-          }}
-        />
-      )}
       {showManagePackageDialog.open && (
         <ManagePackageDialog
           isClone={showManagePackageDialog.isClone}

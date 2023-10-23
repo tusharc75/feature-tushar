@@ -168,6 +168,7 @@ const ServiceTable = ({ packageId, packageData }) => {
   };
 
   const handleAdd = async (rows) => {
+    setIsAssigning(true);
     axiosInstance()
       .post(`${packages.api}/material`, {
         ids: [packageId],
@@ -181,9 +182,11 @@ const ServiceTable = ({ packageId, packageData }) => {
           message: data.message
         });
         fetchData();
+        setIsAssigning(false);
       })
       .catch((err) => {
         setShowServiceAssignDialog(false);
+        setIsAssigning(false);
         toastConfig.setToastConfig(err);
       });
   };
@@ -321,13 +324,12 @@ const ServiceTable = ({ packageId, packageData }) => {
       )}
       {showServiceAssignDialog && (
         <AssignServiceDialog
-          reference="package"
-          referenceId={packageId}
           handleClose={() => setShowServiceAssignDialog(false)}
           ids={[...dataRows?.map((e) => e._id)]}
           onSuccess={(rows) => {
             handleAdd(rows);
           }}
+          isSubmitting={isAssigning}
         />
       )}
       {showServiceConfirmBox && (

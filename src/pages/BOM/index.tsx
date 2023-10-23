@@ -46,6 +46,8 @@ const BOMTable = () => {
   const [frameWorkComponent, setFrameWorkComponent] = useState(null);
   const { getColumnData } = useColumns();
 
+  const [isSubmitting, setSubmitting] = useState(false);
+
   const defaultColumns = [
     { field: 'qty', headerName: 'Qty', show: true, cellRenderer: 'commonRenderer', cellEditor: 'numericCellEditor', editable: true }
   ];
@@ -227,12 +229,8 @@ const BOMTable = () => {
   };
 
   const handleAdd = async (rows) => {
-    const dataObj = rows
-      .filter((d) => d.qty > 0)
-      .map((d) => {
-        return { childProduct: d.id, qty: Number(d.qty) };
-      });
-
+    setSubmitting(true)
+    const dataObj = rows.filter((d) => d.qty > 0).map((d) => { return { childProduct: d.id, qty: Number(d.qty) }; });
     await axiosInstance()
       .post(`/product/${id}/bom`, dataObj)
       .then(({ data }) => {
@@ -243,10 +241,11 @@ const BOMTable = () => {
           message: data.message
         });
         setOpenAssignProductDialog(false);
+        setSubmitting(false)
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        setOpenAssignProductDialog(false);
+        setSubmitting(false)
       });
   };
 
@@ -349,13 +348,12 @@ const BOMTable = () => {
       )}
       {openAssignProductDialog && (
         <AssignProductDialog
-          productsDialogOpen={openAssignProductDialog}
-          productId={id}
           handleCloseDialog={() => setOpenAssignProductDialog(false)}
-          assignedProducts={[...parts?.map((p) => p.childProduct), id]}
+          ids={[...parts?.map((p) => p.childProduct), id]}
           onSuccess={(rows) => {
             handleAdd(rows);
           }}
+          isSubmitting={isSubmitting}
         />
       )}
     </div>
