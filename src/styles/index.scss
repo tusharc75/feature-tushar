@@ -4130,6 +4130,13 @@ body {
     // }
   }
 }
+.w-full-chip {
+  .form-types {
+    .MuiChip-root.MuiAutocomplete-tag {
+      max-width: 100% !important;
+    }
+  }
+}
 
 .MuiTypography-colorSecondary {
   [data-mode='dark'] & {
