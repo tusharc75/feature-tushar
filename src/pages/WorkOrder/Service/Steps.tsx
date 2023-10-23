@@ -1361,7 +1361,7 @@ const Steps = ({
                   ? `As per the logic applied on this step, we need to return to step ${addServiceConfirmation.step?.stepName || ''
                   }. Do you want to continue ?`
                   : addServiceConfirmation.type === 'isQuoteRevisionOnFail'
-                    ? ` Step fail requires Quote Revision. Do you confirm on this?`
+                    ? ` Step fail requires Quotation Revision. Do you confirm on this?`
                     : addServiceConfirmation.type === 'jumpStep'
                       ? ` As per the logic applied on this step, we will skip few steps in this service. Do you want to continue?`
                       : `As per the logic applied on this step, a new service  ${addServiceConfirmation.services

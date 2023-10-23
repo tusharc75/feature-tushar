@@ -27,7 +27,8 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { generateCustomTableColumns } from 'src/constants/columns';
 import moment from 'moment';
 
-const CreateBillingDialog = ({ currencySymbol = null, invoiceData = null, onClose, onSuccess, subleaseData = null }) => {
+const CreateInvoiceDialog = ({ onClose, onSuccess, subleaseData }) => {
+
   const toastConfig = useContext(CustomToastContext);
 
   const [isUpdating, setUpdating] = useState(false);
@@ -57,11 +58,11 @@ const CreateBillingDialog = ({ currencySymbol = null, invoiceData = null, onClos
 
   const fetchFields = async () => {
     setColumns(null);
-    var data = await fetch_sublease_product_fields(currencySymbol);
+    var data = await fetch_sublease_product_fields(subleaseData?.currency);
     data?.forEach((e) => {
       e.isColumnEditable = false;
     });
-    const newColumns = generateCustomTableColumns(data, currencySymbol, renderedFrom);
+    const newColumns = generateCustomTableColumns(data, subleaseData?.currency, renderedFrom);
     setAllFields(JSON.parse(JSON.stringify(data)));
     let column: any = [
       {
@@ -465,4 +466,4 @@ const CreateBillingDialog = ({ currencySymbol = null, invoiceData = null, onClos
   );
 };
 
-export default CreateBillingDialog;
+export default CreateInvoiceDialog;

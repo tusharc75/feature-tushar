@@ -1,5 +1,5 @@
 import { Box, Grid, IconButton } from '@material-ui/core';
-import { Fragment, useEffect, useReducer, useState } from 'react';
+import { Fragment, useEffect, useReducer, useState, useContext } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
 import { camelCase } from 'lodash';
@@ -7,24 +7,26 @@ import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser }
 import { useData } from 'src/StateProvider/Provider';
 import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { SUBLEASE_STATUS, gridLoadingTimeout, prepareDataForGrid, removeLocalStorage, sidebarResource } from 'src/constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import NoteAddIcon from '@material-ui/icons/NoteAdd';
 import VisibilityIcon from '@material-ui/icons/Visibility';
-import CreateInvoiceDialog from './CreateInvoice';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { isMobile } from 'react-device-detect';
 import CustomContainer from 'src/components/CustomContainer';
 import styles from '../Leads/Header.module.scss';
 import SearchBox from 'src/components/Helpers/SearchBox';
-import InvoiceDialog from './InvoiceDialog';
+import { rentalManagement } from 'src/constants/helpers';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import CreateBillingDialog from 'src/pages/RentalManagement/ProgressiveBilling/CreateBillingDialog';
+import InvoiceDialog from './InvoicesDialog';
 
-const SubleaseInvoice = () => {
+const RentalManagementInvoice = () => {
 
-  const renderedFrom = `${camelCase(routes?.subleaseInvoice.title)}`;
+  const renderedFrom = `${camelCase(routes?.rentalManagementInvoice.title)}`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const {
-    state: { selectedEntity }
+    state: { selectedEntity, user }
   }: any = useData();
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
@@ -33,78 +35,84 @@ const SubleaseInvoice = () => {
   const [columns, setColumns] = useState([]);
   const [gridApi, setGridApi] = useState(null);
   const { getColumnData } = useColumns();
+  const toastConfig = useContext(CustomToastContext);
 
   const [createInvoiceDialog, setCreateInvoiceDialog] = useState({ open: false, data: null });
   const [viewInvoiceDialog, setViewInvoiceDialog] = useState({ open: false, data: null });
 
-  const fetchGridColumns = async () => {
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource?.sublease}`);
-    let data = response?.data?.data;
-    let columns = [];
-    let rendererNames = [];
-    data.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.subleaseDetail.path);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-          rendererNames.push(currentColumn?.rendererName);
+  useEffect(() => {
+    fetchGridColumns();
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
+
+  const fetchGridColumns = () => {
+    axiosInstance().get(`/field?resource=${rentalManagement.resource}&entity=${selectedEntity}&view=true`).then(({ data: { data } }) => {
+      let columns = [];
+      let rendererNames = [];
+      data.forEach((o) => {
+        let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.rentalManagementDetail.path);
+        if (currentColumn !== null) {
+          columns = [...columns, currentColumn?.columnData];
+          if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+            rendererNames.push(currentColumn?.rendererName);
+          }
         }
-      }
+      });
+      let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
+      tempFrameworkComponent = {
+        ...tempFrameworkComponent,
+        actionsRenderer: ActionsRenderer
+      };
+      setFrameWorkComponent({ ...tempFrameworkComponent });
+      columns = [...columns, ...getStaticFields()];
+      setColumns([...columns]);
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
     });
-    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-    tempFrameworkComponent = {
-      ...tempFrameworkComponent,
-      actionsRenderer: ActionsRenderer
-    };
-    setFrameWorkComponent({ ...tempFrameworkComponent });
-    columns = [...columns, ...getStaticFields()];
-    setColumns([...columns]);
   };
 
-  const fetchSubleaseData = async () => {
+  const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     if (gridApi) {
       gridApi.setRowData([]);
     }
-    axiosInstance()
-      .get(`${routes?.subleaseInvoice.path}${queryString}`)
-      .then(({ data: { data, count } }) => {
-        let rows = data?.map((u: any) => {
-          let finalObject: any = prepareDataForGrid(u);
-          finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-          return {
-            ...finalObject
-          };
-        });
-        if (appendRows) {
-          dispatch({
-            type: 'initialize',
-            data: [...dataRows, ...rows],
-            count: count,
-            selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
-          });
-        } else {
-          dispatch({
-            type: 'initialize',
-            data: rows,
-            count: count,
-            selectedRecords: rows.filter((f) => f.isChecked === true)
-          });
-        }
-        dispatch({ type: 'initialize', data: rows, count: count });
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
+    axiosInstance().get(`/rental-management-invoice${queryString}`).then(({ data: { data, count } }) => {
+      let rows = data?.map((u: any) => {
+        let finalObject: any = prepareDataForGrid(u);
+        return {
+          ...finalObject
+        };
       });
-  };
+      if (appendRows) {
+        dispatch({
+          type: 'initialize',
+          data: [...dataRows, ...rows],
+          count: count,
+          selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
+        });
+      } else {
+        dispatch({
+          type: 'initialize',
+          data: rows,
+          count: count,
+          selectedRecords: rows.filter((f) => f.isChecked === true)
+        });
+      }
+      dispatch({ type: 'initialize', data: rows, count: count });
+      setTimeout(() => {
+        dispatch({ type: 'loading', loading: false });
+      }, gridLoadingTimeout);
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });;
+  }
 
   const getQueryString = (isExport = false) => {
     let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
-
-    if (selectedEntity) {
-      deepFilter = `${deepFilter}&entity=${selectedEntity}`;
-    }
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
@@ -134,43 +142,32 @@ const SubleaseInvoice = () => {
 
   const ActionsRenderer = (params) => (
     <Fragment>
-      {params.data.status === SUBLEASE_STATUS.issued && (
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <HtmlTooltip title="Create Invoice">
+      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <HtmlTooltip title="Create Invoice">
+          <IconButton
+            size="small"
+            onClick={() => {
+              setCreateInvoiceDialog({ open: true, data: params.data });
+            }}
+          >
+            <NoteAddIcon fontSize="small" color="primary" />
+          </IconButton>
+        </HtmlTooltip>
+        <Box ml={1}>
+          <HtmlTooltip title="View Invoices">
             <IconButton
               size="small"
               onClick={() => {
-                setCreateInvoiceDialog({ open: true, data: [params.data] });
+                setViewInvoiceDialog({ open: true, data: params.data });
               }}
             >
-              <NoteAddIcon fontSize="small" color="primary" />
+              <VisibilityIcon fontSize="small" color="primary" />
             </IconButton>
           </HtmlTooltip>
-          <Box ml={1}>
-            <HtmlTooltip title="View Invoices">
-              <IconButton
-                size="small"
-                onClick={() => {
-                  setViewInvoiceDialog({ open: true, data: params.data });
-                }}
-              >
-                <VisibilityIcon fontSize="small" color="primary" />
-              </IconButton>
-            </HtmlTooltip>
-          </Box>
-        </div>
-      )}
+        </Box>
+      </div>
     </Fragment>
   );
-
-  useEffect(() => {
-    fetchGridColumns();
-  }, []);
-
-  useEffect(() => {
-    fetchSubleaseData();
-  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
-
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
@@ -180,7 +177,7 @@ const SubleaseInvoice = () => {
     <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[{ title: routes.subleaseInvoice.title }]} />
+          <CustomBreadCrumbs routes={[{ title: routes.rentalManagementInvoice.title }]} />
         </Grid>
         <Grid item md={8} sm={1} xs={2} />
       </Grid>
@@ -215,29 +212,31 @@ const SubleaseInvoice = () => {
             allowAction={true}
             loading={loading}
             renderedFrom={renderedFrom}
-            refreshGrid={fetchSubleaseData}
+            refreshGrid={fetchData}
             showFilters={true}
             actionWidth={120}
-            resource={sidebarResource.sublease}
+            resource={sidebarResource.rentalManagement}
             allowSelection={false}
           />
         )
           : null}
         {createInvoiceDialog.open && (
-          <CreateInvoiceDialog
-            subleaseData={createInvoiceDialog?.data[0]}
-            onClose={() => setCreateInvoiceDialog({ open: false, data: null })}
+          <CreateBillingDialog
+            rentalManagementData={createInvoiceDialog.data}
+            onClose={() => {
+              setCreateInvoiceDialog({ open: false, data: null });
+            }}
             onSuccess={() => {
               setCreateInvoiceDialog({ open: false, data: null });
-              removeLocalStorage(localStorageSelectedRecords);
-              fetchSubleaseData();
+              fetchData();
             }}
           />
         )}
         {viewInvoiceDialog.open && (
           <InvoiceDialog
-            subleaseId={viewInvoiceDialog?.data?._id}
-            subleaseName={viewInvoiceDialog?.data?.subleaseName}
+            rentalManagementData={viewInvoiceDialog?.data}
+            rentalId={viewInvoiceDialog?.data?._id}
+            rentalJobName={viewInvoiceDialog?.data?.rentalJobName}
             handleClose={() => {
               setViewInvoiceDialog({ open: false, data: null });
             }}
@@ -248,4 +247,4 @@ const SubleaseInvoice = () => {
   );
 };
 
-export default SubleaseInvoice;
+export default RentalManagementInvoice;

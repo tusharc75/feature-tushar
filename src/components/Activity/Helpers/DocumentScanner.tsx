@@ -30,7 +30,10 @@ const DocumentScanner = ({ open, onClose, setFieldValue, onUploadFile }) => {
     });
 
     navigator.mediaDevices
-      .getUserMedia({ video: true })
+      .getUserMedia({ video: {
+        width: { ideal: 1920 },
+        height: { ideal: 1080 },
+      } })
       .then((stream) => {
         setCameraPermission('granted');
         stream.getTracks().forEach((track) => track.stop());
@@ -40,8 +43,18 @@ const DocumentScanner = ({ open, onClose, setFieldValue, onUploadFile }) => {
       });
   }, [cameraPermission]);
 
+  const captureImageFromStream = () => {
+    const video = webcamRef.current.video;
+    const canvas = document.createElement("canvas");
+    canvas.width = 1920;
+    canvas.height = 1080;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    return canvas.toDataURL("image/png");
+  };
+
   const handleCapture = () => {
-    const imageSrc = webcamRef.current.getScreenshot();
+    const imageSrc = captureImageFromStream();
     setPicture(imageSrc);
     setIsScanning(true);
     axiosInstance()
@@ -98,9 +111,10 @@ const DocumentScanner = ({ open, onClose, setFieldValue, onUploadFile }) => {
                 audio={false}
                 ref={webcamRef}
                 screenshotFormat="image/jpeg"
+                screenshotQuality={1}
                 width="100%"
                 height="100%"
-                videoConstraints={{ facingMode: facingMode }}
+                videoConstraints={{ facingMode: facingMode, width: 1920, height: 1080 }}
               />
             ) : (
               <img src={picture} width="100%" height="100%" />
@@ -124,7 +138,7 @@ const DocumentScanner = ({ open, onClose, setFieldValue, onUploadFile }) => {
             color="primary"
             onClick={handleCapture}
             size="small"
-            disabled={cameraPermission !== 'granted' || isScanning}
+            disabled={isScanning}
             startIcon={isScanning && <CircularProgress size={15} />}
           >
             {isScanning ? 'Scanning...' : 'Capture'}

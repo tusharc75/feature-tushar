@@ -244,6 +244,9 @@ import ChartOfAccountDetail from './pages/ChartOfAccount/ChartOfAccountDetail';
 import Flash from './pages/Flash';
 import FlashDetailsPage from './pages/Flash/FlashDetailsPage';
 import SubleaseInvoice from './pages/SubleaseInvoice';
+import RentalManagementInvoice from './pages/RentalMangementInvoice';
+import CreditMemo from './pages/CreditMemo';
+import CreditMemoDetail from './pages/CreditMemo/CreditMemoDetail';
 
 var notificationInterval: any = null;
 
@@ -557,6 +560,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.rentalManagementDetail.path + '/:id'}>
               <RentalManagementDetailsPage />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.rentalManagementInvoice.path}>
+              <RentalManagementInvoice />
             </PrivateRoute>
             <PrivateRoute exact path={routes.sublease.path}>
               <Sublease />
@@ -1070,6 +1076,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.flashDetail.path}/:id`}>
               <FlashDetailsPage />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.creditMemo.path}`}>
+              <CreditMemo />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.creditMemoDetail.path}/:id`}>
+              <CreditMemoDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
