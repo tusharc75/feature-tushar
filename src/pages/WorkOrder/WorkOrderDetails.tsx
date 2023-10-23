@@ -307,9 +307,11 @@ const WorkOrderDetails = () => {
               <BiFoodMenu className="mr-1" fontSize="inherit" /> BOM
             </CustomTab>
           )}
-          <CustomTab index={4} value={4} className={'tabLayout'} {...a11yProps(4)}>
-            <RiFlowChart className="mr-1" fontSize="inherit" /> Views
-          </CustomTab>
+          {!(isMobile && !isTablet) && (
+            <CustomTab index={4} value={4} className={'tabLayout'} {...a11yProps(4)}>
+              <RiFlowChart className="mr-1" fontSize="inherit" /> Views
+            </CustomTab>
+          )}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
