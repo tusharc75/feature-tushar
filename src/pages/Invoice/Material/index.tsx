@@ -93,7 +93,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
         width: 300,
         Cell: ({ row, rows }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {allowedToEdit && row.original.type !== 'serializedAsset' ? (
+            {allowedToEdit ? (
               <p
                 onClick={() => {
                   openMaterial(row, rows);
