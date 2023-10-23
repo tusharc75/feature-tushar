@@ -26,7 +26,7 @@ let searchTimeout;
 
 const AssignServiceDialog = ({ onSuccess, handleClose, ids = [], extraStaticFilter = [], isSubmitting = false }) => {
 
-  const renderedFrom = `${camelCase(routes.serviceMaster?.title)}`;
+  const renderedFrom = `${camelCase(routes.serviceMaster?.title)}_assign`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const {

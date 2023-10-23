@@ -33,7 +33,7 @@ const AssignProductDialog = ({
   isSubmitting = false
 }) => {
 
-  const renderedFrom = `${camelCase(routes.product?.title)}`;
+  const renderedFrom = `${camelCase(routes.product?.title)}_assign`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const {

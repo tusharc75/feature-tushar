@@ -269,7 +269,6 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
     axiosInstance()
       .patch(`${routes?.fieldTicketInvoice.path}/invoice/cancle`, {
         invoice: invoiceData?._id,
-        fieldTicket: invoiceData?.id,
         comment: data
       })
       .then(({ data }) => {
