@@ -743,7 +743,8 @@ const WorkOrder = ({
                   setCompleteConfirmBox(true);
                   closeActions();
                 }}
-                disabled={selectedProducts.some((e) => e?.canAutoCompleteWorkOrder) ? false : true}
+                disabled={selectedProducts.filter((e) => e.type === MATERIAL_TYPE.serializedAsset && e?.canAutoCompleteWorkOrder)?.length ===
+                  selectedProducts.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length ? false : true}
               >
                 Auto Complete Work Order(s)
               </MenuItem>

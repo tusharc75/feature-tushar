@@ -37,7 +37,7 @@ const FieldTicketInvoice = () => {
   const { getColumnData } = useColumns();
 
   const [createInvoiceDialog, setCreateInvoiceDialog] = useState({ open: false, data: null });
-  const [viewInvoiceDialog, setViewInvoiceDialog] = useState({ open: false, data: null });
+  const [viewInvoiceDialog, setViewInvoiceDialog] = useState({ open: false, invoice: null });
 
   const fetchGridColumns = async () => {
     const response = await axiosInstance().get(`/field?resource=${sidebarResource?.fieldTicket}`);
@@ -152,7 +152,7 @@ const FieldTicketInvoice = () => {
           <IconButton
             size="small"
             onClick={() => {
-              setViewInvoiceDialog({ open: true, data: params.data });
+              setViewInvoiceDialog({ open: true, invoice: params.data.invoiceId || params.data.invoice });
             }}
           >
             <VisibilityIcon fontSize="small" color="primary" />
@@ -198,6 +198,7 @@ const FieldTicketInvoice = () => {
       return true;
     }
   };
+
 
   return (
     <Fragment>
@@ -295,16 +296,16 @@ const FieldTicketInvoice = () => {
         )}
         {viewInvoiceDialog.open && (
           <ViewInvoice
-            invoiceData={{ ...viewInvoiceDialog.data, invoiceNumber: viewInvoiceDialog?.data?.invoice, _id: viewInvoiceDialog?.data?.invoiceId }}
+            invoiceId={viewInvoiceDialog.invoice}
             onClose={() => {
-              setViewInvoiceDialog({ open: false, data: null });
+              setViewInvoiceDialog({ open: false, invoice: null });
             }}
             onSuccess={() => {
-              setViewInvoiceDialog({ open: false, data: null });
+              setViewInvoiceDialog({ open: false, invoice: null });
               removeLocalStorage(localStorageSelectedRecords);
               fetchFieldTicketData();
             }}
-            resource = {sidebarResource.fieldTicketInvoice}
+            resource={sidebarResource.fieldTicketInvoice}
           />
         )}
       </CustomContainer>

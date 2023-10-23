@@ -1,7 +1,7 @@
 import { Box, Button, CircularProgress, Dialog, Grid } from '@material-ui/core';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
-import { Fragment, useContext, useEffect, useRef, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
@@ -9,10 +9,9 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import InputField from 'src/components/Helpers/InputField';
 import routes from 'src/components/Helpers/Routes';
 import { useHistory } from 'react-router-dom';
-import { CustomDialogTransition, setFieldsInAscendingOrder, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, GenerateResourceLineNumber, setFieldsInAscendingOrder, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
@@ -20,6 +19,7 @@ import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from 'src/components/Helpers/FormTypes';
 
 const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null, isRedirectToDetailPage = true }) => {
+  
   const history = useHistory();
   const {
     state: { user }
@@ -58,8 +58,9 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, id = null, refe
             let tempData = data;
             if (isClone) {
               fields = fieldsDataForCreate;
-              const { creditMemoNumber, ...rest } = data;
-              setCloneHeading(creditMemoNumber);
+              const { ...rest } = data;
+              rest.creditMemoNumber = GenerateResourceLineNumber(fieldsDataForCreate);
+              setCloneHeading(rest.creditMemoNumber);
               tempData = rest;
             }
             setInitialData({
@@ -72,6 +73,7 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, id = null, refe
           });
       } else {
         const tempInitialData: any = getObjKeys('', fieldsDataForCreate);
+        tempInitialData['creditMemoNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
         if (referenceData) {
           for (const key in referenceData) {
             if (referenceData[key] && fieldsDataForCreate?.some((e) => e.fieldName === key)) {
@@ -84,7 +86,6 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, id = null, refe
             }
           }
         }
-        tempInitialData['creditMemoNumber'] = `${Date.now()}`
         setInitialData({
           fields: fieldsDataForCreate,
           values: tempInitialData
@@ -161,13 +162,12 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, id = null, refe
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={`${
-                  id
-                    ? isClone
-                      ? `Clone - ${cloneHeading}`
-                      : `Update ${initialData.values?.creditMemoNumber ? `(${initialData.values?.creditMemoNumber})` : ''}`
-                    : `Create ${routes?.creditMemo?.title}`
-                }`}
+                title={`${id
+                  ? isClone
+                    ? `Clone - ${cloneHeading}`
+                    : `Update - ${initialData.values?.creditMemoNumber ? `${initialData.values?.creditMemoNumber}` : ''}`
+                  : `Create ${routes?.creditMemo?.title}`
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -176,15 +176,6 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, id = null, refe
               />
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  {/* <InputField
-                    errors={errors}
-                    values={values}
-                    setFieldValue={setFieldValue}
-                    touched={touched}
-                    fieldsData={initialData.fields}
-                    size="small"
-                    fullWidth
-                  /> */}
                   {formsData &&
                     formsData?.map((form, i) => {
                       return form?.name ? (
@@ -206,8 +197,8 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, id = null, refe
                                         ? id
                                           ? field?.disableOnEdit && !isClone
                                           : field?.isUneditable && field?.disableOnEdit
-                                          ? true
-                                          : false
+                                            ? true
+                                            : false
                                         : id && field.disableOnEdit && !isClone
                                     }
                                     values={values}
@@ -228,8 +219,8 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, id = null, refe
                                     imageOrFileUploadCompletePercentage={
                                       ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                         ? (completePercentage) => {
-                                            setUploadingImageOrFileProgress(completePercentage);
-                                          }
+                                          setUploadingImageOrFileProgress(completePercentage);
+                                        }
                                         : null
                                     }
                                     fields={initialData?.fields}
