@@ -670,13 +670,11 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
       )}
       {addDialog.open && addDialog.type === 'package' && (
         <AssignPackageDialog
-          referenceType="salesOrder"
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
-          ids={[]}
           onSuccess={(rows) => {
             handleAdd(rows);
           }}
-          packageType={null}
+          isSubmitting={isSubmitting}
         />
       )}
     </Fragment>

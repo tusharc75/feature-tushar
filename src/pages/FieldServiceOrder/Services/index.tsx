@@ -500,7 +500,6 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'package' && (
         <AssignPackageDialog
-          referenceType={'fieldServiceOrder'}
           onSuccess={(rows) => {
             handleAdd(rows);
           }}
@@ -508,7 +507,7 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
             setAddExistingProductDialog({ open: false, type: '', parentId: null });
           }}
           packageType="service"
-          ids={[]}
+          isSubmitting={isSubmitting}
         />
       )}
       {isProductEdit.open && (
@@ -532,6 +531,7 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
           handleClose={() => {
             setAddExistingProductDialog({ open: false, type: '', parentId: null });
           }}
+          isSubmitting={isSubmitting}
         />
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'product' && (

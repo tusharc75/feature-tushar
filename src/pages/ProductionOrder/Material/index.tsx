@@ -519,13 +519,11 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
       }
       {addDialog.open && addDialog.type === 'package' && (
         <AssignPackageDialog
-          referenceType="productionOrder"
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
-          ids={[]}
           onSuccess={(rows) => {
             handleAdd(rows);
           }}
-          packageType={null}
+          isSubmitting={isSubmitting}
         />
       )}
       {materialEdit.open && (
