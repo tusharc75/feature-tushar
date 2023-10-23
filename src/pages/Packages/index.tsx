@@ -331,6 +331,27 @@ const PackageList = () => {
     }
   };
 
+  const handleAdd = async (rows) => {
+    axiosInstance()
+    .post(`${packages.api}/material`, {
+      ids: [...selectedRecords.map((d) => d._id)],
+      products: rows.map((d: any) => ({ product: d.id, qty: Number(d.qty) }))
+    })
+    .then(({data}) => {
+      fetchPackages();
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: data.message
+      });
+      setShowProductAssignDialog(false);
+    })
+    .catch((err) => {
+      toastConfig.setToastConfig(err);
+      setShowProductAssignDialog(false);
+    });
+  }
+
   return (
     <>
       <section className="main-container-v1">
@@ -521,8 +542,8 @@ const PackageList = () => {
           productId={[...selectedRecords.map((d) => d._id)]}
           handleCloseDialog={() => setShowProductAssignDialog(false)}
           assignedProducts={selectedPackageProducts}
-          onSuccess={() => {
-            setShowProductAssignDialog(false);
+          onSuccess={(rows) => {
+            handleAdd(rows);
           }}
         />
       )}

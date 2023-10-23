@@ -204,6 +204,30 @@ function Parts({ id }) {
       }
     }
 
+  const handleAdd = async (rows) => {
+    const dataObj = rows
+      .filter((d) => d.qty > 0)
+      .map((d) => {
+        return { childProduct: d.id, qty: Number(d.qty) };
+      });
+
+    await axiosInstance()
+      .post(`/product/${id}/bom`, dataObj)
+      .then(({ data }) => {
+        if (permissions?.serializedAsset) fetchBOMData();
+        setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        setOpenAssignProductDialog(false);
+      })
+      .catch((error) => {
+        setToastConfig(error);
+        setOpenAssignProductDialog(false);
+      });
+  };
+
   return (
     <div>
       {hasPermissions && (
@@ -296,11 +320,8 @@ function Parts({ id }) {
           productId={id}
           handleCloseDialog={() => setOpenAssignProductDialog(false)}
           assignedProducts={[...parts?.map((p) => p.childProduct), id]}
-          onSuccess={() => {
-            if (permissions?.serializedAsset) {
-              fetchBOMData();
-            }
-            setOpenAssignProductDialog(false);
+          onSuccess={(rows) => {
+            handleAdd(rows);
           }}
         />
       )}
