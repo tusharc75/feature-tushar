@@ -147,6 +147,7 @@
 
   --success-dark: #1c592a;
   --error-dark: #5e1c23;
+  --ag-control-panel-background-color: var(--dark-primary);
 }
 [data-mode='dark'] {
   .MuiOutlinedInput-notchedOutline {
@@ -4128,6 +4129,13 @@ body {
     //     max-width: 288px !important;
     //   }
     // }
+  }
+}
+.w-full-chip {
+  .form-types {
+    .MuiChip-root.MuiAutocomplete-tag {
+      max-width: 100% !important;
+    }
   }
 }
 

@@ -593,7 +593,7 @@ const RentalManagementDetailsPage = () => {
                 {...a11yProps(2)}
               />
             )}
-            {!isOffline && (
+            {!isOffline && !(isMobile && !isTablet) && (
               <Tab
                 className={'tabLayout'}
                 label={
