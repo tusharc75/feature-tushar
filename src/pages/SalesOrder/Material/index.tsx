@@ -36,7 +36,6 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
   const [isUpdating, setUpdating] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [isProductEdit, setIsProductEdit] = useState({ open: false, isBulkedit: false, showSaveAndNext: false });
-  const [isAddingProducts, setAddingProducts] = useState(false);
   const [recordToUpdate, setRecordToUpdate] = useState(null);
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
@@ -50,6 +49,9 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
   const [anchorEl, setAnchorEl] = useState(null);
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [leadTimeDialog, setLeadTimeDialog] = useState({ open: false, data: null });
+
+
+  const [isSubmitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     fetchFields();
@@ -217,10 +219,10 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = `${parent.type === 'product'
-          ? parent.productDetail?.productName
-          : parent.type === 'service'
-            ? parent.serviceDetail?.serviceName
-            : parent.packageDetail?.packageName
+        ? parent.productDetail?.productName
+        : parent.type === 'service'
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
         }`;
       parent.description =
         parent.type === 'product'
@@ -247,10 +249,10 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.detail = `${_subRow.type === 'product'
-          ? _subRow.productDetail?.productName
-          : _subRow.type === 'service'
-            ? _subRow.serviceDetail?.serviceName
-            : _subRow.packageDetail?.packageName
+        ? _subRow.productDetail?.productName
+        : _subRow.type === 'service'
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.packageDetail?.packageName
         }`;
       _subRow.description =
         _subRow.type === 'product'
@@ -290,7 +292,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
   };
 
   const handleAdd = async (rows) => {
-    setAddingProducts(true);
+    setSubmitting(true);
     const material: any = [];
     rows.forEach((d) => {
       const element: any = {};
@@ -324,11 +326,11 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
       .then(() => {
         setAddDialog({ open: false, type: '', parentId: null });
         fetchMaterialData();
-        setAddingProducts(false);
+        setSubmitting(false);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        setAddingProducts(false);
+        setSubmitting(false);
       });
   };
 
@@ -663,13 +665,11 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
       )}
       {addDialog.open && addDialog.type === 'service' && (
         <AssignServiceDialog
-          reference={'salesOrder'}
-          referenceId={salesOrderData?._id}
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
-          ids={[]}
           onSuccess={(rows) => {
             handleAdd(rows);
           }}
+          isSubmitting={isSubmitting}
         />
       )}
       {addDialog.open && addDialog.type === 'package' && (

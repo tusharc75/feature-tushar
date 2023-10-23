@@ -593,13 +593,11 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
       )}
       {addDialog.open && addDialog.type === 'service' && (
         <AssignServiceDialog
-          reference={'planning'}
-          referenceId={planningData?._id}
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
-          ids={[]}
           onSuccess={(rows) => {
             handleAdd(rows);
           }}
+          isSubmitting={isAdding}
         />
       )}
       {addDialog.open && addDialog.type === 'package' && (

@@ -563,7 +563,6 @@ const ServiceMaster = (props: Props) => {
       )}
       {openAddDialog && (
         <AssignServiceDialog
-          reference={'productService'}
           onSuccess={(services) => {
             const ids = services?.map((i) => i?._id)
             handleSubmit(ids);
@@ -571,7 +570,7 @@ const ServiceMaster = (props: Props) => {
           handleClose={() => {
             setOpenAddDialog(false)
           }}
-          ids={[]}
+          isSubmitting={isSubmitting}
         />
       )}
       {arrangeView && (

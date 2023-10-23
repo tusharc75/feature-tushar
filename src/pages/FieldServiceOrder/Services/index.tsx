@@ -205,16 +205,16 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
         parent.type === 'product'
           ? parent?.productDetail?.productName
           : parent.type === 'service'
-          ? parent?.serviceDetail?.serviceName
-          : parent?.packageDetail?.packageName;
+            ? parent?.serviceDetail?.serviceName
+            : parent?.packageDetail?.packageName;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDescription || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : '';
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : '';
       parent.qtyDisplay = parent.qty;
       parent.canDelete = technician.some((d) => d._id === parent._id) ? false : true;
       parent.estimateStartDate = parent.estimateStartDate ? parent.estimateStartDate : serviceOrderData?.estimateStartDate;
@@ -238,16 +238,16 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow?.serviceDetail?.serviceName
-          : _subRow?.packageDetail?.packageName;
+            ? _subRow?.serviceDetail?.serviceName
+            : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty} `;
       _subRow.canDelete = technician.some((d) => d.service.optionValue === _subRow._id) ? false : true;
       _subRow.estimateStartDate = _subRow.estimateStartDate ? _subRow.estimateStartDate : serviceOrderData?.estimateStartDate;
@@ -524,14 +524,12 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'service' && (
         <AssignServiceDialog
-          reference={'fieldServiceOrder'}
           onSuccess={(services) => {
             handleAdd(services);
           }}
           handleClose={() => {
             setAddExistingProductDialog({ open: false, type: '', parentId: null });
           }}
-          ids={[]}
         />
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'product' && (

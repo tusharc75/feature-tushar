@@ -47,6 +47,8 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
   const [isUpdating, setUpdating] = useState(false);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
 
+  const [isSubmitting, setSubmitting] = useState(false);
+
   useEffect(() => {
     fetchFields();
   }, []);
@@ -207,7 +209,9 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
       showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
     });
   };
+
   const handleAdd = async (rows) => {
+    setSubmitting(true)
     const material: any = [];
     rows.forEach((d) => {
       const element: any = {};
@@ -228,9 +232,10 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
           message: data.message
         });
         fetchData();
+        setSubmitting(false)
       })
       .catch((error) => {
-        setAddDialog({ open: false, type: '', parentId: null });
+        setSubmitting(false)
         toastConfig.setToastConfig(error);
       });
   };
@@ -468,13 +473,11 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
       )}
       {addDialog.open && addDialog.type === 'service' && (
         <AssignServiceDialog
-          reference={'purchaseRequisition'}
-          referenceId={purchaseRequisitionData?._id}
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
-          ids={[]}
           onSuccess={(rows) => {
             handleAdd(rows);
           }}
+          isSubmitting={isSubmitting}
         />
       )}
     </Fragment>
