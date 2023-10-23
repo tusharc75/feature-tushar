@@ -322,10 +322,12 @@ const PurchaseOrderDetailsPage = () => {
               <BiFoodMenu className="mr-1" fontSize="inherit" /> Invoice
             </CustomTab>
           )}
-          {purchaseOrderData?.deleted && (isMobile && !isTablet) ? null : (
-            <CustomTab className={'tabLayout'} index={2} {...a11yProps(2)}>
-              <RiFlowChart className="mr-1" fontSize="inherit" /> Views
-            </CustomTab>
+          {purchaseOrderData?.deleted ? null : (
+            !(isMobile && !isTablet) && (
+              <CustomTab className={'tabLayout'} index={2} {...a11yProps(2)}>
+                <RiFlowChart className="mr-1" fontSize="inherit" /> Views
+              </CustomTab>
+            )
           )}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
