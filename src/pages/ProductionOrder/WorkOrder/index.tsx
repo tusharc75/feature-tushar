@@ -43,6 +43,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   const [isCompleting, setCompleting] = useState(false);
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
+  const [isSubmitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     fetchFields();
@@ -308,22 +309,19 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   };
 
   const handleAddService = (ids) => {
+    setSubmitting(true)
     const allWorkOrders = selectedProducts?.map((e) => e.workOrder?._id);
     const data: any = {};
     data.serviceIds = ids;
     data.workOrderIds = [...new Set(allWorkOrders)];
-    axiosInstance()
-      .post(`${workOrder.api}/service`, data)
-      .then(() => {
-        setAddServicesDialog({ open: false, new: false });
-        // if (isPostWorkService && repairOrderData?.addQuotationStep) {
-        //   createNewVersionQuote(true);
-        // }
-        fetchData();
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+    axiosInstance().post(`${workOrder.api}/service`, data).then(() => {
+      setAddServicesDialog({ open: false, new: false });
+      fetchData();
+      setSubmitting(false)
+    }).catch((err) => {
+      toastConfig.setToastConfig(err);
+      setSubmitting(false)
+    });
   };
 
   const handleDelete = () => {
@@ -578,12 +576,11 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
 
       {addServicesDialog.open && !addServicesDialog.new && (
         <AssignServiceDialog
-          reference="repairOrder"
           handleClose={() => setAddServicesDialog({ open: false, new: false })}
-          ids={[]}
           onSuccess={(data) => {
             handleAddService(data?.map((e) => { return { _id: e._id, qty: parseInt(e?.qty) || 1 } }));
           }}
+          isSubmitting={isSubmitting}
         />
       )}
       {addServicesDialog.open && addServicesDialog.new && (

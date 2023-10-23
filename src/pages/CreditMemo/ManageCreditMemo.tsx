@@ -1,7 +1,7 @@
-import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog, Grid } from '@material-ui/core';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
-import { Fragment, useContext, useEffect, useRef, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
@@ -9,15 +9,17 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import InputField from 'src/components/Helpers/InputField';
 import routes from 'src/components/Helpers/Routes';
 import { useHistory } from 'react-router-dom';
-import { CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, GenerateResourceLineNumber, setFieldsInAscendingOrder, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
+import { FaDiceOne } from 'react-icons/fa';
+import FormTypes from 'src/components/Helpers/FormTypes';
 
-const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, id = null }) => {
+const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null, isRedirectToDetailPage = true }) => {
+  
   const history = useHistory();
   const {
     state: { user }
@@ -29,10 +31,16 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, id = null }) =>
   const [submitting, setSubmitting] = useState(false);
   const [cloneHeading, setCloneHeading] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
+  const [formsData, setFormsData] = useState([]);
 
   useEffect(() => {
     fetchFields();
   }, []);
+
+  useEffect(() => {
+    setFormsData(setFieldsInAscendingOrder(initialData.fields));
+  }, [initialData.fields]);
 
   const fetchFields = async () => {
     try {
@@ -50,8 +58,9 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, id = null }) =>
             let tempData = data;
             if (isClone) {
               fields = fieldsDataForCreate;
-              const { creditMemoNumber, ...rest } = data;
-              setCloneHeading(creditMemoNumber);
+              const { ...rest } = data;
+              rest.creditMemoNumber = GenerateResourceLineNumber(fieldsDataForCreate);
+              setCloneHeading(rest.creditMemoNumber);
               tempData = rest;
             }
             setInitialData({
@@ -64,6 +73,19 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, id = null }) =>
           });
       } else {
         const tempInitialData: any = getObjKeys('', fieldsDataForCreate);
+        tempInitialData['creditMemoNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
+        if (referenceData) {
+          for (const key in referenceData) {
+            if (referenceData[key] && fieldsDataForCreate?.some((e) => e.fieldName === key)) {
+              tempInitialData[key] = referenceData[key];
+              const field = fieldsDataForCreate?.find((f) => f?.fieldName === key);
+              if (field) {
+                field.disableOnEdit = true;
+                field.isUneditable = true;
+              }
+            }
+          }
+        }
         setInitialData({
           fields: fieldsDataForCreate,
           values: tempInitialData
@@ -98,7 +120,9 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, id = null }) =>
         .post(`${routes.creditMemo?.path}`, values)
         .then(({ data: { data, message } }: any) => {
           setLoading(false);
-          history.push(`${routes.creditMemoDetail.path}/${data._id}`);
+          if (isRedirectToDetailPage) {
+            history.push(`${routes.creditMemoDetail.path}/${data._id}`);
+          }
           onSuccess(data);
           setSubmitting(true);
           toastConfig.setToastConfig({
@@ -138,13 +162,12 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, id = null }) =>
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={`${
-                  id
-                    ? isClone
-                      ? `Clone - ${cloneHeading}`
-                      : `Update ${initialData.values?.creditMemoNumber ? `(${initialData.values?.creditMemoNumber})` : ''}`
-                    : `Create ${routes?.creditMemo?.title}`
-                }`}
+                title={`${id
+                  ? isClone
+                    ? `Clone - ${cloneHeading}`
+                    : `Update - ${initialData.values?.creditMemoNumber ? `${initialData.values?.creditMemoNumber}` : ''}`
+                  : `Create ${routes?.creditMemo?.title}`
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -153,15 +176,62 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, id = null }) =>
               />
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  <InputField
-                    errors={errors}
-                    values={values}
-                    setFieldValue={setFieldValue}
-                    touched={touched}
-                    fieldsData={initialData.fields}
-                    size="small"
-                    fullWidth
-                  />
+                  {formsData &&
+                    formsData?.map((form, i) => {
+                      return form?.name ? (
+                        <div key={i}>
+                          <div className={'detail-box-content'}>
+                            <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
+                            <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
+                          </div>
+                          <Box marginY={2}>
+                            <Grid spacing={3} container>
+                              {form.sectionFields.map((field) => (
+                                <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                  <FormTypes
+                                    creditMemoId={id}
+                                    {...field}
+                                    fieldData={field}
+                                    disabled={
+                                      field.fieldName === 'currency'
+                                        ? id
+                                          ? field?.disableOnEdit && !isClone
+                                          : field?.isUneditable && field?.disableOnEdit
+                                            ? true
+                                            : false
+                                        : id && field.disableOnEdit && !isClone
+                                    }
+                                    values={values}
+                                    errors={errors}
+                                    touched={touched}
+                                    label={field.fieldLabel}
+                                    name={field.fieldName}
+                                    type={field.type}
+                                    options={field.option}
+                                    setFieldValue={(name, value) => {
+                                      setFieldValue(name, value);
+                                    }}
+                                    required={field.required}
+                                    fullWidth
+                                    isTooltip={field?.isTooltip || false}
+                                    tooltipMessage={field?.tooltipMessage}
+                                    size="small"
+                                    imageOrFileUploadCompletePercentage={
+                                      ['imageUpload', 'fileUpload'].some((s) => s === field.type)
+                                        ? (completePercentage) => {
+                                          setUploadingImageOrFileProgress(completePercentage);
+                                        }
+                                        : null
+                                    }
+                                    fields={initialData?.fields}
+                                  />
+                                </Grid>
+                              ))}
+                            </Grid>
+                          </Box>
+                        </div>
+                      ) : null;
+                    })}
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
@@ -177,7 +247,7 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, id = null }) =>
                   Cancel
                 </Button>
                 <Button
-                  disabled={loading || submitting}
+                  disabled={uploadingImageOrFileProgress > 0 || loading || submitting}
                   variant="contained"
                   color="primary"
                   type="submit"

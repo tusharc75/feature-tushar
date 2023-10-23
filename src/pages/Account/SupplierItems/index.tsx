@@ -39,6 +39,7 @@ function SupplierItems({ api, id, allowedToEdit, permission }) {
     const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords, filters, sorting, appendRows } = state;
 
     const [assignDialog, setAssignDialog] = useState({ open: false, type: null, data: null })
+    const [isSubmitting, setSubmitting] = useState(false);
 
     const {
         state: { user }
@@ -134,6 +135,7 @@ function SupplierItems({ api, id, allowedToEdit, permission }) {
     }
 
     const assignItems = async (values) => {
+        setSubmitting(true)
         axiosInstance().put(`${api}/items/${id}/assign`, values).then(({ data }) => {
             fetchData();
             toastConfig.setToastConfig({
@@ -141,8 +143,10 @@ function SupplierItems({ api, id, allowedToEdit, permission }) {
                 type: 'success',
                 message: data.message
             });
+            setSubmitting(false)
         }).catch((err) => {
             toastConfig.setToastConfig(err);
+            setSubmitting(false)
         })
     }
 
@@ -255,17 +259,13 @@ function SupplierItems({ api, id, allowedToEdit, permission }) {
                 )}
             {assignDialog.open && assignDialog.type === 'product' && (
                 <AssignProductDialog
-                    productsDialogOpen={assignDialog.open}
-                    productId={null}
-                    assignedProducts={assignDialog?.data?.map((item) => item._id) || []}
-                    reference='supplier'
-                    handleCloseDialog={() =>
-                        setAssignDialog({ open: false, type: null, data: null })}
+                    ids={assignDialog?.data?.map((item) => item._id) || []}
+                    handleCloseDialog={() => setAssignDialog({ open: false, type: null, data: null })}
                     onSuccess={(data) => {
-                        const assignProducts = data?.map((item) => item.id)
-                        assignItems({ products: assignProducts || [] })
+                        assignItems({ products: data?.map((item) => item._id) || [] })
                     }}
                     serialized={true}
+                    isSubmitting={isSubmitting}
                 />
             )}
             {assignDialog.open && assignDialog.type === 'serializedAsset' && (

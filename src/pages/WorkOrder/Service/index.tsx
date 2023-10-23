@@ -133,6 +133,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [addServiceAnchorEl, setAddServiceAnchorEl] = useState(null);
 
+  const [isSubmitting, setSubmitting] = useState(false);
+
   useEffect(() => {
     fetchServiceData();
   }, [workOrderId]);
@@ -167,7 +169,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
       });
       const preWorkService = workOrderDetail?.services?.filter((e) => e.preWork)?.sort((a, b) => (a.order > b.order ? 1 : -1));
       const postWorkService = workOrderDetail?.services?.filter((e) => !e.preWork)?.sort((a, b) => (a.order > b.order ? 1 : -1));
-      const quote = [{ _id: 'quotation', uniqueId: 'quotation', order: 9999, type: 'quotation', serviceName: 'Quote to Customer' }];
+      const quote = [{ _id: 'quotation', uniqueId: 'quotation', order: 9999, type: 'quotation', serviceName: 'Quotation to Customer' }];
       const services = isQuotation ? [...preWorkService, ...quote, ...postWorkService] : [...preWorkService, ...postWorkService];
 
       if (services?.length) {
@@ -288,6 +290,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
   };
 
   const handleAddService = (ids, uniqueId) => {
+    setSubmitting(true)
     const data: any = {};
     data.serviceIds = ids;
     if (uniqueId) {
@@ -303,9 +306,11 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           fetchServiceData();
         }
         fetchWorkOrderData();
+        setSubmitting(false)
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
+        setSubmitting(false)
       });
   };
 
@@ -619,7 +624,6 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                     gap: '10px'
                                   }}
                                 >
-                                  {/* Serial Number or Quote icon */}
                                   {data?.type === 'service' ? (
                                     <Box
                                       style={{
@@ -1192,16 +1196,14 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
       )}
       {serviceDialog.open && serviceDialog.type === 'service' && (
         <AssignServiceDialog
-          reference="workorder"
-          referenceId={workOrderId}
           handleClose={() => setServiceDialog({ open: false, type: '', uniqueId: null, preWork: null })}
-          ids={[]}
           onSuccess={(data) => {
             handleAddService(
               data?.map((e) => { return { _id: e._id, qty: parseInt(e?.qty) || 1 } }),
               serviceDialog.uniqueId
             );
           }}
+          isSubmitting={isSubmitting}
           extraStaticFilter={serviceDialog.preWork === null ? [] : [{ field: 'preWork', term: serviceDialog.preWork }]}
         />
       )}

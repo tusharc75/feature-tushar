@@ -580,37 +580,29 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
       )}
       {addDialog.open && addDialog.type === 'product' && (
         <AssignProductDialog
-          reference="planning"
-          serialized={null}
-          productsDialogOpen={addDialog.open}
-          productId={null}
           handleCloseDialog={() => setAddDialog({ open: false, type: '', parentId: null })}
-          assignedProducts={[]}
           onSuccess={(d) => {
             handleAdd(d);
           }}
+          isSubmitting={isAdding}
         />
       )}
       {addDialog.open && addDialog.type === 'service' && (
         <AssignServiceDialog
-          reference={'planning'}
-          referenceId={planningData?._id}
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
-          ids={[]}
           onSuccess={(rows) => {
             handleAdd(rows);
           }}
+          isSubmitting={isAdding}
         />
       )}
       {addDialog.open && addDialog.type === 'package' && (
         <AssignPackageDialog
-          referenceType="planning"
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
-          ids={[]}
           onSuccess={(rows) => {
             handleAdd(rows);
           }}
-          packageType={null}
+          isSubmitting={isAdding}
         />
       )}
       {addDialog.open && addDialog.type === 'serializedAsset' && (

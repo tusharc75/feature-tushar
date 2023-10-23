@@ -40,6 +40,8 @@ function Product({ id }) {
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [dataRows, setDataRows] = useState([]);
 
+  const [isSubmitting, setSubmitting] = useState(false);
+
   const openActions = (event) => {
     setAnchorActionEl(event.currentTarget);
   };
@@ -65,7 +67,7 @@ function Product({ id }) {
         setDataRows(data?.map((e) => ({ ...e, ...(e?.productDetail || {}) })));
         setParts([...data]);
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   const fetchGridColumns = async () => {
@@ -224,6 +226,35 @@ function Product({ id }) {
       });
   };
 
+  const handleAdd = async (rows) => {
+    setSubmitting(true)
+    const productObj = rows
+      .filter((d) => d.qty > 0)
+      .map((d) => {
+        return {
+          product: d.id,
+          qty: Number(d.qty)
+        };
+      });
+
+    await axiosInstance()
+      .post(`${serviceMaster.api}/product/${id}`, productObj)
+      .then(({ data }) => {
+        fetchData();
+        setToastConfig({
+          open: true,
+          message: data.message,
+          severity: 'success'
+        });
+        setOpenAssignProductDialog(false);
+        setSubmitting(false)
+      })
+      .catch((error) => {
+        setSubmitting(false)
+        setToastConfig(error);
+      });
+  };
+
   return (
     <div>
       {permissions?.serviceMaster?.isUpdate && (
@@ -270,8 +301,7 @@ function Product({ id }) {
                   <MenuItem
                     onClick={() => {
                       setShowConfirmBox({ open: true, data: selectedRecords });
-                      // closeActions();
-                      // setShowConfirmBox({ open: true, ids: selectedRecords?.map((e) => e._id) });
+                      closeActions();
                     }}
                   >
                     Delete
@@ -332,16 +362,13 @@ function Product({ id }) {
       )}
       {openAssignProductDialog && (
         <AssignProductDialog
-          productsDialogOpen={openAssignProductDialog}
-          productId={id}
           handleCloseDialog={() => setOpenAssignProductDialog(false)}
-          assignedProducts={[...parts?.map((p) => p.product), id]}
-          reference={'serviceMaster'}
-          onSuccess={() => {
-            fetchData();
-            setOpenAssignProductDialog(false);
+          ids={[...parts?.map((p) => p.product), id]}
+          onSuccess={(rows) => {
+            handleAdd(rows);
           }}
           serialized={false}
+          isSubmitting={isSubmitting}
         />
       )}
     </div>

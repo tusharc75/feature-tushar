@@ -22,8 +22,9 @@ import CommentDialog from 'src/components/CommentDialog';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
 import { generateCustomTableColumns } from 'src/constants/columns';
+import { useData } from 'src/StateProvider/Provider';
 
-const ViewInvoice = ({ invoiceData, onClose, onSuccess, resource }) => {
+const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = `${camelCase(routes?.invoice.title)}_view`;
@@ -35,16 +36,33 @@ const ViewInvoice = ({ invoiceData, onClose, onSuccess, resource }) => {
   const [isDownloadingZip, setIsDownloadingZip] = useState(false);
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
 
+  const [invoiceData, setInvoiceData] = useState(null);
+
   const [tabValue, setTabValue] = useState(0);
+  const {
+    state: { permissions }
+  }: any = useData();
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
   };
 
   useEffect(() => {
-    fetchFields();
-    fetchData();
-  }, []);
+    axiosInstance().get(`${invoice.api}/${invoiceId}`)
+      .then(({ data: { data } }) => {
+        setInvoiceData(data);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }, [invoiceId]);
+
+  useEffect(() => {
+    if (invoiceData) {
+      fetchFields();
+      fetchData();
+    }
+  }, [invoiceData]);
 
   const fetchFields = async () => {
     try {
@@ -131,10 +149,10 @@ const ViewInvoice = ({ invoiceData, onClose, onSuccess, resource }) => {
   const fetchData = async () => {
     var data: any = [];
 
-    const response = await axiosInstance().get(`${invoice.api}/material/${invoiceData._id}`);
+    const response = await axiosInstance().get(`${invoice.api}/material/${invoiceData?._id}`);
     data = response?.data?.data;
 
-    const responseAdditionalCostData = await axiosInstance().get(`${invoice.api}/${invoiceData._id}/additional-cost`);
+    const responseAdditionalCostData = await axiosInstance().get(`${invoice.api}/${invoiceData?._id}/additional-cost`);
     let additionalCostData = responseAdditionalCostData?.data?.data;
 
     const rows = data.material.filter((e) => !e.parentId);
@@ -206,7 +224,7 @@ const ViewInvoice = ({ invoiceData, onClose, onSuccess, resource }) => {
   const handleDownloadZip = () => {
     setIsDownloadingZip(true);
     axiosInstance()
-      .get(`${invoice.api}/zip/${invoiceData._id}`, {
+      .get(`${invoice.api}/zip/${invoiceData?._id}`, {
         responseType: 'blob'
       })
       .then((response) => {
@@ -251,7 +269,6 @@ const ViewInvoice = ({ invoiceData, onClose, onSuccess, resource }) => {
     axiosInstance()
       .patch(`${routes?.fieldTicketInvoice.path}/invoice/cancle`, {
         invoice: invoiceData?._id,
-        fieldTicket: invoiceData?.id,
         comment: data
       })
       .then(({ data }) => {
@@ -265,6 +282,34 @@ const ViewInvoice = ({ invoiceData, onClose, onSuccess, resource }) => {
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
+  };
+
+  const Invoice = () => {
+    return (
+      <Fragment>
+        {columns && rowsData ? (
+          <Box zIndex={5} width={'100%'} height={'calc(100vh - 285px)'} pt={1}>
+            <CustomReactTable
+              height={'calc(100vh - 200px)'}
+              columns={columns}
+              data={rowsData}
+              onSelect={() => { }}
+              childrenProperty="subRows"
+              uniqueKey="_id"
+              hideSelection={true}
+              hideAction={true}
+              renderedFrom={renderedFrom}
+              isClientSideGrid={true}
+              hideExpander={true}
+            />
+          </Box>
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
+      </Fragment>
+    );
   };
 
   return (
@@ -299,7 +344,7 @@ const ViewInvoice = ({ invoiceData, onClose, onSuccess, resource }) => {
                       `finalPrice_${invoiceData?.currency?.toLowerCase()}`
                     ]}
                   />
-                  {resource === sidebarResource.fieldTicketInvoice &&
+                  {resource === sidebarResource.fieldTicketInvoice && (
                     <>
                       <Button
                         variant={isMobile && !isTablet ? 'text' : 'outlined'}
@@ -328,79 +373,58 @@ const ViewInvoice = ({ invoiceData, onClose, onSuccess, resource }) => {
                         {isMobile && !isTablet ? <IoMdDownload size={20} /> : isDownloadingPdf ? 'Please wait...' : 'Download Invoice Tickets'}
                       </Button>
                     </>
-                  }
+                  )}
                 </Box>
               )}
               <div className="ml-auto">
                 {rowsData && rowsData?.length > 0 && resource === sidebarResource.fieldTicketInvoice &&
-                  <DeleteButton text="Cancel Invoice" onClick={() => setCommentDialog(true)} />}
+                  ![INVOICE_STATUS.closed, INVOICE_STATUS.cancelled]?.includes(invoiceData?.status) && (
+                    <DeleteButton text="Cancel Invoice" onClick={() => setCommentDialog(true)} />
+                  )}
               </div>
             </div>
             <Box pt={1}>
-              {/* <Tabs
-                className="new-tab-container-v1"
-                value={tabValue}
-                onChange={handleMainTabChange}
-                textColor="primary"
-                TabIndicatorProps={{
-                  style: {
-                    height: 0
-                  }
-                }}
-              >
-                <Tab
-                  className={'tabLayout'}
-                  label={
-                    <div className="d-flex align-items-center tab-font">
-                      Details
-                    </div>
-                  }
-                  value={0}
-                  aria-controls="a11y-tabpanel-0"
-                  id="a11y-tab-0"
-                />
-                <Tab
-                  className={'tabLayout'}
-                  label={
-                    <div className="d-flex align-items-center tab-font">
-                      Credit Memo
-                    </div>
-                  }
-                  value={1}
-                  aria-controls="a11y-tabpanel-1"
-                  id="a11y-tab-1"
-                />
-              </Tabs> */}
-              <Fragment>
-                {columns && rowsData ? (
-                  <Box zIndex={5} width={'100%'} height={'calc(100vh - 285px)'} pt={1}>
-                    <CustomReactTable
-                      height={'calc(100vh - 200px)'}
-                      columns={columns}
-                      data={rowsData}
-                      onSelect={() => { }}
-                      childrenProperty="subRows"
-                      uniqueKey="_id"
-                      hideSelection={true}
-                      hideAction={true}
-                      renderedFrom={renderedFrom}
-                      isClientSideGrid={true}
-                      hideExpander={true}
+              {resource === sidebarResource.fieldTicketInvoice && permissions?.creditMemo?.isRead ? (
+                <>
+                  <Tabs
+                    className="new-tab-container-v1"
+                    value={tabValue}
+                    onChange={handleMainTabChange}
+                    textColor="primary"
+                    TabIndicatorProps={{
+                      style: {
+                        height: 0
+                      }
+                    }}
+                  >
+                    <Tab
+                      className={'tabLayout'}
+                      label={<div className="d-flex align-items-center tab-font">Details</div>}
+                      value={0}
+                      aria-controls="a11y-tabpanel-0"
+                      id="a11y-tab-0"
                     />
-                  </Box>
-                ) : (
-                  <Box p={2} height={500}>
-                    <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                  </Box>
-                )}
-
-              </Fragment>
-              {/* <TabPanel value={tabValue} index={0}>
-
-              </TabPanel>
-              <TabPanel value={tabValue} index={1}>
-                <CreditMemo invoiceData={invoiceData} />
-              </TabPanel> */}
+                    <Tab
+                      className={'tabLayout'}
+                      label={<div className="d-flex align-items-center tab-font">{routes.creditMemo.title}</div>}
+                      value={1}
+                      aria-controls="a11y-tabpanel-1"
+                      id="a11y-tab-1"
+                    />
+                  </Tabs>
+                  <TabPanel value={tabValue} index={0}>
+                    <Invoice />
+                  </TabPanel>
+                  <TabPanel value={tabValue} index={1}>
+                    <CreditMemo
+                      invoiceData={invoiceData}
+                      allowedToEdit={[INVOICE_STATUS.closed, INVOICE_STATUS.cancelled]?.includes(invoiceData?.status) ? false : true}
+                    />
+                  </TabPanel>
+                </>
+              ) : (
+                <Invoice />
+              )}
             </Box>
           </Fragment>
         </CustomDialogContent>
