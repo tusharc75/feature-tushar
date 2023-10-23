@@ -43,7 +43,7 @@ const AdditionalCost = ({ quotationData, setNextStep, renderedFrom, version, all
   useEffect(() => {
     fetchFields();
     fetchData();
-  }, [quotationData, allowedToEdit]);
+  }, []);
 
   const handleOpen = (row, rows) => {
     setShowCostDialog({
