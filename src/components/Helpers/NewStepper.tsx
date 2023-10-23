@@ -175,98 +175,101 @@ const NewStepper = ({ steps = null, heading, doaCurrency = null, quoteDOA = null
           <Stepper activeStep={-1} connector={<QontoConnector />} alternativeLabel>
             {quoteDOA
               ? quoteDOA?.map((label, index) => (
-                  <Step key={index}>
-                    <StepLabel
-                      StepIconComponent={
-                        label?.status === 'approve'
-                          ? QontoStepIconForApprove
-                          : label?.status === 'pending'
+                <Step key={index}>
+                  <StepLabel
+                    StepIconComponent={
+                      label?.status === 'approve'
+                        ? QontoStepIconForApprove
+                        : label?.status === 'pending'
                           ? QontoStepIconForPending
                           : QontoStepIconForReject
-                      }
-                    >
-                      <>
-                        {label?.status === 'pending' ? (
-                          <>
-                            {label?.users?.slice(0, 3).map((obj) => (
+                    }
+                  >
+                    <>
+                      {label?.status === 'pending' ? (
+                        <>
+                          {label?.users?.slice(0, 3).map((obj) => (
+                            <div style={{ color: 'var(--dark-secondary-text, #09445A)' }}>
+                              <Link title={obj?.firstName}
+                                className="link"
+                                target='_blank'
+                                to={`${routes.userDetail.path}/${obj?.id}`}>
+                                {`${obj?.firstName} ${obj?.lastName}`}
+                              </Link>
+                            </div>
+                          ))}
+                          {label?.users?.length > 4 && `+ ${label?.users.length - 4} more`}
+                        </>
+                      ) : (
+                        <div style={{ color: 'var(--dark-secondary-text, #09445A)' }}>
+                          <Link
+                            title={label?.users.find((d) => d?.status === label?.status)?.firstName}
+                            className="link"
+                            target='_blank'
+                            to={`${routes.userDetail.path}/${label?.users.find((d) => d?.status === label?.status)?.id}`}
+                          >
+                            {`${label?.users.find((d) => d?.status === label?.status)?.firstName} ${label?.users.find((d) => d.status === label?.status)?.lastName
+                              }`}
+                          </Link>
+                        </div>
+                      )}
+                    </>
+                  </StepLabel>
+                </Step>
+              ))
+              : steps
+                .filter((item) => !item?.disable)
+                .map((label) => (
+                  <Step key={label}>
+                    <StepLabel StepIconComponent={QontoStepIcon}>
+                      {doaApproveType === 'User' ? (
+                        <>
+                          {label?.user
+                            ?.slice(0, 3)
+                            .filter((user) => user?.firstName && user?.lastName)
+                            .map((obj) => (
                               <div style={{ color: 'var(--dark-secondary-text, #09445A)' }}>
-                                <Link title={obj?.firstName} className="link" to={`${routes.userDetail.path}/${obj?.id}`}>
+                                <Link title={obj?.firstName} target='_blank' className="link" to={`${routes.userDetail.path}/${obj?._id}`}>
                                   {`${obj?.firstName} ${obj?.lastName}`}
                                 </Link>
                               </div>
                             ))}
-                            {label?.users?.length > 4 && `+ ${label?.users.length - 4} more`}
-                          </>
-                        ) : (
-                          <div style={{ color: 'var(--dark-secondary-text, #09445A)' }}>
-                            <Link
-                              title={label?.users.find((d) => d?.status === label?.status)?.firstName}
-                              className="link"
-                              to={`${routes.userDetail.path}/${label?.users.find((d) => d?.status === label?.status)?.id}`}
-                            >
-                              {`${label?.users.find((d) => d?.status === label?.status)?.firstName} ${
-                                label?.users.find((d) => d.status === label?.status)?.lastName
-                              }`}
-                            </Link>
-                          </div>
-                        )}
-                      </>
+                          {label?.users?.length > 4 && `+ ${label?.users.length - 4} more`}
+                          {doaCurrency && (
+                            <div style={{ color: 'var(--dark-secondary-text, #09445A)' }}>
+                              {getUniqueCurrencies().filter((data) => data?.currencyCode === doaCurrency).length
+                                ? getUniqueCurrencies().filter((data) => data?.currencyCode === doaCurrency)[0].symbolNative
+                                : null}
+                              {label?.amount}
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          {label?.role
+                            ?.slice(0, 3)
+                            .filter((role) => role?.name)
+                            .map((obj) => (
+                              <div style={{ color: 'var(--dark-secondary-text, #09445A)' }}>
+                                <Link title={obj?.name} className="link" to={`${routes.roleDetail.path}/${obj?._id}`}>
+                                  {`${obj?.name}`}
+                                </Link>
+                              </div>
+                            ))}
+                          {label?.role?.length > 4 && `+ ${label?.role.length - 4} more`}
+                          {doaCurrency && (
+                            <div style={{ color: 'var(--dark-secondary-text, #09445A)' }}>
+                              {getUniqueCurrencies().filter((data) => data?.currencyCode === doaCurrency).length
+                                ? getUniqueCurrencies().filter((data) => data?.currencyCode === doaCurrency)[0].symbolNative
+                                : null}
+                              {label?.amount}
+                            </div>
+                          )}
+                        </>
+                      )}
                     </StepLabel>
                   </Step>
-                ))
-              : steps
-                  .filter((item) => !item?.disable)
-                  .map((label) => (
-                    <Step key={label}>
-                      <StepLabel StepIconComponent={QontoStepIcon}>
-                        {doaApproveType === 'User' ? (
-                          <>
-                            {label?.user
-                              ?.slice(0, 3)
-                              .filter((user) => user?.firstName && user?.lastName)
-                              .map((obj) => (
-                                <div style={{ color: 'var(--dark-secondary-text, #09445A)' }}>
-                                  <Link title={obj?.firstName} className="link" to={`${routes.userDetail.path}/${obj?._id}`}>
-                                    {`${obj?.firstName} ${obj?.lastName}`}
-                                  </Link>
-                                </div>
-                              ))}
-                            {label?.users?.length > 4 && `+ ${label?.users.length - 4} more`}
-                            {doaCurrency && (
-                              <div style={{ color: 'var(--dark-secondary-text, #09445A)' }}>
-                                {getUniqueCurrencies().filter((data) => data?.currencyCode === doaCurrency).length
-                                  ? getUniqueCurrencies().filter((data) => data?.currencyCode === doaCurrency)[0].symbolNative
-                                  : null}
-                                {label?.amount}
-                              </div>
-                            )}
-                          </>
-                        ) : (
-                          <>
-                            {label?.role
-                              ?.slice(0, 3)
-                              .filter((role) => role?.name)
-                              .map((obj) => (
-                                <div style={{ color: 'var(--dark-secondary-text, #09445A)' }}>
-                                  <Link title={obj?.name} className="link" to={`${routes.roleDetail.path}/${obj?._id}`}>
-                                    {`${obj?.name}`}
-                                  </Link>
-                                </div>
-                              ))}
-                            {label?.role?.length > 4 && `+ ${label?.role.length - 4} more`}
-                            {doaCurrency && (
-                              <div style={{ color: 'var(--dark-secondary-text, #09445A)' }}>
-                                {getUniqueCurrencies().filter((data) => data?.currencyCode === doaCurrency).length
-                                  ? getUniqueCurrencies().filter((data) => data?.currencyCode === doaCurrency)[0].symbolNative
-                                  : null}
-                                {label?.amount}
-                              </div>
-                            )}
-                          </>
-                        )}
-                      </StepLabel>
-                    </Step>
-                  ))}
+                ))}
           </Stepper>
         </Grid>
       </Grid>

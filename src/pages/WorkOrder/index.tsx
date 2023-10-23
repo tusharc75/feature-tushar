@@ -248,6 +248,7 @@ const WorkOrder = () => {
   };
 
   const handleWorkOrderTypeSel = (filterValues) => {
+    dispatch({ type: 'setPage', page: 0 });
     setSelectedType(filterValues);
     history.push(`?type=${filterValues}`);
   };
@@ -482,6 +483,7 @@ const WorkOrder = () => {
         </div>
         {isMobile && !isTablet ? (
           <CustomSwipableList
+            key={selectedType}
             allowSelection={true}
             allowSwipe={true}
             permissions={permissions.workOrder}

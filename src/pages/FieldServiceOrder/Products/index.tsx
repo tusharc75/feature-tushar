@@ -152,7 +152,7 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
                   size="small"
                   aria-label="Details"
                   onClick={() => {
-                    setAssignAssetDialog({ open: true, products: [{_id: row.original?._id, product: row.original?.materialId, qty: row.original?.qty, productName: row.original?.detail}] });
+                    setAssignAssetDialog({ open: true, products: [{ _id: row.original?._id, product: row.original?.materialId, qty: row.original?.qty, productName: row.original?.detail }] });
                   }}
                 >
                   <AddIcon fontSize="small" color={'primary'} />
@@ -324,7 +324,7 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
   };
 
   const handleAssignAssets = (data) => {
-   
+
   };
 
   return (
@@ -418,12 +418,7 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
       </Grid>
       {addProductDialog.open && (
         <AssignProductDialog
-          reference="fieldServiceOrder"
-          serialized={null}
-          productsDialogOpen={addProductDialog.open}
-          productId={null}
           handleCloseDialog={() => setAddProductDialog({ open: false, parentId: null })}
-          assignedProducts={[]}
           onSuccess={(row) => {
             handleAdd(row);
           }}

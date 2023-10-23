@@ -295,6 +295,7 @@ const LeadTimeMaster = () => {
   };
 
   const handleLeadTimeMasterTypeSel = (filterValues) => {
+    dispatch({ type: 'setPage', page: 0 });
     setSelectedType(filterValues);
     if (referenceId && referenceType) {
       history.push(`?type=${filterValues}&referenceType=${referenceType}&referenceId=${referenceId}`);
@@ -437,6 +438,7 @@ const LeadTimeMaster = () => {
         {Object.keys(frameworkComponents).length > 0 ? (
           isMobile && !isTablet ? (
             <CustomSwipableList
+              key={selectedType}
               allowSelection={true}
               allowSwipe={true}
               permissions={permissions.leadTimeMaster}

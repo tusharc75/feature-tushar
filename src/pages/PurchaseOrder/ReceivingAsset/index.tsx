@@ -395,8 +395,8 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
             }
           });
         }
-        res['assetQty'] = res?.subRows?.length;
-        res['inventoryQty'] = item?.actualReceived ? (item?.actualReceived || 0) - res?.subRows?.length : 0;
+        res['assetQty'] = res?.subRows?.filter((e) => e.type === 'Asset')?.length;
+        res['inventoryQty'] = item?.actualReceived ? (item?.actualReceived || 0) - res?.subRows?.filter((e) => e.type === 'Asset')?.length : 0;
         return res;
       });
 
@@ -457,6 +457,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
         </Box>
         <div className="d-flex gap-2">
           <PreviewDownload
+            fileName={`${routes.purchaseOrder.title}-${purchaseOrderData?.purchaseOrderNumber}`}
             resource={sidebarResource.purchaseOrder}
             referenceId={purchaseOrderData?._id}
             columns={columns?.map((e) => { return { ...e, accessor: e.accessor === 'serializedProductView' ? 'serializedProduct' : e.accessor } })}

@@ -73,6 +73,8 @@ const WorkOrder = ({
   const [updateDialog, setUpdateDialog] = useState({ open: false, data: null });
   const [isBulkEdit, setIsBulkEdit] = useState(false);
 
+  const [isSubmitting, setSubmitting] = useState(false);
+
   useEffect(() => {
     fetchFields();
     fetchData();
@@ -519,12 +521,8 @@ const WorkOrder = ({
       }
     } else {
       if (
-        data?.material?.filter(
-          (e) =>
-            e?.type === 'service' &&
-            e?.serviceDetail?.preWork &&
-            [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress]?.sort()?.includes(e?.status)
-        )?.length
+        data?.material?.filter((e) => e?.type === 'service' && e?.serviceDetail?.preWork
+          && [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress]?.sort()?.includes(e?.status))?.length
       ) {
         setNextStep(false);
       } else {
@@ -584,6 +582,7 @@ const WorkOrder = ({
   };
 
   const handleAddService = (ids) => {
+    setSubmitting(true)
     const allWorkOrders = selectedProducts?.map((e) => e.workOrder?._id);
     const data: any = {};
     data.serviceIds = ids;
@@ -596,9 +595,11 @@ const WorkOrder = ({
           createNewVersionQuote(true);
         }
         fetchData();
+        setSubmitting(false)
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
+        setSubmitting(false)
       });
   };
 
@@ -747,7 +748,8 @@ const WorkOrder = ({
                   setCompleteConfirmBox(true);
                   closeActions();
                 }}
-                disabled={selectedProducts.some((e) => e?.canAutoCompleteWorkOrder) ? false : true}
+                disabled={selectedProducts.filter((e) => e.type === MATERIAL_TYPE.serializedAsset && e?.canAutoCompleteWorkOrder)?.length ===
+                  selectedProducts.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length ? false : true}
               >
                 Auto Complete Work Order(s)
               </MenuItem>
@@ -823,13 +825,12 @@ const WorkOrder = ({
           )}
           {addServicesDialog.open && !addServicesDialog.new && (
             <AssignServiceDialog
-              reference="repairOrder"
               handleClose={() => setAddServicesDialog({ open: false, new: false })}
-              ids={[]}
               onSuccess={(data) => {
                 handleAddService(data?.map((e) => { return { _id: e._id, qty: parseInt(e?.qty) || 1 } }));
               }}
               extraStaticFilter={!isPostWorkService ? [] : [{ field: 'preWork', term: false }]}
+              isSubmitting={isSubmitting}
             />
           )}
           {addServicesDialog.open && addServicesDialog.new && (

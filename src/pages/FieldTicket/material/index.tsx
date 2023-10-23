@@ -40,6 +40,10 @@ const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, h
   const [isUpdating, setUpdating] = useState(false);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
 
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+
   const {
     state: { permissions }
   }: any = useData();
@@ -82,7 +86,7 @@ const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, h
             ) : (
               <p
                 onClick={() => {
-                  openMaterial(row, rows)
+                  openMaterial(row, rows);
                 }}
                 className="link text-truncate"
                 title={row.original.detail}
@@ -124,7 +128,7 @@ const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, h
         Header: 'Competencies',
         width: 250,
         Cell: ({ row }) => (row.original['competencies'] ? <p>{row.original?.competencies}</p> : <NoDataCell />)
-      },
+      }
     ];
     column = [...column, ...newColumns];
     column.push({
@@ -144,7 +148,7 @@ const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, h
                 aria-label="Delete"
                 disabled={!allowedToEdit}
                 onClick={() => {
-                  openMaterial(row, rows)
+                  openMaterial(row, rows);
                 }}
               >
                 <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
@@ -226,6 +230,7 @@ const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, h
   };
 
   const handleAdd = async (rows) => {
+    setIsSubmitting(true)
     const material: any = [];
     rows.forEach((d) => {
       const element: any = {};
@@ -270,16 +275,19 @@ const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, h
       });
     }
 
-    await axiosInstance().post(`${fieldTicket.api}/${fieldTicketData?._id}/material`, { material: tempMaterial })
+    await axiosInstance()
+      .post(`${fieldTicket.api}/${fieldTicketData?._id}/material`, { material: tempMaterial })
       .then(() => {
         if (fieldTicketData?.status === FIELD_TICKET_STATUS.new) {
-          handleChangeStatus(FIELD_TICKET_STATUS.inProgress)
+          handleChangeStatus(FIELD_TICKET_STATUS.inProgress);
         }
         fetchMaterial();
         setServiceDialog({ open: false, type: '' });
+        setIsSubmitting(false)
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
+        setIsSubmitting(false)
       });
   };
 
@@ -378,12 +386,12 @@ const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, h
               <MenuItem
                 onClick={() => {
                   setServiceDialog({ open: true, type: 'service' });
-                  closeAddActions()
+                  closeAddActions();
                 }}
               >
                 Add Existing Service
               </MenuItem>
-              {permissions?.serviceMaster?.isCreate &&
+              {permissions?.serviceMaster?.isCreate && (
                 <MenuItem
                   onClick={() => {
                     setServiceDialog({ open: true, type: 'newService' });
@@ -392,7 +400,7 @@ const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, h
                 >
                   Add New Service
                 </MenuItem>
-              }
+              )}
             </Menu>
           </Box>
           <Box display="flex" ml={1}>
@@ -480,32 +488,26 @@ const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, h
         </Box>
       )}
       <Box mt={3}>
-        <Consumables
-          allowedToEdit={allowedToEdit}
-          services={rowsData}
-          fieldTicketData={fieldTicketData}
-          renderedFrom={`${renderedFrom}_1`} />
+        <Consumables allowedToEdit={allowedToEdit} services={rowsData} fieldTicketData={fieldTicketData} renderedFrom={`${renderedFrom}_1`} />
       </Box>
       {serviceDialog?.open && serviceDialog?.type === 'service' && (
         <AssignServiceDialog
-          reference={'fieldTicket'}
-          referenceId={fieldTicketData?._id}
           onSuccess={handleAdd}
           handleClose={() => {
             setServiceDialog({ open: false, type: '' });
           }}
           ids={rowsData?.map((row) => row?.materialId)}
           extraStaticFilter={[{ field: 'serviceType', term: SERVICE_TYPE.fieldService }]}
+          isSubmitting={isSubmitting}
         />
       )}
-
       {serviceDialog.open && serviceDialog.type === 'newService' && (
         <ManageServiceMaster
           isClone={false}
           serviceMasterId={null}
           onClose={() => setServiceDialog({ open: false, type: '' })}
           onSuccess={(data) => {
-            const row = data?.data
+            const row = data?.data;
             row.unitMain = row?.unit;
             row.pricingMethodMain = row?.pricingMethod;
             handleAdd([row]);

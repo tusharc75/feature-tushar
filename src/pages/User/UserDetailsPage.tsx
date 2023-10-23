@@ -27,7 +27,7 @@ import {
   useMediaQuery
 } from '@material-ui/core';
 import DeleteButton from '../../components/Helpers/DeleteButton';
-import { ControlPoint } from '@material-ui/icons';
+import { ControlPoint, Edit } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory, useLocation, Link } from 'react-router-dom';
 import { startCase } from 'lodash';
@@ -74,8 +74,8 @@ import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/picker
 import DateFnsUtils from '@date-io/date-fns';
 import { Line } from 'react-chartjs-2';
 import ResourceTransferDialog from '../../components/ResourceTransferDialog';
-import { BiReset } from 'react-icons/all';
-import { BiEdit } from 'react-icons/bi';
+import { BiReset, RiSettingsFill } from 'react-icons/all';
+
 import { MdDelete } from 'react-icons/md';
 import QuotesInAccordion from 'src/components/QuotesInAccordion/QuotesInAccordion';
 import ActivityButton from 'src/components/Activity/ActivityButton';
@@ -160,7 +160,7 @@ const UserDetailsPage = () => {
       fetchUserRelatedDetail();
       setCurrentTabIndex(0);
     }
-    userSetup === 'true' && setShowSetupUserDialog(true);
+    // userSetup === 'true' && setShowSetupUserDialog(true);
     // eslint-disable-next-line
   }, [id]);
 
@@ -169,6 +169,12 @@ const UserDetailsPage = () => {
     fetchLoggedInUserEntities();
     fetchLoggedInUserRole();
   }, []);
+
+  useEffect(() => {
+    if (roleAccessOfLoggedInUser?.length && userSetup === 'true') {
+      setShowSetupUserDialog(true);
+    }
+  }, [id, roleAccessOfLoggedInUser]);
 
   useEffect(() => {
     switch (timeFrame) {
@@ -380,9 +386,9 @@ const UserDetailsPage = () => {
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((user: any) => ({
-        id: user._id,
-        name: `${user.firstName} ${user.lastName}`
-      }))
+          id: user._id,
+          name: `${user.firstName} ${user.lastName}`
+        }))
       : [];
 
     setUserList(rows);
@@ -594,8 +600,8 @@ const UserDetailsPage = () => {
           <Box className="controls-v1">
             <Box className="control-buttons-v1">
               {permissions?.role?.isUpdate && permissions?.entity?.isUpdate && (
-                <Button variant="contained" className={`btn-outline-v1`} onClick={entityDialogOpen}>
-                  Assign Entity/Role
+                <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className={`btn-outline-v1`} onClick={entityDialogOpen}>
+                  {isMobile && !isTablet ? <RiSettingsFill /> : 'Assign Entity/Role'}
                 </Button>
               )}
               {permissions?.user?.isUpdate && (
@@ -613,11 +619,15 @@ const UserDetailsPage = () => {
                   variant={isMobile && !isTablet ? 'text' : 'contained'}
                   className={`btn-outline-v1`}
                   onClick={handleOpenUpdateDialog}
-                  disabled={userData?.userType === userType.brandAdmin ?
-                    user?.role?.selectedEntity?.superAdminAccess || user?.user?._id === id ? false : true
-                    : false}
+                  disabled={
+                    userData?.userType === userType.brandAdmin
+                      ? user?.role?.selectedEntity?.superAdminAccess || user?.user?._id === id
+                        ? false
+                        : true
+                      : false
+                  }
                 >
-                  {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                  {isMobile && !isTablet ? <Edit /> : 'Edit'}
                 </Button>
               ) : null}
               {permissions?.user?.isDelete ? (
@@ -743,8 +753,13 @@ const UserDetailsPage = () => {
                           <TableBody>
                             <TableRow key={userData.proxyDOA.user}>
                               <TableCell>
-                                <Link className="link" to={`${routes.userDetail.path}/${userData.proxyDOA.optionValue}`}>
-                                  {userData.proxyDOA.optionLabel}
+                                <Link
+                                  className="link"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  to={`${routes.userDetail.path}/${userData.proxyDOA.user}`}
+                                >
+                                  {userData.proxyDOA.user}
                                 </Link>
                               </TableCell>
                               <TableCell align="center">
@@ -929,7 +944,11 @@ const UserDetailsPage = () => {
                             ) : userPermissions ? (
                               Object.keys(userPermissions).map((key) => (
                                 <Tooltip
-                                  title={!hasPermissionToUpdateApprovalProcess ? `You do not have permission to update ${key === 'doaSetup' ? 'DOA Setup' : startCase(key)}` : ''}
+                                  title={
+                                    !hasPermissionToUpdateApprovalProcess
+                                      ? `You do not have permission to update ${key === 'doaSetup' ? 'DOA Setup' : startCase(key)}`
+                                      : ''
+                                  }
                                 >
                                   <FormControlLabel
                                     key={key}
@@ -1059,7 +1078,7 @@ const UserDetailsPage = () => {
             </div>
           </Box>
         </Box>
-      </Box >
+      </Box>
       {openUpdateDialog && (
         <ManageUserDialog
           open={openUpdateDialog}
@@ -1073,132 +1092,119 @@ const UserDetailsPage = () => {
           dataToUpdate={userData}
           isNew={false}
         />
-      )
-      }
-      {
-        rolesDialogOpen && (
-          <Dialog fullWidth maxWidth="xs" open={rolesDialogOpen} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
-            <AssignRolesDialog
-              rolesDialogOpen={rolesDialogOpen}
-              handleCloseDialog={handleCloseDialog}
-              userIds={[id]}
-              assignedRoles={globalRoles}
-              onSuccess={() => {
-                handleCloseDialog();
-                fetchUserData();
-                getRoleUnion();
-              }}
-            />
-          </Dialog>
-        )
-      }
-      {
-        showAssignEntityDialog && (
-          <Dialog fullWidth maxWidth="xs" open={showAssignEntityDialog} onClose={entityDialogClose} aria-labelledby="assign-roles-dialog">
-            <AssignEntityDialog
-              entitiesDialogOpen={showAssignEntityDialog}
-              handleCloseDialog={entityDialogClose}
-              type="entity"
-              ids={[id]}
-              assignedEntity={entities}
-              regionalRole={false}
-              onSuccess={() => {
-                fetchUserData();
-                entityDialogClose();
-              }}
-              roleAccessIds={roleAccessOfLoggedInUser}
-            />
-          </Dialog>
-        )
-      }
-      {
-        showConfirmBox ? (
-          <ConfirmationDialog
-            open={showConfirmBox}
-            // message={`Are you sure you want to delete this User ?`}
-            // onClose={() => setShowConfirmBox(false)}
-            // onOk={handleDeleteUser}
-            message={
-              deleteUserRec
-                ? `Are you sure you want to delete this User ${userData.firstName} ${userData.lastName} ?`
-                : roleDeleteRec
-                  ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName} ?`
-                  : ''
-            }
-            onClose={() => {
-              setShowConfirmBox(false);
-              if (roleDeleteRec) setRoleDeleteRec(undefined);
-              if (deleteUserRec) setDeleteUserRec(undefined);
-            }}
-            onOk={deleteUserRec ? DeleteUser : roleDeleteRec ? unassignUserRole : null}
-          />
-        ) : null
-      }
-      {
-        orgChartInFullScreenDialog && (
-          <FullScreenDialog
-            heading="Org Chart"
-            open={orgChartInFullScreenDialog}
-            close={() => {
-              setOrgChartInFullScreenDialog(false);
-            }}
-          >
-            <OrgChartContainer
-              data={orgChartData}
-              onClick={(id) => {
-                setOrgChartInFullScreenDialog(false);
-                history.push(`${routes.userDetail.path}/${id}`);
-              }}
-            />
-          </FullScreenDialog>
-        )
-      }
-      {
-        showSetupUserDialog && (
-          <UserSetupDialog
-            open={showSetupUserDialog}
-            close={() => {
-              history.push({
-                pathname: `/user/detail/${id}`,
-                search: ''
-              });
-              setShowSetupUserDialog(false);
-              fetchUserData();
-            }}
+      )}
+      {rolesDialogOpen && (
+        <Dialog fullWidth maxWidth="xs" open={rolesDialogOpen} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
+          <AssignRolesDialog
+            rolesDialogOpen={rolesDialogOpen}
+            handleCloseDialog={handleCloseDialog}
             userIds={[id]}
+            assignedRoles={globalRoles}
             onSuccess={() => {
-              setShowSetupUserDialog(false);
-              history.push({
-                pathname: `/user/detail/${id}`,
-                search: ''
-              });
+              handleCloseDialog();
               fetchUserData();
+              getRoleUnion();
             }}
-            fetchUsers={() => fetchUsers()}
-            userList={userList}
-            selectedRecords={[{ ...userData }]}
-            isRoleSetUpPermission={permissions?.role?.isUpdate && permissions?.entity?.isUpdate && permissions?.user?.isUpdate}
-            isApprovalProcess={isLoggedInUserBrandAdmin}
+          />
+        </Dialog>
+      )}
+      {showAssignEntityDialog && (
+        <Dialog fullWidth maxWidth="xs" open={showAssignEntityDialog} onClose={entityDialogClose} aria-labelledby="assign-roles-dialog">
+          <AssignEntityDialog
+            entitiesDialogOpen={showAssignEntityDialog}
+            handleCloseDialog={entityDialogClose}
+            type="entity"
+            ids={[id]}
+            assignedEntity={entities}
+            regionalRole={false}
+            onSuccess={() => {
+              fetchUserData();
+              entityDialogClose();
+            }}
             roleAccessIds={roleAccessOfLoggedInUser}
-            entityAccessIds={entityAccess}
           />
-        )
-      }
-      {
-        showConfirmBox && deleteUserRec ? (
-          <ResourceTransferDialog
-            open={showConfirmBox}
-            resource="User"
-            fromResource={[userData]}
-            allResourceData={allUsers}
-            onClose={() => setShowConfirmBox(false)}
-            handleDelete={() => {
-              setShowConfirmBox(false);
-              history.push(routes.user.path);
+        </Dialog>
+      )}
+      {showConfirmBox ? (
+        <ConfirmationDialog
+          open={showConfirmBox}
+          // message={`Are you sure you want to delete this User ?`}
+          // onClose={() => setShowConfirmBox(false)}
+          // onOk={handleDeleteUser}
+          message={
+            deleteUserRec
+              ? `Are you sure you want to delete this User ${userData.firstName} ${userData.lastName} ?`
+              : roleDeleteRec
+              ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName} ?`
+              : ''
+          }
+          onClose={() => {
+            setShowConfirmBox(false);
+            if (roleDeleteRec) setRoleDeleteRec(undefined);
+            if (deleteUserRec) setDeleteUserRec(undefined);
+          }}
+          onOk={deleteUserRec ? DeleteUser : roleDeleteRec ? unassignUserRole : null}
+        />
+      ) : null}
+      {orgChartInFullScreenDialog && (
+        <FullScreenDialog
+          heading="Org Chart"
+          open={orgChartInFullScreenDialog}
+          close={() => {
+            setOrgChartInFullScreenDialog(false);
+          }}
+        >
+          <OrgChartContainer
+            data={orgChartData}
+            onClick={(id) => {
+              setOrgChartInFullScreenDialog(false);
+              history.push(`${routes.userDetail.path}/${id}`);
             }}
           />
-        ) : null
-      }
+        </FullScreenDialog>
+      )}
+      {showSetupUserDialog && (
+        <UserSetupDialog
+          open={showSetupUserDialog}
+          close={() => {
+            history.push({
+              pathname: `/user/detail/${id}`,
+              search: ''
+            });
+            setShowSetupUserDialog(false);
+            fetchUserData();
+          }}
+          userIds={[id]}
+          onSuccess={() => {
+            setShowSetupUserDialog(false);
+            history.push({
+              pathname: `/user/detail/${id}`,
+              search: ''
+            });
+            fetchUserData();
+          }}
+          fetchUsers={() => fetchUsers()}
+          userList={userList}
+          selectedRecords={[{ ...userData }]}
+          isRoleSetUpPermission={permissions?.role?.isUpdate && permissions?.entity?.isUpdate && permissions?.user?.isUpdate}
+          isApprovalProcess={isLoggedInUserBrandAdmin}
+          roleAccessIds={roleAccessOfLoggedInUser}
+          entityAccessIds={entityAccess}
+        />
+      )}
+      {showConfirmBox && deleteUserRec ? (
+        <ResourceTransferDialog
+          open={showConfirmBox}
+          resource="User"
+          fromResource={[userData]}
+          allResourceData={allUsers}
+          onClose={() => setShowConfirmBox(false)}
+          handleDelete={() => {
+            setShowConfirmBox(false);
+            history.push(routes.user.path);
+          }}
+        />
+      ) : null}
     </>
   );
 };

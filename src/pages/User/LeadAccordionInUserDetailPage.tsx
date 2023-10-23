@@ -132,7 +132,7 @@ export default function LeadAccordionInUserDetailPage({ leads, expanded = true, 
                             <Grid item xs={12} sm={8}>
                               {hasAccessToEntity(obj.entity) ? (
                                 obj.entity === selectedEntity ? (
-                                  <Link className="link" to={`${routes.leadDetail.path}/${obj._id}`}>
+                                  <Link className="link" target="_blank" rel="noopener noreferrer" to={`${routes.leadDetail.path}/${obj._id}`}>
                                     <Typography>
                                       {obj?.firstName} {obj?.lastName}{' '}
                                     </Typography>
@@ -140,9 +140,11 @@ export default function LeadAccordionInUserDetailPage({ leads, expanded = true, 
                                 ) : (
                                   <Link
                                     className="link"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    to={`${routes.leadDetail.path}/${obj._id}`}
                                     onClick={() => {
                                       handleEntityChange(obj.entity);
-                                      history.push(`${routes.leadDetail.path}/${obj._id}`);
                                     }}
                                   >
                                     <Typography>

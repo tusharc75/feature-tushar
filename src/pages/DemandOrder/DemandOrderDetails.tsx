@@ -36,7 +36,7 @@ const DemandOrderDetails = () => {
 
   const [headingLabel, setHeadingLabel] = useState('');
   const [loading, setLoading] = useState(false);
-  const [salesOrderData, setSalesOrderData] = useState(null);
+  const [demandOrderData, setDemandOrderData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [salesOrderFields, setSalesOrderFields] = useState([]);
@@ -86,7 +86,7 @@ const DemandOrderDetails = () => {
       data = response?.data?.data;
       setHeadingLabel(data.demandOrderNumber);
       setCustomizedRoutes([routes.demandOrder, { title: `${data.demandOrderNumber}` }]);
-      setSalesOrderData(data);
+      setDemandOrderData(data);
       var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
       if (user?.role?.selectedEntity?.superAdminAccess) {
         isAllowedToEdit = true;
@@ -124,7 +124,7 @@ const DemandOrderDetails = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            {salesOrderData ? (
+            {demandOrderData ? (
               <>
                 {permissions?.demandOrder?.isUpdate && allowedToEdit && (
                   <Button
@@ -143,9 +143,9 @@ const DemandOrderDetails = () => {
               <Skeleton variant="text" width="150px" height="32px" />
             )}
             <ActivityButton
-              referenceId={salesOrderData?._id}
+              referenceId={demandOrderData?._id}
               resource={ACTIVITY_RESOURCE.demandOrder}
-              resourceLabel={salesOrderData?.demandOrderNumber}
+              resourceLabel={demandOrderData?.demandOrderNumber}
             />
           </Box>
         </Box>
@@ -189,15 +189,15 @@ const DemandOrderDetails = () => {
               </Grid>
             ) : (
               <>
-                <DetailsPage data={salesOrderData} fields={salesOrderFields} />
+                <DetailsPage data={demandOrderData} fields={salesOrderFields} />
               </>
             )}
           </Box>
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
-          {salesOrderData && (
+          {demandOrderData && (
             <Material
-              salesOrderData={salesOrderData}
+            demandOrderData={demandOrderData}
               renderedFrom={`${renderedFrom}_grid-1`}
               allowedToEdit={allowedToEdit && permissions?.demandOrder?.isUpdate ? true : false}
             />
@@ -221,7 +221,7 @@ const DemandOrderDetails = () => {
           isClone={false}
           open={openUpdateDialog}
           demandOrderId={id}
-          demandOrderData={salesOrderData}
+          demandOrderData={demandOrderData}
           onClose={() => {
             setOpenUpdateDialog(false);
           }}

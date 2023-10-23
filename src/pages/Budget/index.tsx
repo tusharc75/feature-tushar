@@ -22,7 +22,14 @@ import SearchBox from '../../components/Helpers/SearchBox';
 import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { budget, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import {
+  budget,
+  getLocalStorageArrayData,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  removeLocalStorage,
+  sidebarResource
+} from '../../constants/helpers';
 import useColumns, { getFrameworkComponents, getStaticFields, gridFilterParser } from '../../constants/useColumns';
 import styles from '../Leads/Header.module.scss';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
@@ -241,6 +248,7 @@ function Budget() {
     axiosInstance()
       .put(`${budgetApi}/remove`, { ids: ids })
       .then(() => {
+        removeLocalStorage(localStorageSelectedRecords);
         fetchBudgetList();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
@@ -288,8 +296,12 @@ function Budget() {
             }}
             isExportAllOrSomeFeature={true}
             total={rowCount}
-            recordsToExport={selectedRecords.length}
-            ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+            recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+            ids={
+              getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+                ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+                : []
+            }
             onExportToExcelSuccess={() => {
               if (gridApi) gridApi.deselectAll();
               else fetchBudgetList();
@@ -414,7 +426,8 @@ function Budget() {
                   permissions={permissions?.budget}
                   primaryField={columns?.find((d) => d.primaryField)}
                   onClick={(d) => {
-                    setShowManageBudgetDialog({ show: true, id: d.id, isClone: false });
+                    history.push(`${routes.budgetDetail.path}/${d.id}`);
+                    // setShowManageBudgetDialog({ show: true, id: d.id, isClone: false });
                   }}
                   dataRows={dataRows}
                   selectedRecords={selectedRecords}
@@ -443,10 +456,12 @@ function Budget() {
                       field: 'year'
                     }
                   ]}
+                  onClone={(d) => {
+                    setShowManageBudgetDialog({ show: true, id: d._id, isClone: true });
+                  }}
                   owerCollaboratorInitialsOrImages=""
                   onCreate={() => setShowManageBudgetDialog({ show: true, id: null, isClone: null })}
-                  showClone={false}
-                  onClone={() => {}}
+                  showClone={true}
                   renderedFrom={renderedFrom}
                 />
               ) : (

@@ -1,8 +1,6 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import AddIcon from '@material-ui/icons/Add';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -14,7 +12,7 @@ import { Box, Chip, Menu, MenuItem, TextField } from '@material-ui/core';
 import SearchBox from '../../components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import routes from '../../components/Helpers/Routes';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
+import { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import {
   serializedAsset,
   isObjectEmpty,
@@ -22,8 +20,7 @@ import {
   product,
   warehouse as warehouseHelper,
   ASSET_STATUS,
-  COLOUR_MASTER,
-  getLocalStorageArrayData
+  COLOUR_MASTER
 } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { useData } from '../../StateProvider/Provider';
@@ -34,9 +31,7 @@ import HtmlTooltip from '../../components/CustomTooltipTitle';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import useColumns, { getStaticFields } from '../../components/CustomReactTableNew/useColumnsReactTable';
 import { prepareDataForGrid } from '../../constants/helpers';
-import { AiFillCrown, MdAdd } from 'react-icons/all';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { isMobile, isTablet } from 'react-device-detect';
+import { isMobile } from 'react-device-detect';
 import { Autocomplete } from '@material-ui/lab';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
@@ -45,6 +40,8 @@ import { Link } from 'react-router-dom';
 import WarningIcon from '@material-ui/icons/Warning';
 import moment from 'moment';
 import CustomReactTable from 'src/components/CustomReactTableNew/CustomReactTable';
+import { sidebarResource } from '../../constants/helpers';
+import { gridFilterParser } from 'src/constants/useColumns';
 
 const SerializedAssetTest = () => {
   const renderedFrom = camelCase(routes?.serializedAsset.title);
@@ -53,14 +50,10 @@ const SerializedAssetTest = () => {
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [gridApi, setGridApi] = useState(null);
   const [columns, setColumns] = useState(null);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
-  const [isAllChecked, setIsAllChecked] = useState(false);
-  const [clonedData, setClonedData] = useState([]);
   const [productCategoryList, setProductCategoryList] = useState([]);
   const [productFilterList, setProductFilterList] = useState([]);
   const [productCategory, setProductCategory] = useState(null);
@@ -224,13 +217,6 @@ const SerializedAssetTest = () => {
             };
           }
         });
-        // let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        // tempFrameworkComponent = {
-        //   ...tempFrameworkComponent,
-        //   assetNumberRenderer: AssetNumberRenderer,
-        //   actionsRenderer: ActionsRenderer
-        // };
-        // setFrameWorkComponent({ ...tempFrameworkComponent });
         columns = [...columns, ...getStaticFields(), ActionsRenderer];
         setColumns([...columns]);
       });
@@ -238,9 +224,6 @@ const SerializedAssetTest = () => {
 
   const fetchProductInventory = () => {
     dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
     const queryString = getQueryString();
     axiosInstance()
       .get(`${serializedAsset.api}${queryString}`)
@@ -255,24 +238,12 @@ const SerializedAssetTest = () => {
             ...finalObject
           };
         });
-        setIsAllChecked(false);
-        setClonedData(data.data);
-        if (appendRows) {
-          dispatch({
-            type: 'initialize',
-            data: [...dataRows, ...rows],
-            count: data.data.count,
-            selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
-          });
-        } else {
-          dispatch({
-            type: 'initialize',
-            data: rows,
-            count: data.count,
-            selectedRecords: rows.filter((f) => f.isChecked === true)
-          });
-        }
-        // dispatch({ type: "initialize", data: rows, count: data.count });
+        dispatch({
+          type: 'initialize',
+          data: rows,
+          count: data.count,
+          selectedRecords: rows.filter((f) => f.isChecked === true)
+        });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
@@ -285,41 +256,39 @@ const SerializedAssetTest = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
-    let filterById = [];
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
+
     if (warehouse?.optionValue) {
-      filterById.push({ field: 'warehouse', term: warehouse?.optionValue });
+      filterByIds.push({ field: 'warehouse', term: warehouse?.optionValue });
     }
     if (selectedPlant && selectedPlant !== '') {
-      filterById.push({ field: 'warehouse', term: selectedPlant });
+      filterByIds.push({ field: 'warehouse', term: selectedPlant });
     }
     if (redirectProduct?.id) {
-      filterById.push({ field: 'product', term: redirectProduct?.id });
+      filterByIds.push({ field: 'product', term: redirectProduct?.id });
     }
     if (fromPurchaseOrder?.pOId) {
-      filterById.push({ field: 'purchaseOrder', term: fromPurchaseOrder.pOId });
+      filterByIds.push({ field: 'purchaseOrder', term: fromPurchaseOrder.pOId });
     }
     if (fromPurchaseOrder?.productId) {
-      filterById.push({ field: 'product', term: fromPurchaseOrder.productId });
+      filterByIds.push({ field: 'product', term: fromPurchaseOrder.productId });
     }
     if (productCategory && productCategory !== '') {
-      filterById.push({ field: 'productCategory', term: productCategory });
+      filterByIds.push({ field: 'productCategory', term: productCategory });
     }
     if (productFilter && productFilter !== '') {
-      filterById.push({ field: 'product', term: productFilter });
+      filterByIds.push({ field: 'product', term: productFilter });
     }
-    if (filterById.length > 0) {
-      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`;
+    if (filterByIds.length > 0) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
-    if (!isObjectEmpty(filters)) {
-      const updatedFilters = [];
-      Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
-          field: field,
-          term: filters[field].filter
-        });
-      });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}`;
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
     }
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
+    }
+  
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
@@ -371,9 +340,6 @@ const SerializedAssetTest = () => {
         reference: { _id: '', type: 'Inventory' }
       })
       .then(() => {
-        if (gridApi) {
-          gridApi.deselectAll();
-        }
         fetchProductInventory();
         setAnchorEl(null);
         toastConfig.setToastConfig({
@@ -430,8 +396,7 @@ const SerializedAssetTest = () => {
           recordsToExport={selectedRecords.length}
           ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
           onExportToExcelSuccess={() => {
-            if (gridApi) gridApi.deselectAll();
-            else fetchProductInventory();
+            fetchProductInventory();
           }}
           additionalParams={getQueryString(true)}
         />
@@ -676,68 +641,6 @@ const SerializedAssetTest = () => {
           </div>
         </div>
         {columns ? (
-          // isMobile && !isTablet ? (
-          //   <CustomSwipableList
-          //     allowSelection={true}
-          //     allowSwipe={true}
-          //     permissions={permissions?.serializedAsset}
-          //     primaryField={columns?.find((d) => d.field === 'assetNumber')}
-          //     onClick={(d) => {
-          //       history.push(`${routes.serializedAssetDetail.path}/${d._id}`);
-          //     }}
-          //     dataRows={dataRows}
-          //     selectedRecords={selectedRecords}
-          //     dispatch={dispatch}
-          //     onEdit={(d) => {
-          //       history.push(`${routes.serializedAssetDetail.path}/${d._id}`);
-          //     }}
-          //     extraParamsToCheckDelete={false}
-          //     onDelete={(d) => {
-          //       setDeleteRecord(d);
-          //       setShowDeleteConfirmBox(true);
-          //     }}
-          //     rowCount={rowCount}
-          //     page={page}
-          //     loading={loading}
-          //     additionalDetails={[]}
-          //     chips={[
-          //       {
-          //         label: 'Serial Number : ',
-          //         field: 'serialNumber'
-          //       }
-          //     ]}
-          //     owerCollaboratorInitialsOrImages=""
-          //     onCreate={false}
-          //     showClone={true}
-          //     onClone={(data) => {
-          //       setShowManageProductInventoryDialog({ open: true, isClone: true, idToClone: data._id });
-          //     }}
-          //     renderedFrom={renderedFrom}
-          //   />
-          // ) : (
-          //   <CustomReactTable
-          //     height={'calc(100vh - 200px)'}
-          //     columns={columns}
-          //     data={dataRows}
-          //     currentPage={page}
-          //     onSelect={(newSelectedRecords) => {
-          //       // dispatch({ type: "selection", selectedRecords: newSelectedRecords })
-          //     }}
-          //     dispatch={dispatch}
-          //     childrenProperty="subRows"
-          //     uniqueKey="_id"
-          //     setWholeRowsCellColor={() => {}}
-          //     renderedFrom={renderedFrom}
-          //     isClientSideGrid={false}
-          //     rowCount={rowCount}
-          //     limit={limit}
-          //     customFilters={filters}
-          //     sorting={sorting}
-          //     refreshGrid={fetchProductInventory}
-          //     loading={loading}
-          //     showOnlyShowFilteredRecordSwitch={true}
-          //   />
-          // )
           <>
             <CustomReactTable
               height={'calc(100vh - 200px)'}
@@ -748,8 +651,6 @@ const SerializedAssetTest = () => {
                 // dispatch({ type: "selection", selectedRecords: newSelectedRecords })
               }}
               dispatch={dispatch}
-              childrenProperty="subRows"
-              uniqueKey="_id"
               setWholeRowsCellColor={() => {}}
               renderedFrom={renderedFrom}
               isClientSideGrid={false}
@@ -760,6 +661,8 @@ const SerializedAssetTest = () => {
               refreshGrid={fetchProductInventory}
               loading={loading}
               showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={sidebarResource.serializedAsset}
             />
           </>
         ) : (

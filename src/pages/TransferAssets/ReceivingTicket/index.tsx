@@ -270,6 +270,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
       {allowedToEdit && (
         <Box display="flex" flexDirection={isMobile && !isTablet ? 'column' : 'row'} justifyContent="space-between" mx={1} my={1}>
           <PreviewDownload
+            fileName={`${routes.transferAsset.title}-${transferAssetData?.transferAssetNumber}`}
             resource={sidebarResource.transferAsset}
             referenceId={transferAssetId}
             columns={columns?.filter((e) => ['assetNumber', 'product', 'productDescription', 'status']?.includes(e?.accessor))}

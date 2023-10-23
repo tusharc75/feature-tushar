@@ -185,6 +185,13 @@ const routes = {
         : RESOURCE_LABEL.priceTemplate,
     path: '/price-template'
   },
+  priceTemplateDetail: {
+    title:
+      storedRoutes && storedRoutes.priceTemplate && storedRoutes.priceTemplate.title
+        ? storedRoutes.priceTemplate?.title
+        : RESOURCE_LABEL.priceTemplate,
+    path: '/price-template'
+  },
   productBuilder: {
     title:
       storedRoutes && storedRoutes.productBuilder && storedRoutes.productBuilder.title
@@ -218,6 +225,13 @@ const routes = {
     path: '/product-category/detail'
   },
   productTemplate: {
+    title:
+      storedRoutes && storedRoutes.productTemplate && storedRoutes.productTemplate.title
+        ? storedRoutes.productTemplate?.title
+        : RESOURCE_LABEL.productTemplate,
+    path: '/product-template'
+  },
+  productTemplateDetail: {
     title:
       storedRoutes && storedRoutes.productTemplate && storedRoutes.productTemplate.title
         ? storedRoutes.productTemplate?.title
@@ -265,6 +279,13 @@ const routes = {
         ? storedRoutes.rentalManagement.title
         : RESOURCE_LABEL.rentalManagement,
     path: '/rental-management'
+  },
+  rentalManagementInvoice: {
+    title:
+      storedRoutes && storedRoutes.rentalManagementInvoice && storedRoutes.rentalManagementInvoice
+        ? storedRoutes.rentalManagementInvoice.title
+        : RESOURCE_LABEL.rentalManagementInvoice,
+    path: '/rental-management-invoice'
   },
   rentalManagementDetail: {
     title:
@@ -1029,6 +1050,13 @@ const routes = {
       : RESOURCE_LABEL.iotReport,
     path: '/iot-report'
   },
+  accountsReceivable : {
+    title:
+      storedRoutes && storedRoutes.accountsReceivable && storedRoutes.accountsReceivable.title
+        ? storedRoutes.accountsReceivable?.title
+        : RESOURCE_LABEL.accountsReceivable,
+    path: '/accounts-receivable'
+  },
   deviceTemplates: {
     title: storedRoutes && storedRoutes.deviceTemplates && storedRoutes.deviceTemplates?.title ? storedRoutes.deviceTemplates?.title
       : RESOURCE_LABEL.deviceTemplates,
@@ -1078,6 +1106,32 @@ const routes = {
         ? storedRoutes.chartOfAccount?.title
         : RESOURCE_LABEL.chartOfAccount,
     path: '/chart-of-account/detail'
+  },
+  flash : {
+    title : storedRoutes && storedRoutes.flash && storedRoutes.flash.title
+    ? storedRoutes.flash?.title
+    : RESOURCE_LABEL.flash,
+    path : '/flash'
+  },
+  flashDetail: {
+    title: storedRoutes && storedRoutes.flash && storedRoutes.flash.title ? storedRoutes.flash?.title : RESOURCE_LABEL.flash,
+    path: '/flash/detail'
+  },
+  subleaseInvoice: {
+    title: storedRoutes && storedRoutes.subleaseInvoice && storedRoutes.subleaseInvoice.title ? storedRoutes.subleaseInvoice?.title : RESOURCE_LABEL.subleaseInvoice,
+    path: '/sublease-invoice'
+  },
+  creditMemo: {
+    title: storedRoutes && storedRoutes.creditMemo && storedRoutes.creditMemo?.title ? storedRoutes.creditMemo?.title
+      : RESOURCE_LABEL.creditMemo,
+    path: '/credit-memo'
+  },
+  creditMemoDetail: {
+    title:
+      storedRoutes && storedRoutes.creditMemo && storedRoutes.creditMemo.title
+        ? storedRoutes.creditMemo?.title
+        : RESOURCE_LABEL.creditMemo,
+    path: '/credit-memo/detail'
   },
 };
 

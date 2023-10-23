@@ -3,7 +3,7 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
-import { Box, Checkbox, Chip, CircularProgress, Dialog, FormControlLabel, FormGroup, IconButton, Menu, MenuItem, Tooltip } from '@material-ui/core';
+import { Box, Checkbox, Dialog, FormControlLabel, FormGroup, IconButton } from '@material-ui/core';
 import { useData } from 'src/StateProvider/Provider';
 import { fetch_rental_product_fields } from 'src/components/RentalManagment/helper';
 import { isMobile } from 'react-device-detect';
@@ -15,9 +15,7 @@ import {
   deliveryTicket,
   DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_TYPE,
-  formatAmountWithCurrency,
   invoice,
-  pricingCondition,
   rentalManagement,
   MATERIAL_TYPE,
   ASSET_STATUS
@@ -28,18 +26,23 @@ import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { MuiPickersUtilsProvider, KeyboardDatePicker, KeyboardTimePicker } from '@material-ui/pickers';
+import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
 import MomentUtils from '@date-io/moment';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import styles from '../../Leads/Header.module.scss';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { startCase } from 'lodash';
+import { camelCase, startCase } from 'lodash';
 import InfoIcon from '@material-ui/icons/InfoOutlined';
 import EditIcon from '@material-ui/icons/Edit';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { generateCustomTableColumns } from 'src/constants/columns';
 
-const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData, onClose, onSuccess }) => {
+const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
+
+
+  const renderedFrom = `${camelCase(routes?.rentalManagementInvoice.title)}_create_invoice`;
+
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -78,7 +81,10 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
       e.isColumnEditable = false;
     });
     setAllFields(JSON.parse(JSON.stringify(data)));
-    const coloum: any = [
+
+    let newColumns = generateCustomTableColumns(data, rentalManagementData?.currency, renderedFrom);
+
+    let coloum: any = [
       {
         accessor: 'index',
         Header: 'Index',
@@ -159,101 +165,17 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
         }
       }
     ];
-    data
-      .filter((d) => !d.fieldName?.includes('estimate'))
-      .forEach((element) => {
-        if (element.type === 'date') {
-          coloum.push({
-            accessor: element.fieldName,
-            Header: element.fieldLabel,
-            disableFilters: true,
-            Cell: ({ row }) =>
-              row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName]).format(dateFormat)}</p> : <NoDataCell />
-          });
-        } else if (element.type === 'converter' || element.type === 'currencyAmount' || element.isConverter === true) {
-          if (element.type !== 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-            element.displayUnits.forEach((_unit) => {
-              let fieldName = element.fieldName + '_' + _unit.toLowerCase();
-              let fieldLabel = element.fieldLabel + ' ' + _unit;
-              coloum.push({
-                accessor: fieldName,
-                Header: fieldLabel,
-                Cell: ({ row }) => (row.original[fieldName] ? <p>{row.original[fieldName]}</p> : <NoDataCell />)
-              });
-            });
-          } else if (element.type === 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-            element.displayUnits.forEach((_unit) => {
-              element.displayCurrency.forEach((_currency) => {
-                let fieldName = element.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase();
-                let fieldLabel = element.fieldLabel + ' ' + _unit + '/' + _currency;
-                coloum.push({
-                  accessor: fieldName,
-                  Header: fieldLabel,
-                  Cell: ({ row }) =>
-                    row.original[fieldName] ? (
-                      <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-                    ) : (
-                      <NoDataCell />
-                    )
-                });
-              });
-            });
-          } else if (element.type === 'currencyAmount') {
-            element.displayCurrency.forEach((_currency) => {
-              let fieldName = element.fieldName + '_' + _currency.toLowerCase();
-              let fieldLabel = element.fieldLabel + ' ' + _currency;
-              coloum.push({
-                accessor: fieldName,
-                Header: fieldLabel,
-                Cell: ({ row }) =>
-                  row.original[fieldName] ? (
-                    <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-                  ) : (
-                    <NoDataCell />
-                  ),
-                Footer: (info) => {
-                  const total = info?.rows
-                    ?.filter((f) => f.original.parentId === null && f.values.hasOwnProperty(fieldName) && !isNaN(f.values[fieldName]))
-                    .reduce((sum, row) => row.values[fieldName] + sum, 0);
-                  return (
-                    <>
-                      {currencySymbol} {formatAmountWithCurrency(rentalManagementData?.currency, total)?.amountWithouCurrencyCode ?? total}
-                    </>
-                  );
-                }
-              });
-            });
-          }
-        } else {
-          if (element.fieldName === 'qty') {
-            element.fieldName = 'qtyDisplay';
-          }
-          coloum.push({
-            accessor: element.fieldName,
-            Header: element.fieldLabel,
-            Cell: ({ row }) =>
-              row.original[element.fieldName]?.optionLabel ? (
-                <p>{row.original[element.fieldName].optionLabel}</p>
-              ) : row.original[element.fieldName] ? (
-                <>
-                  {['Per Week', 'Per Month'].includes(row.original[element.fieldName]) && proRata && row.original.isAppliedBill ? (
-                    <Box display="flex" alignItems="center">
-                      <p>{row.original[element.fieldName]}</p>
-                      <Box ml={1} />
-                      <Tooltip title="Per Day Price is calculated">
-                        <InfoIcon fontSize="small" color="primary" />
-                      </Tooltip>
-                    </Box>
-                  ) : (
-                    <p>{row.original[element.fieldName]}</p>
-                  )}
-                </>
-              ) : (
-                <NoDataCell />
-              )
-          });
-        }
-      });
+
+    //remove all fields have 'estimate'
+    newColumns = newColumns?.filter((d) => !d?.accessor?.includes('estimate'))
+
+    const pricingMethodColumn = newColumns?.find(obj => obj.accessor === "pricingMethod");
+    if (pricingMethodColumn) {
+      pricingMethodColumn.Cell = ({ row }) => pricingMethodRenderer(row);
+    }
+
+    coloum = [...coloum, ...newColumns];
+
     coloum.push({
       accessor: 'action',
       Header: 'Actions',
@@ -275,18 +197,29 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
           </IconButton>
         )
     });
-    coloum.forEach((element) => {
-      if (element.accessor === 'qtyDisplay') {
-        element['Footer'] = (info) => {
-          const qtyTotal = info.rows
-            .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
-            .reduce((sum, row) => row.values[element.accessor] + sum, 0);
-          return <>{qtyTotal}</>;
-        };
-      }
-    });
+
     setColumns(coloum);
   };
+
+  const pricingMethodRenderer = (row) => {
+    return row.original['pricingMethod'] ? (
+      <>  {['Per Week', 'Per Month'].includes(row.original['pricingMethod']) && proRata && row.original.isAppliedBill ? (
+        <Box display="flex" alignItems="center">
+          <p>{row.original['pricingMethod']}</p>
+          <Box ml={1} />
+          <HtmlTooltip title="Per Day Price is calculated">
+            <InfoIcon fontSize="small" color="primary" />
+          </HtmlTooltip>
+        </Box>
+      ) : (
+        <p>{row.original['pricingMethod']}</p>
+      )}
+      </>
+    ) : (
+      <NoDataCell />
+    );
+  }
+
 
   const fetchData = async () => {
     let data: any = {};
@@ -298,6 +231,10 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
     const invoiceResponse = await axiosInstance().get(`/rental-management/${rentalManagementData?._id}/invoice/material-end-date-qty`);
     invoicedProducts = invoiceResponse?.data?.data?.material;
     additionalCost = invoiceResponse?.data?.data?.additionalCost;
+
+    const queryString = `?rentalJob=${rentalManagementData._id}`
+    const invoiceDataResponce = await axiosInstance().get(`${invoice.api}${queryString}`)
+    const invoiceData = invoiceDataResponce?.data?.data
 
     const responseAdditionalCostData = await axiosInstance().get(`${rentalManagement.api}/additionalcost/${rentalManagementData._id}`);
     let additionalCostData = responseAdditionalCostData?.data?.data;
@@ -394,6 +331,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
     }
 
     data.material = newMaterial;
+
     if (invoiceData) {
       data.material = data?.material
         ?.map((e) => {
@@ -788,9 +726,9 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
               </Grid>
             </MuiPickersUtilsProvider>
             {columns && rowsData ? (
-              <Box zIndex={5} width={'100%'} height={'calc(100vh - 285px)'} p={1}>
+              <Box zIndex={5} width={'100%'} height={'calc(100vh - 200px)'} p={1}>
                 <CustomReactTable
-                  height={'calc(100vh - 285px)'}
+                  height={'calc(100vh - 200px)'}
                   columns={columns}
                   data={rowsData}
                   setWholeRowsCellColor={(rowData) => {
@@ -801,7 +739,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
                   onSelect={setSelectedProducts}
                   childrenProperty="subRows"
                   uniqueKey="_id"
-                  renderedFrom="rental_management_create_billing"
+                  renderedFrom={renderedFrom}
                   isClientSideGrid={true}
                 />
               </Box>

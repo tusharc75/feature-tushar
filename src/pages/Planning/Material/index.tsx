@@ -89,12 +89,12 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                ? row.original?.packageDetail?.packageType === 'Product'
-                  ? '(Product)'
-                  : '(Service)'
-                : row.original.type === 'service'
-                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                : ''}
+                  ? row.original?.packageDetail?.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === 'service'
+                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                    : ''}
             </Box>
           </div>
         )
@@ -233,14 +233,14 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
         parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'package'
-          ? parent.packageDetail?.packageName
-          : parent.serviceDetail?.serviceName;
+            ? parent.packageDetail?.packageName
+            : parent.serviceDetail?.serviceName;
       parent.description =
         parent.type === 'product'
           ? parent?.productDetail?.productDescription
           : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription
-          : parent?.serviceDetail?.serviceDescription;
+            ? parent?.packageDetail?.packageDescription
+            : parent?.serviceDetail?.serviceDescription;
       parent.qty = parent.qty;
       parent.qtyDisplay = parent.qty;
       parent.assetQty = data.material?.filter((i) => i.parentId === parent._id && i.type === 'serializedAsset')?.length;
@@ -268,18 +268,18 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
         _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'package'
-          ? _subRow.packageDetail?.packageName
-          : _subRow.type === 'serializedAsset'
-          ? _subRow.assetDetail.assetNumber
-          : _subRow.serviceDetail?.serviceName;
+            ? _subRow.packageDetail?.packageName
+            : _subRow.type === 'serializedAsset'
+              ? _subRow.assetDetail.assetNumber
+              : _subRow.serviceDetail?.serviceName;
       _subRow.description =
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productDescription
           : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription
-          : _subRow.type === 'serializedAsset'
-          ? parent.description
-          : _subRow?.serviceDetail?.serviceDescription;
+            ? _subRow?.packageDetail?.packageDescription
+            : _subRow.type === 'serializedAsset'
+              ? parent.description
+              : _subRow?.serviceDetail?.serviceDescription;
       _subRow.qty = _subRow.qty;
       _subRow.assetQty = material?.filter((i) => i.parentId === _subRow._id && i.type === 'serializedAsset')?.length;
       _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
@@ -410,119 +410,130 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
 
   return (
     <Fragment>
-      {allowedToEdit && (
-        <Box display="flex" justifyContent="space-between" m={1}>
-          <Box display="flex" alignItems="center">
-            <Button variant={'outlined'} color="primary" size="small" startIcon={<AddIcon />} onClick={openAddActions} aria-controls="add-menu">
-              {'Add'}
-              <ExpandMore fontSize="small" />
-            </Button>
-            <Menu
-              anchorEl={addAnchorEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
-              }}
-              id="add-menu"
-              open={Boolean(addAnchorEl)}
-              onClose={closeAddActions}
-            >
-              <MenuItem
-                onClick={() => {
-                  closeAddActions();
-                  setAddDialog({ open: true, type: 'product', parentId: null });
+      <Box display="flex" justifyContent="space-between" m={1}>
+        <Box display="flex" alignItems="center">
+          {allowedToEdit &&
+            <>
+              <Button variant={'outlined'} color="primary" size="small" startIcon={<AddIcon />} onClick={openAddActions} aria-controls="add-menu">
+                {'Add'}
+                <ExpandMore fontSize="small" />
+              </Button>
+              <Menu
+                anchorEl={addAnchorEl}
+                keepMounted
+                getContentAnchorEl={null}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'left'
                 }}
+                id="add-menu"
+                open={Boolean(addAnchorEl)}
+                onClose={closeAddActions}
               >
-                Add Products
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  closeAddActions();
-                  setAddDialog({ open: true, type: 'service', parentId: null });
-                }}
-              >
-                Add Services
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  closeAddActions();
-                  setAddDialog({ open: true, type: 'package', parentId: null });
-                }}
-              >
-                Add Packages
-              </MenuItem>
-            </Menu>
-          </Box>
-          <Box display="flex">
-            <PreviewDownload resource={sidebarResource.planning} referenceId={planningData._id} columns={columns} isSendEmail={true} />
-            <Box mr={1} />
-            <Button
-              disabled={selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true}
-              variant={isMobile ? 'text' : 'outlined'}
-              color="default"
-              size="small"
-              onClick={openActions}
-              className="new-dropdown-v1"
-              aria-controls="action-menu"
-              endIcon={<ExpandMore />}
-            >
-              Actions
-            </Button>
-            <Menu
-              anchorEl={anchorEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
-              }}
-              id="action-menu"
-              open={Boolean(anchorEl)}
-              onClose={closeActions}
-            >
-              {planningData.type === 'Rental Job' && (
                 <MenuItem
-                  disabled={disableAssignSerializedAssets()}
                   onClick={() => {
-                    closeActions();
-                    setAssetAssignedProduct(selectedRecords.filter((i) => i?.type === 'product' && i?.productDetail?.serializedProduct));
-                    setAddDialog({ open: true, type: 'serializedAsset', parentId: null });
+                    closeAddActions();
+                    setAddDialog({ open: true, type: 'product', parentId: null });
                   }}
                 >
-                  Assign Serialized Asset
+                  Add Existing Products
                 </MenuItem>
-              )}
-              <MenuItem
-                onClick={() => {
-                  closeActions();
-                  setMaterialEdit({ open: true, data: selectedRecords?.filter((e) => !e.hideSelection), bulkedit: true, showSaveAndNext: false });
-                }}
-              >
-                Bulk Edit
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  const dataToDelete = selectedRecords
-                    ?.filter((e) => !e.hideSelection)
-                    .map((rec: any) => {
-                      const obj: any = {};
-                      obj.id = rec._id;
-                      obj.type = rec?.type;
-                      obj.materialId = rec?.materialId;
-                      return obj;
-                    });
-                  setDeleteData(dataToDelete);
-                  closeActions();
-                }}
-              >
-                Delete
-              </MenuItem>
-            </Menu>
-          </Box>
+                <MenuItem
+                  onClick={() => {
+                    closeAddActions();
+                    setAddDialog({ open: true, type: 'service', parentId: null });
+                  }}
+                >
+                  Add Existing Services
+                </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    closeAddActions();
+                    setAddDialog({ open: true, type: 'package', parentId: null });
+                  }}
+                >
+                  Add Existing Packages
+                </MenuItem>
+              </Menu>
+            </>
+          }
         </Box>
-      )}
+        <Box display="flex">
+          <PreviewDownload
+            fileName={`${routes.planning.title}-${planningData?.planningNumber}`}
+            resource={sidebarResource.planning}
+            referenceId={planningData._id}
+            columns={columns}
+            isSendEmail={true} />
+          <Box mr={1} />
+          {allowedToEdit &&
+            <>
+              <Button
+                disabled={selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true}
+                variant={isMobile ? 'text' : 'outlined'}
+                color="default"
+                size="small"
+                onClick={openActions}
+                className="new-dropdown-v1"
+                aria-controls="action-menu"
+                endIcon={<ExpandMore />}
+              >
+                Actions
+              </Button>
+              <Menu
+                anchorEl={anchorEl}
+                keepMounted
+                getContentAnchorEl={null}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'left'
+                }}
+                id="action-menu"
+                open={Boolean(anchorEl)}
+                onClose={closeActions}
+              >
+                {planningData.type === 'Rental Job' && (
+                  <MenuItem
+                    disabled={disableAssignSerializedAssets()}
+                    onClick={() => {
+                      closeActions();
+                      setAssetAssignedProduct(selectedRecords.filter((i) => i?.type === 'product' && i?.productDetail?.serializedProduct));
+                      setAddDialog({ open: true, type: 'serializedAsset', parentId: null });
+                    }}
+                  >
+                    Assign Serialized Asset
+                  </MenuItem>
+                )}
+                <MenuItem
+                  onClick={() => {
+                    closeActions();
+                    setMaterialEdit({ open: true, data: selectedRecords?.filter((e) => !e.hideSelection), bulkedit: true, showSaveAndNext: false });
+                  }}
+                >
+                  Bulk Edit
+                </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    const dataToDelete = selectedRecords
+                      ?.filter((e) => !e.hideSelection)
+                      .map((rec: any) => {
+                        const obj: any = {};
+                        obj.id = rec._id;
+                        obj.type = rec?.type;
+                        obj.materialId = rec?.materialId;
+                        return obj;
+                      });
+                    setDeleteData(dataToDelete);
+                    closeActions();
+                  }}
+                >
+                  Delete
+                </MenuItem>
+              </Menu>
+            </>
+          }
+        </Box>
+      </Box>
       {columns && rowsData ? (
         <Box p="6px" zIndex={5} width={'100%'}>
           <CustomReactTable
@@ -569,37 +580,29 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
       )}
       {addDialog.open && addDialog.type === 'product' && (
         <AssignProductDialog
-          reference="planning"
-          serialized={null}
-          productsDialogOpen={addDialog.open}
-          productId={null}
           handleCloseDialog={() => setAddDialog({ open: false, type: '', parentId: null })}
-          assignedProducts={[]}
           onSuccess={(d) => {
             handleAdd(d);
           }}
+          isSubmitting={isAdding}
         />
       )}
       {addDialog.open && addDialog.type === 'service' && (
         <AssignServiceDialog
-          reference={'planning'}
-          referenceId={planningData?._id}
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
-          ids={[]}
           onSuccess={(rows) => {
             handleAdd(rows);
           }}
+          isSubmitting={isAdding}
         />
       )}
       {addDialog.open && addDialog.type === 'package' && (
         <AssignPackageDialog
-          referenceType="planning"
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
-          ids={[]}
           onSuccess={(rows) => {
             handleAdd(rows);
           }}
-          packageType={null}
+          isSubmitting={isAdding}
         />
       )}
       {addDialog.open && addDialog.type === 'serializedAsset' && (

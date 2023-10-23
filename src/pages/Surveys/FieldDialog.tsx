@@ -6,38 +6,38 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter'
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader'
 import { FormBuilder } from 'src/components/FormBuilder'
-import { CustomDialogTransition } from 'src/constants/helpers'
+import { CustomDialogTransition, fieldLabelToFieldName } from 'src/constants/helpers'
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext'
 
 
 
-const FieldDialog = ({handleClose,handleSuccess,surveyId,notEditable=false}) => {
+const FieldDialog = ({ handleClose, handleSuccess, surveyId, notEditable = false }) => {
   const toastConfig = React.useContext(CustomToastContext);
   const [isSubmitting, setSubmitting] = React.useState(false);
   const [section, setSection] = React.useState([]);
   const [deleteField, setDeleteField] = React.useState([]);
 
-  React.useEffect(()=>{
+  React.useEffect(() => {
     axiosInstance()
-    .get(`surveys/fields/${surveyId}`)
-    .then(({ data: { data } }) => {
-      const _data = [];
-      const _section = uniq(map(data, 'sectionName'));
-      _section.forEach((element: any, index: number) => {
-        _data.push({
-          sectionId: index,
-          sectionName: element,
-          field: data?.filter((el: any) => el.sectionName === element)
+      .get(`surveys/fields/${surveyId}`)
+      .then(({ data: { data } }) => {
+        const _data = [];
+        const _section = uniq(map(data, 'sectionName'));
+        _section.forEach((element: any, index: number) => {
+          _data.push({
+            sectionId: index,
+            sectionName: element,
+            field: data?.filter((el: any) => el.sectionName === element)
+          });
         });
-      });
-      setSection(_data);
-    })
-    .catch((err) => {
-      toastConfig.setToastConfig(err);
-    })
-  },[])
+        setSection(_data);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      })
+  }, [])
 
-  
+
   const handleExportFields = () => {
     var dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(section));
     var dlAnchorElem = document.getElementById('downloadAnchorElem');
@@ -58,7 +58,7 @@ const FieldDialog = ({handleClose,handleSuccess,surveyId,notEditable=false}) => 
     reader.readAsBinaryString(f);
   };
 
-  const handleSave = async() =>{
+  const handleSave = async () => {
     let data = [];
     let order = 0;
     section.forEach((_section) => {
@@ -67,7 +67,7 @@ const FieldDialog = ({handleClose,handleSuccess,surveyId,notEditable=false}) => 
         _field_data._id = _field_data._id.toString();
         _field_data.sectionName = _section.sectionName;
         if (!isNaN(_field._id)) {
-          _field_data.fieldName = camelCase(_field.fieldLabel.replace(/[^a-zA-Z0-9]/g, ''));
+          _field_data.fieldName = fieldLabelToFieldName(_field.fieldLabel);
         }
         _field_data.order = ++order;
         if (!_field_data.roleType) {
@@ -77,18 +77,18 @@ const FieldDialog = ({handleClose,handleSuccess,surveyId,notEditable=false}) => 
       });
     });
     axiosInstance()
-    .post(`surveys/fields/${surveyId}`, { fields: data })
-    .then(({ data }) => {
+      .post(`surveys/fields/${surveyId}`, { fields: data })
+      .then(({ data }) => {
         handleSuccess();
-      toastConfig.setToastConfig({
-        open: true,
-        message: data.message,
-        severity: 'success'
+        toastConfig.setToastConfig({
+          open: true,
+          message: data.message,
+          severity: 'success'
+        });
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
       });
-    })
-    .catch((err) => {
-      toastConfig.setToastConfig(err);
-    });
   }
 
 
@@ -136,7 +136,7 @@ const FieldDialog = ({handleClose,handleSuccess,surveyId,notEditable=false}) => 
         <Button disabled={isSubmitting} variant="outlined" size="small" color="primary" onClick={handleClose}>
           Close
         </Button>
-        { notEditable ? null :
+        {notEditable ? null :
           <Button
             variant="contained"
             size="small"

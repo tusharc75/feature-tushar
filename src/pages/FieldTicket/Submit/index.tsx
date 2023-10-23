@@ -149,6 +149,7 @@ const Submit = ({ stepFullScreen, fieldTicketData, renderedFrom, allowedToEdit, 
             <Box display="flex" justifyContent="space-between" m={1}>
                 <Box display="flex" alignItems="center">
                     <PreviewDownload
+                        fileName={`${routes.fieldTicket.title}-${fieldTicketData?.fieldTicketNumber}`}
                         hideDetailButton={true}
                         resource={sidebarResource.fieldTicket}
                         referenceId={fieldTicketData?._id}
@@ -157,7 +158,12 @@ const Submit = ({ stepFullScreen, fieldTicketData, renderedFrom, allowedToEdit, 
                         defaultColumns={[
                             'type',
                             'detail',
-                            'unit'
+                            'estimateStartDate',
+                            'estimateEndDate',
+                            'pricingMethod',
+                            'qty',
+                            `price_${fieldTicketData?.currency?.toLowerCase()}`,
+                            `finalPrice_${fieldTicketData?.currency?.toLowerCase()}`
                         ]}
                     />
                 </Box>

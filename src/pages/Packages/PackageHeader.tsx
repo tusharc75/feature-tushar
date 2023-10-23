@@ -52,7 +52,6 @@ function PackageHeader(props) {
   };
 
   const {
-    openAssingToProduct,
     selectedRecords,
     onTypeChange,
     options,
@@ -202,14 +201,6 @@ function PackageHeader(props) {
                       Delete
                     </MenuItem>
                   )}
-                  {/* {packagePermissions.isUpdate && <MenuItem
-                                        onClick={() => {
-                                            openAssingToProduct()
-                                            closeActions();
-                                        }}
-                                    >
-                                        Assign Products
-                                    </MenuItem>} */}
                 </Menu>
               </>
             </HideWhenOffline>

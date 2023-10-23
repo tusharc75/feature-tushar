@@ -69,6 +69,8 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
 
   const [material, setMaterial] = useState([]);
 
+  const [isSubmitting, setSubmitting] = useState(false);
+
   useEffect(() => {
     fetchFields();
   }, []);
@@ -523,6 +525,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
   };
 
   const handleAddService = (rows) => {
+    setSubmitting(true)
     let tempServiceArray = rows?.map((d) => ({
       serviceId: d._id,
       qty: d.qty ? parseInt(d.qty) : 1,
@@ -533,9 +536,11 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
       .then(() => {
         fetchData();
         setAddServiceDialog(false);
+        setSubmitting(false)
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
+        setSubmitting(false)
       });
   };
 
@@ -650,6 +655,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
           </Box>
           <div className="d-flex gap-2">
             <PreviewDownload
+              fileName={`${routes.purchaseOrder.title}-${purchaseOrderData?.purchaseOrderNumber}`}
               resource={sidebarResource.purchaseOrder}
               referenceId={purchaseOrderData?._id}
               columns={columns?.map((e) => { return { ...e, accessor: e.accessor === 'serializedProductView' ? 'serializedProduct' : e.accessor } })}
@@ -765,12 +771,9 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
       )}
       {addProductDialog && purchaseOrderData && (
         <AssignProductDialog
-          productsDialogOpen={addProductDialog}
           handleCloseDialog={() => setAddProductDialog(false)}
           reference="purchaseOrder"
           onSuccess={handleAddProduct}
-          productId={null}
-          assignedProducts={[]}
           extraDeepFilter={(purchaseOrderData?.expenseItem === true || purchaseOrderData?.expenseItem === false) ? [{
             field: 'expenseItem',
             term: purchaseOrderData?.expenseItem
@@ -780,6 +783,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
             field: 'chartOfAccount',
             term: { $in: purchaseOrderData?.chartOfAccount?.map((e) => e?.optionValue) }
           }] : []}
+          isSubmitting={isAddingProducts}
         />
       )}
       {showProductDialog.open && (
@@ -827,15 +831,13 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
       )}
       {addServiceDialog && (
         <AssignServiceDialog
-          reference={'purchaseOrder'}
-          referenceId={purchaseOrderData?._id}
           onSuccess={(services) => {
             handleAddService(services);
           }}
           handleClose={() => {
             setAddServiceDialog(false);
           }}
-          ids={[]}
+          isSubmitting={isSubmitting}
         />
       )}
       {showDeleteConfirmBox && (

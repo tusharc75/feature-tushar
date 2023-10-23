@@ -563,7 +563,6 @@ const ServiceMaster = (props: Props) => {
       )}
       {openAddDialog && (
         <AssignServiceDialog
-          reference={'productService'}
           onSuccess={(services) => {
             const ids = services?.map((i) => i?._id)
             handleSubmit(ids);
@@ -571,7 +570,7 @@ const ServiceMaster = (props: Props) => {
           handleClose={() => {
             setOpenAddDialog(false)
           }}
-          ids={[]}
+          isSubmitting={isSubmitting}
         />
       )}
       {arrangeView && (
@@ -589,12 +588,7 @@ const ServiceMaster = (props: Props) => {
       )}
       {assignProductDialog.open && (
         <AssignProductDialog
-          productsDialogOpen={assignProductDialog.open}
-          productId={id}
           handleCloseDialog={() => setAssignProductDialog({ open: false, products: null, service: null, uniqueId: null, steps: null })}
-          //assignedProducts={assignProductDialog.products}
-          assignedProducts={[]}
-          reference={'productService'}
           onSuccess={(d: any) => {
             setAssignStepsToConsumablesDialog({ open: true, consumables: d, service: assignProductDialog.service, steps: assignProductDialog.steps });
             // const data = d?.map((d) => {

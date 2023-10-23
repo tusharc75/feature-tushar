@@ -181,10 +181,26 @@ const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, 
     <Fragment>
       <Box p={2}>
         <PreviewDownload
+          fileName={`${routes.invoice.title}-${invoiceData?.invoiceNumber}`}
           resource={sidebarResource.invoice}
           referenceId={invoiceData?._id}
           columns={columns}
           isSendEmail={true}
+          defaultColumns={[
+            'type',
+            'detail',
+            'fieldTicket',
+            'qty',
+            'unit',
+            'pricingMethod',
+            'actualStartDate',
+            'actualEndDate',
+            `price_${invoiceData?.currency?.toLowerCase()}`,
+            `totalPrice_${invoiceData?.currency?.toLowerCase()}`,
+            `taxPercentage`,
+            `tax_${invoiceData?.currency?.toLowerCase()}`,
+            `finalPrice_${invoiceData?.currency?.toLowerCase()}`
+          ]}
         />
       </Box>
       <Grid item xs={12} md={12} sm={12}>

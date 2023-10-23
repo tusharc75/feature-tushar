@@ -44,6 +44,8 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
   const [allFields, setAllFields] = useState([]);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
 
+  const [isSubmitting, setSubmitting] = useState(false);
+
   useEffect(() => {
     fetchFields();
   }, [productionOrderData]);
@@ -243,6 +245,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
   };
 
   const handleAdd = async (rows) => {
+    setSubmitting(true)
     const material: any = [];
     rows.forEach((d) => {
       const element: any = {};
@@ -263,9 +266,10 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
           message: data.message
         });
         fetchData();
+        setSubmitting(false)
       })
       .catch((error) => {
-        setAddDialog({ open: false, type: '', parentId: null });
+        setSubmitting(false)
         toastConfig.setToastConfig(error);
       });
   };
@@ -374,7 +378,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
                   setAddDialog({ open: true, type: 'product', parentId: null });
                 }}
               >
-                Add Products
+                Add Existing Products
               </MenuItem>
               <MenuItem
                 onClick={() => {
@@ -390,12 +394,16 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
                   setAddDialog({ open: true, type: 'package', parentId: null });
                 }}
               >
-                Add Packages
+                Add Existing Packages
               </MenuItem>
             </Menu>
           </Box>
           <Box display="flex">
-            <PreviewDownload resource={sidebarResource.productionOrder} referenceId={productionOrderData?._id} columns={columns} />
+            <PreviewDownload
+              fileName={`${routes.productionOrder.title}-${productionOrderData?.productionOrderNumber}`}
+              resource={sidebarResource.productionOrder}
+              referenceId={productionOrderData?._id}
+              columns={columns} />
             <Box ml={1} />
             <Button
               disabled={selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true}
@@ -485,15 +493,11 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
       )}
       {addDialog.open && addDialog.type === 'product' && (
         <AssignProductDialog
-          reference="productionOrder"
-          serialized={null}
-          productsDialogOpen={addDialog.open}
-          productId={null}
           handleCloseDialog={() => setAddDialog({ open: false, type: '', parentId: null })}
-          assignedProducts={[]}
           onSuccess={(d) => {
             handleAdd(d);
           }}
+          isSubmitting={isSubmitting}
         />
       )}
       {
@@ -515,13 +519,11 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
       }
       {addDialog.open && addDialog.type === 'package' && (
         <AssignPackageDialog
-          referenceType="productionOrder"
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
-          ids={[]}
           onSuccess={(rows) => {
             handleAdd(rows);
           }}
-          packageType={null}
+          isSubmitting={isSubmitting}
         />
       )}
       {materialEdit.open && (

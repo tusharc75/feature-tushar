@@ -83,7 +83,7 @@ function GridFilter({ resource, currentGridApi, handleClose, setSelectedFilter, 
             }
           });
           modifiedColumn = modifiedColumn?.filter((e) => e.fieldName !== 'lastName');
-        } else if (resource === sidebarResource.customerContact || resource === sidebarResource.supplierContact) {
+        } else if (resource === sidebarResource.customerContact || resource === sidebarResource.supplierContact || resource === sidebarResource.lead) {
           modifiedColumn?.forEach((e) => {
             if (e.fieldName === 'firstName') {
               e.fieldName = 'concatedName';
@@ -201,7 +201,15 @@ function GridFilter({ resource, currentGridApi, handleClose, setSelectedFilter, 
           type: 'contains',
           filter: formValues[fieldName]
         };
-      } else if (['multiSelect', 'dropDown'].includes(col.type) && col.lookup && formValues[fieldName]) {
+      }
+      if (['year']?.includes(col.type) && formValues[fieldName]) {
+        filterModel[fieldName] = {
+          filterType: 'text',
+          type: 'contains',
+          filter: moment(new Date(formValues[fieldName])).format('YYYY')
+        };
+      }
+      else if (['multiSelect', 'dropDown'].includes(col.type) && col.lookup && formValues[fieldName]) {
         const options = coloums?.find((item) => item.fieldName == fieldName)?.option || [];
         if (col.type === 'multiSelect' && formValues[fieldName]?.length > 0) {
           filterModel[fieldName] = {
@@ -250,6 +258,15 @@ function GridFilter({ resource, currentGridApi, handleClose, setSelectedFilter, 
             filterType: 'text',
             type: 'contains',
             filter: formValues[fieldName] === true ? 'Yes' : 'No'
+          };
+        }
+      }
+      else if (col.type === 'location') {
+        if (formValues[fieldName]?.length > 0) {
+          filterModel[fieldName] = {
+            filterType: 'text',
+            type: 'contains',
+            filter: formValues[fieldName]
           };
         }
       }

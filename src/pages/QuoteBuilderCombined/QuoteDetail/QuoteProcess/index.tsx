@@ -1,28 +1,17 @@
 import {
   Button,
-  CircularProgress,
   Grid,
-  Paper,
   makeStyles,
-  FormControl,
-  Checkbox,
-  TextField,
-  IconButton,
   Tooltip,
   Dialog,
   Typography,
-  Menu,
-  MenuItem
 } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 import { BiLayerPlus, BiMailSend } from 'react-icons/bi';
-import { FiDownloadCloud } from 'react-icons/fi';
-import { GiVintageRobot, GiProfit } from 'react-icons/gi';
-import { AiFillEdit, AiFillPlusCircle, AiOutlineEye } from 'react-icons/ai';
-import { HiPencil } from 'react-icons/hi';
+import { GiVintageRobot } from 'react-icons/gi';
+import { AiFillEdit, AiFillPlusCircle } from 'react-icons/ai';
 import axiosInstance from '../../../../axios/axiosInstance';
 import Loader from '../../../../components/Loader';
 import ProductBuilder from '../../../../components/productBuilder';
@@ -32,39 +21,19 @@ import {
   customerAccount,
   customerContact,
   formatAmountWithCurrency,
-  opportunity,
-  QUOTATION_STATUS,
-  quote,
+  QUOTE_PROCESS_STATUS,
   quoteBuilder,
   sidebarResource,
-  supplierAccount
 } from '../../../../constants/helpers';
 import { CustomToastContext } from '../../../../StateProvider/CustomToastContext/CustomToastContext';
 import Steps from './Steps';
-import { saveAs } from 'file-saver';
-import { utils, write } from 'xlsx-js-style';
-import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
-import CheckBoxIcon from '@material-ui/icons/CheckBox';
-import ImportExportIcon from '@material-ui/icons/ImportExport';
 import CustomDialogContent from '../../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../../../../components/CustomDialog/CustomDialogHeader';
 import { isMobile, isTablet } from 'react-device-detect';
 import PerformanceTuningImg from '../../../../assets/PerformanceTuning.png';
-import { CreateEmail } from '../../../../components/Activity/Email/CreateEmail';
 import MessageDialog from '../../../../components/Helpers/MessageDialog';
-import ColumnsDialog from './ColumnsDialog';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useData } from '../../../../StateProvider/Provider';
 import DOAReasonDialog from '../../../DOA/DOAReasonDialog';
-import { camelCase, isEqual, startCase } from 'lodash';
-import { VscVersions } from 'react-icons/vsc';
-import { MdDelete } from 'react-icons/md';
-import { AiOutlineFileExcel, AiOutlineFilePdf } from 'react-icons/ai';
-import ThumbUpIcon from '@material-ui/icons/ThumbUp';
-import ThumbDownIcon from '@material-ui/icons/ThumbDown';
-import CustomDialogFooter from '../../../../components/CustomDialog/CustomDialogFooter';
-import CustomButton from '../../../../components/Helpers/CustomButton';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import { stepIconInterface } from 'src/components/Steps/icons';
 import PreviewDownload from 'src/components/PreviewDownload';
@@ -75,51 +44,6 @@ interface StepInterface extends stepIconInterface {
   name: string;
   title: string;
 }
-
-const useStyles = makeStyles((theme) => ({
-  formControl: {
-    margin: theme.spacing(1),
-    paddingRight: '15px'
-  },
-  chips: {
-    display: 'flex',
-    flexWrap: 'wrap'
-  },
-  chip: {
-    margin: 2
-  },
-  noLabel: {
-    marginTop: theme.spacing(3)
-  },
-  bgProduct: {
-    background: '#f5f5f5 !important',
-    paddingBottom: '0',
-    border: '1px solid #163340',
-    borderTop: '0px',
-    borderBottom: 'none',
-    boxShadow: 'none',
-    borderRadius: '0'
-  },
-  productInformation: {
-    background: 'white',
-    padding: '9px',
-    borderRadius: '3px',
-    border: '1px solid #163340'
-  },
-  termsBtn: {
-    position: 'absolute',
-    top: '-16px',
-    right: '0'
-  },
-  detailBox: {
-    border: '1px solid #163340'
-  },
-  btnHeader: {
-    position: 'absolute',
-    top: '4px',
-    right: '20px'
-  }
-}));
 
 const DOASteps: StepInterface[] = [
   {
@@ -204,44 +128,29 @@ const OtherSteps: StepInterface[] = [
   }
 ];
 
-const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
-const checkedIcon = <CheckBoxIcon fontSize="small" />;
-
 export default function QuoteProcess(props) {
   const {
     state,
     dispatch,
     quoteData,
-    ProcessStatus,
+    processStatus,
     allowedToEdit,
     ifQuoteApproved,
     currentVersion,
-    handleChangeVersion,
     productBuilderId,
     versionStatus,
     fetchQuoteData,
-    columnView,
-    columnViewExcel,
-    handleOpenUpdateDialog,
-    fetchTNC,
     handleVersionUpdate,
-    updatingVersion,
     globalLoading,
     setShowTotalSalesDialog,
     showTotalSalesDialog,
     DOAlimit,
     DOAsetup
   } = props;
-  const defaultSelectColumns = [
-    'Product Description',
-    'Unit',
-    'Qty',
-    `Sales Price Per Unit ${quoteData?.currency}`,
-    `Total Sales Price ${quoteData?.currency}`
-  ];
-  const classes = useStyles();
+
+
   const toastConfig = useContext(CustomToastContext);
-  const { qbResource, qbApi } = quoteBuilder;
+  const { qbResource } = quoteBuilder;
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
@@ -249,68 +158,55 @@ export default function QuoteProcess(props) {
 
   const [quoteCurrency] = useState(quoteData?.currency);
   const [nextStep, setNextStep] = useState(false);
+  const [prevStep, setPrevStep] = useState(true);
   const [redCard, setRedCard] = useState(false);
+  const [userEmails, setUserEmails] = useState({ to: [], cc: [] });
+
   const [totalProfit, setTotalProfit] = useState({
     shortFormatAmount: '',
     fullFormatAmount: '',
     fullFormatAmountWithCurrencyName: ''
   });
-  const [totalPrice, setTotalPrice] = useState(0);
+
   const [totalcost, setTotalCost] = useState({
     shortFormatAmount: '',
     fullFormatAmount: '',
     fullFormatAmountWithCurrencyName: ''
   });
+
   const [totalsale, setTotalSale] = useState({
     shortFormatAmount: '',
     fullFormatAmount: '',
     fullFormatAmountWithCurrencyName: ''
   });
+
   const [totalmargin, setTotalMargin] = useState({
     shortFormatAmount: '',
     fullFormatAmount: '',
     fullFormatAmountWithCurrencyName: ''
   });
 
-  const [buttonMessage, setButtonMessage] = useState('Send to Customer');
   const [DOAreq, setDOAreq] = useState(false);
   const [DOAneeded, setDOAneeded] = useState(false);
   const [Customerreq, setCustomerreq] = useState(true);
   const [DOAData, setDOAData] = useState(null);
   const [DOAApproved, setDOAApproved] = useState(false);
   const [DOARequestId, setDOARequestId] = useState(null);
-  const [visibleColumns, setVisibleColumns] = useState(defaultSelectColumns);
-  const [visibleColumnsExcel, setVisibleColumnsExcel] = useState(defaultSelectColumns);
-  const [ColumnName, setColName] = useState([]);
-  const [dynamicTableData, setDynamicTableData] = useState([]);
-  const [deletingDOA, setDeletingDOA] = useState(false);
-  const [reminderLoading, setReminderLoading] = useState(false);
-  const [isCloning, setCloning] = useState(false);
-  const [isRearrangeColumns, setRearrangeColumns] = useState(false);
-  const [isRearrangeColumnsExcel, setRearrangeColumnsExcel] = useState(false);
+
   const [isAddNewProduct, setIsAddNewProduct] = useState(false);
   const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);
   const [showQuoteStatusChangeDialog, setShowQuoteStatusChangeDialog] = useState(false);
   const [quoteStatusChangeData, setQuoteStatusChangeData] = useState('');
-  const [approvedButtonText] = useState('Accept');
   const [loading, setLoading] = useState(false);
-  const [pdfFileBase64, setPdfFileBase64] = useState(null);
-  const [excelFileBase64, setExcelFileBase64] = useState(null);
-  const [generatingPdfFile, setGeneratingFile] = useState(false);
-  const [userEmails, setUserEmails] = useState({ to: [], cc: [] });
-  const [sendEmail, setSendEmail] = useState(false);
-  const [showAiDialog, setShowAiDialog] = useState(false);
-  const [viewDownloadLoading, setViewDownloadLoading] = useState(false);
-  const [showPDFArrangeColumns, setShowPDFArrangeColumns] = useState(false);
-  const [showExcelArrangeColumns, setShowExcelArrangeColumns] = useState(false);
-  const [stepFullScreen, setStepFullScreen] = useState(false);
-  const [columns, setColumnDatas] = useState([]);
 
-  const [messageDialog, setMessageDialog] = useState({
-    open: false,
-    message: null
-  });
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [showAiDialog, setShowAiDialog] = useState(false);
+
+  const [stepFullScreen, setStepFullScreen] = useState(false);
+  const [columns, setColumnData] = useState([]);
+
+  const [sendToLoading, setSendToLoading] = useState(false);
+
+  const [messageDialog, setMessageDialog] = useState({ open: false, message: null });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   useEffect(() => {
@@ -321,7 +217,6 @@ export default function QuoteProcess(props) {
 
   useEffect(() => {
     dispatch({ type: 'selection', selectedRecords: quoteData?.versions[currentVersion]?.TNC });
-
     axiosInstance()
       .get(`/doa-request`)
       .then(({ data: { data } }) => {
@@ -341,36 +236,27 @@ export default function QuoteProcess(props) {
               setDOARequestId(data.requestId);
             })
             .catch((err) => {
-              // toastConfig.setToastConfig(err);
             });
         }
       })
       .catch((error) => {
-        //   toastConfig.setToastConfig(error);
       });
   }, [currentVersion]);
 
   useEffect(() => {
-    setVisibleColumns(columnView && columnView.length ? columnView : defaultSelectColumns);
-    setVisibleColumnsExcel(columnViewExcel && columnViewExcel.length ? columnViewExcel : defaultSelectColumns);
-  }, [columnView]);
-
-  useEffect(() => {
-    fetchUserEmails();
-    const tempProcessStatus = quoteData?.versions[currentVersion]?.processStatus;
-    const tempOverallStatus = quoteData?.versions[currentVersion]?.status;
-
-    if (tempProcessStatus === 'DOA Process' && !tempOverallStatus.includes('Accepted') && DOAneeded) {
-      setNextStep(false);
+    fetchUserEmails()
+    if (processStatus === QUOTE_PROCESS_STATUS.doaProcess) {
+      const currentVersionStatus = quoteData?.versions[currentVersion]?.status;
+      if (currentVersionStatus.includes('Accepted')) {
+        setNextStep(true);
+      } else {
+        setNextStep(false);
+      }
     }
-    if (tempProcessStatus === 'DOA Process' && tempOverallStatus.includes('Accepted') && DOAneeded) {
-      setNextStep(true);
-    }
-    if (tempProcessStatus === 'Customer Process') {
-      setNextStep(false);
-    }
-    if (tempProcessStatus === 'Quote Builder' || 'Send To Customer') {
-      setNextStep(true);
+    if (processStatus === QUOTE_PROCESS_STATUS.sendToCustomer) {
+      if (ifQuoteApproved.approved || quoteData?.versions[currentVersion]?.offered) {
+        setNextStep(true);
+      }
     }
   }, [quoteData]);
 
@@ -383,7 +269,7 @@ export default function QuoteProcess(props) {
           data = data.data?.product?.map((u, index) => ({
             ...u,
             id: u._id,
-            srno: index + 1,
+            index: index + 1,
             // productTemplateDisplayValue: u.productTemplate?.optionLabel,
             productCategoryDisplayValue: u.productCategory?.optionLabel,
             priceTemplateDisplayValue: u.priceTemplate?.optionLabel
@@ -403,11 +289,9 @@ export default function QuoteProcess(props) {
           if (DOAsetup && totalSellingPrice > DOAlimit && versionStatus === 'Building Quote') {
             setDOAreq(true);
             setCustomerreq(false);
-            setButtonMessage('Send for DOA');
           } else if (versionStatus.includes('Rejected by DOA')) {
             setDOAreq(true);
             setCustomerreq(false);
-            setButtonMessage('Re-Send for DOA');
           } else if (versionStatus === 'Sent for DOA') {
             setDOAreq(false);
             setCustomerreq(false);
@@ -427,7 +311,7 @@ export default function QuoteProcess(props) {
   }, [DOAsetup, DOAlimit]);
 
   const fetchDOAData = () => {
-    if ((ProcessStatus === 'DOA Process' && DOAneeded) || (versionStatus.includes('Rejected by DOA') && ProcessStatus === 'End')) {
+    if ((processStatus === QUOTE_PROCESS_STATUS.doaProcess && DOAneeded) || (versionStatus.includes('Rejected by DOA') && processStatus === 'End')) {
       axiosInstance()
         .get(`doa-request/doaFlow/${quoteData._id}/${currentVersion}`)
         .then(({ data: { data } }) => {
@@ -435,7 +319,6 @@ export default function QuoteProcess(props) {
         })
         .catch((err) => {
           setDOAData(null);
-          // toastConfig.setToastConfig(err);
         });
     }
   };
@@ -450,7 +333,7 @@ export default function QuoteProcess(props) {
 
   const productCalculationForDoa = (BuilderData) => {
     const inventory: { fieldName: string; fieldValue: any }[][] = [];
-    const ignoredKeys = ['fields', '_id', 'productId', 'templateFields', 'id', 'string', 'srno'];
+    const ignoredKeys = ['fields', '_id', 'productId', 'templateFields', 'id', 'string', 'index'];
 
     let totalCost = 0;
     let totalSellingPrice = 0;
@@ -556,9 +439,6 @@ export default function QuoteProcess(props) {
                   colName.push(d);
                 }
               });
-              // if (data.required) {
-              //     (quoteRows[fieldName] && quoteRows[fieldName] !== "") || ((quoteRows[`${fieldName}_${data.displayCurrency.toLowerCase()}`] && quoteRows[`${fieldName}_${data.displayCurrency.toLowerCase()}`] !== "")) ? requiredFieldArray.push({ "key": quoteRows[fieldName], "value": true }) : requiredFieldArray.push({ "key": quoteRows[fieldName], "value": false }) //next button disable logic
-              // }
             }
           });
         }
@@ -572,25 +452,6 @@ export default function QuoteProcess(props) {
             key = splitKey[0];
             currency = splitKey[1].toUpperCase();
           }
-          // let fields = quoteRows["fields"];
-          // let field = fields.filter(
-          //     (d: { fieldName: string }) => d.fieldName === key
-          // );
-
-          // if (typeof field[0] !== "undefined") {
-          //     if (typeof quoteRows[key] === "object") {
-          //         inventorydata.push({
-          //             fieldName: field[0].fieldLabel,
-          //             fieldValue: quoteRows[key] ? quoteRows[key][key] : null,
-          //         });
-          //     } else {
-          //         inventorydata.push({
-          //             fieldName: field[0].fieldLabel,
-          //             fieldValue:
-          //                 quoteRows[indexkey] === null ? 0 : quoteRows[indexkey],
-          //         });
-          //     }
-
           if (currency === quoteData?.currency && key === 'totalCost') {
             totalCost = totalCost + quoteRows[indexkey];
           } else if (currency === quoteData?.currency && key === 'totalSalesPrice') {
@@ -600,7 +461,6 @@ export default function QuoteProcess(props) {
           } else if (currency === quoteData?.currency && key === 'totalMargin') {
             totalMargin = totalMargin + quoteRows[indexkey];
           }
-          // }
         }
       });
 
@@ -612,7 +472,7 @@ export default function QuoteProcess(props) {
           return isEmpty.length > 0 ? true : false;
         });
 
-      if (DOASteps.findIndex((d) => d?.key === ProcessStatus) === 1 || ProcessStatus === 'Price Builder') {
+      if (DOASteps.findIndex((d) => d?.key === processStatus) === 1 || processStatus === 'Price Builder') {
         let hasPrice = false;
         tempBuilderData.forEach((data) => {
           if (
@@ -624,24 +484,10 @@ export default function QuoteProcess(props) {
             hasPrice = false;
           }
         });
-        const withZeroQty = tempBuilderData.filter((d) => d.qty === 0);
-        let withZeroAmt = [];
-        if (hasPrice) {
-          withZeroAmt = tempBuilderData.filter((d) => d[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] === 0);
-        }
-
-        if ((!ungivenValues && ungivenValues.length === 0) || (!withZeroAmt.length && hasPrice && !withZeroQty.length)) {
-          setNextStep(true);
-        } else {
-          setNextStep(false);
-        }
       }
       dynamicTable.push(labelsWithVal);
       inventory.push(inventorydata);
     });
-    // requiredFieldArray.every(v => v.value === true) ? setNextStep(true) : setNextStep(false)
-    // setColName(colName);
-    setDynamicTableData(dynamicTable);
     return {
       inventory: inventory,
       totalMargin: totalMargin,
@@ -651,56 +497,17 @@ export default function QuoteProcess(props) {
     };
   };
 
-  const generateBase64forFile = (blobData, type) => {
-    let reader = new FileReader();
-    reader.readAsDataURL(blobData);
-    reader.onloadend = function () {
-      let base64data = reader.result;
-      if (type === 'pdf') {
-        setPdfFileBase64(base64data);
-      }
-
-      if (type === 'excel') {
-        setExcelFileBase64(base64data);
-      }
-    };
-  };
-
   const refreshProducts = (data) => {
-    if (ProcessStatus === 'New' && data?.product?.length === 0) {
-      setNextStep(false);
-    }
-    if (ProcessStatus === 'New' && data?.product?.length > 0) {
-      setNextStep(true);
-    }
-    if (ProcessStatus === 'Price Builder' && data?.product?.length === 0) {
-      axiosInstance()
-        .post(`quote-builder/updateprocess/${quoteData._id}?version=${currentVersion}`, {
-          processStatus: 'New'
-        })
-        .then(() => {
-          fetchQuoteData(currentVersion);
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
-    }
-    productBuilderdatatoQuoteBuilderdata(data);
-  };
-
-  const productBuilderdatatoQuoteBuilderdata = (BuilderData) => {
-    if (BuilderData && Object.keys(BuilderData).length !== 0) {
+    if (data && Object.keys(data).length !== 0) {
       setRedCard(false);
-      const { totalMargin, totalSellingPrice, totalCost, totalProfit } = productCalculationForDoa(BuilderData);
+      const { totalMargin, totalSellingPrice, totalCost, totalProfit } = productCalculationForDoa(data);
       setTotalProfit(formatAmountWithCurrency(quoteData.currency, totalProfit));
       setTotalMargin(formatAmountWithCurrency(quoteData.currency, totalMargin));
       setTotalSale(formatAmountWithCurrency(quoteData.currency, totalSellingPrice));
-      setTotalPrice(totalCost);
       setTotalCost(formatAmountWithCurrency(quoteData.currency, totalCost));
       if (totalSellingPrice < totalCost) {
         setRedCard(true);
       }
-      setButtonMessage('Send to Customer');
       setDOAreq(false);
       setCustomerreq(true);
       if (DOAsetup && totalSellingPrice > DOAlimit) {
@@ -711,11 +518,9 @@ export default function QuoteProcess(props) {
       if (DOAsetup && totalSellingPrice > DOAlimit && versionStatus === 'Building Quote') {
         setDOAreq(true);
         setCustomerreq(false);
-        setButtonMessage('Send for DOA');
       } else if (versionStatus.includes('Rejected by DOA')) {
         setDOAreq(true);
         setCustomerreq(false);
-        setButtonMessage('Re-Send for DOA');
       } else if (versionStatus === 'Sent for DOA') {
         setDOAreq(false);
         setCustomerreq(false);
@@ -729,217 +534,6 @@ export default function QuoteProcess(props) {
       ) {
         setDOAreq(false);
         setCustomerreq(false);
-      }
-    }
-  };
-
-  const cloneVersion = () => {
-    const previousVersionTNC = quoteData.versions[currentVersion]?.acceptedColumns;
-    setCloning(true);
-    axiosInstance()
-      .post(`/quote-builder/createVersion/${quoteData._id}?version=${currentVersion}`, { TNC: previousVersionTNC })
-      .then(() => {
-        fetchQuoteData(0);
-        setCloning(false);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        setCloning(false);
-      });
-  };
-
-  const deleteVersion = () => {
-    let versions = quoteData?.versions;
-
-    delete versions[currentVersion];
-
-    setDeletingDOA(true);
-    axiosInstance()
-      .delete(`${qbApi}/${quoteData._id}/${currentVersion}`)
-      .then(() => {
-        setDeletingDOA(false);
-        fetchQuoteData(0);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        setDeletingDOA(false);
-      });
-  };
-
-  const handleSendReminder = () => {
-    if (quoteData && currentVersion) {
-      setReminderLoading(true);
-      axiosInstance()
-        .get(`quote-builder/reminder/${quoteData._id}/${currentVersion}`)
-        .then((data: { data }) => {
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: 'Reminder Sent'
-          });
-          setReminderLoading(false);
-        })
-        .catch((err) => {
-          toastConfig.setToastConfig(err);
-          setReminderLoading(false);
-        });
-    }
-  };
-
-  const exportToCSV = (send = false) => {
-    const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
-    const fileExtension = '.xlsx';
-
-    if (dynamicTableData.length) {
-      let newTable = [];
-      dynamicTableData.forEach((d, i) => {
-        let obj = {};
-        visibleColumnsExcel.forEach((col) => {
-          if (Array.isArray(d[col]) && d[col].length > 0) {
-            if (d[col][0]?.hasOwnProperty('optionLabel')) {
-              obj[col] = d[col]?.map((d) => d.optionLabel).join() || '';
-            } else {
-              obj[col] = d[col]?.join() || '';
-            }
-          } else if (d[col]?.hasOwnProperty('optionLabel')) {
-            obj[col] = d[col]?.optionLabel || '';
-          } else {
-            obj[col] = d[col] || '';
-          }
-        });
-
-        newTable.push(obj);
-      });
-
-      newTable = newTable.map((row, i) => {
-        return {
-          'SR No.': i + 1,
-          ...row
-        };
-      });
-
-      const res = newTable.reduce(
-        (result, item) => {
-          const keys = Object?.keys(item);
-          keys.forEach((key) => {
-            if (!key.includes(quoteCurrency)) {
-              return;
-            }
-            result[key] = result[key] ? result[key] + item[key] : item[key];
-          });
-          return result;
-        },
-        { ['SR No.']: 'Total' }
-      );
-
-      Object?.keys(res).forEach((k) => {
-        if (k.includes(quoteCurrency)) {
-          res[k] =
-            res[k] && res[k].toString().split('.')[1] !== undefined && res[k].toString().split('.')[1].length > 4
-              ? parseFloat(res[k]).toFixed(4)
-              : res[k];
-        }
-      });
-
-      newTable.push(res);
-
-      const wb = utils.book_new();
-      const ws = utils.json_to_sheet(newTable);
-      const range = utils.decode_range(ws['!ref']);
-      let cs,
-        rs: number = range.s.r;
-      let ce,
-        re: number = range.e.r;
-
-      let wscols = [];
-
-      for (cs = range.s.r; cs <= range.e.c; ++cs) {
-        let sCell = utils.encode_cell({ c: cs, r: rs });
-
-        ws[sCell].s = {
-          font: {
-            name: 'Calibri',
-            sz: 12,
-            bold: true,
-            color: { rgb: 'ffffff' }
-          },
-          fill: {
-            fgColor: { rgb: '02617d' }
-          }
-        };
-
-        if (sCell !== 'A1') {
-          wscols.push({ wch: 20 });
-        } else {
-          wscols.push({ wch: 6 });
-        }
-      }
-
-      for (ce = range.e.c; ce >= range.s.r; --ce) {
-        let cell = utils.encode_cell({ c: ce, r: re });
-
-        if (ws[cell])
-          ws[cell].s = {
-            font: {
-              name: 'Calibri',
-              sz: 12,
-              bold: true,
-              color: { rgb: 'ffffff' }
-            },
-            fill: {
-              fgColor: { rgb: 'ff6666' }
-            }
-          };
-      }
-
-      Object.keys(ws).forEach((key, i) => {
-        if (key === '!cols' || key === '!ref') return;
-
-        if (ws[key]?.s) {
-          ws[key].s = {
-            ...ws[key]?.s,
-            alignment: {
-              horizontal: 'left'
-            }
-          };
-        } else {
-          if (key.includes('A')) {
-            ws[key].s = {
-              font: {
-                name: 'Calibri',
-                sz: 12,
-                bold: false,
-                color: { rgb: 'ffffff' }
-              },
-              fill: {
-                fgColor: { rgb: '02617d' }
-              },
-              alignment: {
-                horizontal: 'left'
-              }
-            };
-          } else {
-            ws[key].s = {
-              alignment: {
-                horizontal: 'left'
-              }
-            };
-          }
-        }
-      });
-
-      ws['!cols'] = wscols;
-      utils.book_append_sheet(wb, ws);
-      const excelBuffer = write(wb, {
-        bookType: 'xlsx',
-        type: 'array'
-      });
-      const data = new Blob([excelBuffer], { type: fileType });
-
-      if (send) {
-        generateBase64forFile(data, 'excel');
-      } else {
-        saveAs(data, `Quotation - v${currentVersion}` + fileExtension);
       }
     }
   };
@@ -980,197 +574,34 @@ export default function QuoteProcess(props) {
     }
   };
 
-  const handleViewPdf = (view = false, download = false) => {
-    setViewDownloadLoading(true);
-    let body = {
-      acceptedColumns: visibleColumns,
-      status: versionStatus,
-      TNC: state.selectedRecords
-    };
+  const findProfitPercentage = (CP, Profit) => {
+    let parsedCP = parseInt(CP?.amountWithouCurrencyCode?.replace(/[^0-9]/g, '') ?? 0);
+    let profit = parseInt(Profit?.amountWithouCurrencyCode?.replace(/[^0-9]/g, '') ?? 0);
+    return ((profit * 100) / parsedCP).toFixed(2);
+  };
+
+  const handleSendForDOA = () => {
+    setSendToLoading(true);
     axiosInstance()
-      .post(`quote-builder/updateVersion/${quoteData._id}?version=${currentVersion}`, body)
-      .then(() => {
-        axiosInstance()
-          .post(`/quote-builder/generate-quote-pdf/${quoteData._id}/${currentVersion}`)
-          .then(({ data }) => {
-            if (view && data.data.fileName) {
-              axiosInstance()
-                .get(`user/download?fileName=${data.data.fileName}`, {
-                  responseType: 'blob'
-                })
-                .then(({ data }) => {
-                  const file = new Blob([data], { type: 'application/pdf' });
-                  const fileURL = URL.createObjectURL(file);
-                  const pdfWindow = window.open();
-                  pdfWindow.location.href = fileURL;
-                  setViewDownloadLoading(false);
-                })
-                .catch((err) => {
-                  setViewDownloadLoading(false);
-                  toastConfig.setToastConfig(err);
-                });
-            } else if (download && data.data.fileName) {
-              axiosInstance()
-                .get(`user/download?fileName=${data.data.fileName}`, {
-                  responseType: 'blob'
-                })
-                .then(({ data }) => {
-                  const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
-                  const link = document.createElement('a');
-                  link.href = url;
-                  link.setAttribute('download', `Quotation-${quoteData.quoteName}-v${currentVersion}.pdf`);
-                  document.body.appendChild(link);
-                  link.click();
-                  setViewDownloadLoading(false);
-                })
-                .catch((err) => {
-                  toastConfig.setToastConfig(err);
-                  setViewDownloadLoading(false);
-                });
-            } else {
-              setViewDownloadLoading(false);
-            }
-          })
-          .catch((err) => {
-            toastConfig.setToastConfig(err);
-            setViewDownloadLoading(false);
-          });
+      .post(`/doa-request/create/${quoteData._id}?version=${currentVersion}`)
+      .then(({ data }) => {
+        handleVersionUpdate('Sent for DOA', state?.selectedRecords);
+        fetchQuoteData(currentVersion);
+        fetchDOAData();
+        setSendToLoading(false);
       })
       .catch((err) => {
+        setSendToLoading(false);
         toastConfig.setToastConfig(err);
-        setViewDownloadLoading(false);
       });
   };
 
-  let isHideReminder = false;
-  if (quoteData?.versions && quoteData.versions[currentVersion] && quoteData.versions[currentVersion]?.adobeAgreementStatus === 'SIGNED') {
-    isHideReminder = true;
-  }
-
-  const handleCases = () => {
-    if (DOAreq) {
-      axiosInstance()
-        .post(`/doa-request/create/${quoteData._id}?version=${currentVersion}`)
-        .then(({ data }) => {
-          handleVersionUpdate(visibleColumns, visibleColumnsExcel, 'Sent for DOA', state?.selectedRecords);
-          fetchQuoteData(currentVersion);
-        })
-        .catch((err) => {
-          toastConfig.setToastConfig(err);
-        });
-    }
-    if (Customerreq) {
-      exportToCSV(true);
-      if (!pdfFileBase64) {
-        setGeneratingFile(true);
-        setLoading(true);
-        if (quoteData.versions[currentVersion].PDF) {
-          axiosInstance()
-            .get(`user/download?fileName=${quoteData.versions[currentVersion].PDF}`, {
-              responseType: 'blob'
-            })
-            .then(({ data }) => {
-              setGeneratingFile(false);
-              const file = new Blob([data], { type: 'application/pdf' });
-              generateBase64forFile(file, 'pdf');
-              setSendEmail(true);
-              setLoading(false);
-            })
-            .catch((err) => {
-              toastConfig.setToastConfig({
-                open: true,
-                type: 'error',
-                message: 'PDF generating error'
-              });
-              setLoading(false);
-              setGeneratingFile(false);
-            });
-        } else {
-          // let body = {
-          //     acceptedColumns: quoteData.versions[currentVersion].acceptedColumns,
-          //     status: quoteData.versions[currentVersion].status,
-          //     TNC: quoteData.versions[currentVersion].TNC
-          // };
-          // axiosInstance()
-          //     .post(`quote-builder/updateVersion/${quoteData._id}?version=${currentVersion}`, body)
-          //     .then(() => {
-          axiosInstance()
-            .post(`/quote-builder/generate-quote-pdf/${quoteData._id}/${currentVersion}`)
-            .then(({ data }) => {
-              axiosInstance()
-                .get(`user/download?fileName=${data.data.fileName}`, {
-                  responseType: 'blob'
-                })
-                .then(({ data }) => {
-                  setGeneratingFile(false);
-                  const file = new Blob([data], { type: 'application/pdf' });
-                  generateBase64forFile(file, 'pdf');
-                  setSendEmail(true);
-                  setLoading(false);
-                })
-                .catch((err) => {
-                  toastConfig.setToastConfig({
-                    open: true,
-                    type: 'error',
-                    message: 'PDF generating error'
-                  });
-                  setLoading(false);
-                  setGeneratingFile(false);
-                });
-            })
-            .catch((err) => {
-              toastConfig.setToastConfig({
-                open: true,
-                type: 'error',
-                message: 'PDF generating error'
-              });
-              setLoading(false);
-              setGeneratingFile(false);
-            });
-          // })
-          // .catch((err) => {
-          //     setGeneratingFile(false);
-          // });
-        }
-      } else {
-        setSendEmail(true);
-      }
-    }
-  };
-
-  const handleVersionUpdateFromAdditionalData = (additionalData) => {
-    if (!isEqual(state.selectedRecords, additionalData)) {
-      handleVersionUpdate(visibleColumns, visibleColumnsExcel, versionStatus, additionalData);
-    }
-  };
-
-  const onSendEmailSuccess = () => {
-    setSendEmail(false);
-    // handleVersionUpdate("", visibleColumns, "Sent to Customer", selectedRecords);
-    handleAttachments();
-    fetchQuoteData(currentVersion);
-  };
-
-  let attachments = [];
-  if (pdfFileBase64) {
-    attachments.push({
-      base64: pdfFileBase64.substring(parseInt(pdfFileBase64.indexOf(',') + 1)),
-      contentType: pdfFileBase64.split(';')[0].split(':')[1],
-      name: `Quotation-${quoteData.quoteName}-v${currentVersion}`
-    });
-  }
-  if (excelFileBase64) {
-    attachments.push({
-      base64: excelFileBase64.substring(parseInt(excelFileBase64.indexOf(',') + 1)),
-      contentType: excelFileBase64.split(';')[0].split(':')[1],
-      name: `Quotation-${quoteData.quoteName}-v${currentVersion}`
-    });
-  }
-
   const handleOfferToCustomer = () => {
+    setSendToLoading(true);
     axiosInstance()
       .patch(`/quote-builder/send-offer/${quoteData._id}/${currentVersion}`)
       .then(({ data }) => {
+        setSendToLoading(false);
         fetchQuoteData(currentVersion);
         toastConfig.setToastConfig({
           open: true,
@@ -1179,6 +610,7 @@ export default function QuoteProcess(props) {
         });
       })
       .catch((err) => {
+        setSendToLoading(false);
         toastConfig.setToastConfig(err);
       });
   };
@@ -1217,62 +649,6 @@ export default function QuoteProcess(props) {
     }
   };
 
-  const handleAttachments = () => {
-    let request;
-
-    request = {
-      name: 'Quotation V' + currentVersion,
-      fileUrl: '',
-      relatedTo: [
-        {
-          type: quote.quoteResource,
-          referenceId: quoteData?._id,
-          access: true
-        },
-        {
-          type: quoteData?.customerAccountName ? customerAccount?.accountResource : supplierAccount?.accountResource,
-          referenceId: quoteData?.customerAccountName ? quoteData?.customerAccountName?.optionValue : quoteData?.supplierAccountName?.optionValue,
-          access: false
-        },
-        {
-          type: opportunity.opportunityResource,
-          referenceId: quoteData.opportunity?.optionValue,
-          access: false
-        }
-      ]
-    };
-
-    // if (PDFAttachment !== "") {
-    //   request.fileUrl = PDFAttachment;
-    //   axiosInstance()
-    //     .post(`/attachment`, request)
-    //     .then(({ data }) => { })
-    //     .catch((error) => {
-    //       toastConfig.setToastConfig(error);
-    //     });
-    // }
-  };
-
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleChangeVersionInQuote = (event) => {
-    handleChangeVersion(event);
-    setAnchorEl(null);
-  };
-
-  const findProfitPercentage = (CP, Profit) => {
-    let parsedCP = parseInt(CP?.amountWithouCurrencyCode?.replace(/[^0-9]/g, '') ?? 0);
-    let profit = parseInt(Profit?.amountWithouCurrencyCode?.replace(/[^0-9]/g, '') ?? 0);
-    return ((profit * 100) / parsedCP).toFixed(2);
-  };
-
-
   return (
     <>
       <div>
@@ -1280,28 +656,27 @@ export default function QuoteProcess(props) {
           steps={DOAneeded ? DOASteps : OtherSteps}
           currentStep={
             DOAneeded
-              ? DOASteps.findIndex((d) => d?.key === ProcessStatus)
-              : ProcessStatus === 'DOA Process'
-                ? OtherSteps.findIndex((d) => d?.key === 'Quote Builder')
-                : OtherSteps.findIndex((d) => d?.key === ProcessStatus)
+              ? DOASteps.findIndex((d) => d?.key === processStatus)
+              : processStatus === QUOTE_PROCESS_STATUS.doaProcess
+                ? OtherSteps.findIndex((d) => d?.key === QUOTE_PROCESS_STATUS.quoteBuilder)
+                : OtherSteps.findIndex((d) => d?.key === processStatus)
           }
           id={quoteData._id}
           version={currentVersion}
           Refresh={fetchQuoteData}
-          nextStep={ProcessStatus === 'Send To Customer' && (ifQuoteApproved.approved || quoteData?.versions[currentVersion]?.offered) ? true : nextStep}
+          nextStep={nextStep}
+          // nextStep={
+          //   processStatus === 'Send To Customer' && (!ifQuoteApproved.approved && !quoteData?.versions[currentVersion]?.offered) ? false :
+          //     ['Rejected by Customer', 'Sent for DOA', 'Sent to Customer'].includes(versionStatus) ? true : nextStep
+          // }
+          isPrevStep={['Rejected by Customer', 'Sent for DOA', 'Sent to Customer'].includes(versionStatus) ? false : prevStep}
           versionStatus={versionStatus}
           loading={loading}
           approvedQuote={ifQuoteApproved}
           handleVersionUpdate={() => {
-            handleVersionUpdate(
-              visibleColumns,
-              visibleColumnsExcel,
-              versionStatus === 'Sent for DOA' && !DOAneeded ? 'Sent to Customer' : versionStatus,
-              state?.selectedRecords
-            );
+            handleVersionUpdate(versionStatus === 'Sent for DOA' && !DOAneeded ? 'Sent to Customer' : versionStatus, state?.selectedRecords);
           }}
-          isStepEnded={['End'].includes(ProcessStatus)}
-          handleViewPdf={handleViewPdf}
+          isStepEnded={['End'].includes(processStatus)}
           allowedToEdit={allowedToEdit}
           DOAData={DOAData}
           quoteData={quoteData}
@@ -1309,9 +684,10 @@ export default function QuoteProcess(props) {
           setStepFullScreen={() => setStepFullScreen(true)}
         />
       </div>
+
       <div className={`pt-[12px] subDetailModule `}>
         <ContentFullScreen
-          title={DOASteps.find((d) => d?.key === ProcessStatus).label || ''}
+          title={DOASteps.find((d) => d?.key === processStatus).label || ''}
           fullScreen={stepFullScreen}
           setFullScreen={setStepFullScreen}
         >
@@ -1319,7 +695,7 @@ export default function QuoteProcess(props) {
             <Grid container className="position-relative">
               <div className="flex items-center justify-between flex-wrap w-full mx-3 gap-[8px]">
                 <div className="flex flex-wrap items-center gap-2">
-                  {!ifQuoteApproved.approved && ProcessStatus === 'New' && allowedToEdit ? (
+                  {!ifQuoteApproved.approved && processStatus === QUOTE_PROCESS_STATUS.new && allowedToEdit ? (
                     <>
                       <Tooltip title="Add New Product">
                         <Button
@@ -1352,23 +728,40 @@ export default function QuoteProcess(props) {
                       </Tooltip>
                     </>
                   ) : null}
-                  {!['New', 'Price Builder'].includes(ProcessStatus) && allowedToEdit && (
+                  {![QUOTE_PROCESS_STATUS.new, QUOTE_PROCESS_STATUS.priceBuilder].includes(processStatus) && (
                     <PreviewDownload
                       resource={sidebarResource.quoteBuilder}
                       referenceId={quoteData?._id}
+                      fileName={`${`Quote-${quoteData?.quoteName}-V(${currentVersion})`}`}
                       columns={columns}
                       hideDetailButton={true}
-                      isSendEmail={true}
+                      isSendEmail={
+                        processStatus === QUOTE_PROCESS_STATUS.sendToCustomer &&
+                          versionStatus !== 'Send To Customer' &&
+                          !ifQuoteApproved.approved &&
+                          !quoteData?.versions[currentVersion]?.offered && allowedToEdit
+                          ? true
+                          : false
+                      }
                       isExcelDownload={true}
-                      extraQueryParams={{ uniqueId: quoteData.versions[currentVersion]._id }}
-                      defaultColumns={['productName',
+                      extraQueryParams={{ uniqueId: quoteData?.versions[currentVersion]?._id }}
+                      versionNumber={currentVersion}
+                      subject={`${user?.user?.brandName ?? 'Brand'} Offer - ${quoteData?.quoteName ?? ''}`}
+                      defaultColumns={[
+                        'productName',
                         'unit',
                         'qty',
                         `salesPricePerUnit_${quoteData?.currency?.toLowerCase()}`,
-                        `totalSalesPrice_${quoteData?.currency?.toLowerCase()}`]}
+                        `totalSalesPrice_${quoteData?.currency?.toLowerCase()}`
+                      ]}
+                      handleRefresh={() => {
+                        fetchQuoteData(currentVersion);
+                      }}
+                      toEmails={userEmails?.to}
+                      ccEmails={userEmails?.cc ?? []}
                     />
                   )}
-                  {['Send To Customer', 'End'].includes(ProcessStatus) && (
+                  {[QUOTE_PROCESS_STATUS.sendToCustomer].includes(processStatus) && (
                     <>
                       <Tooltip title="AI Suggestion">
                         <Button
@@ -1409,134 +802,36 @@ export default function QuoteProcess(props) {
                     </>
                   )}
                 </div>
-                {ProcessStatus === 'Quote Builder' ? (
-                  <span className="d-flex flex-wrap gap-2 align-items-center justify-content-end ml-auto">
-                    <Tooltip title="View">
-                      <Button
-                        onClick={() => {
-                          handleViewPdf(true, false);
-                        }}
-                        variant="outlined"
-                        disabled={viewDownloadLoading || updatingVersion}
-                        size="small"
-                        className="setIconForMobile"
-                        startIcon={isMobile && !isTablet ? '' : <AiOutlineEye />}
-                        color="primary"
-                      >
-                        {isMobile && !isTablet ? <AiOutlineEye size={20} /> : ''}
-                        {isMobile && !isTablet ? '' : 'View'}
-                      </Button>
-                    </Tooltip>
-                    <Tooltip title="Download">
-                      <Button
-                        disabled={viewDownloadLoading || updatingVersion}
-                        onClick={() => {
-                          handleViewPdf(false, true);
-                          exportToCSV();
-                        }}
-                        variant="outlined"
-                        size="small"
-                        className="setIconForMobile"
-                        startIcon={isMobile && !isTablet ? '' : <FiDownloadCloud />}
-                        color="primary"
-                      >
-                        {isMobile && !isTablet ? <FiDownloadCloud size={20} /> : ''}
-                        {isMobile && !isTablet ? '' : 'Download'}
-                      </Button>
-                    </Tooltip>
-
-                    <Tooltip title="View">
-                      <Button
-                        onClick={() => {
-                          handleViewPdf(true, false);
-                        }}
-                        variant="outlined"
-                        disabled={viewDownloadLoading || updatingVersion}
-                        size="small"
-                        className="setIconForMobile"
-                        startIcon={isMobile && !isTablet ? '' : <AiOutlineEye />}
-                        color="primary"
-                      >
-                        {isMobile && !isTablet ? <AiOutlineEye size={20} /> : ''}
-                        {isMobile && !isTablet ? '' : 'View'}
-                      </Button>
-                    </Tooltip>
-                    <Tooltip title="Download">
-                      <Button
-                        disabled={viewDownloadLoading || updatingVersion}
-                        onClick={() => {
-                          handleViewPdf(false, true);
-                          exportToCSV();
-                        }}
-                        variant="outlined"
-                        size="small"
-                        className="setIconForMobile"
-                        startIcon={isMobile && !isTablet ? '' : <FiDownloadCloud />}
-                        color="primary"
-                      >
-                        {isMobile && !isTablet ? <FiDownloadCloud size={20} /> : ''}
-                        {isMobile && !isTablet ? '' : 'Download'}
-                      </Button>
-                    </Tooltip>
-                    <Tooltip title="PDF Columns">
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        startIcon={<AiOutlineFilePdf />}
-                        color="primary"
-                        onClick={() => {
-                          setShowPDFArrangeColumns(true);
-                        }}
-                      >
-                        {isMobile && !isTablet ? '' : 'PDF Columns'}
-                      </Button>
-                    </Tooltip>
-                    <Tooltip title="Excel Columns">
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        startIcon={<AiOutlineFileExcel />}
-                        color="primary"
-                        onClick={() => {
-                          setShowExcelArrangeColumns(true);
-                        }}
-                      >
-                        {isMobile && !isTablet ? '' : 'Excel Columns'}
-                      </Button>
-                    </Tooltip>
-                  </span>
-                ) : null}
-                {(ProcessStatus === 'DOA Process' && versionStatus === 'Building Quote' && DOAneeded) ||
-                  (ProcessStatus === 'Send To Customer' && versionStatus !== 'Sent to Customer') ? (
+                {processStatus === QUOTE_PROCESS_STATUS.doaProcess && versionStatus === 'Building Quote' && DOAneeded ? (
                   <div className={`flex flex-wrap items-center ml-auto ${isMobile ? 'actio-pos-quote' : ''}`}>
-                    {!ifQuoteApproved.approved && (
-                      <Button
-                        onClick={() => {
-                          handleCases();
-                          fetchUserEmails();
-                        }}
-                        disabled={!allowedToEdit || (!DOAreq && !Customerreq) || loading}
-                        startIcon={<BiMailSend />}
-                        variant="contained"
-                        size="small"
-                        color="primary"
-                      >
-                        {isMobile && !isTablet ? '' : `${buttonMessage}`}
-                      </Button>
-                    )}
+                    <Button
+                      onClick={() => {
+                        handleSendForDOA();
+                      }}
+                      disabled={!allowedToEdit || sendToLoading}
+                      startIcon={<BiMailSend />}
+                      variant="contained"
+                      size="small"
+                      color="primary"
+                    >
+                      {isMobile && !isTablet ? '' : `Send for DOA`}
+                    </Button>
+                  </div>
+                ) : null}
+                {processStatus === QUOTE_PROCESS_STATUS.sendToCustomer && versionStatus !== 'Send To Customer' && !ifQuoteApproved.approved ? (
+                  <div className={`flex flex-wrap items-center ml-auto ${isMobile ? 'actio-pos-quote' : ''}`}>
                     <span className="d-flex align-items-center justify-content-end ml-3">
-                      {!ifQuoteApproved.approved && buttonMessage === 'Send to Customer' && !quoteData?.versions[currentVersion]?.offered && (
+                      {!quoteData?.versions[currentVersion]?.offered && (
                         <Button
                           onClick={() => {
                             handleOfferToCustomer();
                           }}
-                          disabled={!allowedToEdit || (!DOAreq && !Customerreq) || loading}
-                          startIcon={<BiMailSend />}
+                          disabled={!allowedToEdit || sendToLoading}
                           variant="contained"
                           size="small"
                           color="primary"
                         >
-                          {isMobile && !isTablet ? '' : `Offered Outside of System`}
+                          {isMobile && !isTablet ? '' : `Process Quote`}
                         </Button>
                       )}
                     </span>
@@ -1556,13 +851,14 @@ export default function QuoteProcess(props) {
                     setIsAddNewProduct={setIsAddNewProduct}
                     isAddExistingProduct={isAddExistingProduct}
                     setIsAddExistingProduct={setIsAddExistingProduct}
-                    setColumnForPDFExcel={setColName}
-                    setColumnDatas={setColumnDatas}
+                    setColumnData={setColumnData}
                     refreshProducts={refreshProducts}
-                    stage={ProcessStatus === 'New' ? 'product' : 'cost'}
-                    isPriceBuilder={ProcessStatus === 'Price Builder'}
-                    Editable={allowedToEdit && (ProcessStatus === 'Price Builder' || ProcessStatus === 'New') ? true : false}
+                    stage={processStatus === QUOTE_PROCESS_STATUS.new ? 'product' : 'cost'}
+                    isPriceBuilder={processStatus === QUOTE_PROCESS_STATUS.priceBuilder}
+                    Editable={allowedToEdit && [QUOTE_PROCESS_STATUS.new, QUOTE_PROCESS_STATUS.priceBuilder]?.includes(processStatus) ? true : false}
                     fullScreen={stepFullScreen}
+                    processStatus={processStatus}
+                    setNextStep={setNextStep}
                   />
                 ) : (
                   <Loader style={{ minHeight: 300 }} text="Loading..." />
@@ -1604,64 +900,6 @@ export default function QuoteProcess(props) {
           </CustomDialogContent>
         </Dialog>
       )}
-
-      {(isRearrangeColumns || isRearrangeColumnsExcel) && (
-        <DndProvider backend={HTML5Backend}>
-          <ColumnsDialog
-            setColumns={isRearrangeColumns ? setVisibleColumns : setVisibleColumnsExcel}
-            columns={isRearrangeColumns ? visibleColumns : visibleColumnsExcel}
-            visibleColumns={isRearrangeColumns ? visibleColumnsExcel : visibleColumns} //we need both columns to update quote
-            setOpenDialog={isRearrangeColumns ? setRearrangeColumns : setRearrangeColumnsExcel}
-            id={quoteData._id}
-            version={currentVersion}
-            refresh={fetchQuoteData}
-            versionStatus={versionStatus}
-            selectedTNC={state?.selectedRecords}
-            type={isRearrangeColumns ? 'pdf' : 'excel'}
-          />
-        </DndProvider>
-      )}
-
-      {sendEmail && (
-        <Dialog
-          open={sendEmail}
-          fullScreen={fullScreen || isMobile || isTablet}
-          TransitionComponent={CustomDialogTransition}
-          aria-labelledby="customized-dialog-title"
-          maxWidth="md"
-          onClose={() => {
-            setSendEmail(false);
-            setFullScreen(false);
-          }}
-          fullWidth
-        >
-          <CreateEmail
-            generatingFile={generatingPdfFile}
-            handleClose={() => {
-              setSendEmail(false);
-              setFullScreen(false);
-            }}
-            fetchData={onSendEmailSuccess}
-            id={quoteData._id}
-            showESign={true}
-            version={currentVersion}
-            isQuoteBuilder={true}
-            options={userEmails?.to}
-            cc={userEmails?.cc ?? []}
-            emailId={null}
-            qouteBuilderAttachments={attachments}
-            subject={`${user?.user?.brandName ?? 'Brand'} Offer - ${quoteData?.quoteName ?? ''}`}
-            fromQuote={true}
-            isMinimized={!fullScreen}
-            onMinimizeMaximize={() => {
-              setFullScreen((prevState) => !prevState);
-            }}
-            showManimizeMaximize={true}
-            referenceType="quote"
-          />
-        </Dialog>
-      )}
-
       {messageDialog.open && (
         <MessageDialog
           open={messageDialog.open}
@@ -1679,7 +917,7 @@ export default function QuoteProcess(props) {
           accepted={quoteStatusChangeData}
         />
       )}
-      {showTotalSalesDialog && ProcessStatus !== 'New' && (
+      {showTotalSalesDialog && processStatus !== 'New' && (
         <Dialog
           open={showTotalSalesDialog}
           aria-labelledby="customized-dialog-title"
@@ -1744,114 +982,6 @@ export default function QuoteProcess(props) {
               )}
             </Grid>
           </CustomDialogContent>
-        </Dialog>
-      )}
-      {(showPDFArrangeColumns || showExcelArrangeColumns) && ProcessStatus !== 'New' && (
-        <Dialog
-          open={showPDFArrangeColumns ? showPDFArrangeColumns : showExcelArrangeColumns}
-          aria-labelledby="customized-dialog-title"
-          maxWidth="sm"
-          onClose={() => {
-            setShowPDFArrangeColumns(false);
-            setShowExcelArrangeColumns(false);
-          }}
-          fullWidth
-          fullScreen={fullScreen || isMobile || isTablet}
-          TransitionComponent={CustomDialogTransition}
-        >
-          <CustomDialogHeader
-            title={showPDFArrangeColumns ? `View Columns PDF` : `View Columns Excel`}
-            onClose={() => {
-              setShowPDFArrangeColumns(false);
-              setShowExcelArrangeColumns(false);
-            }}
-            isMinimized={!fullScreen}
-            onMinimizeMaximize={() => {
-              setFullScreen((prevState) => !prevState);
-            }}
-            showManimizeMaximize={true}
-          />
-          <CustomDialogContent>
-            <Grid container justify="space-between" alignItems="center">
-              <Grid item xs={11} md={11} sm={11}>
-                <FormControl fullWidth className={classes.formControl}>
-                  <Autocomplete
-                    id="demo-mutiple-chip"
-                    disabled={!allowedToEdit}
-                    fullWidth
-                    size="small"
-                    multiple
-                    value={showPDFArrangeColumns ? visibleColumns : visibleColumnsExcel}
-                    onChange={(e, val) => {
-                      if (val.includes('Select All') && ['Select All', ...ColumnName].sort().toString() !== val.sort().toString()) {
-                        showPDFArrangeColumns ? setVisibleColumns(ColumnName) : setVisibleColumnsExcel(ColumnName);
-                      } else if (['Select All', ...ColumnName].sort().toString() === val.sort().toString()) {
-                        showPDFArrangeColumns ? setVisibleColumns([]) : setVisibleColumnsExcel([]);
-                      } else {
-                        showPDFArrangeColumns ? setVisibleColumns(val) : setVisibleColumnsExcel(val);
-                      }
-                    }}
-                    options={['Select All', ...ColumnName]}
-                    disableCloseOnSelect
-                    getOptionLabel={(option) => option}
-                    renderOption={(option, { selected }) => (
-                      <React.Fragment>
-                        <Checkbox
-                          icon={icon}
-                          checkedIcon={checkedIcon}
-                          style={{ marginRight: 8 }}
-                          checked={
-                            (showExcelArrangeColumns &&
-                              ['Select All', ...ColumnName].sort().toString() === ['Select All', ...visibleColumnsExcel].sort().toString()) ||
-                              (showPDFArrangeColumns &&
-                                ['Select All', ...ColumnName].sort().toString() === ['Select All', ...visibleColumns].sort().toString())
-                              ? true
-                              : selected
-                          }
-                        />
-                        {option}
-                      </React.Fragment>
-                    )}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        variant="outlined"
-                        label={showPDFArrangeColumns ? `Visible Columns in Quote PDF` : `Visible Columns in Quote Excel`}
-                        placeholder="Select "
-                      />
-                    )}
-                  />
-                </FormControl>
-              </Grid>
-              <Grid item xs={1} md={1} sm={1}>
-                <IconButton
-                  disabled={!allowedToEdit}
-                  title="Re-arrange columns"
-                  color="inherit"
-                  onClick={() => (showPDFArrangeColumns ? setRearrangeColumns(true) : setRearrangeColumnsExcel(true))}
-                >
-                  <ImportExportIcon />
-                </IconButton>
-              </Grid>
-            </Grid>
-          </CustomDialogContent>
-          <CustomDialogFooter>
-            <CustomButton
-              loading={loading}
-              variant="contained"
-              color="primary"
-              size="small"
-              disabled={showPDFArrangeColumns ? visibleColumns.length === 0 : visibleColumnsExcel.length === 0}
-              onClick={(e) => {
-                e.preventDefault();
-                handleVersionUpdate(visibleColumns, visibleColumnsExcel, versionStatus, state?.selectedRecords);
-                setShowPDFArrangeColumns(false);
-                setShowExcelArrangeColumns(false);
-              }}
-            >
-              Save
-            </CustomButton>
-          </CustomDialogFooter>
         </Dialog>
       )}
     </>

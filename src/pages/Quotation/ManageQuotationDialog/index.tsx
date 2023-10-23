@@ -16,7 +16,8 @@ import {
   quotation,
   setFieldsInAscendingOrder,
   yupSchema,
-  GenerateResourceLineNumber
+  GenerateResourceLineNumber,
+  QUOTATION_TYPE
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import Dialog from '@material-ui/core/Dialog';
@@ -61,7 +62,7 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
     try {
       let fieldData;
       const response: any = await axiosInstance().get('/field?resource=Quotation');
-      fieldData = response?.data?.data?.filter((obj) => !['rentalJob', 'repairOrder', 'salesOrder']?.includes(obj?.fieldData?.fieldName));
+      fieldData = response?.data?.data?.filter((obj) => !['rentalJob', 'repairOrder', 'salesOrder', 'fieldJob']?.includes(obj?.fieldData?.fieldName));
 
       const fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
       const fieldsDataForUpdate = fieldData?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
@@ -180,18 +181,17 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
     }
   };
 
-  const handleTypeChange = (data) => {
-    if (data === 'Rental Job' || data === 'Repair Order') {
+  const handleTypeChange = (type) => {
+    if ([QUOTATION_TYPE.rentalJob, QUOTATION_TYPE.repairOrder, QUOTATION_TYPE.fieldJob]?.includes(type)) {
       setFormsData(
         setFieldsInAscendingOrder(
-          initialData.fields.filter((d) => d.fieldName !== 'expectedCustomerDeliveryDate' && d.fieldName !== 'supplierSuggestedDeliveryDate')
+          initialData.fields.filter((d) => !['expectedCustomerDeliveryDate', 'supplierSuggestedDeliveryDate']?.includes(d.fieldName))
         )
       );
     }
-    if (data === 'Sales Order') {
+    if (type === QUOTATION_TYPE.salesOrder) {
       setFormsData(
-        setFieldsInAscendingOrder(initialData.fields.filter((d) => d.fieldName !== 'estimateStartDate' && d.fieldName !== 'estimateEndDate'))
-      );
+        setFieldsInAscendingOrder(initialData.fields.filter((d) => !['estimateStartDate', 'estimateEndDate']?.includes(d.fieldName))))
     }
   };
 

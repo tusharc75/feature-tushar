@@ -28,7 +28,8 @@ export default function StepDialog({
   workOrderId = null,
   uniqueId = null,
   notEditable = false,
-  stepData = null
+  stepData = null,
+  isClone = false
 }) {
   const {
     state: {
@@ -274,7 +275,7 @@ export default function StepDialog({
             {({ submitForm, touched, errors, setFieldValue, values }) => (
               <Fragment>
                 <CustomDialogHeader
-                  title={'Step Information'}
+                  title={isClone ? `Clone ${stepData?.stepName}` : 'Step Information'}
                   onClose={() => {
                     handleClose();
                   }}
@@ -786,7 +787,7 @@ export default function StepDialog({
                                       color="primary"
                                     />
                                   }
-                                  label="Quote Revision On Fail"
+                                  label="Quotation Revision On Fail"
                                 />
                               </Grid>
                             </Grid>

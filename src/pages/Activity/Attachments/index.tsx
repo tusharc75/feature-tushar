@@ -37,6 +37,8 @@ import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import SendIcon from '@material-ui/icons/Send';
 import { CreateEmail } from 'src/components/Activity/Email/CreateEmail';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import mime from 'mime';
+
 
 function reducer(state, action) {
   switch (action.type) {
@@ -223,7 +225,7 @@ export default function Attachment() {
           {row.original.relatedTo && row.original.relatedTo?.length > 0 ? (
             row.original.relatedTo.map((d) => {
               return (
-                <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center' }} key={d.name}>
                   <p>{d.name}</p>
                   <IconButton className="ml-3" size="small" onClick={() => redirectToResource(d?.type, d?.referenceId)}>
                     <OpenInNewIcon fontSize="small" color="primary" />
@@ -285,29 +287,33 @@ export default function Attachment() {
         const allPdf = _.every(row.original?.file, (d) => _.endsWith(d?.url, '.pdf'));
         return (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <HtmlTooltip title="Send Email" >
-              <IconButton size="small"
+            <HtmlTooltip title="Send Email">
+              <IconButton
+                size="small"
                 onClick={() => {
                   if (row.original.type === 'folder') {
-                    handleMailForFolder(row.original?._id, row.original?.name)
-                  }
-                  else {
+                    handleMailForFolder(row.original?._id, row.original?.name);
+                  } else {
                     handleMail(row.original);
                   }
-                }}>
+                }}
+              >
                 <SendIcon color="primary" style={{ maxWidth: '18px' }} />
               </IconButton>
             </HtmlTooltip>
             <HtmlTooltip title="Download">
-              <IconButton size="small" aria-label="Download" onClick={() => {
-                if (row.original.type === 'folder') {
-                  downloadFolder(row.original?._id, row.original?.name)
-                }
-                else {
-                  downloadFile(row.original)
-                }
-              }}
-              ><GetAppIcon fontSize="small" color="primary" />
+              <IconButton
+                size="small"
+                aria-label="Download"
+                onClick={() => {
+                  if (row.original.type === 'folder') {
+                    downloadFolder(row.original?._id, row.original?.name);
+                  } else {
+                    downloadFile(row.original);
+                  }
+                }}
+              >
+                <GetAppIcon fontSize="small" color="primary" />
               </IconButton>
             </HtmlTooltip>
             {allPdf && row.original.type === 'file' && (
@@ -335,7 +341,7 @@ export default function Attachment() {
                 </IconButton>
               </HtmlTooltip>
             )}
-          </div >
+          </div>
         );
       }
     }
@@ -457,20 +463,29 @@ export default function Attachment() {
         });
     }
   };
-
+  
   const handleMail = (data) => {
-    const file = data?.file;
-    axiosInstance()
-      .get(`user/download?fileName=${file[0].url}`, {
-        responseType: 'blob'
-      })
-      .then(({ data }) => {
-        const tempfile = new Blob([data], { type: 'application/pdf' });
-        generateBase64forFile(tempfile, file[0].name, `.${file[0].name.split('.')?.pop()}`);
-      })
-      .catch((err) => {
+    const attachments: any = []
+    Promise.all(data?.file.map(async file => {
+      await axiosInstance().get(`user/download?fileName=${file?.url}`, { responseType: 'blob' }).then(({ data }) => {
+        let reader = new FileReader();
+        reader.readAsDataURL(new Blob([data], { type: mime.getType(file.url.split('.')?.pop()) }));
+        reader.onloadend = function () {
+          let base64data: any = reader.result;
+          attachments.push({
+            base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
+            contentType: base64data.split(';')[0].split(':')[1],
+            extension: `.${file.url.split('.')?.pop()}`,
+            name: file.name
+          })
+        };
+      }).catch((err) => {
         toastConfig.setToastConfig(err);
       });
+    })).finally(() => {
+      setEmailAttachment(attachments);
+      setSendMail(true);
+    });
   };
 
   const handleMailForFolder = (_id, name) => {
@@ -829,7 +844,7 @@ export default function Attachment() {
                     onClose={closeActions}
                   >
                     <MenuItem
-                      disabled={permissions.attachment.isDelete ? !selectedRecords.some((records) => records.canEdit) : true}
+                      disabled={permissions.attachment.isDelete ? !selectedRecords.every((records) => records.canEdit) : true}
                       onClick={() => {
                         showConfirmBox(null);
                         closeActions();

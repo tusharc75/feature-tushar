@@ -322,7 +322,7 @@ const PurchaseOrderDetailsPage = () => {
               <BiFoodMenu className="mr-1" fontSize="inherit" /> Invoice
             </CustomTab>
           )}
-          {purchaseOrderData?.deleted ? null : (
+          {purchaseOrderData?.deleted && (isMobile && !isTablet) ? null : (
             <CustomTab className={'tabLayout'} index={2} {...a11yProps(2)}>
               <RiFlowChart className="mr-1" fontSize="inherit" /> Views
             </CustomTab>
@@ -420,7 +420,6 @@ const PurchaseOrderDetailsPage = () => {
             setOpenUpdateDialog(false);
             fetchPurchaseOrderData();
           }}
-          disableEdit={purchaseOrderData?.canDelete ? false : true}
           currency={user.user?.brandCurrency || null}
         />
       )}

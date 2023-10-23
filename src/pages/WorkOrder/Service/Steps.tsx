@@ -2,6 +2,7 @@ import React, { Fragment, useContext, useEffect, useRef, useState } from 'react'
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import { AiOutlinePlus } from 'react-icons/ai';
 import Button from '@material-ui/core/Button';
+import { ExpandMore } from '@material-ui/icons';
 import {
   convertMsToTime,
   getChipColor,
@@ -252,10 +253,12 @@ const Steps = ({
   const [arrangeView, setArrangeView] = useState(false);
   const [comment, setComment] = useState('');
   const [openCompleteDialog, setOpenCompleteDialog] = useState(false);
-  const [assignSteps, setAssignSteps] = useState(false);
   const [commentsDialog, setCommentsDialog] = useState(false);
   const [userAssignDialog, setUserAssignDialog] = useState(false);
   const mobScreen = useMediaQuery('(max-width:768px)');
+
+  const [addNewStep, setAddNewStep] = useState({ open: false, clone: false, cloneStepData: null });
+
 
   const {
     state: {
@@ -266,6 +269,7 @@ const Steps = ({
   const [isAllStepDone, setIsAllStepDone] = React.useState(false);
   const [attchmentsDialog, setAttchmentsDialog] = useState({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
   const [anchorEl, setAnchorEl] = useState(null);
+  const [anchorElAction, setAnchorElAction] = useState(null);
   const [selectedStep, setSelectedStep] = useState(null);
   const [fieldDialog, setFieldDialog] = useState(false);
   const [isFieldDialogEditable, setIsFieldDialogEditable] = useState(true);
@@ -391,7 +395,7 @@ const Steps = ({
           message: data.message,
           severity: 'success'
         });
-        setAssignSteps(false);
+        setAddNewStep({ open: false, clone: false, cloneStepData: null })
         fetchService();
       })
       .catch((error) => {
@@ -624,9 +628,9 @@ const Steps = ({
             services: result?.skipServiceOnFail
           }));
         } else if (type === WORKORDER_SERVICE_STEP_STATUS.passed && result?.isAddStepsOnPass) {
-          setAssignSteps(true);
+          setAddNewStep({ open: true, clone: false, cloneStepData: null })
         } else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isAddStepsOnFail) {
-          setAssignSteps(true);
+          setAddNewStep({ open: true, clone: false, cloneStepData: null })
         }
         toastConfig.setToastConfig({
           open: true,
@@ -704,6 +708,14 @@ const Steps = ({
     }
   };
 
+  const openActions = (event) => {
+    setAnchorElAction(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorElAction(null);
+  };
+
   const completeAllSteps = async () => {
     setIsCompleteAllLoading(true);
     const payload = {
@@ -751,7 +763,7 @@ const Steps = ({
       });
   };
 
-  return serviceDetails ? (
+  return <>{serviceDetails ? (
     serviceDetails?.steps?.length ? (
       <Box className={classes.mainContainer} sx={{ position: 'relative', overflow: 'hidden' }}>
         <div className="flex justify-between items-center gap-[8px] p-[8px] flex-wrap">
@@ -780,7 +792,7 @@ const Steps = ({
                 ) ? false : true}
                 onClick={(e) => {
                   e.stopPropagation();
-                  setAssignSteps(true);
+                  setAddNewStep({ open: true, clone: false, cloneStepData: null })
                 }}
                 startIcon={<AiOutlinePlus />}
               >
@@ -801,6 +813,45 @@ const Steps = ({
                 Arrange
               </Button>
             )}
+            <Button
+              className={` new-dropdown-v1`}
+              variant="outlined"
+              color="default"
+              size="small"
+              onClick={openActions}
+              disabled={selectedSteps?.length ? false : true}
+              aria-controls="action-menu"
+              endIcon={<ExpandMore />}
+            >
+              Actions
+            </Button>
+            <Menu
+              anchorEl={anchorElAction}
+              keepMounted
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left'
+              }}
+              id="action-menu"
+              open={Boolean(anchorElAction)}
+              onClose={closeActions}
+            >
+              <MenuItem
+                disabled={(allowedToEdit && serviceDetails?.steps?.filter((d) => selectedSteps?.includes(d?._id))?.every(element => element?.isAllowToCheck === true)) ? false : true}
+                onClick={() => {
+                  setShowDeleteConfirmBox((prev) => ({
+                    ...prev,
+                    open: true,
+                    steps: serviceDetails?.steps?.filter((d) => selectedSteps?.includes(d?._id)),
+                  }));
+                  closeActions();
+                }}
+
+              >
+                Delete
+              </MenuItem>
+            </Menu>
           </div>
         </div>
         <div className={classes.root}>
@@ -1198,6 +1249,18 @@ const Steps = ({
               >
                 Comments
               </MenuItem>
+              <MenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setAddNewStep({ open: true, clone: true, cloneStepData: selectedStep })
+                  setAnchorEl(null);
+                }}
+                disabled={allowedToEdit && ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                  selectedService?.status
+                ) ? false : true}
+              >
+                Clone Step
+              </MenuItem>
               {referencType !== 'workOrderTechnician' && (
                 <MenuItem
                   onClick={(e) => {
@@ -1298,7 +1361,7 @@ const Steps = ({
                   ? `As per the logic applied on this step, we need to return to step ${addServiceConfirmation.step?.stepName || ''
                   }. Do you want to continue ?`
                   : addServiceConfirmation.type === 'isQuoteRevisionOnFail'
-                    ? ` Step fail requires Quote Revision. Do you confirm on this?`
+                    ? ` Step fail requires Quotation Revision. Do you confirm on this?`
                     : addServiceConfirmation.type === 'jumpStep'
                       ? ` As per the logic applied on this step, we will skip few steps in this service. Do you want to continue?`
                       : `As per the logic applied on this step, a new service  ${addServiceConfirmation.services
@@ -1386,22 +1449,6 @@ const Steps = ({
             }}
           />
         )}
-        {assignSteps && (
-          <StepDialog
-            handleClose={() => {
-              setAssignSteps(false);
-            }}
-            handleSucess={(data) => {
-              handleAddStep(data);
-            }}
-            stepId={''}
-            steps={serviceDetails?.steps}
-            reference={'workOrder'}
-            workOrderId={workOrderId}
-            serviceId={selectedService?._id}
-            uniqueId={selectedService?.uniqueId}
-          />
-        )}
         {showDeleteConfirmBox.open && (
           <ConfirmationDialog
             open={showDeleteConfirmBox.open}
@@ -1429,7 +1476,7 @@ const Steps = ({
               ) ? false : true}
               onClick={(e) => {
                 e.stopPropagation();
-                setAssignSteps(true);
+                setAddNewStep({ open: true, clone: false, cloneStepData: null })
               }}
               startIcon={<AiOutlinePlus />}
             >
@@ -1437,30 +1484,37 @@ const Steps = ({
             </Button>
           )}
         </Box>
-        {assignSteps && (
-          <StepDialog
-            handleClose={() => {
-              setAssignSteps(false);
-            }}
-            handleSucess={(data) => {
-              handleAddStep(data);
-            }}
-            stepId={''}
-            steps={serviceDetails?.steps}
-            reference={'workOrder'}
-            workOrderId={workOrderId}
-            serviceId={selectedService?._id}
-            uniqueId={selectedService?.uniqueId}
-          />
-        )}
       </>
     )
   ) : (
     <Box m={2} height={500}>
       <CommonSkeleton lenArray={[...Array(10).keys()]} />
     </Box>
-  );
+  )};
+    {addNewStep.open && (
+      <StepDialog
+        handleClose={() => {
+          setAddNewStep({ open: false, clone: false, cloneStepData: null })
+        }}
+        handleSucess={(data) => {
+          if (addNewStep.clone) {
+            delete data?.stepId
+          }
+          handleAddStep(data);
+        }}
+        stepId={addNewStep.clone ? addNewStep.cloneStepData?._id : ''}
+        stepData={addNewStep.clone ? addNewStep.cloneStepData : null}
+        steps={serviceDetails?.steps}
+        reference={'workOrder'}
+        workOrderId={workOrderId}
+        serviceId={selectedService?._id}
+        uniqueId={selectedService?.uniqueId}
+        isClone={addNewStep.clone}
+      />
+    )}
+  </>
 };
+
 
 export default Steps;
 

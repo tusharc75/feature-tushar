@@ -12,11 +12,13 @@ import styles from 'src/pages/Leads/Header.module.scss';
 import CustomAgGridEditable, { reducer, intialState } from '../AgGridComponents/CustomAgGridEditable';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
+import { camelCase } from 'lodash';
 
 let searchTimeout;
 
-const AssignPackageDialog = ({ referenceType, onSuccess, handleClose, packageType, ids }) => {
-  const renderedFrom = `${routes.packages.title}_${referenceType}_selected`;
+const AssignPackageDialog = ({ onSuccess, handleClose, packageType = null, ids = [], isSubmitting = false }) => {
+
+  const renderedFrom = `${camelCase(routes.packages?.title)}_assign`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const {
@@ -24,7 +26,7 @@ const AssignPackageDialog = ({ referenceType, onSuccess, handleClose, packageTyp
   }: any = useData();
 
   const toastConfig = useContext(CustomToastContext);
-  const [isAssigning, setAssigning] = useState(false);
+
   const [disableSaveButton, setDisableSaveButton] = useState(false);
 
   const [gridApi, setGridApi] = useState(null);
@@ -184,15 +186,14 @@ const AssignPackageDialog = ({ referenceType, onSuccess, handleClose, packageTyp
               <Box className={styles.filter_side_header} component="div">
                 <SearchBox onChange={handleSearch} className={styles.search_box_input} width="242px" size="small" value={search} />
                 <Button
-                  disabled={isAssigning || disableSaveButton || [...getLocalStorageArrayData(localStorageSelectedRecords)].length === 0}
+                  disabled={isSubmitting || disableSaveButton || [...getLocalStorageArrayData(localStorageSelectedRecords)].length === 0}
                   onClick={() => {
-                    setAssigning(true);
                     onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]);
                   }}
                   color="primary"
                   size="small"
                   variant="contained"
-                  endIcon={isAssigning && <CircularProgress color="inherit" size={18} />}
+                  endIcon={isSubmitting && <CircularProgress color="inherit" size={18} />}
                 >
                   Add{' '}
                   {[...getLocalStorageArrayData(localStorageSelectedRecords)].length > 0

@@ -40,7 +40,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
 
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [isProductEdit, setIsProductEdit] = useState({ open: false, data: null, showSaveAndNext: false });
-  const [isAddingProducts, setAddingProducts] = useState(false);
+  const [isSubmitting, setSubmitting] = useState(false);
 
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
@@ -344,7 +344,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
   };
 
   const handleAdd = async (rows) => {
-    setAddingProducts(true);
+    setSubmitting(true);
     const material: any = [];
     rows.forEach((d) => {
       const element: any = {};
@@ -398,12 +398,12 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
       .then(() => {
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
         fetchProductInventory();
-        setAddingProducts(false);
+        setSubmitting(false);
       })
       .catch((error) => {
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
         toastConfig.setToastConfig(error);
-        setAddingProducts(false);
+        setSubmitting(false);
       });
   };
 
@@ -648,7 +648,6 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'package' && (
         <AssignPackageDialog
-          referenceType={renderedFrom}
           onSuccess={(rows) => {
             handleAdd(rows.map((d) => ({ ...d, detail: d.packageName })));
           }}
@@ -656,7 +655,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
             setAddExistingProductDialog({ open: false, type: '', parentId: null });
           }}
           packageType="service"
-          ids={[]}
+          isSubmitting={isSubmitting}
         />
       )}
       {isProductEdit.open && (
@@ -678,20 +677,19 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'service' && (
         <AssignServiceDialog
-          reference={'rentalManagement'}
           onSuccess={(services) => {
             handleAdd(services);
           }}
           handleClose={() => {
             setAddExistingProductDialog({ open: false, type: '', parentId: null });
           }}
-          ids={[]}
+          isSubmitting={isSubmitting}
         />
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'newPackage' && (
         <ManagePackageDialog
           isClone={false}
-          referenceData={{ packageType: 'Service' }}
+          referenceData={{ packageType: 'Service', customerAccount: rentalManagementData?.customerAccount?.optionValue }}
           open={addExistingProductDialog.open}
           packageId={null}
           onClose={() => setAddExistingProductDialog({ open: false, type: '', parentId: null })}

@@ -369,7 +369,7 @@ const ProductTemplate: FC = () => {
                     onClick={openActions}
                     disabled={selectedRecords.length ? false : true}
                     aria-controls="action-menu"
-                    className={`$new-dropdown-v1`}
+                    className={`new-dropdown-v1`}
                     endIcon={<ExpandMore />}
                   >
                     Actions

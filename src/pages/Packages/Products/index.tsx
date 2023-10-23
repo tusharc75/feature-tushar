@@ -40,6 +40,8 @@ const ProductsTable = ({ packageId, packageData }) => {
   const [assignAssetDialog, setAssignAssetDialog] = useState({ open: false, products: [] });
   const [isAssetAdding, setIsAssetAdding] = useState(false);
 
+  const [isSubmitting, setSubmitting] = useState(false);
+
   useEffect(() => {
     fetchColumns();
     fetchData();
@@ -298,6 +300,29 @@ const ProductsTable = ({ packageId, packageData }) => {
       });
   };
 
+  const handleAdd = async (rows) => {
+    setSubmitting(true)
+    axiosInstance()
+      .post(`${packages.api}/material`, {
+        ids: [packageId],
+        products: rows.map((d: any) => ({ product: d.id, qty: Number(d.qty) }))
+      })
+      .then(({ data }) => {
+        fetchData();
+        setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        setShowProductAssignDialog(false);
+        setSubmitting(false)
+      })
+      .catch((err) => {
+        setToastConfig(err);
+        setSubmitting(false)
+      });
+  }
+
   const disableAssignSerializedAssets = () => {
     if (selectedRecords.length === 0) return true;
     const flatArray = selectedRecords.filter((f) => f.type === 'product' && f.serializedProduct && f.qty > f.assetQty);
@@ -405,16 +430,13 @@ const ProductsTable = ({ packageId, packageData }) => {
       )}
       {showProductAssignDialog && (
         <AssignProductDialog
-          reference="package"
           serialized={packageData?.packageType === 'Service' ? false : null}
-          productsDialogOpen={true}
-          productId={packageId}
           handleCloseDialog={() => setShowProductAssignDialog(false)}
-          assignedProducts={[...rowsData?.map((e) => e._id)]}
-          onSuccess={() => {
-            fetchData();
-            setShowProductAssignDialog(false);
+          ids={[...rowsData?.map((e) => e._id)]}
+          onSuccess={(rows) => {
+            handleAdd(rows);
           }}
+          isSubmitting={isSubmitting}
         />
       )}
       {showProductConfirmBox && (

@@ -22,7 +22,7 @@ import DeleteButton from '../../components/Helpers/DeleteButton';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import TabPanel from '../../components/TabPanel';
-import { ACTIVITY_RESOURCE, SALES_ORDER_STATUS, getUniqueCurrencies, salesOrder, salesOrderProcessSteps } from '../../constants/helpers';
+import { ACTIVITY_RESOURCE, SALES_ORDER_STATUS, salesOrder, salesOrderProcessSteps } from '../../constants/helpers';
 import AdditionalCost from './AdditionalCost';
 import Invoice from './Invoice';
 import ManageSalesOrderDialog from './ManageSalesOrderDialog';
@@ -52,7 +52,6 @@ const SalesOrderDetails = () => {
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [nextStep, setNextStep] = useState(true);
   const [currentStep, setCurrentStep] = useState(null);
-  const [currencySymbol, setCurrencySymbol] = useState(null);
   const [statusOptions, setStatusOptions] = useState([]);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -139,7 +138,6 @@ const SalesOrderDetails = () => {
       setCustomizedRoutes([routes.salesOrder, { title: `${data.salesOrderNo}` }]);
       setSalesOrderData(data);
 
-      setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
       var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
       if (user?.role?.selectedEntity?.superAdminAccess) {
         isAllowedToEdit = true;
@@ -291,15 +289,17 @@ const SalesOrderDetails = () => {
             }
             {...a11yProps(1)}
           />
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <RiFlowChart className="mr-1" fontSize="inherit" /> Views
-              </div>
-            }
-            {...a11yProps(2)}
-          />
+          {!(isMobile && !isTablet) && (
+            <Tab
+              className={'tabLayout'}
+              label={
+                <div className="d-flex align-items-center tab-font">
+                  <RiFlowChart className="mr-1" fontSize="inherit" /> Views
+                </div>
+              }
+              {...a11yProps(2)}
+            />
+          )}
         </Tabs>
         <TabPanel value={tabValue} index={0}>
           <Box>

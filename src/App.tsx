@@ -215,7 +215,7 @@ import DynamicFormDetail from './pages/DynamicForm/DynamicFormDetail';
 import Competencies from './pages/Competencies';
 import CompetenciesDetail from './pages/Competencies/CompetenciesDetail';
 import MaterialHandling from './pages/MaterialHandling';
-import ScreenOrientationOverlay from './components/ScreenOrientationOverlay';
+import ScreenOrientationOverlay from './components/ScreenMessages/ScreenOrientationOverlay';
 import PadMaster from './pages/PadMaster';
 import PadMasterDetail from './pages/PadMaster/PadMasterDetail';
 import DriverMaster from './pages/DriverMaster';
@@ -231,14 +231,22 @@ import IotChart from './pages/IotChart';
 import IotChartDetail from './pages/IotChart/IotChartDetail';
 import IotReportList from './pages/IotReport';
 import IotReport from './pages/IotReport/Report';
+import AccountsReceivable from './pages/AccountsReceivable';
+import AccountsReceivableDetail from './pages/AccountsReceivable/AccountsReceivableDetail';
 import DeviceTemplates from './pages/DeviceTemplates';
 import DeviceTemplatesDetails from './pages/DeviceTemplates/DeviceTemplatesDetails';
 import WorkStations from './pages/WorkStations';
 import WorkStationsDetail from './pages/WorkStations/WorkStationsDetail';
 import DeviceTemplatesAlert from './pages/DeviceTemplatesAlert';
-import DeviceTemplateAlertDetail from './pages/DeviceTemplatesAlert/DeviceTemplateAlertDetail'
+import DeviceTemplateAlertDetail from './pages/DeviceTemplatesAlert/DeviceTemplateAlertDetail';
 import ChartOfAccount from './pages/ChartOfAccount';
 import ChartOfAccountDetail from './pages/ChartOfAccount/ChartOfAccountDetail';
+import Flash from './pages/Flash';
+import FlashDetailsPage from './pages/Flash/FlashDetailsPage';
+import SubleaseInvoice from './pages/SubleaseInvoice';
+import RentalManagementInvoice from './pages/RentalMangementInvoice';
+import CreditMemo from './pages/CreditMemo';
+import CreditMemoDetail from './pages/CreditMemo/CreditMemoDetail';
 
 var notificationInterval: any = null;
 
@@ -293,7 +301,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) { }
+    } catch (e) {}
   }, [isOffline]);
 
   const getNotification = async () => {
@@ -553,11 +561,17 @@ function App() {
             <PrivateRoute exact path={routes.rentalManagementDetail.path + '/:id'}>
               <RentalManagementDetailsPage />
             </PrivateRoute>
+            <PrivateRoute exact path={routes.rentalManagementInvoice.path}>
+              <RentalManagementInvoice />
+            </PrivateRoute>
             <PrivateRoute exact path={routes.sublease.path}>
               <Sublease />
             </PrivateRoute>
             <PrivateRoute exact path={routes.subleaseDetail.path + '/:id'}>
               <SubleaseDetailsPage />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.subleaseInvoice.path}>
+              <SubleaseInvoice />
             </PrivateRoute>
             <PrivateRoute exact path={routes.productCategory.path}>
               <ProductCategory />
@@ -765,6 +779,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.posProductDetail.path}/:id/:warehouseId`}>
               <PosProductDetails />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.accountsReceivable.path}`}>
+              <AccountsReceivable />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.accountsReceivable.path}/:id`}>
+              <AccountsReceivableDetail />
             </PrivateRoute>
             <PrivateRoute exact path={'/dashboard-master/:id'}>
               <DashboardBuilder />
@@ -1050,6 +1070,18 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.chartOfAccountDetail.path}/:id`}>
               <ChartOfAccountDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.flash.path}`}>
+              <Flash />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.flashDetail.path}/:id`}>
+              <FlashDetailsPage />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.creditMemo.path}`}>
+              <CreditMemo />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.creditMemoDetail.path}/:id`}>
+              <CreditMemoDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />

@@ -25,7 +25,7 @@ import { CHILD_RESOURCE, sidebarResource } from 'src/constants/helpers';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 
-const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
+const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -43,6 +43,8 @@ const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
 
+  const [isSubmitting, setSubmitting] = useState(false);
+
   useEffect(() => {
     fetchFields();
   }, []);
@@ -50,9 +52,9 @@ const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
   const fetchFields = async () => {
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.demandOrderDetail}`);
     var data = response?.data?.data;
-    data = CURReplaceByCurrencySingle(data, salesOrderData?.currency || 'USD');
+    data = CURReplaceByCurrencySingle(data, demandOrderData?.currency || 'USD');
     setAllFields(JSON.parse(JSON.stringify(data)));
-    const newColumns = generateCustomTableColumns(data, salesOrderData?.currency || 'USD', renderedFrom);
+    const newColumns = generateCustomTableColumns(data, demandOrderData?.currency || 'USD', renderedFrom);
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';
@@ -190,7 +192,7 @@ const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
 
   const fetchData = async () => {
     var data: any = [];
-    const response = await axiosInstance().get(`${routes.demandOrder.path}/material/${salesOrderData._id}`);
+    const response = await axiosInstance().get(`${routes.demandOrder.path}/material/${demandOrderData._id}`);
     data = response?.data?.data;
     let rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
@@ -213,14 +215,14 @@ const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
         _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'package'
-          ? _subRow.packageDetail?.packageName
-          : _subRow.serviceDetail?.serviceName;
+            ? _subRow.packageDetail?.packageName
+            : _subRow.serviceDetail?.serviceName;
       _subRow.description =
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productDescription
           : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription
-          : _subRow?.serviceDetail?.serviceDescription;
+            ? _subRow?.packageDetail?.packageDescription
+            : _subRow?.serviceDetail?.serviceDescription;
       _subRow.qty = _subRow.qty;
       _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
       _subRow.subRows = generateNestedData(material, _subRow);
@@ -229,6 +231,7 @@ const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
   };
 
   const handleAdd = async (rows) => {
+    setSubmitting(true)
     const material: any = [];
     rows.forEach((d) => {
       const element: any = {};
@@ -240,7 +243,7 @@ const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
       material.push(element);
     });
     axiosInstance()
-      .post(`${routes?.demandOrder?.path}/material/${salesOrderData._id}`, { material })
+      .post(`${routes?.demandOrder?.path}/material/${demandOrderData._id}`, { material })
       .then(({ data }) => {
         setAddDialog({ open: false, type: '', parentId: null });
         toastConfig.setToastConfig({
@@ -249,17 +252,18 @@ const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
           message: data.message
         });
         fetchData();
+        setSubmitting(false)
       })
       .catch((error) => {
-        setAddDialog({ open: false, type: '', parentId: null });
         toastConfig.setToastConfig(error);
+        setSubmitting(false)
       });
   };
 
   const handleSaveData = async (rows: any, saveAndNext = false) => {
     setUpdating(true);
     axiosInstance()
-      .put(`${routes.demandOrder.path}/material/${salesOrderData._id}`, { material: rows })
+      .put(`${routes.demandOrder.path}/material/${demandOrderData._id}`, { material: rows })
       .then(({ data }) => {
         setUpdating(false);
         fetchData();
@@ -306,7 +310,7 @@ const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
   const handleDelete = (rows) => {
     setDeleting(true);
     axiosInstance()
-      .put(`${routes.demandOrder.path}/material/${salesOrderData?._id}/delete`, { ids: rows })
+      .put(`${routes.demandOrder.path}/material/${demandOrderData?._id}/delete`, { ids: rows })
       .then(({ data }) => {
         setDeleting(false);
         toastConfig.setToastConfig({
@@ -380,18 +384,23 @@ const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
             </Menu>
           </Box>
           <Box display="flex">
-            <PreviewDownload resource={sidebarResource.demandOrder} referenceId={salesOrderData?._id} columns={columns} />
+            <PreviewDownload
+              fileName={`${routes.demandOrder.title}-${demandOrderData?.demandOrderNumber}`}
+              resource={sidebarResource.demandOrder}
+              referenceId={demandOrderData?._id}
+              columns={columns} />
             <Box ml={1} />
             <Button
               disabled={selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true}
-              variant={isMobile ? 'text' : 'outlined'}
+              variant={'outlined'}
               color="default"
               size="small"
               onClick={openActions}
+              className={`new-dropdown-v1`}
               aria-controls="action-menu"
               endIcon={<ExpandMore />}
             >
-              {isMobile ? '' : 'Actions'}
+              Actions
             </Button>
             <Menu
               anchorEl={anchorEl}
@@ -473,7 +482,7 @@ const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
             setMaterialEdit({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
           }}
           materialData={materialEdit.data}
-          salesOrderData={salesOrderData}
+          demandOrderData={demandOrderData}
           handleUpdate={handleSaveData}
           loadingEdit={isUpdating}
           bulkEdit={materialEdit.bulkedit}
@@ -482,26 +491,20 @@ const Material = ({ salesOrderData, renderedFrom, allowedToEdit }) => {
       )}
       {addDialog.open && addDialog.type === 'product' && (
         <AssignProductDialog
-          reference="demandOrder"
-          serialized={null}
-          productsDialogOpen={addDialog.open}
-          productId={null}
           handleCloseDialog={() => setAddDialog({ open: false, type: '', parentId: null })}
-          assignedProducts={[]}
-          onSuccess={(d) => {
-            handleAdd(d);
+          onSuccess={(rows) => {
+            handleAdd(rows);
           }}
+          isSubmitting={isSubmitting}
         />
       )}
       {addDialog.open && addDialog.type === 'package' && (
         <AssignPackageDialog
-          referenceType="demandOrder"
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
-          ids={[]}
           onSuccess={(rows) => {
             handleAdd(rows);
           }}
-          packageType={null}
+          isSubmitting={isSubmitting}
         />
       )}
     </Fragment>

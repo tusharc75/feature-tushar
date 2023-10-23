@@ -93,7 +93,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
         width: 300,
         Cell: ({ row, rows }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {allowedToEdit && row.original.type !== 'serializedAsset' ? (
+            {allowedToEdit ? (
               <p
                 onClick={() => {
                   openMaterial(row, rows);
@@ -669,37 +669,29 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
       )}
       {addDialog.open && addDialog.type === 'product' && (
         <AssignProductDialog
-          reference="invoice"
-          serialized={null}
-          productsDialogOpen={addDialog.open}
-          productId={null}
           handleCloseDialog={() => setAddDialog({ open: false, type: '', parentId: null })}
-          assignedProducts={[]}
           onSuccess={(d) => {
             handleAdd(d);
           }}
+          isSubmitting={isAdding}
         />
       )}
       {addDialog.open && addDialog.type === 'service' && (
         <AssignServiceDialog
-          reference={'invoice'}
-          referenceId={invoiceData?._id}
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
-          ids={[]}
           onSuccess={(rows) => {
             handleAdd(rows);
           }}
+          isSubmitting={isAdding}
         />
       )}
       {addDialog.open && addDialog.type === 'package' && (
         <AssignPackageDialog
-          referenceType="invoice"
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
-          ids={[]}
           onSuccess={(rows) => {
             handleAdd(rows);
           }}
-          packageType={null}
+          isSubmitting={isAdding}
         />
       )}
       {addDialog.open && addDialog.type === 'serializedAsset' && (

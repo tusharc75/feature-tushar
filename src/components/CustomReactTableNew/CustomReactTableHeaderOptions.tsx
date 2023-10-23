@@ -1,12 +1,6 @@
-import React, { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createStyles, withStyles, Theme, FormControlLabel, Switch, Typography, SwitchClassKey, SwitchProps } from '@material-ui/core';
-import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
-import axiosInstance from '../../axios/axiosInstance';
-import { useData } from '../../StateProvider/Provider';
-import { disabledColumns, getSortedColumns } from '../../constants/useColumns';
-import { SET_GRID_METADATA } from '../../StateProvider/actionTypes';
-
-let timeout;
+import DisplayChips from './ChipDataDisplay';
 
 interface Styles extends Partial<Record<SwitchClassKey, string>> {
   focusVisible?: string;
@@ -60,7 +54,6 @@ const CustomSwitch = withStyles((theme: Theme) =>
   return (
     <Switch
       focusVisibleClassName={classes.focusVisible}
-      // disableRipple
       classes={{
         root: classes.root,
         switchBase: classes.switchBase,
@@ -76,34 +69,25 @@ const CustomSwitch = withStyles((theme: Theme) =>
 
 function CustomReactTableHeaderOptions({
   columns,
-  // setColumns,
-  // columnApi,
-  // refreshGrid = null,
   renderedFrom = null,
-  isClientSideGrid = false,
   dispatchTable = null,
   showOnlyShowFilteredRecordSwitch = false,
-  saveColumnOptions = false,
   selectedRecords = 0,
-  // selectedReportView = null,
-  // setSelectedReportView = null
-  setHiddenColumns = null,
-  getToggleHideAllColumnsProps = null,
-  setColumnOrder = null
+  customFilters = null,
+  showFilters,
+  handleFilterOpen,
+  selectedFilter,
+  setSelectedFilter,
+  currentFomValue,
+  setCurrentFomValue
 }) {
   const [disableSelectionSwitch, setDisableSelectionSwitch] = useState(true);
 
-  const [openColumnSelection, setOpenColumnSelection] = useState(false);
   const [checked, setChecked] = useState(false);
-  const [openColumnSelectionAnchorEl, setOpenColumnSelectionAnchorEl] = useState<HTMLButtonElement | null>(null);
-  const { isOffline } = useContext(CustomOfflineContext);
-  const {
-    state: { user }
-  }: any = useData();
-  const { dispatch }: any = useData();
+  const [chipData, setChipData] = useState([]);
+  const [isFilterPresent, setIsFilterPresent] = useState<boolean>(false);
 
   useEffect(() => {
-
     const saved = localStorage.getItem(`${renderedFrom}_selected`);
     if (saved) {
       try {
@@ -121,89 +105,77 @@ function CustomReactTableHeaderOptions({
     } else {
       setDisableSelectionSwitch(true);
     }
-
   }, [selectedRecords]);
 
-  const updateGridHiddenColumns = (hiddenColumns = []) => {
-    if (timeout) clearTimeout(timeout);
-    timeout = setTimeout(function () {
-      let data = localStorage.getItem('gridMetaData');
-      let request = data == 'undefined' ? {} : { ...JSON.parse(data) };
-      if (request[renderedFrom]) {
-        request[renderedFrom].hide = [...hiddenColumns];
-      } else {
-        request[renderedFrom] = {
-          hide: [...hiddenColumns],
-          staticColumns: {
-            createdBy: false,
-            updatedBy: false
-          },
-          disable: disabledColumns[renderedFrom] ?? []
-        };
-      }
-      updateGridMetaData(request);
-    }, 600);
-  };
-  const updateGridMetaData = (request) => {
-    axiosInstance()
-      .post(`user/meta-grid`, {
-        _id: user?.user?._id,
-        gridMetaData: { ...request }
-      })
-      .then((data) => {
-        fetchGridMetaData();
-      });
-  };
-  const fetchGridMetaData = () => {
-    axiosInstance()
-      .get(`user/meta-grid/${user?.user?._id}`)
-      .then(({ data: { data } }) => {
-        let tempMetaData = JSON.stringify(data?.gridMetaData);
-        localStorage.setItem('gridMetaData', tempMetaData);
-        if (dispatch) {
-          dispatch({ type: SET_GRID_METADATA, payload: data?.gridMetaData });
-        }
-      });
+  const clearSingleFilter = (name) => {
+    // Create a copy of the customFilters object
+    const newFilters = { ...customFilters };
+    // Delete the property with the given name
+    delete newFilters[name];
+    let formValues = { ...currentFomValue };
+    delete formValues[name];
+    delete formValues[`from_${name}`];
+    delete formValues[`to_${name}`];
+    setCurrentFomValue(formValues);
+    // Dispatch the updated filters and update the chipData
+    dispatchTable({ type: 'filter', filters: newFilters });
+    setChipData((prev) => prev.filter((item) => item.name !== name));
   };
 
-  // useEffect(() => {
-  //     if (!selectedReportView || !columnApi) return
-
-  //     localStorage.removeItem(renderedFrom)
-
-  //     const columnView = JSON.parse(selectedReportView.columnState);
-
-  //     columnApi.setColumnState(columnView);
-
-  // }, [selectedReportView, columnApi])
+  const clearFilterAll = () => {
+    dispatchTable({ type: 'filter', filters: {} });
+    setSelectedFilter(null);
+    setChipData([]);
+    setCurrentFomValue({});
+  };
 
   return (
     <>
-      {showOnlyShowFilteredRecordSwitch && (
+      <div
+        className="table-filter-v1"
+        style={{ flexBasis: isFilterPresent ? '766px' : 'unset', maxWidth: isFilterPresent ? '766px' : 'unset', paddingRight: '52px' }}
+      >
+        {showOnlyShowFilteredRecordSwitch && (
+          <>
+            <FormControlLabel
+              value={checked}
+              checked={checked}
+              onChange={() => {
+                setChecked(!checked);
 
-        <>
-          <FormControlLabel
-            value={checked}
-            checked={checked}
-            onChange={() => {
-              setChecked(!checked);
-
-              if (dispatchTable) {
-                dispatchTable({
-                  type: 'showFilteredRecordsOnly'
-                });
-              }
-            }}
-            control={<CustomSwitch disabled={disableSelectionSwitch} />}
-            style={{ fontSize: '0.8rem', marginLeft: 0, padding: '0px 0 10px' }}
-            label={<Typography style={{ fontWeight: 400 }}>Show Only Selected</Typography>}
-            labelPlacement="end"
-          />
-
-        </>
-      )}
+                if (dispatchTable) {
+                  dispatchTable({
+                    type: 'showFilteredRecordsOnly'
+                  });
+                }
+              }}
+              className="show-only-selected-switch"
+              control={<CustomSwitch disabled={disableSelectionSwitch} />}
+              style={{ fontSize: '0.8rem', marginLeft: 0, padding: '0px 0 10px' }}
+              label={<Typography style={{ fontWeight: 400 }}>Show Only Selected</Typography>}
+              labelPlacement="end"
+            />
+          </>
+        )}
+        {Object.keys(customFilters).length > 0 && showFilters && (
+          <div style={{ minWidth: '450px' }}>
+            <DisplayChips
+              columns={columns}
+              customFilters={customFilters}
+              selectedFilter={selectedFilter}
+              chipData={chipData}
+              setChipData={setChipData}
+              handleFilterOpen={handleFilterOpen}
+              clearSingleFilter={clearSingleFilter}
+              clearFilterAll={clearFilterAll}
+              setIsFilterPresent={setIsFilterPresent}
+            />
+          </div>
+        )}
+      </div>
     </>
   );
 }
 
 export default CustomReactTableHeaderOptions;
+

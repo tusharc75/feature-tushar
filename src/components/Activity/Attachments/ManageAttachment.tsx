@@ -20,6 +20,7 @@ import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import AttachmentThumbnail from 'src/components/AttachmentThumbnail';
 import { isEqual } from 'lodash';
+import DocumentScanner from '../Helpers/DocumentScanner';
 
 const AttachmentSchema = object().shape({
   name: string().required('Attachment Name is required'),
@@ -55,6 +56,7 @@ export default function ManageAttachment({
   const [attachmentToDelete, setAttachemnetToDelete] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
+  const [documentScanDialog, setDocumentScanDialog] = useState(false);
 
   useEffect(() => {
     fetchAttachmentDetail();
@@ -245,28 +247,44 @@ export default function ManageAttachment({
                     </Grid>
                     {type === 'file' && (
                       <Grid container item xs={12}>
-                        <Grid item xs={10} sm={11} md={11}>
-                          <FormTypes
-                            label="File"
-                            name="fileUrl"
-                            required={true}
-                            type="fileUpload"
-                            values={values}
-                            canEdit={canEdit}
-                            errors={errors}
-                            touched={touched}
-                            size="small"
-                            setFieldValue={(fname, file) => {
-                              setFieldValue('fileUrl', file);
-                              onUploadFile(file);
-                            }}
-                            doNotShowUploadedFile={true}
-                            imageOrFileUploadCompletePercentage={(completePercentage) => {
-                              setUploadingImageOrFileProgress(completePercentage);
-                            }}
-                          />
+                        <Grid item xs={12}>
+                          <div style={{ width: '100%' }}>
+                            <Box display="flex" flexDirection="row">
+                              <Box >
+                                <FormTypes
+                                  label="File"
+                                  name="fileUrl"
+                                  required={true}
+                                  type="fileUpload"
+                                  values={values}
+                                  canEdit={canEdit}
+                                  errors={errors}
+                                  touched={touched}
+                                  size="small"
+                                  setFieldValue={(fname, file) => {
+                                    setFieldValue('fileUrl', file);
+                                    onUploadFile(file);
+                                  }}
+                                  doNotShowUploadedFile={true}
+                                  imageOrFileUploadCompletePercentage={(completePercentage) => {
+                                    setUploadingImageOrFileProgress(completePercentage);
+                                  }}
+                                />
+                              </Box>
+                              <Box pl={2}>
+                                <CustomButton
+                                  variant="contained"
+                                  color="primary"
+                                  onClick={() => setDocumentScanDialog(true)}>
+                                  Scan Document
+                                </CustomButton>
+                              </Box>
+                            </Box>
+                          </div>
                         </Grid>
-                        <AttachmentThumbnail attachments={otherAttachments} handleDeleteAttachment={handleDeleteAttachment} canEdit={canEdit} />
+                        <Grid item xs={12}>
+                          <AttachmentThumbnail attachments={otherAttachments} handleDeleteAttachment={handleDeleteAttachment} canEdit={canEdit} />
+                        </Grid>
                       </Grid>
                     )}
                   </Grid>
@@ -331,6 +349,14 @@ export default function ManageAttachment({
                   setShowConfirmationDialog(false);
                 }}
                 onOk={() => handleDeleteAttachment(attachmentToDelete)}
+              />
+            )}
+            {documentScanDialog && (
+              <DocumentScanner
+                open={setDocumentScanDialog}
+                onClose={() => setDocumentScanDialog(false)}
+                setFieldValue={setFieldValue}
+                onUploadFile={onUploadFile}
               />
             )}
           </>

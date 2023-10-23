@@ -31,7 +31,6 @@ const useClasses = makeStyles(() => ({
 }));
 
 const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, onSuccess, selectedRecords, serviceName, consumeRequest }) => {
-
   const classes = useClasses();
   const toastConfig = useContext(CustomToastContext);
 
@@ -73,6 +72,7 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
         });
       }
     });
+
     data.products = products;
     data.referenceId = referenceId;
     data.referenceType = referenceType;
@@ -115,7 +115,8 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
     data.products = products;
     if (products?.length) {
       setIsSubmitting(true);
-      axiosInstance().put(`material-handling/request`, data)
+      axiosInstance()
+        .put(`material-handling/request`, data)
         .then(({ data }) => {
           onSuccess();
           setIsSubmitting(false);
@@ -148,6 +149,9 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
         //     errors.consumedQty = `Consume Qty is limited to Qty.`;
         //   }
         // }
+        if (d.consumedQty < 1) {
+          errors.consumedQty = `Consume Qty cannot be 0`;
+        }
       });
     }
     return errors;
@@ -186,7 +190,7 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
           }))
         }}
         enableReinitialize={true}
-        onSubmit={() => { }}
+        onSubmit={() => {}}
       >
         {({ values }) => (
           <>
@@ -283,9 +287,12 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
                                           consumedQty: value
                                         });
                                       }}
-                                      label={consumeRequest ? "Request Qty" : "Consume Qty"}
-                                      placeholder={consumeRequest ? "Request Qty" : "Consume Qty"}
-                                      helperText={validate([value])?.consumedQty ? `${consumeRequest ? 'Request' : 'Consume'} Qty is limited to Qty.` : ''}
+                                      label={consumeRequest ? 'Request Qty' : 'Consume Qty'}
+                                      placeholder={consumeRequest ? 'Request Qty' : 'Consume Qty'}
+                                      helperText={
+                                        // validate([value])?.consumedQty ? `${consumeRequest ? 'Request' : 'Consume'} Qty is limited to Qty.` : ''
+                                        validate([value])?.consumedQty ?? ''
+                                      }
                                     />
                                   </TableCell>
                                 </TableRow>
@@ -307,7 +314,7 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
               <Button variant="outlined" disabled={isSubmitting} size="small" color="primary" onClick={onClose}>
                 Cancel
               </Button>
-              {consumeRequest ?
+              {consumeRequest ? (
                 <Button
                   onClick={() => {
                     if (!validate(values.products).consumedQty && !validate(values.products).storageLocation) {
@@ -320,10 +327,11 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
                   color="primary"
                 >
                   Request
-                </Button> :
+                </Button>
+              ) : (
                 <Button
                   onClick={() => {
-                    if (!validate(values.products).consumedQty && !validate(values.products).storageLocation) {
+                    if (!Boolean(validate(values.products).consumedQty) && !Boolean(validate(values.products).storageLocation)) {
                       handleSubmit(values);
                     }
                   }}
@@ -334,7 +342,7 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
                 >
                   Save
                 </Button>
-              }
+              )}
             </CustomDialogFooter>
           </>
         )}

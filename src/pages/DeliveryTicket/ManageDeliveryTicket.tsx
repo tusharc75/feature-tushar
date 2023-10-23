@@ -353,6 +353,8 @@ const ManageDeliveryTicket = ({
             tempInitialData['transferInventory'] = referenceData?.referenceId;
           } else if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.repairOrder) {
             tempInitialData['repairOrder'] = referenceData?.referenceId;
+          } else if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.productionOrder) {
+            tempInitialData['productionOrder'] = referenceData?.referenceId;
           }
 
           tempInitialData['pickupFromType'] = referenceData?.pickupFromType;
@@ -529,6 +531,9 @@ const ManageDeliveryTicket = ({
         errors['pickUpDate'] = 'Please enter valid pick-Up date';
       }
       if (!moment(values['createDate']).isSameOrAfter(moment(createDateMin))) {
+        errors['createDate'] = `Please select valid date`;
+      }
+      if (moment(values['createDate']).isAfter(moment())) {
         errors['createDate'] = `Please select valid date`;
       }
     }
