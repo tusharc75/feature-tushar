@@ -156,8 +156,7 @@ const AssignServiceDialog = ({ reference, referenceId = null, onSuccess, handleC
           if (user?.user?.brandPolicy?.servicePrePost) {
             updatedFilters.push(e);
           }
-        }
-        else {
+        } else {
           updatedFilters.push(e);
         }
       });
@@ -180,27 +179,6 @@ const AssignServiceDialog = ({ reference, referenceId = null, onSuccess, handleC
       deepFilter = `${deepFilter}&search=${search}`;
     }
     return deepFilter;
-  };
-
-  const handleSubmit = async () => {
-    setAssigning(true);
-    if (reference === 'package') {
-      axiosInstance()
-        .post(`${packages.api}/material`, {
-          ids: Array.isArray(referenceId) && referenceId.length ? referenceId : [referenceId],
-          services: [...getLocalStorageArrayData(localStorageSelectedRecords)].map((d: any) => ({ service: d.id, qty: Number(d.qty) }))
-        })
-        .then(() => {
-          onSuccess();
-          setAssigning(false);
-        })
-        .catch((err) => {
-          setAssigning(false);
-          toastConfig.setToastConfig(err);
-        });
-    } else {
-      onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]);
-    }
   };
 
   const handleSearch = (e) => {
@@ -239,7 +217,11 @@ const AssignServiceDialog = ({ reference, referenceId = null, onSuccess, handleC
                 <SearchBox onChange={handleSearch} className={styles.search_box_input} width="242px" size="small" value={search} />
                 <Button
                   disabled={isAssigning || disableSaveButton || [...getLocalStorageArrayData(localStorageSelectedRecords)].length === 0}
-                  onClick={handleSubmit}
+                  onClick={() => {
+                    setAssigning(true);
+                    onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]);
+                    setAssigning(false);
+                  }}
                   color="primary"
                   size="small"
                   variant="contained"

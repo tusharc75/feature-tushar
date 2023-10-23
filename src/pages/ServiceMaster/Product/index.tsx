@@ -224,6 +224,33 @@ function Product({ id }) {
       });
   };
 
+  const handleAdd = async (rows) => {
+    const productObj = rows
+      .filter((d) => d.qty > 0)
+      .map((d) => {
+        return {
+          product: d.id,
+          qty: Number(d.qty)
+        };
+      });
+
+    await axiosInstance()
+      .post(`${serviceMaster.api}/product/${id}`, productObj)
+      .then(({ data }) => {
+        fetchData();
+        setToastConfig({
+          open: true,
+          message: data.message,
+          severity: 'success'
+        });
+        setOpenAssignProductDialog(false);
+      })
+      .catch((error) => {
+        setOpenAssignProductDialog(false);
+        setToastConfig(error);
+      });
+  };
+
   return (
     <div>
       {permissions?.serviceMaster?.isUpdate && (
@@ -337,9 +364,8 @@ function Product({ id }) {
           handleCloseDialog={() => setOpenAssignProductDialog(false)}
           assignedProducts={[...parts?.map((p) => p.product), id]}
           reference={'serviceMaster'}
-          onSuccess={() => {
-            fetchData();
-            setOpenAssignProductDialog(false);
+          onSuccess={(rows) => {
+            handleAdd(rows);
           }}
           serialized={false}
         />
