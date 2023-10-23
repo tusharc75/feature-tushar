@@ -41,8 +41,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
 
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [isProductEdit, setIsProductEdit] = useState({ open: false, isBulkedit: false, showSaveAndNext: false });
-  const [isAddingProducts, setAddingProducts] = useState(false);
-
+  const [isSubmitting, setSubmitting] = useState(false);
   const [recordToUpdate, setRecordToUpdate] = useState(null);
 
   const [deleteData, setDeleteData] = useState(null);
@@ -337,7 +336,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
   };
 
   const handleAdd = async (rows) => {
-    setAddingProducts(true);
+    setSubmitting(true);
     const material: any = [];
     rows.forEach((d) => {
       const element: any = {};
@@ -385,10 +384,10 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
       .then(() => {
         setAddDialog({ open: false, type: '', parentId: null });
         fetchData();
-        setAddingProducts(false);
+        setSubmitting(false);
       })
       .catch((error) => {
-        setAddingProducts(false);
+        setSubmitting(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -770,15 +769,12 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
       )}
       {addDialog.open && addDialog.type === 'product' && (
         <AssignProductDialog
-          reference={'quotation'}
-          productsDialogOpen={addDialog.open}
-          productId={null}
           handleCloseDialog={() => setAddDialog({ open: false, type: '', parentId: null })}
-          assignedProducts={[]}
           onSuccess={(d) => {
             handleAdd(d);
           }}
           serialized={quotationData?.type === QUOTATION_TYPE.fieldJob ? false : null}
+          isSubmitting={isSubmitting}
         />
       )}
       {addDialog.open && addDialog.type === MATERIAL_TYPE.serializedAsset && (
@@ -791,7 +787,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
           }}
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
           ids={[...rowsData?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.map((e: any) => e?.serializedAssetDetail?._id)]}
-          isAssigning={isAddingProducts}
+          isAssigning={isSubmitting}
           // extraStaticFilter={[{ field: 'status', term: [ASSET_STATUS.new, ASSET_STATUS.available] }]}
           handleSucess={(rows) => {
             if (products?.length) {
@@ -820,7 +816,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
             handleAdd(rows);
           }}
           extraStaticFilter={quotationData?.type === QUOTATION_TYPE.fieldJob ? [{ field: 'serviceType', term: SERVICE_TYPE.fieldService }] : []}
-          isSubmitting={isAddingProducts}
+          isSubmitting={isSubmitting}
         />
       )}
       {addDialog.open && addDialog.type === 'package' && (

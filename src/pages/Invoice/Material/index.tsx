@@ -669,15 +669,11 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
       )}
       {addDialog.open && addDialog.type === 'product' && (
         <AssignProductDialog
-          reference="invoice"
-          serialized={null}
-          productsDialogOpen={addDialog.open}
-          productId={null}
           handleCloseDialog={() => setAddDialog({ open: false, type: '', parentId: null })}
-          assignedProducts={[]}
           onSuccess={(d) => {
             handleAdd(d);
           }}
+          isSubmitting={isAdding}
         />
       )}
       {addDialog.open && addDialog.type === 'service' && (
