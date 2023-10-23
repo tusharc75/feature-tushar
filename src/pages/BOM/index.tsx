@@ -29,7 +29,7 @@ const BOMTable = () => {
   const renderedFrom = `${camelCase(routes?.product.title)}_bom`;
   const localStorageSelectedRecords = `${routes.product.title}_selected`;
 
-  const { setToastConfig } = useContext(CustomToastContext);
+  const toastConfig = useContext(CustomToastContext);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [showConfirmBox, setShowConfirmBox] = useState({ open: false, data: null });
   const [isDeleting, setIsDeleting] = useState(false);
@@ -45,6 +45,8 @@ const BOMTable = () => {
   const [parts, setParts] = useState([]);
   const [frameWorkComponent, setFrameWorkComponent] = useState(null);
   const { getColumnData } = useColumns();
+
+  const [isSubmitting, setSubmitting] = useState(false);
 
   const defaultColumns = [
     { field: 'qty', headerName: 'Qty', show: true, cellRenderer: 'commonRenderer', cellEditor: 'numericCellEditor', editable: true }
@@ -175,7 +177,7 @@ const BOMTable = () => {
             closeActions();
           })
           .catch((err) => {
-            setToastConfig(err);
+            toastConfig.setToastConfig(err);
             setIsDeleting(false);
           });
       });
@@ -192,7 +194,7 @@ const BOMTable = () => {
           closeActions();
         })
         .catch((err) => {
-          setToastConfig(err);
+          toastConfig.setToastConfig(err);
           setIsDeleting(false);
         });
     }
@@ -222,7 +224,28 @@ const BOMTable = () => {
         fetchBOMData();
       })
       .catch((err) => {
-        setToastConfig(err);
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const handleAdd = async (rows) => {
+    setSubmitting(true)
+    const dataObj = rows.filter((d) => d.qty > 0).map((d) => { return { childProduct: d.id, qty: Number(d.qty) }; });
+    await axiosInstance()
+      .post(`/product/${id}/bom`, dataObj)
+      .then(({ data }) => {
+        if (permissions?.serializedAsset) fetchBOMData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        setOpenAssignProductDialog(false);
+        setSubmitting(false)
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setSubmitting(false)
       });
   };
 
@@ -325,16 +348,12 @@ const BOMTable = () => {
       )}
       {openAssignProductDialog && (
         <AssignProductDialog
-          productsDialogOpen={openAssignProductDialog}
-          productId={id}
           handleCloseDialog={() => setOpenAssignProductDialog(false)}
-          assignedProducts={[...parts?.map((p) => p.childProduct), id]}
-          onSuccess={() => {
-            if (permissions?.serializedAsset) {
-              fetchBOMData();
-            }
-            setOpenAssignProductDialog(false);
+          ids={[...parts?.map((p) => p.childProduct), id]}
+          onSuccess={(rows) => {
+            handleAdd(rows);
           }}
+          isSubmitting={isSubmitting}
         />
       )}
     </div>

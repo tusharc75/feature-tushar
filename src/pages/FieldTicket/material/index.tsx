@@ -40,6 +40,10 @@ const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, h
   const [isUpdating, setUpdating] = useState(false);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
 
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+
   const {
     state: { permissions }
   }: any = useData();
@@ -226,6 +230,7 @@ const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, h
   };
 
   const handleAdd = async (rows) => {
+    setIsSubmitting(true)
     const material: any = [];
     rows.forEach((d) => {
       const element: any = {};
@@ -278,9 +283,11 @@ const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, h
         }
         fetchMaterial();
         setServiceDialog({ open: false, type: '' });
+        setIsSubmitting(false)
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
+        setIsSubmitting(false)
       });
   };
 
@@ -485,17 +492,15 @@ const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, h
       </Box>
       {serviceDialog?.open && serviceDialog?.type === 'service' && (
         <AssignServiceDialog
-          reference={'fieldTicket'}
-          referenceId={fieldTicketData?._id}
           onSuccess={handleAdd}
           handleClose={() => {
             setServiceDialog({ open: false, type: '' });
           }}
           ids={rowsData?.map((row) => row?.materialId)}
           extraStaticFilter={[{ field: 'serviceType', term: SERVICE_TYPE.fieldService }]}
+          isSubmitting={isSubmitting}
         />
       )}
-
       {serviceDialog.open && serviceDialog.type === 'newService' && (
         <ManageServiceMaster
           isClone={false}

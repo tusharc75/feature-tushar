@@ -379,13 +379,13 @@ const ServicePackage = ({ renderedFrom, productId }) => {
       )}
       {openAddDialog && (
         <AssignPackageDialog
-          referenceType="product"
           handleClose={() => setOpenAddDialog(false)}
           ids={[...dataRows?.map((e) => e._id)]}
           onSuccess={(rows) => {
             handleSubmit(rows);
           }}
           packageType={'Service'}
+          isSubmitting={isSubmitting}
         />
       )}
     </Fragment>
