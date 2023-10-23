@@ -20,12 +20,13 @@ import styles from 'src/pages/Leads/Header.module.scss';
 import CustomAgGridEditable, { reducer, intialState } from '../AgGridComponents/CustomAgGridEditable';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
+import { camelCase } from 'lodash';
 
 let searchTimeout;
 
 const AssignServiceDialog = ({ onSuccess, handleClose, ids = [], extraStaticFilter = [], isSubmitting = false }) => {
 
-  const renderedFrom = `${routes.serviceMaster.title}_selected`;
+  const renderedFrom = `${camelCase(routes.serviceMaster?.title)}`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const {

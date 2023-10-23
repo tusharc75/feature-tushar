@@ -18,7 +18,6 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import AddIcon from '@material-ui/icons/Add';
 import MaterialDialog from './materialDialog';
-import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { CHILD_RESOURCE, sidebarResource } from 'src/constants/helpers';
@@ -460,15 +459,11 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
       )}
       {addDialog.open && addDialog.type === 'product' && (
         <AssignProductDialog
-          reference="purchaseRequisition"
-          serialized={null}
-          productsDialogOpen={addDialog.open}
-          productId={null}
           handleCloseDialog={() => setAddDialog({ open: false, type: '', parentId: null })}
-          assignedProducts={[]}
           onSuccess={(d) => {
             handleAdd(d);
           }}
+          isSubmitting={isSubmitting}
         />
       )}
       {addDialog.open && addDialog.type === 'service' && (

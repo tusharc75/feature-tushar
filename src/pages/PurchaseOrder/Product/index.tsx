@@ -771,12 +771,9 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
       )}
       {addProductDialog && purchaseOrderData && (
         <AssignProductDialog
-          productsDialogOpen={addProductDialog}
           handleCloseDialog={() => setAddProductDialog(false)}
           reference="purchaseOrder"
           onSuccess={handleAddProduct}
-          productId={null}
-          assignedProducts={[]}
           extraDeepFilter={(purchaseOrderData?.expenseItem === true || purchaseOrderData?.expenseItem === false) ? [{
             field: 'expenseItem',
             term: purchaseOrderData?.expenseItem
@@ -786,6 +783,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
             field: 'chartOfAccount',
             term: { $in: purchaseOrderData?.chartOfAccount?.map((e) => e?.optionValue) }
           }] : []}
+          isSubmitting={isAddingProducts}
         />
       )}
       {showProductDialog.open && (

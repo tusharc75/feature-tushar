@@ -37,7 +37,6 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
 
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [isProductEdit, setIsProductEdit] = useState({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
-  const [isAddingProducts, setAddingProducts] = useState(false);
   const [material, setMaterial] = useState([]);
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
@@ -47,6 +46,9 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
   const [rowsData, setRowsData] = useState(null);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
   const [allFields, setAllFields] = useState([]);
+
+  const [isSubmitting, setSubmitting] = useState(false);
+
 
   useEffect(() => {
     fetchFields();
@@ -258,7 +260,7 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
   };
 
   const handleAdd = (rows) => {
-    setAddingProducts(true);
+    setSubmitting(true);
     const material: any = [];
     rows.forEach((d) => {
       const element: any = {};
@@ -276,12 +278,12 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
     axiosInstance()
       .post(`${fieldServiceOrder.api}/${serviceOrderData._id}/material`, { material })
       .then(({ data }) => {
-        setUpdating(false);
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
         fetchProductInventory();
+        setSubmitting(false);
       })
       .catch((error) => {
-        setUpdating(false);
+        setSubmitting(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -534,15 +536,11 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'product' && (
         <AssignProductDialog
-          reference={'fieldServiceOrder'}
-          serialized={null}
-          productsDialogOpen={addExistingProductDialog.open}
-          productId={null}
           handleCloseDialog={() => setAddExistingProductDialog({ open: false, type: '', parentId: null })}
-          assignedProducts={[]}
           onSuccess={(product) => {
             handleAdd(product);
           }}
+          isSubmitting={isSubmitting}
         />
       )}
     </Fragment>

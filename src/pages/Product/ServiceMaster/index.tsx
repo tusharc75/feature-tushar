@@ -588,12 +588,7 @@ const ServiceMaster = (props: Props) => {
       )}
       {assignProductDialog.open && (
         <AssignProductDialog
-          productsDialogOpen={assignProductDialog.open}
-          productId={id}
           handleCloseDialog={() => setAssignProductDialog({ open: false, products: null, service: null, uniqueId: null, steps: null })}
-          //assignedProducts={assignProductDialog.products}
-          assignedProducts={[]}
-          reference={'productService'}
           onSuccess={(d: any) => {
             setAssignStepsToConsumablesDialog({ open: true, consumables: d, service: assignProductDialog.service, steps: assignProductDialog.steps });
             // const data = d?.map((d) => {

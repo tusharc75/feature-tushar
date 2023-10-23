@@ -580,15 +580,11 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
       )}
       {addDialog.open && addDialog.type === 'product' && (
         <AssignProductDialog
-          reference="planning"
-          serialized={null}
-          productsDialogOpen={addDialog.open}
-          productId={null}
           handleCloseDialog={() => setAddDialog({ open: false, type: '', parentId: null })}
-          assignedProducts={[]}
           onSuccess={(d) => {
             handleAdd(d);
           }}
+          isSubmitting={isAdding}
         />
       )}
       {addDialog.open && addDialog.type === 'service' && (

@@ -43,6 +43,8 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
 
+  const [isSubmitting, setSubmitting] = useState(false);
+
   useEffect(() => {
     fetchFields();
   }, []);
@@ -229,6 +231,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
   };
 
   const handleAdd = async (rows) => {
+    setSubmitting(true)
     const material: any = [];
     rows.forEach((d) => {
       const element: any = {};
@@ -249,10 +252,11 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
           message: data.message
         });
         fetchData();
+        setSubmitting(false)
       })
       .catch((error) => {
-        setAddDialog({ open: false, type: '', parentId: null });
         toastConfig.setToastConfig(error);
+        setSubmitting(false)
       });
   };
 
@@ -487,15 +491,11 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
       )}
       {addDialog.open && addDialog.type === 'product' && (
         <AssignProductDialog
-          reference="demandOrder"
-          serialized={null}
-          productsDialogOpen={addDialog.open}
-          productId={null}
           handleCloseDialog={() => setAddDialog({ open: false, type: '', parentId: null })}
-          assignedProducts={[]}
-          onSuccess={(d) => {
-            handleAdd(d);
+          onSuccess={(rows) => {
+            handleAdd(rows);
           }}
+          isSubmitting={isSubmitting}
         />
       )}
       {addDialog.open && addDialog.type === 'package' && (

@@ -443,11 +443,8 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
         </Grid>
         {consumablesDialog && (
           <AssignProductDialog
-            productsDialogOpen={consumablesDialog}
-            productId={workOrderId}
-            reference={'workOrder'}
             handleCloseDialog={() => setConsumablesDialog(false)}
-            assignedProducts={dataRows?.map((d) => d?.materialId) || []}
+            ids={dataRows?.map((d) => d?.materialId) || []}
             onSuccess={(rows) => {
               handleSubmit(rows);
             }}
