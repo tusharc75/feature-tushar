@@ -682,13 +682,11 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
       )}
       {addDialog.open && addDialog.type === 'service' && (
         <AssignServiceDialog
-          reference={'invoice'}
-          referenceId={invoiceData?._id}
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
-          ids={[]}
           onSuccess={(rows) => {
             handleAdd(rows);
           }}
+          isSubmitting={isAdding}
         />
       )}
       {addDialog.open && addDialog.type === 'package' && (

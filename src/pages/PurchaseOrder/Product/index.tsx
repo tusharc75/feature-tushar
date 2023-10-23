@@ -69,6 +69,8 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
 
   const [material, setMaterial] = useState([]);
 
+  const [isSubmitting, setSubmitting] = useState(false);
+
   useEffect(() => {
     fetchFields();
   }, []);
@@ -523,6 +525,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
   };
 
   const handleAddService = (rows) => {
+    setSubmitting(true)
     let tempServiceArray = rows?.map((d) => ({
       serviceId: d._id,
       qty: d.qty ? parseInt(d.qty) : 1,
@@ -533,9 +536,11 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
       .then(() => {
         fetchData();
         setAddServiceDialog(false);
+        setSubmitting(false)
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
+        setSubmitting(false)
       });
   };
 
@@ -828,15 +833,13 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
       )}
       {addServiceDialog && (
         <AssignServiceDialog
-          reference={'purchaseOrder'}
-          referenceId={purchaseOrderData?._id}
           onSuccess={(services) => {
             handleAddService(services);
           }}
           handleClose={() => {
             setAddServiceDialog(false);
           }}
-          ids={[]}
+          isSubmitting={isSubmitting}
         />
       )}
       {showDeleteConfirmBox && (

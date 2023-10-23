@@ -815,15 +815,12 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
       )}
       {addDialog.open && addDialog.type === 'service' && (
         <AssignServiceDialog
-          reference={'quotation'}
-          referenceId={quotationData?._id}
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
-          ids={[]}
           onSuccess={(rows) => {
             handleAdd(rows);
           }}
-          extraStaticFilter={quotationData?.type === QUOTATION_TYPE.fieldJob ? [{ field: 'serviceType', term: SERVICE_TYPE.fieldService }]
-            : []}
+          extraStaticFilter={quotationData?.type === QUOTATION_TYPE.fieldJob ? [{ field: 'serviceType', term: SERVICE_TYPE.fieldService }] : []}
+          isSubmitting={isAddingProducts}
         />
       )}
       {addDialog.open && addDialog.type === 'package' && (
