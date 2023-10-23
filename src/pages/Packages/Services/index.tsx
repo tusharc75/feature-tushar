@@ -23,7 +23,7 @@ import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 const ServiceTable = ({ packageId, packageData }) => {
   const renderedFrom = `${camelCase(routes?.packages.title)}_${packageData?.packageType || 'product'}`;
 
-  const { setToastConfig } = useContext(CustomToastContext);
+  const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
     state: { permissions }
@@ -74,7 +74,7 @@ const ServiceTable = ({ packageId, packageData }) => {
       })
       .catch((err) => {
         dispatch({ type: 'loading', loading: false });
-        setToastConfig(err);
+        toastConfig.setToastConfig(err);
       });
   };
 
@@ -116,7 +116,7 @@ const ServiceTable = ({ packageId, packageData }) => {
       .then(() => {
         fetchData();
       })
-      .catch((err) => setToastConfig(err));
+      .catch((err) => toastConfig.setToastConfig(err));
   };
 
   const removeProducts = () => {
@@ -132,7 +132,7 @@ const ServiceTable = ({ packageId, packageData }) => {
       .catch((err) => {
         setRemovingServices(false);
         setShowServiceConfirmBox(false);
-        setToastConfig(err);
+        toastConfig.setToastConfig(err);
       });
   };
 
@@ -155,7 +155,7 @@ const ServiceTable = ({ packageId, packageData }) => {
       .catch((err) => {
         setIsAssigning(false);
         setArrangeView(false);
-        setToastConfig(err);
+        toastConfig.setToastConfig(err);
       });
   };
 
@@ -165,6 +165,27 @@ const ServiceTable = ({ packageId, packageData }) => {
 
   const handleClose = () => {
     setAnchorActionEl(null);
+  };
+
+  const handleAdd = async (rows) => {
+    axiosInstance()
+      .post(`${packages.api}/material`, {
+        ids: [packageId],
+        services: rows.map((d: any) => ({ service: d.id, qty: Number(d.qty) }))
+      })
+      .then(({ data }) => {
+        setShowServiceAssignDialog(false);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        fetchData();
+      })
+      .catch((err) => {
+        setShowServiceAssignDialog(false);
+        toastConfig.setToastConfig(err);
+      });
   };
 
   const ActionsRenderer = (params) => <span>{params?.data?.qty}</span>;
@@ -301,13 +322,11 @@ const ServiceTable = ({ packageId, packageData }) => {
       {showServiceAssignDialog && (
         <AssignServiceDialog
           reference="package"
-          serviceType={packageData?.serviceType || ''}
           referenceId={packageId}
           handleClose={() => setShowServiceAssignDialog(false)}
           ids={[...dataRows?.map((e) => e._id)]}
-          onSuccess={() => {
-            fetchData();
-            setShowServiceAssignDialog(false);
+          onSuccess={(rows) => {
+            handleAdd(rows);
           }}
         />
       )}
