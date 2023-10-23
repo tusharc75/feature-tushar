@@ -648,7 +648,6 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'package' && (
         <AssignPackageDialog
-          referenceType={renderedFrom}
           onSuccess={(rows) => {
             handleAdd(rows.map((d) => ({ ...d, detail: d.packageName })));
           }}
@@ -656,7 +655,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
             setAddExistingProductDialog({ open: false, type: '', parentId: null });
           }}
           packageType="service"
-          ids={[]}
+          isSubmitting={isSubmitting}
         />
       )}
       {isProductEdit.open && (

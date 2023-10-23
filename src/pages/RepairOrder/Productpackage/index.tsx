@@ -627,13 +627,11 @@ const Productpackage = ({
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'package' && (
         <AssignPackageDialog
-          referenceType="repairOrder"
           handleClose={() => setAddExistingProductDialog({ open: false, type: '', parentId: null, existing: false, productId: null, productCategory: null })}
-          ids={[]}
           onSuccess={(rows) => {
             handleAdd(rows);
           }}
-          packageType={null}
+          isSubmitting={isAddingProducts}
         />
       )}
       {addExistingProductDialog.open && addExistingProductDialog.existing === false && addExistingProductDialog.type === 'serializedAsset' && (

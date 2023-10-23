@@ -821,13 +821,11 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
       )}
       {addDialog.open && addDialog.type === 'package' && (
         <AssignPackageDialog
-          referenceType={'quotation'}
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
-          ids={[]}
           onSuccess={(rows) => {
             handleAdd(rows);
           }}
-          packageType={null}
+          isSubmitting={isSubmitting}
         />
       )}
       {requestDialog && selectedType && (

@@ -687,13 +687,11 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
       )}
       {addDialog.open && addDialog.type === 'package' && (
         <AssignPackageDialog
-          referenceType="invoice"
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
-          ids={[]}
           onSuccess={(rows) => {
             handleAdd(rows);
           }}
-          packageType={null}
+          isSubmitting={isAdding}
         />
       )}
       {addDialog.open && addDialog.type === 'serializedAsset' && (
