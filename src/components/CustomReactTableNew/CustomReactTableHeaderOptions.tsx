@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { createStyles, withStyles, Theme, FormControlLabel, Switch, Typography, SwitchClassKey, SwitchProps } from '@material-ui/core';
+import DisplayChips from './ChipDataDisplay';
 
 interface Styles extends Partial<Record<SwitchClassKey, string>> {
   focusVisible?: string;
@@ -65,10 +66,26 @@ const CustomSwitch = withStyles((theme: Theme) =>
   );
 });
 
-function CustomReactTableHeaderOptions({ renderedFrom = null, dispatchTable = null, showOnlyShowFilteredRecordSwitch = false, selectedRecords = 0 }) {
+
+function CustomReactTableHeaderOptions({
+  columns,
+  renderedFrom = null,
+  dispatchTable = null,
+  showOnlyShowFilteredRecordSwitch = false,
+  selectedRecords = 0,
+  customFilters = null,
+  showFilters,
+  handleFilterOpen,
+  selectedFilter,
+  setSelectedFilter,
+  currentFomValue,
+  setCurrentFomValue
+}) {
   const [disableSelectionSwitch, setDisableSelectionSwitch] = useState(true);
 
   const [checked, setChecked] = useState(false);
+  const [chipData, setChipData] = useState([]);
+  const [isFilterPresent, setIsFilterPresent] = useState<boolean>(false);
 
   useEffect(() => {
     const saved = localStorage.getItem(`${renderedFrom}_selected`);
@@ -90,32 +107,75 @@ function CustomReactTableHeaderOptions({ renderedFrom = null, dispatchTable = nu
     }
   }, [selectedRecords]);
 
+  const clearSingleFilter = (name) => {
+    // Create a copy of the customFilters object
+    const newFilters = { ...customFilters };
+    // Delete the property with the given name
+    delete newFilters[name];
+    let formValues = { ...currentFomValue };
+    delete formValues[name];
+    delete formValues[`from_${name}`];
+    delete formValues[`to_${name}`];
+    setCurrentFomValue(formValues);
+    // Dispatch the updated filters and update the chipData
+    dispatchTable({ type: 'filter', filters: newFilters });
+    setChipData((prev) => prev.filter((item) => item.name !== name));
+  };
+
+  const clearFilterAll = () => {
+    dispatchTable({ type: 'filter', filters: {} });
+    setSelectedFilter(null);
+    setChipData([]);
+    setCurrentFomValue({});
+  };
+
   return (
     <>
-      {showOnlyShowFilteredRecordSwitch && (
-        <>
-          <FormControlLabel
-            value={checked}
-            checked={checked}
-            onChange={() => {
-              setChecked(!checked);
+      <div
+        className="table-filter-v1"
+        style={{ flexBasis: isFilterPresent ? '766px' : 'unset', maxWidth: isFilterPresent ? '766px' : 'unset', paddingRight: '52px' }}
+      >
+        {showOnlyShowFilteredRecordSwitch && (
+          <>
+            <FormControlLabel
+              value={checked}
+              checked={checked}
+              onChange={() => {
+                setChecked(!checked);
 
-              if (dispatchTable) {
-                dispatchTable({
-                  type: 'showFilteredRecordsOnly'
-                });
-              }
-            }}
-            className="show-only-selected-switch"
-            control={<CustomSwitch disabled={disableSelectionSwitch} />}
-            style={{ fontSize: '0.8rem', marginLeft: 0, padding: '0px 0 10px' }}
-            label={<Typography style={{ fontWeight: 400 }}>Show Only Selected</Typography>}
-            labelPlacement="end"
-          />
-        </>
-      )}
+                if (dispatchTable) {
+                  dispatchTable({
+                    type: 'showFilteredRecordsOnly'
+                  });
+                }
+              }}
+              className="show-only-selected-switch"
+              control={<CustomSwitch disabled={disableSelectionSwitch} />}
+              style={{ fontSize: '0.8rem', marginLeft: 0, padding: '0px 0 10px' }}
+              label={<Typography style={{ fontWeight: 400 }}>Show Only Selected</Typography>}
+              labelPlacement="end"
+            />
+          </>
+        )}
+        {Object.keys(customFilters).length > 0 && showFilters && (
+          <div style={{ minWidth: '450px' }}>
+            <DisplayChips
+              columns={columns}
+              customFilters={customFilters}
+              selectedFilter={selectedFilter}
+              chipData={chipData}
+              setChipData={setChipData}
+              handleFilterOpen={handleFilterOpen}
+              clearSingleFilter={clearSingleFilter}
+              clearFilterAll={clearFilterAll}
+              setIsFilterPresent={setIsFilterPresent}
+            />
+          </div>
+        )}
+      </div>
     </>
   );
 }
 
 export default CustomReactTableHeaderOptions;
+

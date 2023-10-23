@@ -5,12 +5,10 @@ import {
   IconButton,
   TableCell,
   TableHead,
-  TableFooter,
   TableRow,
-  TextField,
-  TablePagination,
   Box,
-  CircularProgress
+  CircularProgress,
+  Button
 } from '@material-ui/core';
 import { Check } from '@material-ui/icons';
 import { FaAngleRight, FaAngleDown } from 'react-icons/fa';
@@ -46,6 +44,8 @@ import { CgSearch } from 'react-icons/cg';
 import GridHeader from './GridHeader';
 import SwipableListForMobile from 'src/components/SwipableListForMobile';
 import Pagination from './Pagination';
+import { BiFilterAlt } from 'react-icons/bi';
+import GridFilter from './Filters';
 
 interface CustomCheckBoxProps extends CheckboxProps {
   indeterminate: any;
@@ -231,7 +231,9 @@ function CustomReactTable({
   sorting,
   loading,
   fetchChildAttachment = null,
-  showOnlyShowFilteredRecordSwitch = false
+  showOnlyShowFilteredRecordSwitch = false,
+  showFilters = false,
+  resource = null
 }) {
   const isMobileView = isMobile && !isTablet;
   const defaultColumn = {
@@ -245,6 +247,17 @@ function CustomReactTable({
   const [isCellEditing, setIsCellEditing] = React.useState(false);
   const [currentRowEditing, setCurrentRowEditing] = React.useState(null);
   const [baseColumns, setBaseColumns] = React.useState([]);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [selectedFilter, setSelectedFilter] = useState(null);
+  const [currentFomValue, setCurrentFomValue] = useState({});
+
+  const handleFilterOpen = () => {
+    setIsFilterOpen(true);
+  };
+
+  const handleFilterClose = () => {
+    setIsFilterOpen(false);
+  };
 
   useEffect(() => {
     setBaseColumns(columns);
@@ -280,98 +293,98 @@ function CustomReactTable({
     () =>
       expander
         ? [
-            {
-              id: 'expander',
-              Header: ({ isAllRowsExpanded }) => (
-                <span
-                  style={{
-                    paddingLeft: '0.3rem',
-                    color: 'black'
-                  }}
+          {
+            id: 'expander',
+            Header: ({ isAllRowsExpanded }) => (
+              <span
+                style={{
+                  paddingLeft: '0.3rem',
+                  color: 'black'
+                }}
+              >
+                {isAllRowsExpanded ? (
+                  <FaAngleDown
+                    style={{ color: 'white' }}
+                    className="cursor-pointer"
+                    onClick={() => {
+                      toggleAllRowsExpanded(false);
+                    }}
+                  />
+                ) : (
+                  <FaAngleRight
+                    style={{ color: 'white' }}
+                    className="cursor-pointer"
+                    onClick={() => {
+                      toggleAllRowsExpanded(true);
+                    }}
+                  />
+                )}
+              </span>
+            ),
+            sticky: 'left',
+            width: isMobile && !isTablet ? 40 : 70,
+            minWidth: isMobile && !isTablet ? 40 : 70,
+            canDrag: false,
+            Cell: ({ row }) =>
+              row.original.type === 'folder' ? (
+                <IconButton
+                  {...row.getToggleRowExpandedProps?.({
+                    style: {
+                      marginLeft: isMobileView ? 0 : `${row.depth * 2}rem`
+                    }
+                  })}
+                  size="small"
                 >
-                  {isAllRowsExpanded ? (
-                    <FaAngleDown
-                      style={{ color: 'white' }}
-                      className="cursor-pointer"
-                      onClick={() => {
-                        toggleAllRowsExpanded(false);
-                      }}
-                    />
+                  {row.isExpanded ? (
+                    <FaAngleDown />
                   ) : (
                     <FaAngleRight
-                      style={{ color: 'white' }}
-                      className="cursor-pointer"
-                      onClick={() => {
-                        toggleAllRowsExpanded(true);
+                      onClick={async () => {
+                        const subRows = await fetchChildAttachment(row.original.id);
+                        row.original.subRows = subRows;
                       }}
                     />
                   )}
-                </span>
-              ),
-              sticky: 'left',
-              width: isMobile && !isTablet ? 40 : 70,
-              minWidth: isMobile && !isTablet ? 40 : 70,
-              canDrag: false,
-              Cell: ({ row }) =>
-                row.original.type === 'folder' ? (
-                  <IconButton
-                    {...row.getToggleRowExpandedProps?.({
-                      style: {
-                        marginLeft: isMobileView ? 0 : `${row.depth * 2}rem`
-                      }
-                    })}
-                    size="small"
-                  >
-                    {row.isExpanded ? (
-                      <FaAngleDown />
-                    ) : (
-                      <FaAngleRight
-                        onClick={async () => {
-                          const subRows = await fetchChildAttachment(row.original.id);
-                          row.original.subRows = subRows;
-                        }}
-                      />
-                    )}
-                  </IconButton>
-                ) : null
-            },
-            {
-              id: 'selection',
-              minWidth: 50,
-              width: 50,
-              maxWidth: 50,
-              Header: ({ getToggleAllRowsSelectedProps }) => (
-                <IndeterminateCheckbox
-                  onClick={(e) => handleAllSelect(getToggleAllRowsSelectedProps()?.checked)}
-                  {...getToggleAllRowsSelectedProps()}
-                  style={{ marginLeft: '7px' }}
-                />
-              ),
-              Cell: ({ row }) => <IndeterminateCheckbox onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps()} />
-            },
-            ...baseColumns.map((m) => {
-              return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' };
-            })
-          ]
+                </IconButton>
+              ) : null
+          },
+          {
+            id: 'selection',
+            minWidth: 50,
+            width: 50,
+            maxWidth: 50,
+            Header: ({ getToggleAllRowsSelectedProps }) => (
+              <IndeterminateCheckbox
+                onClick={(e) => handleAllSelect(getToggleAllRowsSelectedProps()?.checked)}
+                {...getToggleAllRowsSelectedProps()}
+                style={{ marginLeft: '7px' }}
+              />
+            ),
+            Cell: ({ row }) => <IndeterminateCheckbox onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps()} />
+          },
+          ...baseColumns.map((m) => {
+            return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' };
+          })
+        ]
         : [
-            {
-              id: 'selection',
-              minWidth: 50,
-              width: 50,
-              maxWidth: 50,
-              Header: ({ getToggleAllRowsSelectedProps }) => (
-                <IndeterminateCheckbox
-                  onClick={(e) => handleAllSelect(getToggleAllRowsSelectedProps()?.checked)}
-                  {...getToggleAllRowsSelectedProps()}
-                  style={{ marginLeft: '7px' }}
-                />
-              ),
-              Cell: ({ row }) => <IndeterminateCheckbox onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps()} />
-            },
-            ...baseColumns.map((m) => {
-              return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' };
-            })
-          ],
+          {
+            id: 'selection',
+            minWidth: 50,
+            width: 50,
+            maxWidth: 50,
+            Header: ({ getToggleAllRowsSelectedProps }) => (
+              <IndeterminateCheckbox
+                onClick={(e) => handleAllSelect(getToggleAllRowsSelectedProps()?.checked)}
+                {...getToggleAllRowsSelectedProps()}
+                style={{ marginLeft: '7px' }}
+              />
+            ),
+            Cell: ({ row }) => <IndeterminateCheckbox onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps()} />
+          },
+          ...baseColumns.map((m) => {
+            return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' };
+          })
+        ],
     [baseColumns]
   );
 
@@ -381,7 +394,7 @@ function CustomReactTable({
     }),
     []
   );
-  const updateData = () => {};
+  const updateData = () => { };
 
   const returnHiddenCols = () => {
     const storedColumns = JSON.parse(localStorage.getItem(renderedFrom));
@@ -425,9 +438,9 @@ function CustomReactTable({
         hiddenColumns: hideSelection ? ['selection', 'action'] : returnHiddenCols(),
         selectedRowIds: localStorage.getItem(`${renderedFrom}_selected`)
           ? Object.assign(
-              {},
-              data.map((d) => JSON.parse(localStorage.getItem(`${renderedFrom}_selected`)).some((obj) => obj._id === d._id))
-            )
+            {},
+            data.map((d) => JSON.parse(localStorage.getItem(`${renderedFrom}_selected`)).some((obj) => obj._id === d._id))
+          )
           : {}
       },
       getSubRows: (row: any) => row.subRows,
@@ -620,6 +633,20 @@ function CustomReactTable({
             loading={loading}
             buttons={
               <>
+                {showFilters && (
+                  <HtmlTooltip title="Apply Filters" placement="top" arrow>
+                    <Button
+                      style={{ marginRight: '8px', color: '#424242' }}
+                      startIcon={<BiFilterAlt />}
+                      size={'small'}
+                      variant="outlined"
+                      className="btn-outline-v1 light "
+                      onClick={handleFilterOpen}
+                    >
+                      Filter
+                    </Button>
+                  </HtmlTooltip>
+                )}
                 <ArrangeViewButton
                   defaultColumns={allColumns}
                   loading={loading}
@@ -635,10 +662,18 @@ function CustomReactTable({
             }
           >
             <CustomReactTableHeaderOptions
+              columns={baseColumns}
+              customFilters={customFilters}
               renderedFrom={renderedFrom}
               dispatchTable={dispatch}
               showOnlyShowFilteredRecordSwitch={showOnlyShowFilteredRecordSwitch}
               selectedRecords={selectedFlatRows?.length}
+              showFilters={showFilters}
+              handleFilterOpen={handleFilterOpen}
+              selectedFilter={selectedFilter}
+              setSelectedFilter={setSelectedFilter}
+              currentFomValue={currentFomValue}
+              setCurrentFomValue={setCurrentFomValue}
             />
             {/* Select All For Mobile */}
             {isMobileView && !hideSelection && mobileSelectAllHeader && (
@@ -647,6 +682,18 @@ function CustomReactTable({
                   {mobileSelectAllHeader.render('Header')} <span>Select All</span>
                 </label>
               </>
+            )}
+            {isFilterOpen && (
+              <GridFilter
+                resource={resource}
+                customFilters={customFilters}
+                handleClose={handleFilterClose}
+                setSelectedFilter={setSelectedFilter}
+                selectedFilter={selectedFilter}
+                currentFomValue={currentFomValue}
+                setCurrentFomValue={setCurrentFomValue}
+                dispatch={dispatch}
+              />
             )}
           </GridHeader>
 
@@ -720,14 +767,13 @@ function CustomReactTable({
                             <TableCell
                               key={index2}
                               {...cell.getCellProps()}
-                              className={`td   ${cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''}    ${
-                                setWholeRowsCellColor ? setWholeRowsCellColor(row.original) : ''
-                              }`}
+                              className={`td   ${cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''}    ${setWholeRowsCellColor ? setWholeRowsCellColor(row.original) : ''
+                                }`}
                             >
                               {!['selection'].includes(cell?.column.id) &&
-                              rowState &&
-                              rowState.hasOwnProperty(row.id) &&
-                              rowState[row.id].cellState[cell?.column.id]?.isEditing ? (
+                                rowState &&
+                                rowState.hasOwnProperty(row.id) &&
+                                rowState[row.id].cellState[cell?.column.id]?.isEditing ? (
                                 <input
                                   autoFocus
                                   onBlur={submitInput}
@@ -837,19 +883,21 @@ interface DraggableHeaderProps {
 const DraggableHeader: React.FC<DraggableHeaderProps> = ({ column, index, reorder, customFilters, dispatch, isClientSideGrid }) => {
   const ref = React.useRef();
   const { id, Header } = column;
-  const [filters, setFilters] = useState(() => {
-    if (Object.keys(customFilters).length === 0) {
-      return [];
-    } else {
-      return Object.keys(customFilters).map((key, i) => {
-        return { id: key, value: customFilters[key].filter };
-      });
-    }
-  });
+  const [filters, setFilters] = useState([]);
+
+  // Use a useEffect to update filters when customFilters changes
+  useEffect(() => {
+    setFilters(Object.keys(customFilters).map((key, i) => ({
+      id: key,
+      value: customFilters[key].filter
+    })))
+  }, [customFilters]); // Add customFilters as a dependency
+
+  const MINIMUM_SEARCH_DELAY = 600; // Adjust this delay as needed
 
   const debouncedFilterDispatch = debounce((updatedCustomFilters) => {
     dispatch({ type: 'filter', filters: updatedCustomFilters });
-  }, 600);
+  }, MINIMUM_SEARCH_DELAY);
 
   const [, drop] = useDrop({
     accept: ItemTypes.COLUMN,
@@ -873,21 +921,34 @@ const DraggableHeader: React.FC<DraggableHeaderProps> = ({ column, index, reorde
     }),
     canDrag: !column?.lockPosition || column?.id !== 'selection' || column?.id !== 'action' || column?.id !== 'expand'
   });
-
   useEffect(() => {
+
     if (!isClientSideGrid) {
-      let tempArray = Object.keys(customFilters).map((key, i) => {
-        return { id: key, value: customFilters[key].filter };
-      });
-      if (JSON.stringify(filters) !== JSON.stringify(tempArray)) {
-        var tempResult = {};
-        filters?.forEach((v) => {
-          if (v.value && v.value !== '') {
-            tempResult[v.id] = { filter: v.value };
-          }
+      // Add a timer to delay the dispatch
+      const searchTimer = setTimeout(() => {
+        let tempArray = Object.keys(customFilters).map((key, i) => {
+          return { id: key, value: customFilters[key].filter };
         });
-        debouncedFilterDispatch(tempResult);
-      }
+
+        if (JSON.stringify(filters) !== JSON.stringify(tempArray)) {
+          var tempResult = {};
+          filters?.forEach((v) => {
+            if (v.value && v.value !== '') {
+              tempResult[v.id] = { filter: v.value };
+            }
+            else {
+              //this is for handling condition where the customFilters has a multiselect type field and we type something in some other filter
+              if (customFilters[v.id] && customFilters[v.id].operator && customFilters[v.id].condition1) {
+                tempResult[v.id] = customFilters[v.id]
+              }
+            }
+          });
+          debouncedFilterDispatch(tempResult);
+        }
+      }, MINIMUM_SEARCH_DELAY);
+
+      // Clear the timer when the component unmounts or when filters change
+      return () => clearTimeout(searchTimer);
     }
   }, [filters]);
 
