@@ -40,6 +40,8 @@ import { Link } from 'react-router-dom';
 import WarningIcon from '@material-ui/icons/Warning';
 import moment from 'moment';
 import CustomReactTable from 'src/components/CustomReactTableNew/CustomReactTable';
+import { sidebarResource } from '../../constants/helpers';
+import { gridFilterParser } from 'src/constants/useColumns';
 
 const SerializedAssetTest = () => {
   const renderedFrom = camelCase(routes?.serializedAsset.title);
@@ -254,41 +256,39 @@ const SerializedAssetTest = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
-    let filterById = [];
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
+
     if (warehouse?.optionValue) {
-      filterById.push({ field: 'warehouse', term: warehouse?.optionValue });
+      filterByIds.push({ field: 'warehouse', term: warehouse?.optionValue });
     }
     if (selectedPlant && selectedPlant !== '') {
-      filterById.push({ field: 'warehouse', term: selectedPlant });
+      filterByIds.push({ field: 'warehouse', term: selectedPlant });
     }
     if (redirectProduct?.id) {
-      filterById.push({ field: 'product', term: redirectProduct?.id });
+      filterByIds.push({ field: 'product', term: redirectProduct?.id });
     }
     if (fromPurchaseOrder?.pOId) {
-      filterById.push({ field: 'purchaseOrder', term: fromPurchaseOrder.pOId });
+      filterByIds.push({ field: 'purchaseOrder', term: fromPurchaseOrder.pOId });
     }
     if (fromPurchaseOrder?.productId) {
-      filterById.push({ field: 'product', term: fromPurchaseOrder.productId });
+      filterByIds.push({ field: 'product', term: fromPurchaseOrder.productId });
     }
     if (productCategory && productCategory !== '') {
-      filterById.push({ field: 'productCategory', term: productCategory });
+      filterByIds.push({ field: 'productCategory', term: productCategory });
     }
     if (productFilter && productFilter !== '') {
-      filterById.push({ field: 'product', term: productFilter });
+      filterByIds.push({ field: 'product', term: productFilter });
     }
-    if (filterById.length > 0) {
-      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`;
+    if (filterByIds.length > 0) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
-    if (!isObjectEmpty(filters)) {
-      const updatedFilters = [];
-      Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
-          field: field,
-          term: filters[field].filter
-        });
-      });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}`;
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
     }
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
+    }
+  
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
@@ -661,6 +661,8 @@ const SerializedAssetTest = () => {
               refreshGrid={fetchProductInventory}
               loading={loading}
               showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={sidebarResource.serializedAsset}
             />
           </>
         ) : (
