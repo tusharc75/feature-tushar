@@ -167,7 +167,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
       });
       const preWorkService = workOrderDetail?.services?.filter((e) => e.preWork)?.sort((a, b) => (a.order > b.order ? 1 : -1));
       const postWorkService = workOrderDetail?.services?.filter((e) => !e.preWork)?.sort((a, b) => (a.order > b.order ? 1 : -1));
-      const quote = [{ _id: 'quotation', uniqueId: 'quotation', order: 9999, type: 'quotation', serviceName: 'Quote to Customer' }];
+      const quote = [{ _id: 'quotation', uniqueId: 'quotation', order: 9999, type: 'quotation', serviceName: 'Quotation to Customer' }];
       const services = isQuotation ? [...preWorkService, ...quote, ...postWorkService] : [...preWorkService, ...postWorkService];
 
       if (services?.length) {
@@ -619,7 +619,6 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                     gap: '10px'
                                   }}
                                 >
-                                  {/* Serial Number or Quote icon */}
                                   {data?.type === 'service' ? (
                                     <Box
                                       style={{

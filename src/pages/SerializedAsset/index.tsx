@@ -47,6 +47,7 @@ import { Link } from 'react-router-dom';
 import WarningIcon from '@material-ui/icons/Warning';
 import moment from 'moment';
 import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
+import ReasonDialog from './ReasonDialog';
 
 const SerializedAsset = () => {
   const renderedFrom = camelCase(routes?.serializedAsset.title);
@@ -90,6 +91,8 @@ const SerializedAsset = () => {
 
   const [redirectProduct, setRedirectProduct] = useState(history.location?.state?.product);
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
+  const [showReasonDialog, setShowReasonDialog] = useState(false);
+  const [status, setStatus] = useState('');
 
   useEffect(() => {
     fetchGridColumns();
@@ -316,7 +319,16 @@ const SerializedAsset = () => {
       });
   };
 
-  const handleStatusUpdate = (status) => {
+  const handleStatusChange = (status) => {
+    if (status === ASSET_STATUS.scrap || status === ASSET_STATUS.lost) {
+      setStatus(status);
+      setShowReasonDialog(true);
+    } else {
+      handleStatusUpdate({ status });
+    }
+  };
+
+  const handleStatusUpdate = (obj) => {
     const ids = [...getLocalStorageArrayData(localStorageSelectedRecords)].map((d) => ({
       _id: d._id,
       currentStatus: d.status
@@ -324,8 +336,8 @@ const SerializedAsset = () => {
     axiosInstance()
       .put(`${serializedAsset.api}/update-status`, {
         assets: ids,
-        status: status,
-        comment: '',
+        status: obj?.status,
+        comment: obj?.reason ? obj?.reason : '',
         reference: { _id: '', type: INVENTORY_HISTORY_TYPE.serializedAssets }
       })
       .then(() => {
@@ -661,7 +673,7 @@ const SerializedAsset = () => {
                       <MenuItem
                         onClick={() => {
                           closeActions();
-                          handleStatusUpdate(status);
+                          handleStatusChange(status);
                         }}
                         disabled={
                           [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) =>
@@ -681,7 +693,7 @@ const SerializedAsset = () => {
                         <MenuItem
                           onClick={() => {
                             closeActions();
-                            handleStatusUpdate(ASSET_STATUS.needRepair);
+                            handleStatusChange(ASSET_STATUS.needRepair);
                           }}
                           disabled={
                             [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) => ![ASSET_STATUS.needRepair].includes(o.status))
@@ -695,7 +707,7 @@ const SerializedAsset = () => {
                         <MenuItem
                           onClick={() => {
                             closeActions();
-                            handleStatusUpdate(ASSET_STATUS.needRecert);
+                            handleStatusChange(ASSET_STATUS.needRecert);
                           }}
                           disabled={
                             [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) => ![ASSET_STATUS.needRecert].includes(o.status))
@@ -709,7 +721,7 @@ const SerializedAsset = () => {
                         <MenuItem
                           onClick={() => {
                             closeActions();
-                            handleStatusUpdate(ASSET_STATUS.scrap);
+                            handleStatusChange(ASSET_STATUS.scrap);
                           }}
                           disabled={
                             [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) => ![ASSET_STATUS.scrap].includes(o.status))
@@ -723,7 +735,7 @@ const SerializedAsset = () => {
                         <MenuItem
                           onClick={() => {
                             closeActions();
-                            handleStatusUpdate(ASSET_STATUS.lost);
+                            handleStatusChange(ASSET_STATUS.lost);
                           }}
                           disabled={
                             [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) => ![ASSET_STATUS.lost].includes(o.status))
@@ -909,6 +921,16 @@ const SerializedAsset = () => {
           ids={[]}
           resource={sidebarResource?.supplierAccount}
           path={routes?.supplierAccount?.path}
+        />
+      )}
+       {showReasonDialog && (
+        <ReasonDialog
+          onClose={() => setShowReasonDialog(false)}
+          status={status}
+          onAddReason={(reason) => {
+            handleStatusUpdate({ status: status, reason: reason });
+            setShowReasonDialog(false);
+          }}
         />
       )}
     </section>

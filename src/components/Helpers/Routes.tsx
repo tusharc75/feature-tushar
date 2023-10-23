@@ -280,6 +280,13 @@ const routes = {
         : RESOURCE_LABEL.rentalManagement,
     path: '/rental-management'
   },
+  rentalManagementInvoice: {
+    title:
+      storedRoutes && storedRoutes.rentalManagementInvoice && storedRoutes.rentalManagementInvoice
+        ? storedRoutes.rentalManagementInvoice.title
+        : RESOURCE_LABEL.rentalManagementInvoice,
+    path: '/rental-management-invoice'
+  },
   rentalManagementDetail: {
     title:
       storedRoutes && storedRoutes.rentalManagement && storedRoutes.rentalManagement
@@ -1113,6 +1120,18 @@ const routes = {
   subleaseInvoice: {
     title: storedRoutes && storedRoutes.subleaseInvoice && storedRoutes.subleaseInvoice.title ? storedRoutes.subleaseInvoice?.title : RESOURCE_LABEL.subleaseInvoice,
     path: '/sublease-invoice'
+  },
+  creditMemo: {
+    title: storedRoutes && storedRoutes.creditMemo && storedRoutes.creditMemo?.title ? storedRoutes.creditMemo?.title
+      : RESOURCE_LABEL.creditMemo,
+    path: '/credit-memo'
+  },
+  creditMemoDetail: {
+    title:
+      storedRoutes && storedRoutes.creditMemo && storedRoutes.creditMemo.title
+        ? storedRoutes.creditMemo?.title
+        : RESOURCE_LABEL.creditMemo,
+    path: '/credit-memo/detail'
   },
 };
 

@@ -787,7 +787,7 @@ export default function StepDialog({
                                       color="primary"
                                     />
                                   }
-                                  label="Quote Revision On Fail"
+                                  label="Quotation Revision On Fail"
                                 />
                               </Grid>
                             </Grid>
