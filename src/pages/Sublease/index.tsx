@@ -8,8 +8,7 @@ import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
-import { FaSuitcase } from 'react-icons/fa';
+import { CiUser, MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
 import { GiStockpiles } from 'react-icons/gi';
 import { useHistory } from 'react-router-dom';
 import HideWhenOffline from 'src/components/HideWhenOffline';
@@ -46,7 +45,7 @@ const Sublease = () => {
   let renderedFrom = camelCase(routes.sublease?.title);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
-  const { type }: any = queryString.parse(history.location.search);
+  let { type, referenceId, referenceType }: any = queryString.parse(history.location.search);
   const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
   const [filter, setFilter] = useState(`All ${routes.sublease.title}`);
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
@@ -60,9 +59,7 @@ const Sublease = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
-
   const [isOpenDialog, setisOpenDialog] = useState(false);
-  const [fromRental, setFromRental] = useState(history.location?.state?.rental);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const {
@@ -76,7 +73,7 @@ const Sublease = () => {
 
   useEffect(() => {
     fetchData();
-  }, [page, limit, filters, sorting, search, selectedEntity, fromRental, selectedType, showFilteredRecordsOnly]);
+  }, [page, limit, filters, sorting, search, selectedEntity, selectedType, showFilteredRecordsOnly]);
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -150,15 +147,18 @@ const Sublease = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-    if (selectedType === 1) {
-      deepFilter = deepFilter + `&myRecords=1`;
-    }
+
     if (isExport) {
       deepFilter = `?`;
     }
+
+    if (selectedType === 1) {
+      deepFilter = deepFilter + `&myRecords=1`;
+    }
+
     let filterById = [];
-    if (fromRental) {
-      filterById.push({ field: 'rentalJob', term: fromRental?._id });
+    if (referenceId) {
+      filterById.push({ field: 'rentalJob', term: referenceId });
     }
     if (filterById.length > 0) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`;
@@ -206,8 +206,13 @@ const Sublease = () => {
       });
   };
   const handleSubleaseTypeSel = (filterValues) => {
+    dispatch({ type: 'setPage', page: 0 });
     setSelectedType(filterValues);
-    history.push(`?type=${filterValues}`);
+    if (referenceId && referenceType) {
+      history.push(`?type=${filterValues}&referenceType=${referenceType}&referenceId=${referenceId}`);
+    } else {
+      history.push(`?type=${filterValues}`);
+    }
   };
 
   const handleFilter = (event, newFilter) => {
@@ -271,6 +276,18 @@ const Sublease = () => {
 
   const handleFilterClose = () => {
     setisOpenDialog(false);
+  };
+
+  const updateQueryParams = () => {
+    const queryParams = new URLSearchParams(history.location.search);
+    queryParams.delete('referenceId');
+    queryParams.delete('referenceType');
+    referenceId = queryParams.get('referenceId');
+    referenceType = queryParams.get('referenceType');
+    history.replace({
+      search: queryParams.toString()
+    });
+    fetchData();
   };
 
   return (
@@ -371,16 +388,7 @@ const Sublease = () => {
                   </div>
                 </HideWhenOffline>
               )}
-              {fromRental && (
-                <Chip
-                  className="ml-3"
-                  color="primary"
-                  label={`Rental Job : ${fromRental?.rentalJobName}`}
-                  onDelete={() => {
-                    setFromRental(null);
-                  }}
-                />
-              )}
+              {referenceType && <Chip className="ml-3" color="primary" label={`Rental Job : ${referenceType}`} onDelete={updateQueryParams} />}
             </div>
             <div className="flex flex-wrap gap-[8px]  justify-end">
               <SearchBox onChange={handleSearch} className={isMobile ? styles.search_box_input : ''} size="small" value={search} />
@@ -431,6 +439,7 @@ const Sublease = () => {
           Object.keys(frameWorkComponent).length > 0 ? (
             isMobile && !isTablet ? (
               <CustomSwipableList
+                key={selectedType}
                 allowSelection={true}
                 allowSwipe={true}
                 permissions={permissions.sublease}
@@ -454,7 +463,7 @@ const Sublease = () => {
                 loading={loading}
                 additionalDetails={[
                   {
-                    icon: <FaSuitcase size={18} />,
+                    icon: <CiUser size={18} />,
                     field: 'supplierAccount'
                   }
                 ]}

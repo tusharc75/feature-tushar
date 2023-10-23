@@ -1,28 +1,26 @@
-import { useState, FC, useEffect, useContext, useReducer, Fragment } from 'react';
-import { Dialog, Grid, IconButton, Tooltip } from '@material-ui/core';
-import { entity, gridLoadingTimeout, isObjectEmpty, sidebarResource } from '../../constants/helpers';
-import axiosInstance from '../../axios/axiosInstance';
-import routes from './../../components/Helpers/Routes';
-import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import EntityHeader from './Header';
-import { useData } from '../../StateProvider/Provider';
-import ManageEntity from './ManageEntity';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import AssignUsersDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import CustomContainer from '../../components/CustomContainer';
-import { FaUser, FaSuitcase, BsCurrencyExchange, FaAddressCard, IoCreate } from 'react-icons/all';
+import { Dialog, IconButton, Tooltip } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { prepareDataForGrid } from '../../constants/helpers';
-import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
-import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
-import ResourceTransferDialog from '../../components/ResourceTransferDialog';
-import { isMobile, isTablet } from 'react-device-detect';
-import { useHistory } from 'react-router-dom';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { camelCase } from 'lodash';
-import { SET_USER } from 'src/StateProvider/actionTypes';
+import { FC, useContext, useEffect, useReducer, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { BsCurrencyExchange, FaAddressCard, FaSuitcase, FaUser, IoCreate } from 'react-icons/all';
+import { useHistory } from 'react-router-dom';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
+import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
+import CustomContainer from '../../components/CustomContainer';
+import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
+import ResourceTransferDialog from '../../components/ResourceTransferDialog';
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import { entity, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import useColumns, { getFrameworkComponents, getStaticFields } from '../../constants/useColumns';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import routes from './../../components/Helpers/Routes';
+import EntityHeader from './Header';
+import ManageEntity from './ManageEntity';
 
 let entityTimeout;
 
@@ -48,11 +46,13 @@ const Entity: FC = () => {
   const [deleteEntity, setDeleteEntity] = useState<any>({});
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
+  const [roleAccessOfLoggedInUser, setRoleAccessOfLoggedInUser] = useState([]);
 
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
+    state;
 
   const columnState = JSON.parse(localStorage.getItem(renderedFrom));
 
@@ -79,6 +79,30 @@ const Entity: FC = () => {
       fetchEntity();
     }, millisec);
   }, [search]);
+
+  useEffect(() => {
+    fetchLoggedInUserRole();
+  }, []);
+
+  const fetchLoggedInUserRole = async () => {
+    let roleIds = [];
+    await axiosInstance()
+      .get(`/user/${user.user?._id}`)
+      .then(({ data: { data } }) => {
+        data.entities.map((item) => {
+          item.role.forEach((role) => {
+            if (roleIds.includes(role?._id)) {
+            } else {
+              roleIds.push(role?._id);
+            }
+          });
+        });
+        setRoleAccessOfLoggedInUser(roleIds);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
 
   useEffect(() => {
     if (renderCount > 0) {
@@ -235,15 +259,29 @@ const Entity: FC = () => {
         let rows = data.map((u) => {
           return prepareDataForGrid(u);
         });
-
-        dispatch({ type: 'initialize', data: rows, count: count });
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
+        if (appendRows) {
+          dispatch({
+            type: 'initialize',
+            data: [...dataRows, ...rows],
+            count: count
+          });
+        } else {
+          dispatch({
+            type: 'initialize',
+            data: rows,
+            count: count
+          });
+        }
+        // dispatch({ type: 'initialize', data: rows, count: count });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
         dispatch({ type: 'loading', loading: false });
+      })
+      .finally(() => {
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
       });
   };
 
@@ -308,9 +346,9 @@ const Entity: FC = () => {
             openUserDialog={handleOpenDialog}
             anyEntitySelected={selectedRecords.length > 0} //single select entity can assign user
             filters={filters}
+            resource={sidebarResource.entity}
           />
         </div>
-
         {isMobile && !isTablet ? (
           <CustomSwipableList
             allowSelection={true}
@@ -331,6 +369,10 @@ const Entity: FC = () => {
             rowCount={rowCount}
             page={page}
             loading={loading}
+            actionCol={(data) => {
+              const params = { data };
+              return <ActionsRenderer {...params} />;
+            }}
             additionalDetails={[
               {
                 icon: <FaSuitcase />,
@@ -393,7 +435,7 @@ const Entity: FC = () => {
         )}
         {usersDialogOpen && !usersDialogLoding && (
           <Dialog fullWidth maxWidth="sm" open={usersDialogOpen} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
-            <AssignUsersDialog
+            <AssignEntityDialog
               entitiesDialogOpen={usersDialogOpen}
               handleCloseDialog={handleCloseDialog}
               type="user"
@@ -404,6 +446,7 @@ const Entity: FC = () => {
                 setSelectedEntity(null);
                 handleCloseDialog();
               }}
+              roleAccessIds={roleAccessOfLoggedInUser}
             />
           </Dialog>
         )}

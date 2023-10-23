@@ -9,7 +9,7 @@ import { Delete } from '@material-ui/icons';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import AddSerializedAsset from './AddSerializedAsset';
-import { rentalManagement, sidebarResource, treeToFlatArray, ASSET_STATUS } from '../../../constants/helpers';
+import { rentalManagement, sidebarResource, treeToFlatArray, ASSET_STATUS, TRANSFER_ASSET_STATUS } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import ManagePurchaseOrder from '../../PurchaseOrder/ManagePurchaseOrder';
@@ -32,8 +32,9 @@ import AddNonSerializeAssets from './AddNonSerializeAssets';
 import { removeAssetsInRental } from '../rentalOfflineHelper';
 import WarningIcon from '@material-ui/icons/Warning';
 import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
+import { rentalManagementMessage } from 'src/constants/messageHelpers';
 
-const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, stepFullScreen, allowedToEdit }) => {
+const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip, stepFullScreen, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
 
@@ -69,6 +70,10 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
   useEffect(() => {
     fetchFields();
   }, []);
+
+  const OpenInNewWindow = (url) => {
+    window.open(`${url}?referenceType=${rentalManagementData?.rentalJobName}&referenceId=${rentalManagementData?._id}`, '_blank')
+  }
 
   const fetchFields = async () => {
     setNextStep(false);
@@ -129,9 +134,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                 <IconButton
                   size="small"
                   onClick={() => {
-                    history.push(routes.purchaseOrder.path, {
-                      rental: rentalManagementData
-                    });
+                    OpenInNewWindow(routes.purchaseOrder.path)
                   }}
                 >
                   <OpenInNewIcon fontSize="small" color={'primary'} />
@@ -161,9 +164,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                 <IconButton
                   size="small"
                   onClick={() => {
-                    history.push(routes.bulkAssetCreation.path, {
-                      rental: rentalManagementData
-                    });
+                    OpenInNewWindow(routes.bulkAssetCreation.path)
                   }}
                 >
                   <LibraryBooksIcon fontSize="small" color={'primary'} />
@@ -175,9 +176,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                 <IconButton
                   size="small"
                   onClick={() => {
-                    history.push(routes.sublease.path, {
-                      rental: rentalManagementData
-                    });
+                    OpenInNewWindow(routes.sublease.path)
                   }}
                 >
                   <ReceiptIcon fontSize="small" color={'primary'} />
@@ -201,8 +200,18 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                       size="small"
                       onClick={() => {
                         setShowConfirmBox(true);
+                        let isTransferAsset = false;
+                        if (row.original?.transferData
+                          && [TRANSFER_ASSET_STATUS.new, TRANSFER_ASSET_STATUS.inProgress]?.includes(row.original?.transferData?.status)) {
+                          isTransferAsset = true;
+                        }
                         setDeleteData([
-                          { _id: row.original.inventory, assetNumber: row.original.detail, isNonSerializeAsset: row.original.isNonSerializeAsset }
+                          {
+                            _id: row.original.inventory,
+                            assetNumber: row.original.detail,
+                            isNonSerializeAsset: row.original.isNonSerializeAsset,
+                            isTransferAsset: isTransferAsset
+                          }
                         ]);
                       }}
                     >
@@ -217,9 +226,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                     <IconButton
                       size="small"
                       onClick={() => {
-                        history.push(routes.transferAsset.path, {
-                          rental: rentalManagementData
-                        });
+                        window.open(`${routes.transferAssetDetail.path}/${row?.original?.transferData?._id}`, '_blank')
                       }}
                     >
                       <RepeatIcon fontSize="small" color={'primary'} />
@@ -277,6 +284,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
 
   const fetchData = async () => {
     setNextStep(false);
+    setNextStepToolTip(null)
     try {
       var data: any = [];
       var transferAssets: any = [];
@@ -403,8 +411,10 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
 
       if (rows.filter((_rows) => _rows.isValid === false).length > 0 && !user?.user?.brandPolicy?.rentalStopAssetNextStepValidation) {
         setNextStep(false);
+        setNextStepToolTip(rentalManagementMessage.assignAssets)
       } else {
         setNextStep(true);
+        setNextStepToolTip(null)
       }
       setRowsData(rows);
       setSelectedRecords([]);
@@ -430,7 +440,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
       const transferFilter = transferAssets.filter((e) => e.assetId === _inventory.inventory);
       var isTransferAsset = false;
       var transferData = {};
-      if (transferFilter.length) {
+      if (transferFilter.length && _inventory.inventoryDetail?.manualStatus === ASSET_STATUS.reserved) {
         isTransferAsset = true;
         transferData = transferFilter[0];
       }
@@ -575,7 +585,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
     );
   };
 
-  const handleAddSerializedAsset = (assets) => {
+  const handleAddSerializedAsset = (assets, withTransfer = false) => {
     setNextStep(false);
     var data = [];
     var flatArray = treeToFlatArray(selectedRecords, 'subRows').filter((f) => f.type === 'product');
@@ -601,7 +611,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
     if (data.length) {
       setAdding(true);
       axiosInstance()
-        .post(`${rentalManagement.api}/${rentalManagementData._id}/inventory`, { products: data })
+        .post(`${rentalManagement.api}/${rentalManagementData._id}/inventory`, { products: data, withTransfer })
         .then(({ data }) => {
           setAddSerializedAssetDialog({ open: false });
           fetchData();
@@ -848,7 +858,16 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                     const assets = flattenArray(selectedRecords)?.filter((d) => d.type === 'asset' && d.canRemove);
                     const dataTodelete = [];
                     assets?.forEach((element) => {
-                      dataTodelete.push({ _id: element?.inventory, assetNumber: element?.detail, isNonSerializeAsset: element?.isNonSerializeAsset });
+                      let isTransferAsset = false;
+                      if (element?.transferData && [TRANSFER_ASSET_STATUS.new, TRANSFER_ASSET_STATUS.inProgress]?.includes(element?.transferData?.status)) {
+                        isTransferAsset = true;
+                      }
+                      dataTodelete.push({
+                        _id: element?.inventory,
+                        assetNumber: element?.detail,
+                        isNonSerializeAsset: element?.isNonSerializeAsset,
+                        isTransferAsset: isTransferAsset
+                      });
                     });
                     setDeleteData(dataTodelete);
                     setShowConfirmBox(true);
@@ -865,6 +884,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                   color="default"
                   size="small"
                   aria-controls="action-menu"
+                  className="normal-case"
                   endIcon={<ExpandMore fontSize="inherit" />}
                 >
                   Order(s)
@@ -890,9 +910,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                   <MenuItem
                     disabled={purchaseOrderCount === 0}
                     onClick={() => {
-                      history.push(routes.purchaseOrder.path, {
-                        rental: rentalManagementData
-                      });
+                      OpenInNewWindow(routes.purchaseOrder.path)
                     }}
                   >
                     {`Show ${routes.purchaseOrder.title}`}
@@ -902,9 +920,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                   <MenuItem
                     disabled={bulkAssetCreationCount === 0}
                     onClick={() => {
-                      history.push(routes.bulkAssetCreation.path, {
-                        rental: rentalManagementData
-                      });
+                      OpenInNewWindow(routes.bulkAssetCreation.path)
                     }}
                   >
                     {`Show ${routes.bulkAssetCreation.title}`}
@@ -915,9 +931,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                   <MenuItem
                     disabled={subleaseCount === 0}
                     onClick={() => {
-                      history.push(routes.sublease.path, {
-                        rental: rentalManagementData
-                      });
+                      OpenInNewWindow(routes.sublease.path)
                     }}
                   >
                     {`Show ${routes.sublease.title}`}
@@ -927,9 +941,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
                   <MenuItem
                     disabled={transferAssetCount === 0}
                     onClick={() => {
-                      history.push(routes.transferAsset.path, {
-                        rental: rentalManagementData
-                      });
+                      OpenInNewWindow(routes.transferAsset.path)
                     }}
                   >
                     {`Show ${routes.transferAsset.title}`}
@@ -992,7 +1004,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, currencySymbol, st
           }}
           isAdding={isAdding}
           selectedProducts={assetAssignedProduct}
-          filterByPlant={rentalManagementData?.warehouse?.optionValue}
+          filterByPlant={rentalManagementData?.warehouse}
           handleSuccess={() => {
             setAddSerializedAssetDialog({ open: false });
             fetchData();

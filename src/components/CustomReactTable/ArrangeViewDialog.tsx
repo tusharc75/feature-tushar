@@ -85,10 +85,23 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
   const [isMinimized, setMinimized] = React.useState(true);
 
   React.useEffect(() => {
-    setSortedColumns([...columns]);
-    setOldData([...columns].map(d => {
-      return { [d.id]: d.isVisible }
-    }));
+    try {
+      const data = localStorage.getItem('gridMetaData');
+      const gridMetaData = JSON.parse(data || '{}');
+      const hiddenCols = gridMetaData[renderedFrom]?.hide || [];
+  
+      const updatedCols = columns.map((col) => ({
+        ...col,
+        isVisible: !hiddenCols.includes(col.id),
+      }));
+  
+      setSortedColumns(updatedCols);
+      setOldData(updatedCols.map(({ id, isVisible }) => ({ [id]: isVisible })));
+    } catch (ex) {
+      setSortedColumns([...columns]);
+      setOldData(columns.map(({ id, isVisible }) => ({ [id]: isVisible })));
+      console.error(`Error while getting stored data from local storage - ${renderedFrom}`);
+    }
   }, []);
 
   useEffect(() => {
@@ -149,7 +162,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
     if (renderedFrom && renderedFrom !== '') {
       updateGridHiddenColumns([], []);
     }
-    setColumnOrder([...defaultColumns.map(m => m.id)])
+    setColumnOrder(defaultColumns?.map((col) => col?.id || col?.accessor))
     setHiddenColumns([])
     onClose()
   }

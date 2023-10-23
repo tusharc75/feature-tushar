@@ -9,9 +9,7 @@ import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { GiCargoShip, MdOutlineFilterAlt, RiFileTransferFill, RiFolderTransferFill, SiStatuspage, TbArrowsSort } from 'react-icons/all';
-import { FaSuitcase } from 'react-icons/fa';
-import { GiStockpiles } from 'react-icons/gi';
+import { CiUser, GiCargoShip, MdOutlineFilterAlt, RiFileTransferFill, RiFolderTransferFill, SiStatuspage, TbArrowsSort } from 'react-icons/all';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -55,14 +53,14 @@ const TransferAsset = () => {
   const [columns, setColumns] = useState([]);
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { dataRows, appendRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } =
+    state;
   const [open, setOpen] = React.useState(false);
   const [isOpenDialog, setisOpenDialog] = useState(false);
   const history = useHistory();
-  const { type }: any = queryString.parse(history.location.search);
+  let { type, referenceId, referenceType }: any = queryString.parse(history.location.search);
   const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
   const [filter, setFilter] = useState(`All ${routes.transferAsset.title}`);
-  const [fromRental, setFromRental] = useState(history.location?.state?.rental);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const {
@@ -76,7 +74,7 @@ const TransferAsset = () => {
 
   useEffect(() => {
     fetchTransferAsset();
-  }, [page, limit, filters, sorting, search, fromRental, selectedEntity, selectedType, showFilteredRecordsOnly]);
+  }, [page, limit, filters, sorting, search, selectedEntity, selectedType, showFilteredRecordsOnly]);
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -126,8 +124,21 @@ const TransferAsset = () => {
         data.data = data.data?.map((u, i) => ({
           ...prepareDataForGrid(u, user)
         }));
+        if (appendRows) {
+          dispatch({
+            type: 'initialize',
+            data: [...dataRows, ...rows],
+            count: data.count
+          });
+        } else {
+          dispatch({
+            type: 'initialize',
+            data: rows,
+            count: data.count
+          });
+        }
 
-        dispatch({ type: 'initialize', data: rows, count: data.count });
+        // dispatch({ type: 'initialize', data: rows, count: data.count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
@@ -140,17 +151,19 @@ const TransferAsset = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-    if (selectedType === 1) {
-      deepFilter = deepFilter + `&myRecords=1`;
-    }
+
     if (isExport) {
       deepFilter = `?`;
     }
 
+    if (selectedType === 1) {
+      deepFilter = deepFilter + `&myRecords=1`;
+    }
+
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
-    if (fromRental) {
-      filterByIds.push({ field: 'rentalJob', term: fromRental?._id });
+    if (referenceId) {
+      filterByIds.push({ field: 'rentalJob', term: referenceId });
     }
 
     if (filterByIds?.length) {
@@ -214,12 +227,18 @@ const TransferAsset = () => {
       });
   };
   const handleTransferAssetTypeSel = (filterValues) => {
+    dispatch({ type: 'setPage', page: 0 });
     setSelectedType(filterValues);
-    history.push(`?type=${filterValues}`);
+    if (referenceId && referenceType) {
+      history.push(`?type=${filterValues}&referenceType=${referenceType}&referenceId=${referenceId}`);
+    } else {
+      history.push(`?type=${filterValues}`);
+    }
   };
 
   const handleFilter = (event, newFilter) => {
     if (newFilter != null) {
+      dispatch({ type: 'setPage', page: 0 });
       setFilter(newFilter);
       handleTransferAssetTypeSel(TransferAssetType.find((d) => d.key === newFilter).value);
     }
@@ -291,6 +310,30 @@ const TransferAsset = () => {
     setOpen(false);
   };
 
+  const updateQueryParams = () => {
+    const queryParams = new URLSearchParams(history.location.search);
+    queryParams.delete('referenceId');
+    queryParams.delete('referenceType');
+    referenceId = queryParams.get('referenceId');
+    referenceType = queryParams.get('referenceType');
+    history.replace({
+      search: queryParams.toString()
+    });
+    fetchTransferAsset();
+  };
+
+  const toggleInner = TransferAssetType && (
+    <ToggleButtonGroup size="small" value={TransferAssetType[selectedType - 1].key} exclusive onChange={handleFilter}>
+      {TransferAssetType.map((k, index) => {
+        return (
+          <ToggleButton value={k.key} key={index}>
+            {k.key}
+          </ToggleButton>
+        );
+      })}
+    </ToggleButtonGroup>
+  );
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -320,87 +363,58 @@ const TransferAsset = () => {
       <div className="main-container">
         <div className="header-panel">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className={'d-flex align-items-center gap-1'}>
-              <div className="d-flex align-items-center">
-                <GiStockpiles size={20} style={{ paddingBottom: '3px' }} className="headerLogo" />
-                <span className="listingHeader">{routes.transferAsset?.title} </span>
-              </div>
+            <div className={'d-flex align-items-center gap-1 w-full'}>
               {isMobile && !isTablet ? (
-                <div className="d-flex ml-auto gap-2 ">
-                  <IconButton
-                    onClick={handleClickOpen}
-                    id="demo-customized-button"
-                    aria-controls="demo-customized-menu"
-                    aria-haspopup="true"
-                    // aria-expanded={open ? 'true' : undefined}
-                    className={'mobileIconButton secondary'}
-                    size="small"
-                  >
-                    <TbArrowsSort className="rotate-90" size={16} />
-                  </IconButton>
-                  <MobileSortDialog
-                    isOpen={open}
-                    handleClose={handleClickClose}
-                    contentPart={null}
-                    secHeading={['Sort Transfer Assests']}
-                    columns={columns}
-                    dispatch={dispatch}
-                  />
-                  <IconButton
-                    id="demo-customized-button"
-                    aria-controls="demo-customized-menu"
-                    aria-haspopup="true"
-                    // aria-expanded={open ? 'true' : undefined}
-                    className={'mobileIconButton secondary'}
-                    size="small"
-                    onClick={handleOpen}
-                  >
-                    <MdOutlineFilterAlt size={16} />
-                  </IconButton>
-                  <MobileFilterDialog
-                    isOpen={isOpenDialog}
-                    handleClose={handleClose}
-                    contentPart={null}
-                    columns={columns}
-                    dispatch={dispatch}
-                    title={routes?.transferAsset?.title}
-                    filters={filters}
-                    resource={sidebarResource.transferAsset}
-                  />
-                </div>
-              ) : (
-                <HideWhenOffline>
-                  <div className={`align-items-center gap-1 layout-for-mobile `}>
-                    {TransferAssetType && (
-                      <ToggleButtonGroup
-                        size="small"
-                        className="ml-2"
-                        value={TransferAssetType[selectedType - 1].key}
-                        exclusive
-                        onChange={handleFilter}
-                      >
-                        {TransferAssetType.map((k, index) => {
-                          return (
-                            <ToggleButton value={k.key} key={index}>
-                              {k.key}
-                            </ToggleButton>
-                          );
-                        })}
-                      </ToggleButtonGroup>
-                    )}
+                <div className="d-flex flex-wrap items-center justify-between w-full">
+                  <div>
+                    <HideWhenOffline>{toggleInner}</HideWhenOffline>
                   </div>
-                </HideWhenOffline>
-              )}
-              {fromRental && (
-                <Chip
-                  className="ml-3"
-                  color="primary"
-                  label={`Rental Job : ${fromRental?.rentalJobName}`}
-                  onDelete={() => {
-                    setFromRental(null);
-                  }}
-                />
-              )}
+                  <div className="flex flex-wrap items-center gap-1 justify-end">
+                    <IconButton
+                      onClick={handleClickOpen}
+                      id="demo-customized-button"
+                      aria-controls="demo-customized-menu"
+                      aria-haspopup="true"
+                      // aria-expanded={open ? 'true' : undefined}
+                      className={'mobileIconButton secondary'}
+                      size="small"
+                    >
+                      <TbArrowsSort className="rotate-90" size={16} />
+                    </IconButton>
+                    <MobileSortDialog
+                      isOpen={open}
+                      handleClose={handleClickClose}
+                      contentPart={null}
+                      secHeading={['Sort Transfer Assests']}
+                      columns={columns}
+                      dispatch={dispatch}
+                    />
+                    <IconButton
+                      id="demo-customized-button"
+                      aria-controls="demo-customized-menu"
+                      aria-haspopup="true"
+                      // aria-expanded={open ? 'true' : undefined}
+                      className={'mobileIconButton secondary'}
+                      size="small"
+                      onClick={handleOpen}
+                    >
+                      <MdOutlineFilterAlt size={16} />
+                    </IconButton>
+                    <MobileFilterDialog
+                      isOpen={isOpenDialog}
+                      handleClose={handleClose}
+                      contentPart={null}
+                      columns={columns}
+                      dispatch={dispatch}
+                      title={routes?.transferAsset?.title}
+                      filters={filters}
+                      resource={sidebarResource.transferAsset}
+                    />
+                  </div>
+                </div>
+              ) : null}
+              {!isMobile && <HideWhenOffline>{toggleInner}</HideWhenOffline>}
+              {referenceType && <Chip className="ml-3" color="primary" label={`Rental Job : ${referenceType}`} onDelete={updateQueryParams} />}
             </div>
             <div className="flex flex-wrap gap-[8px]  justify-end">
               <SearchBox onChange={handleSearch} className={styles.search_box_input} size="small" value={search} />
@@ -428,6 +442,7 @@ const TransferAsset = () => {
           Object.keys(frameWorkComponent).length > 0 ? (
             isMobile && !isTablet ? (
               <CustomSwipableList
+                key={selectedType}
                 allowSelection={true}
                 allowSwipe={true}
                 permissions={permissions?.transferAsset}
@@ -438,12 +453,16 @@ const TransferAsset = () => {
                 dataRows={dataRows}
                 selectedRecords={selectedRecords}
                 dispatch={dispatch}
-                onEdit={() => {}}
-                extraParamsToCheckDelete={true}
-                onDelete={(data) => {
-                  setDeleteRecord(data);
-                  setShowDeleteConfirmBox(true);
+                actionCol={(data) => {
+                  const params = { data };
+                  return <ActionsRenderer {...params} />;
                 }}
+                extraParamsToCheckDelete={false}
+                // onEdit={() => {}}
+                // onDelete={(data) => {
+                //   setDeleteRecord(data);
+                //   setShowDeleteConfirmBox(true);
+                // }}
                 rowCount={rowCount}
                 page={page}
                 loading={loading}
@@ -471,16 +490,16 @@ const TransferAsset = () => {
                 ]}
                 additionalDetails={[
                   {
-                    icon: <FaSuitcase size={18} />,
+                    icon: <CiUser size={18} />,
                     field: 'transferType'
                   }
                 ]}
                 owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
                 onCreate={false}
-                showClone={true}
-                onClone={(data) => {
-                  setShowManageTransferAssetDialog({ open: true, isClone: true, idToClone: data._id });
-                }}
+                showClone={false}
+                // onClone={(data) => {
+                //   setShowManageTransferAssetDialog({ open: true, isClone: true, idToClone: data._id });
+                // }}
                 renderedFrom={renderedFrom}
               />
             ) : (

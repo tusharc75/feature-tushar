@@ -28,11 +28,9 @@ const useStyles = makeStyles((theme) => ({
   topbar: {
     backgroundColor: 'var(--dark-primary,#fff)'
   },
-  whiteBg: {
-    backgroundColor: 'var(--dark-secondary,#fff)'
-  },
+
   indicators: {
-    padding: '8px 16px',
+    padding: '8px 5px',
     borderRadius: '4px',
     fontSize: '14px',
     lineHeight: '17px'
@@ -125,6 +123,8 @@ const BigCalendar = () => {
     fetchBoard();
   };
 
+  // const get;
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -132,48 +132,36 @@ const BigCalendar = () => {
       </div>
       <CustomContainer>
         {filter && (
-          <div className={`bgLight ${classes.whiteBg}`}>
+          <>
             <div className="flex flex-wrap gap-2">
               <div className="flex flex-wrap gap-2">
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-wrap items-center gap-3">
                   <Button aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick} size="small" color="primary" variant="contained">
                     Create Activity
                   </Button>
-                  {['Event', 'Task', 'Case'].map((item) => (
-                    <>
-                      <Box
-                        display="flex"
-                        bgcolor={
-                          item === 'Event'
-                            ? 'var(--dark-secondary,rgba(255, 232, 204, 1))'
-                            : item === 'Task'
-                            ? 'var(--dark-secondary,rgba(234, 239, 254, 1))'
-                            : 'var(--dark-secondary,rgba(253, 220, 228, 1))'
-                        }
-                        className={`${classes.indicators}`}
-                        style={{
-                          color: `${
-                            item === 'Event'
-                              ? 'rgba(236, 85, 0, 1)'
-                              : item === 'Task'
-                              ? 'var(--dark-secondary-text,rgba(4, 50, 161, 1))'
-                              : 'rgba(165, 4, 43, 1)'
-                          }`
-                        }}
-                      >
-                        {item}
-                        {/* <Box component="span" ml={1} />
+                  <div className="flex flex-wrap gap-2">
+                    {['Event', 'Task', 'Case'].map((item) => (
+                      <>
                         <Box
-                          width={16}
-                          height={16}
-                          bgcolor={
-                            item === 'Event' ? 'rgba(255, 232, 204, 1)' : item === 'Task' ? 'rgba(234, 239, 254, 1)' : 'rgba(253, 220, 228, 1)'
-                          }
-                          borderRadius={50}
-                        /> */}
-                      </Box>
-                    </>
-                  ))}
+                          key={item}
+                          className={`${classes.indicators} flex items-center gap-1 
+                          ${item === 'Event' ? 'text-[rgba(236,_85,_0,_1))] ' : ''}
+                          ${item === 'Task' ? 'text-[var(--task-color,_rgba(4,_50,_161,_1))] ' : ''}
+                          ${item === 'Case' ? 'text-[rgba(165,_4,_43,_1)] ' : ''}
+                          `}
+                        >
+                          <Box
+                            className={`w-[12px] h-[12px] 
+                            ${item === 'Event' ? 'bg-[rgba(236,_85,_0,_1)] ' : ''}
+                            ${item === 'Task' ? 'bg-[var(--task-color,_rgba(4,_50,_161,_1))] ' : ''}
+                            ${item === 'Case' ? 'bg-[rgba(165,_4,_43,_1)] ' : ''}
+                            `}
+                          />
+                          {item}
+                        </Box>
+                      </>
+                    ))}
+                  </div>
                 </div>
                 <Popper
                   id="simple-menu"
@@ -219,7 +207,7 @@ const BigCalendar = () => {
               </div>
             </div>
             <MyCalendar activities={activities} setActivityData={setActivityData} />
-          </div>
+          </>
         )}
         {activityData && (
           <ActivityModelHandler

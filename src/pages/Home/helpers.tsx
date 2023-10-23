@@ -1,36 +1,33 @@
 import { AiFillAccountBook } from 'react-icons/ai';
 import { SVGImages, IMAGE_WIDTH, IMAGE_HEIGHT, IconConst } from '../../assets/dashboard_images';
 import DashboardIcons from 'src/assets/dashboard_images/icons';
-import { CollaborationToolsIcon } from 'src/assets/sidebar_assets/icons';
-
 import {
   ProductSetup,
   ServiceManagementIcon,
   RentalOperationManagementIcon,
   ServiceOperationManagementIcon,
   PurchasingManagementIcon,
-  FieldServiceOperationIcon
-} from '../../assets/sidebar_assets/icons';
+  FieldServiceOperationIcon,
+  FleetManagementIcon,
+  CollaborationToolsIcon,
+  CustomForms,
+  IOT,
+  ForeCastingAndPlanning
+} from 'src/assets/sidebar_assets/icons';
+
 import {
   BiCog,
-  IoPeopleOutline,
-  RiSuitcaseLine,
   BiCart,
   FaRegUserCircle,
   FaReact,
   FaRegRegistered,
   FaRegUser,
   MdOutlineDynamicForm,
-  MdMiscellaneousServices,
   RiShieldUserLine,
   SiCivicrm,
-  RiCustomerServiceLine,
-  AiOutlineCalendar,
-  GiCircuitry,
   AiOutlineDatabase,
   HiOutlineWrenchScrewdriver,
-  MdOutlineEventAvailable,
-  PiUsersThree
+  MdOutlineEventAvailable
 } from 'react-icons/all';
 
 // CREATE OBJECT FROM LIST GROUPED BY KEYGETTER
@@ -66,82 +63,100 @@ export const setDataBySectionName = (secName, index = 0) => {
   const colorAccessor = getColors(index);
   const iconColour = colorAccessor.icon || ['#FFA800', '#E35200'];
 
+  const compareName = (nameList: string[], name) => {
+    const namelistInSmallLetter = nameList.map((n) => n.toLowerCase());
+    const lowercaseName = name.toLowerCase();
+
+    return namelistInSmallLetter.includes(lowercaseName);
+  };
+
   let icon = <DashboardIcons.INVENTORY_MANAGEMENT colors={iconColour} />;
   let text = '';
   let sideBarIcon = <FaReact size={20} />;
   const color = '#ffffff';
   const gradient = colorAccessor.gradient || ['#FFA800', '#E35200'];
 
-  if (['CRM +', 'Sales Management'].includes(secName)) {
+  if (compareName(['CRM +', 'Sales Management'], secName)) {
     text = 'Convert leads and close sales deals faster.';
     icon = <DashboardIcons.CRM colors={iconColour} />;
     sideBarIcon = <SiCivicrm size={18} />;
-  } else if (['eCommerce'].includes(secName)) {
+  } else if (compareName(['eCommerce'], secName)) {
     text = 'Simplified eCommerce functionalities to smoothen your lives.';
     icon = <DashboardIcons.ECOMMERCE colors={iconColour} />;
     sideBarIcon = <BiCart size={20} />;
-  } else if (['Inventory Management'].includes(secName)) {
+  } else if (compareName(['Inventory Management'], secName)) {
     text = 'Manage Inventory Smartly.';
     icon = <DashboardIcons.INVENTORY_MANAGEMENT colors={iconColour} />;
     sideBarIcon = <ServiceManagementIcon size={20} />;
-  } else if (['Rental Operations Management'].includes(secName)) {
+  } else if (compareName(['Rental Operations Management'], secName)) {
     text = 'Fulfill Rental Orders Faster.';
     icon = <DashboardIcons.ROM colors={iconColour} />;
     sideBarIcon = <RentalOperationManagementIcon size={20} />;
-  } else if (['ROM'].includes(secName)) {
+  } else if (compareName(['ROM'], secName)) {
     text = 'Fulfill Rental Orders Faster.';
     icon = <DashboardIcons.ROM colors={iconColour} />;
     sideBarIcon = <FaRegRegistered size={20} />;
-  } else if (['Field Service Operations'].includes(secName)) {
+  } else if (compareName(['Field Service Operations'], secName)) {
     text = 'Fulfill Service Orders Faster.';
     icon = <DashboardIcons.FIELD_SERVICE_OPERATION colors={iconColour} />;
     sideBarIcon = <FieldServiceOperationIcon size={20} />;
-  } else if (['Repair & Maintenance Management'].includes(secName)) {
+  } else if (compareName(['Repair & Maintenance Management'], secName)) {
     text = 'Repair & Maintain your product and services at ease.';
     icon = <DashboardIcons.REPAIR_AND_MAINTENANCE_MANAGEMENT colors={iconColour} />;
     sideBarIcon = <HiOutlineWrenchScrewdriver size={18} />;
-  } else if (['Admin Portal'].includes(secName)) {
+  } else if (compareName(['Admin Portal'], secName)) {
     text = 'Build your own Template, Manage Roles and Entities.';
     icon = <DashboardIcons.ADMIN_PORTAL colors={iconColour} />;
     sideBarIcon = <RiShieldUserLine size={20} />;
-  } else if (['Accounts'].includes(secName)) {
+  } else if (compareName(['Accounts'], secName)) {
     text = 'Customer and Supplier Account Management at your fingertips.';
     icon = <DashboardIcons.ACCOUNTS colors={iconColour} />;
     sideBarIcon = <FaRegUser size={20} />;
-  } else if (['Product Setup'].includes(secName)) {
+  } else if (compareName(['Product Setup'], secName)) {
     text = 'Product and Category Setup.';
     icon = <DashboardIcons.PRODUCT_SETUP colors={iconColour} />;
     sideBarIcon = <ProductSetup size={20} />;
-  } else if (['Dynamic Forms'].includes(secName)) {
+  } else if (compareName(['Dynamic Forms'], secName)) {
     text = 'Setup Dynamic Forms & Templates';
     icon = <DashboardIcons.FORM_ICON colors={iconColour} />;
     sideBarIcon = <MdOutlineDynamicForm size={20} />;
-  } else if (['Service Operations Management'].includes(secName)) {
+  } else if (compareName(['Service Operations Management'], secName)) {
     text = 'Deploy, Track and Bill for field services efficiently.';
     icon = <DashboardIcons.SERVICE_OPERATION_MANAGEMENT colors={iconColour} />;
     sideBarIcon = <ServiceOperationManagementIcon size={20} />;
-  } else if (['Purchasing Management'].includes(secName)) {
+  } else if (compareName(['Purchasing Management'], secName)) {
     text = 'Manage working capital effectively.';
     icon = <DashboardIcons.PURCHASING_MANAGEMENT colors={iconColour} />;
     sideBarIcon = <PurchasingManagementIcon size={20} />;
-  } else if (['Planning & Forecasting'].includes(secName)) {
+  } else if (compareName(['Planning & Forecasting'], secName)) {
     text = 'Optimize your resource utilization.';
     icon = <DashboardIcons.PLANNING_FORECASTING colors={iconColour} />;
     sideBarIcon = <MdOutlineEventAvailable size={20} />;
-  } else if (['Brand Admin'].includes(secName)) {
+  } else if (compareName(['Brand Admin'], secName)) {
     sideBarIcon = <FaRegUserCircle size={20} />;
-  } else if (['Master Data'].includes(secName)) {
+  } else if (compareName(['Master Data'], secName)) {
     sideBarIcon = <AiOutlineDatabase size={20} />;
-  } else if (['Rental Management'].includes(secName)) {
+  } else if (compareName(['Rental Management'], secName)) {
     sideBarIcon = <FaRegRegistered size={20} />;
-  } else if (['Service Management'].includes(secName)) {
+  } else if (compareName(['Service Management'], secName)) {
     sideBarIcon = <ServiceManagementIcon size={18} />;
-  } else if (['Setups & Administration'].includes(secName)) {
+  } else if (compareName(['Setups & Administration'], secName)) {
     sideBarIcon = <BiCog size={20} />;
-  } else if (['Activities', 'Collaboration Tools'].includes(secName)) {
+  } else if (compareName(['Activities', 'Collaboration Tools'], secName)) {
     sideBarIcon = <CollaborationToolsIcon size={20} />;
+  } else if (compareName(['Fleet Management'], secName)) {
+    sideBarIcon = <FleetManagementIcon size={20} />;
+    icon = <DashboardIcons.FLEET_MANAGEMENT colors={iconColour} />;
+  } else if (compareName(['iot'], secName)) {
+    sideBarIcon = <IOT size={20} />;
+    icon = <DashboardIcons.IOT colors={iconColour} />;
+  } else if (compareName(['hiii', 'Custom Forms'], secName)) {
+    sideBarIcon = <CustomForms size={18} />;
+    icon = <DashboardIcons.CUSTOM_FORMS colors={iconColour} />;
+  } else if (compareName(['Forecasting & Planning'], secName)) {
+    sideBarIcon = <ForeCastingAndPlanning size={18} />;
+    icon = <DashboardIcons.FORECASTING_AND_PLANNING colors={iconColour} />;
   }
-
   return {
     icon: icon,
     text: text,

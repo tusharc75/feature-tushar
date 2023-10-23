@@ -1,5 +1,5 @@
 import { Box, Button, IconButton } from '@material-ui/core';
-import { useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
@@ -19,7 +19,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import HistoryIcon from '@material-ui/icons/History';
 import ViewLogs from './ViewLogs';
 
-const Submit = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEdit, fetchData }) => {
+const Submit = ({ stepFullScreen, fieldTicketData, renderedFrom, allowedToEdit, fetchData }) => {
     const toastConfig = useContext(CustomToastContext);
     const [columns, setColumns] = useState(null);
     const [rowsData, setRowsData] = useState([]);
@@ -30,7 +30,7 @@ const Submit = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEd
     useEffect(() => {
         fetchFields();
         fetchGridData();
-    }, [id]);
+    }, [fieldTicketData]);
 
     const fetchFields = async () => {
         setColumns(null);
@@ -104,8 +104,8 @@ const Submit = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEd
 
     const fetchGridData = async () => {
 
-        const materialResponse = await axiosInstance().get(`${fieldTicket.api}/${id}/material`);
-        const costResponse = await axiosInstance().get(`${fieldTicket.api}/${id}/cost`)
+        const materialResponse = await axiosInstance().get(`${fieldTicket.api}/${fieldTicketData?._id}/material`);
+        const costResponse = await axiosInstance().get(`${fieldTicket.api}/${fieldTicketData?._id}/cost`)
 
         const material = materialResponse?.data?.data?.material;
         const costs = costResponse?.data?.data || [];
@@ -149,45 +149,46 @@ const Submit = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEd
             <Box display="flex" justifyContent="space-between" m={1}>
                 <Box display="flex" alignItems="center">
                     <PreviewDownload
+                        fileName={`${routes.fieldTicket.title}-${fieldTicketData?.fieldTicketNumber}`}
                         hideDetailButton={true}
                         resource={sidebarResource.fieldTicket}
-                        referenceId={id}
+                        referenceId={fieldTicketData?._id}
                         columns={columns}
                         isSendEmail={true}
                         defaultColumns={[
-                            'index',
                             'type',
                             'detail',
-                            'description',
-                            'qty',
-                            'unit',
                             'estimateStartDate',
                             'estimateEndDate',
-                            'estimateJobDuration',
+                            'pricingMethod',
+                            'qty',
                             `price_${fieldTicketData?.currency?.toLowerCase()}`,
                             `finalPrice_${fieldTicketData?.currency?.toLowerCase()}`
                         ]}
                     />
                 </Box>
                 <Box display="flex">
-                    {(fieldTicketData.status === FIELD_TICKET_STATUS.new || fieldTicketData.status === FIELD_TICKET_STATUS.inProgress) && <Button
-                        variant="contained"
-                        color="primary"
-                        size='small'
-                        onClick={() => {
-                            setSubmitDialog(true);
-                        }}
-                    >
-                        Submit
-                    </Button>}
-                    {fieldTicketData.status === FIELD_TICKET_STATUS.readyToInvoice && <Button
-                        variant="contained"
-                        color="primary"
-                        size='small'
-                        onClick={() => setCommentDialog(true)}
-                    >
-                        Re-Open
-                    </Button>}
+                    {allowedToEdit &&
+                        <Fragment>
+                            {(fieldTicketData.status === FIELD_TICKET_STATUS.new || fieldTicketData.status === FIELD_TICKET_STATUS.inProgress) && <Button
+                                variant="contained"
+                                color="primary"
+                                size='small'
+                                onClick={() => {
+                                    setSubmitDialog(true);
+                                }}
+                            >
+                                Submit
+                            </Button>}
+                            {fieldTicketData.status === FIELD_TICKET_STATUS.readyToInvoice && <Button
+                                variant="contained"
+                                color="primary"
+                                size='small'
+                                onClick={() => setCommentDialog(true)}
+                            >
+                                Re-Open
+                            </Button>}
+                        </Fragment>}
                     <Box ml={1}></Box>
                     <HtmlTooltip title="View Logs">
                         <IconButton
@@ -248,8 +249,7 @@ const Submit = ({ stepFullScreen, fieldTicketData, id, renderedFrom, allowedToEd
 
             {viewLogsDialog && (
                 <ViewLogs
-                    id={id}
-                    fieldTicketName={fieldTicketData?.fieldTicketNumber}
+                    fieldTicketData={fieldTicketData}
                     handleClose={() => {
                         setViewLogsDialog(false)
                     }}

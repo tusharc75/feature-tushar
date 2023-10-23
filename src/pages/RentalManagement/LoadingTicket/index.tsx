@@ -186,7 +186,7 @@ const LoadingTicket = ({
             currentOwner: u?.currentOwner,
             currentLocation: u?.currentLocation?.optionValue,
             startDate: u?.startDate,
-            mtrAttachedView: u?.mtrAttached ? 'Yes' : 'No',
+            mtrAttachedView: u?.mtrAttached ? 'Yes' : 'No'
           }));
 
         const result = await axiosInstance().get(
@@ -319,6 +319,10 @@ const LoadingTicket = ({
 
       productAssets = [...productAssets?.filter((e) => !e.isReplaced), ...productAssets?.filter((e) => e.isReplaced)];
 
+      productAssets?.forEach((e, index) => {
+        e.index = index + 1;
+      })
+
       dispatch({ type: 'initialize', data: productAssets, count: productAssets.length });
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
@@ -331,7 +335,7 @@ const LoadingTicket = ({
 
   const TicketRenderer = (params) =>
     params?.value ? (
-      <div className="d-flex gap-2 align-items-center">
+      <>
         <p className="text-truncate">{params.value}</p>
         <IconButton
           size="small"
@@ -341,7 +345,7 @@ const LoadingTicket = ({
         >
           <OpenInNewIcon fontSize="small" color={'primary'} />
         </IconButton>
-      </div>
+      </>
     ) : (
       <NoDataCell />
     );
@@ -415,31 +419,42 @@ const LoadingTicket = ({
   );
 
   const ProductNameRenderer = (params) => (
-    <div className="d-flex gap-2 align-items-center">
+    <>
       <p className="text-truncate">{params.value}</p>
-      <IconButton
-        size="small"
-        onClick={() => {
-          window.open(`${routes.productDetail.path}/${params.data?.productId}`);
-        }}
-      >
-        <OpenInNewIcon fontSize="small" color="primary" />
-      </IconButton>
-    </div>
+      <Box ml={1}>
+        <IconButton
+          size="small"
+          onClick={() => {
+            window.open(`${routes.productDetail.path}/${params.data?.productId}`);
+          }}
+        >
+          <OpenInNewIcon fontSize="small" color="primary" />
+        </IconButton>
+      </Box>
+    </>
   );
 
   const ParentNameRenderer = (params) => (params.data?.parentId ? <span>{params?.data?.parentName}</span> : <NoDataCell />);
 
   const ActionRenderer = (params) =>
     user?.user?.brandPolicy?.assetDeliveredStatus &&
-      [RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy, RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable]?.includes(params?.data?.rentalAssetStatus) &&
+      [RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy, RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable]?.includes(
+        params?.data?.rentalAssetStatus
+      ) &&
       params?.data?.type === 'Asset' ? (
       <HtmlTooltip title={'Change Date'}>
         <span>
           <IconButton
             size="small"
             onClick={() => {
-              setOpenDateDialog({ open: true, type: 'changeDate', status: params?.data?.assetNumber, prevStatus: '', assets: [params?.data?._id], loading: false });
+              setOpenDateDialog({
+                open: true,
+                type: 'changeDate',
+                status: params?.data?.assetNumber,
+                prevStatus: '',
+                assets: [params?.data?._id],
+                loading: false
+              });
             }}
           >
             <Edit fontSize="small" />
@@ -489,6 +504,7 @@ const LoadingTicket = ({
   };
 
   const columns = [
+    { field: 'index', headerName: 'Index', show: true, disabled: true, cellRenderer: 'commonRenderer', width: 100 },
     {
       field: 'assetNumber',
       headerName: 'Details',
@@ -585,9 +601,6 @@ const LoadingTicket = ({
     }
   };
 
-
-
-
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -671,8 +684,8 @@ const LoadingTicket = ({
               message: `Delivered Successfully`
             });
             setOpenDateDialog({ open: false, type: null, status: null, prevStatus: null, assets: [], loading: false });
+            fetchRecords();
           }
-          fetchRecords();
           checkProgressiveBilling();
         })
         .catch((error) => {
@@ -709,11 +722,14 @@ const LoadingTicket = ({
   };
 
   const handelCancleTickets = () => {
+    setOkBtnLoading(true);
     const loadingTicketIds = uniq(map(selectedRecords, 'loadingTicketId'));
     if (loadingTicketIds.length) {
       axiosInstance()
         .put(`${deliveryTicket.api}/revert`, { ids: loadingTicketIds })
         .then(({ data }) => {
+          setOkBtnLoading(false);
+          setShowConformationCancleTicket({ open: false, type: '' });
           fetchRecords();
           toastConfig.setToastConfig({
             open: true,
@@ -722,12 +738,14 @@ const LoadingTicket = ({
           });
         })
         .catch((error) => {
+          setOkBtnLoading(false);
           toastConfig.setToastConfig(error);
         });
     }
   };
 
   const handelCancelDeliveredTicket = () => {
+    setOkBtnLoading(true);
     const loadingTicketId = uniq(map(selectedRecords, 'loadingTicketId'));
     const ticketIds: any = [];
     loadingTicketId?.forEach((e) => {
@@ -741,6 +759,8 @@ const LoadingTicket = ({
       axiosInstance()
         .post(`${deliveryTicket.api}/cancel-delivered-ticket`, data)
         .then(({ data }) => {
+          setOkBtnLoading(false);
+          setShowConformationCancleTicket({ open: false, type: '' });
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
@@ -749,6 +769,7 @@ const LoadingTicket = ({
           fetchRecords();
         })
         .catch((error) => {
+          setOkBtnLoading(false);
           toastConfig.setToastConfig(error);
         });
     }
@@ -759,7 +780,12 @@ const LoadingTicket = ({
     const assets = selectedRecords?.filter((e: any) => e.type === 'Asset')?.map((e) => e._id);
     if (assets?.length) {
       axiosInstance()
-        .put(`${rentalManagement.api}/${rentalManagementData._id}/assets-inuse-standby`, { assets, status: status, prevStatus: prevStatus, date: date })
+        .put(`${rentalManagement.api}/${rentalManagementData._id}/assets-inuse-standby`, {
+          assets,
+          status: status,
+          prevStatus: prevStatus,
+          date: date
+        })
         .then(({ data }) => {
           fetchRecords();
           toastConfig.setToastConfig({
@@ -773,8 +799,7 @@ const LoadingTicket = ({
           toastConfig.setToastConfig(error);
           setOpenDateDialog((prev) => ({ ...prev, loading: false }));
         });
-    }
-    else {
+    } else {
       fetchRecords();
       setOpenDateDialog({ open: false, type: null, status: null, prevStatus: null, assets: [], loading: false });
     }
@@ -802,7 +827,14 @@ const LoadingTicket = ({
   const checkUniqStatus = () => {
     if (selectedRecords.length === 0) {
       return false;
-    } else if (uniq(map(selectedRecords?.filter((e: any) => e.type === 'Asset'), 'status')).length === 1) {
+    } else if (
+      uniq(
+        map(
+          selectedRecords?.filter((e: any) => e.type === 'Asset'),
+          'status'
+        )
+      ).length === 1
+    ) {
       return true;
     } else {
       return false;
@@ -818,24 +850,19 @@ const LoadingTicket = ({
               onClick={() => {
                 setDownlodingFile(true);
                 axiosInstance()
-                  .post(`/delivery-ticket/pdf`, { ids: uniqueLoadingTicket })
+                  .get(`pdf/multiple?resource=${sidebarResource.deliveryTicket}&ids=${uniqueLoadingTicket}`, {
+                    responseType: 'blob'
+                  })
                   .then(({ data }) => {
-                    axiosInstance()
-                      .get(`user/download?fileName=${data.data.fileName}`, {
-                        responseType: 'blob'
-                      })
-                      .then(({ data }) => {
-                        const file = new Blob([data], { type: 'application/pdf' });
-                        const fileURL = URL.createObjectURL(file);
-                        const pdfWindow = window.open();
-                        pdfWindow.location.href = fileURL;
-                        toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
-                        setDownlodingFile(false);
-                      })
-                      .catch((err) => {
-                        toastConfig.setToastConfig(err);
-                        setDownlodingFile(false);
-                      });
+                    const file = new Blob([data], { type: 'application/pdf' });
+                    const fileURL = URL.createObjectURL(file);
+                    const link = document.createElement('a');
+                    link.href = fileURL;
+                    link.target = '_blank';
+                    link.style.display = 'none';
+                    link.click();
+                    toastConfig.setToastConfig({ open: true, type: 'success', message: 'File Previewed Successfully.' });
+                    setDownlodingFile(false);
                   })
                   .catch((err) => {
                     toastConfig.setToastConfig(err);
@@ -858,11 +885,13 @@ const LoadingTicket = ({
               color="primary"
               aria-controls="simple-menu"
               aria-haspopup="true"
-              disabled={!allowUpdateStatus
-                || selectedRecords.length === 0
-                || selectedRecords?.some((f) => f.type === 'Product')
-                || isOffline
-                || selectedRecords?.some((f) => [ASSET_STATUS.lost].includes(f.status))}
+              disabled={
+                !allowUpdateStatus ||
+                selectedRecords.length === 0 ||
+                selectedRecords?.some((f) => f.type === 'Product') ||
+                isOffline ||
+                selectedRecords?.some((f) => [ASSET_STATUS.lost].includes(f.status))
+              }
               size="small"
               onClick={handleClick}
               endIcon={<ArrowDropDownIcon />}
@@ -968,12 +997,13 @@ const LoadingTicket = ({
                 </MenuItem>
                 {user?.user?.brandPolicy?.assetDeliveredStatus && (
                   <Box>
-                    {(selectedRecords.length > 0 &&
+                    {selectedRecords.length > 0 &&
                       selectedRecords.filter(
                         (e: any) =>
                           e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered &&
                           [ASSET_STATUS.delivered, ASSET_STATUS.inUse, ASSET_STATUS.standByNotChargeable].includes(e?.status)
-                      ).length === selectedRecords.length && checkUniqStatus()) && (
+                      ).length === selectedRecords.length &&
+                      checkUniqStatus() && (
                         <MenuItem
                           onClick={() => {
                             closeActions();
@@ -990,12 +1020,13 @@ const LoadingTicket = ({
                           {`Change Status to ${ASSET_STATUS.standBy}`}
                         </MenuItem>
                       )}
-                    {(selectedRecords.length > 0 &&
+                    {selectedRecords.length > 0 &&
                       selectedRecords.filter(
                         (e: any) =>
                           e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered &&
                           [ASSET_STATUS.delivered, ASSET_STATUS.inUse, ASSET_STATUS.standBy].includes(e?.status)
-                      ).length === selectedRecords.length && checkUniqStatus()) && (
+                      ).length === selectedRecords.length &&
+                      checkUniqStatus() && (
                         <MenuItem
                           onClick={() => {
                             closeActions();
@@ -1012,11 +1043,13 @@ const LoadingTicket = ({
                           {`Change Status to ${ASSET_STATUS.standByNotChargeable}`}
                         </MenuItem>
                       )}
-                    {(selectedRecords.length > 0 &&
-                      selectedRecords.filter((e: any) =>
-                        e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered &&
-                        [ASSET_STATUS.delivered, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable].includes(e?.status)
-                      ).length === selectedRecords.length && checkUniqStatus()) && (
+                    {selectedRecords.length > 0 &&
+                      selectedRecords.filter(
+                        (e: any) =>
+                          e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered &&
+                          [ASSET_STATUS.delivered, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable].includes(e?.status)
+                      ).length === selectedRecords.length &&
+                      checkUniqStatus() && (
                         <MenuItem
                           onClick={() => {
                             closeActions();
@@ -1037,8 +1070,13 @@ const LoadingTicket = ({
                       selectedRecords.filter(
                         (e: any) =>
                           e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered &&
-                          [RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy, RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable].includes(e?.rentalAssetStatus)
-                      ).length === selectedRecords.length && checkUniqStatus() && (
+                          [
+                            RENTAL_INTERNAL_ASSET_STATUS.inUse,
+                            RENTAL_INTERNAL_ASSET_STATUS.standBy,
+                            RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable
+                          ].includes(e?.rentalAssetStatus)
+                      ).length === selectedRecords.length &&
+                      checkUniqStatus() && (
                         <MenuItem
                           onClick={() => {
                             closeActions();
@@ -1079,10 +1117,18 @@ const LoadingTicket = ({
                     </MenuItem>
                   </Box>
                 ) : null}
-                {(selectedRecords.length > 0 &&
-                  selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered
-                    && e?.status === ASSET_STATUS.inUse && e?.rentalAssetStatus === RENTAL_INTERNAL_ASSET_STATUS.inUse).length === selectedRecords?.length)
-                  ?
+                {selectedRecords.length > 0 &&
+                  selectedRecords.filter(
+                    (e: any) =>
+                      e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered &&
+                      (([ASSET_STATUS.inUse, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable]?.includes(e?.status) &&
+                        [
+                          RENTAL_INTERNAL_ASSET_STATUS.inUse,
+                          RENTAL_INTERNAL_ASSET_STATUS.standBy,
+                          RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable
+                        ]?.includes(e?.rentalAssetStatus)) ||
+                        e?.type === 'Product')
+                  ).length === selectedRecords?.length ? (
                   <MenuItem
                     onClick={() => {
                       closeActions();
@@ -1091,7 +1137,7 @@ const LoadingTicket = ({
                   >
                     Cancel Loading Ticket(s)
                   </MenuItem>
-                  : null}
+                ) : null}
                 {selectedRecords.length &&
                   selectedRecords?.filter(
                     (f) =>
@@ -1390,7 +1436,7 @@ const LoadingTicket = ({
           }}
           isAdding={replaceLoading}
           selectedProducts={addSerializedAssetDialog.products}
-          filterByPlant={rentalManagementData?.warehouse?.optionValue}
+          filterByPlant={rentalManagementData?.warehouse}
         />
       )}
       {showReplaceReason.open && (
@@ -1426,11 +1472,9 @@ const LoadingTicket = ({
           onOk={() => {
             if (showConformationCancleTicket.type === 'Delivered') {
               handelCancelDeliveredTicket();
-            }
-            else {
+            } else {
               handelCancleTickets();
             }
-            setShowConformationCancleTicket({ open: false, type: '' });
           }}
           okBtnLoading={okBtnLoading}
         />
@@ -1455,7 +1499,10 @@ const LoadingTicket = ({
             setOpenDateDialog({ open: false, type: null, status: null, prevStatus: '', assets: [], loading: false });
           }}
           handleSubmit={(date, status) => {
-            if (openDateDialog.type === 'changeStatus' && [ASSET_STATUS.inUse, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable]?.includes(openDateDialog.status)) {
+            if (
+              openDateDialog.type === 'changeStatus' &&
+              [ASSET_STATUS.inUse, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable]?.includes(openDateDialog.status)
+            ) {
               handleChangeStatusInUse(openDateDialog.status, openDateDialog.prevStatus, date);
             } else if (openDateDialog.type === 'changeStatus' && [ASSET_STATUS.delivered]?.includes(openDateDialog.status)) {
               handelProcessTickets(date, status);

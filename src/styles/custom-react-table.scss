@@ -1,7 +1,12 @@
-$isPurchaseOrder: #ffa500;
+$isPurchaseOrder: #ffcf78;
 $isSublease: #ffe4c0;
 $isTransferAsset: #ecc19c;
 $isAppliedBill: #a8ec9c;
+
+$isPurchaseOrderDark: #754e07;
+$isSubleaseDark: #826325;
+$isTransferAssetDark: #9b6c44;
+$isAppliedBillDark: #234623;
 
 .custom-react-table {
   // padding: 1rem;
@@ -83,23 +88,35 @@ $isAppliedBill: #a8ec9c;
     }
 
     .td.error[data-sticky-td='true'] {
-      background: var(--dark-error, #efcccc) !important;
+      background: var(--error-dark, #efcccc) !important;
     }
 
     .td.isAppliedBill[data-sticky-td='true'] {
       background: $isAppliedBill !important;
+      [data-mode='dark'] & {
+        background-color: $isAppliedBillDark !important;
+      }
     }
 
     .td.isPurchaseOrder[data-sticky-td='true'] {
       background: $isPurchaseOrder !important;
+      [data-mode='dark'] & {
+        background-color: $isPurchaseOrderDark !important;
+      }
     }
 
     .td.isSublease[data-sticky-td='true'] {
       background: $isSublease !important;
+      [data-mode='dark'] & {
+        background: $isSubleaseDark !important;
+      }
     }
 
     .td.isTransferAsset[data-sticky-td='true'] {
       background: $isTransferAsset !important;
+      [data-mode='dark'] & {
+        background-color: $isTransferAssetDark !important;
+      }
     }
 
     .td {
@@ -115,29 +132,48 @@ $isAppliedBill: #a8ec9c;
       .isAppliedBill {
         background: $isAppliedBill;
         border-bottom: 1px solid $isAppliedBill;
+        [data-mode='dark'] & {
+          background-color: $isAppliedBillDark !important;
+          border-bottom: 1px solid $isAppliedBillDark;
+        }
       }
 
       .isPurchaseOrder {
         background: $isPurchaseOrder;
         border-bottom: 1px solid $isPurchaseOrder;
+        [data-mode='dark'] & {
+          background-color: $isPurchaseOrderDark;
+          border-bottom: 1px solid $isPurchaseOrderDark;
+        }
         //border-right: 1px solid $isPurchaseOrder;
       }
 
       .isSublease {
         background: $isSublease;
         border-bottom: 1px solid $isSublease;
+        [data-mode='dark'] & {
+          background: $isSubleaseDark;
+          border: $isSubleaseDark;
+        }
         //border-right: 1px solid $isSublease;
       }
 
       .isTransferAsset {
         background: $isTransferAsset;
         border-bottom: 1px solid $isTransferAsset;
+        [data-mode='dark'] & {
+          background-color: $isTransferAssetDark;
+          border-bottom: 1px solid $isTransferAssetDark;
+        }
         //border-right: 1px solid $isTransferAsset;
       }
 
       .isService {
         background: #fffaef;
         border-bottom: 1px solid #fffaef;
+        [data-mode='dark'] & {
+          background-color: #23233d;
+        }
       }
 
       // background-color: #fff;
@@ -195,30 +231,48 @@ $isAppliedBill: #a8ec9c;
 
         td.isAppliedBill {
           background: $isAppliedBill;
+          [data-mode='dark'] & {
+            background-color: $isAppliedBillDark;
+          }
         }
 
         td.isPurchaseOrder {
           background: $isPurchaseOrder;
+          [data-mode='dark'] & {
+            background-color: $isPurchaseOrderDark;
+          }
         }
 
         td.isSublease {
           background: $isSublease;
+          [data-mode='dark'] & {
+            background: $isSubleaseDark;
+          }
         }
 
         td.isTransferAsset {
           background: $isTransferAsset;
+          [data-mode='dark'] & {
+            background-color: $isTransferAssetDark;
+          }
         }
 
         td.isTransferAsset {
           background: $isTransferAsset;
+          [data-mode='dark'] & {
+            background-color: $isTransferAssetDark;
+          }
         }
 
         td.isService {
           background: #fffaef;
+          [data-mode='dark'] & {
+            background-color: #23233d;
+          }
         }
 
         td.error {
-          background: var(--dark-error, #efcccc);
+          background: var(--error-dark, #efcccc);
         }
       }
 

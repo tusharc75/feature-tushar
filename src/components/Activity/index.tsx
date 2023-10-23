@@ -83,6 +83,7 @@ const Activity = (props) => {
   const classes = useStyles();
   const {
     relatedTo,
+    extraRelatedTo = null,
     handleActivityRefresh,
     emails = [],
     restrictedAddActivities = [],
@@ -105,6 +106,7 @@ const Activity = (props) => {
     Email: 0,
     Attachment: 0
   });
+
   const [infoTitle, setInfoTitle] = useState({
     Task: 'The Tasks are visible to the Assignee and Reporter.',
     Event: 'The Event is visible to all participants.',
@@ -304,11 +306,17 @@ const Activity = (props) => {
                               </HtmlTooltip>
                             </Box>
                           )}
-                          <Box mr={1}>
-                            <HtmlTooltip title={infoTitle[data]}>
+                          <HtmlTooltip title={infoTitle[data]} enterTouchDelay={0} arrow placement="top">
+                            <IconButton
+                              size="small"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                e.stopPropagation();
+                              }}
+                            >
                               <InfoOutlinedIcon style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#2A3042)' }} />
-                            </HtmlTooltip>
-                          </Box>
+                            </IconButton>
+                          </HtmlTooltip>
                           <IconButton size="small" onClick={(event) => handleCreateActivity(event, data)}>
                             <AddOutlinedIcon style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#2A3042)' }} />
                           </IconButton>
@@ -371,7 +379,7 @@ const Activity = (props) => {
                 handleClose();
                 setFullScreen(false);
               }}
-              relatedTo={relatedTo}
+              relatedTo={extraRelatedTo ? [...relatedTo, extraRelatedTo] : relatedTo}
               isMinimized={!fullScreen}
               onMinimizeMaximize={() => {
                 setFullScreen((prevState) => !prevState);
@@ -386,7 +394,7 @@ const Activity = (props) => {
                 handleClose();
                 setFullScreen(false);
               }}
-              relatedTo={relatedTo}
+              relatedTo={extraRelatedTo ? [...relatedTo, extraRelatedTo] : relatedTo}
               email={emails}
               isMinimized={!fullScreen}
               onMinimizeMaximize={() => {
@@ -402,7 +410,7 @@ const Activity = (props) => {
                 handleClose();
                 setFullScreen(false);
               }}
-              relatedTo={relatedTo}
+              relatedTo={extraRelatedTo ? [...relatedTo, extraRelatedTo] : relatedTo}
               isMinimized={!fullScreen}
               onMinimizeMaximize={() => {
                 setFullScreen((prevState) => !prevState);
@@ -417,7 +425,7 @@ const Activity = (props) => {
                 handleClose();
                 setFullScreen(false);
               }}
-              relatedTo={relatedTo}
+              relatedTo={extraRelatedTo ? [...relatedTo, extraRelatedTo] : relatedTo}
               handleDialogClose={() => {
                 handleClose();
                 setFullScreen(false);
@@ -436,7 +444,7 @@ const Activity = (props) => {
                 handleClose();
                 setFullScreen(false);
               }}
-              relatedTo={relatedTo}
+              relatedTo={extraRelatedTo ? [...relatedTo, extraRelatedTo] : relatedTo}
               options={emailUsersOptions}
               isMinimized={!fullScreen}
               onMinimizeMaximize={() => {
@@ -452,7 +460,7 @@ const Activity = (props) => {
                 handleClose();
                 setFullScreen(false);
               }}
-              relatedTo={relatedTo}
+              relatedTo={extraRelatedTo ? [...relatedTo, extraRelatedTo] : relatedTo}
               isMinimized={!fullScreen}
               onMinimizeMaximize={() => {
                 setFullScreen((prevState) => !prevState);
@@ -467,7 +475,7 @@ const Activity = (props) => {
                 handleClose();
                 setFullScreen(false);
               }}
-              relatedTo={relatedTo}
+              relatedTo={extraRelatedTo ? [...relatedTo, extraRelatedTo] : relatedTo}
               isMinimized={!fullScreen}
               onMinimizeMaximize={() => {
                 setFullScreen((prevState) => !prevState);

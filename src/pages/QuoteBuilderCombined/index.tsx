@@ -1,55 +1,49 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import { Grid, Chip, Typography, Tooltip } from '@material-ui/core';
-import { Link } from 'react-router-dom';
-import { useData } from '../../StateProvider/Provider';
-import axiosInstance from '../../axios/axiosInstance';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import MessageDialog from '../../components/Helpers/MessageDialog';
-import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import routes from './../../components/Helpers/Routes';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { GiHiveMind } from 'react-icons/gi';
-import { SiMarketo, AiFillFileMarkdown, FaPercentage, SiStatuspage, GoVersions } from 'react-icons/all';
-import {
-  isObjectEmpty,
-  customerAccount,
-  supplierAccount,
-  quoteBuilder,
-  formatAmountWithCurrency,
-  gridLoadingTimeout,
-  prepareDataForGrid,
-  customerContact,
-  supplierContact,
-  quote,
-  getLocalStorageArrayData,
-  removeLocalStorage,
-  sidebarResource
-} from '../../constants/helpers';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import CustomContainer from '../../components/CustomContainer';
-import { useHistory } from 'react-router-dom';
-import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
-import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
-import './style.scss';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import QuoteHeader from './QuoteHeader';
-import ManageQuoteDialog from './ManageQuote/ManageQuoteDialog';
-import NoDataCell from '../../components/Helpers/NoDataCell';
-import CustomDialogComponent from '../../components/CustomDialog/CustomDialogComponent';
-import VersionStatus from './VersionStatus';
-import TransferEntityDialog from '../../components/AssignRolesDialog/TransferEntityDialog';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField, gridFilterParser } from '../../constants/useColumns';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { isMobile, isTablet } from 'react-device-detect';
-import { quoteStepColors } from '../../constants/helpers';
-import InfiniteScroll from 'react-infinite-scroll-component';
-import { FaSuitcase } from 'react-icons/fa';
-import { AiFillCrown, BiDollar } from 'react-icons/all';
+import { Chip, Tooltip } from '@material-ui/core';
 import IconButton from '@material-ui/core/IconButton';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { styles } from '@material-ui/pickers/views/Calendar/Calendar';
 import { camelCase } from 'lodash';
+import queryString from 'query-string';
+import { useContext, useEffect, useReducer, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { AiFillFileMarkdown, BiDollar, CiUser, GoVersions, SiMarketo, SiStatuspage } from 'react-icons/all';
+import { GiHiveMind } from 'react-icons/gi';
+import { Link, useHistory } from 'react-router-dom';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
+import TransferEntityDialog from '../../components/AssignRolesDialog/TransferEntityDialog';
+import CustomContainer from '../../components/CustomContainer';
+import CustomDialogComponent from '../../components/CustomDialog/CustomDialogComponent';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
+import MessageDialog from '../../components/Helpers/MessageDialog';
+import NoDataCell from '../../components/Helpers/NoDataCell';
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import {
+  customerAccount,
+  customerContact,
+  formatAmountWithCurrency,
+  getLocalStorageArrayData,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  quote,
+  quoteBuilder,
+  quoteStepColors,
+  removeLocalStorage,
+  sidebarResource,
+  supplierAccount,
+  supplierContact
+} from '../../constants/helpers';
+import useColumns, { checkStaticField, getFrameworkComponents, getStaticFields, gridFilterParser } from '../../constants/useColumns';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import routes from './../../components/Helpers/Routes';
+import ManageQuoteDialog from './ManageQuote/ManageQuoteDialog';
+import QuoteHeader from './QuoteHeader';
+import VersionStatus from './VersionStatus';
+import './style.scss';
 
 let quoteTimeout;
 const QuoteType = [
@@ -65,9 +59,10 @@ const QuoteType = [
 const arr = [...Array(9).keys()];
 
 const QuoteBuilders = () => {
+  const history = useHistory();
+  const { type }: any = queryString.parse(history.location.search);
   const renderedFrom = camelCase(routes?.quoteBuilder.title);
   const toastConfig = useContext(CustomToastContext);
-  const history = useHistory();
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
@@ -553,8 +548,13 @@ const QuoteBuilders = () => {
   };
 
   const handleQuoteBuilderTypeSel = (filterValues) => {
+    dispatch({ type: 'setPage', page: 0 });
     setSelectedType(filterValues);
+    history.push(`?type=${filterValues}`);
   };
+  useEffect(() => {
+    setSelectedType(type ? parseInt(type) : 1);
+  }, []);
 
   const onSuccess = () => {
     setshowCreateQuoteDialog(false);
@@ -728,6 +728,7 @@ const QuoteBuilders = () => {
         </div>
         {isMobile && !isTablet ? (
           <CustomSwipableList
+            key={selectedType}
             allowSelection={true}
             allowSwipe={true}
             permissions={permissions.quoteBuilder}
@@ -754,7 +755,7 @@ const QuoteBuilders = () => {
             loading={loading}
             additionalDetails={[
               {
-                icon: <FaSuitcase size={18} />,
+                icon: <CiUser size={18} />,
                 field: 'customerAccountName'
               },
               {
@@ -816,7 +817,7 @@ const QuoteBuilders = () => {
                 const versions = params.data?.versions;
                 if (versions && versions.length > 0) {
                   const lastVersion = versions[versions.length - 1];
-                  if (lastVersion?.status === "Building Quote") {
+                  if (lastVersion?.status === 'Building Quote') {
                     return true;
                   }
                 }

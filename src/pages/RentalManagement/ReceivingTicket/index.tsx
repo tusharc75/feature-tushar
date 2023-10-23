@@ -25,7 +25,8 @@ import {
   DELIVERY_FROM_TO_TYPE,
   COLOUR_MASTER,
   REPAIR_JOB_STATUS,
-  repairOrder
+  repairOrder,
+  sidebarResource
 } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
@@ -166,6 +167,10 @@ const ReceivingTicket = ({
     getColumn();
     fetchRecords();
   }, []);
+
+  const OpenInNewWindow = (url) => {
+    window.open(`${url}?referenceType=${rentalManagementData?.rentalJobName}&referenceId=${rentalManagementData?._id}`, '_blank');
+  };
 
   const fetchRecords = async () => {
     setLoadingData(true);
@@ -329,10 +334,10 @@ const ReceivingTicket = ({
             element.type === 'service'
               ? element?.serviceDetail?.serviceDescription || ''
               : element.type === 'product'
-                ? element?.productDetail?.productDescription || ''
-                : element.type === 'package'
-                  ? element?.packageDetail?.packageDescription || ''
-                  : '';
+              ? element?.productDetail?.productDescription || ''
+              : element.type === 'package'
+              ? element?.packageDetail?.packageDescription || ''
+              : '';
           obj.qty = ele.qty;
           obj.consumeQty = consumeQty;
           obj.returnQty = !element?.productDetail?.serializedProduct ? returnTicketProducts[element?.materialId] || 0 : 0;
@@ -351,10 +356,10 @@ const ReceivingTicket = ({
             ? ele.qty === consumeQty
               ? 'Consumed'
               : consumeQty < ele.qty && consumeQty > 0
-                ? 'Partially Consumed'
-                : ele.qty === returnTicketProducts[element?.materialId]
-                  ? 'Returned'
-                  : ''
+              ? 'Partially Consumed'
+              : ele.qty === returnTicketProducts[element?.materialId]
+              ? 'Returned'
+              : ''
             : element?.status;
           obj.startDate = element?.actualStartDate;
           obj.endDate = element?.actualEndDate;
@@ -382,10 +387,10 @@ const ReceivingTicket = ({
             element.type === 'service'
               ? element?.serviceDetail?.serviceDescription || ''
               : element.type === 'product'
-                ? element?.productDetail?.productDescription || ''
-                : element.type === 'package'
-                  ? element?.packageDetail?.packageDescription || ''
-                  : '';
+              ? element?.productDetail?.productDescription || ''
+              : element.type === 'package'
+              ? element?.packageDetail?.packageDescription || ''
+              : '';
           obj.qty = qty;
           obj.parentId = element?.parentId;
           obj.parentName = element?.parentName;
@@ -402,10 +407,10 @@ const ReceivingTicket = ({
             ? qty === consumeQty
               ? 'Consumed'
               : consumeQty < qty && consumeQty > 0
-                ? 'Partially Consumed'
-                : qty === returnTicketProducts[element?.materialId]
-                  ? 'Returned'
-                  : ''
+              ? 'Partially Consumed'
+              : qty === returnTicketProducts[element?.materialId]
+              ? 'Returned'
+              : ''
             : element?.status;
           obj.currentLocation =
             element?.currentLocation?.optionValue ||
@@ -466,8 +471,8 @@ const ReceivingTicket = ({
         d['isChecked'] = false;
         d['hideSelection'] =
           [ASSET_STATUS.lost].includes(d.status) ||
-            d?.manualStatus === ASSET_STATUS.reserved ||
-            (d?.loadingTicketId && d?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered)
+          d?.manualStatus === ASSET_STATUS.reserved ||
+          (d?.loadingTicketId && d?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered)
             ? false
             : true;
 
@@ -502,6 +507,10 @@ const ReceivingTicket = ({
 
       productAssets = [...productAssets?.filter((e) => !e.isReplaced), ...productAssets?.filter((e) => e.isReplaced)];
 
+      productAssets?.forEach((e, index) => {
+        e.index = index + 1;
+      })
+      
       dispatch({ type: 'initialize', data: productAssets, count: productAssets.length });
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
@@ -667,15 +676,15 @@ const ReceivingTicket = ({
       <NoDataCell />
     );
 
-  const ActionRenderer = (params) =>
-    allowedToEdit ? (
+  const ActionRenderer = (params) => {
+    return allowedToEdit ? (
       <HtmlTooltip
         title={
           params?.data?.isAllowedStartDate === false && params?.data?.isAllowedEndDate === false
             ? `Invoice Created - Cannot change Start Date`
             : params?.data?.isAllowedEndDate === false && params?.data?.isAllowedStartDate !== true
-              ? `Can change the End Date after received`
-              : 'Update - Start Date/End Date'
+            ? `Can change the End Date after received`
+            : 'Update - Start Date/End Date'
         }
       >
         <span>
@@ -690,9 +699,8 @@ const ReceivingTicket = ({
           </IconButton>
         </span>
       </HtmlTooltip>
-    ) : (
-      ''
-    );
+    ) : null;
+  };
 
   const frameworkComponents = {
     receivingTicketRenderer: ReceivingTicketRenderer,
@@ -733,6 +741,7 @@ const ReceivingTicket = ({
   };
 
   const columns = [
+    { field: 'index', headerName: 'Index', show: true, disabled: true, cellRenderer: 'commonRenderer', width: 100 },
     {
       field: 'assetNumber',
       headerName: 'Details',
@@ -829,7 +838,7 @@ const ReceivingTicket = ({
       .then(({ data }) => {
         axiosInstance()
           .patch(`${repairJob.api}/${repairJobId}/status`, { status: REPAIR_JOB_STATUS.inProgress })
-          .then(({ data: { data } }) => { })
+          .then(({ data: { data } }) => {})
           .catch((error) => {
             toastConfig.setToastConfig(error);
           });
@@ -976,6 +985,7 @@ const ReceivingTicket = ({
   };
 
   const handelCancelDeliveredTicket = () => {
+    setOkBtnLoading(true);
     const receivingTicketId = uniq(map(selectedRecords, 'receivingTicketId'));
     const returnTicketId = uniq(map(selectedRecords, 'returnTicketId'));
     const ticketIds: any = [];
@@ -995,14 +1005,18 @@ const ReceivingTicket = ({
       axiosInstance()
         .post(`${deliveryTicket.api}/cancel-delivered-ticket`, data)
         .then(({ data }) => {
+          setOkBtnLoading(false);
+          setShowConformationCancleTicket({ open: false, type: '' });
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
             message: `Cancelled Successfully`
           });
           fetchRecords();
+          fetchRentalData();
         })
         .catch((error) => {
+          setOkBtnLoading(false);
           toastConfig.setToastConfig(error);
         });
     }
@@ -1090,6 +1104,7 @@ const ReceivingTicket = ({
   };
 
   const handelRevertTickets = () => {
+    setOkBtnLoading(true);
     const receivingTicketIds = uniq(map(selectedRecords, 'receivingTicketId'));
     if (receivingTicketIds.length) {
       let data = [];
@@ -1103,6 +1118,8 @@ const ReceivingTicket = ({
       axiosInstance()
         .put(`${deliveryTicket.api}/revert-partially`, data)
         .then(({ data: { data } }) => {
+          setOkBtnLoading(false);
+          setShowConformationRevertTicket(false);
           fetchRecords();
           toastConfig.setToastConfig({
             open: true,
@@ -1111,17 +1128,21 @@ const ReceivingTicket = ({
           });
         })
         .catch((error) => {
+          setOkBtnLoading(false);
           toastConfig.setToastConfig(error);
         });
     }
   };
 
   const handelCancleTickets = () => {
+    setOkBtnLoading(true);
     const receivingTicketIds = uniq(map(selectedRecords, 'receivingTicketId'));
     if (receivingTicketIds.length) {
       axiosInstance()
         .put(`${deliveryTicket.api}/revert`, { ids: receivingTicketIds })
         .then(({ data: { data } }) => {
+          setOkBtnLoading(false);
+          setShowConformationCancleTicket({ open: false, type: '' });
           fetchRecords();
           toastConfig.setToastConfig({
             open: true,
@@ -1130,6 +1151,7 @@ const ReceivingTicket = ({
           });
         })
         .catch((error) => {
+          setOkBtnLoading(false);
           toastConfig.setToastConfig(error);
         });
     }
@@ -1195,24 +1217,19 @@ const ReceivingTicket = ({
               onClick={() => {
                 setDownlodingFile(true);
                 axiosInstance()
-                  .post(`/delivery-ticket/pdf`, { ids: uniqueReceivingTicket })
+                  .get(`pdf/multiple?resource=${sidebarResource.deliveryTicket}&ids=${uniqueReceivingTicket}`, {
+                    responseType: 'blob'
+                  })
                   .then(({ data }) => {
-                    axiosInstance()
-                      .get(`user/download?fileName=${data.data.fileName}`, {
-                        responseType: 'blob'
-                      })
-                      .then(({ data }) => {
-                        const file = new Blob([data], { type: 'application/pdf' });
-                        const fileURL = URL.createObjectURL(file);
-                        const pdfWindow = window.open();
-                        pdfWindow.location.href = fileURL;
-                        toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
-                        setDownlodingFile(false);
-                      })
-                      .catch((err) => {
-                        toastConfig.setToastConfig(err);
-                        setDownlodingFile(false);
-                      });
+                    const file = new Blob([data], { type: 'application/pdf' });
+                    const fileURL = URL.createObjectURL(file);
+                    const link = document.createElement('a');
+                    link.href = fileURL;
+                    link.target = '_blank';
+                    link.style.display = 'none';
+                    link.click();
+                    toastConfig.setToastConfig({ open: true, type: 'success', message: 'File Previewed Successfully.' });
+                    setDownlodingFile(false);
                   })
                   .catch((err) => {
                     toastConfig.setToastConfig(err);
@@ -1236,10 +1253,11 @@ const ReceivingTicket = ({
               color="primary"
               aria-controls="simple-menu"
               aria-haspopup="true"
-              disabled={selectedRecords?.length === 0
-                || isOffline
-                || selectedRecords?.some((f) => f.type === 'Product')
-                || selectedRecords?.some((f) => [ASSET_STATUS.lost].includes(f.status))
+              disabled={
+                selectedRecords?.length === 0 ||
+                isOffline ||
+                selectedRecords?.some((f) => f.type === 'Product') ||
+                selectedRecords?.some((f) => [ASSET_STATUS.lost].includes(f.status))
               }
               size="small"
               onClick={handleClick}
@@ -1272,17 +1290,17 @@ const ReceivingTicket = ({
                       (f.hasOwnProperty('returnTicketId') && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered)) &&
                     [ASSET_STATUS.underReview].includes(f.status)
                 )?.length === selectedRecords?.length && (
-                    <Fragment>
-                      <MenuItem
-                        onClick={() => {
-                          setAnchorEl(null);
-                          setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.available, message: '' });
-                        }}
-                      >
-                        {ASSET_STATUS.available}
-                      </MenuItem>
-                    </Fragment>
-                  )}
+                  <Fragment>
+                    <MenuItem
+                      onClick={() => {
+                        setAnchorEl(null);
+                        setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.available, message: '' });
+                      }}
+                    >
+                      {ASSET_STATUS.available}
+                    </MenuItem>
+                  </Fragment>
+                )}
                 <MenuItem
                   onClick={() => {
                     setAnchorEl(null);
@@ -1372,8 +1390,8 @@ const ReceivingTicket = ({
             </MenuItem>
 
             {selectedRecords.length &&
-              selectedRecords?.filter((f) => f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new)
-                ?.length === selectedRecords?.length ? (
+            selectedRecords?.filter((f) => f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new)
+              ?.length === selectedRecords?.length ? (
               <MenuItem
                 onClick={() => {
                   setShowRemoveAssetFromReceivingTicketDialog(true);
@@ -1464,19 +1482,19 @@ const ReceivingTicket = ({
             </MenuItem>
 
             {permissions?.repairJob?.isCreate &&
-              selectedRecords.length &&
-              selectedRecords?.filter(
-                (f) =>
-                  ((f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
-                    (f.hasOwnProperty('returnTicketId') && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
-                    f.status === ASSET_STATUS.scrap) &&
-                  [ASSET_STATUS.underReview, ASSET_STATUS.scrap, ASSET_STATUS.available, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair].includes(
-                    f.status
-                  ) &&
-                  !f.subleaseAsset &&
-                  checkUniqWarehouse()
-              )?.length === selectedRecords?.length &&
-              !isOffline ? (
+            selectedRecords.length &&
+            selectedRecords?.filter(
+              (f) =>
+                ((f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
+                  (f.hasOwnProperty('returnTicketId') && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
+                  f.status === ASSET_STATUS.scrap) &&
+                [ASSET_STATUS.underReview, ASSET_STATUS.scrap, ASSET_STATUS.available, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair].includes(
+                  f.status
+                ) &&
+                !f.subleaseAsset &&
+                checkUniqWarehouse()
+            )?.length === selectedRecords?.length &&
+            !isOffline ? (
               <MenuItem
                 onClick={() => {
                   closeActions();
@@ -1488,19 +1506,19 @@ const ReceivingTicket = ({
             ) : null}
 
             {permissions?.repairOrder?.isCreate &&
-              selectedRecords.length &&
-              selectedRecords?.filter(
-                (f) =>
-                  ((f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
-                    (f.hasOwnProperty('returnTicketId') && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
-                    f.status === ASSET_STATUS.scrap) &&
-                  [ASSET_STATUS.underReview, ASSET_STATUS.scrap, ASSET_STATUS.available, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair].includes(
-                    f.status
-                  ) &&
-                  !f.subleaseAsset &&
-                  checkUniqWarehouse()
-              )?.length === selectedRecords?.length &&
-              !isOffline ? (
+            selectedRecords.length &&
+            selectedRecords?.filter(
+              (f) =>
+                ((f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
+                  (f.hasOwnProperty('returnTicketId') && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
+                  f.status === ASSET_STATUS.scrap) &&
+                [ASSET_STATUS.underReview, ASSET_STATUS.scrap, ASSET_STATUS.available, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair].includes(
+                  f.status
+                ) &&
+                !f.subleaseAsset &&
+                checkUniqWarehouse()
+            )?.length === selectedRecords?.length &&
+            !isOffline ? (
               <MenuItem
                 onClick={() => {
                   closeActions();
@@ -1545,8 +1563,8 @@ const ReceivingTicket = ({
               Replace Products
             </MenuItem> */}
             {selectedRecords.length &&
-              selectedRecords?.filter((f) => f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.indTransit)
-                ?.length === selectedRecords?.length ? (
+            selectedRecords?.filter((f) => f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.indTransit)
+              ?.length === selectedRecords?.length ? (
               <Fragment>
                 <MenuItem
                   onClick={() => {
@@ -1567,9 +1585,12 @@ const ReceivingTicket = ({
               </Fragment>
             ) : null}
             {selectedRecords.length > 0 &&
-              selectedRecords.filter((e: any) => e?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered
-                && e?.status === ASSET_STATUS.underReview && e?.rentalAssetStatus === RENTAL_INTERNAL_ASSET_STATUS.complete)?.length === selectedRecords?.length
-              ?
+            selectedRecords.filter(
+              (e: any) =>
+                e?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered &&
+                e?.status === ASSET_STATUS.underReview &&
+                e?.rentalAssetStatus === RENTAL_INTERNAL_ASSET_STATUS.complete
+            )?.length === selectedRecords?.length ? (
               <MenuItem
                 onClick={() => {
                   closeActions();
@@ -1577,7 +1598,8 @@ const ReceivingTicket = ({
                 }}
               >
                 Cancel Receiving Ticket(s)
-              </MenuItem> : null}
+              </MenuItem>
+            ) : null}
             {selectedRecords?.filter(
               (f) =>
                 f.type === 'Product' &&
@@ -1585,19 +1607,19 @@ const ReceivingTicket = ({
                 f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered &&
                 Number(f?.consumeQty) + Number(f?.returnQty) < Number(f?.qty)
             ).length === selectedRecords.length && (
-                <MenuItem
-                  onClick={() => {
-                    closeActions();
-                    if (selectedRecords?.length === 1) {
-                      setShowConformationConsume({ open: true, type: 'add' });
-                    } else {
-                      setShowConformationConsumeMultiple(true);
-                    }
-                  }}
-                >
-                  {RENTAL_INTERNAL_ASSET_STATUS.consumed}
-                </MenuItem>
-              )}
+              <MenuItem
+                onClick={() => {
+                  closeActions();
+                  if (selectedRecords?.length === 1) {
+                    setShowConformationConsume({ open: true, type: 'add' });
+                  } else {
+                    setShowConformationConsumeMultiple(true);
+                  }
+                }}
+              >
+                {RENTAL_INTERNAL_ASSET_STATUS.consumed}
+              </MenuItem>
+            )}
             {selectedRecords.length === 1 &&
               selectedRecords?.filter(
                 (f) =>
@@ -1645,9 +1667,7 @@ const ReceivingTicket = ({
             {repairJobCount > 0 && (
               <MenuItem
                 onClick={() => {
-                  history.push(routes.repairJob.path, {
-                    rental: rentalManagementData
-                  });
+                  OpenInNewWindow(routes.repairJob.path);
                 }}
               >
                 {`Created ${routes.repairJob.title}`}
@@ -1656,9 +1676,7 @@ const ReceivingTicket = ({
             {repairOrderCount > 0 && (
               <MenuItem
                 onClick={() => {
-                  history.push(routes.repairOrder.path, {
-                    rental: rentalManagementData
-                  });
+                  OpenInNewWindow(routes.repairOrder.path);
                 }}
               >
                 {`Created ${routes.repairOrder.title}`}
@@ -1704,6 +1722,10 @@ const ReceivingTicket = ({
               page={page}
               loading={loading}
               additionalDetails={[]}
+              actionCol={(data) => {
+                const params = { data };
+                return <ActionRenderer {...params} />;
+              }}
               chips={[
                 {
                   label: 'Status : ',
@@ -1728,7 +1750,7 @@ const ReceivingTicket = ({
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={() => { }}
+              onClone={() => {}}
               renderedFrom={renderedFrom}
             />
           ) : (
@@ -1956,7 +1978,7 @@ const ReceivingTicket = ({
           }}
           isAdding={replaceLoading}
           selectedProducts={addSerializedAssetDialog.products}
-          filterByPlant={rentalManagementData?.warehouse?.optionValue}
+          filterByPlant={rentalManagementData?.warehouse}
         />
       )}
       {showReplaceReason.open && (
@@ -2004,7 +2026,6 @@ const ReceivingTicket = ({
           }}
           onOk={() => {
             handelRevertTickets();
-            setShowConformationRevertTicket(false);
           }}
           okBtnLoading={okBtnLoading}
         />
@@ -2019,11 +2040,9 @@ const ReceivingTicket = ({
           onOk={() => {
             if (showConformationCancleTicket.type === 'Delivered') {
               handelCancelDeliveredTicket();
-            }
-            else {
+            } else {
               handelCancleTickets();
             }
-            setShowConformationCancleTicket({ open: false, type: '' });
           }}
           okBtnLoading={okBtnLoading}
         />

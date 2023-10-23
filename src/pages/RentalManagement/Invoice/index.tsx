@@ -14,11 +14,9 @@ import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import AdditionalCostDialog from '../AdditionalCost/AdditionalCostDialog';
 import { fetch_rental_product_fields, fetch_rental_cost_fields } from '../../../components/RentalManagment/helper';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
-import moment from 'moment';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import PreviewDownload from 'src/components/PreviewDownload';
 import { generateCustomTableColumns } from 'src/constants/columns';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
 const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFullScreen, allowedToEdit, renderedFrom }) => {
@@ -299,6 +297,7 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
             </Fragment>
           )}
           <PreviewDownload
+            fileName={`${routes.rentalManagement.title}-${rentalManagementData?.rentalJobName}`}
             resource={sidebarResource.rentalManagement}
             referenceId={rentalManagementData._id}
             columns={columns}

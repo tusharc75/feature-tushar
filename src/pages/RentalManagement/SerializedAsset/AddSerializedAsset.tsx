@@ -57,7 +57,8 @@ const AddSerializedAsset = ({
   transferAssetId = null,
   notIn = null,
   filterByPlant = null,
-  handleSuccess = null
+  handleSuccess = null,
+  chartOfAccount = null
 }) => {
 
   const renderedFrom = `${camelCase(routes?.serializedAsset.title)}_assign`;
@@ -78,7 +79,7 @@ const AddSerializedAsset = ({
   const [showTransferAssetDialog, setShowTransferAssetDialog] = useState(false);
 
   const [warehouseOption, setWarehouseOption] = useState([]);
-  const [selectedWarehouse, setSelectedWarehouse] = useState(filterByPlant);
+  const [selectedWarehouse, setSelectedWarehouse] = useState(filterByPlant?.optionValue);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [tabValue, setTabValue] = useState(0);
 
@@ -265,23 +266,27 @@ const AddSerializedAsset = ({
       }
 
       if (referenceType === 'Repair Job') {
-        deepFilter = `${deepFilter}&repairJob=true`;
-      }
-      else if (referenceType === 'Transfer Asset') {
+        if (chartOfAccount) {
+          deepFilter = `${deepFilter}&repairJob=true&chartOfAccount=${chartOfAccount?.optionValue}`;
+        } else {
+          deepFilter = `${deepFilter}&repairJob=true`;
+        }
+      } else if (referenceType === 'Transfer Asset') {
         deepFilter = `${deepFilter}&transferable=true`;
-      }
-      else if (referenceType === 'Rental Job') {
+      } else if (referenceType === 'Rental Job') {
         const dateFilter = { from: referenceData?.fromDate, to: referenceData?.toDate };
         deepFilter = `${deepFilter}&rental=true&date=${JSON.stringify(dateFilter)}`;
-      }
-      else {
+      } else {
         deepFilter = `${deepFilter}&availableAsset=true`;
       }
     }
-    if (Number(tabValue) === 1) {
-      deepFilter = `${deepFilter}&subleaseAsset=1`;
-    } else {
-      deepFilter = `${deepFilter}&subleaseAsset=0`;
+
+    if (referenceType !== 'Transfer Asset') {
+      if (Number(tabValue) === 1) {
+        deepFilter = `${deepFilter}&subleaseAsset=1`;
+      } else {
+        deepFilter = `${deepFilter}&subleaseAsset=0`;
+      }
     }
 
     return deepFilter;
@@ -318,7 +323,7 @@ const AddSerializedAsset = ({
       ) {
         return true;
       }
-      if (uniq(map(getLocalStorageArrayData(`${localStorageSelectedRecords}`), 'warehouseId'))[0] === filterByPlant) {
+      if (uniq(map(getLocalStorageArrayData(`${localStorageSelectedRecords}`), 'warehouseId'))[0] === filterByPlant?.optionValue) {
         return true;
       }
       return false;
@@ -351,7 +356,7 @@ const AddSerializedAsset = ({
       .then(({ data }) => {
         fetchAssets();
         setShowTransferAssetDialog(false);
-        addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)]);
+        addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)], true);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -372,7 +377,7 @@ const AddSerializedAsset = ({
       localStorage.removeItem(localStorageSelectedRecords);
     }
     // if (newValue === 0) {
-    //   setSelectedWarehouse(filterByPlant);
+    //   setSelectedWarehouse(filterByPlant?.optionValue);
     // } else {
     //   setSelectedWarehouse(null);
     // }
@@ -490,9 +495,26 @@ const AddSerializedAsset = ({
       });
   };
 
+  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
+  if (columnState) {
+    columns?.forEach((item) => {
+      columnState?.forEach((d) => {
+        if (d.colId === item.field) {
+          item.show = !d.hide;
+        }
+      });
+    });
+  }
+
   return (
     <Fragment>
-      <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
+      <Dialog
+        disableEnforceFocus
+        fullScreen={true}
+        TransitionComponent={CustomDialogTransition}
+        aria-labelledby="customized-dialog-title"
+        open={true}
+      >
         <CustomDialogHeader
           title={`${referenceType === 'ReplaceAsset' ? 'Replace' : 'Add'} ${routes.serializedAsset.title}`}
           onClose={handleSerializedAssetClose}
@@ -535,7 +557,7 @@ const AddSerializedAsset = ({
                   </Box>
                 </Box>
                 {serializedProducts.length > 0 && serializedProducts.some((s) => s.qty < 0) ? (
-                  <div className="text-error font-weight-bold">You have selected more assets then needed.</div>
+                  <div className="text-error font-weight-bold">You have selected more assets than required</div>
                 ) : (
                   ''
                 )}
@@ -575,97 +597,95 @@ const AddSerializedAsset = ({
                 )}
               </Grid>
               <Grid item xs={12} md={5}>
-                <Box display="flex" alignItems={'center'}>
-                  <Box flexGrow={1}>
-                    <SearchBox
-                      onChange={handleSearch}
-                      className="terms_header_search_bar"
-                      value={search}
-                      width={isMobile && !isTablet ? '75%' : '100%'}
-                    />
-                  </Box>
+                <Box className="flex flex-wrap justify-end items-center gap-2">
+                  <SearchBox
+                    size="small"
+                    onChange={handleSearch}
+                    className="small-searchbar ml-auto"
+                    value={search}
+                    width={isMobile && !isTablet ? '75%' : '100%'}
+                  />
                   {(Number(tabValue) === 0 || Number(tabValue) === 1) && (
                     <Fragment>
                       {permissions?.transferAsset?.isCreate &&
                         getLocalStorageArrayData(`${localStorageSelectedRecords}`).length !== 0 &&
                         !checkUniqWarehouse() && (
-                          <Box pl={1}>
-                            <Button
-                              style={{ minWidth: 'max-content' }}
-                              size="small"
-                              color="primary"
-                              onClick={() => {
-                                setShowTransferAssetDialog(true);
-                              }}
-                              variant={isMobile && !isTablet ? 'text' : 'contained'}
-                              disabled={isAdding || serializedProducts.some((d) => d?.qty < 0)}
-                              className={`${isMobile && !isTablet ? 'mobile_button' : ''} yellow-button `}
-                              endIcon={isAdding && <CircularProgress size={20} />}
-                            >
-                              {'Transfer to Job Plant'}
-                              {getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
-                                ? ' (' + getLocalStorageArrayData(`${localStorageSelectedRecords}`).length + ')'
-                                : ''}
-                            </Button>
-                          </Box>
-                        )}
-                      <Box pl={1}>
-                        <HtmlTooltip
-                          title={
-                            getLocalStorageArrayData(`${localStorageSelectedRecords}`).length !== 0 && !checkUniqWarehouse()
-                              ? 'Direct transfer to customer location'
-                              : referenceType === 'Rental Job'
-                                ? 'Add to Job'
-                                : referenceType === 'ReplaceAsset'
-                                  ? 'Replace'
-                                  : 'Add'
-                          }
-                        >
                           <Button
-                            color="primary"
-                            size="small"
                             style={{ minWidth: 'max-content' }}
+                            size="small"
+                            color="primary"
                             onClick={() => {
-                              if (referenceType === 'Rental Job') {
-                                if (user?.user?.brandPolicy?.serializedAssetCertification &&
-                                  [...getLocalStorageArrayData(localStorageSelectedRecords)]?.some((e) => e.certificateExpiryDate
-                                    && new Date(e.certificateExpiryDate)?.getTime() <= new Date()?.getTime())) {
-                                  setCertificateExpireAlert({
-                                    open: true,
-                                    asset: [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((e) => e.certificateExpiryDate
-                                      && new Date(e.certificateExpiryDate)?.getTime() <= new Date()?.getTime())?.map((e) => e.assetNumber)?.toString()
-                                  })
-                                }
-                                else if (checkMTRValidation) {
-                                  if ([...getLocalStorageArrayData(localStorageSelectedRecords)]?.some((e) => e.mtrAttached !== true)) {
-                                    setMtrConfirmBox(true);
-                                  } else {
-                                    addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)]);
-                                  }
-                                }
-                                else {
+                              setShowTransferAssetDialog(true);
+                            }}
+                            variant={isMobile && !isTablet ? 'text' : 'contained'}
+                            disabled={isAdding || serializedProducts.some((d) => d?.qty < 0)}
+                            className={`${isMobile && !isTablet ? 'mobile_button' : ''}  `}
+                            endIcon={isAdding && <CircularProgress size={20} />}
+                          >
+                            {`Transfer to ${filterByPlant?.optionLabel}`}
+                            {getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
+                              ? ' (' + getLocalStorageArrayData(`${localStorageSelectedRecords}`).length + ')'
+                              : ''}
+                          </Button>
+                        )}
+                      <HtmlTooltip
+                        title={
+                          getLocalStorageArrayData(`${localStorageSelectedRecords}`).length !== 0 && !checkUniqWarehouse()
+                            ? 'Direct transfer to customer location'
+                            : referenceType === 'Rental Job'
+                              ? 'Add to Job'
+                              : referenceType === 'ReplaceAsset'
+                                ? 'Replace'
+                                : 'Add'
+                        }
+                      >
+                        <Button
+                          color="primary"
+                          size="small"
+                          style={{ minWidth: 'max-content' }}
+                          onClick={() => {
+                            if (referenceType === 'Rental Job') {
+                              if (
+                                user?.user?.brandPolicy?.serializedAssetCertification &&
+                                [...getLocalStorageArrayData(localStorageSelectedRecords)]?.some(
+                                  (e) => e.certificateExpiryDate && new Date(e.certificateExpiryDate)?.getTime() <= new Date()?.getTime()
+                                )
+                              ) {
+                                setCertificateExpireAlert({
+                                  open: true,
+                                  asset: [...getLocalStorageArrayData(localStorageSelectedRecords)]
+                                    ?.filter((e) => e.certificateExpiryDate && new Date(e.certificateExpiryDate)?.getTime() <= new Date()?.getTime())
+                                    ?.map((e) => e.assetNumber)
+                                    ?.toString()
+                                });
+                              } else if (checkMTRValidation) {
+                                if ([...getLocalStorageArrayData(localStorageSelectedRecords)]?.some((e) => e.mtrAttached !== true)) {
+                                  setMtrConfirmBox(true);
+                                } else {
                                   addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)]);
                                 }
                               } else {
                                 addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)]);
                               }
-                            }}
-                            variant={isMobile && !isTablet ? 'text' : 'contained'}
-                            disabled={
-                              getLocalStorageArrayData(`${localStorageSelectedRecords}`).length === 0 ||
-                              isAdding ||
-                              serializedProducts.some((d) => d?.qty < 0)
+                            } else {
+                              addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)]);
                             }
-                            className={`${isMobile && !isTablet ? 'mobile_button' : ''}  `}
-                            endIcon={isAdding && <CircularProgress size={20} />}
-                          >
-                            {referenceType === 'Rental Job' ? 'Add to Job' : referenceType === 'ReplaceAsset' ? 'Replace' : 'Add'}
-                            {getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
-                              ? ' (' + getLocalStorageArrayData(`${localStorageSelectedRecords}`).length + ')'
-                              : ''}
-                          </Button>
-                        </HtmlTooltip>
-                      </Box>
+                          }}
+                          variant={isMobile && !isTablet ? 'text' : 'contained'}
+                          disabled={
+                            getLocalStorageArrayData(`${localStorageSelectedRecords}`).length === 0 ||
+                            isAdding ||
+                            serializedProducts.some((d) => d?.qty < 0)
+                          }
+                          className={`${isMobile && !isTablet ? 'mobile_button' : ''}  `}
+                          endIcon={isAdding && <CircularProgress size={20} />}
+                        >
+                          {referenceType === 'Rental Job' ? 'Add to Job' : referenceType === 'ReplaceAsset' ? 'Replace' : 'Add'}
+                          {getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
+                            ? ' (' + getLocalStorageArrayData(`${localStorageSelectedRecords}`).length + ')'
+                            : ''}
+                        </Button>
+                      </HtmlTooltip>
                     </Fragment>
                   )}
                   {Number(tabValue) === 2 && (
@@ -734,58 +754,52 @@ const AddSerializedAsset = ({
           </Box>
         </CustomDialogContent>
       </Dialog>
-      {
-        showTransferAssetDialog && (
-          <ManageTransferAsset
-            isClone={false}
-            transferAssetId={null}
-            onClose={() => setShowTransferAssetDialog(false)}
-            onSuccess={(data) => {
-              handleAddAssetToTransferAsset(data?._id);
-            }}
-            referenceId={referenceData._id}
-            referenceType={referenceType}
-            referenceData={{
-              transferFromPlant: getLocalStorageArrayData(`${localStorageSelectedRecords}`)[0]?.warehouseId,
-              transferToPlant: referenceData?.warehouse,
-              wellName: referenceData?.wellName,
-              wellNumber: referenceData?.wellNumber,
-              afeNumber: referenceData?.afeNumber
-            }}
-          />
-        )
-      }
-      {
-        showTicketDialog.open && (
-          <ManageDeliveryTicket
-            ticketType={DELIVERY_TICKET_TYPE.receiving}
-            referenceType={DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}
-            referenceData={showTicketDialog.data}
-            productInventory={getLocalStorageArrayData(`${localStorageSelectedRecords}`)}
-            products={[]}
-            onClose={() => setShowTicketDialog({ open: false, data: {}, assets: [] })}
-            onSuccess={(data) => {
-              handleCreateLoadingTicketAddAsstes(data);
-            }}
-          />
-        )
-      }
-      {
-        mtrConfirmBox && (
-          <ConfirmationDialog
-            open={mtrConfirmBox}
-            okBtnLoading={isAdding}
-            message={`MTR(s) missing for some or all line items.`}
-            onClose={() => {
-              setMtrConfirmBox(false);
-            }}
-            onOk={() => {
-              addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)]);
-              setMtrConfirmBox(false);
-            }}
-          />
-        )
-      }
+      {showTransferAssetDialog ? (
+        <ManageTransferAsset
+          isClone={false}
+          transferAssetId={null}
+          onClose={() => setShowTransferAssetDialog(false)}
+          onSuccess={(data) => {
+            handleAddAssetToTransferAsset(data?._id);
+          }}
+          referenceId={referenceData._id}
+          referenceType={referenceType}
+          referenceData={{
+            transferFromPlant: getLocalStorageArrayData(`${localStorageSelectedRecords}`)[0]?.warehouseId,
+            transferToPlant: referenceData?.warehouse,
+            wellName: referenceData?.wellName,
+            wellNumber: referenceData?.wellNumber,
+            afeNumber: referenceData?.afeNumber
+          }}
+        />
+      ) : null}
+      {showTicketDialog.open && (
+        <ManageDeliveryTicket
+          ticketType={DELIVERY_TICKET_TYPE.receiving}
+          referenceType={DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}
+          referenceData={showTicketDialog.data}
+          productInventory={getLocalStorageArrayData(`${localStorageSelectedRecords}`)}
+          products={[]}
+          onClose={() => setShowTicketDialog({ open: false, data: {}, assets: [] })}
+          onSuccess={(data) => {
+            handleCreateLoadingTicketAddAsstes(data);
+          }}
+        />
+      )}
+      {mtrConfirmBox && (
+        <ConfirmationDialog
+          open={mtrConfirmBox}
+          okBtnLoading={isAdding}
+          message={`MTR(s) missing for some or all line items.`}
+          onClose={() => {
+            setMtrConfirmBox(false);
+          }}
+          onOk={() => {
+            addSerializedAsset([...getLocalStorageArrayData(localStorageSelectedRecords)]);
+            setMtrConfirmBox(false);
+          }}
+        />
+      )}
       {inuseAssetConfirmBox && (
         <ConfirmationDialog
           open={inuseAssetConfirmBox}
@@ -803,12 +817,12 @@ const AddSerializedAsset = ({
       {certificateExpireAlert.open && (
         <MessageDialog
           open={true}
-          header='Certification Information'
+          header="Certification Information"
           message={`Certification has expired for asset(s) - ${certificateExpireAlert.asset}`}
           onClose={() => setCertificateExpireAlert({ open: false, asset: '' })}
         />
       )}
-    </Fragment >
+    </Fragment>
   );
 };
 

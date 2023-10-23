@@ -222,11 +222,8 @@ export default function MobileFilterDialog({ isOpen, handleClose, contentPart, c
               )}
               {inputFields?.map((field) => (
                 <Box key={field.id}>
-                  <Box
-                    p={1}
-                    className="shadow-[0px_5.44444px_27.22222px_0px_rgba(0,_0,_0,_0.06)] border-1 border border-[var(--common-border-color)] rounded-md"
-                  >
-                    <Box display="flex" alignItems={'center'}>
+                  <Box className="p-[14px_12px_12px] shadow-[0px_5.44444px_27.22222px_0px_rgba(0,_0,_0,_0.06)] border-1 border border-[var(--common-border-color)] rounded-md">
+                    <Box display="flex" alignItems={'center'} className="mb-[10px]">
                       <Box flexGrow={1}>
                         <Autocomplete
                           id={`fieldName_${field.id}`}
@@ -297,7 +294,15 @@ export default function MobileFilterDialog({ isOpen, handleClose, contentPart, c
                 Save Filter
               </Button>
             )}
-            <Button type="submit" className="no-shadow" color="primary" size="small" variant="contained" onClick={handleSubmit}>
+            <Button
+              disabled={inputFields?.some((v) => v.fieldValue === '' || v.fieldName === '')}
+              type="submit"
+              className="no-shadow"
+              color="primary"
+              size="small"
+              variant="contained"
+              onClick={handleSubmit}
+            >
               Apply Now
             </Button>
           </CustomDialogFooter>
@@ -403,7 +408,7 @@ export const DisplayFiltersForMobile = ({ resource = '' }) => {
           </span>
           <span>
             <IconButton aria-label="delete" size="small" style={{ width: 20, height: 20 }} onClick={() => clearFilter(item)}>
-              <Close style={{ width: 16, height: 16 }} />
+              <Close style={{ width: 16, height: 16 }} className="text-[var(--primary)]" />
             </IconButton>
           </span>
         </div>

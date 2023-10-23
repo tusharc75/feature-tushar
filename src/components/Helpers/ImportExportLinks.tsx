@@ -36,7 +36,7 @@ export default function ImportExportLinks({
   exportSelectedRecords = null,
   isExportAllOrSomeFeature = false,
   onlyExport = false,
-  onExportToExcelSuccess = () => {},
+  onExportToExcelSuccess = () => { },
   total = 0,
   additionalParams = null,
   isDownloadExcel = true,
@@ -136,7 +136,7 @@ export default function ImportExportLinks({
     let exportApi = apiUrl ? apiUrl : `${api}/template?export=true`;
 
     if (additionalParams) {
-      exportApi = `${exportApi}&${additionalParams}`;
+      exportApi = `${exportApi}${additionalParams}`;
     }
 
     if (recordsToExport > 0) {

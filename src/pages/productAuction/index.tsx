@@ -20,7 +20,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import routes from '../../components/Helpers/Routes';
 import SearchBox from '../../components/Helpers/SearchBox';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
+import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import {
@@ -321,6 +321,7 @@ const ProductAuction = () => {
                       dispatch={dispatch}
                       title={routes?.productAuction?.title}
                       filters={filters}
+                      resource={sidebarResource.productAuction}
                     />
                   </div>
                 </div>
@@ -368,6 +369,7 @@ const ProductAuction = () => {
                 </Menu>
               </div>
             </div>
+            <DisplayFiltersForMobile resource={sidebarResource.productAuction} />
           </div>
         </div>
         {columns ? (

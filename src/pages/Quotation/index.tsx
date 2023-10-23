@@ -1,42 +1,42 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import { Link, useHistory } from 'react-router-dom';
-import { Chip, Grid, IconButton, Tooltip, Box } from '@material-ui/core';
+import { Box, Chip, IconButton, Tooltip } from '@material-ui/core';
+import { Delete, Info, Warning } from '@material-ui/icons';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { FaSuitcase } from 'react-icons/fa';
-import { GiHiveMind } from 'react-icons/gi';
-import { MdContactPhone, RiContactsBookUploadFill, RiShip2Fill, FaWarehouse, SiStatuspage } from 'react-icons/all';
-import {
-  isObjectEmpty,
-  customerAccount,
-  supplierAccount,
-  gridLoadingTimeout,
-  quotation,
-  sidebarResource,
-  prepareDataForGrid,
-  getLocalStorageArrayData,
-  removeLocalStorage
-} from '../../constants/helpers';
-import CustomContainer from '../../components/CustomContainer';
-import routes from '../../components/Helpers/Routes';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import MessageDialog from '../../components/Helpers/MessageDialog';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import QuotationHeader from './QuotationHeader';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import { camelCase } from 'lodash';
+import moment from 'moment';
+import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
+import { CiUser, FaWarehouse, MdContactPhone, RiContactsBookUploadFill, RiShip2Fill, SiStatuspage } from 'react-icons/all';
+import { GiHiveMind } from 'react-icons/gi';
+import { Link, useHistory } from 'react-router-dom';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField, gridFilterParser } from '../../constants/useColumns';
+import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import CustomContainer from '../../components/CustomContainer';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { camelCase } from 'lodash';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
+import MessageDialog from '../../components/Helpers/MessageDialog';
+import routes from '../../components/Helpers/Routes';
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import {
+  QUOTATION_TYPE,
+  customerAccount,
+  getLocalStorageArrayData,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  quotation,
+  removeLocalStorage,
+  sidebarResource,
+  supplierAccount
+} from '../../constants/helpers';
+import useColumns, { checkStaticField, getFrameworkComponents, getStaticFields, gridFilterParser } from '../../constants/useColumns';
 import ManageQuotationDialog from './ManageQuotationDialog';
-import { Delete, Info, Warning } from '@material-ui/icons';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import moment from 'moment';
+import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
+import QuotationHeader from './QuotationHeader';
 
 let quotationTimeout;
 
@@ -78,7 +78,8 @@ const Quotation = () => {
   });
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
+    state;
 
   const { getColumnData } = useColumns();
   const [frameworkComponent, setFrameworkComponent] = useState({});
@@ -166,14 +167,17 @@ const Quotation = () => {
       });
   };
 
-  const isDatePast = (dateStr) => {
-    return moment(dateStr).isBefore(moment(), 'day');
-  };
-
-  const isDateWithinNext15Days = (dateStr) => {
-    const today = moment();
-    const newDate = moment(dateStr);
-    return newDate.isBetween(today, today.add(15, 'days'), 'day', '[]');
+  const isDateWithinNext15Days = (endData) => {
+    var a = moment(endData);
+    var b = moment();
+    const days = a.diff(b, 'days');
+    if (days < 15 && days >= 0) {
+      return true;
+    } else if (days < 0) {
+      return false;
+    } else {
+      return false;
+    }
   };
 
   const QuotationNumberRenderer = (params) => (
@@ -181,20 +185,23 @@ const Quotation = () => {
       <Link className="link text-truncate" title={params.value} to={`${routes.quotation.path}/detail/${params.data?._id}`}>
         {params.value}
       </Link>
-      {params.data?.type === 'Rental Job' && isDatePast(params.data?.estimateEndDate) && (
-        <Box ml={1}>
-          <HtmlTooltip title={`${routes.quotation.title} Expired`}>
-            <Warning style={{ fontSize: '14px' }} fontSize="small" color="error" />
-          </HtmlTooltip>
-        </Box>
-      )}
-
-      {params.data?.type === 'Rental Job' && isDateWithinNext15Days(params.data?.estimateEndDate) && (
-        <Box ml={1}>
-          <HtmlTooltip title={`${routes.quotation.title} about to renew`}>
-            <Info style={{ fontSize: '14px' }} fontSize="small" color="primary" />
-          </HtmlTooltip>
-        </Box>
+      {params.data?.type === QUOTATION_TYPE.rentalJob && (
+        <Fragment>
+          {moment(params.data?.estimateEndDate).isBefore(moment(), 'day') && (
+            <Box ml={1}>
+              <HtmlTooltip title={`${routes.quotation.title} Expired`}>
+                <Warning style={{ fontSize: '14px' }} fontSize="small" color="error" />
+              </HtmlTooltip>
+            </Box>
+          )}
+          {isDateWithinNext15Days(params.data?.estimateEndDate) && (
+            <Box ml={1}>
+              <HtmlTooltip title={`${routes.quotation.title} about to renew`}>
+                <HelpOutlineIcon style={{ fontSize: '14px', backgroundColor: 'yellow' }} fontSize="small" />
+              </HtmlTooltip>
+            </Box>
+          )}
+        </Fragment>
       )}
     </Fragment>
   );
@@ -246,12 +253,15 @@ const Quotation = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-    if (selectedType === 1) {
-      deepFilter = deepFilter + `&myRecords=1`;
-    }
+
     if (isExport) {
       deepFilter = `?`;
     }
+
+    if (selectedType === 1) {
+      deepFilter = deepFilter + `&myRecords=1`;
+    }
+
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (accountDetails.accountId) {
@@ -312,7 +322,20 @@ const Quotation = () => {
           finalObject['canDelete'] = permissions?.quotation?.isDelete;
           return finalObject;
         });
-        dispatch({ type: 'initialize', data: rows, count: count });
+        if (appendRows) {
+          dispatch({
+            type: 'initialize',
+            data: [...dataRows, ...rows],
+            count: count
+          });
+        } else {
+          dispatch({
+            type: 'initialize',
+            data: rows,
+            count: count
+          });
+        }
+        // dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
@@ -328,6 +351,7 @@ const Quotation = () => {
   };
 
   const handleQuotationTypeSel = (filterValues) => {
+    dispatch({ type: 'setPage', page: 0 });
     setSelectedType(filterValues);
   };
 
@@ -452,6 +476,7 @@ const Quotation = () => {
         {Object.keys(frameworkComponent).length > 0 && columns ? (
           isMobile && !isTablet ? (
             <CustomSwipableList
+              key={selectedType}
               allowSelection={true}
               allowSwipe={true}
               permissions={permissions?.quotation}
@@ -478,7 +503,7 @@ const Quotation = () => {
               loading={loading}
               additionalDetails={[
                 {
-                  icon: <FaSuitcase size={18} />,
+                  icon: <CiUser size={18} />,
                   field: 'customerAccount'
                 }
               ]}

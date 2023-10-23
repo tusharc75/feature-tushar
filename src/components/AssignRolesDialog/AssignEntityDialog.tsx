@@ -3,6 +3,7 @@ import {
   Button,
   Checkbox,
   CircularProgress,
+  Collapse,
   FormControl,
   FormControlLabel,
   Grid,
@@ -27,6 +28,7 @@ import StepContent from '@material-ui/core/StepContent';
 import { roleTypes } from '../../constants/helpers';
 import SearchBox from '../Helpers/SearchBox';
 import { useData } from '../../StateProvider/Provider';
+import { Check, CheckCircle } from '@material-ui/icons';
 
 const useStyles = makeStyles((theme) => ({
   button: {
@@ -58,7 +60,7 @@ const AssignEntityDialog = ({
   const toastConfig = useContext(CustomToastContext);
 
   const {
-    state: { user },
+    state: { user }
   }: any = useData();
 
   const [data, setData] = useState([]);
@@ -248,35 +250,13 @@ const AssignEntityDialog = ({
     switch (step) {
       case 0:
         return (
-          <List style={{ padding: 0 }}>
-            {/* <ListItem divider>
-            <ListItemIcon>
-              <Checkbox
-                edge="start"
-                onChange={(e) => {
-                  setCheckAll(e.target.checked);
-
-                  const newData = data.map(d => {
-                    return {
-                      ...d,
-                      isChecked: e.target.checked
-                    }
-                  });
-                  setData(newData);
-                  setSelectedData(newData.filter(d => d.isChecked).map(obj => obj._id))
-                }}
-                checked={checkAll}
-                inputProps={{
-                  "aria-labelledby": `checkbox-list-label-check-all-user`,
-                }}
-              />
-            </ListItemIcon>
-            <ListItemText primary="Select all" />
-          </ListItem> */}
-
+          <ul key={0}>
             {data.map((d) => (
-              <ListItem divider key={d._id}>
-                <ListItemIcon>
+              <li
+                className="flex gap-2 px-2 py-2 md:px-[15px] text-[var(--primary-text)]"
+                style={{ borderBottom: '1px solid var(--common-border-color)' }}
+              >
+                <div>
                   <Checkbox
                     edge="start"
                     onChange={(e) => {
@@ -289,21 +269,26 @@ const AssignEntityDialog = ({
                       'aria-labelledby': `checkbox-list-label-${d._id}`
                     }}
                   />
-                </ListItemIcon>
-                <ListItemText
-                  primary={type === 'entity' ? d.entityName : d.concatedName}
-                  secondary={type === 'user' ? d.email : d?.address?.optionLabel || d?.address || ''}
-                />
-              </ListItem>
+                </div>
+                <div>
+                  <h6 className="line-clamp-1 MuiTypography-body1 text-[16px] font-[500_!important]">
+                    {type === 'entity' ? d.entityName : d.concatedName}
+                  </h6>
+                  <p className="line-clamp-1 MuiTypography-body2">{type === 'user' ? d.email : d?.address?.optionLabel || d?.address || ''}</p>
+                </div>
+              </li>
             ))}
-          </List>
+          </ul>
         );
       case 1:
         return (
-          <List style={{ padding: 0 }}>
+          <ul style={{ padding: 0 }} key={1}>
             {role.map((d) => (
-              <ListItem divider key={d._id}>
-                <ListItemIcon>
+              <li
+                className="flex gap-2 px-2 py-2 md:px-[15px] text-[var(--primary-text)]"
+                style={{ borderBottom: '1px solid var(--common-border-color)' }}
+              >
+                <div>
                   <Checkbox
                     edge="start"
                     onChange={(e) => {
@@ -315,11 +300,14 @@ const AssignEntityDialog = ({
                       'aria-labelledby': `checkbox-list-label-${d._id}`
                     }}
                   />
-                </ListItemIcon>
-                <ListItemText primary={d.name || ''} secondary={d.description || ''} />
-              </ListItem>
+                </div>
+                <div>
+                  <h6 className="line-clamp-1 MuiTypography-body1 text-[16px] font-[500_!important]">{d.name || ''}</h6>
+                  <p className="line-clamp-1 MuiTypography-body2">{d.description || ''}</p>
+                </div>
+              </li>
             ))}
-          </List>
+          </ul>
         );
 
       default:
@@ -340,99 +328,115 @@ const AssignEntityDialog = ({
         <CustomDialogHeader title={regionalRole ? `Assign role` : type === 'entity' ? 'Assign Entities - Roles' : `Assign  ${startCase(type)}`} />
       )}
       <CustomDialogContent>
-        {!regionalRole ? (
-          loadingData ? (
-            <Loader text={`Loading ${startCase(type)}`} />
-          ) : dataConst.length ? (
-            <>
-              <Grid container>
-                <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-1">
-                  <FormControl component="fieldset">
-                    <FormControlLabel
-                      value="top"
-                      control={
-                        <Checkbox
-                          edge="start"
-                          onChange={(e) => {
-                            if (activeStep === 0 && !regionalRole) {
-                              data.forEach((d) => (d.isChecked = e.target.checked));
-                              setSelectedData(data.filter((r) => r.isChecked).map((obj) => obj._id));
-                            } else {
-                              role.forEach((d) => (d.isChecked = e.target.checked));
-                              setSelectedRole(role.filter((r) => r.isChecked).map((obj) => obj._id));
-                            }
-                          }}
-                          checked={activeStep === 0 && !regionalRole ? data.every((x) => x.isChecked) : role.every((x) => x.isChecked)}
-                          inputProps={{
-                            'aria-labelledby': `checkbox-list-label-select-all`
-                          }}
-                        />
-                      }
-                      label="Select all "
-                    />
-                  </FormControl>
+        <div className="p-3 md:p-4">
+          {!regionalRole ? (
+            loadingData ? (
+              <Loader text={`Loading ${startCase(type)}`} />
+            ) : dataConst.length ? (
+              <>
+                <Grid container>
+                  <Grid item xs={12} md={6} sm={6} className="d-flex align-items-center gap-1">
+                    <FormControl component="fieldset">
+                      <FormControlLabel
+                        value="top"
+                        style={{ marginLeft: 0 }}
+                        control={
+                          <Checkbox
+                            edge="start"
+                            onChange={(e) => {
+                              if (activeStep === 0 && !regionalRole) {
+                                data.forEach((d) => (d.isChecked = e.target.checked));
+                                setSelectedData(data.filter((r) => r.isChecked).map((obj) => obj._id));
+                              } else {
+                                role.forEach((d) => (d.isChecked = e.target.checked));
+                                setSelectedRole(role.filter((r) => r.isChecked).map((obj) => obj._id));
+                              }
+                            }}
+                            checked={activeStep === 0 && !regionalRole ? data.every((x) => x.isChecked) : role.every((x) => x.isChecked)}
+                            inputProps={{
+                              'aria-labelledby': `checkbox-list-label-select-all`
+                            }}
+                          />
+                        }
+                        label="Select all "
+                      />
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} md={6} sm={6} container justify="flex-end">
+                    <SearchBox onChange={handleSearch} className="terms_header_search_bar" width="300px" value={search} />
+                  </Grid>
                 </Grid>
-                <Grid item xs={12} md={6} sm={6} container justify="flex-end">
-                  <SearchBox onChange={handleSearch} className="terms_header_search_bar" width="300px" value={search} />
-                </Grid>
-              </Grid>
-              <Stepper activeStep={activeStep} orientation="vertical">
-                {steps.map((label, index) => (
-                  <Step key={label}>
-                    <StepLabel>{label}</StepLabel>
-                    <StepContent>
-                      <Typography>{getStepContent(index)}</Typography>
-                      <div className={classes.actionsContainer}>
-                        <div>
-                          <Button size="small" disabled={activeStep === 0} onClick={handleBack} className={classes.button}>
-                            Back
-                          </Button>
-                          {activeStep !== steps.length - 1 && (
-                            <Button
-                              variant="contained"
-                              color="primary"
-                              size="small"
-                              onClick={handleNext}
-                              disabled={selectedData.length === 0}
-                              className={classes.button}
-                            >
-                              Next
-                            </Button>
-                          )}
+                <div className="grid gap-[20px] mt-3">
+                  {steps.map((label, index) => (
+                    <div key={label} className="relative">
+                      <h4 className="text-[14px] flex items-center max-[600px]:ml-[6px] gap-[18px] text-[var(--primary-text)]">
+                        <span className="rounded-full bg-[--primary] grid place-items-center text-white text-[12px] w-[20px] h-[20px]">
+                          {activeStep > index ? <Check className="block" style={{ fontSize: 14 }} /> : index + 1}
+                        </span>
+                        <span>{label}</span>
+                      </h4>
+                      {activeStep === index && (
+                        <div
+                          style={{ borderLeft: '1px dashed var(--common-border-color)' }}
+                          className="hidden min-[600px]:block w-[2px]  h-full absolute left-[10px] top-[20px] transform -translate-x-1/2 -translate-y-1/2 z-10"
+                        ></div>
+                      )}
+                      <Collapse in={activeStep === index}>
+                        <div className="max-w-full  min-[600px]:ml-[35px]">
+                          <div className="max-w-full">{getStepContent(index)}</div>
+                          <div className={classes.actionsContainer}>
+                            <div>
+                              <Button size="small" disabled={activeStep === 0} onClick={handleBack} className={classes.button}>
+                                Back
+                              </Button>
+                              {activeStep !== steps.length - 1 && (
+                                <Button
+                                  variant="contained"
+                                  color="primary"
+                                  size="small"
+                                  onClick={handleNext}
+                                  disabled={selectedData.length === 0}
+                                  className={classes.button}
+                                >
+                                  Next
+                                </Button>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </StepContent>
-                  </Step>
-                ))}
-              </Stepper>
-            </>
+                      </Collapse>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <Typography>{`All ${startCase(type)} has been assigned`}</Typography>
+            )
+          ) : roleConst.length ? (
+            <List style={{ padding: 0 }}>
+              {role.map((d) => (
+                <ListItem divider key={d._id}>
+                  <ListItemIcon>
+                    <Checkbox
+                      edge="start"
+                      onChange={(e) => {
+                        d.isChecked = e.target.checked;
+                        setSelectedRole(role.filter((r) => r.isChecked).map((obj) => obj._id));
+                      }}
+                      checked={d.isChecked}
+                      inputProps={{
+                        'aria-labelledby': `checkbox-list-label-${d._id}`
+                      }}
+                    />
+                  </ListItemIcon>
+                  <ListItemText primary={d.name || ''} secondary={d.description || ''} />
+                </ListItem>
+              ))}
+            </List>
           ) : (
-            <Typography>{`All ${startCase(type)} has been assigned`}</Typography>
-          )
-        ) : roleConst.length ? (
-          <List style={{ padding: 0 }}>
-            {role.map((d) => (
-              <ListItem divider key={d._id}>
-                <ListItemIcon>
-                  <Checkbox
-                    edge="start"
-                    onChange={(e) => {
-                      d.isChecked = e.target.checked;
-                      setSelectedRole(role.filter((r) => r.isChecked).map((obj) => obj._id));
-                    }}
-                    checked={d.isChecked}
-                    inputProps={{
-                      'aria-labelledby': `checkbox-list-label-${d._id}`
-                    }}
-                  />
-                </ListItemIcon>
-                <ListItemText primary={d.name || ''} secondary={d.description || ''} />
-              </ListItem>
-            ))}
-          </List>
-        ) : (
-          <Typography>{`All Region wide functional role has been assigned`}</Typography>
-        )}
+            <Typography>{`All Region wide functional role has been assigned`}</Typography>
+          )}
+        </div>
       </CustomDialogContent>
       <CustomDialogFooter>
         {!isRenderedFromUserSetUp && (

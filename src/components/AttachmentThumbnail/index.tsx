@@ -1,11 +1,11 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, Fragment } from 'react';
 import Grid from '@material-ui/core/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { IconButton, Typography, Paper, Tooltip, Dialog } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import GetAppIcon from '@material-ui/icons/GetApp';
-import { csvIcon, docIcon, excelSheetIcon, pdfFileIcon, pptIcon, textFileIcon, imageIcon } from 'src/assets/file_icons';
+import { csvIcon, docIcon, excelSheetIcon, pdfFileIcon, pptIcon, textFileIcon, imageIcon, zipIcon } from 'src/assets/file_icons';
 import emailStyles from 'src/pages/Activity/Email/email.module.scss';
 import { useData } from 'src/StateProvider/Provider';
 import PreviewIcon from '@material-ui/icons/Visibility';
@@ -44,6 +44,45 @@ const fileIcons = [
   {
     extensions: ['.tif', 'tiff', '.bmp', '.jpg', '.jpeg', '.gif', '.png', '.eps', '.raw', '.cr2', '.nef', '.orf', '.sr2'],
     source: imageIcon
+  },
+  {
+    extensions: [
+      '.arc',
+      '.arj',
+      '.as',
+      '.b64',
+      '.btoa',
+      '.bz',
+      '.bz2',
+      '.cab',
+      '.cpt',
+      '.gz',
+      '.hqx',
+      '.iso',
+      '.lha',
+      '.lzh',
+      '.mim',
+      '.mme',
+      '.pak',
+      '.pf',
+      '.rar',
+      '.rpm',
+      '.sea',
+      '.sit',
+      '.sitx',
+      '.tar',
+      '.gz',
+      '.tbz',
+      '.tbz2',
+      '.tgz',
+      '.uu',
+      '.uue',
+      '.z',
+      '.zip',
+      '.zipx',
+      '.zoo'
+    ],
+    source: zipIcon
   }
 ];
 
@@ -133,7 +172,12 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
     setIsDownloading(true);
     setDownloadProgress(0);
 
-    if (file.url) {
+    if (file?.base64) {
+      let link = document.createElement('a');
+      link.href = `data:application/${file?.contentType};base64,${file?.base64}`;
+      link.download = `${file?.name}${file?.extension}`;
+      link.click();
+    } else if (file.url) {
       axiosInstance()
         .get(`user/download?fileName=${file.url}`, {
           responseType: 'blob',
@@ -198,31 +242,34 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
 
   return (
     <>
-      <Grid container spacing={1} className={emailStyles.createEmailContainer}>
+      <div className="flex flex-wrap gap-2 py-3">
         {attachments && attachments.length > 0 ? (
           <>
             {attachments.map((attachment, i) => {
               return (
-                <Grid item key={i} sm={3} xs={3} md={3} xl={3} style={{ maxWidth: '150px' }}>
-                  <Paper className={emailStyles.fileContainer}>
-                    <img
-                      src={getFileIconSrc(attachment?.contentType ? attachment?.contentType : attachment.url ? attachment.url : attachment)}
-                      className={emailStyles.file}
-                      alt="attchment"
-                    />
-                    <Typography noWrap variant="body2">
-                      {attachment
-                        ? attachment?.name
+                <Fragment key={i}>
+                  <div className="w-[138px] max-w-[138px] basis-[138px] flex-grow group border border-[var(--common-border-color)] min-h-[153px] relative rounded-[4px] p-[var(--gutter)] [--gutter:18px]">
+                    <div className="front  group-hover:hidden">
+                      <div className="mx-auto h-[79px] mb-[11px]">
+                        <img
+                          src={getFileIconSrc(attachment?.contentType ? attachment?.contentType : attachment.url ? attachment.url : attachment)}
+                          className={`object-contain mx-auto block h-full w-full max-w-full`}
+                          alt="attchment"
+                        />
+                      </div>
+                      <p className=" line-clamp-1 text-[14px] text-[var(--text-primary)]">
+                        {attachment
                           ? attachment?.name
-                          : attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
-                          ? attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
-                          : attachment.substring(attachment.lastIndexOf('/') + 1)
-                        : 'attachment'}
-                    </Typography>
-                    {attachment?.date && <Typography variant="body2">{moment(attachment?.date)?.format(dateTimeFormat)}</Typography>}
-                    <div className={emailStyles.fileOverlay}>
-                      <Typography
-                        variant="subtitle2"
+                            ? attachment?.name
+                            : attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
+                            ? attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
+                            : attachment.substring(attachment.lastIndexOf('/') + 1)
+                          : 'attachment'}
+                      </p>
+                    </div>
+                    <div className="back group-hover:opacity-100 opacity-0 absolute inset-0 p-[var(--gutter)] flex flex-col justify-between">
+                      <p
+                        className=" line-clamp-4 text-[14px] text-[var(--text-primary)]"
                         title={
                           attachment
                             ? attachment?.name
@@ -240,8 +287,8 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
                             ? attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
                             : attachment?.substring(attachment.lastIndexOf('/') + 1)
                           : 'attachment'}
-                      </Typography>
-                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      </p>
+                      <div className="flex justify-between">
                         <Tooltip title="Download" placement="top">
                           <IconButton size={'small'} onClick={(event) => downloadFile(event, attachment)} style={{ paddingBottom: '1px' }}>
                             {<GetAppIcon />}
@@ -280,13 +327,13 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
                         )}
                       </div>
                     </div>
-                  </Paper>
-                </Grid>
+                  </div>
+                </Fragment>
               );
             })}
           </>
         ) : null}
-      </Grid>
+      </div>
       {showConfirmationDialog && (
         <ConfirmationDialog
           open={showConfirmationDialog}

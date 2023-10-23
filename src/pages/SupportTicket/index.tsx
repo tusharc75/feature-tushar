@@ -12,17 +12,14 @@ import { useData } from 'src/StateProvider/Provider';
 import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import { MdAdd } from 'react-icons/md';
-import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import axiosInstance from 'src/axios/axiosInstance';
 import {
   getLocalStorageArrayData,
   gridLoadingTimeout,
-  isObjectEmpty,
   prepareDataForGrid,
   removeLocalStorage,
   sidebarResource
 } from 'src/constants/helpers';
-import { Link } from 'react-router-dom';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -106,10 +103,9 @@ const SupportTicket = () => {
         let count = data?.count;
         let rows = data?.data.map((u: any) => {
           let finalObject: any = prepareDataForGrid(u);
-          finalObject['canDelete'] = permissions?.supportTicket?.isDelete && finalObject?.ownerId === user?.user?._id && finalObject?.status === "Pending" ;
+          finalObject['canDelete'] = permissions?.supportTicket?.isDelete && finalObject?.ownerId === user?.user?._id && finalObject?.status === "Pending";
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions?.supportTicket?.isUpdate;
-
           return {
             ...finalObject
           };
@@ -207,10 +203,10 @@ const SupportTicket = () => {
           </IconButton>
         </Tooltip>
       )}
-
       {params?.data?.canDelete ? (
         <Tooltip title="Delete">
           <IconButton
+            size="small"
             aria-label="Delete"
             onClick={() => {
               setDeleteRecord(params.data);
@@ -309,19 +305,19 @@ const SupportTicket = () => {
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
             <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
-            <div className={`align-items-center gap-1 layout-for-mobile `}>
-                  {SupportTicketType && (
-                    <ToggleButtonGroup size="small" className="ml-2" value={SupportTicketType[selectedType - 1].key} exclusive onChange={handleFilter}>
-                      {SupportTicketType.map((k, index) => {
-                        return (
-                          <ToggleButton value={k.key} key={index}>
-                            {k.key}
-                          </ToggleButton>
-                        );
-                      })}
-                    </ToggleButtonGroup>
-                  )}
-                </div>
+              <div className={`align-items-center gap-1 layout-for-mobile `}>
+                {SupportTicketType && (
+                  <ToggleButtonGroup size="small" className="ml-2" value={SupportTicketType[selectedType - 1].key} exclusive onChange={handleFilter}>
+                    {SupportTicketType.map((k, index) => {
+                      return (
+                        <ToggleButton value={k.key} key={index}>
+                          {k.key}
+                        </ToggleButton>
+                      );
+                    })}
+                  </ToggleButtonGroup>
+                )}
+              </div>
             </Grid>
             <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
@@ -358,7 +354,7 @@ const SupportTicket = () => {
                         color="default"
                         size="small"
                         onClick={openActions}
-                        disabled={selectedRecords.length ? false : true}
+                        disabled={selectedRecords.length === 0 || selectedRecords?.some((e) => !e.canDelete) ? true : false}
                         aria-controls="action-menu"
                         className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
                         endIcon={<ExpandMore />}
@@ -381,9 +377,8 @@ const SupportTicket = () => {
                         <MenuItem
                           onClick={() => {
                             closeActions();
-                            // eslint-disable-next-line no-lone-blocks
-                            {
-                              selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
+                            if (selectedRecords.length === 1) {
+                              setDeleteRecord(selectedRecords[0]);
                             }
                             setShowDeleteConfirmBox(true);
                           }}
@@ -399,62 +394,24 @@ const SupportTicket = () => {
           </Grid>
         </div>
         {Object.keys(frameWorkComponent).length > 0 ? (
-          isMobile && !isTablet ? (
-            <CustomSwipableList
-              allowSelection={true}
-              allowSwipe={true}
-              permissions={permissions.supportTicket}
-              primaryField={columns?.find((d) => d.primaryField)}
-              onClick={(data) => {
-                setSupportTicketId(data.id);
-                setOpen({ open: true, isClone: false });
-              }}
-              dataRows={dataRows}
-              selectedRecords={selectedRecords}
-              dispatch={dispatch}
-              onEdit={(data) => {
-                setSupportTicketId(data.id);
-                setOpen({ open: true, isClone: false });
-              }}
-              extraParamsToCheckDelete={true}
-              onDelete={(data) => {
-                setDeleteRecord(data);
-                setShowDeleteConfirmBox(true);
-              }}
-              rowCount={rowCount}
-              page={page}
-              loading={loading}
-              additionalDetails={[]}
-              owerCollaboratorInitialsOrImages=""
-              onCreate={false}
-              showClone={true}
-              onClone={(data) => {
-                setSupportTicketId(data.id);
-                setOpen({ open: true, isClone: true });
-              }}
-              chips={[]}
-              renderedFrom={renderedFrom}
-            />
-          ) : (
-            <CustomAgGrid
-              columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameWorkComponent}
-              setGridApi={setGridApi}
-              dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              allowAction={true}
-              loading={loading}
-              renderedFrom={renderedFrom}
-              refreshGrid={fetchSupportTicketData}
-              showOnlyShowFilteredRecordSwitch={true}
-              showFilters={true}
-              resource={sidebarResource.supportTicket}
-            />
-          )
+          <CustomAgGrid
+            columns={columns}
+            dataRows={dataRows}
+            frameworkComponents={frameWorkComponent}
+            setGridApi={setGridApi}
+            dispatch={dispatch}
+            rowCount={rowCount}
+            limit={limit}
+            pageSizes={pageSizes}
+            page={page}
+            allowAction={true}
+            loading={loading}
+            renderedFrom={renderedFrom}
+            refreshGrid={fetchSupportTicketData}
+            showOnlyShowFilteredRecordSwitch={true}
+            showFilters={true}
+            resource={sidebarResource.supportTicket}
+          />
         ) : null}
         {showDeleteConfirmBox && (
           <ConfirmationDialog
@@ -467,7 +424,6 @@ const SupportTicket = () => {
             onOk={handleDelete}
           />
         )}
-
         {open?.open && (
           <ManageSupportTicket
             id={supportTicketId}

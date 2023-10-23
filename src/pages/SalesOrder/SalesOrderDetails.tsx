@@ -1,33 +1,32 @@
-import React, { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, Paper, Tabs, Tab, useMediaQuery, Menu, MenuItem } from '@material-ui/core';
+import { Box, Button, Grid, Menu, MenuItem, Tab, Tabs } from '@material-ui/core';
+import ExpandMore from '@material-ui/icons/ExpandMore';
 import { Skeleton } from '@material-ui/lab';
-import { useParams, useHistory } from 'react-router-dom';
-import axiosInstance from '../../axios/axiosInstance';
-import routes from '../../components/Helpers/Routes';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPageHeader from '../../components/DetailsPageHeader';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import { useData } from '../../StateProvider/Provider';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { salesOrder, salesOrderProcessSteps, getUniqueCurrencies, ACTIVITY_RESOURCE, SALES_ORDER_STATUS } from '../../constants/helpers';
-import ManageSalesOrderDialog from './ManageSalesOrderDialog';
-import DeleteButton from '../../components/Helpers/DeleteButton';
-import TabPanel from '../../components/TabPanel';
+import { camelCase } from 'lodash';
 import queryString from 'query-string';
-import { FaWpforms } from 'react-icons/fa';
+import React, { useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { GrStatusInfo, RiFlowChart } from 'react-icons/all';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
-import Material from './Material';
+import { FaWpforms } from 'react-icons/fa';
+import { useHistory, useParams } from 'react-router-dom';
+import ActivityButton from 'src/components/Activity/ActivityButton';
+import ContentFullScreen from 'src/components/ContentFullScreen';
+import Steps, { getIndex } from 'src/components/Steps';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import DeleteButton from '../../components/Helpers/DeleteButton';
+import routes from '../../components/Helpers/Routes';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import TabPanel from '../../components/TabPanel';
+import { ACTIVITY_RESOURCE, SALES_ORDER_STATUS, salesOrder, salesOrderProcessSteps } from '../../constants/helpers';
 import AdditionalCost from './AdditionalCost';
 import Invoice from './Invoice';
-import { isMobile, isTablet } from 'react-device-detect';
-import ExpandMore from '@material-ui/icons/ExpandMore';
-import { GrStatusInfo, RiFlowChart } from 'react-icons/all';
-import { camelCase } from 'lodash';
-import ContentFullScreen from 'src/components/ContentFullScreen';
-import ActivityButton from 'src/components/Activity/ActivityButton';
-import Steps, { getIndex } from 'src/components/Steps';
+import ManageSalesOrderDialog from './ManageSalesOrderDialog';
+import Material from './Material';
 import Process from './Process';
 import SalesOrderView from './View';
 
@@ -53,7 +52,6 @@ const SalesOrderDetails = () => {
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [nextStep, setNextStep] = useState(true);
   const [currentStep, setCurrentStep] = useState(null);
-  const [currencySymbol, setCurrencySymbol] = useState(null);
   const [statusOptions, setStatusOptions] = useState([]);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -105,7 +103,7 @@ const SalesOrderDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${salesOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -140,7 +138,6 @@ const SalesOrderDetails = () => {
       setCustomizedRoutes([routes.salesOrder, { title: `${data.salesOrderNo}` }]);
       setSalesOrderData(data);
 
-      setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
       var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
       if (user?.role?.selectedEntity?.superAdminAccess) {
         isAllowedToEdit = true;
@@ -211,56 +208,54 @@ const SalesOrderDetails = () => {
                   <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
                 )}
 
-                {permissions?.salesOrder?.isUpdate && [SALES_ORDER_STATUS.readyToInvoice, SALES_ORDER_STATUS.invoiced].includes(salesOrderData?.status) && (
-                  <>
-                    <Button
-                      variant="outlined"
-                      color="default"
-                      size="small"
-                      onClick={openActions}
-                      aria-controls="action-menu"
-                      endIcon={isMobile ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
-                    >
-                      {isMobile ? <GrStatusInfo size={20} /> : 'Change Status'}
-                    </Button>
-                    <Menu
-                      anchorEl={anchorEl}
-                      keepMounted
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
-                      }}
-                      id="action-menu"
-                      open={Boolean(anchorEl)}
-                      onClose={closeActions}
-                    >
-                      {statusOptions?.map((o, index) => {
-                        return (
-                          <MenuItem
-                            disabled={index <= statusOptions.findIndex((d) => d.optionLabel === salesOrderData?.status)}
-                            onClick={() => {
-                              closeActions();
-                              handleStatusChange(o);
-                            }}
-                            value={o}
-                          >
-                            {o?.optionLabel}
-                          </MenuItem>
-                        );
-                      })}
-                    </Menu>
-                  </>
-                )}
+                {permissions?.salesOrder?.isUpdate &&
+                  [SALES_ORDER_STATUS.readyToInvoice, SALES_ORDER_STATUS.invoiced].includes(salesOrderData?.status) && (
+                    <>
+                      <Button
+                        variant="outlined"
+                        color="default"
+                        size="small"
+                        onClick={openActions}
+                        aria-controls="action-menu"
+                        className="btn-outline-v1"
+                        endIcon={isMobile ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
+                      >
+                        {isMobile ? <GrStatusInfo size={20} /> : 'Change Status'}
+                      </Button>
+                      <Menu
+                        anchorEl={anchorEl}
+                        keepMounted
+                        getContentAnchorEl={null}
+                        anchorOrigin={{
+                          vertical: 'bottom',
+                          horizontal: 'left'
+                        }}
+                        id="action-menu"
+                        open={Boolean(anchorEl)}
+                        onClose={closeActions}
+                      >
+                        {statusOptions?.map((o, index) => {
+                          return (
+                            <MenuItem
+                              disabled={index <= statusOptions.findIndex((d) => d.optionLabel === salesOrderData?.status)}
+                              onClick={() => {
+                                closeActions();
+                                handleStatusChange(o);
+                              }}
+                              value={o}
+                            >
+                              {o?.optionLabel}
+                            </MenuItem>
+                          );
+                        })}
+                      </Menu>
+                    </>
+                  )}
               </>
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
             )}
-            <ActivityButton
-              referenceId={salesOrderData?._id}
-              resource={ACTIVITY_RESOURCE.salesOrder}
-              resourceLabel={salesOrderData?.salesOrderNo}
-            />
+            <ActivityButton referenceId={salesOrderData?._id} resource={ACTIVITY_RESOURCE.salesOrder} resourceLabel={salesOrderData?.salesOrderNo} />
           </Box>
         </Box>
       </Box>

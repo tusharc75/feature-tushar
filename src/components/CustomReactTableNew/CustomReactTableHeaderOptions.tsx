@@ -62,7 +62,6 @@ const CustomSwitch = withStyles((theme: Theme) =>
   return (
     <Switch
       focusVisibleClassName={classes.focusVisible}
-      // disableRipple
       classes={{
         root: classes.root,
         switchBase: classes.switchBase,
@@ -78,25 +77,14 @@ const CustomSwitch = withStyles((theme: Theme) =>
 
 function CustomReactTableHeaderOptions({
   columns,
-  // setColumns,
-  // columnApi,
-  // refreshGrid = null,
   renderedFrom = null,
-  isClientSideGrid = false,
   dispatchTable = null,
   showOnlyShowFilteredRecordSwitch = false,
-  saveColumnOptions = false,
   selectedRecords = 0,
-  // selectedReportView = null,
-  // setSelectedReportView = null
-  setHiddenColumns = null,
-  getToggleHideAllColumnsProps = null,
-  setColumnOrder = null,
   customFilters = null
 }) {
   const [disableSelectionSwitch, setDisableSelectionSwitch] = useState(true);
 
-  const [openColumnSelection, setOpenColumnSelection] = useState(false);
   const [checked, setChecked] = useState(false);
   const [openColumnSelectionAnchorEl, setOpenColumnSelectionAnchorEl] = useState<HTMLButtonElement | null>(null);
   const { isOffline } = useContext(CustomOfflineContext);
@@ -111,7 +99,6 @@ function CustomReactTableHeaderOptions({
   const { dispatch }: any = useData();
 
   useEffect(() => {
-
     const saved = localStorage.getItem(`${renderedFrom}_selected`);
     if (saved) {
       try {
@@ -129,7 +116,6 @@ function CustomReactTableHeaderOptions({
     } else {
       setDisableSelectionSwitch(true);
     }
-
   }, [selectedRecords]);
 
   const updateGridHiddenColumns = (hiddenColumns = []) => {
@@ -208,7 +194,6 @@ function CustomReactTableHeaderOptions({
         style={{ flexBasis: isFilterPresent ? '766px' : 'unset', maxWidth: isFilterPresent ? '766px' : 'unset', paddingRight: '52px' }}
         >
       {showOnlyShowFilteredRecordSwitch && (
-
         <>
           <FormControlLabel
             value={checked}
@@ -222,12 +207,12 @@ function CustomReactTableHeaderOptions({
                 });
               }
             }}
+            className="show-only-selected-switch"
             control={<CustomSwitch disabled={disableSelectionSwitch} />}
             style={{ fontSize: '0.8rem', marginLeft: 0, padding: '0px 0 10px' }}
             label={<Typography style={{ fontWeight: 400 }}>Show Only Selected</Typography>}
             labelPlacement="end"
           />
-
         </>
       )}
       {Object.keys(customFilters).length>0 && (

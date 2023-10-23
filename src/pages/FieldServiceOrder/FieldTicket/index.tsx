@@ -3,7 +3,7 @@ import { Box, Grid, Button, Menu, MenuItem, IconButton } from '@material-ui/core
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { FIELD_TICKET_STATUS, getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { FIELD_TICKET_STATUS, SERVICE_ORDER_STATUS, getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import useColumns, { getFrameworkComponents, getStaticFields, gridFilterParser } from 'src/constants/useColumns';
 import routes from 'src/components/Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
@@ -18,7 +18,7 @@ import ManageFieldTicket from 'src/pages/FieldTicket/ManageFieldTicket';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import CustomRenderCell from 'src/components/Helpers/CustomRenderCell';
 
-const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdit, refreshFieldServiceOrder }) => {
+const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdit, handleChangeStatus }) => {
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const toastConfig = useContext(CustomToastContext);
   const [openDialog, setOpenDialog] = useState({ open: false, isClone: false, id: null });
@@ -46,17 +46,17 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
 
 
   const FieldTicketNumberRenderer = (params) => (
-    <div style={{ display: 'flex', alignItems: 'center' }}>
+    <>
       {params?.data?.allowedToEdit ?
         <span
-          className="link"
+          className="link line-clamp-1"
           onClick={() => {
             setOpenDialog({ open: true, isClone: false, id: params.data._id });
           }}
         >
           <CustomRenderCell value={params?.value} />
         </span> :
-        <p>{params?.value}</p>}
+        <p className='line-clamp-1'>{params?.value}</p>}
       <Box ml={1}>
         <IconButton
           size="small"
@@ -67,7 +67,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
           <OpenInNewIcon fontSize="small" color="primary" />
         </IconButton>
       </Box>
-    </div>
+    </>
   );
 
   const fetchGridColumns = () => {
@@ -358,12 +358,15 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
             customerAccount: serviceOrderData?.customerAccount?.optionValue || '',
             billingAddress: serviceOrderData?.billingAddress?.optionValue || '',
             shippingAddress: serviceOrderData?.shippingAddress?.optionValue || '',
+            taxCode: serviceOrderData?.taxCode?.optionValue || '',
             collaborator: serviceOrderData?.collaborator?.map((m) => m.optionValue) || [],
           }}
           onSuccess={() => {
+            if (serviceOrderData?.status === SERVICE_ORDER_STATUS.new) {
+              handleChangeStatus(SERVICE_ORDER_STATUS.inProgress);
+            }
             setOpenDialog({ open: false, isClone: false, id: null });
             fetchData();
-            refreshFieldServiceOrder();
           }}
           renderedFrom={renderedFrom}
         />

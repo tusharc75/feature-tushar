@@ -222,6 +222,10 @@ const FieldTicketDetail = () => {
               referenceId={fieldTicketData?._id}
               resource={ACTIVITY_RESOURCE.fieldTicket}
               resourceLabel={fieldTicketData?.fieldTicketNumber}
+              extraRelatedTo={{
+                referenceId: fieldTicketData?.fieldServiceOrder?.optionValue,
+                resource: ACTIVITY_RESOURCE.fieldServiceOrder,
+              }}
             />
           </Box>
         </Box>
@@ -282,29 +286,26 @@ const FieldTicketDetail = () => {
             setStepFullScreen={() => setStepFullScreen(true)}
           />
           <ContentFullScreen title={fieldTicketSteps[currentStep]?.title} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-            {currentStep === 0 && (
+            {currentStep === 0 && fieldTicketData && (
               <Material
-                stepFullScreen={stepFullScreen}
                 fieldTicketData={fieldTicketData}
-                id={id}
                 renderedFrom={`${renderedFrom}_grid-1`}
                 allowedToEdit={allowedToEdit}
                 setNextStep={setNextStep}
-                refreshFieldTicket={fetchData}
+                handleChangeStatus={handleChangeStatus}
               />
             )}
-            {currentStep === 1 && (
+            {currentStep === 1 && fieldTicketData && (
               <AddCost
                 fieldTicketData={fieldTicketData}
-                id={id}
                 renderedFrom={`${renderedFrom}_grid-2`}
+                allowedToEdit={allowedToEdit}
                 setNextStep={setNextStep} />
             )}
-            {currentStep === 2 && (
+            {currentStep === 2 && fieldTicketData && (
               <Submit
                 stepFullScreen={stepFullScreen}
                 fieldTicketData={fieldTicketData}
-                id={id}
                 renderedFrom={`${renderedFrom}_grid-3`}
                 allowedToEdit={allowedToEdit}
                 fetchData={fetchData}

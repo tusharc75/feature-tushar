@@ -230,108 +230,98 @@ export default function ManageAccount(props) {
                                           }}
                                         />
                                       ) : field.fieldName === 'billingAddress' ? (
-                                        <Grid key={field.fieldName} item className="hellow">
-                                          <Box display={'flex'}>
-                                            <Box style={{ flexGrow: 1 }}>
-                                              <FormTypes
-                                                isNew={isNew}
-                                                {...field}
-                                                disabled={!isNew && field.disableOnEdit}
-                                                values={values}
-                                                errors={errors}
-                                                touched={touched}
-                                                label={field.fieldLabel}
-                                                name={field.fieldName}
-                                                type={field.type}
-                                                options={addressDataSource}
-                                                setFieldValue={(name, value) => {
-                                                  setFieldValue(field.fieldName, value);
-                                                  if (values.isShippingAddressSameAsBillingAddress === true) {
-                                                    setFieldValue('shippingAddress', value ?? '');
-                                                  }
-                                                }}
-                                                required={field.required}
-                                                fullWidth
-                                                isTooltip={field?.isTooltip || false}
-                                                tooltipMessage={field?.tooltipMessage}
-                                                size="small"
-                                              />
-                                            </Box>
-                                            {
-                                              <Box ml={1}>
-                                                <Tooltip title="Add Address" className="mt-1">
-                                                  <IconButton
-                                                    onClick={() => {
-                                                      setShowAddAddresstDialog(true);
-                                                      setAddressType({ account: accountResource, address: 'billingAddress' });
-                                                    }}
-                                                    disabled={field.disableOnEdit}
-                                                    size="small"
-                                                  >
-                                                    <AddIcon color={field.disableOnEdit ? 'disabled' : 'primary'} />
-                                                  </IconButton>
-                                                </Tooltip>
-                                              </Box>
-                                            }
-                                            {field?.tooltipMessage ? (
-                                              <Grid item xs={1} sm={1} md={1}>
-                                                <Tooltip title={field?.tooltipMessage ?? ''}>
-                                                  <InfoIcon color="disabled" />
-                                                </Tooltip>
-                                              </Grid>
-                                            ) : null}
+                                        <div key={field.fieldName} className="flex gap-2 items-center">
+                                          <Box style={{ flexGrow: 1 }}>
+                                            <FormTypes
+                                              isNew={isNew}
+                                              {...field}
+                                              disabled={!isNew && field.disableOnEdit}
+                                              values={values}
+                                              errors={errors}
+                                              touched={touched}
+                                              label={field.fieldLabel}
+                                              name={field.fieldName}
+                                              type={field.type}
+                                              options={addressDataSource}
+                                              setFieldValue={(name, value) => {
+                                                setFieldValue(field.fieldName, value);
+                                                if (values.isShippingAddressSameAsBillingAddress === true) {
+                                                  setFieldValue('shippingAddress', value ?? '');
+                                                }
+                                              }}
+                                              required={field.required}
+                                              fullWidth
+                                              isTooltip={field?.isTooltip || false}
+                                              tooltipMessage={field?.tooltipMessage}
+                                              size="small"
+                                            />
                                           </Box>
-                                        </Grid>
+
+                                          <Tooltip title="Add Address" className="mt-1">
+                                            <IconButton
+                                              onClick={() => {
+                                                setShowAddAddresstDialog(true);
+                                                setAddressType({ account: accountResource, address: 'billingAddress' });
+                                              }}
+                                              disabled={field.disableOnEdit}
+                                              size="small"
+                                            >
+                                              <AddIcon color={field.disableOnEdit ? 'disabled' : 'primary'} />
+                                            </IconButton>
+                                          </Tooltip>
+
+                                          {field?.tooltipMessage ? (
+                                            <Tooltip title={field?.tooltipMessage ?? ''}>
+                                              <InfoIcon color="disabled" />
+                                            </Tooltip>
+                                          ) : null}
+                                        </div>
                                       ) : field.fieldName === 'shippingAddress' ? (
-                                        <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
-                                          <Grid container spacing={1}>
-                                            <Grid item xs={permissions[accountResource]?.isCreate ? 10 : 11}>
-                                              <FormTypes
-                                                isNew={isNew}
-                                                {...field}
-                                                values={values}
-                                                errors={errors}
-                                                touched={touched}
-                                                label={field.fieldLabel}
-                                                name={field.fieldName}
-                                                type={field.type}
-                                                options={addressDataSource}
-                                                setFieldValue={(name, value) => {
-                                                  setFieldValue(field.fieldName, value);
-                                                }}
-                                                required={field.required}
-                                                fullWidth
-                                                isTooltip={field?.isTooltip || false}
-                                                tooltipMessage={field?.tooltipMessage}
-                                                size="small"
-                                                disabled={values.isShippingAddressSameAsBillingAddress === true || (!isNew && field.disableOnEdit)}
-                                              />
+                                        <div key={field.fieldName} className="flex gap-2 items-center">
+                                          <div className="flex-grow">
+                                            <FormTypes
+                                              isNew={isNew}
+                                              {...field}
+                                              values={values}
+                                              errors={errors}
+                                              touched={touched}
+                                              label={field.fieldLabel}
+                                              name={field.fieldName}
+                                              type={field.type}
+                                              options={addressDataSource}
+                                              setFieldValue={(name, value) => {
+                                                setFieldValue(field.fieldName, value);
+                                              }}
+                                              required={field.required}
+                                              fullWidth
+                                              isTooltip={field?.isTooltip || false}
+                                              tooltipMessage={field?.tooltipMessage}
+                                              size="small"
+                                              disabled={values.isShippingAddressSameAsBillingAddress === true || (!isNew && field.disableOnEdit)}
+                                            />
+                                          </div>
+
+                                          <Tooltip title="Add Address" className="mt-1">
+                                            <IconButton
+                                              onClick={() => {
+                                                setShowAddAddresstDialog(true);
+                                                setAddressType({ account: accountResource, address: 'shippingAddress' });
+                                              }}
+                                              disabled={field.disableOnEdit}
+                                              size="small"
+                                            >
+                                              <AddIcon color={field.disableOnEdit ? 'disabled' : 'primary'} />
+                                            </IconButton>
+                                          </Tooltip>
+
+                                          {field?.tooltipMessage ? (
+                                            <Grid item xs={1} sm={1} md={1}>
+                                              <Tooltip title={field?.tooltipMessage ?? ''}>
+                                                <InfoIcon color="disabled" />
+                                              </Tooltip>
                                             </Grid>
-                                            {
-                                              <Grid item xs={1} sm={1} md={1}>
-                                                <Tooltip title="Add Address" className="mt-1">
-                                                  <IconButton
-                                                    onClick={() => {
-                                                      setShowAddAddresstDialog(true);
-                                                      setAddressType({ account: accountResource, address: 'shippingAddress' });
-                                                    }}
-                                                    disabled={field.disableOnEdit}
-                                                    size="small"
-                                                  >
-                                                    <AddIcon color={field.disableOnEdit ? 'disabled' : 'primary'} />
-                                                  </IconButton>
-                                                </Tooltip>
-                                              </Grid>
-                                            }
-                                            {field?.tooltipMessage ? (
-                                              <Grid item xs={1} sm={1} md={1}>
-                                                <Tooltip title={field?.tooltipMessage ?? ''}>
-                                                  <InfoIcon color="disabled" />
-                                                </Tooltip>
-                                              </Grid>
-                                            ) : null}
-                                          </Grid>
-                                        </Grid>
+                                          ) : null}
+                                        </div>
                                       ) : field.fieldName === 'parentAccount' ? (
                                         <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
                                           <Grid container spacing={1}>

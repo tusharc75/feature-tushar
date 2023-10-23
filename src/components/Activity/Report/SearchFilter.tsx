@@ -17,6 +17,7 @@ const useStyles = makeStyles((theme) => ({
     height: 'unset !important',
     padding: '2px 12px',
     maxWidth: '100%',
+    margin: '3px',
     '& span.MuiChip-label': {
       fontWeight: '500'
     },
@@ -103,12 +104,12 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip, dontShowMyActiv
   };
 
   return (
-    <div className={`sm:max-w-[300px] sm:min-w-[200px] flex-grow`}>
+    <div className={`w-full sm:w-[unset] sm:max-w-[500px] sm:min-w-[200px] flex-grow`}>
       <Autocomplete
         limitTags={1}
         multiple={true}
         disableCloseOnSelect={true}
-        className={`sm:max-w-[300px] sm:min-w-[200px] flex-grow`}
+        className={`sm:max-w-[500px] sm:min-w-[200px] flex-grow`}
         size="small"
         // fullWidth
         loading={loading}

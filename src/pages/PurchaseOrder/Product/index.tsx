@@ -24,7 +24,7 @@ import CostDialog from './CostDialog';
 import ServiceDialog from './ServiceDialog';
 import AddIcon from '@material-ui/icons/Add';
 import VisibilityIcon from '@material-ui/icons/Visibility';
-import { map, startCase, uniq } from 'lodash';
+import { isEmpty, map, startCase, uniq } from 'lodash';
 import EditIcon from '@material-ui/icons/Edit';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import PreviewDownload from 'src/components/PreviewDownload';
@@ -628,7 +628,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
                   Add Existing Products
                 </MenuItem>
               )}
-              {permissions?.serviceMaster?.isRead && (
+              {(permissions?.serviceMaster?.isRead && user?.user?.brandPolicy?.purchaseOrderAddService) && (
                 <MenuItem
                   onClick={() => {
                     closeAddActions();
@@ -650,6 +650,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
           </Box>
           <div className="d-flex gap-2">
             <PreviewDownload
+              fileName={`${routes.purchaseOrder.title}-${purchaseOrderData?.purchaseOrderNumber}`}
               resource={sidebarResource.purchaseOrder}
               referenceId={purchaseOrderData?._id}
               columns={columns?.map((e) => { return { ...e, accessor: e.accessor === 'serializedProductView' ? 'serializedProduct' : e.accessor } })}
@@ -771,13 +772,15 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
           onSuccess={handleAddProduct}
           productId={null}
           assignedProducts={[]}
-          extraDeepFilter={purchaseOrderData?.expenseItem === true || purchaseOrderData?.expenseItem === false ?
-            [{
-              field: 'expenseItem',
-              term: purchaseOrderData?.expenseItem
-                ? 'Yes' : 'No'
-            }
-            ] : []}
+          extraDeepFilter={(purchaseOrderData?.expenseItem === true || purchaseOrderData?.expenseItem === false) ? [{
+            field: 'expenseItem',
+            term: purchaseOrderData?.expenseItem
+              ? 'Yes' : 'No'
+          }] : []}
+          extraFilterById={purchaseOrderData?.chartOfAccount && !isEmpty(purchaseOrderData?.chartOfAccount) ? [{
+            field: 'chartOfAccount',
+            term: { $in: purchaseOrderData?.chartOfAccount?.map((e) => e?.optionValue) }
+          }] : []}
         />
       )}
       {showProductDialog.open && (

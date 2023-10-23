@@ -48,8 +48,7 @@ const DeliveryTicket = () => {
   let renderedFrom = camelCase(routes?.deliveryTicket.title);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
-  const { type }: any = queryString.parse(history.location.search);
-  const [fromRental, setFromRental] = useState(history?.location?.state?.rental);
+  let { type, referenceId, referenceType }: any = queryString.parse(history.location.search);
   const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
   const [filter, setFilter] = useState(`All ${routes.deliveryTicket.title}`);
   const {
@@ -193,7 +192,7 @@ const DeliveryTicket = () => {
     if (renderCount > 0) {
       fetchDeliveryTicket();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, filters, sorting, selectedEntity, isOffline, selectedType, showFilteredRecordsOnly, fromRental]);
+  }, [page, limit, filters, sorting, selectedEntity, isOffline, selectedType, showFilteredRecordsOnly]);
 
   const ActionsRenderer = (params) => (
     <>
@@ -212,20 +211,23 @@ const DeliveryTicket = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-    if (selectedType === 1) {
-      deepFilter = deepFilter + `&myRecords=1`;
-    }
+
     if (isExport) {
       deepFilter = `?`;
     }
+
+    if (selectedType === 1) {
+      deepFilter = deepFilter + `&myRecords=1`;
+    }
+
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
-    if (fromRental) {
-      filterByIds.push({ field: 'rentalJob', term: fromRental?._id });
+    if (referenceId) {
+      filterByIds.push({ field: 'rentalJob', term: referenceId });
     }
 
     if (filterByIds?.length) {
@@ -257,8 +259,13 @@ const DeliveryTicket = () => {
   };
 
   const handleDeliveryTicketTypeSel = (filterValues) => {
+    dispatch({ type: 'setPage', page: 0 });
     setSelectedType(filterValues);
-    history.push(`?type=${filterValues}`);
+    if (referenceId && referenceType) {
+      history.push(`?type=${filterValues}&referenceType=${referenceType}&referenceId=${referenceId}`);
+    } else {
+      history.push(`?type=${filterValues}`);
+    }
   };
 
   const handleFilter = (event, newFilter) => {
@@ -331,6 +338,18 @@ const DeliveryTicket = () => {
     setisOpenDialog(false);
   };
 
+  const updateQueryParams = () => {
+    const queryParams = new URLSearchParams(history.location.search);
+    queryParams.delete('referenceId');
+    queryParams.delete('referenceType');
+    referenceId = queryParams.get('referenceId');
+    referenceType = queryParams.get('referenceType');
+    history.replace({
+      search: queryParams.toString()
+    });
+    fetchDeliveryTicket();
+  };
+
   return (
     <>
       <section className="main-container-v1">
@@ -369,16 +388,7 @@ const DeliveryTicket = () => {
                 <div className="flex flex-wrap">
                   <GiAbstract055 className="headerLogo" />
                   <span className="listingHeader">{routes.deliveryTicket.title} </span>
-                  {fromRental && (
-                    <Chip
-                      className="ml-3"
-                      color="primary"
-                      label={`Rental : ${fromRental.rentalJobName}`}
-                      onDelete={() => {
-                        setFromRental(null);
-                      }}
-                    />
-                  )}
+                  {referenceType && <Chip className="ml-3" color="primary" label={`Rental : ${referenceType}`} onDelete={updateQueryParams} />}
                 </div>
                 {isMobile && !isTablet ? (
                   <>
@@ -495,6 +505,7 @@ const DeliveryTicket = () => {
 
           {isMobile && !isTablet ? (
             <CustomSwipableList
+              key={selectedType}
               allowSelection={true}
               allowSwipe={true}
               permissions={permissions.deliveryTicket}

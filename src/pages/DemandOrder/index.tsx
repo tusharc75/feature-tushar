@@ -9,7 +9,8 @@ import {
   prepareDataForGrid,
   getLocalStorageArrayData,
   removeLocalStorage,
-  demandOrder
+  demandOrder,
+  sidebarResource
 } from '../../constants/helpers';
 import CustomContainer from '../../components/CustomContainer';
 import routes from './../../components/Helpers/Routes';
@@ -190,12 +191,15 @@ const DemandOrder = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-    if (selectedType === 1) {
-      deepFilter = deepFilter + `&myRecords=1`;
-    }
+
     if (isExport) {
       deepFilter = `?`;
     }
+
+    if (selectedType === 1) {
+      deepFilter = deepFilter + `&myRecords=1`;
+    }
+
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
@@ -259,6 +263,7 @@ const DemandOrder = () => {
   };
 
   const handleSalesOrderTypeSel = (filterValues) => {
+    dispatch({ type: 'setPage', page: 0 });
     setSelectedType(filterValues);
     history.push(`?type=${filterValues}`);
   };
@@ -363,12 +368,14 @@ const DemandOrder = () => {
               columns={columns}
               dispatch={dispatch}
               filters={filters}
+              resource={sidebarResource.demandOrder}
             ></SalesOrderHeader>
           )}
         </div>
         {Object.keys(frameworkComponent).length > 0 && columns ? (
           isMobile && !isTablet ? (
             <CustomSwipableList
+              key={selectedType}
               allowSelection={true}
               allowSwipe={true}
               permissions={permissions?.demandOrder}

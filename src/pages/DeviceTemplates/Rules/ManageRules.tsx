@@ -16,10 +16,9 @@ import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { UserDropdown } from 'src/components/Activity/Helpers/userDropdown';
-import { TbRuler2Off } from 'react-icons/tb';
 import { isEqual } from 'lodash';
 
-export default function ManageRules({ deviceTemplate, open, id = null, onClose, onSuccess }) {
+export default function ManageRules({ deviceTemplate, open, isClone = false, id = null, onClose, onSuccess }) {
   const OPERATOR = [
     {
       optionLabel: 'Less than',
@@ -42,7 +41,7 @@ export default function ManageRules({ deviceTemplate, open, id = null, onClose, 
   const toastConfig = useContext(CustomToastContext);
 
   const [fullScreen, setFullScreen] = useState(true);
-  const [iotDataPoints, setIotDataPoints] = useState([]);
+  const [iotDataPoints, setIotDataPoints] = useState(null);
   const [initialValue, setInitialValue] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -58,7 +57,7 @@ export default function ManageRules({ deviceTemplate, open, id = null, onClose, 
         .get(`${routes.deviceTemplates.path}/rule/${id}`)
         .then(({ data: { data } }) => {
           setInitialValue({
-            ruleName: data?.ruleName,
+            ruleName: isClone ? '' : data?.ruleName,
             condition: data?.condition,
             isEmailAlert: data?.isEmailAlert,
             emailAlertUsers: data?.emailAlertUsers?.map((e) => ({ userId: e })),
@@ -85,17 +84,10 @@ export default function ManageRules({ deviceTemplate, open, id = null, onClose, 
 
   const findIotDataoints = () => {
     const query = [{ field: 'deviceTemplate', term: deviceTemplate }];
-    axiosInstance()
-      .get(`${routes.iotDataPoints.path}?filterById=${JSON.stringify(query)}&filterType=and`)
-      .then(
-        ({
-          data: {
-            data: { data }
-          }
-        }) => {
-          setIotDataPoints(data?.map((d) => ({ optionLabel: d?.fieldLabel, optionValue: d?._id })));
-        }
-      );
+    axiosInstance().get(`${routes.iotDataPoints.path}?filterById=${JSON.stringify(query)}&filterType=and`)
+      .then(({ data: { data: { data } } }) => {
+        setIotDataPoints(data?.map((d) => ({ optionLabel: d?.fieldLabel, optionValue: d?._id })));
+      });
   };
 
   useEffect(() => {
@@ -104,7 +96,7 @@ export default function ManageRules({ deviceTemplate, open, id = null, onClose, 
 
   const handleSubmit = (values) => {
     setLoading(true);
-    if (id) {
+    if (id && !isClone) {
       values._id = id;
       axiosInstance()
         .put(`${routes.deviceTemplates.path}/rule`, values)
@@ -146,7 +138,6 @@ export default function ManageRules({ deviceTemplate, open, id = null, onClose, 
     if (values.ruleName === '') {
       errors['ruleName'] = 'Please enter rule name';
     }
-
     if (values?.condition?.length > 0) {
       values?.condition?.forEach((cnd: any, i) => {
         if (!cnd?.dataPoint) {
@@ -160,19 +151,16 @@ export default function ManageRules({ deviceTemplate, open, id = null, onClose, 
         }
       });
     }
-
     if (values?.isEmailAlert) {
       if (values?.emailAlertUsers?.length <= 0) {
         errors['emailAlertUsers'] = 'Email Alert Users is Required';
       }
     }
-
     if (values?.isCreateTask) {
       if (values?.taksAssignUsers?.length <= 0) {
         errors['taksAssignUsers'] = 'Taks Assign Users is Required';
       }
     }
-
     return errors;
   }
 
@@ -191,12 +179,12 @@ export default function ManageRules({ deviceTemplate, open, id = null, onClose, 
         }}
         open={open}
       >
-        {initialValue ? (
+        {initialValue && iotDataPoints ? (
           <Formik initialValues={initialValue} validateOnMount validate={validate} onSubmit={handleSubmit}>
             {({ values, errors, touched, setFieldValue, submitForm }) => (
               <Fragment>
                 <CustomDialogHeader
-                  title={id ? `Update Rule - ${initialValue?.ruleName}` : 'Create Rule'}
+                  title={id ? isClone ? `Clone - ${initialValue?.ruleName}` : `Update Rule - ${initialValue?.ruleName}` : 'Create Rule'}
                   onClose={(e, reason) => {
                     if (isEqual(initialValue, values)) {
                       onClose();

@@ -1,4 +1,4 @@
-import React, { useState, useReducer, Fragment, useContext, useEffect, FC } from 'react';
+import React, { useState, Fragment, useContext, useEffect, FC } from 'react';
 import { Button, Box } from '@material-ui/core';
 import { Link, useHistory } from 'react-router-dom';
 
@@ -11,20 +11,19 @@ import {
   DELIVERY_TICKET_STATUS,
   DELIVERY_TICKET_TYPE,
   DELIVERY_TICKET_REFERENCE_TYPE,
-  DELIVERY_FROM_TO_TYPE
+  DELIVERY_FROM_TO_TYPE,
+  serializedAsset,
+  prepareDataForGrid
 } from 'src/constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { groupBy } from 'lodash';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
-import { CommonRenderer, DateRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import CustomAgGrid, { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
-import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
-import { AiFillFilePdf } from 'react-icons/ai';
-import { IoMdDownload } from 'react-icons/io';
 import PreviewDownload from 'src/components/PreviewDownload';
-
+import useColumns from 'src/components/CustomReactTableNew/useColumnsReactTable';
+import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 interface ReceivingGridProps {
   fetchAssets: any;
   permissions: any;
@@ -39,6 +38,7 @@ interface ReceivingGridProps {
   renderedFrom?: string;
   isTransferEnded: boolean;
   allowedToEdit: boolean;
+  stepFullScreen: any;
 }
 
 const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
@@ -54,7 +54,8 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
     updateTransferStatus,
     isTransferEnded,
     renderedFrom,
-    allowedToEdit
+    allowedToEdit,
+    stepFullScreen
   } = props;
   const toastConfig = useContext(CustomToastContext);
 
@@ -65,66 +66,86 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
 
   const [isRemovingTicket, setRemovingTicket] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const [dataRows, setDataRows] = useState(null);
+  const [selectedRecords, setSelectedRecords] = useState([]);
+  const [columns, setColumns] = useState(null);
 
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
-
-  const columns = [
-    { field: 'assetNumber', headerName: 'Asset Number', show: true, disabled: true, cellRenderer: 'assetRenderer' },
-    { field: 'serialNumber', headerName: 'Serial Number', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'ticketRenderer' },
-    { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'receivingTicket', headerName: 'Receiving Ticket', show: true, cellRenderer: 'receivingRenderer' },
-    { field: 'receivingTicketStatus', headerName: 'Receiving Ticket Status', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'loadingTicketStatus', headerName: 'Loading Ticket Status', show: true, cellRenderer: 'commonRenderer' }
-  ];
+  const { getColumnData } = useColumns();
 
   const history = useHistory();
 
-  const AssetRenderer = (params) =>
-    params.value ? (
-       <p className="link cursor-pointer" title={params.value} onClick={() => window.open(`${routes.serializedAssetDetail.path}/${params.data._id}`)}>
-          {params.value}
-        </p>
-    ) : (
-      <NoDataCell />
-    );
+  const fetchFields = () => {
+    setColumns(null);
+    axiosInstance()
+      .get(`/field?resource=${serializedAsset.resource}`)
+      .then(({ data: { data } }) => {
+        let columns = [];
+        data?.filter(d => ['assetNumber', 'serialNumber', 'product', 'productDescription', 'status']?.includes(d?.fieldData?.fieldName))?.forEach((o) => {
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path);
+          if (currentColumn !== null) {
+            columns = [...columns, currentColumn?.columnData];
+          }
+        });
 
-  const LoadingTicketRenderer = (params) =>
-    params.value ? (
-       <p title={params.value} className="link cursor-pointer" onClick={() => window.open(`${routes.deliveryTicketDetail.path}/${params.data.loadingTicketId}`)}>
-      {params.value}
-      </p>
-    ) : (
-      <NoDataCell />
-    );
-
-  const ReceivingTicketRenderer = (params) =>
-    params.value ? (
-      <p  title={params.value} className="link cursor-pointer" onClick={() => window.open(`${routes.deliveryTicketDetail.path}/${params.data.receivingTicketId}`)}>
-      {params.value}
-      </p>
-    ) : (
-      <NoDataCell />
-    );
-
-  const ProductRenderer = (params) =>
-    params.value ? (
-     <p className="link cursor-pointer" title={params.value} onClick={() => window.open(`${routes.productDetail.path}/${params.data.productId}`)}>
-      {params.value}
-      </p>
-    ) : (
-      <NoDataCell />
-    );
-
-  const frameworkComponents = {
-    ticketRenderer: LoadingTicketRenderer,
-    receivingRenderer: ReceivingTicketRenderer,
-    productRenderer: ProductRenderer,
-    assetRenderer: AssetRenderer,
-    commonRenderer: CommonRenderer,
-    dateRenderer: DateRenderer
+        const column = [
+          {
+            accessor: 'index',
+            Header: 'Index',
+            width: 70,
+            sticky: isMobile ? 'none' : 'left',
+            Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+            Footer: () => {
+              return <>Total</>;
+            }
+          },
+          ...columns,
+          {
+            accessor: 'loadingTicket',
+            Header: 'Loading Ticket',
+            width: 300,
+            Cell: ({ row }) =>
+              row?.original?.loadingTicket ? (
+                <p title={row?.original?.loadingTicket}
+                  className="link cursor-pointer"
+                  onClick={() => window.open(`${routes.deliveryTicketDetail.path}/${row?.original?.loadingTicketId}`)}>
+                  {row?.original?.loadingTicket}
+                </p>
+              ) : (
+                <NoDataCell />
+              )
+          },
+          {
+            accessor: 'loadingTicketStatus',
+            Header: 'Loading Ticket Status',
+            primaryField: true,
+            width: 200,
+            Cell: ({ row }) => <p className="text-truncate">{row?.original?.loadingTicketStatus || <NoDataCell />}</p>
+          },
+          {
+            accessor: 'receivingTicket',
+            Header: 'Receiving Ticket',
+            primaryField: true,
+            width: 300,
+            Cell: ({ row }) =>
+              row?.original?.receivingTicket ? (
+                <p title={row?.original?.receivingTicket}
+                  className="link cursor-pointer"
+                  onClick={() => window.open(`${routes.deliveryTicketDetail.path}/${row?.original?.receivingTicketId}`)}>
+                  {row?.original?.receivingTicket}
+                </p>
+              ) : (
+                <NoDataCell />
+              )
+          },
+          {
+            accessor: 'receivingTicketStatus',
+            Header: 'Receiving Ticket Status',
+            width: 200,
+            Cell: ({ row }) => <p className="text-truncate">{row?.original?.receivingTicketStatus || <NoDataCell />}</p>
+          },
+        ]
+        setColumns(column);
+      });
   };
 
   useEffect(() => {
@@ -134,10 +155,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
   }, [transferAssetId]);
 
   const fetchAssetsData = async (forceRefresh) => {
-    dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
+    await fetchFields();
 
     try {
       let assetData = await fetchAssets(forceRefresh);
@@ -164,10 +182,16 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
           }
         }
       }
-      dispatch({ type: 'initialize', data: assetData, count: assetData.length });
-      dispatch({ type: 'loading', loading: false });
+
+      assetData = assetData?.map((d: any, index: number) => {
+        let finalObject: any = prepareDataForGrid(d);
+        return {
+          index: index + 1,
+          ...finalObject
+        };
+      });
+      setDataRows(assetData)
     } catch (error) {
-      dispatch({ type: 'loading', loading: false });
       toastConfig.setToastConfig(error);
     }
   };
@@ -194,16 +218,16 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
       setAssetWithNoTicket(inventoryWithNoTicket);
     }
 
-    if (dataRows.length > 0) {
-      const inventoryWithNoTicket = dataRows.filter((asset: any) => !asset?.hasOwnProperty('receivingTicket'));
-      const inventoryDelivered = dataRows.filter((asset: any) => asset?.receivingTicketStatus === 'Delivered');
+    if (dataRows?.length > 0) {
+      const inventoryWithNoTicket = dataRows?.filter((asset: any) => !asset?.hasOwnProperty('receivingTicket'));
+      const inventoryDelivered = dataRows?.filter((asset: any) => asset?.receivingTicketStatus === 'Delivered');
       if (inventoryWithNoTicket.length > 0) {
         setNextStep(false);
       } else {
         setNextStep(true);
       }
       if (transferAssetData?.transferType.includes('External')) {
-        if (inventoryDelivered.length === dataRows.filter((d) => d.status !== 'Lost').length) {
+        if (inventoryDelivered.length === dataRows?.filter((d) => d.status !== 'Lost').length) {
           setTransferIsEnded(true);
           updateTransferStatus('Completed');
         } else {
@@ -246,9 +270,10 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
       {allowedToEdit && (
         <Box display="flex" flexDirection={isMobile && !isTablet ? 'column' : 'row'} justifyContent="space-between" mx={1} my={1}>
           <PreviewDownload
+            fileName={`${routes.transferAsset.title}-${transferAssetData?.transferAssetNumber}`}
             resource={sidebarResource.transferAsset}
             referenceId={transferAssetId}
-            columns={columns?.filter((e) => ['assetNumber', 'productName', 'productDescription', 'status']?.includes(e.field))}
+            columns={columns?.filter((e) => ['assetNumber', 'product', 'productDescription', 'status']?.includes(e?.accessor))}
             hideDetailButton={true}
           />
           {!isTransferEnded && (
@@ -313,9 +338,9 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
               )}
               <Box component="span" mx={1} />
               {permissions?.transferAsset?.isUpdate &&
-              selectedRecords.length &&
-              selectedRecords?.filter((f) => f.hasOwnProperty('receivingTicket') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new)
-                ?.length === selectedRecords?.length ? (
+                selectedRecords.length &&
+                selectedRecords?.filter((f) => f.hasOwnProperty('receivingTicket') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new)
+                  ?.length === selectedRecords?.length ? (
                 <Button variant="contained" size="small" color="primary" onClick={() => setShowConfirmBox(true)}>
                   Remove Receiving Ticket
                 </Button>
@@ -325,68 +350,28 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
         </Box>
       )}
       <Box mt={1}>
-        {isMobile && !isTablet ? (
-          <CustomSwipableList
-            allowSelection={allowedToEdit}
-            allowSwipe={false}
-            permissions={permissions?.transferAsset}
-            primaryField={columns?.find((d) => d.field)}
-            onClick={(data) => {
-              history.push(`${routes.serializedAssetDetail.path}/${data._id}`);
-            }}
-            dataRows={dataRows}
-            selectedRecords={selectedRecords}
-            dispatch={dispatch}
-            onEdit={(data) => {
-            }}
-            extraParamsToCheckDelete={true}
-            onDelete={(data) => {}}
-            rowCount={rowCount}
-            page={page}
-            loading={loading}
-            chips={[
-              {
-                label: 'Status: ',
-                field: 'status'
-              },
-              {
-                label: 'Loading Ticket : ',
-                field: 'loadingTicket',
-                onClick: (data: any) => history.push(`${routes.deliveryTicketDetail.path}/${data.loadingTicketId}`)
-              },
-              {
-                label: 'Receiving Ticket : ',
-                field: 'receivingTicket',
-                onClick: (data: any) => history.push(`${routes.deliveryTicketDetail.path}/${data.receivingTicketId}`)
-              }
-            ]}
-            additionalDetails={[]}
-            owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-            onCreate={false}
-            showClone={false}
-            onClone={(data) => {}}
-            renderedFrom={renderedFrom}
-          />
+        {columns && dataRows ? (
+          <Box zIndex={5} width={'100%'}>
+            <CustomReactTable
+              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
+              columns={columns}
+              data={dataRows}
+              onSelect={setSelectedRecords}
+              childrenProperty="subRows"
+              uniqueKey="_id"
+              hideSelection={!allowedToEdit}
+              hideAction={true}
+              renderedFrom={renderedFrom}
+              isClientSideGrid={true}
+              hideExpander={true}
+            />
+          </Box>
         ) : (
-          <CustomAgGrid
-            columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameworkComponents}
-            setGridApi={setGridApi}
-            dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            allowAction={false}
-            actionWidth={100}
-            allowSelection={allowedToEdit}
-            isClientSideGrid={true}
-            loading={loading}
-            renderedFrom={renderedFrom}
-            refreshGrid={() => fetchAssetsData(true)}
-          />
-        )}
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )
+        }
       </Box>
       {showTicketDialog.open && (
         <ManageDeliveryTicket

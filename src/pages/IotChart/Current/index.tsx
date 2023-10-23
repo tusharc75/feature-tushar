@@ -1,27 +1,55 @@
-import { Box, Grid, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@material-ui/core';
-import _, { startCase } from 'lodash';
+import { Box, Grid, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@material-ui/core';
+import { startCase } from 'lodash';
 import moment from 'moment';
-import { useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { dateTimeFormat } from 'src/constants/helpers';
-import CustomAccordian from '../Accordian';
+import TreeView from './TreeView';
+import RefreshIcon from '@material-ui/icons/Refresh';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import SearchBox from 'src/components/Helpers/SearchBox';
 
 export default function Current({ assetId }) {
   const toastConfig = useContext(CustomToastContext);
 
-  const [category, setCategory] = useState(null);
-  const [parentCategory, setParentCategory] = useState(null);
   const [errorData, setErrorData] = useState(null);
-  const [expandedAccordition, setExpandedAccordition] = useState<string | false>('');
+  const [expandedAccordition, setExpandedAccordition] = useState({});
+  const [categories, setCategories] = useState(null);
+  const [currentData, setCurrentData] = useState(null);
+  const [searchValue, setSearchValue] = useState('');
 
   useEffect(() => {
+    fetchCategory();
     fetchData();
     fetchErrorData();
   }, [assetId]);
 
+  const fetchCategory = async () => {
+    axiosInstance()
+      .get(`/dynamic-form`, {
+        headers: {
+          Resource: 'Iot Data Points Category'
+        }
+      })
+      .then(({ data: { data } }) => {
+        const categoryData: any = data?.filter((e) => !e.parentCategory);
+        categoryData?.forEach((element) => {
+          element.child = data?.filter((e) => e?.parentCategory?.optionValue === element?._id);
+        });
+        setCategories(categoryData);
+        if (categoryData?.length) {
+          setExpandedAccordition({ [categoryData[0]._id]: true });
+        }
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   const fetchData = async () => {
+    setCurrentData(null);
     axiosInstance()
       .get(`/report/iot/current-status`, {
         params: {
@@ -29,25 +57,7 @@ export default function Current({ assetId }) {
         }
       })
       .then(({ data: { data } }) => {
-        const parentCategory: any = [];
-        const category: any = [];
-
-        data?.dataPointData.forEach((d) => {
-          if (d?.hasOwnProperty('parentCategory')) {
-            parentCategory.push({
-              ...d,
-              time: moment(d?.time).format(dateTimeFormat)
-            });
-          } else {
-            category.push({
-              ...d,
-              time: moment(d?.time).format(dateTimeFormat)
-            });
-          }
-        });
-
-        setParentCategory(parentCategory);
-        setCategory(category);
+        setCurrentData(data?.dataPointData || []);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -55,60 +65,80 @@ export default function Current({ assetId }) {
   };
 
   const fetchErrorData = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/report/iot/asset-error-message?asset=${assetId}`);
-      const tableData: any = [];
-      data
-        ?.sort((a, b) => moment(a.time).diff(moment(b.time)))
-        ?.forEach((e) => {
-          if (e.errorMessage) {
-            tableData.push({
-              ...e,
-              time: moment(e?.time).format(dateTimeFormat)
-            });
-          }
-        });
-      setErrorData(tableData);
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
+    setErrorData(null);
+    axiosInstance()
+      .get(`/report/iot/asset-error-message`, {
+        params: {
+          asset: assetId
+        }
+      })
+      .then(({ data: { data } }) => {
+        setErrorData(data);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   };
 
   return (
     <>
-      {(parentCategory && parentCategory?.length) || (category && category?.length) || (errorData && errorData?.length) ? (
-        <Grid container spacing={2}>
-          <Grid item lg={8} md={8} sm={12} xs={12}>
-            {_.uniqBy(parentCategory, 'parentCategory.optionValue')?.map((p: any, index) => (
-              <CustomAccordian
-                expended={expandedAccordition}
-                data={p}
-                onChange={() => {
-                  setExpandedAccordition((prev) =>
-                    !prev ? p?.parentCategory?.optionValue : prev === p?.parentCategory?.optionValue ? false : p?.parentCategory?.optionValue
-                  );
-                }}
-                type={'parentCategory'}
-                allData={parentCategory}
-              />
-            ))}
-            {_.uniqBy(category, 'category.optionValue')?.map((c: any, i) => (
-              <CustomAccordian
-                expended={expandedAccordition}
-                data={c}
-                onChange={() => {
-                  setExpandedAccordition((prev) =>
-                    !prev ? c?.category?.optionValue : prev === c?.category?.optionValue ? false : c?.category?.optionValue
-                  );
-                }}
-                type={'category'}
-                allData={category}
-              />
-            ))}
+      <Box pb={2}>
+        <Grid direction="row" justifyContent="flex-end" alignItems="center" container spacing={2}>
+          <Grid item>
+            <SearchBox
+              onChange={(e) => {
+                setSearchValue(e.target.value);
+              }}
+              value={searchValue}
+              size="small"
+            />
           </Grid>
-          <Grid item lg={4} md={4} sm={12} xs={12}>
+          <Grid item>
+            <HtmlTooltip title="Refresh">
+              <IconButton
+                size="small"
+                onClick={() => {
+                  fetchData();
+                  fetchErrorData();
+                }}
+              >
+                <RefreshIcon />
+              </IconButton>
+            </HtmlTooltip>
+          </Grid>
+        </Grid>
+      </Box>
+      <Grid container spacing={2}>
+        <Grid item lg={8} md={8} sm={12} xs={12}>
+          {categories && currentData ? (
+            currentData?.length ? (
+              <div className="grid gap-3 md:gap-4">
+                {categories?.map((category: any, index) => (
+                  <TreeView
+                    expandedAccordition={expandedAccordition}
+                    setExpandedAccordition={setExpandedAccordition}
+                    category={category}
+                    currentData={
+                      searchValue?.trim() === ''
+                        ? currentData
+                        : currentData?.filter((e) => e?.fieldLabel?.toLowerCase()?.includes(searchValue?.trim()?.toLowerCase()))
+                    }
+                  />
+                ))}
+              </div>
+            ) : (
+              <Box mt={5} textAlign="center">
+                <p>No Data Found</p>
+              </Box>
+            )
+          ) : (
+            <Box p={2} height={500}>
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Box>
+          )}
+        </Grid>
+        <Grid item lg={4} md={4} sm={12} xs={12}>
+          {errorData ? (
             <TableContainer id={`${Date.now()}`} style={{ height: 'calc(100vh - 200px)', width: 'auto' }}>
               <Table stickyHeader id={'table_' + '1'} aria-label="simple table">
                 <TableHead>
@@ -121,25 +151,28 @@ export default function Current({ assetId }) {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {errorData?.map((data: any, index) => (
-                    <TableRow key={'row ' + index + 1}>
-                      <TableCell key={'cell ' + index + 1} align="left">
-                        {data?.errorMessage}
-                        <br />
-                        {data?.time}
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {errorData
+                    ?.sort((a, b) => moment(a.time).diff(moment(b.time)))
+                    ?.filter((e) => e?.message)
+                    ?.map((data: any, index) => (
+                      <TableRow key={'row ' + index + 1}>
+                        <TableCell key={'cell ' + index + 1} align="left">
+                          {data?.message}
+                          <br />
+                          {moment(data?.time).format(dateTimeFormat)}
+                        </TableCell>
+                      </TableRow>
+                    ))}
                 </TableBody>
               </Table>
             </TableContainer>
-          </Grid>
+          ) : (
+            <Box p={2} height={500}>
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Box>
+          )}
         </Grid>
-      ) : (
-        <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>
-      )}
+      </Grid>
     </>
   );
 }

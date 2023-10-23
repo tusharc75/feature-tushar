@@ -1,36 +1,30 @@
-import { useState, useEffect, useContext, useReducer } from 'react';
-import { Grid, Chip } from '@material-ui/core';
-import { Link } from 'react-router-dom';
-import { useData } from '../../StateProvider/Provider';
-import axiosInstance from '../../axios/axiosInstance';
-import { displayDate } from '../../services/util';
-import OpportunitiesHeader from './OpportunitiesHeader';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import MessageDialog from '../../components/Helpers/MessageDialog';
-import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import routes from './../../components/Helpers/Routes';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { GiHiveMind } from 'react-icons/gi';
-import ManageOpportunityDialog from './ManageOpportunityDialog';
-import { opportunity, isObjectEmpty, customerAccount, supplierAccount, gridLoadingTimeout, sidebarResource } from '../../constants/helpers';
-import NoDataCell from '../../components/Helpers/NoDataCell';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import CustomContainer from '../../components/CustomContainer';
-import { useHistory } from 'react-router-dom';
-import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import './style.scss';
-import TransferEntityDialog from '../../components/AssignRolesDialog/TransferEntityDialog';
-import Tooltip from '@material-ui/core/Tooltip';
+import { Chip } from '@material-ui/core';
 import IconButton from '@material-ui/core/IconButton';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { prepareDataForGrid } from '../../constants/helpers';
-import { SiMarketo, AiFillFileMarkdown, FaPercentage } from 'react-icons/all';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import { useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { FaSuitcase } from 'react-icons/fa';
-import useColumns, { getFrameworkComponents, checkStaticField, getStaticFields, gridFilterParser } from '../../constants/useColumns';
+import { AiFillFileMarkdown, CiUser, FaPercentage, SiMarketo } from 'react-icons/all';
+import { GiHiveMind } from 'react-icons/gi';
+import { useHistory } from 'react-router-dom';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
+import TransferEntityDialog from '../../components/AssignRolesDialog/TransferEntityDialog';
+import CustomContainer from '../../components/CustomContainer';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
+import MessageDialog from '../../components/Helpers/MessageDialog';
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import { customerAccount, gridLoadingTimeout, opportunity, prepareDataForGrid, sidebarResource, supplierAccount, getLocalStorageArrayData, removeLocalStorage } from '../../constants/helpers';
+import useColumns, { checkStaticField, getFrameworkComponents, getStaticFields, gridFilterParser } from '../../constants/useColumns';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import routes from './../../components/Helpers/Routes';
+import ManageOpportunityDialog from './ManageOpportunityDialog';
+import OpportunitiesHeader from './OpportunitiesHeader';
+import './style.scss';
 
 let opportunityTimeout;
 
@@ -83,21 +77,10 @@ const Opportunities = () => {
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
-  const columnState = JSON.parse(localStorage.getItem(opportunityResource));
-  const [isAllChecked, setIsAllChecked] = useState(false);
-  const [clonedData, setClonedData] = useState([]);
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
+
   const localStorageSelectedRecords = `${opportunityResource}_selected`;
 
-  if (columnState) {
-    columns.map((item) => {
-      columnState.map((d) => {
-        if (d.colId === item.field) {
-          item.show = !d.hide;
-        }
-      });
-    });
-  }
 
   //  Grid Variables - End
   useEffect(() => {
@@ -175,7 +158,7 @@ const Opportunities = () => {
     if (renderCount > 0) {
       fetchOpportunities();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting, selectedEntity, accountDetails]);
+  }, [page, limit, selectedType, filters, sorting, selectedEntity, accountDetails, showFilteredRecordsOnly]);
 
   const handleSingleDeleteOpportunity = async () => {
     dispatch({ type: 'loading', loading: true });
@@ -243,12 +226,20 @@ const Opportunities = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-    if (selectedType === 1) {
-      deepFilter = deepFilter + `&myRecords=1`;
-    }
+
     if (isExport) {
       deepFilter = `?`;
     }
+
+    if (selectedType === 1) {
+      deepFilter = deepFilter + `&myRecords=1`;
+    }
+
+    if (showFilteredRecordsOnly) {
+      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+    }
+
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
@@ -324,8 +315,7 @@ const Opportunities = () => {
             };
             return res;
           });
-          setIsAllChecked(false);
-          setClonedData(data);
+         
           if (appendRows) {
             dispatch({
               type: 'initialize',
@@ -340,21 +330,6 @@ const Opportunities = () => {
               count: count,
               selectedRecords: rows.filter((f) => f.isChecked === true)
             });
-          }
-
-          if (gridApi) {
-            try {
-              let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords)
-                ? JSON.parse(localStorage.getItem(localStorageSelectedRecords))
-                : [];
-              if (oldSelectedRecords.length > 0) {
-                gridApi.forEachNode(function (node) {
-                  node.setSelected(oldSelectedRecords.some((o) => o === node.data._id));
-                });
-              }
-            } catch (ex) {
-              console.error('Error in getting selected records from local storage');
-            }
           }
 
           dispatch({ type: 'initialize', data: rows, count: count });
@@ -374,6 +349,7 @@ const Opportunities = () => {
   };
 
   const handleOpportunityTypeChange = (filterValues) => {
+    dispatch({ type: 'setPage', page: 0 });
     setSelectedType(filterValues);
   };
 
@@ -424,6 +400,7 @@ const Opportunities = () => {
             type: 'success',
             message: data.message
           });
+          removeLocalStorage(localStorageSelectedRecords);
           setIsConformDialogVisible(false);
           setDeleteLoading(false);
           if (deleteRecord) setDeleteRecord({});
@@ -450,8 +427,12 @@ const Opportunities = () => {
           }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
-          recordsToExport={selectedRecords.length}
-          ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+          recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+          ids={
+            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+              ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+              : []
+          }
           onExportToExcelSuccess={() => {
             if (gridApi) gridApi.deselectAll();
             else fetchOpportunities();
@@ -500,6 +481,7 @@ const Opportunities = () => {
         {Object.keys(frameWorkComponent).length > 0 ? (
           isMobile && !isTablet ? (
             <CustomSwipableList
+              key={selectedType}
               allowSelection={true}
               allowSwipe={true}
               permissions={permissions[opportunityResource]}
@@ -526,7 +508,7 @@ const Opportunities = () => {
               loading={loading}
               additionalDetails={[
                 {
-                  icon: <FaSuitcase size={18} />,
+                  icon: <CiUser size={18} />,
                   field: 'customerAccountName'
                 }
               ]}

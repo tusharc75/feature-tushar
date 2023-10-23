@@ -208,11 +208,13 @@ const WorkOrder = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-    if (selectedType === 1) {
-      deepFilter = deepFilter + `&myRecords=1`;
-    }
+
     if (isExport) {
       deepFilter = `?`;
+    }
+
+    if (selectedType === 1) {
+      deepFilter = deepFilter + `&myRecords=1`;
     }
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
@@ -246,6 +248,7 @@ const WorkOrder = () => {
   };
 
   const handleWorkOrderTypeSel = (filterValues) => {
+    dispatch({ type: 'setPage', page: 0 });
     setSelectedType(filterValues);
     history.push(`?type=${filterValues}`);
   };
@@ -480,6 +483,7 @@ const WorkOrder = () => {
         </div>
         {isMobile && !isTablet ? (
           <CustomSwipableList
+            key={selectedType}
             allowSelection={true}
             allowSwipe={true}
             permissions={permissions.workOrder}

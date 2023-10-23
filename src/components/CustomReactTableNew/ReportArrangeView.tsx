@@ -76,10 +76,6 @@ const ReportArrangeView = (props: ArrangeColumnsProps) => {
   const toastConfig = React.useContext(CustomToastContext);
   const [isSubmitting, setSubmitting] = React.useState(false);
   const [reportName, setReportName] = React.useState(selectedReportView ? selectedReportView.name : '');
-  const [lockedItem, setLockedItem] = React.useState({
-    index: 0,
-    column: {}
-  });
 
   React.useEffect(() => {
     if (!columnApi) return;
@@ -127,7 +123,6 @@ const ReportArrangeView = (props: ArrangeColumnsProps) => {
 
   const handleSaveChange = () => {
     const newColumns = [...sortedColumns];
-    // newColumns.splice(lockedItem.index, 0, lockedItem.column);
     setColumns(newColumns);
     const colIds = newColumns.map((col) => col.field);
     const oldColumnState = columnApi.getColumnState();

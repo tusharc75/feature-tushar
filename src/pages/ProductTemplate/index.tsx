@@ -16,10 +16,10 @@ import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from '../../comp
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import SearchBox from '../../components/Helpers/SearchBox';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
+import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, productTemplate } from '../../constants/helpers';
+import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, productTemplate, sidebarResource } from '../../constants/helpers';
 import styles from '../Leads/Header.module.scss';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
@@ -333,6 +333,7 @@ const ProductTemplate: FC = () => {
                       dispatch={dispatch}
                       title={routes?.productTemplate?.title}
                       filters={filters}
+                      resource={sidebarResource.productTemplate}
                     />
                   </div>
                 </div>
@@ -368,7 +369,7 @@ const ProductTemplate: FC = () => {
                     onClick={openActions}
                     disabled={selectedRecords.length ? false : true}
                     aria-controls="action-menu"
-                    className={`$new-dropdown-v1`}
+                    className={`new-dropdown-v1`}
                     endIcon={<ExpandMore />}
                   >
                     Actions
@@ -390,6 +391,7 @@ const ProductTemplate: FC = () => {
                 </Menu>
               </div>
             </div>
+            <DisplayFiltersForMobile resource={sidebarResource.productTemplate} />
           </div>
         </div>
         {isMobile && !isTablet ? (

@@ -21,7 +21,8 @@ import {
   primaryFields,
   productInventory,
   isObjectEmpty,
-  sidebarResource
+  sidebarResource,
+  product
 } from 'src/constants/helpers';
 import Loader from 'src/components/Loader';
 import MomentUtils from '@date-io/moment';
@@ -105,8 +106,7 @@ const Report = () => {
           data: { data: productOption }
         } = await axiosInstance().get(`sa-formbuilder/lookup?lookupResource=Product`);
 
-        POFields.filter((field) =>
-          ['purchaseOrderNumber', 'purchaseOrderDate', 'supplierAccount', 'warehouse'].includes(field?.fieldData.fieldName)
+        POFields.filter((field) => ['purchaseOrderNumber', 'purchaseOrderDate', 'supplierAccount', 'warehouse'].includes(field?.fieldData.fieldName)
         ).forEach((field: any) => {
           if (field?.fieldData.fieldName === 'purchaseOrderNumber') {
             resourceFieldData.push(field);
@@ -149,14 +149,18 @@ const Report = () => {
               headerName: field?.fieldData?.fieldLabel,
               show: true,
               disabled: false,
+              filter: false,
+              sortable: false,
               cellRenderer: 'dateRenderer'
             });
           }
         });
 
-        productFields
-          .filter((field) => ['productName', 'productNumber'].includes(field?.fieldData.fieldName))
+        productFields.filter((field) => ['productName', 'productNumber', 'expenseItem'].includes(field?.fieldData.fieldName))
           .forEach((field: any) => {
+            if (field?.fieldData.fieldName === 'expenseItem') {
+              resourceFieldData.push(field);
+            }
             if (field?.fieldData.fieldName === 'productName') {
               resourceFieldData.push({
                 ...field,
@@ -184,7 +188,7 @@ const Report = () => {
         POProductFields.forEach((o) => {
           let currentColumn = getColumnData('Purchase Order Product', o?.fieldData, '');
           if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
+            columns = [...columns, { ...currentColumn?.columnData, filter: false, sortable: false }];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
               rendererNames.push(currentColumn?.rendererName);
             }
@@ -234,6 +238,9 @@ const Report = () => {
         });
 
         productFields.forEach((o: any) => {
+          if (o?.fieldData.fieldName === 'expenseItem') {
+            resourceFieldData.push(o);
+          }
           if (o?.fieldData.fieldName === 'productCategory') {
             resourceFieldData.push(o);
           }
@@ -384,22 +391,26 @@ const Report = () => {
           });
         }
 
-        productFields
-          .filter((field) => ['productName', 'productDescription', 'productNumber'].includes(field?.fieldData.fieldName))
+        productFields.filter((field) => ['productName', 'productDescription', 'productNumber', 'expenseItem'].includes(field?.fieldData.fieldName))
           .forEach((field: any) => {
+            if (field?.fieldData.fieldName === 'expenseItem') {
+              resourceFieldData.push(field);
+            }
             if (field?.fieldData.fieldName === 'productName') {
               resourceFieldData.push({
                 ...field,
                 fieldData: { ...field.fieldData, fieldName: 'product', type: 'dropDown', lookup: true, option: productOption?.Product || [] }
               });
             }
-            columns.push({
-              field: field?.fieldData.fieldName === 'productName' ? 'product' : field?.fieldData.fieldName,
-              headerName: field?.fieldData?.fieldLabel,
-              show: true,
-              disabled: false,
-              cellRenderer: field?.fieldData.fieldName === 'productName' ? 'productRenderer' : 'commonRenderer'
-            });
+            if (!['expenseItem'].includes(field?.fieldData.fieldName)) {
+              columns.push({
+                field: field?.fieldData.fieldName === 'productName' ? 'product' : field?.fieldData.fieldName,
+                headerName: field?.fieldData?.fieldLabel,
+                show: true,
+                disabled: false,
+                cellRenderer: field?.fieldData.fieldName === 'productName' ? 'productRenderer' : 'commonRenderer'
+              });
+            }
           });
 
         columns = [
@@ -429,13 +440,13 @@ const Report = () => {
           { field: 'warehouse', headerName: routes.warehouse.title, show: true, cellRenderer: 'commonRenderer' },
           ...(user?.user?.brandPolicy?.storageLocation
             ? [
-                {
-                  field: 'storageLocation',
-                  headerName: 'Storage Location',
-                  show: true,
-                  cellRenderer: 'commonRenderer'
-                }
-              ]
+              {
+                field: 'storageLocation',
+                headerName: 'Storage Location',
+                show: true,
+                cellRenderer: 'commonRenderer'
+              }
+            ]
             : []),
           { field: 'comment', headerName: 'Comment', show: true, cellRenderer: 'commonRenderer' },
           { field: 'serialNumber', headerName: 'Serial Number', filter: false, show: true, cellRenderer: 'serialNumberRenderer' },
@@ -464,6 +475,9 @@ const Report = () => {
         } = await axiosInstance().get(`sa-formbuilder/lookup?lookupResource=Product`);
 
         productFields.forEach((o: any) => {
+          if (o?.fieldData.fieldName === 'expenseItem') {
+            resourceFieldData.push(o);
+          }
           if (o?.fieldData.fieldName === 'productName') {
             resourceFieldData.push({
               ...o,
@@ -1156,13 +1170,17 @@ const Report = () => {
         });
 
         forDeepFilter.forEach((key) => {
-          const options = selectedData[key].value;
-          options.forEach((o: any) => {
+          if (selectedData[key].type === 'checkBox') {
             deepFilter.push({
               field: key,
-              term: o.optionValue
+              term: selectedData[key].value ? 'Yes' : 'No'
             });
-          });
+          } else {
+            deepFilter.push({
+              field: key,
+              term: selectedData[key].value?.map((d: any) => d.optionValue)
+            });
+          }
         });
 
         if (filterById.length > 0) {

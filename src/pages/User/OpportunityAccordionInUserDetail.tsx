@@ -156,15 +156,22 @@ export default function OpportunityAccordionInUserDetail({ opportunities, expand
                               <Grid item xs={7} sm={8}>
                                 {hasAccessToEntity(obj.entity) ? (
                                   obj.entity === selectedEntity ? (
-                                    <Link className="link" to={`${routes.opportunityDetail.path}/${obj._id}`}>
+                                    <Link
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="link"
+                                      to={`${routes.opportunityDetail.path}/${obj._id}`}
+                                    >
                                       <Typography className="detailName">{obj?.opportunityName}</Typography>
                                     </Link>
                                   ) : (
                                     <Link
                                       className="link"
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      to={`${routes.opportunityDetail.path}/${obj._id}`}
                                       onClick={() => {
                                         handleEntityChange(obj.entity);
-                                        history.push(`${routes.opportunityDetail.path}/${obj._id}`);
                                       }}
                                     >
                                       <Typography className="detailName">{obj?.opportunityName}</Typography>

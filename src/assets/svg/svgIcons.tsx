@@ -1,7 +1,44 @@
+import { FC } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+
+const getHash = () => {
+  return uuidv4();
+};
+
 interface svgInterface extends React.SVGAttributes<SVGElement> {}
 interface svgInterfaceWithSize extends svgInterface {
   size?: number;
 }
+
+export const DOAApproved: React.FC<svgInterfaceWithSize> = ({ size = 14, width = 14, height = 14, ...others }) => {
+  return (
+    <svg {...others} xmlns="http://www.w3.org/2000/svg" width={size ?? width} height={size ?? height} fill="none" viewBox="0 0 14 14">
+      <path stroke="currentcolor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.143" d="M2.5 7.643l3 3 6-6.429"></path>
+    </svg>
+  );
+};
+
+export const DOARejected: React.FC<svgInterfaceWithSize> = ({ size = 14, width = 14, height = 14, ...others }) => {
+  return (
+    <svg {...others} xmlns="http://www.w3.org/2000/svg" width={size ?? width} height={size ?? height} fill="none" viewBox="0 0 14 14">
+      <path stroke="currentcolor" strokeLinecap="round" strokeWidth="1.714" d="M11.429 10.857L2.857 2.286m8.572 0l-8.572 8.571"></path>
+    </svg>
+  );
+};
+export const DOAPending: React.FC<svgInterfaceWithSize> = ({ size = 14, width = 14, height = 14, ...others }) => {
+  return (
+    <svg {...others} xmlns="http://www.w3.org/2000/svg" width={size ?? width} height={size ?? height} fill="none" viewBox="0 0 14 14">
+      <path fill="currentcolor" d="M7.571 3.571H6.428v.572a.571.571 0 101.143 0V3.57z"></path>
+      <path
+        fill="currentcolor"
+        fillRule="evenodd"
+        d="M3.571 1.286v1.143h.572v1.714A2.857 2.857 0 007 7a2.857 2.857 0 00-2.857 2.857v1.714H3.57v1.143h6.857v-1.143h-.571V9.857A2.857 2.857 0 007 7a2.857 2.857 0 002.857-2.857V2.429h.571V1.286H3.571zm1.715 1.143h3.428v1.714a1.714 1.714 0 01-3.428 0V2.429zm0 7.428v1.714h3.428V9.857a1.714 1.714 0 00-3.428 0z"
+        clipRule="evenodd"
+      ></path>
+    </svg>
+  );
+};
+
 export const PreWorkIcon = ({ className = '', width = '', height = '', size = 15, color = '#298B88', style = {} }) => {
   return (
     <svg
@@ -527,18 +564,19 @@ export const PressureIcon: React.FC<svgInterfaceWithSize> = ({ width = 39, heigh
   );
 };
 
-export const VolumeIcon: React.FC<svgInterfaceWithSize> = ({ width = 39, height = 39, size = 39, ...rest }) => {
+export const VolumeIcon: React.FC<TIconWithColors> = ({ width = 39, height = 39, size = 39, colors = ['#AD14F5', '#6203AC'], ...rest }) => {
+  const hash = getHash();
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={size ? size : width} height={size ? size : height} fill="none" viewBox="0 0 39 39" {...rest}>
-      <rect width="38" height="38" x="0.289" y="0.133" fill="url(#paint0_linear_4216_50391)" rx="8"></rect>
+      <rect width="38" height="38" x="0.289" y="0.133" fill={`url(#${hash})`} rx="8"></rect>
       <path
         fill="#fff"
         d="M20.08 11.451c-.452-.77-.93-.744-1.383 0-2.074 3.086-5.213 7.713-5.213 10.027 0 1.623.665 3.112 1.73 4.176a5.912 5.912 0 004.175 1.729 5.912 5.912 0 004.175-1.729 5.912 5.912 0 001.73-4.175c0-2.341-3.14-6.942-5.214-10.027zm3.564 12.66a5.049 5.049 0 01-1.782 1.73c-.345.185-.771.08-.957-.267a.7.7 0 01.266-.984 3.52 3.52 0 001.277-1.223c.319-.506.505-1.09.531-1.702a.694.694 0 01.745-.665.694.694 0 01.665.744 5.268 5.268 0 01-.745 2.367z"
       ></path>
       <defs>
-        <linearGradient id="paint0_linear_4216_50391" x1="5.93" x2="38.289" y1="0.133" y2="38.133" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#AD14F5"></stop>
-          <stop offset="1" stopColor="#6203AC"></stop>
+        <linearGradient id={hash} x1="5.93" x2="38.289" y1="0.133" y2="38.133" gradientUnits="userSpaceOnUse">
+          <stop stopColor={colors[0] || 'currentcolor'}></stop>
+          <stop offset="1" stopColor={colors[1] || 'currentcolor'}></stop>
         </linearGradient>
       </defs>
     </svg>
@@ -717,6 +755,17 @@ export const MobileExportIcon: React.FC<svgInterfaceWithSize> = ({ size = 18, wi
       <path
         fill={color}
         d="M14.663 7.479v4.124a1.667 1.667 0 01-1.719 1.604H3.78a1.667 1.667 0 01-1.718-1.604V7.48a.573.573 0 111.146 0v4.124a.533.533 0 00.572.458h9.165a.532.532 0 00.573-.458V7.48a.573.573 0 111.146 0zM6.98 5.663l.808-.813v4.92a.573.573 0 101.146 0V4.85l.807.813a.573.573 0 00.98-.407.574.574 0 00-.166-.406L8.769 3.063a.573.573 0 00-.367-.167h-.109a.573.573 0 00-.31.138h-.028L6.168 4.85a.575.575 0 10.813.813z"
+      ></path>
+    </svg>
+  );
+};
+export const FileCopyIcon: FC<svgInterfaceWithSize> = ({ width = null, height = null, size = 18, ...others }) => {
+  return (
+    <svg {...others} xmlns="http://www.w3.org/2000/svg" width={width ?? size} height={height ?? size} fill="none" viewBox="0 0 18 18">
+      <path fill="transparent" d="M0 0H18V18H0z"></path>
+      <path
+        fill="currentcolor"
+        d="M11.25 4.5H7.5A1.5 1.5 0 006 6v6.75H3.75a1.5 1.5 0 01-1.5-1.5V3a1.5 1.5 0 011.5-1.5h6a1.5 1.5 0 011.5 1.5v1.5zm-3 .75h5.25l2.25 2.25V15a1.5 1.5 0 01-1.5 1.5h-6a1.5 1.5 0 01-1.5-1.5V6.75a1.5 1.5 0 011.5-1.5z"
       ></path>
     </svg>
   );

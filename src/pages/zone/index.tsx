@@ -10,8 +10,7 @@ import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
-import { FaSuitcase } from 'react-icons/fa';
+import { CiUser, MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
 import { useLocation } from 'react-router-dom';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -428,7 +427,7 @@ const Zone = () => {
               loading={loading}
               additionalDetails={[
                 {
-                  icon: <FaSuitcase size={18} />,
+                  icon: <CiUser size={18} />,
                   field: 'name'
                 }
               ]}

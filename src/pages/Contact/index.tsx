@@ -1,47 +1,49 @@
-import { useContext, useEffect, useState, useReducer, Fragment } from 'react';
-import { Box, Button, Menu, MenuItem, Grid, Dialog } from '@material-ui/core';
-import { useData } from '../../StateProvider/Provider';
-import { Link } from 'react-router-dom';
+import { Box, Button, Chip, Collapse, Dialog, Grid, Menu, MenuItem } from '@material-ui/core';
+import IconButton from '@material-ui/core/IconButton';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import ManageContactDialog from './ManageContact';
-import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import SearchBox from '../../components/Helpers/SearchBox';
-import CustomContainer from '../../components/CustomContainer';
-import MessageDialog from '../../components/Helpers/MessageDialog';
-import styles from '../Leads/Header.module.scss';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
-import { MdContacts, MdOutlineFilterAlt } from 'react-icons/md';
-import axiosInstance from '../../axios/axiosInstance';
-import { gridLoadingTimeout, prepareDataForGrid, userType, getLocalStorageArrayData, removeLocalStorage } from '../../constants/helpers';
-import { useHistory } from 'react-router-dom';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { Chip } from '@material-ui/core';
-import routes from './../../components/Helpers/Routes';
-import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import contactClass from './contact.module.scss';
-import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
-import EntitySelectionsDialog from '../../components/EntitySelections';
-import { AiOutlineDeploymentUnit } from 'react-icons/ai';
-import { sidebarResource } from '../../constants/helpers';
-import IconButton from '@material-ui/core/IconButton';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
-import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField, gridFilterParser } from '../../constants/useColumns';
-import NoDataCell from '../../components/Helpers/NoDataCell';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { isMobile, isTablet } from 'react-device-detect';
-import { MdAdd, TbArrowsSort } from 'react-icons/all';
-import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
-import { FaSuitcase, MdFilterList, MdSort } from 'react-icons/all';
-import MobileSortDialog from '../../components/MobileSortDialog';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
 import { camelCase } from 'lodash';
-import WarhouseList from '../Account/Warehouse/WarhouseList';
+import { useContext, useEffect, useReducer, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { AiOutlineDeploymentUnit } from 'react-icons/ai';
+import { CiUser, FaSuitcase, TbArrowsSort } from 'react-icons/all';
+import { MdOutlineFilterAlt } from 'react-icons/md';
+import { Link, useHistory } from 'react-router-dom';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
+import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
+import CustomContainer from '../../components/CustomContainer';
+import EntitySelectionsDialog from '../../components/EntitySelections';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
+import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
+import MessageDialog from '../../components/Helpers/MessageDialog';
+import NoDataCell from '../../components/Helpers/NoDataCell';
+import SearchBox from '../../components/Helpers/SearchBox';
+import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
+import MobileSortDialog from '../../components/MobileSortDialog';
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import {
+  getLocalStorageArrayData,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  removeLocalStorage,
+  sidebarResource,
+  userType
+} from '../../constants/helpers';
+import useColumns, { checkStaticField, getFrameworkComponents, getStaticFields, gridFilterParser } from '../../constants/useColumns';
+import WarhouseList from '../Account/Warehouse/WarhouseList';
+import styles from '../Leads/Header.module.scss';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import routes from './../../components/Helpers/Routes';
+import ManageContactDialog from './ManageContact';
 
 const ContactTypes = [
   {
@@ -328,12 +330,12 @@ export default function Contact(props) {
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
 
-    if (selectedType === 2) {
-      deepFilter = deepFilter + `&myRecords=1`;
-    }
-
     if (isExport) {
       deepFilter = `?`;
+    }
+
+    if (selectedType === 2) {
+      deepFilter = deepFilter + `&myRecords=1`;
     }
 
     if (selectedEntity) {
@@ -436,14 +438,15 @@ export default function Contact(props) {
             console.error('Error in getting selected records from local storage');
           }
         }
-
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
         dispatch({ type: 'loading', loading: false });
+      })
+      .finally(() => {
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
       });
   };
 
@@ -525,6 +528,7 @@ export default function Contact(props) {
   };
 
   const handleContactSelect = (filterValues) => {
+    dispatch({ type: 'setPage', page: 0 });
     setSelectedType(filterValues);
   };
   const handleOpen = () => {
@@ -616,6 +620,7 @@ export default function Contact(props) {
                       dispatch={dispatch}
                       title={routes?.[contactResource]?.title}
                       filters={filters}
+                      resource={sidebarResource[contactResource]}
                     />
                   </div>
                 </div>
@@ -775,12 +780,14 @@ export default function Contact(props) {
                 )}
               </div>
             </div>
+            <DisplayFiltersForMobile resource={sidebarResource[contactResource]} />
           </div>
         </div>
 
         {Object.keys(frameWorkComponent).length > 0 &&
           (isMobile && !isTablet ? (
             <CustomSwipableList
+              key={selectedType}
               allowSelection={true}
               allowSwipe={true}
               permissions={contactPermissions}
@@ -807,7 +814,7 @@ export default function Contact(props) {
               loading={loading}
               additionalDetails={[
                 {
-                  icon: <FaSuitcase size={18} />,
+                  icon: <CiUser size={18} />,
                   field: 'accountName'
                 }
               ]}
@@ -815,12 +822,9 @@ export default function Contact(props) {
                 {
                   label: 'Email : ',
                   field: 'email'
-                },
-                {
-                  label: 'Entity',
-                  field: 'entity'
                 }
               ]}
+              renderExtraChip={(data) => <RenderExtraChip data={data} />}
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={true}
@@ -973,3 +977,55 @@ export default function Contact(props) {
     </section>
   );
 }
+
+const RenderExtraChip = ({ data }) => {
+  const [open, setOpen] = useState(false);
+
+  const chip = (text: string) => (
+    <>
+      <span
+        className={`${
+          text && text !== ''
+            ? ' line-clamp-1 block px-3 py-[3px] font-semibold transition-all text-[12px] bg-[#F2F6FF] dark:bg-[var(--dark-primary)] dark:border-[var(--common-border-color)_!important]'
+            : ''
+        } ${open ? 'py-2 rounded-[5px]' : 'rounded-full'}`}
+      >
+        {text && text !== '' ? `Entity : ${text}` : null}
+        {data?.restentity?.length > 0 ? (
+          <>
+            <Collapse in={open} unmountOnExit>
+              {data?.restentity?.map((o) => (
+                <span key={o._id} className="block line-clamp-1">
+                  {o.optionLabel}
+                </span>
+              ))}
+            </Collapse>
+          </>
+        ) : null}
+      </span>
+    </>
+  );
+
+  if (data?.entityId && data?.entity) {
+    return (
+      <div className="flex items-start gap-2">
+        <Link to={`${routes.entityDetail.path}/${data.entityId}`} target="_blank">
+          {chip(data.entity)}
+        </Link>
+        {data?.restentity?.length > 0 ? (
+          <Button
+            size="small"
+            variant="outlined"
+            className="no-shadow"
+            onClick={() => setOpen((prev) => !prev)}
+            style={{ padding: '0px 5px', background: 'var(--dark-primary)', color: 'var(--primary-text)' }}
+          >
+            {open ? 'Hide' : `+${data.restentity.length} more.`}
+          </Button>
+        ) : null}
+      </div>
+    );
+  }
+
+  return <>{chip(data?.entity)}</>;
+};

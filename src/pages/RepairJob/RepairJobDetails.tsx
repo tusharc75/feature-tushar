@@ -128,21 +128,20 @@ const RepairJobDetails = () => {
           });
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   const fetchRepairJobData = () => {
     axiosInstance()
       .get(`${routes.repairJob.path}/${id}`)
       .then(({ data: { data } }) => {
-        setRepairJobData({ ...data });
         setCurrentStep(getIndex(data?.processStatus, repairJobProcessSteps));
-
         let isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
         if (user?.role?.selectedEntity?.superAdminAccess) {
           isAllowedToEdit = true;
         }
         setAllowedToEdit(isAllowedToEdit);
+        setRepairJobData({ ...data });
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -177,14 +176,14 @@ const RepairJobDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${repairJob.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
+      .then(({ data }) => { })
+      .catch((error) => { });
   };
 
   const updateJobStatus = (status) => {
     axiosInstance()
       .patch(`${repairJob.api}/${id}/status`, { status: status })
-      .then(({ data: { data } }) => {})
+      .then(({ data: { data } }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -293,18 +292,17 @@ const RepairJobDetails = () => {
               setStepFullScreen={() => setStepFullScreen(true)}
             />
             <ContentFullScreen title={repairJobProcessStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-              {currentStep === 0 && (
+              {(currentStep === 0 && repairJobData) && (
                 <AddSerializedAsset
                   repairJobData={repairJobData}
                   setNextStep={setNextStep}
                   updateJobStatus={updateJobStatus}
-                  repairedAssetStatus={repairedAssetStatus}
                   renderedFrom={`${renderedFrom}_grid-1`}
                   allowedToEdit={allowedToEdit}
-                  allowUpdateStatus={allowUpdateStatus}
+                  stepFullScreen={stepFullScreen}
                 />
               )}
-              {currentStep === 1 && (
+              {(currentStep === 1 && repairJobData) && (
                 <SerializedAsset
                   repairJobData={repairJobData}
                   fetchRepairJobData={fetchRepairJobData}
@@ -312,6 +310,7 @@ const RepairJobDetails = () => {
                   renderedFrom={`${renderedFrom}_grid-2`}
                   allowedToEdit={allowedToEdit}
                   allowUpdateStatus={allowUpdateStatus}
+                  stepFullScreen={stepFullScreen}
                 />
               )}
             </ContentFullScreen>

@@ -1,9 +1,34 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { graphOptions } from '../../constants/helpers';
 import Graph from 'vis-react';
+import { useAppTheme } from 'src/constants/AppConfig';
 
 export default function CustomNodalStructure({ graphData, onClick, loadingGraphData, id }) {
+  const [themeColor] = useAppTheme();
   const { nodes, edges, colorPalette } = graphData;
+  const [options, setOptions] = useState(graphOptions);
+  const [currentTheme, setCurrentTheme] = useState(themeColor); // without this state graph update will lack behind one step
+
+  useEffect(() => {
+    if (themeColor === 'dark') {
+      const nodeOptions = graphOptions.nodes;
+      const edgeOptions = graphOptions.edges;
+      edgeOptions.color = '#fff';
+      nodeOptions.font.color = '#fff';
+
+      const darkOptions = { ...options, nodes: nodeOptions, edges: edgeOptions };
+      setOptions(darkOptions);
+      setCurrentTheme(themeColor);
+    } else {
+      const nodeOptions = graphOptions.nodes;
+      nodeOptions.font.color = '#163340';
+      const edgeOptions = graphOptions.edges;
+      edgeOptions.color = '#163340';
+      const lightOptions = { ...options, nodes: nodeOptions, edges: edgeOptions };
+      setOptions(lightOptions);
+      setCurrentTheme(themeColor);
+    }
+  }, [themeColor]);
 
   const [graphNetwork, setGraphNetwork] = useState<any>(null);
 
@@ -60,6 +85,7 @@ export default function CustomNodalStructure({ graphData, onClick, loadingGraphD
           </div>
         ) : !loadingGraphData && nodes.length > 0 ? (
           <Graph
+            key={currentTheme}
             graph={{
               nodes: nodes.map((m) => {
                 return {
@@ -71,7 +97,7 @@ export default function CustomNodalStructure({ graphData, onClick, loadingGraphD
               }),
               edges: edges
             }}
-            options={graphOptions}
+            options={options}
             getNetwork={getNetwork}
             getEdges={getEdges}
             getNodes={getNodes}

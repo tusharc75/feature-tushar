@@ -159,7 +159,6 @@ export default function useColumns() {
       } else if (field?.primaryField === true && detailScreenRoute) {
         return {
           columnData: {
-            // pivotIndex: 0,
             lockPosition: true,
             ...commonFieldData,
             disabled: true,
@@ -189,7 +188,7 @@ export default function useColumns() {
         let pathName = '';
 
         if (field?.lookupResource) {
-          pathName = routes[`${camelCase(field?.lookupResource)}`]?.path ?? '';
+          pathName = routes[`${camelCase(field?.lookupResource)}Detail`]?.path ?? '';
         } else {
           pathName = detailPagePath[joinedFieldName]
             ? detailPagePath[joinedFieldName]

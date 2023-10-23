@@ -150,7 +150,7 @@ export default function ProjectInAccordion({
                         <Card className="detailCard  card-v1" variant="outlined">
                           <CardContent className="card-link">
                             <Grid item xs={12}>
-                              <Link to={`${routes.projectSalesDetail.path}/${obj._id}`}>
+                              <Link target="_blank" rel="noopener noreferrer" to={`${routes.projectSalesDetail.path}/${obj._id}`}>
                                 <Typography className="detailName">{obj.projectName}</Typography>
                               </Link>
 

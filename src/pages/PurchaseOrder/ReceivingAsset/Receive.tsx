@@ -255,8 +255,8 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                 productId: d.productId,
                 warehouse: defaultWareHouse || '',
                 storageLocation: purchaseOrderData?.storageLocation || null,
-                inventoryQuantity: d.qty - (d.actualReceived || 0) - (d.rejectQuantity || 0),
-                assetQuantity: 0,
+                inventoryQuantity: !d.serializedProduct ? d.qty - (d.actualReceived || 0) - (d.rejectQuantity || 0) : 0,
+                assetQuantity: d.serializedProduct ? d.qty - (d.actualReceived || 0) - (d.rejectQuantity || 0) : 0,
                 serializedProduct: d.serializedProduct || false,
                 serialNumber: [],
                 comment: '',
@@ -370,26 +370,28 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                           )}
                                         />
                                       )}
-                                      <TextField
-                                        fullWidth
-                                        label="Inventory Quantity"
-                                        variant="outlined"
-                                        type="number"
-                                        size="small"
-                                        onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
-                                        name="inventoryQuantity"
-                                        placeholder="Inventory Quantity"
-                                        value={data.inventoryQuantity}
-                                        onChange={(e) => {
-                                          const value = e.target.value.replace(/[^0-9]/g, '');
-                                          arrayHelpers.replace(index, {
-                                            ...values.seriaizedAsset[index],
-                                            ['inventoryQuantity']: value
-                                          });
-                                        }}
-                                        error={validate([data])?.inventoryQuantity}
-                                        helperText={validate([data]).inventoryQuantity ? 'Receiving quantity is more than actual quantity' : ''}
-                                      />
+                                      {(data?.serializedProduct && !user?.user?.brandPolicy?.purchaseOrderSerializedAddInventory) ?
+                                        null :
+                                        <TextField
+                                          fullWidth
+                                          label="Quantity"
+                                          variant="outlined"
+                                          type="number"
+                                          size="small"
+                                          onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
+                                          name="inventoryQuantity"
+                                          placeholder="Quantity"
+                                          value={data.inventoryQuantity}
+                                          onChange={(e) => {
+                                            const value = e.target.value.replace(/[^0-9]/g, '');
+                                            arrayHelpers.replace(index, {
+                                              ...values.seriaizedAsset[index],
+                                              ['inventoryQuantity']: value
+                                            });
+                                          }}
+                                          error={validate([data])?.inventoryQuantity}
+                                          helperText={validate([data]).inventoryQuantity ? 'Receiving quantity is more than actual quantity' : ''}
+                                        />}
                                       {data?.serializedProduct && (
                                         <TextField
                                           fullWidth
@@ -444,7 +446,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                           });
                                         }}
                                       />
-                                      {data?.serializedProduct && (
+                                      {data?.serializedProduct && user?.user?.brandPolicy?.purchaseOrderSerializedAddInventory && (
                                         <div className="flex gap-2 items-center">
                                           <Autocomplete
                                             options={[]}

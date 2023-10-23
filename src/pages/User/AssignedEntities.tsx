@@ -270,6 +270,8 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
                       field={unionRoleData ? unionRoleData.field : []}
                       resource={unionRoleData ? unionRoleData.resource : []}
                       isDisable={true}
+                      setField={() => {}}
+                      setResource={() => {}}
                     />
                   </BoxWithBorder>
                 </Grid>

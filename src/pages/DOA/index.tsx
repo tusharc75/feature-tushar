@@ -1,5 +1,5 @@
 import { IconButton } from '@material-ui/core';
-import { camelCase } from 'lodash';
+import { camelCase, isEmpty } from 'lodash';
 import { useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
@@ -11,23 +11,24 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import CustomContainer from '../../components/CustomContainer';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import routes from '../../components/Helpers/Routes';
-import MobileFilterDialog from '../../components/MobileFilterDialog';
+import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { gridLoadingTimeout } from '../../constants/helpers';
+import { gridLoadingTimeout, sidebarResource } from '../../constants/helpers';
 
 const DOARequest = () => {
+  
   const renderedFrom = camelCase(routes?.DOARequest.title);
   const toastConfig = useContext(CustomToastContext);
   const [gridApi, setGridApi] = useState(null);
   const history = useHistory();
   const [isOpenDialog, setisOpenDialog] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
-  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
 
-  const [columns] = useState([
+  const [state, dispatch] = useReducer(reducer, intialState);
+  const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
+
+  const columns: any = [
     {
       field: 'name',
       headerName: 'Name',
@@ -53,8 +54,9 @@ const DOARequest = () => {
       headerName: 'Status',
       show: true
     }
-  ]);
+  ]
 
+  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
   if (columnState) {
     columns.map((item) => {
       columnState.map((d) => {
@@ -88,7 +90,7 @@ const DOARequest = () => {
   const NameRenderer = (params) => (
     <Link
       className="link"
-      to={params.data.quotation ? `/doa-request/quotation/${params.data.id}` : `/doa-request/${params.data.id}`}
+      to={params.data.quotation && !isEmpty(params.data.quotation) ? `/doa-request/quotation/${params.data.id}` : `/doa-request/${params.data.id}`}
       title={params.value}
     >
       {params.value}
@@ -206,11 +208,13 @@ const DOARequest = () => {
                       dispatch={dispatch}
                       title={routes?.DOARequest?.title}
                       filters={{}}
+                      resource={sidebarResource.DOARequest}
                     />
                   </div>
                 </div>
               )}
             </div>
+            <DisplayFiltersForMobile resource={sidebarResource.DOARequest} />
           </div>
         </div>
         {isMobile && !isTablet ? (
@@ -229,16 +233,16 @@ const DOARequest = () => {
               history.push(`${routes.budget.path}?id=${d._id}`);
             }}
             extraParamsToCheckDelete={true}
-            onDelete={(d) => {}}
+            onDelete={(d) => { }}
             rowCount={rowCount}
             page={page}
             loading={loading}
             additionalDetails={[]}
             chips={[]}
             owerCollaboratorInitialsOrImages=""
-            onCreate={() => {}}
+            onCreate={() => { }}
             showClone={false}
-            onClone={() => {}}
+            onClone={() => { }}
             renderedFrom={renderedFrom}
           />
         ) : (

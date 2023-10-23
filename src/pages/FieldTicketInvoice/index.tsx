@@ -110,8 +110,6 @@ const FieldTicketInvoice = () => {
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
-    deepFilters.push({ field: 'status', term: [FIELD_TICKET_STATUS.readyToInvoice, FIELD_TICKET_STATUS.invoiced] });
-
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
@@ -306,6 +304,7 @@ const FieldTicketInvoice = () => {
               removeLocalStorage(localStorageSelectedRecords);
               fetchFieldTicketData();
             }}
+            resource = {sidebarResource.fieldTicketInvoice}
           />
         )}
       </CustomContainer>

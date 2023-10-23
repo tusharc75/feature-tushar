@@ -93,7 +93,7 @@ function RepairJobHeader(props) {
           <>
             <div className="d-flex flex-wrap items-center justify-between w-full">
               <div>{toggleInner}</div>
-              <div className="flex flex-wrap items-center gap-1">
+              <div className="flex flex-wrap items-center gap-1 justify-end">
                 <IconButton
                   size="small"
                   className={'mobileIconButton secondary'}

@@ -12,10 +12,9 @@ import Dialog from '@material-ui/core/Dialog';
 import ManageAttachment from '../../../components/Activity/Attachments/ManageAttachment';
 import CustomContainer from '../../../components/CustomContainer';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import styles from '../../Leads/Header.module.scss';
 import { AiOutlinePaperClip } from 'react-icons/ai';
 import { AddOutlined } from '@material-ui/icons';
-import { Button, Tooltip, IconButton, MenuItem, Menu, TextField, Chip, Link, Popover, MenuList } from '@material-ui/core';
+import { Button, IconButton, MenuItem, Menu, TextField, Chip, Link, Popover, MenuList } from '@material-ui/core';
 import { useData } from '../../../StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, gridLoadingTimeout, sidebarResource } from '../../../constants/helpers';
@@ -23,7 +22,6 @@ import { Delete as DeleteIcon } from '@material-ui/icons';
 import { gridPageSizes, isObjectEmpty, displayDate } from '../../../constants/helpers';
 import { ExpandMore } from '@material-ui/icons';
 import routes from '../../../components/Helpers/Routes';
-import { MdAdd } from 'react-icons/all';
 import GetAppIcon from '@material-ui/icons/GetApp';
 import { Autocomplete } from '@material-ui/lab';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
@@ -39,6 +37,8 @@ import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import SendIcon from '@material-ui/icons/Send';
 import { CreateEmail } from 'src/components/Activity/Email/CreateEmail';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import mime from 'mime';
+
 
 function reducer(state, action) {
   switch (action.type) {
@@ -225,7 +225,7 @@ export default function Attachment() {
           {row.original.relatedTo && row.original.relatedTo?.length > 0 ? (
             row.original.relatedTo.map((d) => {
               return (
-                <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center' }} key={d.name}>
                   <p>{d.name}</p>
                   <IconButton className="ml-3" size="small" onClick={() => redirectToResource(d?.type, d?.referenceId)}>
                     <OpenInNewIcon fontSize="small" color="primary" />
@@ -287,27 +287,37 @@ export default function Attachment() {
         const allPdf = _.every(row.original?.file, (d) => _.endsWith(d?.url, '.pdf'));
         return (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {row.original.type === 'file' && (
-              <Tooltip
-                title="Send Email"
+            <HtmlTooltip title="Send Email">
+              <IconButton
+                size="small"
                 onClick={() => {
-                  handleMail(row.original);
+                  if (row.original.type === 'folder') {
+                    handleMailForFolder(row.original?._id, row.original?.name);
+                  } else {
+                    handleMail(row.original);
+                  }
                 }}
               >
-                <IconButton size="small">
-                  <SendIcon color="primary" style={{ maxWidth: '18px' }} />
-                </IconButton>
-              </Tooltip>
-            )}
-            {row.original.type !== 'folder' && (
-              <Tooltip title="Download">
-                <IconButton size="small" aria-label="Delete" onClick={() => downloadFile(row.original)}>
-                  <GetAppIcon fontSize="small" color="primary" />
-                </IconButton>
-              </Tooltip>
-            )}
+                <SendIcon color="primary" style={{ maxWidth: '18px' }} />
+              </IconButton>
+            </HtmlTooltip>
+            <HtmlTooltip title="Download">
+              <IconButton
+                size="small"
+                aria-label="Download"
+                onClick={() => {
+                  if (row.original.type === 'folder') {
+                    downloadFolder(row.original?._id, row.original?.name);
+                  } else {
+                    downloadFile(row.original);
+                  }
+                }}
+              >
+                <GetAppIcon fontSize="small" color="primary" />
+              </IconButton>
+            </HtmlTooltip>
             {allPdf && row.original.type === 'file' && (
-              <Tooltip
+              <HtmlTooltip
                 title="Preview"
                 onClick={(e) => {
                   viewPdf(e, row.original);
@@ -316,27 +326,44 @@ export default function Attachment() {
                 <IconButton size="small">
                   <PreviewIcon fontSize="small" color="primary" />
                 </IconButton>
-              </Tooltip>
+              </HtmlTooltip>
             )}
-
             {row.original.canEdit ? (
-              <Tooltip title="Delete">
+              <HtmlTooltip title="Delete">
                 <IconButton size="small" aria-label="Delete" onClick={() => showConfirmBox(row.original)}>
                   <DeleteIcon fontSize="small" color="error" />
                 </IconButton>
-              </Tooltip>
+              </HtmlTooltip>
             ) : (
-              <Tooltip className="cursor-stop" title="Signed Quote Attachment can not be deleted">
+              <HtmlTooltip className="cursor-stop" title="Signed Quote Attachment can not be deleted">
                 <IconButton size="small" aria-label="Delete">
                   <DeleteIcon fontSize="small" color="disabled" />
                 </IconButton>
-              </Tooltip>
+              </HtmlTooltip>
             )}
           </div>
         );
       }
     }
   ];
+
+  const downloadFolder = (_id, name) => {
+    axiosInstance()
+      .get(`attachment/zip/${_id}`, {
+        responseType: 'blob'
+      })
+      .then(({ data }) => {
+        const url = window.URL.createObjectURL(new Blob([data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `${name || 'folder'}.zip`);
+        document.body.appendChild(link);
+        link.click();
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
 
   useEffect(() => {
     setResourceOptions(get_activity_resource(permissions));
@@ -436,15 +463,37 @@ export default function Attachment() {
         });
     }
   };
+  
   const handleMail = (data) => {
-    const file = data?.file;
+    const attachments: any = []
+    Promise.all(data?.file.map(async file => {
+      await axiosInstance().get(`user/download?fileName=${file?.url}`, { responseType: 'blob' }).then(({ data }) => {
+        let reader = new FileReader();
+        reader.readAsDataURL(new Blob([data], { type: mime.getType(file.url.split('.')?.pop()) }));
+        reader.onloadend = function () {
+          let base64data: any = reader.result;
+          attachments.push({
+            base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
+            contentType: base64data.split(';')[0].split(':')[1],
+            extension: `.${file.url.split('.')?.pop()}`,
+            name: file.name
+          })
+        };
+      }).catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+    })).finally(() => {
+      setEmailAttachment(attachments);
+      setSendMail(true);
+    });
+  };
+
+  const handleMailForFolder = (_id, name) => {
     axiosInstance()
-      .get(`user/download?fileName=${file[0].url}`, {
-        responseType: 'blob'
-      })
+      .get(`attachment/zip/${_id}`, { responseType: 'blob' })
       .then(({ data }) => {
-        const tempfile = new Blob([data], { type: 'application/pdf' });
-        generateBase64forFile(tempfile, file[0].name, `.${file[0].name.split(".")?.pop()}`);
+        const zipfile = new Blob([data], { type: 'application/zip' });
+        generateBase64forFile(zipfile, `${name || 'folder'}.zip`, '.zip');
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -795,7 +844,7 @@ export default function Attachment() {
                     onClose={closeActions}
                   >
                     <MenuItem
-                      disabled={permissions.attachment.isDelete ? !selectedRecords.some((records) => records.canEdit) : true}
+                      disabled={permissions.attachment.isDelete ? !selectedRecords.every((records) => records.canEdit) : true}
                       onClick={() => {
                         showConfirmBox(null);
                         closeActions();
@@ -971,7 +1020,7 @@ export default function Attachment() {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.id ? deleteRecord?.name ?? 'this attachment?' : 'these attachments?'}`}
+            message={`Are you sure you want to delete this attachment(s)?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord(null);
               setIsConfirmDialogVisible(false);

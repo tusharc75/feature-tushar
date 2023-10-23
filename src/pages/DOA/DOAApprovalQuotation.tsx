@@ -34,11 +34,13 @@ import { fetch_quotation_product_fields } from 'src/components/Quotation/helper'
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const DoaQuotationApproval = () => {
+  
   const {
     state: {
-      user: { user: currentUser }
+      user: { user: currentUser, permissions }
     }
   } = useData();
+
   const { setToastConfig } = useContext(CustomToastContext);
 
   const history = useHistory();
@@ -108,16 +110,15 @@ const DoaQuotationApproval = () => {
     });
 
     rows.forEach((parent, i) => {
-      parent.srno = i + 1;
-      parent.detail = `${
-        parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail?.assetNumber
-          : parent.type === 'product'
+      parent.index = i + 1;
+      parent.detail = `${parent.type === 'serializedAsset'
+        ? parent.serializedAssetDetail?.assetNumber
+        : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
-      }`;
+            ? parent.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName
+        }`;
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
@@ -130,16 +131,15 @@ const DoaQuotationApproval = () => {
   const generateNestedData = (material, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
-      _subRow.srno = parent.srno + '.' + `${index + 1}`;
-      _subRow.detail = `${
-        _subRow.type === 'serializedAsset'
-          ? _subRow.serializedAssetDetail?.assetNumber
-          : _subRow.type === 'product'
+      _subRow.index = parent.index + '.' + `${index + 1}`;
+      _subRow.detail = `${_subRow.type === 'serializedAsset'
+        ? _subRow.serializedAssetDetail?.assetNumber
+        : _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.packageDetail?.packageName
-      }`;
+            ? _subRow.serviceDetail?.serviceName
+            : _subRow.packageDetail?.packageName
+        }`;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qtyDisplay = _subRow.qty;
@@ -161,11 +161,11 @@ const DoaQuotationApproval = () => {
     }
     let column: any = [
       {
-        accessor: 'srno',
+        accessor: 'index',
         Header: 'Index',
         width: 70,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>,
+        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
         }
@@ -193,7 +193,7 @@ const DoaQuotationApproval = () => {
           </div>
         )
       },
-      {
+      ...(permissions?.leadTimeMaster ? [{
         accessor: 'leadTime',
         Header: 'Lead Time (Days)',
         Cell: ({ row }) => (row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0),
@@ -203,7 +203,7 @@ const DoaQuotationApproval = () => {
             .reduce((sum, row) => parseInt(row.values['leadTime']) + sum, 0);
           return <>{total}</>;
         }
-      }
+      }] : [])
     ];
     column = [...column, ...newColumns];
     setColumns(column);
@@ -261,8 +261,8 @@ const DoaQuotationApproval = () => {
               View
             </Button>
             {DOAData?.DOARequestThrough?.some((u) => u.user.includes(currentUser._id)) &&
-            DOAData?.status !== 'Accepted' &&
-            DOAData?.status !== 'Rejected' ? (
+              DOAData?.status !== 'Accepted' &&
+              DOAData?.status !== 'Rejected' ? (
               <>
                 <Button
                   onClick={() => {
@@ -289,10 +289,10 @@ const DoaQuotationApproval = () => {
                 </Button>
               </>
             ) : null}
-            <ActivityButton 
-            referenceId={quoteData?.quotation} 
-            resource={sidebarResource.quotation} 
-            resourceLabel={DOAData?.DOAName}
+            <ActivityButton
+              referenceId={quoteData?.quotation}
+              resource={sidebarResource.quotation}
+              resourceLabel={DOAData?.DOAName}
             />
           </Box>
         </Box>
@@ -334,7 +334,7 @@ const DoaQuotationApproval = () => {
               height={'calc(100vh - 395px)'}
               columns={columns}
               data={rowsData}
-              onSelect={() => {}}
+              onSelect={() => { }}
               childrenProperty="subRows"
               uniqueKey="_id"
               renderedFrom="quotation_product_package"

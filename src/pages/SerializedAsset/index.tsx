@@ -47,6 +47,7 @@ import { Link } from 'react-router-dom';
 import WarningIcon from '@material-ui/icons/Warning';
 import moment from 'moment';
 import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
+import ReasonDialog from './ReasonDialog';
 
 const SerializedAsset = () => {
   const renderedFrom = camelCase(routes?.serializedAsset.title);
@@ -90,6 +91,8 @@ const SerializedAsset = () => {
 
   const [redirectProduct, setRedirectProduct] = useState(history.location?.state?.product);
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
+  const [showReasonDialog, setShowReasonDialog] = useState(false);
+  const [status, setStatus] = useState('');
 
   useEffect(() => {
     fetchGridColumns();
@@ -205,10 +208,11 @@ const SerializedAsset = () => {
       .then(({ data }) => {
         let rows = data.data?.map((u, user) => {
           let finalObject = prepareDataForGrid(u);
-          finalObject['canDelete'] = permissions?.serializedAsset?.isDelete;
           finalObject['isChecked'] = [...getLocalStorageArrayData(localStorageSelectedRecords)].some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions?.serializedAsset.isUpdate;
-          finalObject['canDelete'] = [ASSET_STATUS.inUse, ASSET_STATUS.reserved, ASSET_STATUS.delivered]?.includes(u?.status) ? false : true;
+          finalObject['canDelete'] = permissions?.serializedAsset?.isDelete &&
+            ![ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.lost, ASSET_STATUS.customerPossession, ASSET_STATUS.onPO,
+            ASSET_STATUS.scrap]?.includes(u?.status) ? false : true;
           return {
             ...finalObject
           };
@@ -315,7 +319,16 @@ const SerializedAsset = () => {
       });
   };
 
-  const handleStatusUpdate = (status) => {
+  const handleStatusChange = (status) => {
+    if (status === ASSET_STATUS.scrap || status === ASSET_STATUS.lost) {
+      setStatus(status);
+      setShowReasonDialog(true);
+    } else {
+      handleStatusUpdate({ status });
+    }
+  };
+
+  const handleStatusUpdate = (obj) => {
     const ids = [...getLocalStorageArrayData(localStorageSelectedRecords)].map((d) => ({
       _id: d._id,
       currentStatus: d.status
@@ -323,8 +336,8 @@ const SerializedAsset = () => {
     axiosInstance()
       .put(`${serializedAsset.api}/update-status`, {
         assets: ids,
-        status: status,
-        comment: '',
+        status: obj?.status,
+        comment: obj?.reason ? obj?.reason : '',
         reference: { _id: '', type: INVENTORY_HISTORY_TYPE.serializedAssets }
       })
       .then(() => {
@@ -660,7 +673,7 @@ const SerializedAsset = () => {
                       <MenuItem
                         onClick={() => {
                           closeActions();
-                          handleStatusUpdate(status);
+                          handleStatusChange(status);
                         }}
                         disabled={
                           [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) =>
@@ -680,7 +693,7 @@ const SerializedAsset = () => {
                         <MenuItem
                           onClick={() => {
                             closeActions();
-                            handleStatusUpdate(ASSET_STATUS.needRepair);
+                            handleStatusChange(ASSET_STATUS.needRepair);
                           }}
                           disabled={
                             [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) => ![ASSET_STATUS.needRepair].includes(o.status))
@@ -694,7 +707,7 @@ const SerializedAsset = () => {
                         <MenuItem
                           onClick={() => {
                             closeActions();
-                            handleStatusUpdate(ASSET_STATUS.needRecert);
+                            handleStatusChange(ASSET_STATUS.needRecert);
                           }}
                           disabled={
                             [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) => ![ASSET_STATUS.needRecert].includes(o.status))
@@ -708,7 +721,7 @@ const SerializedAsset = () => {
                         <MenuItem
                           onClick={() => {
                             closeActions();
-                            handleStatusUpdate(ASSET_STATUS.scrap);
+                            handleStatusChange(ASSET_STATUS.scrap);
                           }}
                           disabled={
                             [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) => ![ASSET_STATUS.scrap].includes(o.status))
@@ -722,7 +735,7 @@ const SerializedAsset = () => {
                         <MenuItem
                           onClick={() => {
                             closeActions();
-                            handleStatusUpdate(ASSET_STATUS.lost);
+                            handleStatusChange(ASSET_STATUS.lost);
                           }}
                           disabled={
                             [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) => ![ASSET_STATUS.lost].includes(o.status))
@@ -887,9 +900,8 @@ const SerializedAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${
-            deleteRecord?._id ? deleteRecord?.assetNumber : ''
-          } ? `}
+          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ''
+            } ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
@@ -909,6 +921,16 @@ const SerializedAsset = () => {
           ids={[]}
           resource={sidebarResource?.supplierAccount}
           path={routes?.supplierAccount?.path}
+        />
+      )}
+       {showReasonDialog && (
+        <ReasonDialog
+          onClose={() => setShowReasonDialog(false)}
+          status={status}
+          onAddReason={(reason) => {
+            handleStatusUpdate({ status: status, reason: reason });
+            setShowReasonDialog(false);
+          }}
         />
       )}
     </section>

@@ -3,7 +3,7 @@ import { Delete as DeleteIcon } from '@material-ui/icons';
 import { camelCase, uniqBy } from 'lodash';
 import { FC, useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { FaSuitcase, FaUserAltSlash, FaUserCheck, IoCreateSharp, MdEmail } from 'react-icons/all';
+import { CiUser, FaUserAltSlash, FaUserCheck, IoCreateSharp, MdEmail } from 'react-icons/all';
 import { Link, useHistory } from 'react-router-dom';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -67,7 +67,8 @@ const User: FC = () => {
   const [userList, setUserList] = useState<any[]>([]);
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
+    state;
   const columnState = JSON.parse(localStorage.getItem(renderedFrom));
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleteUser, setDeleteUser] = useState<any>([]);
@@ -184,13 +185,14 @@ const User: FC = () => {
         {permissions?.user?.isDelete ? (
           params.data.isBrandAdmin ? (
             <Tooltip className="cursor-stop" title="Brand Admin Can not be Deleted">
-              <IconButton aria-label="Delete">
+              <IconButton aria-label="Delete" size={'small'}>
                 <DeleteIcon fontSize="small" />
               </IconButton>
             </Tooltip>
           ) : (
             <Tooltip title="Delete">
               <IconButton
+                size={'small'}
                 aria-label="Delete"
                 onClick={() => {
                   setDeleteUser([params?.data]);
@@ -203,7 +205,7 @@ const User: FC = () => {
           )
         ) : (
           <Tooltip className="cursor-stop" title="You do not have permission to delete user">
-            <IconButton aria-label="Delete">
+            <IconButton aria-label="Delete" size={'small'}>
               <DeleteIcon fontSize="small" />
             </IconButton>
           </Tooltip>
@@ -359,15 +361,29 @@ const User: FC = () => {
 
           setUserList(tempUsers);
         }
-
-        dispatch({ type: 'initialize', data: rows, count: count });
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
+        if (appendRows) {
+          dispatch({
+            type: 'initialize',
+            data: [...dataRows, ...rows],
+            count: count
+          });
+        } else {
+          dispatch({
+            type: 'initialize',
+            data: rows,
+            count: count
+          });
+        }
+        // dispatch({ type: 'initialize', data: rows, count: count });
       })
       .catch((error) => {
         dispatch({ type: 'loading', loading: false });
         toastConfig.setToastConfig(error);
+      })
+      .finally(() => {
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
       });
     fetchAllUsers();
     // eslint-disable-next-line
@@ -743,20 +759,24 @@ const User: FC = () => {
               dataRows={dataRows}
               selectedRecords={selectedRecords}
               dispatch={dispatch}
-              onEdit={(d) => {
-                history.push(`${routes.userDetail.path}/${d._id}`);
+              actionCol={(data) => {
+                const params = { data };
+                return <ActionsRenderer {...params} />;
               }}
+              // onEdit={(d) => {
+              //   history.push(`${routes.userDetail.path}/${d._id}`);
+              // }}
               extraParamsToCheckDelete={true}
-              onDelete={(d) => {
-                setDeleteUser([d]);
-                setShowDeleteDialog(true);
-              }}
+              // onDelete={(d) => {
+              //   setDeleteUser([d]);
+              //   setShowDeleteDialog(true);
+              // }}
               rowCount={rowCount}
               page={page}
               loading={loading}
               additionalDetails={[
                 {
-                  icon: <FaSuitcase size={18} />,
+                  icon: <CiUser size={18} />,
                   field: 'regionalWideRole'
                 }
               ]}

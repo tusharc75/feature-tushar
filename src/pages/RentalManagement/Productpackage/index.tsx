@@ -25,14 +25,14 @@ import { startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import CalculatePriceDialog from 'src/components/RentalManagment/CalculatePriceDialog';
 import { generateCustomTableColumns, flattenArray } from 'src/constants/columns';
-import AssignmentTurnedInIcon from '@material-ui/icons/AssignmentTurnedIn';
 import AssetAvailability from '../AssetAvailability';
 import { AssetAvailabilityIcon } from 'src/assets/svg/svgIcons';
 import { ExpandMore } from '@material-ui/icons';
 import ManagePackageDialog from 'src/pages/Packages/ManagePackageDialog';
 import EditIcon from '@material-ui/icons/Edit';
+import { rentalManagementMessage } from 'src/constants/messageHelpers';
 
-const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }) => {
+const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip, renderedFrom, stepFullScreen, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -60,7 +60,6 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
   const [isBulkEdit, setIsBulkEdit] = useState(false);
   const [openAssetAvailibility, setOpenAssetAvailibility] = useState(false);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
-
 
   const { isOffline } = useContext(CustomOfflineContext);
 
@@ -136,7 +135,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
             ) : (
               <p
                 onClick={() => {
-                  openMaterial(row, rows)
+                  openMaterial(row, rows);
                 }}
                 className="link text-truncate"
                 title={row.original.detail}
@@ -205,51 +204,49 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
       Cell: ({ row, rows }) => {
         return (
           <>
-            <HtmlTooltip title={(isOffline || !allowedToEdit) ? '' : 'Edit'}>
+            <HtmlTooltip title={isOffline || !allowedToEdit ? '' : 'Edit'}>
               <IconButton
                 size="small"
                 aria-label="Details"
-                disabled={(isOffline || !allowedToEdit) ? true : false}
+                disabled={isOffline || !allowedToEdit ? true : false}
                 onClick={() => {
-                  openMaterial(row, rows)
+                  openMaterial(row, rows);
                 }}
               >
-                <EditIcon fontSize="small" color={(isOffline || !allowedToEdit) ? 'disabled' : 'primary'} />
+                <EditIcon fontSize="small" color={isOffline || !allowedToEdit ? 'disabled' : 'primary'} />
               </IconButton>
             </HtmlTooltip>
-            {
-              allowedToEdit ? (
-                row.original.hideSelection ? (
-                  <HtmlTooltip title={'Asset is already assigned'}>
-                    <span>
-                      <IconButton size="small" aria-label="Details" disabled={true}>
-                        <DeleteIcon fontSize="small" color={'disabled'} />
-                      </IconButton>
-                    </span>
-                  </HtmlTooltip>
-                ) : (
-                  <HtmlTooltip title={'Delete'}>
-                    <span>
-                      <IconButton
-                        size="small"
-                        aria-label="Details"
-                        onClick={() => {
-                          const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                          getNestedSubRows(obj, row.original);
-                          setDeleteData(obj);
-                        }}
-                      >
-                        <DeleteIcon fontSize="small" color={'error'} />
-                      </IconButton>
-                    </span>
-                  </HtmlTooltip>
-                )
+            {allowedToEdit ? (
+              row.original.hideSelection ? (
+                <HtmlTooltip title={'Asset is already assigned'}>
+                  <span>
+                    <IconButton size="small" aria-label="Details" disabled={true}>
+                      <DeleteIcon fontSize="small" color={'disabled'} />
+                    </IconButton>
+                  </span>
+                </HtmlTooltip>
               ) : (
-                ''
+                <HtmlTooltip title={'Delete'}>
+                  <span>
+                    <IconButton
+                      size="small"
+                      aria-label="Details"
+                      onClick={() => {
+                        const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                        getNestedSubRows(obj, row.original);
+                        setDeleteData(obj);
+                      }}
+                    >
+                      <DeleteIcon fontSize="small" color={'error'} />
+                    </IconButton>
+                  </span>
+                </HtmlTooltip>
               )
-            }
+            ) : (
+              ''
+            )}
           </>
-        )
+        );
       }
     });
     setColumns(column);
@@ -257,6 +254,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
 
   const fetchProductInventory = async () => {
     setNextStep(false);
+    setNextStepToolTip(null)
     var data: any = [];
     var inventory: any = [];
     var nonSerializeAsset: any = [];
@@ -307,8 +305,10 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
 
     if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
       setNextStep(false);
+      setNextStepToolTip(rentalManagementMessage.addProductPackage)
     } else {
       setNextStep(true);
+      setNextStepToolTip(null)
     }
     setRowsData(rows);
     setSelectedProducts([]);
@@ -753,25 +753,23 @@ const Productpackage = ({ rentalManagementData, setNextStep, renderedFrom, stepF
           isInlineEdit={isInlineEdit}
         />
       )}
-      {
-        addExistingProductDialog.open && addExistingProductDialog.type === 'newPackage' && (
-          <ManagePackageDialog
-            referenceData={{ packageType: 'Product' }}
-            isClone={false}
-            open={addExistingProductDialog.open}
-            packageId={null}
-            onClose={() => setAddExistingProductDialog({ open: false, type: '', parentId: null })}
-            onSuccess={(data) => {
-              data.type = 'package'
-              data.unitMain = data?.unit;
-              data.pricingMethodMain = data?.pricingMethod;
-              handleAdd([data]);
-              setAddExistingProductDialog({ open: false, type: '', parentId: null });
-            }}
-            isRedirectToDetailPage={false}
-          />
-        )
-      }
+      {addExistingProductDialog.open && addExistingProductDialog.type === 'newPackage' && (
+        <ManagePackageDialog
+          referenceData={{ packageType: 'Product', customerAccount: rentalManagementData?.customerAccount?.optionValue }}
+          isClone={false}
+          open={addExistingProductDialog.open}
+          packageId={null}
+          onClose={() => setAddExistingProductDialog({ open: false, type: '', parentId: null })}
+          onSuccess={(data) => {
+            data.type = 'package';
+            data.unitMain = data?.unit;
+            data.pricingMethodMain = data?.pricingMethod;
+            handleAdd([data]);
+            setAddExistingProductDialog({ open: false, type: '', parentId: null });
+          }}
+          isRedirectToDetailPage={false}
+        />
+      )}
       {addExistingProductDialog.open && addExistingProductDialog.type !== 'newPackage' && (
         <AddExistingProductInventory
           renderedFrom={addExistingProductDialog?.type === 'product' ? `${renderedFrom}-product` : `${renderedFrom}-package`}

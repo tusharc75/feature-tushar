@@ -21,7 +21,7 @@ import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import LeadTimeDialog from './LeadTimeDialog';
 import DateRangeIcon from '@material-ui/icons/DateRange';
 
-const AdditionalCost = ({ quotationData, setNextStep, renderedFrom, version, allowedToEdit }) => {
+const AdditionalCost = ({ quotationData, setNextStep, renderedFrom, version, allowedToEdit, stepFullScreen }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -96,17 +96,19 @@ const AdditionalCost = ({ quotationData, setNextStep, renderedFrom, version, all
                 <EditIcon color="primary" />
               </IconButton>
             </HtmlTooltip>
-            <HtmlTooltip title="Edit Lead Time">
-              <IconButton
-                size="small"
-                aria-label="Details"
-                onClick={() => {
-                  setLeadTimeDialog({ open: true, data: row.original });
-                }}
-              >
-                <DateRangeIcon fontSize="small" color="primary" />
-              </IconButton>
-            </HtmlTooltip>
+            {permissions?.leadTimeMaster &&
+              <HtmlTooltip title="Edit Lead Time">
+                <IconButton
+                  size="small"
+                  aria-label="Details"
+                  onClick={() => {
+                    setLeadTimeDialog({ open: true, data: row.original });
+                  }}
+                >
+                  <DateRangeIcon fontSize="small" color="primary" />
+                </IconButton>
+              </HtmlTooltip>
+            }
             <GridDeleteIcon
               hasDeletePermission={permissions?.quotation?.isUpdate}
               ownerId={user?.user?._id}
@@ -286,7 +288,7 @@ const AdditionalCost = ({ quotationData, setNextStep, renderedFrom, version, all
       {columns && rowsData ? (
         <Box zIndex={5}>
           <CustomReactTable
-            height={'calc(100vh - 395px)'}
+            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
             columns={columns}
             data={rowsData}
             setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}

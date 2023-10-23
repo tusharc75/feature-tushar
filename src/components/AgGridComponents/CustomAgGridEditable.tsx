@@ -284,14 +284,14 @@ export default function CustomAgGridEditable({
       (result, item) => {
         const keys = Object.keys(item);
         keys.forEach((key) => {
-          if (key === 'srno') {
+          if (key === 'index') {
             return;
           }
           result[key] = result[key] ? result[key] + item[key] : item[key];
         });
         return result;
       },
-      { [fromProductGrid && !allowSelection && 'productName']: 'Total' }
+      { [fromProductGrid && !allowSelection && 'index']: 'Total' }
     );
 
     let dataObj = {};
@@ -307,13 +307,13 @@ export default function CustomAgGridEditable({
     return [dataObj];
   };
 
-  useEffect(()=>{
-    const checkBoxCols = columns?.filter((m)=>m?.cellRenderer === "checkboxRenderer")
-    dataRows.map((row)=>{
-      checkBoxCols.forEach(col =>{
-           if(!row.hasOwnProperty(col?.field)){
-            row[col?.field] = false;
-           }
+  useEffect(() => {
+    const checkBoxCols = columns?.filter((m) => m?.cellRenderer === "checkboxRenderer")
+    dataRows.map((row) => {
+      checkBoxCols.forEach(col => {
+        if (!row.hasOwnProperty(col?.field)) {
+          row[col?.field] = false;
+        }
       })
     })
   }, [dataRows, columns])
@@ -348,8 +348,8 @@ export default function CustomAgGridEditable({
               ? true
               : checkStaticField(renderedFrom, column.field)
             : column.hasOwnProperty('show') && !column?.show
-            ? true
-            : false
+              ? true
+              : false
         }
         valueGetter={column.valueGetter ?? null}
       ></AgGridColumn>
@@ -385,8 +385,8 @@ export default function CustomAgGridEditable({
               ? true
               : checkStaticField(renderedFrom, column.field)
             : column.hasOwnProperty('show') && !column?.show
-            ? true
-            : false
+              ? true
+              : false
         }
         valueGetter={column.valueGetter ?? null}
       ></AgGridColumn>
@@ -453,14 +453,14 @@ export default function CustomAgGridEditable({
                   rowClassRules
                     ? rowClassRules
                     : {
-                        'red-data-row':
-                          forProductBuilder &&
-                          function (params) {
-                            const tsp = params.data[`totalSalesPrice_${currency}`] || 0;
-                            const qty = params.data.qty;
-                            return qty === 0 || tsp === 0;
-                          }
-                      }
+                      'red-data-row':
+                        forProductBuilder &&
+                        function (params) {
+                          const tsp = params.data[`totalSalesPrice_${currency}`] || 0;
+                          const qty = params.data.qty;
+                          return qty === 0 || tsp === 0;
+                        }
+                    }
                 }
                 onGridReady={onGridReady}
                 suppressDragLeaveHidesColumns={true}
@@ -599,7 +599,7 @@ export default function CustomAgGridEditable({
                 suppressPaginationPanel={true}
                 paginationPageSize={limit}
                 rowDragManaged={enableRowDrag}
-                // stopEditingWhenCellsLoseFocus={true}
+              // stopEditingWhenCellsLoseFocus={true}
               >
                 {allowSelection && (
                   <AgGridColumn

@@ -6,7 +6,7 @@ import VisibilityIcon from '@material-ui/icons/Visibility';
 import { camelCase } from 'lodash';
 import { FC, useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { FaSuitcase, MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
+import { CiUser, MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
 import { Link, useHistory } from 'react-router-dom';
 import { gridFilterParser } from 'src/constants/useColumns';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -143,20 +143,21 @@ const QuotePdfTemplate: FC = () => {
   const ActionsRenderer = (params) => (
     <>
       <Tooltip title="Preview">
-        <IconButton size="small" aria-label="Clone" className="mr-2" onClick={() => previewPdfTemplate(params.data._id)}>
+        <IconButton size="small" aria-label="Clone" className="md:mr-2" onClick={() => previewPdfTemplate(params.data._id)}>
           <VisibilityIcon color="primary" />
         </IconButton>
       </Tooltip>
       {permissions?.quotePdfTemplate?.isCreate && (
         <Tooltip title="Clone">
           <IconButton size="small" aria-label="Clone" onClick={() => CreateNew(params.data.id, true)}>
-            <FileCopyIcon color="primary" />
+            <FileCopyIcon color="primary" className="max-[600px]:[font-size:20px_!important]" />
           </IconButton>
         </Tooltip>
       )}
       {permissions?.quotePdfTemplate?.isDelete ? (
         <Tooltip title="Delete">
           <IconButton
+            size="small"
             aria-label="Delete"
             onClick={() => {
               setDeleteRecord(params.data);
@@ -168,7 +169,7 @@ const QuotePdfTemplate: FC = () => {
         </Tooltip>
       ) : (
         <Tooltip className="cursor-stop" title={`You do not have permission to delete `}>
-          <IconButton aria-label="Delete">
+          <IconButton aria-label="Delete" size="small">
             <DeleteIcon fontSize="small" />
           </IconButton>
         </Tooltip>
@@ -231,6 +232,7 @@ const QuotePdfTemplate: FC = () => {
     if (isExport) {
       deepFilter = `?`;
     }
+
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
@@ -420,20 +422,17 @@ const QuotePdfTemplate: FC = () => {
             dataRows={dataRows}
             selectedRecords={selectedRecords}
             dispatch={dispatch}
-            onEdit={(d) => {
-              history.push(`${routes.quotePdfTemplateDetail.path}/${d._id}`);
-            }}
             extraParamsToCheckDelete={true}
-            onDelete={(d) => {
-              setDeleteRecord(d);
-              setShowDeleteConfirmBox(true);
+            actionCol={(data) => {
+              const params = { data };
+              return <ActionsRenderer {...params} />;
             }}
             rowCount={rowCount}
             page={page}
             loading={loading}
             additionalDetails={[
               {
-                icon: <FaSuitcase size={18} />,
+                icon: <CiUser size={18} />,
                 field: 'createdBy'
               }
             ]}

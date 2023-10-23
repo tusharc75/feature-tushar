@@ -83,7 +83,7 @@ export default function VersionStatus({ versionStatusData, handleCloneQuoteWithV
     </>
 
     const columns = [
-        { field: 'versionNumber', headerName: 'Version #', show: true, cellRenderer: 'commonRenderer' },
+        { field: 'versionNumber', headerName: 'Version', show: true, cellRenderer: 'commonRenderer' },
         { field: 'status', headerName: 'Status', show: true, cellRenderer: 'nameRenderer' },
         { field: 'comment', headerName: 'Comment', show: true, cellRenderer: 'commonRenderer' },
         { field: 'processStatus', headerName: 'Current Step', show: true, cellRenderer: 'commonRenderer' },

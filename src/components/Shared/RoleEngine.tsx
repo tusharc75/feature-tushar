@@ -14,6 +14,7 @@ import {
   IconButton
 } from '@material-ui/core';
 import { KeyboardArrowDown, KeyboardArrowUp } from '@material-ui/icons';
+import { ROLE_TIER } from 'src/constants/helpers';
 
 interface RoleProps {
   field: any[];
@@ -22,16 +23,24 @@ interface RoleProps {
   setResource?: any;
   isDisable?: boolean;
   style?: React.CSSProperties;
+  tier?: string;
 }
 
 const RoleEngine = (props: RoleProps) => {
-  const { field, resource, setField, setResource, isDisable, style } = props;
+  const { field, resource, setField, setResource, isDisable, style, tier = ROLE_TIER.tier1 } = props;
 
   const [isReadChecked, setIsReadChecked] = useState(false);
   const [isCreateChecked, setIsCreateChecked] = useState(false);
   const [isUpdateChecked, setIsUpdateChecked] = useState(false);
   const [isDeleteChecked, setIsDeleteChecked] = useState(false);
   const [isHiddenChecked, setIsHiddenChecked] = useState(false);
+
+  const [renderCount, setRenderCount] = useState(0);
+
+  const [selectedResource, setSelectedResource] = useState({
+    id: '',
+    type: ''
+  });
 
   useEffect(() => {
     let isAnyReadFoundUnchecked = false;
@@ -57,7 +66,6 @@ const RoleEngine = (props: RoleProps) => {
             return _field.isRead === false;
           });
       }
-
       if (_resource.isCreate === false && !_resource.isCreateDisabled && isAnyCreateFoundUnchecked === false) {
         field
           .filter((d) => d.fieldData.resource === _resource.name && !d.isCreateDisabled)
@@ -101,11 +109,34 @@ const RoleEngine = (props: RoleProps) => {
       }
     });
 
+    if (tier === ROLE_TIER.tier3) {
+      isAnyCreateFoundUnchecked = true;
+      isAnyUpdateFoundUnchecked = true;
+      isAnyDeleteFoundUnchecked = true;
+      isAnyHiddenFoundUnchecked = true;
+    }
+
     setIsReadChecked(!isAnyReadFoundUnchecked);
     setIsCreateChecked(!isAnyCreateFoundUnchecked);
     setIsUpdateChecked(!isAnyUpdateFoundUnchecked);
     setIsDeleteChecked(!isAnyDeleteFoundUnchecked);
     setIsHiddenChecked(!isAnyHiddenFoundUnchecked);
+
+    if (tier === ROLE_TIER.tier2 && renderCount === 0) {
+      const temp = {
+        id: '',
+        type: ''
+      };
+      temp.id = resource?.filter?.((_r) => _r?.isRead || _r?.isCreate || _r?.isUpdate || _r?.isDelete || _r?.isHidden)[0]?.resourceId || '';
+      temp.type = 'resource';
+
+      if (!temp.id) {
+        const resourceName = field?.filter?.((_f) => _f?.isRead || _f?.isCreate || _f?.isUpdate)[0]?.fieldData?.resource;
+        temp.id = resource?.find((_r) => _r?.name === resourceName)?.resourceId || '';
+        temp.type = 'field';
+      }
+      setSelectedResource(temp);
+    }
   }, [field, resource]);
 
   const updateRoles = (propertyToUpdate, isChecked) => {
@@ -137,6 +168,10 @@ const RoleEngine = (props: RoleProps) => {
 
   const handleChange = (type, id, access) => (event) => {
     //Checking for the type if it is resource or field
+    setSelectedResource({
+      id: id,
+      type: type
+    });
     if (type === 'resource') {
       const newResource = [...resource];
       const newField = [...field];
@@ -245,6 +280,99 @@ const RoleEngine = (props: RoleProps) => {
     }
   };
 
+  const validateRoleAndField = (resource: any[], field: any[]) => {
+    if (setField) {
+      setField(
+        field?.map((f) => ({
+          ...f,
+          isCreate: renderCount === 0 ? f?.isCreate === true : false,
+          isRead: renderCount === 0 ? f?.isRead === true : false,
+          isUpdate: renderCount === 0 ? f?.isUpdate === true : false,
+          isReadDisabled: false,
+          isCreateDisabled: tier === ROLE_TIER?.tier3 ? true : false,
+          isUpdateDisabled: tier === ROLE_TIER?.tier3 ? true : false,
+          isDeleteDisabled: tier === ROLE_TIER?.tier3 ? true : false,
+          isHiddenDisabled: tier === ROLE_TIER?.tier3 ? true : false
+        }))
+      );
+    }
+    if (setResource) {
+      setResource(
+        resource?.map((r) => ({
+          ...r,
+          isCreate: renderCount === 0 ? r?.isCreate === true : false,
+          isDelete: renderCount === 0 ? r?.isDelete === true : false,
+          isRead: renderCount === 0 ? r?.isRead === true : false,
+          isUpdate: renderCount === 0 ? r?.isUpdate === true : false,
+          isHidden: renderCount === 0 ? r?.isHidden === true : false,
+          isReadDisabled: false,
+          isCreateDisabled: tier === ROLE_TIER?.tier3 ? true : false,
+          isUpdateDisabled: tier === ROLE_TIER?.tier3 ? true : false,
+          isDeleteDisabled: tier === ROLE_TIER?.tier3 ? true : false,
+          isHiddenDisabled: tier === ROLE_TIER?.tier3 ? true : false
+        }))
+      );
+    }
+    setRenderCount(renderCount + 1);
+  };
+
+  const validateTier2 = (resource: any[], field: any[], selectedResource: any) => {
+    if (tier === ROLE_TIER?.tier2) {
+      let checkedResource = [];
+      let unCheckedResource = [];
+
+      if (selectedResource.type === 'resource') {
+        checkedResource = resource?.filter((_r) => _r?.resourceId === selectedResource.id);
+        unCheckedResource = resource?.filter((_r) => _r?.resourceId !== selectedResource.id);
+      } else {
+        const resourceName = field?.filter((f) => f?.fieldData?._id === selectedResource?.id)[0]?.fieldData?.resource;
+        checkedResource = resource?.filter((_r) => _r?.name === resourceName);
+        unCheckedResource = resource?.filter((_r) => _r?.name !== resourceName);
+      }
+
+      let isChecked = false;
+      if (
+        checkedResource[0]?.isRead ||
+        checkedResource[0]?.isCreate ||
+        checkedResource[0]?.isUpdate ||
+        checkedResource[0]?.isDelete ||
+        checkedResource[0]?.isHidden
+      ) {
+        isChecked = true;
+      }
+
+      const index = resource?.findIndex((_r) => _r?.resourceId === checkedResource[0]?.resourceId);
+
+      let newResource = [...resource];
+
+      if (checkedResource[0]) {
+        newResource = unCheckedResource?.map((_r) => ({
+          ..._r,
+          isCreateDisabled: isChecked ? true : false,
+          isReadDisabled: isChecked ? true : false,
+          isUpdateDisabled: isChecked ? true : false,
+          isDeleteDisabled: isChecked ? true : false,
+          isHiddenDisabled: isChecked ? true : false
+        }));
+
+        newResource.splice(index, 0, checkedResource[0]);
+      }
+
+      setResource(newResource);
+      setField(field);
+
+      setRenderCount(renderCount + 1);
+    }
+  };
+
+  useEffect(() => {
+    validateRoleAndField(resource, field);
+  }, [tier]);
+
+  useEffect(() => {
+    validateTier2(resource, field, selectedResource);
+  }, [selectedResource]);
+
   return (
     <TableContainer
       style={{ height: 400, minHeight: 400, ...style }}
@@ -258,7 +386,7 @@ const RoleEngine = (props: RoleProps) => {
               <FormControlLabel
                 control={
                   <Checkbox
-                    disabled={isDisable}
+                    disabled={isDisable || tier === ROLE_TIER.tier2}
                     checked={isReadChecked}
                     onChange={(e) => {
                       setIsReadChecked(e.target.checked);
@@ -273,7 +401,7 @@ const RoleEngine = (props: RoleProps) => {
               <FormControlLabel
                 control={
                   <Checkbox
-                    disabled={isDisable}
+                    disabled={isDisable || tier === ROLE_TIER.tier2 || tier === ROLE_TIER.tier3}
                     checked={isCreateChecked}
                     onChange={(e) => {
                       setIsCreateChecked(e.target.checked);
@@ -293,7 +421,7 @@ const RoleEngine = (props: RoleProps) => {
               <FormControlLabel
                 control={
                   <Checkbox
-                    disabled={isDisable}
+                    disabled={isDisable || tier === ROLE_TIER.tier2 || tier === ROLE_TIER.tier3}
                     checked={isUpdateChecked}
                     onChange={(e) => {
                       setIsUpdateChecked(e.target.checked);
@@ -313,7 +441,7 @@ const RoleEngine = (props: RoleProps) => {
               <FormControlLabel
                 control={
                   <Checkbox
-                    disabled={isDisable}
+                    disabled={isDisable || tier === ROLE_TIER.tier2 || tier === ROLE_TIER.tier3}
                     checked={isDeleteChecked}
                     onChange={(e) => {
                       setIsDeleteChecked(e.target.checked);
@@ -333,7 +461,7 @@ const RoleEngine = (props: RoleProps) => {
               <FormControlLabel
                 control={
                   <Checkbox
-                    disabled={isDisable}
+                    disabled={isDisable || tier === ROLE_TIER.tier2 || tier === ROLE_TIER.tier3}
                     checked={isHiddenChecked}
                     onChange={(e) => {
                       setIsHiddenChecked(e.target.checked);
@@ -425,7 +553,11 @@ const Row = ({ _resource, isDisable, handleChange, fieldCheckbox }) => {
           />
         </TableCell>
         <TableCell align="center">
-          <Checkbox disabled={isDisable} checked={!!_resource.isHidden} onChange={handleChange('resource', _resource.resourceId, 'isHidden')} />
+          <Checkbox
+            disabled={isDisable || _resource?.isHiddenDisabled}
+            checked={!!_resource.isHidden}
+            onChange={handleChange('resource', _resource.resourceId, 'isHidden')}
+          />
         </TableCell>
       </TableRow>
       {open &&

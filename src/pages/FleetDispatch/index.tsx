@@ -68,14 +68,8 @@ const FleetDispatch = () => {
         </Box>
         {fleets && jobs ? (
           <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
-            <Grid container spacing={2}>
-              <Grid item md={6} xs={12} style={{ paddingTop: '0px' }}>
-                <DispatchList activity={fleets} cardType="fleet" handleDispatch={handleDispatch} />
-              </Grid>
-              <Grid item md={6} xs={12} style={{ paddingTop: '0px' }}>
-                <DispatchList activity={jobs} cardType="job" handleDispatch={handleDispatch} />
-              </Grid>
-            </Grid>
+            <DispatchList activity={fleets} cardType="fleet" handleDispatch={handleDispatch} />
+            <DispatchList activity={jobs} cardType="job" handleDispatch={handleDispatch} />
           </DndProvider>
         ) : (
           <Box p={2} height={500}>

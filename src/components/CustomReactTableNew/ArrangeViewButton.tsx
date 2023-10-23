@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import { useState } from 'react';
 import { IconButton } from '@material-ui/core';
 import SwapHorizIcon from '@material-ui/icons/SwapHoriz';
 import axiosInstance from '../../axios/axiosInstance';
@@ -23,7 +23,6 @@ const ArrangeViewButton = ({
   refColsOrder = null
 }) => {
   const [openColumnSelection, setOpenColumnSelection] = useState(false);
-  const [openColumnSelectionAnchorEl, setOpenColumnSelectionAnchorEl] = useState<HTMLButtonElement | null>(null);
 
   const {
     state: { user }
@@ -84,7 +83,6 @@ const ArrangeViewButton = ({
           className="refresh-arrange-button"
           onClick={(event) => {
             setOpenColumnSelection(true);
-            setOpenColumnSelectionAnchorEl(event.currentTarget);
           }}
         >
           <SwapHorizIcon />
@@ -101,11 +99,11 @@ const ArrangeViewButton = ({
             columnApi={null}
             isClientSideGrid={isClientSideGrid}
             renderedFrom={renderedFrom}
-            defaultColumns = {defaultColumns}
+            defaultColumns={defaultColumns}
             setHiddenColumns={setHiddenColumns}
             getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
             setColumnOrder={setColumnOrder}
-            refColsOrder = {refColsOrder}
+            refColsOrder={refColsOrder}
           />
         </>
       )}

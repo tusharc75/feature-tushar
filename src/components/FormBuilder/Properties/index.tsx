@@ -25,7 +25,7 @@ import { SignatureUser } from '../AddField/signatureUser';
 import { DecimalPlaces } from '../AddField/decimalPlaces';
 import { MultipleFormula } from '../AddField/multipleformula';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition } from '../../../constants/helpers';
+import { CustomDialogTransition, fieldLabelToFieldName } from '../../../constants/helpers';
 import { Autocomplete } from '@material-ui/lab';
 import FormTypes from '../../Helpers/FormTypes';
 import { camelCase, isEqual } from 'lodash';
@@ -101,7 +101,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
       if (!values.disableOnEdit && module !== 'price-template' && module !== 'product-template') {
         values.disableOnEdit = false;
       }
-      if (!values.hiddenField && module !== 'price-template' && module !== 'product-template') {
+      if (!values.hiddenField) {
         values.hiddenField = false;
       }
       if (!values.addAdditionalOption && (fieldData.type === 'multiSelect' || fieldData.type === 'dropDown')) {
@@ -167,7 +167,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
     _section.field.forEach((_field) => {
       let ele = { ..._field };
       if (!ele.fieldName) {
-        ele.fieldName = camelCase(ele.fieldLabel.replace(/[^a-zA-Z0-9]/g, ''));
+        ele.fieldName = fieldLabelToFieldName(ele.fieldLabel);
       }
       if (ele.type === 'converter' || ele.type === 'currencyAmount' || ele.isConverter === true) {
         if (ele.type !== 'currencyAmount' && (ele.type === 'converter' || ele.isConverter === true)) {
@@ -251,6 +251,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
               ele.systemGeneratedPrefix = values.systemGeneratedPrefix;
             }
             ele.isColumnEditable = values?.isColumnEditable || false;
+            ele.stopHideColumn = values?.stopHideColumn || false
             ele.isHideColumnSum = values?.isHideColumnSum || false;
 
             if (values?.hasOwnProperty('isWarningTooltip')) {
@@ -531,7 +532,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         fullWidth
                         margin="dense"
                         disabled={true}
-                        value={values['fieldName'] ? values['fieldName'] : camelCase(values['fieldLabel'].replace(/[^a-zA-Z0-9]/g, ''))}
+                        value={values['fieldName'] ? values['fieldName'] : fieldLabelToFieldName(values['fieldLabel'])}
                       />
                       {/* <FormControlLabel
                         control={
@@ -1046,6 +1047,19 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                     <FormControlLabel
                       control={
                         <Checkbox
+                          name="stopHideColumn"
+                          checked={values['stopHideColumn']}
+                          onChange={(e) => {
+                            setFieldValue('stopHideColumn', e.target.checked);
+                          }}
+                          color="primary"
+                        />
+                      }
+                      label="Stop Hide Column"
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox
                           name="isHideColumnSum"
                           checked={values['isHideColumnSum']}
                           onChange={(e) => {
@@ -1164,22 +1178,20 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                           />
                         </Box></>
                     )}
-                    {module !== 'price-template' && module !== 'product-template' ? (
-                      <FormControlLabel
-                        disabled={values['required']}
-                        control={
-                          <Checkbox
-                            name="ishiddenField"
-                            checked={values['required'] ? false : values['hiddenField']}
-                            onChange={(e) => {
-                              setFieldValue('hiddenField', e.target.checked);
-                            }}
-                            color="primary"
-                          />
-                        }
-                        label="Hidden Field"
-                      />
-                    ) : null}
+                    <FormControlLabel
+                      disabled={values['required']}
+                      control={
+                        <Checkbox
+                          name="ishiddenField"
+                          checked={values['required'] ? false : values['hiddenField']}
+                          onChange={(e) => {
+                            setFieldValue('hiddenField', e.target.checked);
+                          }}
+                          color="primary"
+                        />
+                      }
+                      label="Hidden Field"
+                    />
                     {(fieldData.type === 'multiSelect' || fieldData.type === 'dropDown') && (
                       <FormControlLabel
                         control={

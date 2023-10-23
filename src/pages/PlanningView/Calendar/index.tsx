@@ -5,7 +5,7 @@ import 'react-big-calendar/lib/addons/dragAndDrop/styles.scss';
 import './calendarView.scss';
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
 import moment from 'moment';
-import { Grid, Checkbox, TextField, Box } from '@material-ui/core';
+import { Grid, Checkbox, TextField, Box, CircularProgress } from '@material-ui/core';
 import axiosInstance from 'src/axios/axiosInstance';
 import { Autocomplete } from '@material-ui/lab';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -51,6 +51,14 @@ const FILTERS = [
   }
 ];
 
+const ASSET_FILTERS = [
+  {
+    label: 'Assets',
+    value: 'Serialized Asset',
+    key: 'assetIds'
+  }
+];
+
 function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
   const [themeMode] = useAppTheme();
   const toastConfig = useContext(CustomToastContext);
@@ -92,6 +100,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
     endDate: moment().add(1, 'months').format('MM/DD/YYYY')
   });
 
+  const [lookupLoading, setLookupLoading] = useState(false);
+
   useEffect(() => {
     if (view === 'month') {
       setMonth({
@@ -117,14 +127,17 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
   }, [dateRange]);
 
   useEffect(() => {
-    let lookupResource = FILTERS?.map((e) => e.value)?.toString();
+    let lookupResource = [...FILTERS, ...ASSET_FILTERS]?.map((e) => e.value)?.toString();
     if (lookupResource) {
+      setLookupLoading(true);
       axiosInstance()
         .get(`/sa-formbuilder/lookup?lookupResource=${lookupResource}`)
         .then(({ data: { data } }) => {
           setLookUpResource(data);
+          setLookupLoading(false);
         })
         .catch((error) => {
+          setLookupLoading(false);
           toastConfig.setToastConfig(error);
         });
     }
@@ -149,6 +162,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
           } else {
             setFilters(FILTERS?.filter((e) => e.key !== 'asset'));
           }
+        } else if (selectedResource.resource === sidebarResource.serializedAsset) {
+          setFilters(ASSET_FILTERS);
         } else {
           setFilters(FILTERS);
         }
@@ -158,6 +173,9 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
 
   useEffect(() => {
     setSelectedFilters([]);
+    if (selectedResource?.resource === sidebarResource.serializedAsset) {
+      setSelectedFilters(ASSET_FILTERS);
+    }
     setSelectedLookUpResourceData(null);
   }, [selectedResource]);
 
@@ -190,6 +208,18 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
       .get(`/planning-view${queryString}`)
       .then(({ data: { data } }) => {
         const rows = data?.map((d: any) => {
+          if (selectedResource.resource === sidebarResource.serializedAsset) {
+            return {
+              id: d._id,
+              title: d?.quotationNumber || d?.planningNumber || d?.rentalJobName,
+              start: new Date(d['estimateStartDate'] || d['startDate']),
+              end: new Date(d['estimateEndDate'] || d['endDate']),
+              allDay: true,
+              type: d.resource,
+              resource: d.resource,
+              fulfillStatus: d?.fulfillStatus
+            };
+          }
           return {
             id: d._id,
             title: d[selectedResource.fieldName],
@@ -232,10 +262,20 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
 
     const element: any = document.getElementsByClassName('rbc-agenda-event-cell');
     for (let i = 0; i < element?.length; i++) {
+      const spanElement = document.createElement('span');
+
+      const content = element[i].textContent;
+      element[i].textContent = '';
+
+      spanElement.style.cursor = 'pointer';
+
+      spanElement.textContent = content;
+      element[i].appendChild(spanElement);
+
       element[i].onclick = () => {
         const event = events.filter((event) => event.title === element[i].innerText)[0];
         const path = selectedResource.path;
-        history.push(`${path}/${event.id}`);
+        window.open(`${path}/${event.id}`);
       };
     }
   };
@@ -376,27 +416,29 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
                 renderInput={(params) => <TextField {...params} label="Select Resource" size="small" variant="outlined" />}
               />
             </Box>
-            <Box ml={1}>
-              <Autocomplete
-                style={{ width: '350px' }}
-                multiple
-                options={filters}
-                disableCloseOnSelect
-                getOptionLabel={(option) => option?.label}
-                renderOption={(option: any) => (
-                  <React.Fragment>
-                    <Checkbox checked={selectedFilters?.some((_s) => _s.key === option.key)} />
-                    {option?.label}
-                  </React.Fragment>
-                )}
-                size="small"
-                renderInput={(params) => <TextField {...params} label="Filters" variant="outlined" />}
-                value={selectedFilters}
-                onChange={(event: any, newValue: any) => {
-                  setSelectedFilters(newValue);
-                }}
-              />
-            </Box>
+            {![sidebarResource.serializedAsset].includes(selectedResource?.resource) && (
+              <Box ml={1}>
+                <Autocomplete
+                  style={{ width: '350px' }}
+                  multiple
+                  options={filters}
+                  disableCloseOnSelect
+                  getOptionLabel={(option) => option?.label}
+                  renderOption={(option: any) => (
+                    <React.Fragment>
+                      <Checkbox checked={selectedFilters?.some((_s) => _s.key === option.key)} />
+                      {option?.label}
+                    </React.Fragment>
+                  )}
+                  size="small"
+                  renderInput={(params) => <TextField {...params} label="Filters" variant="outlined" />}
+                  value={selectedFilters}
+                  onChange={(event: any, newValue: any) => {
+                    setSelectedFilters(newValue);
+                  }}
+                />
+              </Box>
+            )}
           </Box>
           <Box display="flex" flexDirection="row" ml={1} mt={2}>
             <Grid container spacing={2}>
@@ -421,7 +463,22 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
                         }
                       }}
                       size="small"
-                      renderInput={(params) => <TextField {...params} label={`Select ${filtered?.label}`} variant="outlined" />}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          label={`Select ${filtered?.label}`}
+                          variant="outlined"
+                          InputProps={{
+                            ...params.InputProps,
+                            endAdornment: (
+                              <>
+                                {lookupLoading ? <CircularProgress color="inherit" size={20} /> : null}
+                                {params.InputProps.endAdornment}
+                              </>
+                            )
+                          }}
+                        />
+                      )}
                     />
                   </Grid>
                 );
@@ -456,7 +513,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
               onNavigate(date);
             }}
             onSelectEvent={(event: any) => {
-              history.push(`${selectedResource.path}/${event.id}`);
+              window.open(`${selectedResource.path}/${event.id}`);
             }}
           />
         ) : (
@@ -483,7 +540,12 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
               onNavigate(date);
             }}
             onSelectEvent={(event: any) => {
-              history.push(`${selectedResource.path}/${event.id}`);
+              if (event.resource) {
+                const resource = resourceList?.find((r) => r.resource === event.resource);
+                window.open(`${resource.path}/${event.id}`);
+              } else {
+                window.open(`${selectedResource.path}/${event.id}`);
+              }
             }}
           />
         )}

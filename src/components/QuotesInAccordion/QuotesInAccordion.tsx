@@ -135,15 +135,17 @@ export default function QuotesInAccordion({
   const quoteNameWithRedirect = (obj) =>
     hasAccessToEntity(obj.entity) ? (
       obj.entity === selectedEntity ? (
-        <Link className="link" to={`${routes.quoteBuilder.path}/detail/${obj._id}`}>
+        <Link className="link" to={`${routes.quoteBuilder.path}/detail/${obj._id}`} target="_blank" rel="noopener noreferrer">
           <Typography className="detailName">{obj.quoteName}</Typography>
         </Link>
       ) : (
         <Link
+          target="_blank"
+          rel="noopener noreferrer"
           className="link"
+          to={`${routes.quoteBuilder.path}/detail/${obj._id}`}
           onClick={() => {
             handleEntityChange(obj.entity);
-            history.push(`${routes.quoteBuilder.path}/detail/${obj._id}`);
           }}
         >
           <Typography className="detailName">{obj.quoteName}</Typography>

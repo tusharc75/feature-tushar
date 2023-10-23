@@ -48,7 +48,7 @@ const PurchaseOrder = () => {
 
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
-  const { type }: any = queryString.parse(history.location.search);
+  let { type, referenceId, referenceType }: any = queryString.parse(history.location.search);
   const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
   const [filter, setFilter] = useState(`All ${routes.purchaseOrder.title}`);
   const [showManagePurchaseOrderDialog, setShowManagePurchaseOrderDialog] = useState({ open: false, isClone: false, idToClone: null });
@@ -63,8 +63,6 @@ const PurchaseOrder = () => {
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
   const [isOpenDialog, setisOpenDialog] = useState(false);
-
-  const [fromRental, setFromRental] = useState(history.location?.state?.rental);
   const [fromSalesOrder, setFromSalesOrder] = useState(history.location?.state?.salesOrder);
 
   const [warehouseOptions, setWarehouseOptions] = useState([]);
@@ -85,7 +83,7 @@ const PurchaseOrder = () => {
 
   useEffect(() => {
     fetchPurchaseOrder();
-  }, [page, limit, filters, sorting, search, selectedEntity, fromRental, fromSalesOrder, selectedType, showFilteredRecordsOnly, warehouse]);
+  }, [page, limit, filters, sorting, search, selectedEntity, fromSalesOrder, selectedType, showFilteredRecordsOnly, warehouse]);
 
   const getPlants = () => {
     axiosInstance()
@@ -145,17 +143,17 @@ const PurchaseOrder = () => {
             type: 'initialize',
             data: [...dataRows, ...rows],
             count: count,
-            selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
+            selectedRecords: [...dataRows, ...rows]
           });
         } else {
           dispatch({
             type: 'initialize',
             data: rows,
             count: count,
-            selectedRecords: rows.filter((f) => f.isChecked === true)
+            selectedRecords: rows
           });
         }
-        dispatch({ type: 'initialize', data: rows, count: count });
+        // dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
@@ -180,8 +178,8 @@ const PurchaseOrder = () => {
     if (warehouse && warehouse !== '') {
       filterByIds.push({ field: 'warehouse', term: warehouse });
     }
-    if (fromRental) {
-      filterByIds.push({ field: 'rentalJob', term: fromRental?._id });
+    if (referenceId) {
+      filterByIds.push({ field: 'rentalJob', term: referenceId });
     }
     if (fromSalesOrder) {
       filterByIds.push({ field: 'salesOrder', term: fromSalesOrder?._id });
@@ -232,8 +230,13 @@ const PurchaseOrder = () => {
   };
 
   const handlePurchaseOrderTypeSel = (filterValues) => {
+    dispatch({ type: 'setPage', page: 0 });
     setSelectedType(filterValues);
-    history.push(`?type=${filterValues}`);
+    if (referenceId && referenceType) {
+      history.push(`?type=${filterValues}&referenceType=${referenceType}&referenceId=${referenceId}`);
+    } else {
+      history.push(`?type=${filterValues}`);
+    }
   };
 
   const handleFilter = (event, newFilter) => {
@@ -314,6 +317,18 @@ const PurchaseOrder = () => {
       })}
     </ToggleButtonGroup>
   );
+
+  const updateQueryParams = () => {
+    const queryParams = new URLSearchParams(history.location.search);
+    queryParams.delete('referenceId');
+    queryParams.delete('referenceType');
+    referenceId = queryParams.get('referenceId');
+    referenceType = queryParams.get('referenceType');
+    history.replace({
+      search: queryParams.toString()
+    });
+    fetchPurchaseOrder();
+  };
 
   return (
     <section className="main-container-v1">
@@ -430,16 +445,7 @@ const PurchaseOrder = () => {
                 }}
                 renderInput={(params) => <TextField {...params} margin="none" size="small" name="plant" label="Plant" variant="outlined" fullWidth />}
               />
-              {fromRental && (
-                <Chip
-                  className="ml-3"
-                  color="primary"
-                  label={`Rental Job : ${fromRental?.rentalJobName}`}
-                  onDelete={() => {
-                    setFromRental(null);
-                  }}
-                />
-              )}
+              {referenceType && <Chip className="ml-3" color="primary" label={`Rental Job : ${referenceType}`} onDelete={updateQueryParams} />}
               {fromSalesOrder && (
                 <Chip
                   className="ml-3"
@@ -527,6 +533,7 @@ const PurchaseOrder = () => {
           Object.keys(frameWorkComponent).length > 0 ? (
             isMobile && !isTablet ? (
               <CustomSwipableList
+                key={selectedType}
                 allowSelection={true}
                 allowSwipe={true}
                 permissions={permissions.purchaseOrder}
