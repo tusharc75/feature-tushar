@@ -30,6 +30,7 @@ import ActivityButton from 'src/components/Activity/ActivityButton';
 import Versions from 'src/components/Versions';
 import ButtonWithPulse from 'src/components/ButtonWithPulse';
 import { IoMdDownload } from 'react-icons/io';
+import CreditMemo from './CreditMemo';
 
 const InvoiceDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -309,6 +310,17 @@ const InvoiceDetails = () => {
             }
             {...a11yProps(1)}
           />
+          {permissions?.creditMemo?.isRead &&
+            <Tab
+              className={'tabLayout'}
+              label={
+                <div className="d-flex align-items-center tab-font">
+                  <BiFoodMenu className="mr-1" fontSize="inherit" /> {routes.creditMemo.title}
+                </div>
+              }
+              {...a11yProps(2)}
+            />
+          }
         </Tabs>
 
         <TabPanel value={tabValue} index={0}>
@@ -361,6 +373,12 @@ const InvoiceDetails = () => {
               />
             )}
           </ContentFullScreen>
+        </TabPanel>
+        <TabPanel value={tabValue} index={2}>
+          <CreditMemo
+            invoiceData={invoiceData}
+            allowedToEdit={allowedToEdit && ![INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(invoiceData?.status)}
+          />
         </TabPanel>
       </Box>
       {showConfirmBox && (

@@ -5,10 +5,9 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { generateCustomTableColumns } from 'src/constants/columns';
-import { dateFormat, invoice, sidebarResource } from 'src/constants/helpers';
+import { prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { Add } from '@material-ui/icons';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -18,9 +17,10 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import ManageCreditMemo from 'src/pages/CreditMemo/ManageCreditMemo';
-import moment from 'moment';
+import { useData } from 'src/StateProvider/Provider';
 
-function CreditMemo({ invoiceData }) {
+function CreditMemo({ invoiceData, allowedToEdit }) {
+
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = `${camelCase(routes?.invoice.title)}_credit_memo`;
 
@@ -29,11 +29,16 @@ function CreditMemo({ invoiceData }) {
 
   const [selectedRecords, setSelectedRecords] = useState([]);
 
-  const [createCreditMemoDialog, setCreateCreditMemoDialog] = useState({ open: false, id: null });
+  const [creditMemoDialog, setCreditMemoDialog] = useState({ open: false, id: null });
   const [anchorActionEl, setAnchorActionEl] = useState(null);
 
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState({ open: false, ids: [] });
   const [isDeleting, setIsDeleting] = useState(false);
+
+
+  const {
+    state: { user, permissions, selectedEntity }
+  }: any = useData();
 
   useEffect(() => {
     fetchFields();
@@ -42,46 +47,35 @@ function CreditMemo({ invoiceData }) {
 
   const fetchFields = async () => {
     try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/field?resource=${sidebarResource.creditMemo}`);
-      const columns = [];
-      data?.forEach((field) => {
-        columns.push({
-          accessor: field?.fieldData?.fieldName,
-          Header: field?.fieldData?.fieldLabel,
-          width: 200,
-          disableFilters: field?.fieldData.type === 'date' ? true : false,
-          Cell: ({ row }) =>
-            row.original[field?.fieldData?.fieldName] ? (
+      const { data: { data } } = await axiosInstance().get(`/field?resource=${sidebarResource.creditMemo}`);
+      data?.forEach((e) => {
+        e.isColumnEditable = false;
+      });
+      const columns = generateCustomTableColumns(data?.filter((e) => !['invoice']?.includes(e?.fieldData?.fieldName))?.map((e) => e.fieldData), invoiceData?.currency, renderedFrom);
+      columns?.forEach((e) => {
+        if (e.accessor === 'creditMemoNumber') {
+          e.Cell = ({ row }) =>
+            row.original['creditMemoNumber'] ? (
               <div style={{ display: 'flex', alignItems: 'center' }}>
-                <p className="text-truncate">
-                  {field?.fieldData.type === 'date'
-                    ? moment(row.original[field?.fieldData?.fieldName]).format(dateFormat)
-                    : row.original[field?.fieldData?.fieldName]}
-                </p>
-                {(field?.fieldData?.fieldName === 'creditMemoNumber' || field?.fieldData?.fieldName === 'invoice') && (
-                  <Box ml={1}>
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        if (field?.fieldData?.fieldName === 'creditMemoNumber') {
-                          window.open(`${routes.creditMemoDetail.path}/${row.original._id}`);
-                        } else if (field?.fieldData?.fieldName === 'invoice') {
-                          window.open(`${routes.invoiceDetail.path}/${row.original.invoiceid}`);
-                        }
-                      }}
-                    >
-                      <OpenInNewIcon fontSize="small" color="primary" />
-                    </IconButton>
-                  </Box>
+                {allowedToEdit ? (
+                  <p
+                    onClick={() => {
+                      setCreditMemoDialog({ open: true, id: row.original._id });
+                    }}
+                    className="link text-truncate"
+                    title={row.original['creditMemoNumber']}
+                  >
+                    {row.original['creditMemoNumber']}
+                  </p>
+                ) : (
+                  <p className="text-truncate">{row.original['creditMemoNumber']}</p>
                 )}
               </div>
             ) : (
               <NoDataCell />
             )
-        });
-      });
+        }
+      })
       columns.push({
         accessor: 'action',
         Header: 'Actions',
@@ -90,31 +84,35 @@ function CreditMemo({ invoiceData }) {
         sticky: 'right',
         disableFilters: true,
         canDrag: false,
-        Cell: ({ row, rows }) => (
+        Cell: ({ row }) => (
           <>
-            <HtmlTooltip title={'Edit'}>
+            {allowedToEdit && permissions?.creditMemo?.isUpdate &&
+              <HtmlTooltip title={'Edit'}>
+                <IconButton
+                  size="small"
+                  aria-label="Delete"
+                  onClick={() => {
+                    setCreditMemoDialog({ open: true, id: row.original._id });
+                  }}
+                >
+                  <EditIcon fontSize="small" color={'primary'} />
+                </IconButton>
+              </HtmlTooltip>
+            }
+            {allowedToEdit && permissions?.creditMemo?.isDelete &&
               <IconButton
                 size="small"
-                aria-label="Delete"
+                aria-label="Details"
                 onClick={() => {
-                  setCreateCreditMemoDialog({ open: true, id: row.original._id });
+                  setShowDeleteConfirmBox({
+                    open: true,
+                    ids: [row.original._id]
+                  });
                 }}
               >
-                <EditIcon fontSize="small" color={'primary'} />
+                <DeleteIcon fontSize="small" color="error" />
               </IconButton>
-            </HtmlTooltip>
-            <IconButton
-              size="small"
-              aria-label="Details"
-              onClick={() => {
-                setShowDeleteConfirmBox({
-                  open: true,
-                  ids: [row.original._id]
-                });
-              }}
-            >
-              <DeleteIcon fontSize="small" color="error" />
-            </IconButton>
+            }
           </>
         )
       });
@@ -125,15 +123,18 @@ function CreditMemo({ invoiceData }) {
   };
 
   const fetchData = async () => {
-    const {
-      data: { data }
-    } = await axiosInstance().get(`${routes?.creditMemo.path}?filterById=${JSON.stringify([{field: 'invoice', term:{$in:[invoiceData?.invoiceId]}}])}&&filterType=and`);
-    const rowData = data?.data;
-    rowData?.forEach((ele) => {
-      ele.invoiceid = ele?.invoice?.optionValue || '';
-      ele.invoice = ele?.invoice?.optionLabel || '';
-    });
-    setRowsData(rowData);
+    const query = `?filterById=${JSON.stringify([{ field: 'invoice', term: { $in: [invoiceData?._id] } }])}&&filterType=and`
+    axiosInstance().get(`${routes?.creditMemo.path}${query}`)
+      .then(({ data: { data } }) => {
+        let rows = data?.data?.map((u) => {
+          let finalObject = prepareDataForGrid(u, user);
+          return finalObject;
+        })
+        setRowsData(rows)
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const handleDelete = async (ids) => {
@@ -168,28 +169,32 @@ function CreditMemo({ invoiceData }) {
   return (
     <Fragment>
       <Box pb={2} justifyContent={'space-between'} className="flex gap-2">
-        <Button
-          variant={'outlined'}
-          color="primary"
-          size="small"
-          startIcon={<Add />}
-          onClick={() => setCreateCreditMemoDialog({ open: true, id: null })}
-        >
-          Create
-        </Button>
-        <Button
-          variant={'outlined'}
-          color="primary"
-          aria-controls="simple-menu"
-          aria-haspopup="true"
-          disabled={selectedRecords.length === 0}
-          size="small"
-          onClick={handleClick}
-          endIcon={<ArrowDropDownIcon />}
-          className="new-dropdown-v1"
-        >
-          {'Actions'}
-        </Button>
+        {allowedToEdit && permissions?.creditMemo?.isCreate &&
+          <Button
+            variant={'outlined'}
+            color="primary"
+            size="small"
+            startIcon={<Add />}
+            onClick={() => setCreditMemoDialog({ open: true, id: null })}
+          >
+            Create
+          </Button>
+        }
+        {allowedToEdit &&
+          <Button
+            variant={'outlined'}
+            color="primary"
+            aria-controls="simple-menu"
+            aria-haspopup="true"
+            disabled={selectedRecords.length === 0}
+            size="small"
+            onClick={handleClick}
+            endIcon={<ArrowDropDownIcon />}
+            className="new-dropdown-v1"
+          >
+            {'Actions'}
+          </Button>
+        }
         <Menu
           anchorEl={anchorActionEl}
           keepMounted
@@ -220,7 +225,7 @@ function CreditMemo({ invoiceData }) {
         </Menu>
       </Box>
       {columns && rowsData ? (
-        <Box zIndex={5} width={'100%'} height={'calc(100vh - 285px)'} pt={1}>
+        <Box zIndex={5} width={'100%'} height={'calc(100vh - 200px)'} pt={1}>
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
@@ -228,8 +233,8 @@ function CreditMemo({ invoiceData }) {
             onSelect={setSelectedRecords}
             childrenProperty="subRows"
             uniqueKey="_id"
-            hideSelection={false}
-            hideAction={false}
+            hideSelection={allowedToEdit ? false : true}
+            hideAction={allowedToEdit ? false : true}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
             hideExpander={true}
@@ -240,17 +245,17 @@ function CreditMemo({ invoiceData }) {
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
-      {createCreditMemoDialog.open && (
+      {creditMemoDialog.open && (
         <ManageCreditMemo
           isClone={false}
-          onClose={() => setCreateCreditMemoDialog({ open: false, id: null })}
+          onClose={() => setCreditMemoDialog({ open: false, id: null })}
           onSuccess={() => {
-            setCreateCreditMemoDialog({ open: false, id: null });
+            setCreditMemoDialog({ open: false, id: null });
             fetchData();
           }}
-          id={createCreditMemoDialog.id}
+          id={creditMemoDialog.id}
           referenceData={{
-            invoice: invoiceData?.invoiceId,
+            invoice: invoiceData?._id,
             currency: invoiceData?.currency
           }}
           isRedirectToDetailPage={false}

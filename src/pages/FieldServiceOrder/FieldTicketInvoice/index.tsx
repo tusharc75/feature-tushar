@@ -32,7 +32,7 @@ const FieldTicketInvoice = ({ fieldServiceOrderData, renderedFrom }) => {
   const [deleteRecord, setDeleteRecord] = useState<any>({});
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [viewBillDialog, setViewBillDialog] = useState({ open: false, invoiceData: null });
+  const [viewBillDialog, setViewBillDialog] = useState({ open: false, invoice: null });
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [selectedInvoices, setSelectedInvoices] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -94,7 +94,7 @@ const FieldTicketInvoice = ({ fieldServiceOrderData, renderedFrom }) => {
       <span
         className="link line-clamp-1"
         onClick={() => {
-          setViewBillDialog({ open: true, invoiceData: params.data });
+          setViewBillDialog({ open: true, invoice: params.data._id });
         }}
       >
         <CustomRenderCell value={params?.value} />
@@ -326,12 +326,12 @@ const FieldTicketInvoice = ({ fieldServiceOrderData, renderedFrom }) => {
       </Grid>
       {viewBillDialog.open && (
         <ViewInvoice
-          invoiceData={viewBillDialog?.invoiceData}
+          invoiceId={viewBillDialog?.invoice}
           onClose={() => {
-            setViewBillDialog({ open: false, invoiceData: null });
+            setViewBillDialog({ open: false, invoice: null });
           }}
           onSuccess={() => {
-            setViewBillDialog({ open: false, invoiceData: null });
+            setViewBillDialog({ open: false, invoice: null });
             fetchBilling();
           }}
           resource={sidebarResource.fieldTicketInvoice}
