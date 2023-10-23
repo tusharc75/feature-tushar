@@ -169,17 +169,19 @@ const IrtTicketDetail = () => {
             aria-controls="a11y-tabpanel-1"
             id="a11y-tab-1"
           />
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                Views
-              </div>
-            }
-            value={2}
-            aria-controls="a11y-tabpanel-1"
-            id="a11y-tab-1"
-          />
+          {!(isMobile && !isTablet) && (
+            <Tab
+              className={'tabLayout'}
+              label={
+                <div className="d-flex align-items-center tab-font">
+                  Views
+                </div>
+              }
+              value={2}
+              aria-controls="a11y-tabpanel-1"
+              id="a11y-tab-1"
+            />
+          )}
         </Tabs>
         {tabValue === 0 && (
           <Box>
