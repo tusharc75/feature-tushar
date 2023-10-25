@@ -239,9 +239,9 @@ function SerializedAsset({ subleaseData, setNextStep, fetchData, isIssued, rende
                 parent.realAssetQty = parent.assetQty;
                 parent.realAssetAssignedQty = parent.assetAssignedQty;
 
-                if (i.assetQty === i.assetAssignedQty) {
-                    parent.hideSelection = true
-                }
+                // if (i.assetQty === i.assetAssignedQty) {
+                //     parent.hideSelection = true
+                // }
 
                 parent.subRows = generateNestedData(
                     data.material,
@@ -419,21 +419,18 @@ function SerializedAsset({ subleaseData, setNextStep, fetchData, isIssued, rende
         setNextStep(false);
         var data = [];
         assets.forEach((e) => {
-            const mId = e.asset;
-            delete e.asset;
             data.push({
                 ...e,
-                inventory: mId,
+                inventory: e.asset,
             });
         });
-        console.log(assets)
         if (data.length) {
             setAdding(true);
             axiosInstance()
-                .post(`${sublease.api}/inventory/${subleaseData._id}`, { products: assets })
+                .post(`${sublease.api}/inventory/${subleaseData._id}`, { products: data })
                 .then(({ data }) => {
                     setAddSerializedAssetDialog(false);
-                    fetchData();
+                    fetchRowData()
                     setSelectedRecords([]);
                     setAssetAssignedProduct([]);
                     setAdding(false);

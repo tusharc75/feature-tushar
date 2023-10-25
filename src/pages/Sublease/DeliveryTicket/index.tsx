@@ -28,7 +28,7 @@ import { useHistory } from 'react-router-dom';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
-import { uniq, map, startCase, upperFirst } from 'lodash';
+import { uniq, map, startCase, upperFirst, capitalize } from 'lodash';
 import { ExpandMore } from '@material-ui/icons';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { useAppTheme } from 'src/constants/AppConfig';
@@ -65,7 +65,7 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, stepF
 
             const response = await axiosInstance().get(`${sublease.api}/inventory/${subleaseData._id}`);
             data = response?.data?.data;
-            let rows = data.material.filter((e) => e.parentId === null);
+            let rows = data.filter((e) => !e?.parentId);
 
             const {
                 data: { data: deliveryTicketList }
@@ -74,17 +74,14 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, stepF
             );
             rows.forEach((parent, i) => {
                 parent.index = i + 1;
-                parent.type = 'Asset';
                 parent.detail = parent.assetNumber
-                parent.description = ""
-                parent.qty = parent.qty;
-                parent.qtyDisplay = parent.qty;
+                parent.type = 'Asset'
             });
 
             deliveryTicketList?.map((obj) => {
                 if (obj.ticketType === ticketType) {
                     rows.map((d, index) => {
-                        if (obj?.products?.some((p) => d?.materialId === p?.product)) {
+                        if (obj?.productInventory?.some((p) => d?._id === p?.optionValue)) {
                             rows[index][`${ticketType}Ticket`] = obj?.ticketName;
                             rows[index][`${ticketType}TicketId`] = obj?._id;
                             rows[index][`${ticketType}TicketStatus`] = obj?.status;
@@ -96,6 +93,9 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, stepF
                 }
             });
             setRowsData(rows);
+            if (rows?.every((e) => e[`${ticketType}TicketStatus`] === DELIVERY_TICKET_STATUS.delivered)) {
+                setNextStep(true);
+            }
         } catch (error) {
             toastConfig.setToastConfig(error);
         }
@@ -165,16 +165,16 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, stepF
             },
             {
                 accessor: `${ticketType}Ticket`,
-                Header: `${upperFirst(ticketType)} Ticket`,
+                Header: `${ticketType} Ticket`,
                 width: 200,
-                Cell: ({ row }) => row?.original?.loadingTicket ?
+                Cell: ({ row }) => row?.original[`${ticketType}Ticket`] ?
                     <div style={{ display: "flex" }}>
                         <p className="text-truncate">{row?.original[`${ticketType}Ticket`]}</p>
                         <Box ml={1}>
                             <IconButton
                                 size="small"
                                 onClick={() => {
-                                    window.open(`${routes.deliveryTicketDetail.path}/${row.original.loadingTicketId}`);
+                                    window.open(`${routes.deliveryTicketDetail.path}/${row.original[`${ticketType}TicketId`]}`);
                                 }}
                             >
                                 <OpenInNewIcon fontSize="small" color="primary" />
@@ -200,22 +200,35 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, stepF
     const closeActions = () => {
         setAnchorActionEl(null);
     };
+    useEffect(() => {
+        console.log(selectedRecords);
+    }, [selectedRecords])
+
 
     const handleDeliveryTicketDialog = () => {
         if (selectedRecords.length) {
             const data = {};
-            data['ticketName'] = subleaseData?.productionOrderNumber || "";
+            data['ticketName'] = subleaseData?.subleaseName || "";
             data['referenceId'] = subleaseData._id;
-            data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.plant;
-            data['pickupFrom'] = subleaseData?.warehouse?.optionValue;
-            data['pickupFromAddress'] = subleaseData?.warehouse?.optionValue;
-            data['deliveryToType'] = DELIVERY_FROM_TO_TYPE.customer;
-            data['deliveryTo'] = subleaseData?.customerAccount?.optionValue;
-            data['deliveryToAddress'] = subleaseData?.shippingAddress?.optionValue;
             data['startDate'] = new Date();
             data['endDate'] = new Date();
             data['isPickupFromDisable'] = true;
             data['isDeliveryToDisable'] = true;
+            if (ticketType === DELIVERY_TICKET_TYPE.loading) {
+                data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.plant;
+                data['pickupFrom'] = subleaseData?.warehouse?.optionValue;
+                data['pickupFromAddress'] = subleaseData?.warehouse?.optionValue;
+                data['deliveryToType'] = DELIVERY_FROM_TO_TYPE.plant;
+                data['deliveryTo'] = subleaseData?.fromWarehouse?.optionValue;
+                data['deliveryToAddress'] = subleaseData?.fromWarehouse?.optionValue;
+            } else {
+                data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.plant;
+                data['pickupFrom'] = subleaseData?.fromWarehouse?.optionValue;
+                data['pickupFromAddress'] = subleaseData?.fromWarehouse?.optionValue;
+                data['deliveryToType'] = DELIVERY_FROM_TO_TYPE.plant;
+                data['deliveryTo'] = subleaseData?.warehouse?.optionValue;
+                data['deliveryToAddress'] = subleaseData?.warehouse?.optionValue;
+            }
             if (subleaseData?.processor?.optionValue) {
                 data['processor'] = subleaseData?.processor?.optionValue;
             }
@@ -226,7 +239,7 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, stepF
 
     const handelProcessTickets = () => {
         let data = {};
-        const loadingTicketIds = uniq(map(selectedRecords, 'loadingTicketId'));
+        const loadingTicketIds = uniq(map(selectedRecords, `${ticketType}TicketId`));
         if (loadingTicketIds.length) {
             data['_ids'] = loadingTicketIds?.map((e) => e);
             data['status'] = DELIVERY_TICKET_STATUS.delivered;
@@ -283,21 +296,22 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, stepF
                                         closeActions();
                                         handleDeliveryTicketDialog();
                                     }}
-                                    disabled={selectedRecords.length === 0 || selectedRecords.some((f) => f.hasOwnProperty('loadingTicketId'))}
+                                    disabled={selectedRecords.length === 0 || selectedRecords.some((f) => f.hasOwnProperty(`${ticketType}TicketId`))}
                                 >
-                                    Create Loading Ticket
+                                    Create {ticketType} Ticket
                                 </MenuItem>
                                 <MenuItem
                                     disabled={
                                         selectedRecords.length === 0 ||
-                                        selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !== selectedRecords.length
+                                        selectedRecords.filter((e: any) => e[`${ticketType}TicketStatus`] === DELIVERY_TICKET_STATUS.indTransit).length !== selectedRecords.length
                                     }
                                     onClick={() => {
                                         handelProcessTickets();
                                         closeActions();
                                     }}
-                                >
-                                    Delivered to Customer
+                                >{
+                                        ticketType === 'loading' ? 'Delivered to Plant' : 'Received at Plant'
+                                    }
                                 </MenuItem>
                             </Menu>
                             <Box mx={1} />
@@ -332,11 +346,11 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, stepF
             </Grid>
             {showTicketDialog.open && (
                 <ManageDeliveryTicket
-                    ticketType={DELIVERY_TICKET_TYPE.loading}
+                    ticketType={ticketType}
                     referenceType={DELIVERY_TICKET_REFERENCE_TYPE.sublease}
                     referenceData={showTicketDialog.data}
                     onClose={() => setShowTicketDialog({ open: false, data: {} })}
-                    productInventory={selectedRecords?.map((e) => ({ ...e, _id: e?.inventory }))}
+                    productInventory={selectedRecords}
                     products={[]}
                     onSuccess={() => {
                         setShowTicketDialog({ open: false, data: {} });
