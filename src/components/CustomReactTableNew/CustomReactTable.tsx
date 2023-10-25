@@ -371,11 +371,11 @@ function CustomReactTable({
               ),
               Cell: ({ row }) => (
                 <div
-                  {...row.getToggleRowExpandedProps?.({
+                  {...{
                     style: {
                       paddingLeft: isMobileView ? 0 : `${row.depth * 15}px`
                     }
-                  })}
+                  }}
                   className="ml-[6px]"
                 >
                   <IndeterminateCheckbox onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps()} />
