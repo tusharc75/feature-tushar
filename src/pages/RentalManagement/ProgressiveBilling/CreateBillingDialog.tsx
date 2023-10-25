@@ -135,7 +135,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                 {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : ''}
               </span>
             </Box>
-            {row.original['type'] !== 'additionalCost' && (
+            {row.original['type'] !== 'manualEntry' && (
               <IconButton
                 size="small"
                 onClick={() => {
@@ -323,7 +323,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
     if (additionalCostData.length > 0) {
       additionalCostData.forEach((element) => {
-        element.type = 'additionalCost';
+        element.type = 'manualEntry';
         element.materialId = element?._id;
         element.parentId = null;
         newMaterial.push(element);
@@ -388,7 +388,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
             ? parent?.serviceDetail?.serviceName
             : parent.type === 'serializedAsset'
               ? parent?.inventoryDetail?.assetNumber
-              : parent.type === 'additionalCost'
+              : parent.type === 'manualEntry'
                 ? parent?.costType
                 : parent.packageDetail?.packageName;
       parent.description =
@@ -399,13 +399,14 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
             : parent.type === 'package'
               ? parent?.packageDetail?.packageDescription || ''
               : parent.type === 'serializedAsset'
-                ? parent?.description || ''
-                : '';
+                ? parent?.description || '' :
+                parent.type === 'manualEntry'
+                  ? parent?.description
+                  : '';
       parent.qtyDisplay = parent.qty;
-      parent.isEditable =
-        ['Per Day', 'Per Week', 'Per Month'].includes(parent?.pricingMethod) || parent.type === 'serializedAsset' || parent.type === 'additionalCost'
-          ? false
-          : true;
+      parent.isEditable = ['Per Day', 'Per Week', 'Per Month'].includes(parent?.pricingMethod) || parent.type === 'serializedAsset' || parent.type === 'manualEntry'
+        ? false
+        : true;
       parent.subRows = generateNestedData(material, parent);
     });
     setRowsData(rows);
@@ -481,7 +482,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
     let rows: any = [];
     selectedProducts.forEach((element) => {
-      if (element.type === 'additionalCost') {
+      if (element.type === 'manualEntry') {
         element.isAppliedBill = true;
         rows.push(element);
       } else {
@@ -590,15 +591,18 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
       delete element?.packageDetail;
       delete element?.serviceDetail;
       delete element?.inventoryDetail;
-      delete element?.description;
       delete element?.subRows;
       delete element?.manualEndDate;
+      delete element?.isAppliedBill;
+      if (element.type !== 'manualEntry') {
+        delete element?.description;
+      }
     });
     setUpdating(true);
     axiosInstance()
       .post(`${rentalManagement.api}/${rentalManagementData._id}/progressive-billing`, {
-        material: rowsApplied.filter((d) => d.type !== 'additionalCost'),
-        additionalCost: rowsApplied.filter((d) => d.type === 'additionalCost')
+        material: rowsApplied.filter((d) => d.type !== 'manualEntry'),
+        additionalCost: rowsApplied.filter((d) => d.type === 'manualEntry')
       })
       .then(() => {
         setUpdating(false);
@@ -679,7 +683,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                         <HtmlTooltip
                           title={
                             !Boolean(
-                              selectedProducts && selectedProducts.length && (endDate || selectedProducts.every((d) => d.type === 'additionalCost'))
+                              selectedProducts && selectedProducts.length && (endDate || selectedProducts.every((d) => d.type === 'manualEntry'))
                             )
                               ? 'Please select product to apply'
                               : ''
@@ -693,7 +697,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                                 !Boolean(
                                   selectedProducts &&
                                   selectedProducts.length &&
-                                  (endDate || selectedProducts.every((d) => d.type === 'additionalCost'))
+                                  (endDate || selectedProducts.every((d) => d.type === 'manualEntry'))
                                 )
                               }
                               size="small"

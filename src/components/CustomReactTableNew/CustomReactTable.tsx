@@ -677,7 +677,6 @@ function CustomReactTable({
   const handleCellClick = (cell, row) => {
     // prepareRow(row);
     if (!cell.column.id || !row.original._id || !cell?.column?.editable) return;
-    console.log({ cell, row });
 
     dispatch({
       type: 'currentEditingCellPosition',
@@ -687,6 +686,13 @@ function CustomReactTable({
       }
     });
     setCellValue(cell?.value || null);
+  };
+
+  const resetField = () => {
+    dispatch({
+      type: 'currentEditingCellPosition',
+      cellPosition: null
+    });
   };
 
   return (
@@ -851,17 +857,11 @@ function CustomReactTable({
                               currentEditingCellPosition?.rowId === row.original._id &&
                               currentEditingCellPosition?.columnName === cell?.column.id ? (
                                 <input
+                                  title={`Edit-${cell.id}`}
                                   autoFocus
-                                  onBlur={submitInput}
-                                  style={{
-                                    borderLeft: '0',
-                                    borderTop: '0',
-                                    padding: '2px 4px',
-                                    width: cell?.column.width - 20,
-                                    background: 'transparent',
-                                    outline: 'none'
-                                  }}
+                                  onBlur={() => (cell.value !== cellValue ? submitInput() : resetField())}
                                   value={cellValue}
+                                  className="dark:text-[white]  appearance-none w-full focus-within:outline-[var(--new-theme-color)] bg-[transparent] outline-[transparent] shadow-0 border-[0] px-[2px] py-[4px] [border-bottom:1px_solid_var(--common-border-color)_!important]"
                                   onChange={(e) => setCellValue(e.target.value)}
                                 />
                               ) : currentEditingCellPosition?.rowId === row.original._id && cell?.column.id === 'action' ? (
@@ -876,7 +876,7 @@ function CustomReactTable({
                                 >
                                   <p>{cell?.value}</p>
                                   <span>
-                                    <Edit color="disabled" fontSize="small" />
+                                    <Edit className="text-[rgba(0,0,0,0.3)] dark:text-[rgba(255,255,255,0.9)]" fontSize="small" />
                                   </span>
                                 </div>
                               ) : (

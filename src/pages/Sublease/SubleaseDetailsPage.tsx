@@ -305,7 +305,6 @@ const SubleaseDetailsPage = () => {
                         renderedFrom={`${renderedFrom}_grid-1`}
                         allowedToEdit={allowedToEdit}
                         stepFullScreen={stepFullScreen}
-                        setCurrentStep={setCurrentStep}
                       />
                     )
                   }
@@ -319,7 +318,6 @@ const SubleaseDetailsPage = () => {
                         renderedFrom={`${renderedFrom}_grid-1`}
                         allowedToEdit={allowedToEdit}
                         stepFullScreen={stepFullScreen}
-                        setCurrentStep={setCurrentStep}
                       />
                     )
                   }
