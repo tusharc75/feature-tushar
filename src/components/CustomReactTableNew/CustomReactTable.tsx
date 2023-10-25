@@ -652,6 +652,17 @@ function CustomReactTable({
                 />
               </>
             }
+            startButtons={
+              isMobileView &&
+              !hideSelection &&
+              mobileSelectAllHeader && (
+                <>
+                  <label className="flex items-center gap-2 cursor-pointer -ml-2">
+                    {mobileSelectAllHeader.render('Header')} <span>Select All</span>
+                  </label>
+                </>
+              )
+            }
           >
             <CustomReactTableHeaderOptions
               columns={baseColumns}
@@ -668,13 +679,7 @@ function CustomReactTable({
               setCurrentFomValue={setCurrentFomValue}
             />
             {/* Select All For Mobile */}
-            {isMobileView && !hideSelection && mobileSelectAllHeader && (
-              <>
-                <label className="flex items-center gap-2 cursor-pointer -ml-2">
-                  {mobileSelectAllHeader.render('Header')} <span>Select All</span>
-                </label>
-              </>
-            )}
+
             {isFilterOpen && (
               <GridFilter
                 resource={resource}
