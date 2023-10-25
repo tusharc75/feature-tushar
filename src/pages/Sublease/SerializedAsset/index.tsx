@@ -238,11 +238,6 @@ function SerializedAsset({ subleaseData, setNextStep, fetchData, isIssued, rende
                     : data.nonSerializeAsset?.filter((e) => e._id === parent._id).length;
                 parent.realAssetQty = parent.assetQty;
                 parent.realAssetAssignedQty = parent.assetAssignedQty;
-
-                // if (i.assetQty === i.assetAssignedQty) {
-                //     parent.hideSelection = true
-                // }
-
                 parent.subRows = generateNestedData(
                     data.material,
                     data.inventory,
@@ -449,6 +444,14 @@ function SerializedAsset({ subleaseData, setNextStep, fetchData, isIssued, rende
         }
     };
 
+    const disableAssignSerializedAssets = () => {
+        if (selectedRecords.length === 0) return true;
+        const flatArray = treeToFlatArray(selectedRecords, 'subRows').filter(
+            (f) => f.type === 'product' && f.serializedProduct && f.realAssetQty > f.realAssetAssignedQty
+        );
+        return flatArray.length === 0;
+    };
+
 
     return (
         <Fragment>
@@ -461,6 +464,7 @@ function SerializedAsset({ subleaseData, setNextStep, fetchData, isIssued, rende
                                 color="primary"
                                 type="button"
                                 size="small"
+                                disabled={disableAssignSerializedAssets()}
                                 onClick={() => {
                                     console.log(selectedRecords)
                                     setAssetAssignedProduct(selectedRecords.filter((i) => i?.type === 'product' && i?.productDetail?.serializedProduct));
@@ -519,53 +523,14 @@ function SerializedAsset({ subleaseData, setNextStep, fetchData, isIssued, rende
                     selectedProducts={assetAssignedProduct?.map((i) => {
                         return { _id: i._id, product: i.materialId, productName: i.detail, qty: i.assetQty - i.assetAssignedQty };
                     })}
+                    extraStaticFilter={
+                        [{
+                            field: 'status',
+                            term: 'Available'
+                        }]
+                    }
                 />
             )}
-            {/* {addSerializedAssetDialog && (
-                <AddSerializedAsset
-                    addSerializedAsset={handleAddSerializedAsset}
-                    handleSerializedAssetClose={() => {
-                        setAddSerializedAssetDialog(false);
-                    }}
-                    referenceType={'Rental Job'}
-                    referenceData={{
-                        _id: rentalManagementData?._id,
-                        warehouse: rentalManagementData?.warehouse?.optionValue,
-                        customerAccount: rentalManagementData?.customerAccount?.optionValue,
-                        shippingAddress: rentalManagementData?.shippingAddress?.optionValue,
-                        wellName: rentalManagementData?.wellName?.optionValue,
-                        wellNumber: rentalManagementData?.wellNumber
-                            ? rentalManagementData?.wellNumber?.optionValue || rentalManagementData?.wellNumber?.map((e) => e?.optionValue)
-                            : null,
-                        fromDate: rentalManagementData?.estimateStartDate,
-                        toDate: rentalManagementData?.estimateEndDate,
-                        afeNumber: rentalManagementData?.afeNumber
-                    }}
-                    isAdding={isAdding}
-                    selectedProducts={assetAssignedProduct}
-                    filterByPlant={rentalManagementData?.warehouse}
-                    handleSuccess={() => {
-                        setAddSerializedAssetDialog({ open: false });
-                        fetchData();
-                        setSelectedRecords([]);
-                        setAssetAssignedProduct([]);
-                        setAdding(false);
-                    }}
-                />
-                
-            )} */}
-            {/* {showConfirmBox && (
-                <ConfirmationDialog
-                    open={showConfirmBox}
-                    message={`Are you sure you want to remove?`}
-                    onClose={() => {
-                        setShowConfirmBox(false);
-                        setDeleteData([]);
-                    }}
-                    okBtnLoading={deleting}
-                    onOk={handleRemoveInventory}
-                />
-            )} */}
         </Fragment>
     )
 }
