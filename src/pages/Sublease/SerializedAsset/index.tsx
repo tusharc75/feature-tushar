@@ -1,401 +1,545 @@
-import Box from '@material-ui/core/Box/Box';
-import { useState, useEffect, useReducer, useContext, Fragment } from 'react';
-import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridComponents/CustomAgGrid';
-import CustomAgGridEditable from '../../../components/AgGridComponents/CustomAgGridEditable';
-import routes from '../../../components/Helpers/Routes';
-import Grid from '@material-ui/core/Grid/Grid';
-import axiosInstance from '../../../axios/axiosInstance';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { gridLoadingTimeout, ASSET_STATUS, serializedAsset, sidebarResource } from '../../../constants/helpers';
-import { useHistory } from 'react-router-dom';
-import { isMobile, isTablet } from 'react-device-detect';
-import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
-import useColumns, { getStaticFields, getFrameworkComponents } from '../../../constants/useColumns';
-import {
-  prepareDataForGrid,
-  DELIVERY_TICKET_REFERENCE_TYPE,
-  DELIVERY_TICKET_TYPE,
-  DELIVERY_FROM_TO_TYPE,
-  sublease,
-  SUBLEASE_STATUS,
-  INVENTORY_OWNER_TYPE
-} from '../../../constants/helpers';
-// import route from '../../../constants/helpers';
-import { useData } from '../../../StateProvider/Provider';
-import { Button, Tooltip } from '@material-ui/core';
-import { AiFillFilePdf } from 'react-icons/ai';
-import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
-import { uniq, map } from 'lodash';
-import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
-import PreviewDownload from 'src/components/PreviewDownload';
-import { Link } from 'react-router-dom';
+import { Box, Button, Grid, IconButton, Menu } from '@material-ui/core';
+import { Delete, ExpandMore } from '@material-ui/icons';
+import { startCase, uniqBy } from 'lodash';
+import React, { Fragment, useContext, useEffect, useState } from 'react'
+import { isMobile } from 'react-device-detect';
+import axiosInstance from 'src/axios/axiosInstance';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
+import routes from 'src/components/Helpers/Routes';
+import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
+import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
+import { ASSET_STATUS, CHILD_RESOURCE, sublease, treeToFlatArray } from 'src/constants/helpers';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
-const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, renderedFrom, allowedToEdit, isProcessor }) => {
-  const toastConfig = useContext(CustomToastContext);
-  const history = useHistory();
 
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
-  const { getColumnData } = useColumns();
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
-  const [columns, setColumns] = useState(null);
-  const {
-    state: { user, permissions, selectedEntity }
-  }: any = useData();
+function SerializedAsset({ subleaseData, setNextStep, fetchData, isIssued, renderedFrom, allowedToEdit, stepFullScreen }) {
+    const toastConfig = useContext(CustomToastContext);
 
-  const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
-  const [isCompleteing, setIsCompleteing] = useState(false);
-  const [isCompleteEnable, setIsCompleteEnable] = useState(false);
+    const [columns, setColumns] = useState(null);
+    const [rowsData, setRowsData] = useState([]);
+    const [selectedRecords, setSelectedRecords] = useState([]);
+    const [anchorActionEl, setAnchorActionEl] = useState(null);
+    const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false);
+    const [assetAssignedProduct, setAssetAssignedProduct] = useState([]);
+    const [isAdding, setAdding] = useState(false);
+    const [deleteData, setDeleteData] = useState([]);
+    const [showConfirmBox, setShowConfirmBox] = useState(false);
+    const [deleting, setDeleting] = useState(false);
 
-  const { setToastConfig } = useContext(CustomToastContext);
 
-  useEffect(() => {
-    fetchGridColumns();
-  }, [currentStep]);
+    useEffect(() => {
+        fetchFields();
+    }, []);
 
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get(`/field?resource=${serializedAsset.resource}`)
-      .then(({ data: { data } }) => {
-        let columns = [];
-        let rendererNames = [];
-        data.forEach((o) => {
-          let currentColumn: any = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path);
-          if (currentColumn !== null) {
-            if (o.fieldData.type === 'singleLine' && o.fieldData.fieldName !== 'assetNumber') {
-              currentColumn.columnData.editable = true;
-            }
-            columns = [...columns, currentColumn?.columnData];
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName);
-            }
-          }
+    const fetchFields = async () => {
+        setNextStep(false);
+        let data = [];
+        var res = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.rentalManagementProduct}`);
+        data = res?.data?.data;
+        data = CURReplaceByCurrencySingle(data, subleaseData?.currency ? subleaseData?.currency : "USD");
+        data?.forEach((e) => {
+            e.isColumnEditable = false;
         });
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          rentalJobRenderer: RentalJobRenderer,
-          wellNameRenderer: WellNameRenderer,
-          ...tempFrameworkComponent
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
-
-        const extraColoums = [
-          { field: 'rentalJob', headerName: 'Rental Job', show: true, cellRenderer: 'rentalJobRenderer' },
-          { field: 'wellName', headerName: 'Well Name', show: true, cellRenderer: 'wellNameRenderer' },
-          { field: 'remainingJobDays', headerName: 'Remaining Job Days', show: true, cellRenderer: 'commonRenderer' }
-        ];
-
-        columns = [...columns.slice(0, 1), ...extraColoums, ...columns.slice(1), ...getStaticFields()];
-        setColumns([...columns]);
-        fetchRecords();
-      });
-  };
-
-  const RentalJobRenderer = (params) =>
-    params?.value ? (
-      <Link
-        className="link text-truncate"
-        target="_blank"
-        title={params?.value}
-        to={`${routes.rentalManagementDetail.path}/${params?.data?.rentalJobId}`}
-      >
-        {params?.value}
-      </Link>
-    ) : (
-      <NoDataCell />
-    );
-
-  const WellNameRenderer = (params) =>
-    params?.value ? (
-      <Link className="link text-truncate" target="_blank" title={params?.value} to={`${routes.wellMasterDetail.path}/${params?.data?.wellNameId}`}>
-        {params?.value}
-      </Link>
-    ) : (
-      <NoDataCell />
-    );
-
-  const fetchRecords = async () => {
-    dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
-    const response = await axiosInstance().get(`${sublease.api}/${subleaseData._id}/serialized-asset`);
-    var isComplate = true;
-    let rows = response?.data?.data.map((u) => {
-      if (
-        u?.currentOwner?.optionValue !== subleaseData?.supplierAccount?.optionValue ||
-        [ASSET_STATUS.reserved, ASSET_STATUS.inUse, ASSET_STATUS.repair].includes(u.status)
-      ) {
-        isComplate = false;
-      }
-      let res = {
-        ...prepareDataForGrid(u, user)
-      };
-      res['isChecked'] = false;
-      return res;
-    });
-    setIsCompleteEnable(isComplate);
-    if (isComplate) {
-      setNextStep(true);
-    } else {
-      setNextStep(false);
-    }
-    dispatch({ type: 'initialize', data: rows, count: rows.length });
-    setTimeout(() => {
-      dispatch({ type: 'loading', loading: false });
-    }, gridLoadingTimeout);
-  };
-
-  const completeSublease = () => {
-    setIsCompleteing(true);
-    axiosInstance()
-      .put(`${sublease.api}/${subleaseData._id}/complete-sublease`)
-      .then(() => {
-        setIsCompleteing(false);
-        fetchData();
-        fetchRecords();
-      })
-      .catch((error) => {
-        setIsCompleteing(false);
-        toastConfig.setToastConfig(error);
-      });
-  };
-
-  const checkUniqWarehouse = () => {
-    if (selectedRecords.length === 0) {
-      return false;
-    } else if (uniq(map(selectedRecords, 'warehouseId')).length === 1) {
-      return true;
-    } else {
-      return false;
-    }
-  };
-
-  const handleValueUpdate = async (row) => {
-    if (!row || !row?.data) return;
-    const assetId = row.data._id;
-    const data = [
-      {
-        _id: assetId,
-        [row.column.colId]: row.newValue
-      }
-    ];
-    try {
-      await axiosInstance()
-        .post(`${routes.serializedAsset.path}/update-assets`, data)
-        .then(() => {
-          fetchGridColumns();
-        });
-    } catch (err) {
-      setToastConfig(err);
-    }
-  };
-
-  return (
-    <>
-      <Box display="flex" justifyContent="flex-end" my={1} className="px-2" gridGap={'8px'} alignItems="center">
-        {allowedToEdit && (
-          <Box>
-            <ImportExportLinks
-              permissions={permissions?.packages}
-              module="packages-products"
-              api={`${serializedAsset.api}/custom-template`}
-              afterImportCompleted={() => {
-                fetchRecords();
-              }}
-              isExportAllOrSomeFeature={true}
-              total={rowCount}
-              recordsToExport={selectedRecords.length ? selectedRecords.length : dataRows.length}
-              ids={selectedRecords.length ? selectedRecords?.map((d: any) => d._id) : dataRows?.map((d: any) => d._id)}
-              isDownloadExcel={false}
-              isBackgroundWhite={true}
-            />
-          </Box>
-        )}
-        <PreviewDownload
-          fileName={`${routes.sublease.title}-${subleaseData?.subleaseName}`}
-          resource={sidebarResource.sublease}
-          referenceId={subleaseData?._id}
-          hideDetailButton={true}
-          columns={columns?.filter((e) => ['assetNumber', 'product', 'serialNumber', 'supplierSerialNumber']?.includes(e.field))}
-        />
-        {SUBLEASE_STATUS.completed != subleaseData?.status && (allowedToEdit || isProcessor) && (
-          <Fragment>
-            {/* {currentStep === 1 && (
-              <Fragment>
-                <Tooltip title="Transfer to Plant">
-                  <Button
-                    variant={'contained'}
-                    color="primary"
-                    size="small"
-                    onClick={() => {
-                      const data = {};
-                      data['ticketName'] = subleaseData.subleaseName;
-                      data['referenceId'] = subleaseData._id;
-                      data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.supplier;
-                      data['pickupFrom'] = subleaseData?.supplierAccount?.optionValue;
-                      data['pickupFromAddress'] = subleaseData?.shippingAddress?.optionValue;
-                      data['deliveryToType'] = DELIVERY_FROM_TO_TYPE.plant;
-                      data['isPickupFromDisable'] = true;
-                      setShowTicketDialog({ open: true, data: data });
-                    }}
-                    disabled={
-                      selectedRecords.length === 0 ||
-                      selectedRecords.some(
-                        (f) =>
-                          f.hasOwnProperty('warehouse') ||
-                          f.currentOwnerType !== INVENTORY_OWNER_TYPE.supplierAccount ||
-                          [ASSET_STATUS.reserved].includes(f.status)
-                      )
-                    }
-                  >
-                    Receiving to Plant
-                  </Button>
-                </Tooltip>
-                <Box mx={1} />
-              </Fragment>
-            )} */}
-            {selectedRecords.length > 0 &&
-              selectedRecords.filter((e) => e.currentOwnerType === INVENTORY_OWNER_TYPE.brand).length === selectedRecords.length &&
-              checkUniqWarehouse() &&
-              currentStep === 1 ? (
-              <Fragment>
-                <Tooltip title="Send to Supplier">
-                  <Button
-                    variant={'contained'}
-                    color="primary"
-                    size="small"
-                    onClick={() => {
-                      const data = {};
-                      data['ticketName'] = subleaseData.subleaseName;
-                      data['referenceId'] = subleaseData._id;
-                      data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.plant;
-                      data['pickupFrom'] = selectedRecords[0]?.warehouseId;
-                      data['pickupFromAddress'] = selectedRecords[0]?.currentLocationId;
-                      data['deliveryToType'] = DELIVERY_FROM_TO_TYPE.supplier;
-                      data['deliveryTo'] = subleaseData?.supplierAccount?.optionValue;
-                      data['deliveryToAddress'] = subleaseData?.shippingAddress?.optionValue;
-                      data['isPickupFromDisable'] = true;
-                      data['isDeliveryToDisable'] = true;
-                      if (subleaseData?.wellName?.optionValue) {
-                        data['wellName'] = subleaseData?.wellName?.optionValue;
-                      }
-                      if (subleaseData?.wellNumber) {
-                        if (subleaseData?.wellNumber?.optionValue) {
-                          data['wellNumber'] = subleaseData?.wellNumber?.optionValue;
-                        } else {
-                          data['wellNumber'] = subleaseData?.wellNumber?.map((e) => e?.optionValue);
-                        }
-                      }
-                      if (subleaseData?.afeNumber) {
-                        data['afeNumber'] = subleaseData?.afeNumber;
-                      }
-                      if (subleaseData?.processor?.optionValue) {
-                        data['processor'] = subleaseData?.processor?.optionValue;
-                      }
-                      setShowTicketDialog({ open: true, data: data });
-                    }}
-                  >
-                    Send to Supplier
-                  </Button>
-                </Tooltip>
-              </Fragment>
-            ) : null}
-            {currentStep === 2 && allowedToEdit && (
-              <Fragment>
-                <Button
-                  variant={'contained'}
-                  color="primary"
-                  size="small"
-                  disabled={!isCompleteEnable || isCompleteing}
-                  onClick={() => {
-                    completeSublease();
-                  }}
-                >
-                  End Sublease
-                </Button>
-              </Fragment>
-            )}
-          </Fragment>
-        )}
-      </Box>
-      <Grid item xs={12} md={12} sm={12}>
-        {columns ? (
-          isMobile && !isTablet ? (
-            <CustomSwipableList
-              allowSelection={allowedToEdit || isProcessor}
-              allowSwipe={true}
-              permissions={true}
-              primaryField={columns?.find((d) => d.field)}
-              onClick={(data) => {
-                history.push(`${routes.serializedAssetDetail.path}/${data._id}`);
-              }}
-              dataRows={dataRows}
-              selectedRecords={selectedRecords}
-              dispatch={dispatch}
-              onEdit={false}
-              extraParamsToCheckDelete={true}
-              onDelete={false}
-              rowCount={rowCount}
-              page={page}
-              loading={loading}
-              additionalDetails={[]}
-              chips={[
-                {
-                  label: 'Status : ',
-                  field: 'status'
+        const newColumns = generateCustomTableColumns(data, subleaseData?.currency, '');
+        let coloum: any = [
+            {
+                accessor: 'index',
+                Header: 'Index',
+                width: 70,
+                sticky: isMobile ? 'none' : 'left',
+                Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+                Footer: () => {
+                    return <>Total</>;
                 }
-              ]}
-              owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-              onCreate={false}
-              showClone={false}
-              onClone={() => { }}
-              renderedFrom={renderedFrom}
-            />
-          ) : (
-            <CustomAgGridEditable
-              columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameWorkComponent}
-              setGridApi={setGridApi}
-              dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              allowAction={false}
-              loading={loading}
-              isClientSideGrid={true}
-              allowSelection={allowedToEdit || isProcessor}
-              renderedFrom={renderedFrom}
-              refreshGrid={fetchRecords}
-              onCellValueChanged={handleValueUpdate}
-            />
-          )
-        ) : (
-          <Box p={2} height={500}>
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Box>
-        )}
-      </Grid>
-      {showTicketDialog.open && (
-        <ManageDeliveryTicket
-          ticketType={DELIVERY_TICKET_TYPE.delivery}
-          referenceType={DELIVERY_TICKET_REFERENCE_TYPE.sublease}
-          referenceData={showTicketDialog.data}
-          productInventory={selectedRecords}
-          onClose={() => setShowTicketDialog({ open: false, data: {} })}
-          onSuccess={() => {
-            setShowTicketDialog({ open: false, data: {} });
-            fetchRecords();
-          }}
-        />
-      )}
-    </>
-  );
-};
+            },
+            {
+                accessor: 'type',
+                Header: 'Type',
+                sticky: isMobile ? 'none' : 'left',
+                disableFilters: true,
+                width: 200,
+                Cell: ({ row }) =>
+                    row.original['type'] ? (
+                        <p>
+                            {row.original?.type === 'asset' && row.original?.isNonSerializeAsset ? 'Inventory' : `${startCase(row.original?.type)} `}
+                            {row.original['type'] === 'product'
+                                ? row.original?.productDetail?.serializedProduct
+                                    ? '(Serialized)'
+                                    : '(Non-Serialized)'
+                                : row.original?.type === 'package'
+                                    ? row.original?.packageDetail.packageType === 'Product'
+                                        ? '(Product)'
+                                        : '(Service)'
+                                    : row.original.type === 'service'
+                                        ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                                        : ''}
+                        </p>
+                    ) : (
+                        <NoDataCell />
+                    )
+            },
+            {
+                accessor: 'detail',
+                Header: 'Details',
+                width: 300,
+                sticky: isMobile ? 'none' : 'left',
+                Cell: ({ row }) => (
+                    <div className="d-flex gap-2 align-items-center">
+                        <p className="text-truncate" title={row.original.detail}>
+                            {row.original.detail}
+                        </p>
+                        {(
+                            <IconButton
+                                size="small"
+                                onClick={() => {
+                                    if (row.original.type === 'service') {
+                                        window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                                    } else if (row.original.type === 'product') {
+                                        window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                                    } else if (row.original.type === 'asset') {
+                                        window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
+                                    } else {
+                                        window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                                    }
+                                }}
+                            >
+                                <OpenInNewIcon fontSize="small" color="primary" />
+                            </IconButton>
+                        )}
+                        {row.original?.type === 'asset' && (
+                            <span className="d-flex align-items-center gap-2">
+                                {allowedToEdit && row?.original?.canRemove && (
+                                    <HtmlTooltip title={`Remove`}>
+                                        <IconButton
+                                            size="small"
+                                            onClick={() => {
+                                                setShowConfirmBox(true);
+                                                setDeleteData([row.original.inventory]);
+                                            }}
+                                        >
+                                            <Delete fontSize="small" color={'error'} />
+                                        </IconButton>
+                                    </HtmlTooltip>
+                                )}
+                            </span>
+                        )}
+                    </div>
+                ),
+            },
+            {
+                accessor: 'description',
+                Header: 'Description',
+                width: 200,
+                Cell: ({ row }) => {
+                    return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
+                }
+            },
+            {
+                accessor: 'assets',
+                Header: 'Asset Assigned',
+                disableFilters: false,
+                Cell: ({ row }) => getAssetAssignedValues(row)
+            }
+        ];
+        coloum = [...coloum, ...newColumns];
+        setColumns(coloum);
+        fetchRowData();
+    };
+
+    const getAssetAssignedValues = (row) => {
+        if (row?.original?.type === 'asset' || row?.original?.assetQty === 0) {
+            return ' N/A ';
+        }
+        return (
+            <p>
+                {row?.original?.assetAssignedQty} / {row?.original?.assetQty}
+            </p>
+        );
+    };
+
+    const checkProductInside = (item, material) => {
+        if (item?.type === 'product') {
+            return true;
+        }
+        const child = material?.filter(e => e.parentId === item?._id);
+        if (child?.some(e => e?.type === 'product')) {
+            return true;
+        }
+        if (child?.length) {
+            for (var ele in child) {
+                return checkProductInside(child[ele], material)
+            }
+        }
+        else {
+            return false
+        }
+    }
+
+    const fetchRowData = async () => {
+        setNextStep(false);
+        try {
+            var data: any = [];
+            var transferAssets: any = [];
+            var purchaseOrderProduct: any = [];
+            var bulkAssetCreationProduct: any = [];
+            var subleaseProduct: any = [];
+            var offlineAssetErrorLog: any = [];
+
+
+            const response = await axiosInstance().get(`${sublease.api}/productpackage/${subleaseData._id}`);
+            data = response?.data?.data;
+            data.inventory = data.inventory?.filter((e) => !e.isReplaced);
+
+
+            const material = data.material;
+            let rows = data.material.filter((e) => e.parentId === null)?.filter((ele) => checkProductInside(ele, material) === true);
+
+            rows.forEach((parent, i) => {
+                parent.index = i + 1;
+                parent.detail = `${parent.type === 'service'
+                    ? parent?.serviceDetail?.serviceName
+                    : parent.type === 'product'
+                        ? parent?.productDetail?.productName
+                        : parent?.packageDetail?.packageName
+                    }`;
+                parent.description =
+                    parent.type === 'service'
+                        ? parent?.serviceDetail?.serviceDescription || ''
+                        : parent.type === 'product'
+                            ? parent?.productDetail?.productDescription || ''
+                            : parent.type === 'package'
+                                ? parent?.packageDetail?.packageDescription || ''
+                                : '';
+                parent.serializedProduct = parent.type === 'product' ? parent?.productDetail?.serializedProduct : false;
+                parent.assetQty = parent.qty;
+                parent.assetAssignedQty = parent.serializedProduct
+                    ? data.inventory?.filter((e) => e._id === parent._id).length
+                    : data.nonSerializeAsset?.filter((e) => e._id === parent._id).length;
+                parent.realAssetQty = parent.assetQty;
+                parent.realAssetAssignedQty = parent.assetAssignedQty;
+                parent.subRows = generateNestedData(
+                    data.material,
+                    data.inventory,
+                    data?.nonSerializeAsset,
+                    parent,
+                    transferAssets,
+                    subleaseProduct,
+                    purchaseOrderProduct,
+                    bulkAssetCreationProduct,
+                    offlineAssetErrorLog
+                );
+                parent.assetQty =
+                    parent.subRows.filter((d) => d.type !== 'asset').length === 0
+                        ? parent.assetQty
+                        : parent.subRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetQty + sum, 0) +
+                        (parent.type === 'product' ? parent.assetQty : 0);
+                parent.assetAssignedQty =
+                    parent.subRows.filter((d) => d.type !== 'asset').length === 0
+                        ? parent.assetAssignedQty
+                        : parent.subRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetAssignedQty + sum, 0) +
+                        (parent.type === 'product' ? parent?.subRows.filter((d) => d.type === 'asset')?.length : 0);
+                parent.isValid = parent.serializedProduct
+                    ? parent.assetAssignedQty === parent.assetQty
+                        ? true
+                        : false
+                    : parent.subRows.length !== 0
+                        ? parent.assetAssignedQty ===
+                        parent.subRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0) ||
+                        parent.subRows.every((d) => d.isValid)
+                        : true;
+
+                if (parent.subRows.length && parent.isValid) {
+                    if (parent.subRows.every((d) => d.isValid)) {
+                        parent.isValid = true;
+                        parent.hideSelection = false
+                    } else {
+                        parent.isValid = false;
+                        parent.hideSelection = true
+                    }
+                }
+            });
+
+            setRowsData(rows);
+            if (rows.every((d) => d.isValid)) {
+                setNextStep(true)
+            } else {
+                setNextStep(false)
+            }
+            setSelectedRecords([]);
+        } catch (error) {
+            toastConfig.setToastConfig(error);
+        }
+    };
+
+    const generateNestedData = (
+        material,
+        inventory,
+        nonSerializeAsset,
+        parent,
+        transferAssets,
+        subleaseProduct,
+        purchaseOrderProduct,
+        bulkAssetCreationProduct,
+        offlineAssetErrorLog
+    ) => {
+        const subRows: any = [];
+        const inventory_result = inventory?.filter((e) => e._id === parent._id);
+        inventory_result?.forEach((_inventory, k) => {
+            subRows.push({
+                ..._inventory,
+                index: `${parent.index}.${k + 1}`,
+                detail: _inventory?.assetNumber ? _inventory?.assetNumber : _inventory.inventoryDetail?.assetNumber,
+                description: parent?.description,
+                type: 'asset',
+                isNonSerializeAsset: false,
+                status: _inventory.inventoryDetail?.status,
+                rentalAssetStatus: _inventory?.status,
+                manualStatus: _inventory.inventoryDetail?.manualStatus,
+                warehouse: _inventory.inventoryDetail?.warehouse,
+                _id: _inventory.inventory,
+                isValid: _inventory.inventoryDetail?.manualStatus === ASSET_STATUS.reserved ? false : true,
+                hideSelection: true,
+                canRemove: true
+            });
+        });
+
+        const nonSerializeAsset_result = nonSerializeAsset?.filter((e) => e._id === parent._id);
+        nonSerializeAsset_result?.forEach((_inventory, k) => {
+            subRows.push({
+                _id: _inventory.id,
+                inventory: _inventory.id,
+                index: `${parent.index}.${k + 1}`,
+                detail: _inventory?.assetNumber,
+                description: parent?.description,
+                type: 'asset',
+                isNonSerializeAsset: true,
+                status: _inventory?.status,
+                warehouse: subleaseData?.warehouse?.optionValue,
+                isValid: true,
+                canRemove: true
+            });
+        });
+
+        const childProduct: any = material.filter((e) => e.parentId === parent._id);
+        var assetQtySUM = 0;
+        var assetAssignedQtySUM = 0;
+        childProduct.forEach((_subRow, j) => {
+            _subRow.index = parent.index + '.' + (j + 1);
+            _subRow.detail =
+                _subRow.type === 'service'
+                    ? _subRow?.serviceDetail?.serviceName
+                    : _subRow.type === 'product'
+                        ? _subRow?.productDetail?.productName
+                        : _subRow?.packageDetail?.packageName;
+            _subRow.description =
+                _subRow.type === 'service'
+                    ? _subRow?.serviceDetail?.serviceDescription || ''
+                    : _subRow.type === 'product'
+                        ? _subRow?.productDetail?.productDescription || ''
+                        : _subRow.type === 'package'
+                            ? _subRow?.packageDetail?.packageDescription || ''
+                            : '';
+            _subRow.serializedProduct = _subRow.type === 'product' ? _subRow?.productDetail?.serializedProduct : false;
+            // _subRow.assetQty = _subRow.type === 'product' || _subRow.type === 'package' ? _subRow.qty * parent.assetQty : 0;
+            _subRow.assetQty =
+                _subRow.type === 'product' || _subRow.type === 'package'
+                    ? parent.type === 'product' || parent.type === 'package'
+                        ? _subRow.qty * parent.assetQty
+                        : _subRow.qty * parent.qty
+                    : 0;
+            _subRow.assetAssignedQty = _subRow.serializedProduct
+                ? inventory?.filter((e) => e._id === _subRow._id).length
+                : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
+            _subRow.realAssetQty = _subRow.type === 'product' || _subRow.type === 'package' ? _subRow.qty * parent.realAssetQty : 0;
+            _subRow.realAssetAssignedQty = _subRow.assetAssignedQty;
+            // _subRow.isValid = _subRow.serializedProduct ? (_subRow.assetAssignedQty === _subRow.assetQty ? true : false) : true;
+            let tempSubRows = generateNestedData(
+                material,
+                inventory,
+                nonSerializeAsset,
+                _subRow,
+                transferAssets,
+                subleaseProduct,
+                purchaseOrderProduct,
+                bulkAssetCreationProduct,
+                offlineAssetErrorLog
+            );
+            _subRow.subRows = tempSubRows;
+            _subRow.assetQty =
+                tempSubRows.filter((d) => d.type !== 'asset').length === 0
+                    ? _subRow.assetQty
+                    : tempSubRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetQty + sum, 0) +
+                    (_subRow.type === 'product' ? _subRow.assetQty : 0);
+            _subRow.isValid = _subRow.serializedProduct
+                ? _subRow.assetAssignedQty === _subRow.assetQty
+                    ? true
+                    : false
+                : tempSubRows?.filter((e) => e.type === 'asset')?.length === tempSubRows?.length
+                    ? true
+                    : _subRow.assetAssignedQty ===
+                        tempSubRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0)
+                        ? true
+                        : false;
+            subRows.push(_subRow);
+            assetAssignedQtySUM += _subRow.serializedProduct ? _subRow.assetAssignedQty : 0;
+        });
+
+        parent.assetAssignedQty += assetAssignedQtySUM;
+        parent.isValid = parent.serializedProduct || parent.type === 'package' ? (parent.assetAssignedQty === parent.assetQty ? true : false) : true;
+
+        return subRows;
+    };
+
+    const handleAddSerializedAsset = (assets) => {
+        setNextStep(false);
+        var data = [];
+        assets.forEach((e) => {
+            data.push({
+                ...e,
+                inventory: e.asset,
+            });
+        });
+        if (data.length) {
+            setAdding(true);
+            axiosInstance()
+                .post(`${sublease.api}/asset/${subleaseData._id}`, { products: data })
+                .then(({ data }) => {
+                    setAddSerializedAssetDialog(false);
+                    fetchRowData()
+                    setSelectedRecords([]);
+                    setAssetAssignedProduct([]);
+                    setAdding(false);
+                    toastConfig.setToastConfig({
+                        open: true,
+                        type: 'success',
+                        message: data.message
+                    });
+                    setNextStep(true);
+                })
+                .catch((error) => {
+                    setAdding(false);
+                    toastConfig.setToastConfig(error);
+                    setNextStep(true);
+                });
+        }
+    };
+
+    const disableAssignSerializedAssets = () => {
+        if (selectedRecords.length === 0) return true;
+        const flatArray = treeToFlatArray(selectedRecords, 'subRows').filter(
+            (f) => f.type === 'product' && f.serializedProduct && f.realAssetQty > f.realAssetAssignedQty
+        );
+        return flatArray.length === 0;
+    };
+
+    const handleRemoveAsset = () => {
+        axiosInstance()
+            .put(`${sublease.api}/asset/${subleaseData._id}/remove`, { ids: deleteData })
+            .then(() => {
+                setDeleting(false);
+                fetchRowData();
+                setDeleteData(null);
+                setShowConfirmBox(false);
+            })
+            .catch((error) => {
+                setDeleting(false);
+                toastConfig.setToastConfig(error);
+                setDeleteData(null);
+            });
+    }
+
+
+    return (
+        <Fragment>
+            {allowedToEdit && (
+                <Box display="flex" justifyContent="flex-end" m={1}>
+                    <Box display="flex" alignItems="center" justifyContent={'flex-end'} gridColumnGap={8} flex={1}>
+                        <Box display="flex" gridGap={'8px'}>
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                type="button"
+                                size="small"
+                                disabled={disableAssignSerializedAssets()}
+                                onClick={() => {
+                                    setAssetAssignedProduct(selectedRecords.filter((i) => i?.type === 'product' && i?.productDetail?.serializedProduct));
+                                    setAddSerializedAssetDialog(true);
+                                }}
+                            >
+                                {`Assign ${routes.serializedAsset.title}`}
+                            </Button>
+                        </Box>
+                    </Box>
+                </Box>
+            )}
+            <Grid container spacing={2}>
+                <Grid item xs={12} md={12} sm={12}>
+                    {columns && rowsData ? (
+                        <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}>
+                            <CustomReactTable
+                                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
+                                columns={columns}
+                                data={rowsData}
+                                setWholeRowsCellColor={(rowData) => {
+                                    if (!rowData.isValid) return 'error';
+                                    return '';
+                                }}
+                                onSelect={setSelectedRecords}
+                                childrenProperty="subRows"
+                                uniqueKey="_id"
+                                hideSelection={!allowedToEdit}
+                                hideAction={!allowedToEdit}
+                                renderedFrom="sublease_asset"
+                                isClientSideGrid={true}
+                            />
+                        </Box>
+                    ) : (
+                        <Box p={2} height={500}>
+                            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                        </Box>
+                    )}
+                </Grid>
+            </Grid>
+
+            {addSerializedAssetDialog && (
+                <AssignSerializedAssetDialog
+                    reference={'sublease'}
+                    handleClose={() => {
+                        setAddSerializedAssetDialog(false);
+                        setAssetAssignedProduct([]);
+                    }}
+                    ids={flattenArray(rowsData)
+                        ?.filter((e) => e.type === 'serializedAsset')
+                        ?.map((e) => e.materialId)}
+                    handleSucess={(rows) => {
+                        handleAddSerializedAsset(rows);
+                    }}
+                    isAssigning={isAdding}
+                    selectedProducts={assetAssignedProduct?.map((i) => {
+                        return { _id: i._id, product: i.materialId, productName: i.detail, qty: i.assetQty - i.assetAssignedQty };
+                    })}
+                />
+            )}
+            {showConfirmBox && (
+                <ConfirmationDialog
+                    open={showConfirmBox}
+                    message={`Are you sure you want to remove?`}
+                    onClose={() => {
+                        setShowConfirmBox(false);
+                        setDeleteData([]);
+                    }}
+                    okBtnLoading={deleting}
+                    onOk={handleRemoveAsset}
+                />
+            )}
+        </Fragment>
+    )
+}
 
 export default SerializedAsset;
