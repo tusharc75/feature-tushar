@@ -877,7 +877,7 @@ function CustomReactTable({
                                 >
                                   <p>{cell?.value}</p>
                                   <span>
-                                    <Edit color="disabled" fontSize="small" />
+                                    <Edit className="text-[rgba(0,0,0,0.3)] dark:text-[rgba(255,255,255,0.9)]" fontSize="small" />
                                   </span>
                                 </div>
                               ) : (
