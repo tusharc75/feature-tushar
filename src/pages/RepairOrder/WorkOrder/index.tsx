@@ -29,7 +29,7 @@ import { PreWorkIcon, PostWorkIcon } from 'src/assets/svg/svgIcons';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import UpdateWorkOrderDialog from './UpdateWorkOrderDialog';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
-import { generateCustomTableColumns } from 'src/constants/columns';
+import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
 import { MdAssignmentTurnedIn } from 'react-icons/md';
 import EditIcon from '@material-ui/icons/Edit';
 import { AutoCompleteIcon } from 'src/assets/svg/svgIcons';
@@ -73,7 +73,8 @@ const WorkOrder = ({
   const [allAssignedUsers, setAllAssignedUsers] = useState([]);
   const [updateDialog, setUpdateDialog] = useState({ open: false, data: null });
   const [isBulkEdit, setIsBulkEdit] = useState(false);
-  const [consumablesDialog, setConsumablesDialog] = useState(false);
+
+  const [consumablesDialog, setConsumablesDialog] = useState({ open: false, ids: [] });
 
   const [isSubmitting, setSubmitting] = useState(false);
 
@@ -349,14 +350,14 @@ const WorkOrder = ({
             )}
             {row?.original?.type === MATERIAL_TYPE.product && (
               <IconButton
-                disabled={row?.original?.consumedQty || row?.original?.requestedQty ? true : false}
+                disabled={row?.original?.canDelete ? false : true}
                 size="small"
                 aria-label="Details"
                 onClick={() => {
                   handleDeleteConsumables(row.original);
                 }}
               >
-                <Delete fontSize="small" color={row?.original?.consumedQty || row?.original?.requestedQty ? 'disabled' : 'error'} />
+                <Delete fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
               </IconButton>
             )}
           </>
@@ -579,6 +580,12 @@ const WorkOrder = ({
       _subRow.type === MATERIAL_TYPE.service ? serviceIndex++ : productIndex++;
       _subRow.isValid = true;
       _subRow.hideSelection = false;
+
+      _subRow.canDelete = false;
+      if (_subRow.type === MATERIAL_TYPE.product) {
+        _subRow.canDelete = _subRow?.consumedQty || _subRow?.requestedQty || _subRow?.status === WORKORDER_SERVICE_STATUS.completed ? false : true;
+      }
+
       if (_subRow?.status === WORKORDER_SERVICE_STATUS.completed) {
         _subRow.hideSelection = true;
       }
@@ -590,10 +597,6 @@ const WorkOrder = ({
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
     }
     return orderBy(subRows, ['type'], ['desc']);
-    // return sortBy(
-    //   subRows?.filter((e) => e.type !== 'product'),
-    //   ['type']
-    // );
   };
 
   const handleAddService = (ids) => {
@@ -696,14 +699,16 @@ const WorkOrder = ({
     setSubmitting(true);
     const data: any = [];
     let workOrderId = '';
-    const asset = selectedProducts?.filter((s) => s.type === MATERIAL_TYPE.serializedAsset);
-    if (asset?.length > 0) {
-      workOrderId = asset[0]?.workOrder?._id;
-      asset?.forEach((a) => {
-        rows?.forEach((e) => {
-          if (parseInt(e.qty)) {
-            data.push({ product: e._id, qty: parseInt(e.qty), service: null, uniqueId: null, stepId: null });
-          }
+    const asset = selectedProducts?.find((s) => s.type === MATERIAL_TYPE.serializedAsset);
+    if (asset) {
+      workOrderId = asset?.workOrder?._id;
+      rows?.forEach((e) => {
+        data.push({
+          product: e._id,
+          qty: parseInt(e.qty) || 1,
+          service: null,
+          uniqueId: null,
+          stepId: null
         });
       });
     } else {
@@ -711,24 +716,29 @@ const WorkOrder = ({
       workOrderId = services[0]?.workOrder?._id;
       services?.forEach((s) => {
         rows?.forEach((e) => {
-          if (parseInt(e.qty)) {
-            data.push({ product: e._id, qty: parseInt(e.qty), service: s?.serviceDetail?._id, uniqueId: s?.uniqueId, stepId: null, parentId: s?._id });
-          }
+          data.push({
+            product: e._id,
+            qty: parseInt(e.qty) || 1,
+            service: s?.serviceDetail?._id,
+            uniqueId: s?.uniqueId,
+            stepId: null,
+            parentId: s?._id
+          });
         });
       });
     }
-
     axiosInstance()
       .post(`${workOrder.api}/${workOrderId}/consumable`, data)
       .then(({ data }) => {
-        fetchData();
-        setSubmitting(false);
-        setConsumablesDialog(false);
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
           message: data.message
         });
+        fetchData();
+        setSubmitting(false);
+        setConsumablesDialog({ open: false, ids: [] });
+
       })
       .catch((error) => {
         setSubmitting(false);
@@ -810,14 +820,20 @@ const WorkOrder = ({
                 Assign Technician
               </MenuItem>
               <MenuItem
-                disabled={
-                  selectedProducts?.filter((d) => d.type === MATERIAL_TYPE.serializedAsset || d.type === MATERIAL_TYPE.service)?.length > 0
-                    ? false
-                    : true
-                }
+                disabled={selectedProducts?.filter((d) => [MATERIAL_TYPE.serializedAsset, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0
+                  && selectedProducts?.every((d) => d.workOrder?._id === selectedServices[0]?.workOrder?._id) ? false : true}
                 onClick={() => {
+                  var ids = []
+                  if (selectedProducts?.find((e) => e.type === MATERIAL_TYPE.serializedAsset)) {
+                    const asset = selectedProducts?.find((e) => e.type === MATERIAL_TYPE.serializedAsset)
+                    ids = flattenArray(rowsData)?.filter((e) => e?.workOrder?._id === asset?.workOrder?._id)?.map((e) => e.materialId);
+                  }
+                  else {
+                    const serviceIds = selectedProducts?.filter((d) => d?.type === MATERIAL_TYPE.service)?.map((e) => e._id)
+                    ids = flattenArray(rowsData)?.filter((e) => serviceIds?.includes(e?.parentId))?.map((e) => e.materialId);
+                  }
                   closeActions();
-                  setConsumablesDialog(true);
+                  setConsumablesDialog({ open: true, ids: ids });
                 }}
               >
                 Add Products/Consumables
@@ -1006,10 +1022,10 @@ const WorkOrder = ({
               isBulkEdit={isBulkEdit}
             />
           )}
-          {consumablesDialog && (
+          {consumablesDialog.open && (
             <AssignProductDialog
-              handleCloseDialog={() => setConsumablesDialog(false)}
-              ids={[]}
+              handleCloseDialog={() => setConsumablesDialog({ open: false, ids: [] })}
+              ids={consumablesDialog.ids}
               onSuccess={(rows) => {
                 handleAddConsumables(rows);
               }}
