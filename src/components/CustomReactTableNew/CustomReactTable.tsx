@@ -37,6 +37,7 @@ import SwipableListForMobile from 'src/components/SwipableListForMobile';
 import Pagination from './Pagination';
 import { BiFilterAlt } from 'react-icons/bi';
 import GridFilter from './Filters';
+import type { TInitialState } from './useTableReducer';
 
 interface CustomCheckBoxProps extends CheckboxProps {
   indeterminate: any;
@@ -212,21 +213,17 @@ function CustomReactTable({
   hideSelection = false,
   renderedFrom,
   isClientSideGrid = true,
-  currentPage = 1,
-  rowCount,
   expander = false,
   allowPagination = true,
-  limit = gridPageSizes[0],
-  customFilters = [],
   refreshGrid = null,
   dispatch,
-  sorting,
-  loading,
+  state,
   fetchChildAttachment = null,
   showOnlyShowFilteredRecordSwitch = false,
   showFilters = false,
   resource = null
 }) {
+  const { dataRows, rowCount, selectedRecords, loading, page, limit, pageSizes, search, filters: customFilters, sorting }: TInitialState = state;
   const isMobileView = isMobile && !isTablet;
   const defaultColumn = {
     Cell: EditableCell,
@@ -428,7 +425,7 @@ function CustomReactTable({
         sortBy: sorting.map((d) => {
           return { id: d.colId, desc: d.sort === 'asc' ? false : true };
         }),
-        pageIndex: currentPage,
+        pageIndex: page,
         autoResetExpanded: false,
         hiddenColumns: hideSelection ? ['selection', 'action'] : returnHiddenCols(),
         selectedRowIds: localStorage.getItem(`${renderedFrom}_selected`)
@@ -814,7 +811,7 @@ function CustomReactTable({
             dataRows={rows}
             dispatch={dispatch}
             loading={loading}
-            page={currentPage}
+            page={page}
             rowCount={rowCount}
             expander={expander}
             backgroundColor={setWholeRowsCellColor}

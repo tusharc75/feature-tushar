@@ -12,7 +12,6 @@ import { Box, Chip, Menu, MenuItem, TextField } from '@material-ui/core';
 import SearchBox from '../../components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import routes from '../../components/Helpers/Routes';
-import { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import {
   serializedAsset,
   isObjectEmpty,
@@ -42,6 +41,7 @@ import moment from 'moment';
 import CustomReactTable from 'src/components/CustomReactTableNew/CustomReactTable';
 import { sidebarResource } from '../../constants/helpers';
 import { gridFilterParser } from 'src/constants/useColumns';
+import { useTableReducer } from 'src/components/CustomReactTableNew/useTableReducer';
 
 const SerializedAssetTest = () => {
   const renderedFrom = camelCase(routes?.serializedAsset.title);
@@ -51,7 +51,7 @@ const SerializedAssetTest = () => {
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const [columns, setColumns] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
+  const { state, dispatch } = useTableReducer();
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
   const [productCategoryList, setProductCategoryList] = useState([]);
@@ -288,7 +288,7 @@ const SerializedAssetTest = () => {
     if (filterByIds?.length || deepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
     }
-  
+
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
@@ -646,20 +646,15 @@ const SerializedAssetTest = () => {
               height={'calc(100vh - 200px)'}
               columns={columns}
               data={dataRows}
-              currentPage={page}
               onSelect={(newSelectedRecords) => {
                 // dispatch({ type: "selection", selectedRecords: newSelectedRecords })
               }}
+              state={state}
               dispatch={dispatch}
               setWholeRowsCellColor={() => {}}
               renderedFrom={renderedFrom}
               isClientSideGrid={false}
-              rowCount={rowCount}
-              limit={limit}
-              customFilters={filters}
-              sorting={sorting}
               refreshGrid={fetchProductInventory}
-              loading={loading}
               showOnlyShowFilteredRecordSwitch={true}
               showFilters={true}
               resource={sidebarResource.serializedAsset}
