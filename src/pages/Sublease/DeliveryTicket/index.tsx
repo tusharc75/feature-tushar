@@ -141,11 +141,7 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, stepF
                             <IconButton
                                 size="small"
                                 onClick={() => {
-                                    if (row.original.type === 'product') {
-                                        window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                                    } else {
-                                        window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                                    }
+                                    window.open(`${routes.serializedAssetDetail.path}/${row.original._id}`);
                                 }}
                             >
                                 <OpenInNewIcon fontSize="small" color="primary" />
@@ -163,10 +159,30 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, stepF
                 }
             },
             {
-                accessor: `Status`,
-                Header: `status`,
+                accessor: `status`,
+                Header: `Status`,
                 width: 200,
                 Cell: ({ row }) => row?.original[`status`] ? <p className="text-truncate">{row?.original[`status`]}</p> : <NoDataCell />
+            },
+            {
+                accessor: `product`,
+                Header: `Product`,
+                width: 200,
+                Cell: ({ row }) => row?.original[`product`] ?
+                    <div style={{ display: "flex" }}>
+                        <p className="text-truncate">{row?.original[`product`]?.optionLabel || ""}</p>
+                        <Box ml={1}>
+                            <IconButton
+                                size="small"
+                                onClick={() => {
+                                    window.open(`${routes.productDetail.path}/${row.original[`product`]?.optionValue}`);
+                                }}
+                            >
+                                <OpenInNewIcon fontSize="small" color="primary" />
+                            </IconButton>
+                        </Box>
+                    </div>
+                    : <NoDataCell />
             },
             {
                 accessor: `LoadingTicket`,
