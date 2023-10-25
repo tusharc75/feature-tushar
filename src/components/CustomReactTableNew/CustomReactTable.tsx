@@ -677,7 +677,6 @@ function CustomReactTable({
   const handleCellClick = (cell, row) => {
     // prepareRow(row);
     if (!cell.column.id || !row.original._id || !cell?.column?.editable) return;
-    console.log({ cell, row });
 
     dispatch({
       type: 'currentEditingCellPosition',
