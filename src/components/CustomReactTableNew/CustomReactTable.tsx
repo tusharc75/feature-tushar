@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import MaUTable from '@material-ui/core/Table';
 import { TableBody, IconButton, TableCell, TableHead, TableRow, Box, CircularProgress, Button } from '@material-ui/core';
-import { Check } from '@material-ui/icons';
+import { Check, Edit } from '@material-ui/icons';
 import { FaAngleRight, FaAngleDown } from 'react-icons/fa';
 import { columnFilter } from './ReactTableHelpers';
 import { gridPageSizes } from '../../constants/helpers';
 import { isString, uniqBy, debounce } from 'lodash';
+import { flattenArray } from 'src/constants/columns';
 import {
   useTable,
   useExpanded,
@@ -206,7 +207,6 @@ const EditableCell = ({ value: initialValue, row: { index }, column: { id }, upd
 function CustomReactTable({
   columns,
   childrenProperty = 'subRows',
-  data,
   onSelect,
   setWholeRowsCellColor = null,
   height = '100%',
@@ -221,9 +221,23 @@ function CustomReactTable({
   fetchChildAttachment = null,
   showOnlyShowFilteredRecordSwitch = false,
   showFilters = false,
-  resource = null
+  resource = null,
+  onSaveEdit = null,
+  hideAction = false
 }) {
-  const { dataRows, rowCount, selectedRecords, loading, page, limit, pageSizes, search, filters: customFilters, sorting }: TInitialState = state;
+  const {
+    currentEditingCellPosition,
+    dataRows: data,
+    rowCount,
+    selectedRecords,
+    loading,
+    page,
+    limit,
+    pageSizes,
+    search,
+    filters: customFilters,
+    sorting
+  }: TInitialState = state;
   const isMobileView = isMobile && !isTablet;
   const defaultColumn = {
     Cell: EditableCell,
@@ -314,45 +328,59 @@ function CustomReactTable({
               width: isMobile && !isTablet ? 40 : 70,
               minWidth: isMobile && !isTablet ? 40 : 70,
               canDrag: false,
-              Cell: ({ row }) =>
-                row.original.type === 'folder' || row.canExpand ? (
-                  <IconButton
-                    {...row.getToggleRowExpandedProps?.({
-                      style: {
-                        marginLeft: isMobileView ? 0 : `${row.depth * 2}rem`
-                      }
-                    })}
-                    size="small"
-                  >
-                    {row.isExpanded ? (
-                      <FaAngleDown />
-                    ) : (
-                      <FaAngleRight
-                        onClick={async () => {
-                          if (!fetchChildAttachment || row.original[childrenProperty]?.length > 0) return;
-                          const subRows = await fetchChildAttachment(row.original.id);
-                          row.original.subRows = subRows;
-                          row.canExpand = true;
-                          row.isExpanded = true;
-                        }}
-                      />
-                    )}
-                  </IconButton>
-                ) : null
+              Cell: ({ row }) => (
+                <div
+                  {...row.getToggleRowExpandedProps?.({
+                    style: {
+                      marginLeft: isMobileView ? 0 : `${row.depth * 10}px`
+                    }
+                  })}
+                >
+                  {row.original.type === 'folder' || row.canExpand ? (
+                    <IconButton size="small" style={{ fontSize: 13 }}>
+                      {row.isExpanded ? (
+                        <FaAngleDown />
+                      ) : (
+                        <FaAngleRight
+                          onClick={async () => {
+                            if (!fetchChildAttachment || row.original[childrenProperty]?.length > 0) return;
+                            const subRows = await fetchChildAttachment(row.original.id);
+                            row.original.subRows = subRows;
+                            row.canExpand = true;
+                            row.isExpanded = true;
+                          }}
+                        />
+                      )}
+                    </IconButton>
+                  ) : null}
+                </div>
+              )
             },
             {
               id: 'selection',
               minWidth: 50,
               width: 50,
+              sticky: isMobileView ? 'none' : 'left',
               maxWidth: 50,
               Header: ({ getToggleAllRowsSelectedProps }) => (
                 <IndeterminateCheckbox
                   onClick={(e) => handleAllSelect(getToggleAllRowsSelectedProps()?.checked)}
                   {...getToggleAllRowsSelectedProps()}
-                  style={{ marginLeft: '7px' }}
+                  style={{ marginLeft: '6px' }}
                 />
               ),
-              Cell: ({ row }) => <IndeterminateCheckbox onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps()} />
+              Cell: ({ row }) => (
+                <div
+                  {...row.getToggleRowExpandedProps?.({
+                    style: {
+                      paddingLeft: isMobileView ? 0 : `${row.depth * 15}px`
+                    }
+                  })}
+                  className="ml-[6px]"
+                >
+                  <IndeterminateCheckbox onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps()} />
+                </div>
+              )
             },
             ...baseColumns.map((m) => {
               return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' };
@@ -361,6 +389,7 @@ function CustomReactTable({
         : [
             {
               id: 'selection',
+              sticky: isMobileView ? 'none' : 'left',
               minWidth: 50,
               width: 50,
               maxWidth: 50,
@@ -379,6 +408,33 @@ function CustomReactTable({
           ],
     [baseColumns]
   );
+
+  const getDataFromLocalStorage = () => {
+    try {
+      const data = localStorage.getItem('gridMetaData');
+      return data && data !== 'undefined' ? JSON.parse(data) : {};
+    } catch (ex) {
+      console.error(`Error while getting data from local storage: ${ex.message}`);
+      return {};
+    }
+  };
+  const returnSavedColOrder = () => {
+    const gridMetaData = getDataFromLocalStorage();
+    const colOrder = gridMetaData[renderedFrom]?.order || [];
+    const orderIndices = {};
+
+    for (let i = 0; i < colOrder.length; i++) {
+      orderIndices[colOrder[i]] = i;
+    }
+
+    const orderedCols = newColumns.slice().sort((a, b) => {
+      const aIndex = orderIndices[a?.id || a?.accessor];
+      const bIndex = orderIndices[b?.id || b?.accessor];
+      return aIndex - bIndex;
+    });
+
+    return orderedCols.length ? orderedCols : newColumns.map((m) => m?.id || m?.accessor);
+  };
 
   const filterTypes = React.useMemo(
     () => ({
@@ -421,13 +477,16 @@ function CustomReactTable({
       defaultColumn,
       filterTypes,
       initialState: {
-        columnOrder: newColumns.map((col) => col?.id || col?.accessor),
+        columnOrder: returnSavedColOrder(),
         sortBy: sorting.map((d) => {
           return { id: d.colId, desc: d.sort === 'asc' ? false : true };
         }),
         pageIndex: page,
+        expanded: false,
         autoResetExpanded: false,
-        hiddenColumns: hideSelection ? ['selection', 'action'] : returnHiddenCols(),
+        // hiddenColumns: hideSelection ? ['selection', 'action'] : returnHiddenCols(),
+        hiddenColumns:
+          hideSelection && hideAction ? ['selection', 'action'] : hideSelection ? ['selection'] : hideAction ? ['action'] : returnHiddenCols(),
         selectedRowIds: localStorage.getItem(`${renderedFrom}_selected`)
           ? Object.assign(
               {},
@@ -592,29 +651,44 @@ function CustomReactTable({
   }, [allColumns]);
 
   const submitInput = () => {
-    const rowData = Object.keys(rowState[currentRowEditing.id].cellState).filter((k) => rowState[currentRowEditing.id].cellState[k].isEditing);
-    const updatedData = data.map((row: any) => {
-      if (row._id == currentRowEditing?.original._id) {
-        row[rowData[0]] = cellValue;
-      }
-      return row;
-    });
+    if (!currentEditingCellPosition) return;
+    const updatedData = flattenArray(data)?.find((row) => row?._id === currentEditingCellPosition.rowId);
+    updatedData[currentEditingCellPosition.columnName] = cellValue;
+    const inputField = { [`${currentEditingCellPosition.columnName}`]: cellValue };
+    console.log({ inputField, updateData });
+    if (onSaveEdit && ![undefined, null].includes(cellValue)) {
+      onSaveEdit(inputField, updatedData);
+    }
     dispatch({
-      type: 'initialize',
-      data: updatedData,
-      count: rowCount
+      type: 'currentEditingCellPosition',
+      cellPosition: null
     });
-    Object.keys(rowState).forEach((rowId) => {
-      Object.keys(rowState[rowId].cellState).forEach((colId) => {
-        setCellState(rowId, colId, { isEditing: false });
-      });
-    });
-    setIsCellEditing(false);
-    setCurrentRowEditing(null);
-    setCellValue('');
   };
 
   const mobileSelectAllHeader: any | null = React.useMemo(() => allColumns?.find((item) => item.id === 'selection') || null, [allColumns]);
+
+  const handleKeyDown = (e) => {
+    if (!currentEditingCellPosition) return;
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      submitInput();
+    }
+  };
+
+  const handleCellClick = (cell, row) => {
+    // prepareRow(row);
+    if (!cell.column.id || !row.original._id || !cell?.column?.editable) return;
+    console.log({ cell, row });
+
+    dispatch({
+      type: 'currentEditingCellPosition',
+      cellPosition: {
+        rowId: row.original._id,
+        columnName: cell.column.id
+      }
+    });
+    setCellValue(cell?.value || null);
+  };
 
   return (
     <DndProvider backend={HTML5Backend}>
@@ -767,11 +841,16 @@ function CustomReactTable({
                               className={`td   ${cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''}    ${
                                 setWholeRowsCellColor ? setWholeRowsCellColor(row.original) : ''
                               }`}
+                              onClick={() => {
+                                handleCellClick(cell, row);
+                              }}
+                              onKeyDown={(e) => {
+                                handleKeyDown(e);
+                              }}
                             >
                               {!['selection'].includes(cell?.column.id) &&
-                              rowState &&
-                              rowState.hasOwnProperty(row.id) &&
-                              rowState[row.id].cellState[cell?.column.id]?.isEditing ? (
+                              currentEditingCellPosition?.rowId === row.original._id &&
+                              currentEditingCellPosition?.columnName === cell?.column.id ? (
                                 <input
                                   autoFocus
                                   onBlur={submitInput}
@@ -786,12 +865,21 @@ function CustomReactTable({
                                   value={cellValue}
                                   onChange={(e) => setCellValue(e.target.value)}
                                 />
-                              ) : isCellEditing && currentRowEditing && currentRowEditing.id === row.id && cell?.column.id === 'action' ? (
+                              ) : currentEditingCellPosition?.rowId === row.original._id && cell?.column.id === 'action' ? (
                                 <HtmlTooltip title="Save">
                                   <IconButton size="small" aria-label="Save" onClick={submitInput}>
                                     <Check color="primary" />
                                   </IconButton>
                                 </HtmlTooltip>
+                              ) : cell.column?.editable && cell?.value ? (
+                                <div
+                                  style={{ borderBottom: '1px dashed #8a8a8a', cursor: 'pointer', display: 'flex', justifyContent: 'space-between' }}
+                                >
+                                  <p>{cell?.value}</p>
+                                  <span>
+                                    <Edit color="disabled" fontSize="small" />
+                                  </span>
+                                </div>
                               ) : (
                                 cell.render('Cell')
                               )}
@@ -807,7 +895,7 @@ function CustomReactTable({
           )}
         </div>
 
-        {isMobileView ? (
+        {isMobileView && rows ? (
           <SwipableListForMobile
             key={pageIndex}
             prepareRow={prepareRow}
@@ -824,6 +912,12 @@ function CustomReactTable({
             handleCellSelection={handleCellSelection}
             IndeterminateCheckbox={IndeterminateCheckbox}
             toggleAllRowsSelected={toggleAllRowsSelected}
+            state={state}
+            submitInput={submitInput}
+            cellValue={cellValue}
+            setCellValue={setCellValue}
+            handleCellClick={handleCellClick}
+            handleKeyDown={handleKeyDown}
           />
         ) : null}
         {/* {allowPagination && (

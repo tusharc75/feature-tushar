@@ -70,7 +70,8 @@ function reducer(state: TInitialState, action: TActios) {
         ...state,
         loading: false
       };
-
+    case 'currentEditingCellPosition':
+      return { ...state, currentEditingCellPosition: action.cellPosition };
     default:
       break;
   }
@@ -88,7 +89,8 @@ const intialState = {
   search: '',
   filters: {},
   sorting: [],
-  selectedRecords: []
+  selectedRecords: [],
+  currentEditingCellPosition: null
 };
 
 export type TInitialState = {
@@ -102,6 +104,7 @@ export type TInitialState = {
   filters: any;
   sorting: any[];
   selectedRecords: any[];
+  currentEditingCellPosition: { rowId: string; columnName: string } | null;
 };
 export type TActios =
   | { type: 'loading'; loading: boolean }
@@ -113,7 +116,8 @@ export type TActios =
   | { type: 'search'; search: string }
   | { type: 'pageChange'; page: number }
   | { type: 'pageSizeChange'; limit: number }
-  | { type: 'complete' };
+  | { type: 'complete' }
+  | { type: 'currentEditingCellPosition'; cellPosition: { rowId: string; columnName: string } | null };
 
 export const useTableReducer = () => {
   const [state, dispatch] = useReducer(reducer, intialState);

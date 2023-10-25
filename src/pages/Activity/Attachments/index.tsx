@@ -778,7 +778,6 @@ export default function Attachment() {
             <CustomReactTable
               height={'calc(100vh - 300px)'}
               columns={column}
-              data={dataRows}
               onSelect={(newSelectedRecords) => {
                 dispatch({ type: 'selection', selectedRecords: newSelectedRecords });
               }}
