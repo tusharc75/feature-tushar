@@ -91,7 +91,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
         width: 300,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row, rows }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'nowrap' }}>
             {allowedToEdit ? (
               <p
                 onClick={() => {
