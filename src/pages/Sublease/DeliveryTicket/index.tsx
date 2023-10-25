@@ -230,9 +230,6 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, stepF
     const closeActions = () => {
         setAnchorActionEl(null);
     };
-    useEffect(() => {
-        console.log(selectedRecords);
-    }, [selectedRecords])
 
 
     const handleDeliveryTicketDialog = () => {

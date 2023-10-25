@@ -468,7 +468,6 @@ function SerializedAsset({ subleaseData, setNextStep, fetchData, isIssued, rende
                                 size="small"
                                 disabled={disableAssignSerializedAssets()}
                                 onClick={() => {
-                                    console.log(selectedRecords)
                                     setAssetAssignedProduct(selectedRecords.filter((i) => i?.type === 'product' && i?.productDetail?.serializedProduct));
                                     setAddSerializedAssetDialog(true);
                                 }}
