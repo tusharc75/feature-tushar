@@ -10,7 +10,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { sublease, SUBLEASE_STATUS, subleaseSteps, ACTIVITY_RESOURCE } from '../../constants/helpers';
+import { sublease, SUBLEASE_STATUS, sublease_Vendor_Steps, sublease_InterCompany_Steps, ACTIVITY_RESOURCE, SUBLEASE_TYPE, DELIVERY_TICKET_TYPE } from '../../constants/helpers';
 import ManageSublease from './ManageSublease';
 import { FaWpforms } from 'react-icons/fa';
 import { BiFoodMenu } from 'react-icons/bi';
@@ -18,7 +18,7 @@ import TabPanel from '../../components/TabPanel';
 import queryString from 'query-string';
 import { isMobile, isTablet } from 'react-device-detect';
 import Productpackage from './Productpackage';
-import SerializedAsset from './SerializedAsset';
+import SubleaseAsset from './SubleaseAsset';
 import Tickets from './Tickets';
 import { GiAbstract055 } from 'react-icons/gi';
 import { camelCase } from 'lodash';
@@ -27,6 +27,8 @@ import ActivityButton from 'src/components/Activity/ActivityButton';
 import Steps, { getIndex } from 'src/components/Steps';
 import EditIcon from '@material-ui/icons/Edit';
 import Invoices from './Invoices';
+import SerializedAsset from './SerializedAsset';
+import LoadingTicket from './DeliveryTicket';
 
 const SubleaseDetailsPage = () => {
   const renderedFrom = camelCase(routes?.sublease.title);
@@ -38,6 +40,9 @@ const SubleaseDetailsPage = () => {
   const {
     state: { user, permissions }
   }: any = useData();
+
+  const [subleaseSteps, setSubleaseSteps] = useState([]);
+  const [subleaseStepsNames, setSubleaseStepsNames] = useState([]);
 
   const [subleaseData, setSubleaseData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -54,9 +59,9 @@ const SubleaseDetailsPage = () => {
   const [isIssued, setIsIssued] = useState(false);
   const [stepFullScreen, setStepFullScreen] = useState(false);
 
-  const subleaseStepsNames = React.useMemo(() => {
-    return subleaseSteps.map((item) => item.name);
-  }, [subleaseSteps]);
+  // const subleaseStepsNames = React.useMemo(() => {
+  //   return subleaseSteps.map((item) => item.name);
+  // }, [subleaseSteps]);
 
   function a11yProps(index: any) {
     return {
@@ -118,6 +123,9 @@ const SubleaseDetailsPage = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`${sublease.api}/${id}`);
+      const subleaseSteps = data?.type === SUBLEASE_TYPE.vendor ? sublease_Vendor_Steps : sublease_InterCompany_Steps;
+      setSubleaseSteps(subleaseSteps);
+      setSubleaseStepsNames(subleaseSteps.map((item) => item.name));
       setCurrentStep(getIndex(data?.processStatus, subleaseSteps));
       var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
       if (user?.role?.selectedEntity?.superAdminAccess) {
@@ -252,7 +260,7 @@ const SubleaseDetailsPage = () => {
                   setStepFullScreen={() => setStepFullScreen(true)}
                 />
                 <ContentFullScreen title={subleaseStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-                  {currentStep === 0 && subleaseData && (
+                  {subleaseStepsNames[currentStep] === 'Add Products' && subleaseData && (
                     <Productpackage
                       subleaseData={subleaseData}
                       setNextStep={setNextStep}
@@ -263,8 +271,8 @@ const SubleaseDetailsPage = () => {
                       stepFullScreen={stepFullScreen}
                     />
                   )}
-                  {(currentStep === 1 || currentStep === 2) && subleaseData && (
-                    <SerializedAsset
+                  {['End Sublease', 'Start Sublease'].includes(subleaseStepsNames[currentStep]) && subleaseData && (
+                    <SubleaseAsset
                       fetchData={fetchData}
                       subleaseData={subleaseData}
                       setNextStep={setNextStep}
@@ -274,6 +282,45 @@ const SubleaseDetailsPage = () => {
                       isProcessor={isProcessor}
                     />
                   )}
+                  {
+                    ['Serialized Asset'].includes(subleaseStepsNames[currentStep]) && subleaseData && (
+                      <SerializedAsset
+                        subleaseData={subleaseData}
+                        setNextStep={setNextStep}
+                        fetchData={fetchData}
+                        isIssued={isIssued}
+                        renderedFrom={`${renderedFrom}_grid-1`}
+                        allowedToEdit={allowedToEdit}
+                        stepFullScreen={stepFullScreen}
+                      />
+                    )
+                  }
+                  {
+                    ['Loading Ticket'].includes(subleaseStepsNames[currentStep]) && subleaseData && (
+                      <LoadingTicket
+                        subleaseData={subleaseData}
+                        setNextStep={setNextStep}
+                        fetchData={fetchData}
+                        ticketType={DELIVERY_TICKET_TYPE.loading}
+                        renderedFrom={`${renderedFrom}_grid-1`}
+                        allowedToEdit={allowedToEdit}
+                        stepFullScreen={stepFullScreen}
+                      />
+                    )
+                  }
+                  {
+                    ['Receiving Ticket'].includes(subleaseStepsNames[currentStep]) && subleaseData && (
+                      <LoadingTicket
+                        subleaseData={subleaseData}
+                        setNextStep={setNextStep}
+                        fetchData={fetchData}
+                        ticketType={DELIVERY_TICKET_TYPE.receiving}
+                        renderedFrom={`${renderedFrom}_grid-1`}
+                        allowedToEdit={allowedToEdit}
+                        stepFullScreen={stepFullScreen}
+                      />
+                    )
+                  }
                 </ContentFullScreen>
               </Grid>
             ) : (
