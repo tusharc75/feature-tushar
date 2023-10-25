@@ -23,8 +23,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import CreateRole from './CreateRole';
 import RoleHeader from './RoleHeader';
-import UpdateResource from './UpdateResource';
-import UpdateResourceDialog from './UpdateResource';
+import AssignUnassignResourceDialog from './AssignUnassignResource';
 
 const rolePermissionArray = [PERMISSION.superAdmin, PERMISSION.brandAdmin];
 let roleTimeout;
@@ -346,7 +345,7 @@ const Roles: FC = () => {
         ))}
       {showUpdateResourceDialog &&
         (
-          <UpdateResourceDialog
+          <AssignUnassignResourceDialog
             showUpdateResourceDialog={showUpdateResourceDialog}
             handleCloseDialog={updateResourceClose}
             roleIds={selectedRecords.map((d) => d._id)}

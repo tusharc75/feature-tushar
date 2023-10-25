@@ -17,13 +17,12 @@ import axiosInstance from '../../axios/axiosInstance';
 import {useData} from '../../StateProvider/Provider'
 
 
-const UpdateResourceDialog = ({ showUpdateResourceDialog, handleCloseDialog, roleIds, onSuccess,  selectedEntity, roleType, setToastConfig}) => {
+const AssignUnassignResourceDialog = ({ showUpdateResourceDialog, handleCloseDialog, roleIds, onSuccess,  selectedEntity, roleType, setToastConfig}) => {
   const [resource, setResource] = useState([]);
   const [selectedResource, setSelectedResource] = useState([]);
   const [access, setAccess] = useState({Read: true, Create: true, Update: true, Delete: true});
   const {state : {user: { user }}} = useData();
   const [loading, setLoading] = useState(false);
-  const [field, setField] = useState([]);
   const [isSubmitting, setSubmitting] = useState(false);
   
 
@@ -36,28 +35,13 @@ const UpdateResourceDialog = ({ showUpdateResourceDialog, handleCloseDialog, rol
     axiosInstance()
       .get(`user/entity-union-role/?userId=${user?._id}&entityId=${selectedEntity}`)
       .then(({ data: { data } }) => {
-        const oldData = {...data}
-        const field = data.field.map(((f:any) => ({
-          ...f,
-          isCreate: false,
-          isRead: false,
-          isUpdate: false,
-          isCreateDisabled: !f.isCreate,
-          isReadDisabled: !f.isRead,
-          isUpdateDisabled: !f.isUpdate,
-        })))
         const resource = data.resource.map((r:any) => ({
           ...r,
-          isCreate: false,
-          isCreateDisabled: !r.isCreate,
-          isDelete: false,
-          isDeleteDisabled: !r.isDelete,
           isRead: false,
-          isReadDisabled: !r.isRead,
+          isCreate: false,
           isUpdate: false,
-          isUpdateDisabled: !r.isUpdate,
+          isDelete: false,
         }))
-        setField(field);
         setResource(resource);
         setLoading(false);
       })
@@ -69,14 +53,13 @@ const UpdateResourceDialog = ({ showUpdateResourceDialog, handleCloseDialog, rol
 
 
   const handleUpdate = async () => {
+    console.log(resource)
     if ( (access.Read || access.Create || access.Update || access.Delete) && selectedResource.length){
-      const resources = resource.map((r) => {
-        let newData = {...r}
-        delete newData.isReadDisabled
-        delete newData.isCreateDisabled
-        delete newData.isUpdateDisabled
-        delete newData.isDeleteDisabled
+      let resources = []
+      resource.forEach((r) => {
         if(selectedResource.includes(r.name)){
+          let newData = {...r}
+          console.log('r', r)
           newData.isRead = access.Read
           newData.isCreate = access.Create
           newData.isUpdate = access.Update
@@ -87,32 +70,13 @@ const UpdateResourceDialog = ({ showUpdateResourceDialog, handleCloseDialog, rol
             newData.isUpdate = false
             newData.isDelete = false
           }
-          return newData;
+          console.log("Selected Resource", newData)
+          resources.push(newData)
         }
-        return newData;
-      });
-      const fields = field.map((f) => {
-        let newData = {...f}
-        delete newData.isReadDisabled
-        delete newData.isCreateDisabled
-        delete newData.isUpdateDisabled
-        if(selectedResource.includes(f?.fieldData?.resource)){
-          newData.isRead = access.Read
-          newData.isCreate = access.Create
-          newData.isUpdate = access.Update
-          if(showUpdateResourceDialog?.action === 'Remove'){
-            newData.isRead = false
-            newData.isCreate = false
-            newData.isUpdate = false
-          }
-          return newData;
-        }
-        return newData;
       });
       setSubmitting(true);
       axiosInstance()
-        .put("/role/update-resources", {
-          field: fields,
+        .put("/role/assign-unassign-resources", {
           resource: resources,
           type: roleType,
           roleIds: roleIds,
@@ -121,6 +85,11 @@ const UpdateResourceDialog = ({ showUpdateResourceDialog, handleCloseDialog, rol
           setSubmitting(false);
           setSelectedResource([]);  
           handleClose();
+          setToastConfig({
+            open: true,
+            type: "success",
+            message: `Resource ${showUpdateResourceDialog?.action} successfully.` ,
+          });
         })
         .catch((err) => {
           setSubmitting(false);
@@ -241,4 +210,4 @@ const UpdateResourceDialog = ({ showUpdateResourceDialog, handleCloseDialog, rol
   );
 };
 
-export default UpdateResourceDialog;
+export default AssignUnassignResourceDialog;
