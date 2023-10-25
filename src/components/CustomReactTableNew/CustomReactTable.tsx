@@ -861,7 +861,7 @@ function CustomReactTable({
                                   autoFocus
                                   onBlur={() => (cell.value !== cellValue ? submitInput() : resetField())}
                                   value={cellValue}
-                                  className=" appearance-none w-full focus-within:outline-[var(--new-theme-color)] bg-[transparent] outline-[transparent] shadow-0 border-[0] px-[2px] py-[4px] [border-bottom:1px_solid_var(--common-border-color)_!important]"
+                                  className="dark:text-[white]  appearance-none w-full focus-within:outline-[var(--new-theme-color)] bg-[transparent] outline-[transparent] shadow-0 border-[0] px-[2px] py-[4px] [border-bottom:1px_solid_var(--common-border-color)_!important]"
                                   onChange={(e) => setCellValue(e.target.value)}
                                 />
                               ) : currentEditingCellPosition?.rowId === row.original._id && cell?.column.id === 'action' ? (
@@ -876,7 +876,7 @@ function CustomReactTable({
                                 >
                                   <p>{cell?.value}</p>
                                   <span>
-                                    <Edit color="disabled" fontSize="small" />
+                                    <Edit className="text-[rgba(0,0,0,0.3)] dark:text-[rgba(255,255,255,0.9)]" fontSize="small" />
                                   </span>
                                 </div>
                               ) : (
