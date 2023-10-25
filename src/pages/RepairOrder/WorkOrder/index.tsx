@@ -24,7 +24,7 @@ import AssignUserDialog from 'src/pages/WorkOrder/Service/AssignUserDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import { capitalize, map, sortBy, startCase, uniq } from 'lodash';
+import { capitalize, map, orderBy, sortBy, startCase, uniq } from 'lodash';
 import { PreWorkIcon, PostWorkIcon } from 'src/assets/svg/svgIcons';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import UpdateWorkOrderDialog from './UpdateWorkOrderDialog';
@@ -34,6 +34,7 @@ import { MdAssignmentTurnedIn } from 'react-icons/md';
 import EditIcon from '@material-ui/icons/Edit';
 import { AutoCompleteIcon } from 'src/assets/svg/svgIcons';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
+import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
 const WorkOrder = ({
@@ -72,8 +73,10 @@ const WorkOrder = ({
   const [allAssignedUsers, setAllAssignedUsers] = useState([]);
   const [updateDialog, setUpdateDialog] = useState({ open: false, data: null });
   const [isBulkEdit, setIsBulkEdit] = useState(false);
+  const [consumablesDialog, setConsumablesDialog] = useState(false);
 
   const [isSubmitting, setSubmitting] = useState(false);
+  const [isSubmittingConsumables, setIsSubmittingConsumables] = useState(false);
 
   useEffect(() => {
     fetchFields();
@@ -345,6 +348,18 @@ const WorkOrder = ({
                 </IconButton>
               </HtmlTooltip>
             )}
+            {row?.original?.type === MATERIAL_TYPE.product && (
+              <IconButton
+                disabled={row?.original?.consumedQty || row?.original?.requestedQty ? true : false}
+                size="small"
+                aria-label="Details"
+                onClick={() => {
+                  handleDeleteConsumables(row.original);
+                }}
+              >
+                <Delete fontSize="small" color={row?.original?.consumedQty || row?.original?.requestedQty ? 'disabled' : 'error'} />
+              </IconButton>
+            )}
           </>
         );
       }
@@ -575,14 +590,15 @@ const WorkOrder = ({
     if (parent.type === 'package') {
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
     }
-    return sortBy(
-      subRows?.filter((e) => e.type !== 'product'),
-      ['type']
-    );
+    return orderBy(subRows, ['type'], ['desc']);
+    // return sortBy(
+    //   subRows?.filter((e) => e.type !== 'product'),
+    //   ['type']
+    // );
   };
 
   const handleAddService = (ids) => {
-    setSubmitting(true)
+    setSubmitting(true);
     const allWorkOrders = selectedProducts?.map((e) => e.workOrder?._id);
     const data: any = {};
     data.serviceIds = ids;
@@ -677,6 +693,69 @@ const WorkOrder = ({
     }
   };
 
+  const handleAddConsumables = (rows) => {
+    setIsSubmittingConsumables(true);
+    const data: any = [];
+    let workOrderId = '';
+    const asset = selectedProducts?.filter((s) => s.type === MATERIAL_TYPE.serializedAsset);
+    if (asset?.length > 0) {
+      workOrderId = asset[0]?.workOrder?._id;
+      asset?.forEach((a) => {
+        rows?.forEach((e) => {
+          if (parseInt(e.qty)) {
+            data.push({ product: e._id, qty: parseInt(e.qty), service: null, uniqueId: null, stepId: null });
+          }
+        });
+      });
+    } else {
+      const services = selectedProducts?.filter((s) => s.type === MATERIAL_TYPE.service);
+      workOrderId = services[0]?.workOrder?._id;
+      services?.forEach((s) => {
+        rows?.forEach((e) => {
+          if (parseInt(e.qty)) {
+            data.push({ product: e._id, qty: parseInt(e.qty), service: s?.serviceDetail?._id, uniqueId: s?.uniqueId, stepId: null, parentId: s?._id });
+          }
+        });
+      });
+    }
+
+    axiosInstance()
+      .post(`${workOrder.api}/${workOrderId}/consumable`, data)
+      .then(({ data }) => {
+        fetchData();
+        setIsSubmittingConsumables(false);
+        setConsumablesDialog(false);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((error) => {
+        setIsSubmittingConsumables(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const handleDeleteConsumables = async (row) => {
+    const workOrderId = row?.workOrder?._id;
+    axiosInstance()
+      .put(`${workOrder.api}/${workOrderId}/consumable/remove`, {
+        ids: [row._id] || []
+      })
+      .then(({ data }) => {
+        fetchData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   return (
     <Fragment>
       <Box display="flex" alignItems="center" justifyContent={'flex-end'} gridColumnGap={8} flex={1} m={1} my={1}>
@@ -730,6 +809,19 @@ const WorkOrder = ({
                 }}
               >
                 Assign Technician
+              </MenuItem>
+              <MenuItem
+                disabled={
+                  selectedProducts?.filter((d) => d.type === MATERIAL_TYPE.serializedAsset || d.type === MATERIAL_TYPE.service)?.length > 0
+                    ? false
+                    : true
+                }
+                onClick={() => {
+                  closeActions();
+                  setConsumablesDialog(true);
+                }}
+              >
+                Add Products/Consumables
               </MenuItem>
               <MenuItem
                 onClick={() => {
@@ -913,6 +1005,17 @@ const WorkOrder = ({
               loadingEdit={isUpdating}
               repairOrderData={repairOrderData}
               isBulkEdit={isBulkEdit}
+            />
+          )}
+          {consumablesDialog && (
+            <AssignProductDialog
+              handleCloseDialog={() => setConsumablesDialog(false)}
+              ids={[]}
+              onSuccess={(rows) => {
+                handleAddConsumables(rows);
+              }}
+              serialized={false}
+              isSubmitting={isSubmittingConsumables}
             />
           )}
         </Grid>
