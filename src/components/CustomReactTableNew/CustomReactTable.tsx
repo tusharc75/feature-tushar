@@ -655,7 +655,6 @@ function CustomReactTable({
     const updatedData = flattenArray(data)?.find((row) => row?._id === currentEditingCellPosition.rowId);
     updatedData[currentEditingCellPosition.columnName] = cellValue;
     const inputField = { [`${currentEditingCellPosition.columnName}`]: cellValue };
-    console.log({ inputField, updateData });
     if (onSaveEdit && ![undefined, null].includes(cellValue)) {
       onSaveEdit(inputField, updatedData);
     }
