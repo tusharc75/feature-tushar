@@ -39,7 +39,6 @@ import { CreateEmail } from 'src/components/Activity/Email/CreateEmail';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import mime from 'mime';
 
-
 function reducer(state, action) {
   switch (action.type) {
     case 'loading':
@@ -463,26 +462,31 @@ export default function Attachment() {
         });
     }
   };
-  
+
   const handleMail = (data) => {
-    const attachments: any = []
-    Promise.all(data?.file.map(async file => {
-      await axiosInstance().get(`user/download?fileName=${file?.url}`, { responseType: 'blob' }).then(({ data }) => {
-        let reader = new FileReader();
-        reader.readAsDataURL(new Blob([data], { type: mime.getType(file.url.split('.')?.pop()) }));
-        reader.onloadend = function () {
-          let base64data: any = reader.result;
-          attachments.push({
-            base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
-            contentType: base64data.split(';')[0].split(':')[1],
-            extension: `.${file.url.split('.')?.pop()}`,
-            name: file.name
+    const attachments: any = [];
+    Promise.all(
+      data?.file.map(async (file) => {
+        await axiosInstance()
+          .get(`user/download?fileName=${file?.url}`, { responseType: 'blob' })
+          .then(({ data }) => {
+            let reader = new FileReader();
+            reader.readAsDataURL(new Blob([data], { type: mime.getType(file.url.split('.')?.pop()) }));
+            reader.onloadend = function () {
+              let base64data: any = reader.result;
+              attachments.push({
+                base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
+                contentType: base64data.split(';')[0].split(':')[1],
+                extension: `.${file.url.split('.')?.pop()}`,
+                name: file.name
+              });
+            };
           })
-        };
-      }).catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
-    })).finally(() => {
+          .catch((err) => {
+            toastConfig.setToastConfig(err);
+          });
+      })
+    ).finally(() => {
       setEmailAttachment(attachments);
       setSendMail(true);
     });
@@ -730,7 +734,7 @@ export default function Attachment() {
           permissions={permissions?.attachment}
           module="Attachment"
           api={`/attachment`}
-          afterImportCompleted={() => { }}
+          afterImportCompleted={() => {}}
           total={rowCount}
           onlyExport={true}
           additionalParams={`&relatedTo=${JSON.stringify(filter)}${getQueryString(true)}`}
@@ -870,9 +874,8 @@ export default function Attachment() {
               }}
               dispatch={dispatch}
               childrenProperty="subRows"
-              uniqueKey="_id"
               expander={true}
-              setWholeRowsCellColor={() => { }}
+              setWholeRowsCellColor={() => {}}
               renderedFrom={'attachment_render'}
               isClientSideGrid={false}
               rowCount={rowCount}
@@ -962,8 +965,8 @@ export default function Attachment() {
                   referenceId: open.parentResource
                     ? open.parentResource?.referenceId
                     : resource && selectedResourceData
-                      ? selectedResourceData.optionValue
-                      : user?.user?._id,
+                    ? selectedResourceData.optionValue
+                    : user?.user?._id,
                   access: true
                 }
               ]}
