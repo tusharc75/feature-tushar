@@ -140,6 +140,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                                 state={state}
                                 handleCellClick={handleCellClick}
                                 handleKeyDown={handleKeyDown}
+                                dispatch={dispatch}
                               />
                             );
                           })}
@@ -158,6 +159,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                                   state={state}
                                   handleCellClick={handleCellClick}
                                   handleKeyDown={handleKeyDown}
+                                  dispatch={dispatch}
                                 />
                               );
                             })}
@@ -306,6 +308,7 @@ const RenderSubCard = ({
                 state={state}
                 handleCellClick={handleCellClick}
                 handleKeyDown={handleKeyDown}
+                dispatch={dispatch}
               />
             );
           })}
@@ -324,6 +327,7 @@ const RenderSubCard = ({
                   state={state}
                   handleCellClick={handleCellClick}
                   handleKeyDown={handleKeyDown}
+                  dispatch={dispatch}
                 />
               );
             })}
@@ -373,10 +377,17 @@ const RenderSubCard = ({
   );
 };
 
-const RenderCellWithHeader = ({ field, row, submitInput, handleCellClick, handleKeyDown, cellValue, setCellValue, state }: any) => {
+const RenderCellWithHeader = ({ field, row, submitInput, handleCellClick, handleKeyDown, cellValue, setCellValue, state, dispatch }: any) => {
   const { currentEditingCellPosition }: TInitialState = state;
   const cell = row.cells.find((cell: any) => cell?.column?.id === field?.id);
   if (!cell) return null;
+
+  const resetField = () => {
+    dispatch({
+      type: 'currentEditingCellPosition',
+      cellPosition: null
+    });
+  };
 
   return (
     <h6 className=" text-[12px] grid grid-cols-2 justify-between gap-2 max-w-full">
@@ -396,16 +407,9 @@ const RenderCellWithHeader = ({ field, row, submitInput, handleCellClick, handle
           <input
             title={`Edit-${cell.id}`}
             autoFocus
-            onBlur={submitInput}
-            style={{
-              borderLeft: '0',
-              borderTop: '0',
-              padding: '2px 4px',
-              width: cell?.column.width - 20,
-              background: 'transparent',
-              outline: 'none'
-            }}
+            onBlur={() => (cell.value !== cellValue ? submitInput() : resetField())}
             value={cellValue}
+            className={` appearance-none w-full focus-within:outline-[var(--new-theme-color)] bg-[transparent] outline-[transparent] shadow-0 border-[0] px-[2px] py-[4px] [border-bottom:1px_solid_var(--common-border-color)_!important]`}
             onChange={(e) => setCellValue(e.target.value)}
           />
         ) : currentEditingCellPosition?.rowId === row.original._id && cell?.column.id === 'action' ? (

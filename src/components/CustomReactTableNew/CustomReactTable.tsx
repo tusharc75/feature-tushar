@@ -689,6 +689,13 @@ function CustomReactTable({
     setCellValue(cell?.value || null);
   };
 
+  const resetField = () => {
+    dispatch({
+      type: 'currentEditingCellPosition',
+      cellPosition: null
+    });
+  };
+
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="custom-react-table custom-react-table-v1 vertical-center">
@@ -851,17 +858,11 @@ function CustomReactTable({
                               currentEditingCellPosition?.rowId === row.original._id &&
                               currentEditingCellPosition?.columnName === cell?.column.id ? (
                                 <input
+                                  title={`Edit-${cell.id}`}
                                   autoFocus
-                                  onBlur={submitInput}
-                                  style={{
-                                    borderLeft: '0',
-                                    borderTop: '0',
-                                    padding: '2px 4px',
-                                    width: cell?.column.width - 20,
-                                    background: 'transparent',
-                                    outline: 'none'
-                                  }}
+                                  onBlur={() => (cell.value !== cellValue ? submitInput() : resetField())}
                                   value={cellValue}
+                                  className=" appearance-none w-full focus-within:outline-[var(--new-theme-color)] bg-[transparent] outline-[transparent] shadow-0 border-[0] px-[2px] py-[4px] [border-bottom:1px_solid_var(--common-border-color)_!important]"
                                   onChange={(e) => setCellValue(e.target.value)}
                                 />
                               ) : currentEditingCellPosition?.rowId === row.original._id && cell?.column.id === 'action' ? (
