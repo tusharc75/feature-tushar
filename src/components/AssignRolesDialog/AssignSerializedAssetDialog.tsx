@@ -158,7 +158,7 @@ const AssignSerializedAssetDialog = ({
       deepFilter = `${deepFilter}&subleaseAsset=0`;
     }
     if (reference === 'sublease') {
-      deepFilter = `${deepFilter}&subleaseAsset=true&subleaseType=${SUBLEASE_TYPE.interCompany}`;
+      deepFilter = `${deepFilter}&masterSubleaseAsset=true`;
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];

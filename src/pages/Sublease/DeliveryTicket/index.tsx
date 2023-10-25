@@ -40,19 +40,11 @@ import { generateCustomTableColumns } from 'src/constants/columns';
 
 const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, stepFullScreen, renderedFrom, allowedToEdit, setCurrentStep }) => {
     const toastConfig = useContext(CustomToastContext);
-    const [theme] = useAppTheme();
-    const history = useHistory();
-    const [state, dispatch] = useReducer(reducer, intialState);
-    const [gridApi, setGridApi] = useState(null);
     const [columns, setColumns] = useState(null);
     const [anchorActionEl, setAnchorActionEl] = useState(null);
     const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
     const [rowsData, setRowsData] = useState(null);
     const [selectedRecords, setSelectedRecords] = useState([]);
-
-    const {
-        state: { user, permissions }
-    }: any = useData();
 
     useEffect(() => {
         fetchFields();
@@ -63,7 +55,7 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, stepF
         try {
             var data: any = [];
 
-            const response = await axiosInstance().get(`${sublease.api}/inventory/${subleaseData._id}`);
+            const response = await axiosInstance().get(`${sublease.api}/asset/${subleaseData._id}`);
             data = response?.data?.data;
             let rows = data.filter((e) => !e?.parentId);
 
@@ -169,6 +161,12 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, stepF
                 Cell: ({ row }) => {
                     return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
                 }
+            },
+            {
+                accessor: `Status`,
+                Header: `status`,
+                width: 200,
+                Cell: ({ row }) => row?.original[`status`] ? <p className="text-truncate">{row?.original[`status`]}</p> : <NoDataCell />
             },
             {
                 accessor: `LoadingTicket`,
@@ -324,15 +322,32 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, stepF
                                 open={Boolean(anchorActionEl)}
                                 onClose={closeActions}
                             >
-                                <MenuItem
-                                    onClick={() => {
-                                        closeActions();
-                                        handleDeliveryTicketDialog();
-                                    }}
-                                    disabled={selectedRecords.length === 0 || selectedRecords.some((f) => f.hasOwnProperty(`${ticketType}TicketId`))}
-                                >
-                                    Create {ticketType} Ticket
-                                </MenuItem>
+                                {
+                                    ticketType === DELIVERY_TICKET_TYPE.loading && (
+                                        <MenuItem
+                                            onClick={() => {
+                                                closeActions();
+                                                handleDeliveryTicketDialog();
+                                            }}
+                                            disabled={selectedRecords.length === 0 || selectedRecords.some((f) => f.hasOwnProperty(`LoadingTicketId`))}
+                                        >
+                                            Create Loading Ticket
+                                        </MenuItem>
+                                    )
+                                }
+                                {
+                                    ticketType === DELIVERY_TICKET_TYPE.receiving && (
+                                        <MenuItem
+                                            onClick={() => {
+                                                closeActions();
+                                                handleDeliveryTicketDialog();
+                                            }}
+                                            disabled={selectedRecords.length === 0 || (selectedRecords.some((f) => f.hasOwnProperty(`ReceivingTicketId`)) || !selectedRecords?.every((f) => f.hasOwnProperty(`LoadingTicketId`) || f.status !== ASSET_STATUS.available))}
+                                        >
+                                            Create Receiving Ticket
+                                        </MenuItem>
+                                    )
+                                }
                                 <MenuItem
                                     disabled={
                                         selectedRecords.length === 0 ||
@@ -366,8 +381,9 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, stepF
                                 uniqueKey="_id"
                                 renderedFrom={renderedFrom}
                                 isClientSideGrid={true}
+                                hideExpander={true}
                                 hideSelection={!allowedToEdit}
-                                hideAction={!allowedToEdit}
+                                hideAction={true}
                             />
                         </Box>
                     </>

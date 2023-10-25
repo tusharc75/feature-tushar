@@ -15,6 +15,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
 
 function SerializedAsset({ subleaseData, setNextStep, fetchData, isIssued, renderedFrom, allowedToEdit, stepFullScreen }) {
@@ -27,9 +28,9 @@ function SerializedAsset({ subleaseData, setNextStep, fetchData, isIssued, rende
     const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false);
     const [assetAssignedProduct, setAssetAssignedProduct] = useState([]);
     const [isAdding, setAdding] = useState(false);
-
-
-
+    const [deleteData, setDeleteData] = useState([]);
+    const [showConfirmBox, setShowConfirmBox] = useState(false);
+    const [deleting, setDeleting] = useState(false);
 
 
     useEffect(() => {
@@ -117,22 +118,10 @@ function SerializedAsset({ subleaseData, setNextStep, fetchData, isIssued, rende
                                     <HtmlTooltip title={`Remove`}>
                                         <IconButton
                                             size="small"
-                                        // onClick={() => {
-                                        //     setShowConfirmBox(true);
-                                        //     let isTransferAsset = false;
-                                        //     if (row.original?.transferData
-                                        //         && [TRANSFER_ASSET_STATUS.new, TRANSFER_ASSET_STATUS.inProgress]?.includes(row.original?.transferData?.status)) {
-                                        //         isTransferAsset = true;
-                                        //     }
-                                        //     setDeleteData([
-                                        //         {
-                                        //             _id: row.original.inventory,
-                                        //             assetNumber: row.original.detail,
-                                        //             isNonSerializeAsset: row.original.isNonSerializeAsset,
-                                        //             isTransferAsset: isTransferAsset
-                                        //         }
-                                        //     ]);
-                                        // }}
+                                            onClick={() => {
+                                                setShowConfirmBox(true);
+                                                setDeleteData([row.original.inventory]);
+                                            }}
                                         >
                                             <Delete fontSize="small" color={'error'} />
                                         </IconButton>
@@ -161,16 +150,12 @@ function SerializedAsset({ subleaseData, setNextStep, fetchData, isIssued, rende
         coloum = [...coloum, ...newColumns];
         setColumns(coloum);
         fetchRowData();
-        setNextStep(true);
     };
 
     const getAssetAssignedValues = (row) => {
         if (row?.original?.type === 'asset' || row?.original?.assetQty === 0) {
             return ' N/A ';
         }
-        // if (!row?.original?.serializedProduct && row?.original?.assetAssignedQty === 0) {
-        //   return <p>---</p>;
-        // }
         return (
             <p>
                 {row?.original?.assetAssignedQty} / {row?.original?.assetQty}
@@ -272,13 +257,20 @@ function SerializedAsset({ subleaseData, setNextStep, fetchData, isIssued, rende
                 if (parent.subRows.length && parent.isValid) {
                     if (parent.subRows.every((d) => d.isValid)) {
                         parent.isValid = true;
+                        parent.hideSelection = false
                     } else {
                         parent.isValid = false;
+                        parent.hideSelection = true
                     }
                 }
             });
 
             setRowsData(rows);
+            if (rows.every((d) => d.isValid)) {
+                setNextStep(true)
+            } else {
+                setNextStep(false)
+            }
             setSelectedRecords([]);
         } catch (error) {
             toastConfig.setToastConfig(error);
@@ -299,9 +291,6 @@ function SerializedAsset({ subleaseData, setNextStep, fetchData, isIssued, rende
         const subRows: any = [];
         const inventory_result = inventory?.filter((e) => e._id === parent._id);
         inventory_result?.forEach((_inventory, k) => {
-            const transferFilter = transferAssets.filter((e) => e.assetId === _inventory.inventory);
-            var transferData = {};
-            var canRemove = false;
             subRows.push({
                 ..._inventory,
                 index: `${parent.index}.${k + 1}`,
@@ -316,7 +305,7 @@ function SerializedAsset({ subleaseData, setNextStep, fetchData, isIssued, rende
                 _id: _inventory.inventory,
                 isValid: _inventory.inventoryDetail?.manualStatus === ASSET_STATUS.reserved ? false : true,
                 hideSelection: true,
-                canRemove: canRemove
+                canRemove: true
             });
         });
 
@@ -407,9 +396,6 @@ function SerializedAsset({ subleaseData, setNextStep, fetchData, isIssued, rende
         return subRows;
     };
 
-
-
-
     const handleAddSerializedAsset = (assets) => {
         setNextStep(false);
         var data = [];
@@ -422,7 +408,7 @@ function SerializedAsset({ subleaseData, setNextStep, fetchData, isIssued, rende
         if (data.length) {
             setAdding(true);
             axiosInstance()
-                .post(`${sublease.api}/inventory/${subleaseData._id}`, { products: data })
+                .post(`${sublease.api}/asset/${subleaseData._id}`, { products: data })
                 .then(({ data }) => {
                     setAddSerializedAssetDialog(false);
                     fetchRowData()
@@ -451,6 +437,22 @@ function SerializedAsset({ subleaseData, setNextStep, fetchData, isIssued, rende
         );
         return flatArray.length === 0;
     };
+
+    const handleRemoveAsset = () => {
+        axiosInstance()
+            .put(`${sublease.api}/asset/${subleaseData._id}/remove`, { ids: deleteData })
+            .then(() => {
+                setDeleting(false);
+                fetchRowData();
+                setDeleteData(null);
+                setShowConfirmBox(false);
+            })
+            .catch((error) => {
+                setDeleting(false);
+                toastConfig.setToastConfig(error);
+                setDeleteData(null);
+            });
+    }
 
 
     return (
@@ -523,6 +525,18 @@ function SerializedAsset({ subleaseData, setNextStep, fetchData, isIssued, rende
                     selectedProducts={assetAssignedProduct?.map((i) => {
                         return { _id: i._id, product: i.materialId, productName: i.detail, qty: i.assetQty - i.assetAssignedQty };
                     })}
+                />
+            )}
+            {showConfirmBox && (
+                <ConfirmationDialog
+                    open={showConfirmBox}
+                    message={`Are you sure you want to remove?`}
+                    onClose={() => {
+                        setShowConfirmBox(false);
+                        setDeleteData([]);
+                    }}
+                    okBtnLoading={deleting}
+                    onOk={handleRemoveAsset}
                 />
             )}
         </Fragment>

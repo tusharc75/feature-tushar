@@ -237,7 +237,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
       }
     });
     if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
-      if (inventory.length === 0 && subleaseData?.type === SUBLEASE_TYPE.interCompany) {
+      if (inventory.length === 0 && subleaseData?.type === SUBLEASE_TYPE.interCompany && rows?.every((e) => e?.isValid)) {
         setNextStep(true);
       } else
         setNextStep(false);
