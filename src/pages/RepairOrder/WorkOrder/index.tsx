@@ -76,7 +76,6 @@ const WorkOrder = ({
   const [consumablesDialog, setConsumablesDialog] = useState(false);
 
   const [isSubmitting, setSubmitting] = useState(false);
-  const [isSubmittingConsumables, setIsSubmittingConsumables] = useState(false);
 
   useEffect(() => {
     fetchFields();
@@ -694,7 +693,7 @@ const WorkOrder = ({
   };
 
   const handleAddConsumables = (rows) => {
-    setIsSubmittingConsumables(true);
+    setSubmitting(true);
     const data: any = [];
     let workOrderId = '';
     const asset = selectedProducts?.filter((s) => s.type === MATERIAL_TYPE.serializedAsset);
@@ -723,7 +722,7 @@ const WorkOrder = ({
       .post(`${workOrder.api}/${workOrderId}/consumable`, data)
       .then(({ data }) => {
         fetchData();
-        setIsSubmittingConsumables(false);
+        setSubmitting(false);
         setConsumablesDialog(false);
         toastConfig.setToastConfig({
           open: true,
@@ -732,7 +731,7 @@ const WorkOrder = ({
         });
       })
       .catch((error) => {
-        setIsSubmittingConsumables(false);
+        setSubmitting(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -1015,7 +1014,7 @@ const WorkOrder = ({
                 handleAddConsumables(rows);
               }}
               serialized={false}
-              isSubmitting={isSubmittingConsumables}
+              isSubmitting={isSubmitting}
             />
           )}
         </Grid>
