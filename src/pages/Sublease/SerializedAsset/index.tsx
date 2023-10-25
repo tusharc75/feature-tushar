@@ -68,17 +68,6 @@ function SerializedAsset({ subleaseData, setNextStep, fetchData, isIssued, rende
                     row.original['type'] ? (
                         <p>
                             {row.original?.type === 'asset' && row.original?.isNonSerializeAsset ? 'Inventory' : `${startCase(row.original?.type)} `}
-                            {row.original['type'] === 'product'
-                                ? row.original?.productDetail?.serializedProduct
-                                    ? '(Serialized)'
-                                    : '(Non-Serialized)'
-                                : row.original?.type === 'package'
-                                    ? row.original?.packageDetail.packageType === 'Product'
-                                        ? '(Product)'
-                                        : '(Service)'
-                                    : row.original.type === 'service'
-                                        ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                                        : ''}
                         </p>
                     ) : (
                         <NoDataCell />
@@ -112,23 +101,6 @@ function SerializedAsset({ subleaseData, setNextStep, fetchData, isIssued, rende
                                 <OpenInNewIcon fontSize="small" color="primary" />
                             </IconButton>
                         )}
-                        {row.original?.type === 'asset' && (
-                            <span className="d-flex align-items-center gap-2">
-                                {allowedToEdit && row?.original?.canRemove && (
-                                    <HtmlTooltip title={`Remove`}>
-                                        <IconButton
-                                            size="small"
-                                            onClick={() => {
-                                                setShowConfirmBox(true);
-                                                setDeleteData([row.original.inventory]);
-                                            }}
-                                        >
-                                            <Delete fontSize="small" color={'error'} />
-                                        </IconButton>
-                                    </HtmlTooltip>
-                                )}
-                            </span>
-                        )}
                     </div>
                 ),
             },
@@ -148,6 +120,36 @@ function SerializedAsset({ subleaseData, setNextStep, fetchData, isIssued, rende
             }
         ];
         coloum = [...coloum, ...newColumns];
+        coloum.push({
+            accessor: 'action',
+            Header: 'Action',
+            sticky: 'right',
+            disableFilters: true,
+            canDrag: false,
+            Cell: ({ row }) => {
+                return <div>
+                    {
+                        row.original?.type === 'asset' && (
+                            <span className="d-flex align-items-center gap-2">
+                                {allowedToEdit && row?.original?.canRemove && (
+                                    <HtmlTooltip title={`Remove`}>
+                                        <IconButton
+                                            size="small"
+                                            onClick={() => {
+                                                setShowConfirmBox(true);
+                                                setDeleteData([row.original.inventory]);
+                                            }}
+                                        >
+                                            <Delete fontSize="small" color={'error'} />
+                                        </IconButton>
+                                    </HtmlTooltip>
+                                )}
+                            </span>
+                        )
+                    }
+                </div>
+            }
+        });
         setColumns(coloum);
         fetchRowData();
     };
@@ -402,6 +404,7 @@ function SerializedAsset({ subleaseData, setNextStep, fetchData, isIssued, rende
         assets.forEach((e) => {
             data.push({
                 ...e,
+                qty: 1,
                 inventory: e.asset,
             });
         });
@@ -494,7 +497,7 @@ function SerializedAsset({ subleaseData, setNextStep, fetchData, isIssued, rende
                                 childrenProperty="subRows"
                                 uniqueKey="_id"
                                 hideSelection={!allowedToEdit}
-                                hideAction={!allowedToEdit}
+                                hideAction={false}
                                 renderedFrom="sublease_asset"
                                 isClientSideGrid={true}
                             />

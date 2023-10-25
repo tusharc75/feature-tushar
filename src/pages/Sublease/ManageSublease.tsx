@@ -233,6 +233,9 @@ const ManageSublease = ({
     if (values?.type === SUBLEASE_TYPE.interCompany && !values?.fromWarehouse) {
       errors['fromWarehouse'] = 'Warehouse is required';
     }
+    if (values?.fromWarehouse && values?.warehouse && values?.fromWarehouse === values?.warehouse) {
+      errors['fromWarehouse'] = 'Plant and From Warehouse should not be same';
+    }
     return errors;
   }
 

@@ -273,8 +273,7 @@ const AssignSerializedAssetDialog = ({
                         while (qty) {
                           const result = selectedAssets.filter((f) => f.productId === ele.product && !f.isCounted);
                           if (result.length) {
-                            ele.asset = result[0]._id
-                            data.push(ele);
+                            data.push({ ...ele, asset: result[0]._id });
                             result[0].isCounted = true;
                           }
                           qty--;
