@@ -12,33 +12,24 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import {
     deliveryTicket,
-    gridLoadingTimeout,
     DELIVERY_TICKET_STATUS,
     DELIVERY_TICKET_TYPE,
     DELIVERY_TICKET_REFERENCE_TYPE,
     DELIVERY_FROM_TO_TYPE,
-    repairOrder,
     ASSET_STATUS,
-    WORK_ORDER_STATUS,
-    productionOrder,
-    CHILD_RESOURCE,
     sublease
 } from '../../../constants/helpers';
-import { useHistory } from 'react-router-dom';
-import { isMobile, isTablet } from 'react-device-detect';
-import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
+import { isMobile } from 'react-device-detect';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
-import { uniq, map, startCase, upperFirst, capitalize } from 'lodash';
+import { uniq, map, startCase } from 'lodash';
 import { ExpandMore } from '@material-ui/icons';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { useAppTheme } from 'src/constants/AppConfig';
-import { useData } from 'src/StateProvider/Provider';
+
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
-import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
-import { generateCustomTableColumns } from 'src/constants/columns';
 
 
-const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, stepFullScreen, renderedFrom, allowedToEdit, setCurrentStep }) => {
+const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, stepFullScreen, renderedFrom, allowedToEdit }) => {
+
     const toastConfig = useContext(CustomToastContext);
     const [columns, setColumns] = useState(null);
     const [anchorActionEl, setAnchorActionEl] = useState(null);
@@ -50,6 +41,136 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, stepF
         fetchFields();
     }, [])
 
+    const fetchFields = async () => {
+        let coloum: any = [
+            {
+                accessor: 'index',
+                Header: 'Index',
+                width: 70,
+                sticky: isMobile ? 'none' : 'left',
+                Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+            },
+            {
+                accessor: 'type',
+                Header: 'Type',
+                disableFilters: true,
+                sticky: isMobile ? 'none' : 'left',
+                width: 100,
+                Cell: ({ row }) => (row.original['type'] ? <p>{`${startCase(row.original?.type)} `}</p> : <NoDataCell />)
+            },
+            {
+                accessor: 'detail',
+                Header: ' Details',
+                minWidth: 200,
+                width: 200,
+                sticky: isMobile ? 'none' : 'left',
+                Cell: ({ row, rows }) => (
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <p className="text-truncate">{row.original?.detail}</p>
+                        <Box ml={1}>
+                            <IconButton
+                                size="small"
+                                onClick={() => {
+                                    window.open(`${routes.serializedAssetDetail.path}/${row.original._id}`);
+                                }}
+                            >
+                                <OpenInNewIcon fontSize="small" color="primary" />
+                            </IconButton>
+                        </Box>
+                    </div>
+                )
+            },
+            {
+                accessor: `productName`,
+                Header: `Product`,
+                width: 200,
+                Cell: ({ row }) => row?.original?.productName ?
+                    <div style={{ display: "flex", alignItems: 'center' }}>
+                        <p className="text-truncate">{row?.original?.productName}</p>
+                        <Box ml={1}>
+                            <IconButton
+                                size="small"
+                                onClick={() => {
+                                    window.open(`${routes.productDetail.path}/${row.original?.productId}`);
+                                }}
+                            >
+                                <OpenInNewIcon fontSize="small" color="primary" />
+                            </IconButton>
+                        </Box>
+                    </div>
+                    : <NoDataCell />
+            },
+            {
+                accessor: 'description',
+                Header: 'Description',
+                width: 200,
+                Cell: ({ row }) => {
+                    return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
+                }
+            },
+            {
+                accessor: `status`,
+                Header: `Status`,
+                width: 200,
+                Cell: ({ row }) => row?.original[`status`] ? <p className="text-truncate">{row?.original[`status`]}</p> : <NoDataCell />
+            },
+            {
+                accessor: `LoadingTicket`,
+                Header: `Loading Ticket`,
+                width: 200,
+                Cell: ({ row }) => row?.original[`LoadingTicket`] ?
+                    <div style={{ display: "flex" }}>
+                        <p className="text-truncate">{row?.original[`LoadingTicket`]}</p>
+                        <Box ml={1}>
+                            <IconButton
+                                size="small"
+                                onClick={() => {
+                                    window.open(`${routes.deliveryTicketDetail.path}/${row.original[`LoadingTicketId`]}`);
+                                }}
+                            >
+                                <OpenInNewIcon fontSize="small" color="primary" />
+                            </IconButton>
+                        </Box>
+                    </div>
+                    : <NoDataCell />
+            },
+            {
+                accessor: `LoadingTicketStatus`,
+                Header: `Loading Ticket Status`,
+                width: 200,
+                Cell: ({ row }) => row?.original[`LoadingTicketStatus`] ? <p className="text-truncate">{row?.original[`LoadingTicketStatus`]}</p> : <NoDataCell />
+            },
+            ...(ticketType === DELIVERY_TICKET_TYPE.receiving ? [{
+                accessor: `ReceivingTicket`,
+                Header: `Receiving Ticket`,
+                width: 200,
+                Cell: ({ row }) => row?.original[`ReceivingTicket`] ?
+                    <div style={{ display: "flex" }}>
+                        <p className="text-truncate">{row?.original[`ReceivingTicket`]}</p>
+                        <Box ml={1}>
+                            <IconButton
+                                size="small"
+                                onClick={() => {
+                                    window.open(`${routes.deliveryTicketDetail.path}/${row.original[`ReceivingTicketId`]}`);
+                                }}
+                            >
+                                <OpenInNewIcon fontSize="small" color="primary" />
+                            </IconButton>
+                        </Box>
+                    </div>
+                    : <NoDataCell />
+            }, {
+                accessor: `ReceivingTicketStatus`,
+                Header: `Receiving Ticket Status`,
+                width: 200,
+                Cell: ({ row }) => row?.original[`ReceivingTicketStatus`] ? <p className="text-truncate">{row?.original[`ReceivingTicketStatus`]}</p> : <NoDataCell />
+            }] : [])
+        ];
+        coloum = [...coloum];
+        setColumns(coloum);
+        fetchRecords();
+    };
+
     const fetchRecords = async () => {
         setNextStep(false);
         try {
@@ -59,14 +180,16 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, stepF
             data = response?.data?.data;
             let rows = data.filter((e) => !e?.parentId);
 
-            const {
-                data: { data: deliveryTicketList }
-            } = await axiosInstance().get(
+            const { data: { data: deliveryTicketList } } = await axiosInstance().get(
                 `${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.sublease}&referenceId=${subleaseData._id}`
             );
+
             rows.forEach((parent, i) => {
                 parent.index = i + 1;
                 parent.detail = parent.assetNumber
+                parent.productName = parent?.product?.optionLabel
+                parent.productId = parent?.product?.optionValue
+                parent.description = parent?.productDescription?.optionLabel
                 parent.type = 'Asset'
             });
 
@@ -108,137 +231,7 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, stepF
             toastConfig.setToastConfig(error);
         }
     };
-    const fetchFields = async () => {
-        let coloum: any = [
-            {
-                accessor: 'index',
-                Header: 'Index',
-                width: 70,
-                sticky: isMobile ? 'none' : 'left',
-                Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
-                Footer: () => {
-                    return <>Total</>;
-                }
-            },
-            {
-                accessor: 'type',
-                Header: 'Type',
-                disableFilters: true,
-                sticky: isMobile ? 'none' : 'left',
-                width: 200,
-                Cell: ({ row }) => (row.original['type'] ? <p>{`${startCase(row.original?.type)} `}</p> : <NoDataCell />)
-            },
-            {
-                accessor: 'detail',
-                Header: ' Details',
-                minWidth: 300,
-                width: 300,
-                sticky: isMobile ? 'none' : 'left',
-                Cell: ({ row, rows }) => (
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <p className="text-truncate">{row.original?.detail}</p>
-                        <Box ml={1}>
-                            <IconButton
-                                size="small"
-                                onClick={() => {
-                                    window.open(`${routes.serializedAssetDetail.path}/${row.original._id}`);
-                                }}
-                            >
-                                <OpenInNewIcon fontSize="small" color="primary" />
-                            </IconButton>
-                        </Box>
-                    </div>
-                )
-            },
-            {
-                accessor: 'description',
-                Header: 'Description',
-                width: 200,
-                Cell: ({ row }) => {
-                    return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
-                }
-            },
-            {
-                accessor: `status`,
-                Header: `Status`,
-                width: 200,
-                Cell: ({ row }) => row?.original[`status`] ? <p className="text-truncate">{row?.original[`status`]}</p> : <NoDataCell />
-            },
-            {
-                accessor: `product`,
-                Header: `Product`,
-                width: 200,
-                Cell: ({ row }) => row?.original[`product`] ?
-                    <div style={{ display: "flex" }}>
-                        <p className="text-truncate">{row?.original[`product`]?.optionLabel || ""}</p>
-                        <Box ml={1}>
-                            <IconButton
-                                size="small"
-                                onClick={() => {
-                                    window.open(`${routes.productDetail.path}/${row.original[`product`]?.optionValue}`);
-                                }}
-                            >
-                                <OpenInNewIcon fontSize="small" color="primary" />
-                            </IconButton>
-                        </Box>
-                    </div>
-                    : <NoDataCell />
-            },
-            {
-                accessor: `LoadingTicket`,
-                Header: `Loading Ticket`,
-                width: 200,
-                Cell: ({ row }) => row?.original[`LoadingTicket`] ?
-                    <div style={{ display: "flex" }}>
-                        <p className="text-truncate">{row?.original[`LoadingTicket`]}</p>
-                        <Box ml={1}>
-                            <IconButton
-                                size="small"
-                                onClick={() => {
-                                    window.open(`${routes.deliveryTicketDetail.path}/${row.original[`LoadingTicketId`]}`);
-                                }}
-                            >
-                                <OpenInNewIcon fontSize="small" color="primary" />
-                            </IconButton>
-                        </Box>
-                    </div>
-                    : <NoDataCell />
-            }, {
-                accessor: `LoadingTicketStatus`,
-                Header: `Loading Ticket Status`,
-                width: 200,
-                Cell: ({ row }) => row?.original[`LoadingTicketStatus`] ? <p className="text-truncate">{row?.original[`LoadingTicketStatus`]}</p> : <NoDataCell />
-            },
-            ...(ticketType === DELIVERY_TICKET_TYPE.receiving ? [{
-                accessor: `ReceivingTicket`,
-                Header: `Receiving Ticket`,
-                width: 200,
-                Cell: ({ row }) => row?.original[`ReceivingTicket`] ?
-                    <div style={{ display: "flex" }}>
-                        <p className="text-truncate">{row?.original[`ReceivingTicket`]}</p>
-                        <Box ml={1}>
-                            <IconButton
-                                size="small"
-                                onClick={() => {
-                                    window.open(`${routes.deliveryTicketDetail.path}/${row.original[`ReceivingTicketId`]}`);
-                                }}
-                            >
-                                <OpenInNewIcon fontSize="small" color="primary" />
-                            </IconButton>
-                        </Box>
-                    </div>
-                    : <NoDataCell />
-            }, {
-                accessor: `ReceivingTicketStatus`,
-                Header: `Receiving Ticket Status`,
-                width: 200,
-                Cell: ({ row }) => row?.original[`ReceivingTicketStatus`] ? <p className="text-truncate">{row?.original[`ReceivingTicketStatus`]}</p> : <NoDataCell />
-            }] : [])
-        ];
-        coloum = [...coloum];
-        setColumns(coloum);
-        fetchRecords();
-    };
+
     const openActions = (event) => {
         setAnchorActionEl(event.currentTarget);
     };
@@ -246,7 +239,6 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, stepF
     const closeActions = () => {
         setAnchorActionEl(null);
     };
-
 
     const handleDeliveryTicketDialog = () => {
         if (selectedRecords.length) {
