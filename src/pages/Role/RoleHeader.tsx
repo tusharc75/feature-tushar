@@ -27,7 +27,8 @@ const RoleHeader = (props) => {
     columns,
     dispatch,
     filters,
-    resource
+    resource,
+    updateResourceOpen
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
   const [filter, setFilter] = useState(
@@ -193,6 +194,22 @@ const RoleHeader = (props) => {
                   }}
                 >
                   Assign users
+                </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    closeActions();
+                    updateResourceOpen({action:"Assign"});
+                  }}
+                >
+                  Assign Resource
+                </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    closeActions();
+                    updateResourceOpen({action:"Remove"});
+                  }}
+                >
+                  Remove Resource
                 </MenuItem>
               </Menu>
             </>

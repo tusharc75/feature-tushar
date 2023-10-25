@@ -23,6 +23,8 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import CreateRole from './CreateRole';
 import RoleHeader from './RoleHeader';
+import UpdateResource from './UpdateResource';
+import UpdateResourceDialog from './UpdateResource';
 
 const rolePermissionArray = [PERMISSION.superAdmin, PERMISSION.brandAdmin];
 let roleTimeout;
@@ -45,6 +47,7 @@ const Roles: FC = () => {
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [showAssignUserDialog, setShowAssignUserDialog] = useState(false);
+  const [showUpdateResourceDialog, setShowUpdateResourceDialog] = useState({open: false, action: null});
   const renderedFrom = camelCase(routes.role.title);
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
@@ -279,6 +282,29 @@ const Roles: FC = () => {
     setShowAssignUserDialog(false);
   };
 
+  const updateResourceOpen = (props:any) => {
+    let breakLoop = false;
+    selectedRecords.forEach((_roleid) => {
+      if(_roleid?.permission === PERMISSION.brandAdmin){
+        toastConfig.setToastConfig({
+          open: true,
+          type: "error",
+          message: "You do not have permission to update resource for brand admin role",
+        });
+        breakLoop = true;
+      }
+      return
+    })
+    if(breakLoop){
+      return
+    }
+    setShowUpdateResourceDialog({open: true, action: props.action});
+  }
+
+  const updateResourceClose = () => {
+    setShowUpdateResourceDialog({open: false, action: null});
+    console.log(showUpdateResourceDialog, 'showUpdateResourceDialog')
+  }
   const disableDelete = selectedRecords.some((o) => rolePermissionArray.indexOf(o?.permission) >= 0);
 
   return (
@@ -318,6 +344,21 @@ const Roles: FC = () => {
             }}
           />
         ))}
+      {showUpdateResourceDialog &&
+        (
+          <UpdateResourceDialog
+            showUpdateResourceDialog={showUpdateResourceDialog}
+            handleCloseDialog={updateResourceClose}
+            roleIds={selectedRecords.map((d) => d._id)}
+            onSuccess={() => {
+              updateResourceClose();
+            }}
+            selectedEntity={selectedEntity || ''}
+            setToastConfig={toastConfig.setToastConfig}
+            roleType={2}
+          
+          />
+        )}
       <section className="main-container-v1">
         <div className="headerbox-v1">
           <CustomBreadCrumbs routes={[routes.role]} />
@@ -340,6 +381,7 @@ const Roles: FC = () => {
               columns={columns}
               filters={filters}
               resource={sidebarResource.role}
+              updateResourceOpen={updateResourceOpen}
             />
           </div>
 
