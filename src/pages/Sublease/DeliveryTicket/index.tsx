@@ -70,7 +70,7 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, stepF
             const {
                 data: { data: deliveryTicketList }
             } = await axiosInstance().get(
-                `${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.sublease}&referenceId=${subleaseData._id}&ticketType=${ticketType}`
+                `${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.sublease}&referenceId=${subleaseData._id}`
             );
             rows.forEach((parent, i) => {
                 parent.index = i + 1;
@@ -79,19 +79,35 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, stepF
             });
 
             deliveryTicketList?.map((obj) => {
-                if (obj.ticketType === ticketType) {
+                if (obj.ticketType === DELIVERY_TICKET_TYPE.loading) {
                     rows.map((d, index) => {
                         if (obj?.productInventory?.some((p) => d?._id === p?.optionValue)) {
-                            rows[index][`${ticketType}Ticket`] = obj?.ticketName;
-                            rows[index][`${ticketType}TicketId`] = obj?._id;
-                            rows[index][`${ticketType}TicketStatus`] = obj?.status;
-                            if (obj?.status === DELIVERY_TICKET_STATUS.delivered) {
+                            rows[index][`LoadingTicket`] = obj?.ticketName;
+                            rows[index][`LoadingTicketId`] = obj?._id;
+                            rows[index][`LoadingTicketStatus`] = obj?.status;
+                            if (obj?.status === DELIVERY_TICKET_STATUS.delivered && ticketType === DELIVERY_TICKET_TYPE.loading) {
                                 rows[index]['hideSelection'] = true;
                             }
                         }
                     });
                 }
             });
+            if (ticketType === DELIVERY_TICKET_TYPE.receiving) {
+                deliveryTicketList?.map((obj) => {
+                    if (obj.ticketType === DELIVERY_TICKET_TYPE.receiving) {
+                        rows.map((d, index) => {
+                            if (obj?.productInventory?.some((p) => d?._id === p?.optionValue)) {
+                                rows[index][`ReceivingTicket`] = obj?.ticketName;
+                                rows[index][`ReceivingTicketId`] = obj?._id;
+                                rows[index][`ReceivingTicketStatus`] = obj?.status;
+                                if (obj?.status === DELIVERY_TICKET_STATUS.delivered && ticketType === DELIVERY_TICKET_TYPE.receiving) {
+                                    rows[index]['hideSelection'] = true;
+                                }
+                            }
+                        });
+                    }
+                });
+            }
             setRowsData(rows);
             if (rows?.every((e) => e[`${ticketType}TicketStatus`] === DELIVERY_TICKET_STATUS.delivered)) {
                 setNextStep(true);
@@ -101,15 +117,6 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, stepF
         }
     };
     const fetchFields = async () => {
-        const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.productionOrderDetail}`);
-        var data = response?.data?.data;
-        data = CURReplaceByCurrencySingle(data, subleaseData?.currency || 'USD');
-        const newColumns = generateCustomTableColumns(data, subleaseData?.currency || 'USD', renderedFrom);
-        let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
-        if (qtyIndex > -1) {
-            newColumns[qtyIndex].accessor = 'qtyDisplay';
-            newColumns[qtyIndex].editable = false;
-        }
         let coloum: any = [
             {
                 accessor: 'index',
@@ -164,17 +171,17 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, stepF
                 }
             },
             {
-                accessor: `${ticketType}Ticket`,
-                Header: `${ticketType} Ticket`,
+                accessor: `LoadingTicket`,
+                Header: `Loading Ticket`,
                 width: 200,
-                Cell: ({ row }) => row?.original[`${ticketType}Ticket`] ?
+                Cell: ({ row }) => row?.original[`LoadingTicket`] ?
                     <div style={{ display: "flex" }}>
-                        <p className="text-truncate">{row?.original[`${ticketType}Ticket`]}</p>
+                        <p className="text-truncate">{row?.original[`LoadingTicket`]}</p>
                         <Box ml={1}>
                             <IconButton
                                 size="small"
                                 onClick={() => {
-                                    window.open(`${routes.deliveryTicketDetail.path}/${row.original[`${ticketType}TicketId`]}`);
+                                    window.open(`${routes.deliveryTicketDetail.path}/${row.original[`LoadingTicketId`]}`);
                                 }}
                             >
                                 <OpenInNewIcon fontSize="small" color="primary" />
@@ -183,13 +190,38 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, stepF
                     </div>
                     : <NoDataCell />
             }, {
-                accessor: `${ticketType}TicketStatus`,
-                Header: `${upperFirst(ticketType)} Ticket Status`,
+                accessor: `LoadingTicketStatus`,
+                Header: `Loading Ticket Status`,
                 width: 200,
-                Cell: ({ row }) => row?.original[`${ticketType}TicketStatus`] ? <p className="text-truncate">{row?.original[`${ticketType}TicketStatus`]}</p> : <NoDataCell />
-            }
+                Cell: ({ row }) => row?.original[`LoadingTicketStatus`] ? <p className="text-truncate">{row?.original[`LoadingTicketStatus`]}</p> : <NoDataCell />
+            },
+            ...(ticketType === DELIVERY_TICKET_TYPE.receiving ? [{
+                accessor: `ReceivingTicket`,
+                Header: `Receiving Ticket`,
+                width: 200,
+                Cell: ({ row }) => row?.original[`ReceivingTicket`] ?
+                    <div style={{ display: "flex" }}>
+                        <p className="text-truncate">{row?.original[`ReceivingTicket`]}</p>
+                        <Box ml={1}>
+                            <IconButton
+                                size="small"
+                                onClick={() => {
+                                    window.open(`${routes.deliveryTicketDetail.path}/${row.original[`ReceivingTicketId`]}`);
+                                }}
+                            >
+                                <OpenInNewIcon fontSize="small" color="primary" />
+                            </IconButton>
+                        </Box>
+                    </div>
+                    : <NoDataCell />
+            }, {
+                accessor: `ReceivingTicketStatus`,
+                Header: `Receiving Ticket Status`,
+                width: 200,
+                Cell: ({ row }) => row?.original[`ReceivingTicketStatus`] ? <p className="text-truncate">{row?.original[`ReceivingTicketStatus`]}</p> : <NoDataCell />
+            }] : [])
         ];
-        coloum = [...coloum, ...newColumns];
+        coloum = [...coloum];
         setColumns(coloum);
         fetchRecords();
     };
@@ -249,6 +281,7 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, stepF
                 .post(`${deliveryTicket.api}/updatebulk`, data)
                 .then(({ data: { data } }) => {
                     fetchRecords();
+                    fetchData();
                     toastConfig.setToastConfig({
                         open: true,
                         type: 'success',

@@ -5,7 +5,7 @@ import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import SearchBox from '../Helpers/SearchBox';
-import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, getLocalStorageArrayData, serializedAsset } from 'src/constants/helpers';
+import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, getLocalStorageArrayData, serializedAsset, SUBLEASE_TYPE } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import routes from '../Helpers/Routes';
 import styles from 'src/pages/Leads/Header.module.scss';
@@ -156,6 +156,9 @@ const AssignSerializedAssetDialog = ({
     }
     if (reference === 'supplier') {
       deepFilter = `${deepFilter}&subleaseAsset=0`;
+    }
+    if (reference === 'sublease') {
+      deepFilter = `${deepFilter}&subleaseAsset=true&subleaseType=${SUBLEASE_TYPE.interCompany}`;
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];

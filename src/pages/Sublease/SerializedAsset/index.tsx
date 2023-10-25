@@ -153,7 +153,7 @@ function SerializedAsset({ subleaseData, setNextStep, fetchData, isIssued, rende
             },
             {
                 accessor: 'assets',
-                Header: 'Qty Assigned',
+                Header: 'Asset Assigned',
                 disableFilters: false,
                 Cell: ({ row }) => getAssetAssignedValues(row)
             }
@@ -523,12 +523,6 @@ function SerializedAsset({ subleaseData, setNextStep, fetchData, isIssued, rende
                     selectedProducts={assetAssignedProduct?.map((i) => {
                         return { _id: i._id, product: i.materialId, productName: i.detail, qty: i.assetQty - i.assetAssignedQty };
                     })}
-                    extraStaticFilter={
-                        [{
-                            field: 'status',
-                            term: 'Available'
-                        }]
-                    }
                 />
             )}
         </Fragment>
