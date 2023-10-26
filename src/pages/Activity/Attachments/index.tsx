@@ -38,97 +38,7 @@ import SendIcon from '@material-ui/icons/Send';
 import { CreateEmail } from 'src/components/Activity/Email/CreateEmail';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import mime from 'mime';
-
-
-function reducer(state, action) {
-  switch (action.type) {
-    case 'loading':
-      return {
-        ...state,
-        loading: action.loading
-      };
-
-    case 'initialize':
-      return {
-        ...state,
-        dataRows: action.data,
-        rowCount: action.count
-      };
-
-    case 'selection':
-      return {
-        ...state,
-        selectedRecords: action.selectedRecords
-      };
-
-    case 'update':
-      return {
-        ...state,
-        dataRows: action.data,
-        loading: false
-      };
-
-    case 'filter':
-      return {
-        ...state,
-        loading: true,
-        filters: action.filters,
-        page: 0
-      };
-
-    case 'sort':
-      return {
-        ...state,
-        sorting: action.sorting,
-        loading: true
-      };
-
-    case 'search':
-      return {
-        ...state,
-        search: action.search,
-        loading: true
-      };
-
-    case 'pageChange':
-      return {
-        ...state,
-        page: action.page
-      };
-
-    case 'pageSizeChange':
-      return {
-        ...state,
-        limit: action.limit,
-        page: 0,
-        loading: true
-      };
-
-    case 'complete':
-      return {
-        ...state,
-        loading: false
-      };
-
-    default:
-      break;
-  }
-
-  return state;
-}
-
-const intialState = {
-  dataRows: [],
-  rowCount: 0,
-  loading: false,
-  page: 0,
-  limit: 25,
-  pageSizes: gridPageSizes,
-  search: '',
-  filters: {},
-  sorting: [],
-  selectedRecords: []
-};
+import { useTableReducer } from 'src/components/CustomReactTableNew/useTableReducer';
 
 export default function Attachment() {
   const history = useHistory();
@@ -150,7 +60,7 @@ export default function Attachment() {
   }: any = useData();
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
+  const { state, dispatch } = useTableReducer();
   const { dataRows, rowCount, selectedRecords, loading, page, limit, pageSizes, search, filters, sorting } = state;
   const [resource, setResource] = useState(null);
   const [resourceData, setResourceData] = useState(null);
@@ -463,26 +373,31 @@ export default function Attachment() {
         });
     }
   };
-  
+
   const handleMail = (data) => {
-    const attachments: any = []
-    Promise.all(data?.file.map(async file => {
-      await axiosInstance().get(`user/download?fileName=${file?.url}`, { responseType: 'blob' }).then(({ data }) => {
-        let reader = new FileReader();
-        reader.readAsDataURL(new Blob([data], { type: mime.getType(file.url.split('.')?.pop()) }));
-        reader.onloadend = function () {
-          let base64data: any = reader.result;
-          attachments.push({
-            base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
-            contentType: base64data.split(';')[0].split(':')[1],
-            extension: `.${file.url.split('.')?.pop()}`,
-            name: file.name
+    const attachments: any = [];
+    Promise.all(
+      data?.file.map(async (file) => {
+        await axiosInstance()
+          .get(`user/download?fileName=${file?.url}`, { responseType: 'blob' })
+          .then(({ data }) => {
+            let reader = new FileReader();
+            reader.readAsDataURL(new Blob([data], { type: mime.getType(file.url.split('.')?.pop()) }));
+            reader.onloadend = function () {
+              let base64data: any = reader.result;
+              attachments.push({
+                base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
+                contentType: base64data.split(';')[0].split(':')[1],
+                extension: `.${file.url.split('.')?.pop()}`,
+                name: file.name
+              });
+            };
           })
-        };
-      }).catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
-    })).finally(() => {
+          .catch((err) => {
+            toastConfig.setToastConfig(err);
+          });
+      })
+    ).finally(() => {
       setEmailAttachment(attachments);
       setSendMail(true);
     });
@@ -730,7 +645,7 @@ export default function Attachment() {
           permissions={permissions?.attachment}
           module="Attachment"
           api={`/attachment`}
-          afterImportCompleted={() => { }}
+          afterImportCompleted={() => {}}
           total={rowCount}
           onlyExport={true}
           additionalParams={`&relatedTo=${JSON.stringify(filter)}${getQueryString(true)}`}
@@ -863,23 +778,16 @@ export default function Attachment() {
             <CustomReactTable
               height={'calc(100vh - 300px)'}
               columns={column}
-              data={dataRows}
-              currentPage={page}
               onSelect={(newSelectedRecords) => {
                 dispatch({ type: 'selection', selectedRecords: newSelectedRecords });
               }}
               dispatch={dispatch}
+              state={state}
               childrenProperty="subRows"
-              uniqueKey="_id"
               expander={true}
-              setWholeRowsCellColor={() => { }}
+              setWholeRowsCellColor={() => {}}
               renderedFrom={'attachment_render'}
               isClientSideGrid={false}
-              rowCount={rowCount}
-              limit={limit}
-              customFilters={filters}
-              sorting={sorting}
-              loading={loading}
               fetchChildAttachment={fetchChildAttachment}
             />
           ) : (
@@ -962,8 +870,8 @@ export default function Attachment() {
                   referenceId: open.parentResource
                     ? open.parentResource?.referenceId
                     : resource && selectedResourceData
-                      ? selectedResourceData.optionValue
-                      : user?.user?._id,
+                    ? selectedResourceData.optionValue
+                    : user?.user?._id,
                   access: true
                 }
               ]}

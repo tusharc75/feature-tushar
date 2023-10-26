@@ -18,11 +18,12 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { PERMISSION } from '../../constants/Roles';
-import { gridLoadingTimeout, isObjectEmpty, localStorageKeys, prepareDataForGrid, roleTypes, sidebarResource } from '../../constants/helpers';
+import { ROLE_TIER, gridLoadingTimeout, isObjectEmpty, localStorageKeys, prepareDataForGrid, roleTypes, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import CreateRole from './CreateRole';
 import RoleHeader from './RoleHeader';
+import AssignUnassignResourceDialog from './AssignUnassignResource';
 
 const rolePermissionArray = [PERMISSION.superAdmin, PERMISSION.brandAdmin];
 let roleTimeout;
@@ -45,6 +46,7 @@ const Roles: FC = () => {
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [showAssignUserDialog, setShowAssignUserDialog] = useState(false);
+  const [showUpdateResourceDialog, setShowUpdateResourceDialog] = useState({ open: false, action: null });
   const renderedFrom = camelCase(routes.role.title);
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
@@ -54,11 +56,12 @@ const Roles: FC = () => {
   const columns = [
     { field: 'name', headerName: 'Name', show: true, disabled: true, cellRenderer: 'nameRenderer' },
     { field: 'description', headerName: 'Description', show: true, cellRenderer: 'commonRenderer' },
+    { field: 'tier', headerName: 'Tier', show: true, cellRenderer: 'commonRenderer' },
     { field: 'createdBy', headerName: 'Created By', show: true, cellRenderer: 'createdByRenderer' },
     { field: 'updatedBy', headerName: 'Updated By', show: true, cellRenderer: 'updatedByRenderer' }
   ];
-  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
 
+  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
   if (columnState) {
     columns.forEach((item) => {
       columnState.forEach((d) => {
@@ -72,11 +75,9 @@ const Roles: FC = () => {
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
-
     if (roleTimeout) {
       clearTimeout(roleTimeout);
     }
-
     roleTimeout = setTimeout(() => {
       fetchRoles();
     }, millisec);
@@ -176,30 +177,26 @@ const Roles: FC = () => {
   const fetchRoles = async () => {
     const queryString = getQueryString();
     dispatch({ type: 'loading', loading: true });
-
     if (gridApi) {
       gridApi.setRowData([]);
     }
-
-    axiosInstance()
-      .get(`/role/${queryString}`)
-      .then(({ data: { data, count } }) => {
-        let rows = data.map((u) => {
-          let finalObject = prepareDataForGrid(u);
-          finalObject['canDelete'] = permissions?.role.isDelete;
-          finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions?.role.isUpdate;
-          return {
-            ...finalObject,
-            type: `${u.type === roleTypes.find((d) => d.key === 'Global')?.value ? 'Global' : 'Regional'} Role`
-          };
-        });
-
-        dispatch({ type: 'initialize', data: rows, count: count });
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
-      })
+    axiosInstance().get(`/role/${queryString}`).then(({ data: { data, count } }) => {
+      let rows = data.map((u) => {
+        let finalObject = prepareDataForGrid(u);
+        finalObject['canDelete'] = permissions?.role.isDelete;
+        finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
+        finalObject['allowedToEdit'] = permissions?.role.isUpdate;
+        finalObject['tier'] = u?.tier ? u?.tier : ROLE_TIER.tier1;
+        return {
+          ...finalObject,
+          type: `${u.type === roleTypes.find((d) => d.key === 'Global')?.value ? 'Global' : 'Regional'} Role`
+        };
+      });
+      dispatch({ type: 'initialize', data: rows, count: count });
+      setTimeout(() => {
+        dispatch({ type: 'loading', loading: false });
+      }, gridLoadingTimeout);
+    })
       .catch((err) => {
         toastConfig.setToastConfig(err);
         dispatch({ type: 'loading', loading: false });
@@ -279,6 +276,10 @@ const Roles: FC = () => {
     setShowAssignUserDialog(false);
   };
 
+  const updateResourceOpen = (props: any) => {
+    setShowUpdateResourceDialog({ open: true, action: props.action });
+  }
+  
   const disableDelete = selectedRecords.some((o) => rolePermissionArray.indexOf(o?.permission) >= 0);
 
   return (
@@ -318,6 +319,22 @@ const Roles: FC = () => {
             }}
           />
         ))}
+      {showUpdateResourceDialog &&
+        (<AssignUnassignResourceDialog
+          showUpdateResourceDialog={showUpdateResourceDialog}
+          handleCloseDialog={() => {
+            setShowUpdateResourceDialog({ open: false, action: null });
+          }}
+          roleIds={selectedRecords.map((d) => d._id)}
+          onSuccess={() => {
+            setShowUpdateResourceDialog({ open: false, action: null });
+            fetchRoles()
+          }}
+          selectedEntity={selectedEntity || ''}
+          setToastConfig={toastConfig.setToastConfig}
+          roleType={2}
+        />
+        )}
       <section className="main-container-v1">
         <div className="headerbox-v1">
           <CustomBreadCrumbs routes={[routes.role]} />
@@ -340,6 +357,7 @@ const Roles: FC = () => {
               columns={columns}
               filters={filters}
               resource={sidebarResource.role}
+              updateResourceOpen={updateResourceOpen}
             />
           </div>
 
@@ -360,7 +378,7 @@ const Roles: FC = () => {
                 history.push(`${routes.roleDetail.path}/${d._id}`);
               }}
               extraParamsToCheckDelete={true}
-              onDelete={(d) => {}}
+              onDelete={(d) => { }}
               rowCount={rowCount}
               page={page}
               loading={loading}
@@ -385,7 +403,7 @@ const Roles: FC = () => {
               owerCollaboratorInitialsOrImages=""
               onCreate={false}
               showClone={false}
-              onClone={() => {}}
+              onClone={() => { }}
               renderedFrom={'role'}
             />
           ) : (

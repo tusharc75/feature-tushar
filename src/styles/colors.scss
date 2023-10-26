@@ -1,5 +1,9 @@
 :root {
+  --error-bg: #ffd2d2;
+  --success-bg: #e3fae3;
 }
 
 [data-mode='dark']:root {
+  --error-bg: #5e1c23;
+  --success-bg: #234623;
 }
