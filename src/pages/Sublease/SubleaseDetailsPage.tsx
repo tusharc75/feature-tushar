@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, Paper, Tab, Tabs, useMediaQuery } from '@material-ui/core';
+import React, { useState, useEffect, useContext } from 'react';
+import { Grid, Box, Button, Tab, Tabs, } from '@material-ui/core';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from '../../axios/axiosInstance';
 import routes from '../../components/Helpers/Routes';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPageHeader from '../../components/DetailsPageHeader';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
@@ -76,7 +75,7 @@ const SubleaseDetailsPage = () => {
   };
 
   useEffect(() => {
-    if (currentStep >= 0 && currentStep <= 2) {
+    if (currentStep !== null && currentStep >= 0 && currentStep <= 4) {
       updateProcessStatus(subleaseStepsNames[currentStep]);
     }
   }, [currentStep]);
