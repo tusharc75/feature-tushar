@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Dialog, Button, CircularProgress, Grid, Box, TextField, Paper, useTheme, useMediaQuery } from '@material-ui/core';
+import { Dialog, Button, CircularProgress, Grid, Box, TextField, Paper, useTheme } from '@material-ui/core';
 import { useHistory } from 'react-router-dom';
 import { Autocomplete, Skeleton } from '@material-ui/lab';
 import axiosInstance from '../../axios/axiosInstance';
@@ -14,16 +14,13 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { useData } from '../../StateProvider/Provider';
 
 const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selectedEntity, isClone = false, roleId = null }) => {
-  const theme = useTheme();
-  const {
-    state: {
-      user: { user }
-    }
-  } = useData();
+
+  const { state: { user: { user } } } = useData();
+
   const history = useHistory();
   const [isSubmitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [values, setValues] = useState({ name: '', description: '', tier: '' });
+  const [values, setValues] = useState({ name: '', description: '', tier: ROLE_TIER.tier1 });
   const [cloneHeading, setCloneHeading] = useState('');
   const [field, setField] = useState([]);
   const [resource, setResource] = useState([]);
@@ -224,7 +221,7 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
                   }}
                   getOptionLabel={(option) => option || ''}
                   value={values?.tier}
-                  renderInput={(params) => <TextField {...params} label="Select Tier" margin="none" size="small" variant="outlined" />}
+                  renderInput={(params) => <TextField {...params} required label="Select Tier" margin="none" size="small" variant="outlined" />}
                 />
               </Box>
               <Paper>
