@@ -10,7 +10,7 @@ import CustomReactTable from '../../../components/CustomReactTable/CustomReactTa
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { sublease, pricingCondition, SUBLEASE_STATUS, SUBLEASE_TYPE } from '../../../constants/helpers';
+import { sublease, pricingCondition, SUBLEASE_TYPE } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import QtyDialog from './QtyDialog';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
@@ -18,12 +18,10 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { MdDelete } from 'react-icons/md';
 import { fetch_sublease_product_fields } from '../../../components/Sublease/helper';
 import { ExpandMore } from '@material-ui/icons';
-import styles from '../../Leads/Header.module.scss';
 import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import EditIcon from '@material-ui/icons/Edit';
-import AddIcon from '@material-ui/icons/Add';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 
@@ -469,38 +467,6 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
                 </MenuItem>
               </Menu>
             </div>)}
-            {/* {(!subleaseData.status || subleaseData.status === SUBLEASE_STATUS.new) && (
-              <Fragment>
-                {permissions?.product?.isRead && (
-                  <Button
-                    variant={'contained'}
-                    color="primary"
-                    size="small"
-                    style={isMobile && !isTablet ? { color: 'var(--secondary)' } : {}}
-                    onClick={() => {
-                      setAddExistingProductDialog({ open: true, type: 'product', parentId: null });
-                    }}
-                    startIcon={isMobile && !isTablet ? <AddIcon /> : null}
-                  >
-                    {isMobile && !isTablet ? `Products` : `Add Products`}
-                  </Button>
-                )}
-                {permissions?.packages?.isRead && (
-                  <Button
-                    variant={'contained'}
-                    color="primary"
-                    size="small"
-                    style={isMobile && !isTablet ? { color: 'var(--colorOpportunity)' } : {}}
-                    onClick={() => {
-                      setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
-                    }}
-                    startIcon={isMobile && !isTablet ? <AddIcon /> : null}
-                  >
-                    {isMobile && !isTablet ? `${routes.packages.title}` : `Add ${routes.packages.title}`}
-                  </Button>
-                )}
-              </Fragment>
-            )} */}
           </div>
           <div className="flex flex-wrap gap-2">
             {material?.length && !isIssued && !rowsData?.some((f) => !f.isValid) && subleaseData?.type !== SUBLEASE_TYPE.interCompany ? (
