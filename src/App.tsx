@@ -247,6 +247,7 @@ import SubleaseInvoice from './pages/SubleaseInvoice';
 import RentalManagementInvoice from './pages/RentalMangementInvoice';
 import CreditMemo from './pages/CreditMemo';
 import CreditMemoDetail from './pages/CreditMemo/CreditMemoDetail';
+import GenerateInvoice from './pages/GenerateInvoice';
 
 var notificationInterval: any = null;
 
@@ -1082,6 +1083,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.creditMemoDetail.path}/:id`}>
               <CreditMemoDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.generateInvoice.path}`}>
+              <GenerateInvoice />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />

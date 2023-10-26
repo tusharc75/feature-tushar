@@ -142,7 +142,7 @@ function PreviewDownload({
         <Box display="flex" flexWrap={'wrap'} gridGap={8}>
           <Button
             variant={isMobile && !isTablet ? 'text' : 'outlined'}
-            className="btn-outline-v1"
+            className="btn-outline-v1  with-border"
             color="primary"
             type="button"
             size="small"
@@ -155,7 +155,7 @@ function PreviewDownload({
             {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : loadingType === 'view' ? 'Please wait...' : 'Preview'}
           </Button>
           <Button
-            className="btn-outline-v1"
+            className="btn-outline-v1 with-border"
             variant={isMobile && !isTablet ? 'text' : 'outlined'}
             color="primary"
             type="button"
@@ -170,7 +170,7 @@ function PreviewDownload({
           </Button>
           {isExcelDownload && (
             <Button
-              className="btn-outline-v1"
+              className="btn-outline-v1  with-border"
               variant={isMobile && !isTablet ? 'text' : 'outlined'}
               color="primary"
               type="button"
@@ -189,7 +189,7 @@ function PreviewDownload({
               variant={isMobile && !isTablet ? 'text' : 'outlined'}
               color="primary"
               size="small"
-              className="btn-outline-v1"
+              className="btn-outline-v1  with-border"
               disabled={loadingType === 'email'}
               startIcon={isMobile ? '' : <MdEmail />}
               onClick={() => {

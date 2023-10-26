@@ -70,7 +70,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
       data?.forEach((e) => {
         e.isColumnEditable = false;
       });
-      const newColumns = generateCustomTableColumns(data, invoiceData?.currency, renderedFrom);
+      const newColumns = generateCustomTableColumns(data, invoiceData.currency ? invoiceData.currency : "USD", renderedFrom);
       let qtyIndex = newColumns?.findIndex((d) => d.accessor === 'qty');
       if (qtyIndex > -1) {
         newColumns[qtyIndex].accessor = 'qtyDisplay';

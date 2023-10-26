@@ -1,111 +1,80 @@
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  makeStyles
-} from '@material-ui/core';
-import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
-import { useState } from 'react';
+import { Error } from '@material-ui/icons';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from 'src/constants/helpers';
+import DashboardModal from '../DashboardModal';
 
-const useStyles = makeStyles((theme) => ({
-  table: {
-    minWidth: 100
-  }
-}));
-
-interface MessageList {
+interface ErrorMessages {
   index?: number;
   message: string;
 }
 
 export default function CustomMessageDialog({
   open,
-  messageList,
+  errorMessages,
   onClose,
   forwardText
 }: {
   open: boolean;
-  messageList: MessageList[];
+  errorMessages: ErrorMessages[];
   onClose: () => void;
   forwardText?: string;
 }) {
-  const classes = useStyles();
-
-  const [fullScreen, setFullScreen] = useState(false);
-
   const getMessageList = (message) => {
-    const messageList: any = [];
+    const errorMessages: any = [];
     message?.forEach((m) => {
       const { index, message } = m;
-      const existingMessage = messageList.find((m) => m?.message === message);
-
+      const existingMessage = errorMessages.find((m) => m?.message === message);
       if (existingMessage) {
         existingMessage.indexes.push(index);
       } else {
-        messageList.push({ message, indexes: [index] });
+        errorMessages.push({ message, indexes: [index] });
       }
     });
-    return messageList;
+    return errorMessages;
   };
 
   return (
-    <Dialog
-      disableEscapeKeyDown
-      fullScreen={fullScreen || isMobile || isTablet}
-      maxWidth="sm"
-      TransitionComponent={CustomDialogTransition}
+    <DashboardModal
+      dialogProps={{
+        disableEscapeKeyDown: true,
+        fullScreen: isMobile || isTablet,
+        maxWidth: 'sm',
+        TransitionComponent: CustomDialogTransition,
+        onClose: (e, reason) => {
+          if (reason !== 'backdropClick') {
+          }
+        },
+        keepMounted: true,
+        fullWidth: true
+      }}
+      modalHead={{
+        icon: <Error color={'error'} />,
+        title: 'Message',
+        fullScreenOption: true
+      }}
+      handleClose={() => onClose()}
       aria-labelledby="confirmation-dialog-title"
       open={open}
-      onClose={(e, reason) => {
-        if (reason !== 'backdropClick') {
-        }
-      }}
       id="confirmation-dialog"
-      keepMounted
-      fullWidth
     >
-      <CustomDialogHeader
-        title={'Message'}
-        onClose={onClose}
-        showRequiredLabel={false}
-        isMinimized={!fullScreen}
-        onMinimizeMaximize={() => {
-          setFullScreen((prevState) => !prevState);
-        }}
-        showManimizeMaximize={true}
-      />
-      <DialogContent>
-        <Table className={classes.table}>
-          <TableHead>
-            <TableRow>
-              <TableCell>Indexes</TableCell>
-              <TableCell align="right">Message</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {getMessageList(messageList)?.map((d) => (
-              <TableRow>
-                <TableCell>{d?.indexes?.map((index) => index).toString()}</TableCell>
-                <TableCell align="right">{d?.message}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </DialogContent>
-      <DialogActions>
-        <Button size="small" onClick={onClose} color="primary">
-          {!forwardText ? 'Close' : forwardText}
-        </Button>
-      </DialogActions>
-    </Dialog>
+      <div className="grid gap-2">
+        {getMessageList(errorMessages)?.map((d) => (
+          <div
+            key={d.message}
+            className="grid grid-cols-[1fr_5fr] gap-[20px]  shadow-[0px_5.44444px_27.22222px_0px_rgba(0,_0,_0,_0.06)] px-[15px] py-[12px] md:px-[20px] rounded-lg"
+            style={{ border: '1px solid var(--common-border-color)' }}
+          >
+            <div title={d?.indexes?.toString()} className="cursor-help">
+              <p className="text-[13px] mb-[8px]">Index</p>
+              <h6 className="text-[16px] line-clamp-1">{d?.indexes?.toString()}</h6>
+            </div>
+            <div title={d?.message} className=" cursor-help">
+              <p className="text-[13px] mb-[8px]">Message</p>
+              <p className="text-[16px] line-clamp-1">{d?.message}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </DashboardModal>
   );
 }

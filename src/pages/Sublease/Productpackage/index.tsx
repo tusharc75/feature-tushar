@@ -6,12 +6,11 @@ import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import AddExistingProductInventory from './AddExistingProductInventory';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { sublease, pricingCondition, SUBLEASE_STATUS, SUBLEASE_TYPE } from '../../../constants/helpers';
+import { sublease, pricingCondition, SUBLEASE_TYPE } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import QtyDialog from './QtyDialog';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
@@ -19,14 +18,15 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { MdDelete } from 'react-icons/md';
 import { fetch_sublease_product_fields } from '../../../components/Sublease/helper';
 import { ExpandMore } from '@material-ui/icons';
-import styles from '../../Leads/Header.module.scss';
 import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import EditIcon from '@material-ui/icons/Edit';
-import AddIcon from '@material-ui/icons/Add';
+import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
+import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
+import { notOwnerAndColaborator, subleaseMessage } from 'src/constants/messageHelpers';
 
-const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, renderedFrom, allowedToEdit, stepFullScreen }) => {
+const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchData, isIssued, renderedFrom, allowedToEdit, stepFullScreen }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -51,6 +51,9 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
   const [allFields, setAllFields] = useState([]);
   const [isRateRequired, setIsRateRequired] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [addAnchorEl, setAddAnchorEl] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
 
   useEffect(() => {
     fetchFields();
@@ -169,7 +172,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
           <IconButton
             size="small"
             aria-label="Details"
-            disabled={row.original.hideSelection || allowedToEdit || row.original?.assetQty > 0}
+            disabled={row.original.hideSelection || !allowedToEdit || row.original?.assetQty > 0}
             onClick={() => {
               const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
               if (row.original?.type === 'package' && row.original?.subRows?.length) {
@@ -180,7 +183,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
               setDeleteData(obj);
             }}
           >
-            <DeleteIcon fontSize="small" color={row.original.hideSelection || allowedToEdit || row.original?.assetQty > 0 ? "disabled" : "error"} />
+            <DeleteIcon fontSize="small" color={row.original.hideSelection || !allowedToEdit || row.original?.assetQty > 0 ? "disabled" : "error"} />
           </IconButton>
 
         </>
@@ -201,6 +204,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
 
   const fetchProductInventory = async () => {
     setNextStep(false);
+    setNextStepToolTip(null)
     var data: any = [];
     var inventory: any = [];
     const response = await axiosInstance().get(`${sublease.api}/productpackage/${subleaseData._id}`);
@@ -238,12 +242,11 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
       }
     });
     if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
-      if (inventory.length === 0 && subleaseData?.type === SUBLEASE_TYPE.interCompany && rows?.every((e) => e?.isValid)) {
-        setNextStep(true);
-      } else
-        setNextStep(false);
+      setNextStep(false);
+      setNextStepToolTip(subleaseMessage.addProductPackageStep);
     } else {
       setNextStep(true);
+      setNextStepToolTip(null)
     }
     setRowsData(rows);
     setSelectedProducts([]);
@@ -405,126 +408,158 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
     if (inputField.hasOwnProperty('qtyDisplay')) {
       inputField['qty'] = inputField['qtyDisplay'];
     }
+    if (inputField['qty'] < rowData?.assetQty) {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'error',
+        message: 'The quantity is less than what was assigned.'
+      });
+      return;
+    }
     let rows: any = [{ ...rowData, ...updatedData }];
     rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
     handleSaveData(rows);
   };
 
+
+  const openAddActions = (event) => {
+    setAddAnchorEl(event.currentTarget);
+  };
+
+  const closeAddActions = () => {
+    setAddAnchorEl(null);
+  };
+
+
   return (
     <Fragment>
-      {allowedToEdit && (
-        <div className="my-2 flex flex-wrap justify-between gap-2">
-          <div className="flex flex-wrap gap-2 px-2">
-            {(!subleaseData.status || subleaseData.status === SUBLEASE_STATUS.new) && (
-              <Fragment>
-                {permissions?.product?.isRead && (
-                  <Button
-                    variant={'contained'}
-                    color="primary"
-                    size="small"
-                    style={isMobile && !isTablet ? { color: 'var(--secondary)' } : {}}
-                    onClick={() => {
-                      setAddExistingProductDialog({ open: true, type: 'product', parentId: null });
-                    }}
-                    startIcon={isMobile && !isTablet ? <AddIcon /> : null}
-                  >
-                    {isMobile && !isTablet ? `Products` : `Add Products`}
-                  </Button>
-                )}
-                {permissions?.packages?.isRead && (
-                  <Button
-                    variant={'contained'}
-                    color="primary"
-                    size="small"
-                    style={isMobile && !isTablet ? { color: 'var(--colorOpportunity)' } : {}}
-                    onClick={() => {
-                      setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
-                    }}
-                    startIcon={isMobile && !isTablet ? <AddIcon /> : null}
-                  >
-                    {isMobile && !isTablet ? `${routes.packages.title}` : `Add ${routes.packages.title}`}
-                  </Button>
-                )}
-              </Fragment>
-            )}
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {material?.length && !isIssued && !rowsData?.some((f) => !f.isValid) && subleaseData?.type !== SUBLEASE_TYPE.interCompany ? (
-              <Fragment>
-                <HtmlTooltip title={'Start Sublease'}>
-                  <Button
-                    variant={'contained'}
-                    color="primary"
-                    size="small"
-                    onClick={() => {
-                      issueSublease();
-                    }}
-                    disabled={isIssueing}
-                    endIcon={isIssueing && <CircularProgress size={20} color="primary" />}
-                  >
-                    {isMobile && !isTablet ? <MdDelete size={20} /> : 'Start Sublease'}
-                  </Button>
-                </HtmlTooltip>
-              </Fragment>
-            ) : null}
-            <Button
-              disabled={selectedProducts?.length ? false : true}
-              variant={'outlined'}
-              color="default"
-              size="small"
-              onClick={openActions}
-              className={` new-dropdown-v1`}
-              aria-controls="action-menu"
-              endIcon={<ExpandMore />}
-            >
-              Actions
-            </Button>
-            <Menu
-              anchorEl={anchorEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
+      <div className="my-2 flex flex-wrap justify-between gap-2">
+        <div className="flex flex-wrap gap-2 ">
+          <HtmlTooltip title={!allowedToEdit ? notOwnerAndColaborator : 'Add Products/Packages'}>
+            <div>
+              <Button
+                variant={'outlined'}
+                color="primary"
+                size="small"
+                startIcon={<Add />}
+                disabled={!allowedToEdit}
+                onClick={openAddActions}
+                aria-controls="add-menu">
+                {'Add'}
+                <ExpandMore fontSize="small" />
+              </Button>
+            </div>
+          </HtmlTooltip>
+          <Menu
+            anchorEl={addAnchorEl}
+            keepMounted
+            getContentAnchorEl={null}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left'
+            }}
+            id="add-menu"
+            open={Boolean(addAnchorEl)}
+            onClose={closeAddActions}
+          >
+            <MenuItem
+              onClick={() => {
+                setAddExistingProductDialog({ open: true, type: 'product', parentId: null });
+                closeAddActions();
               }}
-              id="action-menu"
-              open={Boolean(anchorEl)}
-              onClose={closeActions}
             >
-              <MenuItem
-                color="primary"
-                disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
-                onClick={() => {
-                  setAnchorEl(null);
-                  setIsProductEdit({ open: true, isBulkedit: true });
-                }}
-              >
-                {'Bulk Edit'}
-              </MenuItem>
-              <MenuItem
-                color="primary"
-                disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
-                onClick={() => {
-                  const dataToDelete =
-                    selectedProducts &&
-                    selectedProducts
-                      .filter((e) => !e.hideSelection)
-                      .map((rec: any) => {
-                        const obj: any = {};
-                        obj.id = rec._id;
-                        obj.type = rec?.type;
-                        obj.materialId = rec?.materialId;
-                        return obj;
-                      });
-                  setDeleteData(dataToDelete);
-                }}
-              >
-                {'Delete'}
-              </MenuItem>
-            </Menu>
-          </div>
+              Add Existing Products
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                closeAddActions();
+                setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
+              }}
+            >
+              Add Existing Packages
+            </MenuItem>
+          </Menu>
         </div>
-      )}
+        <div className="flex flex-wrap gap-2">
+          {material?.length && rowsData?.length && !isIssued && !rowsData?.some((f) => !f.isValid) && subleaseData?.type !== SUBLEASE_TYPE.interCompany ? (
+            <Fragment>
+              <HtmlTooltip title={!allowedToEdit ? notOwnerAndColaborator : 'Start Sublease'}>
+                <Button
+                  variant={'contained'}
+                  color="primary"
+                  size="small"
+                  onClick={() => {
+                    issueSublease();
+                  }}
+                  disabled={isIssueing || !allowedToEdit}
+                  endIcon={isIssueing && <CircularProgress size={20} color="primary" />}
+                >
+                  {isMobile && !isTablet ? <MdDelete size={20} /> : 'Start Sublease'}
+                </Button>
+              </HtmlTooltip>
+            </Fragment>
+          ) : null}
+          <HtmlTooltip title={!allowedToEdit ? notOwnerAndColaborator : 'Actions'}>
+            <div>
+              <Button
+                disabled={selectedProducts?.length || !allowedToEdit ? false : true}
+                variant={'outlined'}
+                color="default"
+                size="small"
+                onClick={openActions}
+                className={` new-dropdown-v1`}
+                aria-controls="action-menu"
+                endIcon={<ExpandMore />}
+              >
+                Actions
+              </Button>
+            </div>
+          </HtmlTooltip>
+          <Menu
+            anchorEl={anchorEl}
+            keepMounted
+            getContentAnchorEl={null}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left'
+            }}
+            id="action-menu"
+            open={Boolean(anchorEl)}
+            onClose={closeActions}
+          >
+            <MenuItem
+              color="primary"
+              disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
+              onClick={() => {
+                setAnchorEl(null);
+                setIsProductEdit({ open: true, isBulkedit: true });
+              }}
+            >
+              {'Bulk Edit'}
+            </MenuItem>
+            <MenuItem
+              color="primary"
+              disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
+              onClick={() => {
+                const dataToDelete =
+                  selectedProducts &&
+                  selectedProducts
+                    .filter((e) => !e.hideSelection)
+                    .map((rec: any) => {
+                      const obj: any = {};
+                      obj.id = rec._id;
+                      obj.type = rec?.type;
+                      obj.materialId = rec?.materialId;
+                      return obj;
+                    });
+                setDeleteData(dataToDelete);
+              }}
+            >
+              {'Delete'}
+            </MenuItem>
+          </Menu>
+        </div>
+      </div>
       {columns && rowsData ? (
         <Box zIndex={5} width={'100%'}>
           <CustomReactTable
@@ -572,19 +607,30 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
           loading={isUpdating}
         />
       )}
-      {addExistingProductDialog.open && (
-        <AddExistingProductInventory
-          isAddingProducts={isAddingProducts}
-          addProductInventory={handleAdd}
-          handleProductInventoryClose={() => {
-            setAddExistingProductDialog({ open: false, type: '', parentId: null });
-          }}
-          type={addExistingProductDialog.type}
-          referenceType="sublease"
-          renderedFrom={addExistingProductDialog.type === 'product' ? `${renderedFrom}-product` : `${renderedFrom}-package`}
-          ignoreIds={[]}
-        />
-      )}
+      {
+        addExistingProductDialog.open && addExistingProductDialog.type === 'product' && (
+          <AssignProductDialog
+            handleCloseDialog={() => setAddExistingProductDialog({ open: false, type: '', parentId: null })}
+            onSuccess={(products) => {
+              handleAdd(products);
+            }}
+            serialized={true}
+            isSubmitting={isSubmitting}
+          />
+        )
+      }
+      {
+        addExistingProductDialog.open && addExistingProductDialog.type === 'package' && (
+          <AssignPackageDialog
+            handleClose={() => setAddExistingProductDialog({ open: false, type: '', parentId: null })}
+            onSuccess={(rows) => {
+              handleAdd(rows);
+            }}
+            packageType={'product'}
+            isSubmitting={isSubmitting}
+          />
+        )
+      }
     </Fragment>
   );
 };

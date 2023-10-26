@@ -31,8 +31,9 @@ import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import PreviewDownload from 'src/components/PreviewDownload';
 import { Link } from 'react-router-dom';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
+import { subleaseMessage } from 'src/constants/messageHelpers';
 
-const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, renderedFrom, allowedToEdit, isProcessor }) => {
+const SerializedAsset = ({ subleaseData, fetchData, setNextStep, setNextStepToolTip, currentStep, renderedFrom, allowedToEdit, isProcessor }) => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
 
@@ -140,8 +141,10 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
     setIsCompleteEnable(isComplate);
     if (isComplate) {
       setNextStep(true);
+      setNextStepToolTip(null)
     } else {
       setNextStep(false);
+      setNextStepToolTip(subleaseMessage.subleaseProcessStep)
     }
     dispatch({ type: 'initialize', data: rows, count: rows.length });
     setTimeout(() => {

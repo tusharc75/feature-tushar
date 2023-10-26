@@ -24,7 +24,7 @@ import { bulkAssetCreation, CHILD_RESOURCE } from 'src/constants/helpers';
 import EditIcon from '@material-ui/icons/Edit';
 import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
 import { CommonRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
-import AddExistingProductInventory from '../../Sublease/Productpackage/AddExistingProductInventory';
+
 import GridDeleteIcon from 'src/components/Helpers/GridDeleteIcon';
 import CustomAgGridEditable from 'src/components/AgGridComponents/CustomAgGridEditable';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -40,6 +40,7 @@ import BulkAssetCreationQtyDialog from './BulkAssetCreationQtyDialog';
 import styles from '../../Leads/Header.module.scss';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import useColumns, { getFrameworkComponents } from 'src/constants/useColumns';
+import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 
 const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProduct, renderedFrom, fetchData, handleUpdateData, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -433,7 +434,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
             showClone={false}
             fullHeight={true}
             renderedFrom={renderedFrom}
-            onClone={() => {}}
+            onClone={() => { }}
           />
         ) : (
           <CustomAgGridEditable
@@ -471,16 +472,13 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
         </Box>
       )}
       {addProductDialog && (
-        <AddExistingProductInventory
-          isAddingProducts={isAddingProducts}
-          addProductInventory={handleAddProduct}
-          handleProductInventoryClose={() => {
-            setAddProductDialog(false);
+        <AssignProductDialog
+          handleCloseDialog={() => setAddProductDialog(false)}
+          onSuccess={(products) => {
+            handleAddProduct(products);
           }}
-          type={'product'}
-          referenceType="bulkAssetCreation"
-          renderedFrom={renderedFrom}
-          ignoreIds={[]}
+          serialized={true}
+          isSubmitting={isAddingProducts}
         />
       )}
       {showProductDialog && (

@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, Paper, Tab, Tabs, useMediaQuery } from '@material-ui/core';
+import React, { useState, useEffect, useContext } from 'react';
+import { Grid, Box, Button, Tab, Tabs, } from '@material-ui/core';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from '../../axios/axiosInstance';
 import routes from '../../components/Helpers/Routes';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPageHeader from '../../components/DetailsPageHeader';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
@@ -58,6 +57,8 @@ const SubleaseDetailsPage = () => {
   const [tabValue, setTabValue] = useState(Number(parsed?.tab || 0));
   const [isIssued, setIsIssued] = useState(false);
   const [stepFullScreen, setStepFullScreen] = useState(false);
+  const [nextStepToolTip, setNextStepToolTip] = useState(null);
+
 
   // const subleaseStepsNames = React.useMemo(() => {
   //   return subleaseSteps.map((item) => item.name);
@@ -76,7 +77,7 @@ const SubleaseDetailsPage = () => {
   };
 
   useEffect(() => {
-    if (currentStep >= 0 && currentStep <= 2) {
+    if (currentStep !== null && currentStep >= 0 && currentStep <= 4) {
       updateProcessStatus(subleaseStepsNames[currentStep]);
     }
   }, [currentStep]);
@@ -254,6 +255,7 @@ const SubleaseDetailsPage = () => {
                   isNextStep={false}
                   nextStep={nextStep}
                   steps={subleaseSteps}
+                  nextStepToolTip={nextStepToolTip}
                   currentStep={currentStep}
                   setCurrentStep={setCurrentStep}
                   isStepEnded={[SUBLEASE_STATUS.completed].includes(subleaseData?.status)}
@@ -266,6 +268,7 @@ const SubleaseDetailsPage = () => {
                       setNextStep={setNextStep}
                       fetchData={fetchData}
                       isIssued={isIssued}
+                      setNextStepToolTip={setNextStepToolTip}
                       renderedFrom={`${renderedFrom}_grid-1`}
                       allowedToEdit={allowedToEdit}
                       stepFullScreen={stepFullScreen}
@@ -277,6 +280,7 @@ const SubleaseDetailsPage = () => {
                       subleaseData={subleaseData}
                       setNextStep={setNextStep}
                       currentStep={currentStep}
+                      setNextStepToolTip={setNextStepToolTip}
                       renderedFrom={`${renderedFrom}_grid-2`}
                       allowedToEdit={allowedToEdit}
                       isProcessor={isProcessor}
@@ -289,6 +293,7 @@ const SubleaseDetailsPage = () => {
                         setNextStep={setNextStep}
                         fetchData={fetchData}
                         isIssued={isIssued}
+                        setNextStepToolTip={setNextStepToolTip}
                         renderedFrom={`${renderedFrom}_grid-1`}
                         allowedToEdit={allowedToEdit}
                         stepFullScreen={stepFullScreen}
@@ -301,6 +306,7 @@ const SubleaseDetailsPage = () => {
                         subleaseData={subleaseData}
                         setNextStep={setNextStep}
                         fetchData={fetchData}
+                        setNextStepToolTip={setNextStepToolTip}
                         ticketType={DELIVERY_TICKET_TYPE.loading}
                         renderedFrom={`${renderedFrom}_grid-1`}
                         allowedToEdit={allowedToEdit}
@@ -314,6 +320,7 @@ const SubleaseDetailsPage = () => {
                         subleaseData={subleaseData}
                         setNextStep={setNextStep}
                         fetchData={fetchData}
+                        setNextStepToolTip={setNextStepToolTip}
                         ticketType={DELIVERY_TICKET_TYPE.receiving}
                         renderedFrom={`${renderedFrom}_grid-1`}
                         allowedToEdit={allowedToEdit}
