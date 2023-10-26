@@ -54,6 +54,7 @@ export default function Attachment() {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [sendMail, setSendMail] = useState(false);
+  const [isAttachmentLoading, setIsAttachmentLoading] = useState(true);
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -201,6 +202,7 @@ export default function Attachment() {
               <IconButton
                 size="small"
                 onClick={() => {
+                  setSendMail(true);
                   if (row.original.type === 'folder') {
                     handleMailForFolder(row.original?._id, row.original?.name);
                   } else {
@@ -374,34 +376,7 @@ export default function Attachment() {
     }
   };
 
-  // const handleMail = (data) => {
-  //   const attachments: any = [];
-  //   Promise.all(
-  //     data?.file.map(async (file) => {
-  //       await axiosInstance()
-  //         .get(`user/download?fileName=${file?.url}`, { responseType: 'blob' })
-  //         .then(({ data }) => {
-  //           let reader = new FileReader();
-  //           reader.readAsDataURL(new Blob([data], { type: mime.getType(file.url.split('.')?.pop()) }));
-  //           reader.onloadend = function () {
-  //             let base64data: any = reader.result;
-  //             attachments.push({
-  //               base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
-  //               contentType: base64data.split(';')[0].split(':')[1],
-  //               extension: `.${file.url.split('.')?.pop()}`,
-  //               name: file.name
-  //             });
-  //           };
-  //         })
-  //         .catch((err) => {
-  //           toastConfig.setToastConfig(err);
-  //         });
-  //     })
-  //   ).finally(() => {
-  //     setEmailAttachment(attachments);
-  //     setSendMail(true);
-  //   });
-  // };
+
 
   const handleMail = async (data) => {
     const attachments: any = [];
@@ -433,7 +408,7 @@ export default function Attachment() {
         })
       );
       setEmailAttachment(attachments);
-      setSendMail(true);
+      setIsAttachmentLoading(false);
     } catch (err) {
       toastConfig.setToastConfig(err);
     }
@@ -465,7 +440,7 @@ export default function Attachment() {
         }
       ];
       setEmailAttachment(attachments);
-      setSendMail(true);
+      setIsAttachmentLoading(false);
     };
   };
 
@@ -937,6 +912,8 @@ export default function Attachment() {
             onClose={() => {
               setSendMail(false);
               setFullScreen(false);
+              setIsAttachmentLoading(true)
+              setEmailAttachment(null)
             }}
             fullWidth
           >
@@ -946,10 +923,14 @@ export default function Attachment() {
               handleClose={() => {
                 setSendMail(false);
                 setFullScreen(false);
+                setIsAttachmentLoading(true)
+                setEmailAttachment(null)
               }}
               fetchData={() => {
                 setSendMail(false);
                 setFullScreen(false);
+                setIsAttachmentLoading(true)
+                setEmailAttachment(null)
               }}
               onMinimizeMaximize={() => {
                 setFullScreen((prevState) => !prevState);
@@ -958,6 +939,7 @@ export default function Attachment() {
               showManimizeMaximize={true}
               qouteBuilderAttachments={emailAttachment}
               isQuoteBuilder={true}
+              isAttachmentLoading={isAttachmentLoading}
             />
           </Dialog>
         )}
