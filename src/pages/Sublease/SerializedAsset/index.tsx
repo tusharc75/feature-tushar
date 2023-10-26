@@ -1,4 +1,4 @@
-import { Box, Button, Grid, IconButton, Menu } from '@material-ui/core';
+import { Box, Button, Grid, IconButton, Menu, MenuItem } from '@material-ui/core';
 import { Delete, ExpandMore } from '@material-ui/icons';
 import { startCase, uniqBy } from 'lodash';
 import React, { Fragment, useContext, useEffect, useState } from 'react'
@@ -8,21 +8,21 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
-import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
-import { ASSET_STATUS, CHILD_RESOURCE, sublease, treeToFlatArray } from 'src/constants/helpers';
+import { ASSET_STATUS, sublease, treeToFlatArray } from 'src/constants/helpers';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import { fetch_sublease_product_fields } from 'src/components/Sublease/helper';
 
 
 function SerializedAsset({ subleaseData, setNextStep, fetchData, isIssued, renderedFrom, allowedToEdit, stepFullScreen }) {
     const toastConfig = useContext(CustomToastContext);
 
     const [columns, setColumns] = useState(null);
-    const [rowsData, setRowsData] = useState([]);
+    const [rowsData, setRowsData] = useState(null);
     const [selectedRecords, setSelectedRecords] = useState([]);
     const [anchorActionEl, setAnchorActionEl] = useState(null);
     const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false);
@@ -39,10 +39,7 @@ function SerializedAsset({ subleaseData, setNextStep, fetchData, isIssued, rende
 
     const fetchFields = async () => {
         setNextStep(false);
-        let data = [];
-        var res = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.rentalManagementProduct}`);
-        data = res?.data?.data;
-        data = CURReplaceByCurrencySingle(data, subleaseData?.currency ? subleaseData?.currency : "USD");
+        var data = await fetch_sublease_product_fields(subleaseData.currency);
         data?.forEach((e) => {
             e.isColumnEditable = false;
         });
@@ -135,12 +132,13 @@ function SerializedAsset({ subleaseData, setNextStep, fetchData, isIssued, rende
                                     <HtmlTooltip title={`Remove`}>
                                         <IconButton
                                             size="small"
+                                            disabled={row.original.status !== ASSET_STATUS.reserved}
                                             onClick={() => {
                                                 setShowConfirmBox(true);
                                                 setDeleteData([row.original.inventory]);
                                             }}
                                         >
-                                            <Delete fontSize="small" color={'error'} />
+                                            <Delete fontSize="small" color={row.original.status !== ASSET_STATUS.reserved ? 'disabled' : 'error'} />
                                         </IconButton>
                                     </HtmlTooltip>
                                 )}
@@ -259,10 +257,8 @@ function SerializedAsset({ subleaseData, setNextStep, fetchData, isIssued, rende
                 if (parent.subRows.length && parent.isValid) {
                     if (parent.subRows.every((d) => d.isValid)) {
                         parent.isValid = true;
-                        parent.hideSelection = false
                     } else {
                         parent.isValid = false;
-                        parent.hideSelection = true
                     }
                 }
             });
@@ -306,7 +302,6 @@ function SerializedAsset({ subleaseData, setNextStep, fetchData, isIssued, rende
                 warehouse: _inventory.inventoryDetail?.warehouse,
                 _id: _inventory.inventory,
                 isValid: _inventory.inventoryDetail?.manualStatus === ASSET_STATUS.reserved ? false : true,
-                hideSelection: true,
                 canRemove: true
             });
         });
@@ -457,6 +452,14 @@ function SerializedAsset({ subleaseData, setNextStep, fetchData, isIssued, rende
             });
     }
 
+    const openActions = (event) => {
+        setAnchorActionEl(event.currentTarget);
+    };
+
+    const closeActions = () => {
+        setAnchorActionEl(null);
+    };
+
 
     return (
         <Fragment>
@@ -477,6 +480,41 @@ function SerializedAsset({ subleaseData, setNextStep, fetchData, isIssued, rende
                             >
                                 {`Assign ${routes.serializedAsset.title}`}
                             </Button>
+                            <Button
+                                variant="outlined"
+                                color="default"
+                                className="new-dropdown-v1"
+                                size="small"
+                                onClick={openActions}
+                                disabled={uniqBy(flattenArray(selectedRecords), '_id')?.filter((e) => e.type === 'asset')?.length === 0}
+                                aria-controls="action-menu"
+                                endIcon={<ExpandMore />}
+                            >
+                                Actions
+                            </Button>
+                            <Menu
+                                anchorEl={anchorActionEl}
+                                keepMounted
+                                getContentAnchorEl={null}
+                                anchorOrigin={{
+                                    vertical: 'bottom',
+                                    horizontal: 'left'
+                                }}
+                                id="action-menu"
+                                open={Boolean(anchorActionEl)}
+                                onClose={closeActions}
+                            >
+                                <MenuItem
+                                    onClick={() => {
+                                        const inventories = uniqBy(flattenArray(selectedRecords), '_id')?.filter((e) => e.type === 'asset')?.map((e) => e.inventory);
+                                        setShowConfirmBox(true);
+                                        setDeleteData(inventories);
+                                        closeActions();
+                                    }}
+                                >
+                                    Delete
+                                </MenuItem>
+                            </Menu>
                         </Box>
                     </Box>
                 </Box>

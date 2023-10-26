@@ -371,6 +371,9 @@ const QtyDialog: FC<EditDialogProps> = ({
       errors['estimateEndDate'] = 'Please enter valid estimate end date';
     }
 
+    if (values.qty < 0) {
+      errors['qty'] = 'Please enter valid quantity';
+    }
     if (rowData && rowData.hideSelection) {
       if (rowData.parentId) {
         const _package = material?.filter((e) => e._id === rowData.parentId);
@@ -545,34 +548,6 @@ const QtyDialog: FC<EditDialogProps> = ({
                                           size="small"
                                           minDate={rentalManagementData?.estimateStartDate}
                                           maxDate={rentalManagementData?.estimateEndDate}
-                                        />
-                                      </Box>
-                                    </Box>
-                                  </Grid>
-                                ) : field.fieldName === 'qty' ? (
-                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                    <Box display="flex">
-                                      <Box flexGrow={1}>
-                                        <FormTypes
-                                          {...field}
-                                          disabled={rowData?.assetQty > 0 ? true : false}
-                                          fields={initialData.fields}
-                                          fieldData={field}
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={field.option}
-                                          setFieldValue={(name, value) => {
-                                            setFieldValue(name, value);
-                                          }}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={field.isTooltip}
-                                          tooltipMessage={field.tooltipMessage}
-                                          size="small"
                                         />
                                       </Box>
                                     </Box>

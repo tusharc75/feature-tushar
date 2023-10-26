@@ -72,8 +72,8 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
   }, []);
 
   const OpenInNewWindow = (url) => {
-    window.open(`${url}?referenceType=${rentalManagementData?.rentalJobName}&referenceId=${rentalManagementData?._id}`, '_blank')
-  }
+    window.open(`${url}?referenceType=${rentalManagementData?.rentalJobName}&referenceId=${rentalManagementData?._id}`, '_blank');
+  };
 
   const fetchFields = async () => {
     setNextStep(false);
@@ -108,12 +108,12 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                  ? row.original?.packageDetail.packageType === 'Product'
-                    ? '(Product)'
-                    : '(Service)'
-                  : row.original.type === 'service'
-                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                    : ''}
+                ? row.original?.packageDetail.packageType === 'Product'
+                  ? '(Product)'
+                  : '(Service)'
+                : row.original.type === 'service'
+                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -134,7 +134,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                 <IconButton
                   size="small"
                   onClick={() => {
-                    OpenInNewWindow(routes.purchaseOrder.path)
+                    OpenInNewWindow(routes.purchaseOrder.path);
                   }}
                 >
                   <OpenInNewIcon fontSize="small" color={'primary'} />
@@ -164,7 +164,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                 <IconButton
                   size="small"
                   onClick={() => {
-                    OpenInNewWindow(routes.bulkAssetCreation.path)
+                    OpenInNewWindow(routes.bulkAssetCreation.path);
                   }}
                 >
                   <LibraryBooksIcon fontSize="small" color={'primary'} />
@@ -176,7 +176,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                 <IconButton
                   size="small"
                   onClick={() => {
-                    OpenInNewWindow(routes.sublease.path)
+                    OpenInNewWindow(routes.sublease.path);
                   }}
                 >
                   <ReceiptIcon fontSize="small" color={'primary'} />
@@ -201,8 +201,10 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                       onClick={() => {
                         setShowConfirmBox(true);
                         let isTransferAsset = false;
-                        if (row.original?.transferData
-                          && [TRANSFER_ASSET_STATUS.new, TRANSFER_ASSET_STATUS.inProgress]?.includes(row.original?.transferData?.status)) {
+                        if (
+                          row.original?.transferData &&
+                          [TRANSFER_ASSET_STATUS.new, TRANSFER_ASSET_STATUS.inProgress]?.includes(row.original?.transferData?.status)
+                        ) {
                           isTransferAsset = true;
                         }
                         setDeleteData([
@@ -226,7 +228,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                     <IconButton
                       size="small"
                       onClick={() => {
-                        window.open(`${routes.transferAssetDetail.path}/${row?.original?.transferData?._id}`, '_blank')
+                        window.open(`${routes.transferAssetDetail.path}/${row?.original?.transferData?._id}`, '_blank');
                       }}
                     >
                       <RepeatIcon fontSize="small" color={'primary'} />
@@ -268,23 +270,22 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
     if (item?.type === 'product') {
       return true;
     }
-    const child = material?.filter(e => e.parentId === item?._id);
-    if (child?.some(e => e?.type === 'product')) {
+    const child = material?.filter((e) => e.parentId === item?._id);
+    if (child?.some((e) => e?.type === 'product')) {
       return true;
     }
     if (child?.length) {
       for (var ele in child) {
-        return checkProductInside(child[ele], material)
+        return checkProductInside(child[ele], material);
       }
+    } else {
+      return false;
     }
-    else {
-      return false
-    }
-  }
+  };
 
   const fetchData = async () => {
     setNextStep(false);
-    setNextStepToolTip(null)
+    setNextStepToolTip(null);
     try {
       var data: any = [];
       var transferAssets: any = [];
@@ -340,20 +341,21 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
 
       rows.forEach((parent, i) => {
         parent.index = i + 1;
-        parent.detail = `${parent.type === 'service'
-          ? parent?.serviceDetail?.serviceName
-          : parent.type === 'product'
+        parent.detail = `${
+          parent.type === 'service'
+            ? parent?.serviceDetail?.serviceName
+            : parent.type === 'product'
             ? parent?.productDetail?.productName
             : parent?.packageDetail?.packageName
-          }`;
+        }`;
         parent.description =
           parent.type === 'service'
             ? parent?.serviceDetail?.serviceDescription || ''
             : parent.type === 'product'
-              ? parent?.productDetail?.productDescription || ''
-              : parent.type === 'package'
-                ? parent?.packageDetail?.packageDescription || ''
-                : '';
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === 'package'
+            ? parent?.packageDetail?.packageDescription || ''
+            : '';
         parent.serializedProduct = parent.type === 'product' ? parent?.productDetail?.serializedProduct : false;
         parent.assetQty = parent.qty;
         parent.assetAssignedQty = parent.serializedProduct
@@ -384,21 +386,21 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           parent.subRows.filter((d) => d.type !== 'asset').length === 0
             ? parent.assetQty
             : parent.subRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetQty + sum, 0) +
-            (parent.type === 'product' ? parent.assetQty : 0);
+              (parent.type === 'product' ? parent.assetQty : 0);
         parent.assetAssignedQty =
           parent.subRows.filter((d) => d.type !== 'asset').length === 0
             ? parent.assetAssignedQty
             : parent.subRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetAssignedQty + sum, 0) +
-            (parent.type === 'product' ? parent?.subRows.filter((d) => d.type === 'asset')?.length : 0);
+              (parent.type === 'product' ? parent?.subRows.filter((d) => d.type === 'asset')?.length : 0);
         parent.isValid = parent.serializedProduct
           ? parent.assetAssignedQty === parent.assetQty
             ? true
             : false
           : parent.subRows.length !== 0
-            ? parent.assetAssignedQty ===
-            parent.subRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0) ||
+          ? parent.assetAssignedQty ===
+              parent.subRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0) ||
             parent.subRows.every((d) => d.isValid)
-            : true;
+          : true;
 
         if (parent.subRows.length && parent.isValid) {
           if (parent.subRows.every((d) => d.isValid)) {
@@ -411,10 +413,10 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
 
       if (rows.filter((_rows) => _rows.isValid === false).length > 0 && !user?.user?.brandPolicy?.rentalStopAssetNextStepValidation) {
         setNextStep(false);
-        setNextStepToolTip(rentalManagementMessage.assignAssets)
+        setNextStepToolTip(rentalManagementMessage.assignAssets);
       } else {
         setNextStep(true);
-        setNextStepToolTip(null)
+        setNextStepToolTip(null);
       }
       setRowsData(rows);
       setSelectedRecords([]);
@@ -503,16 +505,16 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceName
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productName
-            : _subRow?.packageDetail?.packageName;
+          ? _subRow?.productDetail?.productName
+          : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === 'package'
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+          ? _subRow?.productDetail?.productDescription || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.serializedProduct = _subRow.type === 'product' ? _subRow?.productDetail?.serializedProduct : false;
       // _subRow.assetQty = _subRow.type === 'product' || _subRow.type === 'package' ? _subRow.qty * parent.assetQty : 0;
       _subRow.assetQty =
@@ -550,17 +552,17 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         tempSubRows.filter((d) => d.type !== 'asset').length === 0
           ? _subRow.assetQty
           : tempSubRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetQty + sum, 0) +
-          (_subRow.type === 'product' ? _subRow.assetQty : 0);
+            (_subRow.type === 'product' ? _subRow.assetQty : 0);
       _subRow.isValid = _subRow.serializedProduct
         ? _subRow.assetAssignedQty === _subRow.assetQty
           ? true
           : false
         : tempSubRows?.filter((e) => e.type === 'asset')?.length === tempSubRows?.length
-          ? true
-          : _subRow.assetAssignedQty ===
-            tempSubRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0)
-            ? true
-            : false;
+        ? true
+        : _subRow.assetAssignedQty ===
+          tempSubRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0)
+        ? true
+        : false;
       subRows.push(_subRow);
       assetAssignedQtySUM += _subRow.serializedProduct ? _subRow.assetAssignedQty : 0;
     });
@@ -825,7 +827,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                   <MenuItem
                     disabled={showOrderDialog?.products?.filter((e) => e.serialized === false)?.length === 0}
                     onClick={() => {
-                      setOrderDialog((prevState) => ({ ...prevState, open: true, type: 'purchaseOrder' }));
+                        setOrderDialog((prevState) => ({ ...prevState, open: true, type: 'purchaseOrder' }));
                       closeActions();
                     }}
                   >
@@ -836,7 +838,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                   <MenuItem
                     disabled={showOrderDialog?.products?.filter((e) => e.serialized === true)?.length === 0}
                     onClick={() => {
-                      setOrderDialog((prevState) => ({ ...prevState, open: true, type: 'sublease' }));
+                        setOrderDialog((prevState) => ({ ...prevState, open: true, type: 'sublease' }));
                       closeActions();
                     }}
                   >
@@ -846,7 +848,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                 <MenuItem
                   disabled={selectedRecords.length === 0 || nonSerializedAssetProduct?.length === 0}
                   onClick={() => {
-                    setAddNonSerializedAssetDialog(true);
+                      setAddNonSerializedAssetDialog(true);
                     closeActions();
                   }}
                 >
@@ -855,22 +857,25 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                 <MenuItem
                   disabled={flattenArray(selectedRecords)?.filter((d) => d.type === 'asset' && d.canRemove)?.length === 0}
                   onClick={() => {
-                    const assets = flattenArray(selectedRecords)?.filter((d) => d.type === 'asset' && d.canRemove);
-                    const dataTodelete = [];
-                    assets?.forEach((element) => {
-                      let isTransferAsset = false;
-                      if (element?.transferData && [TRANSFER_ASSET_STATUS.new, TRANSFER_ASSET_STATUS.inProgress]?.includes(element?.transferData?.status)) {
-                        isTransferAsset = true;
-                      }
-                      dataTodelete.push({
-                        _id: element?.inventory,
-                        assetNumber: element?.detail,
-                        isNonSerializeAsset: element?.isNonSerializeAsset,
-                        isTransferAsset: isTransferAsset
+                      const assets = flattenArray(selectedRecords)?.filter((d) => d.type === 'asset' && d.canRemove);
+                      const dataTodelete = [];
+                      assets?.forEach((element) => {
+                        let isTransferAsset = false;
+                        if (
+                          element?.transferData &&
+                          [TRANSFER_ASSET_STATUS.new, TRANSFER_ASSET_STATUS.inProgress]?.includes(element?.transferData?.status)
+                        ) {
+                          isTransferAsset = true;
+                        }
+                        dataTodelete.push({
+                          _id: element?.inventory,
+                          assetNumber: element?.detail,
+                          isNonSerializeAsset: element?.isNonSerializeAsset,
+                          isTransferAsset: isTransferAsset
+                        });
                       });
-                    });
-                    setDeleteData(dataTodelete);
-                    setShowConfirmBox(true);
+                      setDeleteData(dataTodelete);
+                      setShowConfirmBox(true);
                     closeActions();
                   }}
                 >
@@ -910,7 +915,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                   <MenuItem
                     disabled={purchaseOrderCount === 0}
                     onClick={() => {
-                      OpenInNewWindow(routes.purchaseOrder.path)
+                      OpenInNewWindow(routes.purchaseOrder.path);
                     }}
                   >
                     {`Show ${routes.purchaseOrder.title}`}
@@ -920,7 +925,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                   <MenuItem
                     disabled={bulkAssetCreationCount === 0}
                     onClick={() => {
-                      OpenInNewWindow(routes.bulkAssetCreation.path)
+                      OpenInNewWindow(routes.bulkAssetCreation.path);
                     }}
                   >
                     {`Show ${routes.bulkAssetCreation.title}`}
@@ -931,7 +936,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                   <MenuItem
                     disabled={subleaseCount === 0}
                     onClick={() => {
-                      OpenInNewWindow(routes.sublease.path)
+                      OpenInNewWindow(routes.sublease.path);
                     }}
                   >
                     {`Show ${routes.sublease.title}`}
@@ -941,7 +946,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                   <MenuItem
                     disabled={transferAssetCount === 0}
                     onClick={() => {
-                      OpenInNewWindow(routes.transferAsset.path)
+                      OpenInNewWindow(routes.transferAsset.path);
                     }}
                   >
                     {`Show ${routes.transferAsset.title}`}
