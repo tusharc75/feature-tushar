@@ -24,8 +24,8 @@ const CustomFilter = ({ field, setFilterQuery }) => {
   const [loading, setLoading] = useState(false);
   const [statusTimeFrame, setStatusTimeFrame] = useState<any>({});
   const [betweenDate, setBetweenDate] = useState(null);
-
   const [chipData, setChipData] = useState([]);
+  const [inputValues, setInputValues] = useState({});
 
   const fetchOptions = useCallback(
     debounce(async (resource: string, searchKey: string = '') => {
@@ -332,12 +332,18 @@ const CustomFilter = ({ field, setFilterQuery }) => {
                             : <Grid item xs={12} sm={6} md={6} key={i}>
                               <Autocomplete
                                 multiple
+                                inputValue={inputValues[field?.fieldName] || ""}
                                 onOpen={() => {
                                   setOptions([]);
                                   setLoading(true);
                                   fetchOptions(field?.resource, '');
                                 }}
-                                onInputChange={(event, value) => fetchOptions(field?.resource, value)}
+                                onInputChange={(event, value, reason) => {
+                                  if (reason === 'input') {
+                                    setInputValues(prevValues => ({ ...prevValues, [field?.fieldName]: value }));
+                                    fetchOptions(field?.resource, value)
+                                  }
+                                }}
                                 options={options}
                                 fullWidth
                                 loading={loading}
@@ -346,6 +352,7 @@ const CustomFilter = ({ field, setFilterQuery }) => {
                                 value={!isEmpty(formValues) && formValues[field?.fieldName] ? formValues[field?.fieldName] : []}
                                 onChange={(e, val) => {
                                   handleSelectFilter(field?.fieldName, val);
+                                  setInputValues(prevValues => ({ ...prevValues, [field?.fieldName]: "" }));
                                 }}
                                 size="small"
                                 renderInput={(params) => <TextField {...params} label={field?.fieldLabel} variant="outlined" name={field?.fieldName} />}
