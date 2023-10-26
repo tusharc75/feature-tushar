@@ -1,10 +1,17 @@
 export const rentalManagementActions = {
     createLoadingTicket: 'Create Loading Ticket',
     deliveredToCustomer: 'Delivered to Customer',
+    cancelInTransitLoadingTicket: 'Cancel In-Transit Loading Ticket',
+    cancelDeliveredLoadingTicket: 'Cancel Delivered Loading Ticket',
+    replaceAsset: 'Replace Asset',
     createReceivingTicket: 'Create Receiving Ticket',
     createReturnTicket: 'Create Return Ticket',
     receiveItems: 'Receive Items',
     createSupplierDeliveryTicket: 'Create Supplier Delivery Ticket',
+    cancelInTransitReceivingTicket: 'Cancel In-Transit Receiving Ticket',
+    cancelDeliveredReceivingTicket: 'Cancel Delivered Receiving Ticket',
+
+
 };
 
 export const rentalManagementMessage = {
@@ -23,6 +30,17 @@ export const rentalManagementMessage = {
     receivingTicketAlreadyDelivered: 'Receiving Ticket already delivered',
     returnTicketAlreadyDelivered: 'Return Ticket already delivered',
     notSubleaseAsset: 'Not Sublease Asset',
+    canNotReplaceProducts: 'Can not replace Product',
+    loadingTicketDeliveredForReplaceAseet: 'loading Ticket delivered for repalce asset',
+    onlyReplaceInUseAssets: 'Only Replace InUse Assets',
+    invoiceCreateCanNotReplace: 'Invoice Created Can Not Replace',
+    cancelInTransitLineItems: 'Only InTransit ticket Cancel',
+    assetStatusInUseForCancelLoadingTicket: 'Asset Status InUse For Cancel Loading Ticket',
+    rentalAssetStatusInUseForCancelLoadingTicket: 'Rental Asset Status InUse For Cancel Loading Ticket',
+    receivingTicketNotCreated: 'Receiving  Ticket Not Created Yet',
+    receivingTicketNotDeliverd: 'Receiving  Ticket Not Deliverd Yet',
+    assetStatusUnderReviewForCancelReceivingTicket: 'Asset Status UnderReview For Cancel Receiving Ticket',
+    rentalAssetStatusCompleteForCancelReceivingTicket: 'Rental Asset Status Complete For Cancel Receiving Ticket',
 };
 
 export const dataNotSelected = 'Data Not Selected'

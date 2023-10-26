@@ -847,23 +847,60 @@ const LoadingTicket = ({
 
   const validateAction = (action) => {
     const errorMessages = [];
-    if (action === rentalManagementActions.createLoadingTicket) {
-      selectedRecords?.forEach((e) => {
+    selectedRecords?.forEach((e) => {
+      if (action === rentalManagementActions.createLoadingTicket) {
         if (e.hasOwnProperty('loadingTicketId')) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingTicketAlreadyCreated });
         }
-      });
-    }
-    else if (action === rentalManagementActions.deliveredToCustomer) {
-      selectedRecords?.forEach((e) => {
+      }
+      else if (action === rentalManagementActions.deliveredToCustomer) {
         if (!e.hasOwnProperty('loadingTicketId')) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingTicketNotCreated });
         }
         else if (e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingTicketAlreadyDelivered });
         }
-      });
-    }
+      }
+      else if (action === rentalManagementActions.replaceAsset) {
+        if (e?.type !== 'Asset') {
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.canNotReplaceProducts });
+        }
+        else if (!e.hasOwnProperty('loadingTicketId')) {
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingTicketNotCreated });
+        }
+        else if (e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered) {
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingTicketDeliveredForReplaceAseet });
+        }
+        else if (e?.status !== ASSET_STATUS.inUse) {
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.onlyReplaceInUseAssets });
+        }
+        else if (!e?.isReplaceable) {
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.invoiceCreateCanNotReplace });
+        }
+      }
+      else if (action === rentalManagementActions.cancelInTransitLoadingTicket) {
+        if (!e.hasOwnProperty('loadingTicketId')) {
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingTicketNotCreated });
+        }
+        else if (e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.indTransit) {
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.cancelInTransitLineItems });
+        }
+      }
+      else if (action === rentalManagementActions.cancelDeliveredLoadingTicket) {
+        if (!e.hasOwnProperty('loadingTicketId')) {
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingTicketNotCreated });
+        }
+        else if (e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered) {
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingTicketNotDeliveredYet });
+        }
+        else if (e?.type === 'Asset' && ![ASSET_STATUS.inUse, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable]?.includes(e?.status)) {
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.assetStatusInUseForCancelLoadingTicket });
+        }
+        else if (e?.type === 'Asset' && ![RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy, RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable]?.includes(e?.rentalAssetStatus)) {
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.rentalAssetStatusInUseForCancelLoadingTicket });
+        }
+      }
+    });
     if (errorMessages?.length) {
       setOpenMessageDialog({ open: true, errorMessages: errorMessages });
       return true;
@@ -1124,81 +1161,60 @@ const LoadingTicket = ({
                       )}
                   </Box>
                 )}
-                {selectedRecords.length > 0 &&
-                  selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit)
-                    ?.length === selectedRecords?.length ? (
-                  <Box>
-                    <MenuItem
-                      onClick={() => {
-                        closeActions();
-                        setShowConformationRevertTicket(true);
-                      }}
-                    >
-                      Revert Line Items
-                    </MenuItem>
-                    <MenuItem
-                      onClick={() => {
-                        closeActions();
-                        setShowConformationCancleTicket({ open: true, type: 'Non-Delivered' });
-                      }}
-                    >
-                      Cancel Loading Ticket(s)
-                    </MenuItem>
-                  </Box>
-                ) : null}
-                {selectedRecords.length > 0 &&
-                  selectedRecords.filter(
-                    (e: any) =>
-                      e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered &&
-                      (([ASSET_STATUS.inUse, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable]?.includes(e?.status) &&
-                        [
-                          RENTAL_INTERNAL_ASSET_STATUS.inUse,
-                          RENTAL_INTERNAL_ASSET_STATUS.standBy,
-                          RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable
-                        ]?.includes(e?.rentalAssetStatus)) ||
-                        e?.type === 'Product')
-                  ).length === selectedRecords?.length ? (
-                  <MenuItem
-                    onClick={() => {
-                      closeActions();
+                <MenuItem
+                  onClick={() => {
+                    if (!validateAction(rentalManagementActions.replaceAsset)) {
+                      const products = [];
+                      selectedRecords?.forEach((element) => {
+                        const foundProduct = products.filter((e) => e._id === element?.product?.optionValue);
+                        if (foundProduct.length) {
+                          foundProduct[0].qty += 1;
+                        } else {
+                          products.push({
+                            _id: element?.product?.optionValue,
+                            id: element?.product?.optionValue,
+                            productName: element?.product?.optionLabel,
+                            qty: 1
+                          });
+                        }
+                      });
+                      setAddSerializedAssetDialog({ open: true, products: products });
+                    }
+                    closeActions();
+                  }}
+                >
+                  Replace Asset
+                </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    if (!validateAction(rentalManagementActions.cancelInTransitLoadingTicket)) {
+                      setShowConformationRevertTicket(true);
+                    }
+                    closeActions();
+                  }}
+                >
+                  Cancel In-Transit Line Items
+                </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    if (!validateAction(rentalManagementActions.cancelInTransitLoadingTicket)) {
+                      setShowConformationCancleTicket({ open: true, type: 'Non-Delivered' });
+                    }
+                    closeActions();
+                  }}
+                >
+                  Cancel In-Transit Loading Ticket(s)
+                </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    if (!validateAction(rentalManagementActions.cancelDeliveredLoadingTicket)) {
                       setShowConformationCancleTicket({ open: true, type: 'Delivered' });
-                    }}
-                  >
-                    Cancel Loading Ticket(s)
-                  </MenuItem>
-                ) : null}
-                {selectedRecords.length &&
-                  selectedRecords?.filter(
-                    (f) =>
-                      f.hasOwnProperty('loadingTicketId') &&
-                      f?.type === 'Asset' &&
-                      f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered &&
-                      f?.status === ASSET_STATUS.inUse &&
-                      f?.isReplaceable
-                  )?.length === selectedRecords?.length && (
-                    <MenuItem
-                      onClick={() => {
-                        const products = [];
-                        selectedRecords?.forEach((element) => {
-                          const foundProduct = products.filter((e) => e._id === element?.product?.optionValue);
-                          if (foundProduct.length) {
-                            foundProduct[0].qty += 1;
-                          } else {
-                            products.push({
-                              _id: element?.product?.optionValue,
-                              id: element?.product?.optionValue,
-                              productName: element?.product?.optionLabel,
-                              qty: 1
-                            });
-                          }
-                        });
-                        setAddSerializedAssetDialog({ open: true, products: products });
-                        closeActions();
-                      }}
-                    >
-                      Replace Asset
-                    </MenuItem>
-                  )}
+                    }
+                    closeActions();
+                  }}
+                >
+                  Cancel Delivered Loading Ticket(s)
+                </MenuItem>
               </Menu>
               {selectedRecords.length &&
                 selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
