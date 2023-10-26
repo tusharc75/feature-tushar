@@ -165,23 +165,24 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
               <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
             </IconButton>
           </HtmlTooltip>
-          {!row.original.hideSelection && allowedToEdit && (
-            <IconButton
-              size="small"
-              aria-label="Details"
-              onClick={() => {
-                const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                if (row.original?.type === 'package' && row.original?.subRows?.length) {
-                  row.original?.subRows.forEach((element) => {
-                    obj.push({ id: element._id, type: element.type, materialId: element.materialId });
-                  });
-                }
-                setDeleteData(obj);
-              }}
-            >
-              <DeleteIcon fontSize="small" color="error" />
-            </IconButton>
-          )}
+
+          <IconButton
+            size="small"
+            aria-label="Details"
+            disabled={row.original.hideSelection || allowedToEdit || row.original?.assetQty > 0}
+            onClick={() => {
+              const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+              if (row.original?.type === 'package' && row.original?.subRows?.length) {
+                row.original?.subRows.forEach((element) => {
+                  obj.push({ id: element._id, type: element.type, materialId: element.materialId });
+                });
+              }
+              setDeleteData(obj);
+            }}
+          >
+            <DeleteIcon fontSize="small" color={row.original.hideSelection || allowedToEdit || row.original?.assetQty > 0 ? "disabled" : "error"} />
+          </IconButton>
+
         </>
       )
     });
@@ -214,7 +215,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + subleaseData?.currency?.toLowerCase()] ? true : !isRateRequired;
       parent.hideSelection = parent.assetQty > 0 ? true : false;
-      parent.assetQty = parent.assetQty;
+      parent.assetQty = inventory?.filter((e) => e._id === parent._id).length
       if (parent.type === 'package') {
         const subRows: any = data.material.filter((e) => e.parentId === parent._id);
         var assetQty = 0;
@@ -225,7 +226,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
           _subRow.qtyDisplay = `${parent.qty * _subRow.qty}`;
           _subRow.isValid = _subRow['finalPrice_' + subleaseData?.currency?.toLowerCase()] ? true : !isRateRequired;
           _subRow.hideSelection = _subRow.assetQty > 0 ? true : false;
-          _subRow.assetQty = _subRow.assetQty;
+          _subRow.assetQty = inventory?.filter((e) => e._id === _subRow._id).length
           assetQty += _subRow.assetQty;
         });
         if (subRows.length === 0) {
