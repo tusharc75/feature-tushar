@@ -146,7 +146,6 @@
   --task-color: #587adc;
 
   --success-dark: #1c592a;
-  --error-dark: #5e1c23;
   --ag-control-panel-background-color: var(--dark-primary);
 }
 [data-mode='dark'] {
@@ -1703,7 +1702,7 @@ body::-webkit-scrollbar-thumb {
 }
 
 .red-data-row {
-  background-color: var(--error-dark, #ffcccb) !important;
+  background-color: var(--error-bg) !important;
 }
 
 .scrap-data-row {
@@ -1711,7 +1710,7 @@ body::-webkit-scrollbar-thumb {
 }
 
 .light-red-data-row {
-  background-color: var(--error-dark, #feb1b1) !important;
+  background-color: var(--error-bg) !important;
 }
 
 .light-yellow-data-row {
@@ -1723,7 +1722,7 @@ body::-webkit-scrollbar-thumb {
 }
 
 .light-green-data-row {
-  background-color: var(--dark-green, #acf1c8) !important;
+  background-color: var(--success-bg) !important;
 }
 
 .a_divider_inner {
@@ -3309,6 +3308,9 @@ body {
       height: 32px;
       border: none !important;
       width: 34px;
+    }
+    &.with-border {
+      border: 1px solid var(--common-border-color) !important;
     }
 
     & > span {

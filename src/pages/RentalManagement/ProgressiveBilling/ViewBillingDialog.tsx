@@ -1,13 +1,13 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
+import { useState, useEffect, useContext, Fragment } from 'react';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
-import { Box, capitalize, Chip, CircularProgress, Dialog, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { Box, Dialog, IconButton, Menu, MenuItem } from '@material-ui/core';
 import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 import { isMobile } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition, dateFormat, formatAmountWithCurrency, invoice, pricingCondition, rentalManagement, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, invoice, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
@@ -45,7 +45,9 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
   }, []);
 
   useEffect(() => {
-    fetchData();
+    if (columns) {
+      fetchData();
+    }
   }, [columns]);
 
   const fetchFields = async () => {
@@ -106,7 +108,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
               <p className="text-truncate" title={row.original?.detail}>
                 {row.original?.detail}
               </p>
-              {row.original['type'] !== 'additionalCost' && (
+              {row.original['type'] !== 'manualEntry' && (
                 <Box ml={1}>
                   <IconButton
                     size="small"
@@ -179,7 +181,6 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
         )
       })
       setColumns(column);
-      fetchData();
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -222,7 +223,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
       additionalCostData?.forEach((element) => {
         element.index = rows.length + 1;
         element.detail = element.costType;
-        element.type = 'additionalCost';
+        element.type = 'manualEntry';
         element.qtyDisplay = element.qty;
         element.materialId = element?._id;
         element.parentId = null;

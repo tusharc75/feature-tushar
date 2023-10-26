@@ -21,6 +21,7 @@ import Material from './Material';
 import { camelCase } from 'lodash';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import { isMobile, isTablet } from 'react-device-detect';
+import { Edit } from '@material-ui/icons';
 
 const DemandOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -133,7 +134,7 @@ const DemandOrderDetails = () => {
                     size="small"
                     onClick={handleOpenUpdateDialog}
                   >
-                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                    {isMobile && !isTablet ? <Edit /> : 'Edit'}
                   </Button>
                 )}
 
@@ -197,7 +198,7 @@ const DemandOrderDetails = () => {
         <TabPanel value={tabValue} index={1}>
           {demandOrderData && (
             <Material
-            demandOrderData={demandOrderData}
+              demandOrderData={demandOrderData}
               renderedFrom={`${renderedFrom}_grid-1`}
               allowedToEdit={allowedToEdit && permissions?.demandOrder?.isUpdate ? true : false}
             />

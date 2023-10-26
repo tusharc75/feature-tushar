@@ -6,7 +6,8 @@ import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
+// import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
+import CustomReactTable from 'src/components/CustomReactTableNew/CustomReactTable';
 import Add from '@material-ui/icons/Add';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -21,15 +22,18 @@ import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageD
 import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import PreviewDownload from 'src/components/PreviewDownload';
-import { CHILD_RESOURCE, sidebarResource } from 'src/constants/helpers';
+import { CHILD_RESOURCE, gridLoadingTimeout, sidebarResource } from 'src/constants/helpers';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
+import { useTableReducer } from 'src/components/CustomReactTableNew/useTableReducer';
 
 const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
   }: any = useData();
+
+  const { state, dispatch } = useTableReducer();
 
   const [isUpdating, setUpdating] = useState(false);
   const [materialEdit, setMaterialEdit] = useState({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
@@ -87,7 +91,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
         width: 300,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row, rows }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'nowrap' }}>
             {allowedToEdit ? (
               <p
                 onClick={() => {
@@ -191,20 +195,31 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
   };
 
   const fetchData = async () => {
-    var data: any = [];
-    const response = await axiosInstance().get(`${routes.demandOrder.path}/material/${demandOrderData._id}`);
-    data = response?.data?.data;
-    let rows = data.material.filter((e) => e.parentId === null);
-    rows.forEach((parent, i) => {
-      parent.index = i + 1;
-      parent.detail = parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName;
-      parent.description = parent.type === 'product' ? parent?.productDetail?.productDescription : parent?.packageDetail?.packageDescription;
-      parent.qty = parent.qty;
-      parent.qtyDisplay = parent.qty;
-      parent.subRows = generateNestedData(data.material, parent);
-    });
-    setRowsData(rows);
-    setSelectedRecords([]);
+    dispatch({ type: 'loading', loading: true });
+    try {
+      var data: any = [];
+      const response = await axiosInstance().get(`${routes.demandOrder.path}/material/${demandOrderData._id}`);
+      data = response?.data?.data;
+      let rows = data.material.filter((e) => e.parentId === null);
+      rows.forEach((parent, i) => {
+        parent.index = i + 1;
+        parent.detail = parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName;
+        parent.description = parent.type === 'product' ? parent?.productDetail?.productDescription : parent?.packageDetail?.packageDescription;
+        parent.qty = parent.qty;
+        parent.qtyDisplay = parent.qty;
+        parent.subRows = generateNestedData(data.material, parent);
+      });
+
+      dispatch({ type: 'initialize', data: rows, count: data.length });
+      setRowsData(rows);
+      setSelectedRecords([]);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setTimeout(() => {
+        dispatch({ type: 'loading', loading: false });
+      }, gridLoadingTimeout);
+    }
   };
 
   const generateNestedData = (material, parent) => {
@@ -215,14 +230,14 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
         _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'package'
-            ? _subRow.packageDetail?.packageName
-            : _subRow.serviceDetail?.serviceName;
+          ? _subRow.packageDetail?.packageName
+          : _subRow.serviceDetail?.serviceName;
       _subRow.description =
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productDescription
           : _subRow.type === 'package'
-            ? _subRow?.packageDetail?.packageDescription
-            : _subRow?.serviceDetail?.serviceDescription;
+          ? _subRow?.packageDetail?.packageDescription
+          : _subRow?.serviceDetail?.serviceDescription;
       _subRow.qty = _subRow.qty;
       _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
       _subRow.subRows = generateNestedData(material, _subRow);
@@ -231,7 +246,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
   };
 
   const handleAdd = async (rows) => {
-    setSubmitting(true)
+    setSubmitting(true);
     const material: any = [];
     rows.forEach((d) => {
       const element: any = {};
@@ -252,11 +267,11 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
           message: data.message
         });
         fetchData();
-        setSubmitting(false)
+        setSubmitting(false);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        setSubmitting(false)
+        setSubmitting(false);
       });
   };
 
@@ -347,7 +362,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
   return (
     <Fragment>
       {allowedToEdit && (
-        <Box display="flex" justifyContent="space-between" m={1}>
+        <Box display="flex" justifyContent="space-between" my={1}>
           <Box display="flex" alignItems="center">
             <Button variant={'outlined'} color="primary" size="small" startIcon={<Add />} onClick={openAddActions} aria-controls="add-menu">
               {'Add'}
@@ -388,7 +403,8 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
               fileName={`${routes.demandOrder.title}-${demandOrderData?.demandOrderNumber}`}
               resource={sidebarResource.demandOrder}
               referenceId={demandOrderData?._id}
-              columns={columns} />
+              columns={columns}
+            />
             <Box ml={1} />
             <Button
               disabled={selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true}
@@ -445,20 +461,22 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
       )}
       {columns && rowsData ? (
         <>
-          <Box p="6px" zIndex={5} width={'100%'}>
+          <Box py="6px" zIndex={5} width={'100%'}>
             <CustomReactTable
               height={'calc(100vh - 345px)'}
               columns={columns}
-              data={rowsData}
               setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
               onSelect={setSelectedRecords}
               childrenProperty="subRows"
-              uniqueKey="_id"
               renderedFrom={renderedFrom}
               isClientSideGrid={true}
               onSaveEdit={onSaveInlineEdit}
               hideSelection={!allowedToEdit}
               hideAction={!allowedToEdit}
+              expander={true}
+              state={state}
+              dispatch={dispatch}
+              allowPagination={false}
             />
           </Box>
         </>
