@@ -76,7 +76,7 @@ const SubleaseDetailsPage = () => {
   };
 
   useEffect(() => {
-    if (currentStep >= 0 && currentStep <= 2) {
+    if (currentStep !== null && currentStep >= 0 && currentStep <= 4) {
       updateProcessStatus(subleaseStepsNames[currentStep]);
     }
   }, [currentStep]);

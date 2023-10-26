@@ -6,7 +6,6 @@ import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import AddExistingProductInventory from './AddExistingProductInventory';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Add from '@material-ui/icons/Add';
@@ -25,6 +24,8 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import EditIcon from '@material-ui/icons/Edit';
 import AddIcon from '@material-ui/icons/Add';
+import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
+import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 
 const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, renderedFrom, allowedToEdit, stepFullScreen }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -51,6 +52,9 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
   const [allFields, setAllFields] = useState([]);
   const [isRateRequired, setIsRateRequired] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [addAnchorEl, setAddAnchorEl] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
 
   useEffect(() => {
     fetchFields();
@@ -169,7 +173,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
           <IconButton
             size="small"
             aria-label="Details"
-            disabled={row.original.hideSelection || allowedToEdit || row.original?.assetQty > 0}
+            disabled={row.original.hideSelection || !allowedToEdit || row.original?.assetQty > 0}
             onClick={() => {
               const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
               if (row.original?.type === 'package' && row.original?.subRows?.length) {
@@ -180,7 +184,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
               setDeleteData(obj);
             }}
           >
-            <DeleteIcon fontSize="small" color={row.original.hideSelection || allowedToEdit || row.original?.assetQty > 0 ? "disabled" : "error"} />
+            <DeleteIcon fontSize="small" color={row.original.hideSelection || !allowedToEdit || row.original?.assetQty > 0 ? "disabled" : "error"} />
           </IconButton>
 
         </>
@@ -238,10 +242,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
       }
     });
     if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
-      if (inventory.length === 0 && subleaseData?.type === SUBLEASE_TYPE.interCompany && rows?.every((e) => e?.isValid)) {
-        setNextStep(true);
-      } else
-        setNextStep(false);
+      setNextStep(false);
     } else {
       setNextStep(true);
     }
@@ -405,17 +406,70 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
     if (inputField.hasOwnProperty('qtyDisplay')) {
       inputField['qty'] = inputField['qtyDisplay'];
     }
+    if (inputField['qty'] < rowData?.assetQty) {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'error',
+        message: 'The quantity is less than what was assigned.'
+      });
+      return;
+    }
     let rows: any = [{ ...rowData, ...updatedData }];
     rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
     handleSaveData(rows);
   };
 
+
+  const openAddActions = (event) => {
+    setAddAnchorEl(event.currentTarget);
+  };
+
+  const closeAddActions = () => {
+    setAddAnchorEl(null);
+  };
+
+
   return (
     <Fragment>
       {allowedToEdit && (
         <div className="my-2 flex flex-wrap justify-between gap-2">
-          <div className="flex flex-wrap gap-2 px-2">
-            {(!subleaseData.status || subleaseData.status === SUBLEASE_STATUS.new) && (
+          <div className="flex flex-wrap gap-2 ">
+            {allowedToEdit && (<div>
+              <Button variant={'outlined'} color="primary" size="small" startIcon={<Add />} onClick={openAddActions} aria-controls="add-menu">
+                {'Add'}
+                <ExpandMore fontSize="small" />
+              </Button>
+              <Menu
+                anchorEl={addAnchorEl}
+                keepMounted
+                getContentAnchorEl={null}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'left'
+                }}
+                id="add-menu"
+                open={Boolean(addAnchorEl)}
+                onClose={closeAddActions}
+              >
+                <MenuItem
+                  onClick={() => {
+                    setAddExistingProductDialog({ open: true, type: 'product', parentId: null });
+                    closeAddActions();
+                  }}
+                >
+                  Add Existing Products
+                </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    closeAddActions();
+                    setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
+                  }}
+                >
+                  Add Existing Packages
+                </MenuItem>
+              </Menu>
+            </div>)}
+            {/* {(!subleaseData.status || subleaseData.status === SUBLEASE_STATUS.new) && (
               <Fragment>
                 {permissions?.product?.isRead && (
                   <Button
@@ -446,7 +500,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
                   </Button>
                 )}
               </Fragment>
-            )}
+            )} */}
           </div>
           <div className="flex flex-wrap gap-2">
             {material?.length && !isIssued && !rowsData?.some((f) => !f.isValid) && subleaseData?.type !== SUBLEASE_TYPE.interCompany ? (
@@ -572,19 +626,30 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
           loading={isUpdating}
         />
       )}
-      {addExistingProductDialog.open && (
-        <AddExistingProductInventory
-          isAddingProducts={isAddingProducts}
-          addProductInventory={handleAdd}
-          handleProductInventoryClose={() => {
-            setAddExistingProductDialog({ open: false, type: '', parentId: null });
-          }}
-          type={addExistingProductDialog.type}
-          referenceType="sublease"
-          renderedFrom={addExistingProductDialog.type === 'product' ? `${renderedFrom}-product` : `${renderedFrom}-package`}
-          ignoreIds={[]}
-        />
-      )}
+      {
+        addExistingProductDialog.open && addExistingProductDialog.type === 'product' && (
+          <AssignProductDialog
+            handleCloseDialog={() => setAddExistingProductDialog({ open: false, type: '', parentId: null })}
+            onSuccess={(products) => {
+              handleAdd(products);
+            }}
+            serialized={true}
+            isSubmitting={isSubmitting}
+          />
+        )
+      }
+      {
+        addExistingProductDialog.open && addExistingProductDialog.type === 'package' && (
+          <AssignPackageDialog
+            handleClose={() => setAddExistingProductDialog({ open: false, type: '', parentId: null })}
+            onSuccess={(rows) => {
+              handleAdd(rows);
+            }}
+            packageType={'product'}
+            isSubmitting={isSubmitting}
+          />
+        )
+      }
     </Fragment>
   );
 };
