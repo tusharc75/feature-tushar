@@ -1,4 +1,4 @@
-import { Box, Button, Grid, IconButton, Menu } from '@material-ui/core';
+import { Box, Button, Grid, IconButton, Menu, MenuItem } from '@material-ui/core';
 import { Delete, ExpandMore } from '@material-ui/icons';
 import { startCase, uniqBy } from 'lodash';
 import React, { Fragment, useContext, useEffect, useState } from 'react'
@@ -457,6 +457,14 @@ function SerializedAsset({ subleaseData, setNextStep, fetchData, isIssued, rende
             });
     }
 
+    const openActions = (event) => {
+        setAnchorActionEl(event.currentTarget);
+    };
+
+    const closeActions = () => {
+        setAnchorActionEl(null);
+    };
+
 
     return (
         <Fragment>
@@ -477,6 +485,41 @@ function SerializedAsset({ subleaseData, setNextStep, fetchData, isIssued, rende
                             >
                                 {`Assign ${routes.serializedAsset.title}`}
                             </Button>
+                            <Button
+                                variant="outlined"
+                                color="default"
+                                className="new-dropdown-v1"
+                                size="small"
+                                onClick={openActions}
+                                disabled={selectedRecords?.length ? false : true}
+                                aria-controls="action-menu"
+                                endIcon={<ExpandMore />}
+                            >
+                                Actions
+                            </Button>
+                            <Menu
+                                anchorEl={anchorActionEl}
+                                keepMounted
+                                getContentAnchorEl={null}
+                                anchorOrigin={{
+                                    vertical: 'bottom',
+                                    horizontal: 'left'
+                                }}
+                                id="action-menu"
+                                open={Boolean(anchorActionEl)}
+                                onClose={closeActions}
+                            >
+                                <MenuItem
+                                    onClick={() => {
+                                        const inventories = uniqBy(flattenArray(selectedRecords), '_id')?.filter((e) => e.type === 'asset')?.map((e) => e.inventory);
+                                        setShowConfirmBox(true);
+                                        setDeleteData(inventories);
+                                        closeActions();
+                                    }}
+                                >
+                                    Delete
+                                </MenuItem>
+                            </Menu>
                         </Box>
                     </Box>
                 </Box>
