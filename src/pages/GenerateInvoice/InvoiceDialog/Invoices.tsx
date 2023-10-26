@@ -17,9 +17,9 @@ import CustomRenderCell from 'src/components/Helpers/CustomRenderCell';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { camelCase } from 'lodash';
 
-const Invoices = ({ subleaseId }) => {
+const Invoices = ({ resourceId, resourceName }) => {
 
-  const renderedFrom = `${camelCase(routes.sublease?.title)}_invoice`
+  const renderedFrom = `${camelCase(routes.generateInvoice?.title)}_invoice`
 
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const toastConfig = useContext(CustomToastContext);
@@ -93,7 +93,7 @@ const Invoices = ({ subleaseId }) => {
       <span
         className="link"
         onClick={() => {
-          setViewInvoiceDialog({ open: true, invoice: params.data.invoiceId });
+          setViewInvoiceDialog({ open: true, invoice: params.data._id });
         }}
       >
         <CustomRenderCell value={params?.value} />
@@ -118,7 +118,7 @@ const Invoices = ({ subleaseId }) => {
           <IconButton
             size="small"
             onClick={() => {
-              setViewInvoiceDialog({ open: true, invoice: params.data });
+              setViewInvoiceDialog({ open: true, invoice: params.data._id });
             }}
           >
             <VisibilityIcon fontSize="small" color="primary" />
@@ -149,7 +149,7 @@ const Invoices = ({ subleaseId }) => {
 
   const getQueryString = (isExport = false) => {
 
-    let deepFilter = `?page=${page}&limit=${limit}&sublease=${subleaseId}`;
+    let deepFilter = `?page=${page}&limit=${limit}&${resourceName}=${resourceId}`;
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;

@@ -1133,6 +1133,10 @@ const routes = {
         : RESOURCE_LABEL.creditMemo,
     path: '/credit-memo/detail'
   },
+  generateInvoice: {
+    title: storedRoutes && storedRoutes.generateInvoice && storedRoutes.generateInvoice.title ? storedRoutes.generateInvoice?.title : RESOURCE_LABEL.generateInvoice,
+    path: '/generate-invoice'
+  },
 };
 
 export default routes;

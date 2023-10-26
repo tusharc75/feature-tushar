@@ -480,7 +480,8 @@ export const RESOURCE_LABEL = {
   chartOfAccount: 'Chart Of Account',
   flash: 'Flash',
   accountsReceivable: 'Accounts Receivable',
-  creditMemo: 'Credit Memo'
+  creditMemo: 'Credit Memo',
+  generateInvoice : 'Generate Invoice'
 };
 
 export const CHILD_RESOURCE = {
