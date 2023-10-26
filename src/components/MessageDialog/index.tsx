@@ -22,19 +22,19 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-interface MessageList {
+interface ErrorMessages {
   index?: number;
   message: string;
 }
 
 export default function CustomMessageDialog({
   open,
-  messageList,
+  errorMessages,
   onClose,
   forwardText
 }: {
   open: boolean;
-  messageList: MessageList[];
+  errorMessages: ErrorMessages[];
   onClose: () => void;
   forwardText?: string;
 }) {
@@ -43,18 +43,17 @@ export default function CustomMessageDialog({
   const [fullScreen, setFullScreen] = useState(false);
 
   const getMessageList = (message) => {
-    const messageList: any = [];
+    const errorMessages: any = [];
     message?.forEach((m) => {
       const { index, message } = m;
-      const existingMessage = messageList.find((m) => m?.message === message);
-
+      const existingMessage = errorMessages.find((m) => m?.message === message);
       if (existingMessage) {
         existingMessage.indexes.push(index);
       } else {
-        messageList.push({ message, indexes: [index] });
+        errorMessages.push({ message, indexes: [index] });
       }
     });
-    return messageList;
+    return errorMessages;
   };
 
   return (
@@ -87,12 +86,12 @@ export default function CustomMessageDialog({
         <Table className={classes.table}>
           <TableHead>
             <TableRow>
-              <TableCell>Indexes</TableCell>
+              <TableCell>Index</TableCell>
               <TableCell align="right">Message</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {getMessageList(messageList)?.map((d) => (
+            {getMessageList(errorMessages)?.map((d) => (
               <TableRow>
                 <TableCell>{d?.indexes?.map((index) => index).toString()}</TableCell>
                 <TableCell align="right">{d?.message}</TableCell>
