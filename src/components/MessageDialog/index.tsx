@@ -19,7 +19,6 @@ export default function CustomMessageDialog({
   onClose: () => void;
   forwardText?: string;
 }) {
-
   const getMessageList = (message) => {
     const errorMessages: any = [];
     message?.forEach((m) => {
@@ -62,15 +61,14 @@ export default function CustomMessageDialog({
         {getMessageList(errorMessages)?.map((d) => (
           <div
             key={d.message}
-            title={d?.message}
             className="grid grid-cols-[1fr_5fr] gap-[20px]  shadow-[0px_5.44444px_27.22222px_0px_rgba(0,_0,_0,_0.06)] px-[15px] py-[12px] md:px-[20px] rounded-lg"
             style={{ border: '1px solid var(--common-border-color)' }}
           >
-            <div>
+            <div title={d?.indexes?.toString()} className="cursor-help">
               <p className="text-[13px] mb-[8px]">Index</p>
-              <h6 className="text-[16px]">{d?.indexes?.toString()}</h6>
+              <h6 className="text-[16px] line-clamp-1">{d?.indexes?.toString()}</h6>
             </div>
-            <div>
+            <div title={d?.message} className=" cursor-help">
               <p className="text-[13px] mb-[8px]">Message</p>
               <p className="text-[16px] line-clamp-1">{d?.message}</p>
             </div>
