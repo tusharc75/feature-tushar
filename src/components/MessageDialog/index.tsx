@@ -19,6 +19,7 @@ export default function CustomMessageDialog({
   onClose: () => void;
   forwardText?: string;
 }) {
+
   const getMessageList = (message) => {
     const errorMessages: any = [];
     message?.forEach((m) => {
@@ -66,12 +67,12 @@ export default function CustomMessageDialog({
             style={{ border: '1px solid var(--common-border-color)' }}
           >
             <div>
-              <h6 className="text-[13px] mb-[6px]">Index:</h6>
-              <p className="text-[14px]">{d?.indexes?.map((index) => `${index}`.padStart(2, '0'))}</p>
+              <p className="text-[13px] mb-[8px]">Index</p>
+              <h6 className="text-[16px]">{d?.indexes?.toString()}</h6>
             </div>
             <div>
-              <h6 className="text-[13px] mb-[6px]">Error Message:</h6>
-              <p className="text-[14px] line-clamp-1">{d?.message}</p>
+              <p className="text-[13px] mb-[8px]">Message</p>
+              <p className="text-[16px] line-clamp-1">{d?.message}</p>
             </div>
           </div>
         ))}
