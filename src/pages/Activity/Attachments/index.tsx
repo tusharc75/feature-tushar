@@ -374,33 +374,69 @@ export default function Attachment() {
     }
   };
 
-  const handleMail = (data) => {
+  // const handleMail = (data) => {
+  //   const attachments: any = [];
+  //   Promise.all(
+  //     data?.file.map(async (file) => {
+  //       await axiosInstance()
+  //         .get(`user/download?fileName=${file?.url}`, { responseType: 'blob' })
+  //         .then(({ data }) => {
+  //           let reader = new FileReader();
+  //           reader.readAsDataURL(new Blob([data], { type: mime.getType(file.url.split('.')?.pop()) }));
+  //           reader.onloadend = function () {
+  //             let base64data: any = reader.result;
+  //             attachments.push({
+  //               base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
+  //               contentType: base64data.split(';')[0].split(':')[1],
+  //               extension: `.${file.url.split('.')?.pop()}`,
+  //               name: file.name
+  //             });
+  //           };
+  //         })
+  //         .catch((err) => {
+  //           toastConfig.setToastConfig(err);
+  //         });
+  //     })
+  //   ).finally(() => {
+  //     setEmailAttachment(attachments);
+  //     setSendMail(true);
+  //   });
+  // };
+
+  const handleMail = async (data) => {
     const attachments: any = [];
-    Promise.all(
-      data?.file.map(async (file) => {
-        await axiosInstance()
-          .get(`user/download?fileName=${file?.url}`, { responseType: 'blob' })
-          .then(({ data }) => {
+    try {
+      await Promise.all(
+        data?.file.map(async (file) => {
+          try {
+            const response = await axiosInstance().get(`user/download?fileName=${file?.url}`, { responseType: 'blob' });
+            const data = response.data;
+
             let reader = new FileReader();
             reader.readAsDataURL(new Blob([data], { type: mime.getType(file.url.split('.')?.pop()) }));
-            reader.onloadend = function () {
-              let base64data: any = reader.result;
-              attachments.push({
-                base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
-                contentType: base64data.split(';')[0].split(':')[1],
-                extension: `.${file.url.split('.')?.pop()}`,
-                name: file.name
-              });
-            };
-          })
-          .catch((err) => {
+
+            await new Promise<void>((resolve) => {
+              reader.onloadend = function () {
+                let base64data: any = reader.result;
+                attachments.push({
+                  base64: base64data.substring(base64data.indexOf(',') + 1),
+                  contentType: base64data.split(';')[0].split(':')[1],
+                  extension: `.${file.url.split('.')?.pop()}`,
+                  name: file.name
+                });
+                resolve();
+              };
+            });
+          } catch (err) {
             toastConfig.setToastConfig(err);
-          });
-      })
-    ).finally(() => {
+          }
+        })
+      );
       setEmailAttachment(attachments);
       setSendMail(true);
-    });
+    } catch (err) {
+      toastConfig.setToastConfig(err);
+    }
   };
 
   const handleMailForFolder = (_id, name) => {
