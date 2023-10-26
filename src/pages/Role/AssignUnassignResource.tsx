@@ -14,28 +14,28 @@ import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader
 import Loader from '../../components/Loader';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import axiosInstance from '../../axios/axiosInstance';
-import {useData} from '../../StateProvider/Provider'
+import { useData } from '../../StateProvider/Provider'
 
 
-const AssignUnassignResourceDialog = ({ showUpdateResourceDialog, handleCloseDialog, roleIds, onSuccess,  selectedEntity, roleType, setToastConfig}) => {
+const AssignUnassignResourceDialog = ({ showUpdateResourceDialog, handleCloseDialog, roleIds, onSuccess, selectedEntity, roleType, setToastConfig }) => {
   const [resource, setResource] = useState([]);
   const [selectedResource, setSelectedResource] = useState([]);
-  const [access, setAccess] = useState({Read: true, Create: true, Update: true, Delete: true});
-  const {state : {user: { user }}} = useData();
+  const [access, setAccess] = useState({ Read: true, Create: true, Update: true, Delete: true });
+  const { state: { user: { user } } } = useData();
   const [loading, setLoading] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
-  
+
 
   useEffect(() => {
     getInitialData();
   }, []);
 
-  const getInitialData = () => {    
+  const getInitialData = () => {
     setLoading(true);
     axiosInstance()
       .get(`user/entity-union-role/?userId=${user?._id}&entityId=${selectedEntity}`)
       .then(({ data: { data } }) => {
-        const resource = data.resource.map((r:any) => ({
+        const resource = data.resource.map((r: any) => ({
           ...r,
           isRead: false,
           isCreate: false,
@@ -53,24 +53,21 @@ const AssignUnassignResourceDialog = ({ showUpdateResourceDialog, handleCloseDia
 
 
   const handleUpdate = async () => {
-    console.log(resource)
-    if ( (access.Read || access.Create || access.Update || access.Delete) && selectedResource.length){
+    if ((access.Read || access.Create || access.Update || access.Delete) && selectedResource.length) {
       let resources = []
       resource.forEach((r) => {
-        if(selectedResource.includes(r.name)){
-          let newData = {...r}
-          console.log('r', r)
+        if (selectedResource.includes(r.name)) {
+          let newData = { ...r }
           newData.isRead = access.Read
           newData.isCreate = access.Create
           newData.isUpdate = access.Update
           newData.isDelete = access.Delete
-          if(showUpdateResourceDialog?.action === 'Remove'){
+          if (showUpdateResourceDialog?.action === 'Remove') {
             newData.isRead = false
             newData.isCreate = false
             newData.isUpdate = false
             newData.isDelete = false
           }
-          console.log("Selected Resource", newData)
           resources.push(newData)
         }
       });
@@ -81,14 +78,14 @@ const AssignUnassignResourceDialog = ({ showUpdateResourceDialog, handleCloseDia
           type: roleType,
           roleIds: roleIds,
         })
-        .then(({ data }) => {        
+        .then(({ data }) => {
           setSubmitting(false);
-          setSelectedResource([]);  
+          setSelectedResource([]);
           handleClose();
           setToastConfig({
             open: true,
             type: "success",
-            message: `Resource ${showUpdateResourceDialog?.action} successfully.` ,
+            message: data.message,
           });
         })
         .catch((err) => {
@@ -106,97 +103,97 @@ const AssignUnassignResourceDialog = ({ showUpdateResourceDialog, handleCloseDia
 
   const handleClose = () => {
     setSelectedResource([]);
-    setAccess({Read: true, Create: true, Update: true, Delete: true});
+    setAccess({ Read: true, Create: true, Update: true, Delete: true });
     handleCloseDialog();
   }
 
   return (
     <Dialog fullWidth maxWidth="md" open={showUpdateResourceDialog?.open} onClose={handleClose} aria-labelledby="assign-resource-dialog">
-      <CustomDialogHeader title={showUpdateResourceDialog?.action + " Resources"  } onClose={handleClose}/>
+      <CustomDialogHeader title={showUpdateResourceDialog?.action + " Resources"} onClose={handleClose} />
       <CustomDialogContent>
-        { isSubmitting ?  (
+        {isSubmitting ? (
           <Loader />
-          ) :(
+        ) : (
           <Box >
-              <Autocomplete
-                id="select-resources"
-                // style={{ width: '400px' }}
-                multiple={true}
-                options={resource?.map((_resource) => _resource.name)}
-                renderInput={(params) =>
-                  <TextField {...params}
-                    variant="outlined"
-                    label="Resource"
-                    margin="dense"
-                    required={true} />}
-                getOptionLabel={(option) => option}
-                onChange={(e, val) => {
-                  setSelectedResource(val);
-                }}
-              />
-            </Box>
-          )}
-          { showUpdateResourceDialog?.action === "Assign" ? (
-            <Box>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name="Read"
-                    checked={access.Read}
-                    onChange={(e) => {
-                      setAccess({ ...access, Read: e.target.checked, Create: e.target.checked, Update: e.target.checked, Delete: e.target.checked });
-                    }}
-                    color="primary"
-                    disabled={isSubmitting}
-                  />
-                }
-                label="Read"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name="Create"
-                    checked={access.Create}
-                    onChange={(e) => {
-                      setAccess({ ...access, Create: e.target.checked, Read: e.target.checked ? true : access.Read });
-                    }}
-                    color="primary"
-                    disabled={isSubmitting}
-                  />
-                }
-                label="Create"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name="Update"
-                    checked={access.Update}
-                    onChange={(e) => {
-                      setAccess({ ...access, Update: e.target.checked, Read: e.target.checked ? true : access.Read });
-                    }}
-                    color="primary"
-                    disabled={isSubmitting}
-                  />
-                }
-                label="Update"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name="Delete"
-                    checked={access.Delete}
-                    onChange={(e) => {
-                      setAccess({ ...access, Delete: e.target.checked, Read: e.target.checked ? true : access.Read });
-                    }}
-                    color="primary"
-                    disabled={isSubmitting}
-                  />
-                }
-                label="Delete"
-              />
+            <Autocomplete
+              id="select-resources"
+              // style={{ width: '400px' }}
+              multiple={true}
+              options={resource?.map((_resource) => _resource.name)}
+              renderInput={(params) =>
+                <TextField {...params}
+                  variant="outlined"
+                  label="Resource"
+                  margin="dense"
+                  required={true} />}
+              getOptionLabel={(option) => option}
+              onChange={(e, val) => {
+                setSelectedResource(val);
+              }}
+            />
+          </Box>
+        )}
+        {showUpdateResourceDialog?.action === "Assign" ? (
+          <Box>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  name="Read"
+                  checked={access.Read}
+                  onChange={(e) => {
+                    setAccess({ ...access, Read: e.target.checked, Create: e.target.checked, Update: e.target.checked, Delete: e.target.checked });
+                  }}
+                  color="primary"
+                  disabled={isSubmitting}
+                />
+              }
+              label="Read"
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  name="Create"
+                  checked={access.Create}
+                  onChange={(e) => {
+                    setAccess({ ...access, Create: e.target.checked, Read: e.target.checked ? true : access.Read });
+                  }}
+                  color="primary"
+                  disabled={isSubmitting}
+                />
+              }
+              label="Create"
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  name="Update"
+                  checked={access.Update}
+                  onChange={(e) => {
+                    setAccess({ ...access, Update: e.target.checked, Read: e.target.checked ? true : access.Read });
+                  }}
+                  color="primary"
+                  disabled={isSubmitting}
+                />
+              }
+              label="Update"
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  name="Delete"
+                  checked={access.Delete}
+                  onChange={(e) => {
+                    setAccess({ ...access, Delete: e.target.checked, Read: e.target.checked ? true : access.Read });
+                  }}
+                  color="primary"
+                  disabled={isSubmitting}
+                />
+              }
+              label="Delete"
+            />
 
           </Box>
-        ): null}
+        ) : null}
       </CustomDialogContent>
       <CustomDialogFooter>
         <Button disabled={isSubmitting} onClick={handleClose} color="primary" size="small">
