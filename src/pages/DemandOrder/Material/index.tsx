@@ -362,7 +362,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
   return (
     <Fragment>
       {allowedToEdit && (
-        <Box display="flex" justifyContent="space-between" m={1}>
+        <Box display="flex" justifyContent="space-between" my={1}>
           <Box display="flex" alignItems="center">
             <Button variant={'outlined'} color="primary" size="small" startIcon={<Add />} onClick={openAddActions} aria-controls="add-menu">
               {'Add'}
@@ -461,7 +461,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
       )}
       {columns && rowsData ? (
         <>
-          <Box p="6px" zIndex={5} width={'100%'}>
+          <Box py="6px" zIndex={5} width={'100%'}>
             <CustomReactTable
               height={'calc(100vh - 345px)'}
               columns={columns}
