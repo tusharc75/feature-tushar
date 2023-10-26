@@ -1,10 +1,10 @@
 import { Collapse, IconButton } from '@material-ui/core';
-import { Check, Edit, KeyboardArrowDown, KeyboardArrowUp, ArrowDropDownCircle } from '@material-ui/icons';
+import { Check, Edit } from '@material-ui/icons';
 import React, { FC, useState } from 'react';
-import type { TSwipableListInputProps } from './types';
-import HtmlTooltip from '../CustomTooltipTitle';
+import { BsChevronContract, BsChevronExpand } from 'react-icons/bs';
 import { TInitialState } from '../CustomReactTableNew/useTableReducer';
-import { BsArrowsExpand, BsArrowsCollapse, BsChevronExpand, BsChevronContract } from 'react-icons/bs';
+import HtmlTooltip from '../CustomTooltipTitle';
+import type { TSwipableListInputProps } from './types';
 
 const DEFAULT_DATA_COUNT = 4;
 
