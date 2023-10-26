@@ -16,9 +16,10 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { fetch_sublease_product_fields } from 'src/components/Sublease/helper';
+import { subleaseMessage } from 'src/constants/messageHelpers';
 
 
-function SerializedAsset({ subleaseData, setNextStep, fetchData, isIssued, renderedFrom, allowedToEdit, stepFullScreen }) {
+function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, fetchData, isIssued, renderedFrom, allowedToEdit, stepFullScreen }) {
     const toastConfig = useContext(CustomToastContext);
 
     const [columns, setColumns] = useState(null);
@@ -183,6 +184,7 @@ function SerializedAsset({ subleaseData, setNextStep, fetchData, isIssued, rende
 
     const fetchRowData = async () => {
         setNextStep(false);
+        setNextStepToolTip(null);
         try {
             var data: any = [];
             var transferAssets: any = [];
@@ -266,8 +268,10 @@ function SerializedAsset({ subleaseData, setNextStep, fetchData, isIssued, rende
             setRowsData(rows);
             if (rows.every((d) => d.isValid)) {
                 setNextStep(true)
+                setNextStepToolTip(null)
             } else {
                 setNextStep(false)
+                setNextStepToolTip(subleaseMessage.assignAssetsStep)
             }
             setSelectedRecords([]);
         } catch (error) {

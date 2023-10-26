@@ -26,3 +26,27 @@ export const rentalManagementMessage = {
 };
 
 export const dataNotSelected = 'Data Not Selected'
+
+export const notOwnerAndColaborator = 'You have to be owner or colaborator to perform this!';
+
+export const subleaseActions = {
+    createLoadingTicket: 'Create Loading Ticket',
+    deliveredToPlant: 'Delivered to Plant',
+    createReceivingTicket: 'Create Receiving Ticket',
+    receiveAtPlant: 'Receive at Plant',
+};
+
+
+export const subleaseMessage = {
+    addProductPackageStep: 'Add Products/Packages to proceed',
+    assignAssetsStep: 'Assign Assets to proceed',
+    deliverLoadingTicketStep: 'Create & Deliver Loading Ticket to proceed',
+    subleaseProcessStep: 'There maybe some reasons that i dont konw',
+    loadingTicketAlreadyCreated: 'Loading Ticket Already Created',
+    loadingTicketNotCreated: 'Loading Ticket Not Created Yet',
+    loadingTicketAlreadyDelivered: 'Loading Ticket already delivered',
+    loadingTicketNotDeliveredYet: 'Loading Ticket not delivered yet',
+    receivingTicketAlreadyCreated: 'Receiving Ticket Already Created',
+    receivingOrReturnTicketNotCreated: 'Receiving or Return Ticket Not Created Yet',
+    receivingTicketAlreadyDelivered: 'Receiving Ticket already delivered',
+};
