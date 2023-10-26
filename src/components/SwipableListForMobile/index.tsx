@@ -1,9 +1,10 @@
 import { Collapse, IconButton } from '@material-ui/core';
-import { Check, Edit, KeyboardArrowDown, KeyboardArrowUp } from '@material-ui/icons';
+import { Check, Edit } from '@material-ui/icons';
 import React, { FC, useState } from 'react';
-import type { TSwipableListInputProps } from './types';
-import HtmlTooltip from '../CustomTooltipTitle';
+import { BsChevronContract, BsChevronExpand } from 'react-icons/bs';
 import { TInitialState } from '../CustomReactTableNew/useTableReducer';
+import HtmlTooltip from '../CustomTooltipTitle';
+import type { TSwipableListInputProps } from './types';
 
 const DEFAULT_DATA_COUNT = 4;
 
@@ -119,7 +120,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                                     handleCollapse(row.original._id);
                                   }}
                                 >
-                                  {compareCollapse(row.original._id) ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+                                  {compareCollapse(row.original._id) ? <BsChevronContract /> : <BsChevronExpand />}
                                 </IconButton>
                               )}
                             </div>
@@ -287,7 +288,7 @@ const RenderSubCard = ({
                     handleCollapse(row.original._id);
                   }}
                 >
-                  {compareCollapse(row.original._id) ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+                  {compareCollapse(row.original._id) ? <BsChevronContract /> : <BsChevronExpand />}
                 </IconButton>
               )}
             </div>
