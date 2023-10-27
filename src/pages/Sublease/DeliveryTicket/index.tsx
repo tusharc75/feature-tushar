@@ -305,34 +305,34 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
         if (action === subleaseActions.createLoadingTicket) {
             selectedRecords?.forEach((e) => {
                 if (e.hasOwnProperty('LoadingTicketId')) {
-                    errorMessages.push({ index: e.index, message: subleaseMessage.loadingTicketAlreadyCreated });
+                    errorMessages.push({ index: e.index, message: subleaseMessage.loadingAlreadyCreated });
                 }
             });
         }
         else if (action === subleaseActions.createReceivingTicket) {
             selectedRecords?.forEach((e) => {
                 if (e.hasOwnProperty('ReceivingTicketId')) {
-                    errorMessages.push({ index: e.index, message: subleaseMessage.loadingTicketAlreadyCreated });
+                    errorMessages.push({ index: e.index, message: subleaseMessage.loadingAlreadyCreated });
                 }
             });
         }
         else if (action === subleaseActions.deliveredToPlant) {
             selectedRecords?.forEach((e) => {
                 if (!e.hasOwnProperty('LoadingTicketId')) {
-                    errorMessages.push({ index: e.index, message: subleaseMessage.loadingTicketNotCreated });
+                    errorMessages.push({ index: e.index, message: subleaseMessage.loadingNotCreated });
                 }
                 else if (e?.LoadingTicketStatus === DELIVERY_TICKET_STATUS.delivered) {
-                    errorMessages.push({ index: e.index, message: subleaseMessage.loadingTicketAlreadyDelivered });
+                    errorMessages.push({ index: e.index, message: subleaseMessage.loadingAlreadyDelivered });
                 }
             });
         }
         else if (action === subleaseActions.receiveAtPlant) {
             selectedRecords?.forEach((e) => {
                 if (!e.hasOwnProperty('ReceivingTicketId')) {
-                    errorMessages.push({ index: e.index, message: subleaseMessage.receivingOrReturnTicketNotCreated });
+                    errorMessages.push({ index: e.index, message: subleaseMessage.receivingOrReturnNotCreated });
                 }
                 else if (e?.ReceivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) {
-                    errorMessages.push({ index: e.index, message: subleaseMessage.receivingTicketAlreadyDelivered });
+                    errorMessages.push({ index: e.index, message: subleaseMessage.receivingAlreadyDelivered });
                 }
             });
         }
