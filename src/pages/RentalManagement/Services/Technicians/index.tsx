@@ -19,7 +19,7 @@ import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmploye
 import { displayDate } from 'src/constants/helpers';
 import { Add } from '@material-ui/icons';
 
-const Technicians = ({ allowedToEdit, rentalManagementData, selectedService }) => {
+const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, services }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const [dataRows, setDataRows] = useState(null);
@@ -38,7 +38,7 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService }) =
     useEffect(() => {
         fetchColumns();
         fetchData();
-    }, [selectedService]);
+    }, [selectedService, services]);
 
 
     const fetchColumns = async () => {
