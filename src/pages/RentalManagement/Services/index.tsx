@@ -311,7 +311,6 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
       }
       setRowsData(rows);
       setSelectedProducts([]);
-      console.log(rows);
 
       setServiceOption([{ optionLabel: 'All', optionValue: 'All' },
       ...rows?.map((s) => {
