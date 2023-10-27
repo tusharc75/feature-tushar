@@ -29,16 +29,13 @@ import ManagePackageDialog from 'src/pages/Packages/ManagePackageDialog';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 import EditIcon from '@material-ui/icons/Edit';
 
-// import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 
 const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }: any) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
   }: any = useData();
-
-  const { state, dispatch } = useTableReducer();
 
   const [isUpdating, setUpdating] = useState(false);
 
@@ -252,7 +249,6 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
 
   const fetchProductInventory = async () => {
     setNextStep(false);
-    dispatch({ type: 'loading', loading: true });
     try {
       var data: any = [];
       var inventory: any = [];
@@ -306,14 +302,9 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
         setNextStep(true);
       }
       setRowsData(rows);
-      dispatch({ type: 'initialize', data: rows, count: data.length });
       setSelectedProducts([]);
     } catch (error) {
-      dispatch({ type: 'error', error: true });
-    } finally {
-      setTimeout(() => {
-        dispatch({ type: 'loading', loading: false });
-      }, gridLoadingTimeout);
+      console.error(error);
     }
   };
 
@@ -523,7 +514,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
   return (
     <Fragment>
       {allowedToEdit && (
-        <Box display="flex" justifyContent="space-between" m={1}>
+        <Box display="flex" justifyContent="space-between" my={1}>
           <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
             <Button variant={'outlined'} color="primary" size="small" startIcon={<Add />} onClick={openAddActions} aria-controls="add-menu">
               {'Add'}
@@ -629,7 +620,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
       )}
       {columns && rowsData ? (
         <Box zIndex={5} width={'100%'}>
-          {/* <CustomReactTable
+          <CustomReactTable
             height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
             columns={columns}
             data={rowsData}
@@ -642,21 +633,6 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
             renderedFrom="rental_management_sevices_1"
             onSaveEdit={onSaveInlineEdit}
             isClientSideGrid={true}
-          /> */}
-          <CustomReactTable
-            columns={columns}
-            setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-            onSelect={setSelectedProducts}
-            childrenProperty="subRows"
-            renderedFrom={renderedFrom}
-            isClientSideGrid={true}
-            onSaveEdit={onSaveInlineEdit}
-            hideSelection={!allowedToEdit}
-            hideAction={!allowedToEdit}
-            expander={true}
-            state={state}
-            dispatch={dispatch}
-            allowPagination={false}
           />
         </Box>
       ) : (
