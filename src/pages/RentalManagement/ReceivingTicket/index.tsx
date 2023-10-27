@@ -81,6 +81,7 @@ const ReceivingTicket = ({
   rentalManagementData,
   fetchRentalData,
   setNextStep,
+  setNextStepToolTip,
   renderedFrom,
   allowedToEdit,
   isProcessor,
@@ -179,6 +180,7 @@ const ReceivingTicket = ({
     setLoadingData(true);
     try {
       setNextStep(false);
+      setNextStepToolTip(null)
       dispatch({ type: 'loading', loading: true });
       if (gridApi) {
         gridApi.setRowData([]);
@@ -499,6 +501,9 @@ const ReceivingTicket = ({
         ).length === productAssets.length
       ) {
         setNextStep(true);
+      }
+      else {
+        setNextStepToolTip(rentalManagementMessage.receivingCreatedAndDelivered)
       }
 
       setUniqueReceivingTicket([...new Set(productAssets.filter((d) => d.receivingTicketId !== undefined).map((d) => d.receivingTicketId))]);

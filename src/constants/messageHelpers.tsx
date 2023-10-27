@@ -1,6 +1,6 @@
 import routes from "src/components/Helpers/Routes";
 
-export const notOwnerAndColaborator = 'You have to be owner or colaborator to perform this!';
+export const ownerAndColaborator = 'You have to be owner or colaborator to perform this!';
 
 export const rentalManagementActions = {
     createLoadingTicket: 'Create Loading Ticket',
@@ -22,6 +22,8 @@ export const rentalManagementActions = {
 export const rentalManagementMessage = {
     addProductPackage: 'Add Products/Packages to proceed',
     assignAssets: 'Assign Assets to proceed',
+    loadingCreatedAndDelivered: 'Loading Ticket Created And Delivered to proceed',
+    receivingCreatedAndDelivered: 'Receiving/Return Ticket Created And Delivered to proceed',
     loadingAlreadyCreated: 'Loading Ticket Already Created',
     loadingNotCreated: 'Loading Ticket Not Created Yet',
     loadingAlreadyDelivered: 'Loading Ticket already delivered',

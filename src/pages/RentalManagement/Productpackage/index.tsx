@@ -30,7 +30,7 @@ import { AssetAvailabilityIcon } from 'src/assets/svg/svgIcons';
 import { ExpandMore } from '@material-ui/icons';
 import ManagePackageDialog from 'src/pages/Packages/ManagePackageDialog';
 import EditIcon from '@material-ui/icons/Edit';
-import { rentalManagementMessage } from 'src/constants/messageHelpers';
+import { ownerAndColaborator, rentalManagementMessage } from 'src/constants/messageHelpers';
 
 const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip, renderedFrom, stepFullScreen, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -575,132 +575,142 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
 
   return (
     <Fragment>
-      {allowedToEdit && (
-        <Box display="flex" justifyContent="space-between" m={1}>
-          <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
-            <Button variant={'outlined'} color="primary" size="small" startIcon={<Add />} onClick={openAddActions} aria-controls="add-menu">
-              {'Add'}
-              <ExpandMore fontSize="small" />
-            </Button>
-            <Menu
-              anchorEl={addAnchorEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
-              }}
-              id="add-menu"
-              open={Boolean(addAnchorEl)}
-              onClose={closeAddActions}
-            >
-              <MenuItem
-                onClick={() => {
-                  closeAddActions();
-                  setAddExistingProductDialog({ open: true, type: 'product', parentId: null });
-                }}
-              >
-                Add Existing Products
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  closeAddActions();
-                  setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
-                }}
-              >
-                Add Existing Packages
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  closeAddActions();
-                  setAddExistingProductDialog({ open: true, type: 'newPackage', parentId: null });
-                }}
-              >
-                Add New Product Package
-              </MenuItem>
-            </Menu>
-          </Box>
-          <Box display="flex" ml={1}>
-            {flattenArray(rowsData)?.filter((e) => e?.serializedProduct)?.length > 0 && (
-              <Box mr={1}>
-                <HtmlTooltip title="Check Assets Availability" arrow placement="top">
-                  <IconButton
-                    size="small"
-                    aria-label="Details"
-                    onClick={() => {
-                      setOpenAssetAvailibility(true);
-                    }}
-                  >
-                    <AssetAvailabilityIcon color={'var(--dark-primary-text, #163340)'} size={24} />
-                  </IconButton>
-                </HtmlTooltip>
-              </Box>
-            )}
-            <Button
-              variant="outlined"
-              color="primary"
-              size="small"
-              id="demo-positioned-button"
-              onClick={handleClick}
-              disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
-              endIcon={<BiChevronDown />}
-              className="new-dropdown-v1"
-            >
-              Actions
-            </Button>
-            <Menu
-              anchorEl={anchorEl}
-              keepMounted
-              open={open}
-              onClose={handleClose}
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'right'
-              }}
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right'
+      <Box display="flex" justifyContent="space-between" m={1}>
+        <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
+          <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : ``}>
+            <span>
+              <Button
+                variant={'outlined'}
+                color="primary"
+                size="small"
+                startIcon={<Add />}
+                onClick={openAddActions}
+                disabled={!allowedToEdit}
+                aria-controls="add-menu">
+                {'Add'}
+                <ExpandMore fontSize="small" />
+              </Button>
+            </span>
+          </HtmlTooltip>
+          <Menu
+            anchorEl={addAnchorEl}
+            keepMounted
+            getContentAnchorEl={null}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left'
+            }}
+            id="add-menu"
+            open={Boolean(addAnchorEl)}
+            onClose={closeAddActions}
+          >
+            <MenuItem
+              onClick={() => {
+                closeAddActions();
+                setAddExistingProductDialog({ open: true, type: 'product', parentId: null });
               }}
             >
-              <HtmlTooltip
-                title={
-                  Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)
-                    ? 'Bulk edit selected records'
-                    : 'Select records to edit'
-                }
-              >
-                <MenuItem
-                  onClick={() => {
-                    setIsProductEdit({ open: true, data: null, showSaveAndNext: false });
-                    setIsBulkEdit(true);
-                    handleClose();
-                  }}
-                >
-                  Bulk Edit
-                </MenuItem>
-              </HtmlTooltip>
-              <HtmlTooltip
-                title={
-                  Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)
-                    ? 'Delete selected records'
-                    : 'Select records to delete'
-                }
-              >
-                <MenuItem
-                  disabled={isDeleting}
-                  onClick={() => {
-                    handleDeleteMultiple();
-                    handleClose();
-                  }}
-                >
-                  Delete
-                </MenuItem>
-              </HtmlTooltip>
-            </Menu>
-          </Box>
+              Add Existing Products
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                closeAddActions();
+                setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
+              }}
+            >
+              Add Existing Packages
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                closeAddActions();
+                setAddExistingProductDialog({ open: true, type: 'newPackage', parentId: null });
+              }}
+            >
+              Add New Product Package
+            </MenuItem>
+          </Menu>
         </Box>
-      )}
+        <Box display="flex" ml={1}>
+          {flattenArray(rowsData)?.filter((e) => e?.serializedProduct)?.length > 0 && (
+            <Box mr={1}>
+              <HtmlTooltip title="Check Assets Availability" arrow placement="top">
+                <IconButton
+                  size="small"
+                  aria-label="Details"
+                  onClick={() => {
+                    setOpenAssetAvailibility(true);
+                  }}
+                >
+                  <AssetAvailabilityIcon color={'var(--dark-primary-text, #163340)'} size={24} />
+                </IconButton>
+              </HtmlTooltip>
+            </Box>
+          )}
+          <Button
+            variant="outlined"
+            color="primary"
+            size="small"
+            id="demo-positioned-button"
+            onClick={handleClick}
+            disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
+            endIcon={<BiChevronDown />}
+            className="new-dropdown-v1"
+          >
+            Actions
+          </Button>
+          <Menu
+            anchorEl={anchorEl}
+            keepMounted
+            open={open}
+            onClose={handleClose}
+            getContentAnchorEl={null}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'right'
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right'
+            }}
+          >
+            <HtmlTooltip
+              title={
+                Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)
+                  ? 'Bulk edit selected records'
+                  : 'Select records to edit'
+              }
+            >
+              <MenuItem
+                onClick={() => {
+                  setIsProductEdit({ open: true, data: null, showSaveAndNext: false });
+                  setIsBulkEdit(true);
+                  handleClose();
+                }}
+              >
+                Bulk Edit
+              </MenuItem>
+            </HtmlTooltip>
+            <HtmlTooltip
+              title={
+                Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)
+                  ? 'Delete selected records'
+                  : 'Select records to delete'
+              }
+            >
+              <MenuItem
+                disabled={isDeleting}
+                onClick={() => {
+                  handleDeleteMultiple();
+                  handleClose();
+                }}
+              >
+                Delete
+              </MenuItem>
+            </HtmlTooltip>
+          </Menu>
+        </Box>
+      </Box>
+
       {columns && rowsData ? (
         <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}>
           <CustomReactTable

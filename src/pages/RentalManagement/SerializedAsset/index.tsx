@@ -32,7 +32,7 @@ import AddNonSerializeAssets from './AddNonSerializeAssets';
 import { removeAssetsInRental } from '../rentalOfflineHelper';
 import WarningIcon from '@material-ui/icons/Warning';
 import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
-import { rentalManagementMessage } from 'src/constants/messageHelpers';
+import { ownerAndColaborator, rentalManagementMessage } from 'src/constants/messageHelpers';
 
 const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip, stepFullScreen, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -108,12 +108,12 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                ? row.original?.packageDetail.packageType === 'Product'
-                  ? '(Product)'
-                  : '(Service)'
-                : row.original.type === 'service'
-                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                : ''}
+                  ? row.original?.packageDetail.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === 'service'
+                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                    : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -341,21 +341,20 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
 
       rows.forEach((parent, i) => {
         parent.index = i + 1;
-        parent.detail = `${
-          parent.type === 'service'
-            ? parent?.serviceDetail?.serviceName
-            : parent.type === 'product'
+        parent.detail = `${parent.type === 'service'
+          ? parent?.serviceDetail?.serviceName
+          : parent.type === 'product'
             ? parent?.productDetail?.productName
             : parent?.packageDetail?.packageName
-        }`;
+          }`;
         parent.description =
           parent.type === 'service'
             ? parent?.serviceDetail?.serviceDescription || ''
             : parent.type === 'product'
-            ? parent?.productDetail?.productDescription || ''
-            : parent.type === 'package'
-            ? parent?.packageDetail?.packageDescription || ''
-            : '';
+              ? parent?.productDetail?.productDescription || ''
+              : parent.type === 'package'
+                ? parent?.packageDetail?.packageDescription || ''
+                : '';
         parent.serializedProduct = parent.type === 'product' ? parent?.productDetail?.serializedProduct : false;
         parent.assetQty = parent.qty;
         parent.assetAssignedQty = parent.serializedProduct
@@ -386,21 +385,21 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           parent.subRows.filter((d) => d.type !== 'asset').length === 0
             ? parent.assetQty
             : parent.subRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetQty + sum, 0) +
-              (parent.type === 'product' ? parent.assetQty : 0);
+            (parent.type === 'product' ? parent.assetQty : 0);
         parent.assetAssignedQty =
           parent.subRows.filter((d) => d.type !== 'asset').length === 0
             ? parent.assetAssignedQty
             : parent.subRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetAssignedQty + sum, 0) +
-              (parent.type === 'product' ? parent?.subRows.filter((d) => d.type === 'asset')?.length : 0);
+            (parent.type === 'product' ? parent?.subRows.filter((d) => d.type === 'asset')?.length : 0);
         parent.isValid = parent.serializedProduct
           ? parent.assetAssignedQty === parent.assetQty
             ? true
             : false
           : parent.subRows.length !== 0
-          ? parent.assetAssignedQty ===
-              parent.subRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0) ||
+            ? parent.assetAssignedQty ===
+            parent.subRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0) ||
             parent.subRows.every((d) => d.isValid)
-          : true;
+            : true;
 
         if (parent.subRows.length && parent.isValid) {
           if (parent.subRows.every((d) => d.isValid)) {
@@ -505,16 +504,16 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceName
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productName
-          : _subRow?.packageDetail?.packageName;
+            ? _subRow?.productDetail?.productName
+            : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.serializedProduct = _subRow.type === 'product' ? _subRow?.productDetail?.serializedProduct : false;
       // _subRow.assetQty = _subRow.type === 'product' || _subRow.type === 'package' ? _subRow.qty * parent.assetQty : 0;
       _subRow.assetQty =
@@ -552,17 +551,17 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         tempSubRows.filter((d) => d.type !== 'asset').length === 0
           ? _subRow.assetQty
           : tempSubRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetQty + sum, 0) +
-            (_subRow.type === 'product' ? _subRow.assetQty : 0);
+          (_subRow.type === 'product' ? _subRow.assetQty : 0);
       _subRow.isValid = _subRow.serializedProduct
         ? _subRow.assetAssignedQty === _subRow.assetQty
           ? true
           : false
         : tempSubRows?.filter((e) => e.type === 'asset')?.length === tempSubRows?.length
-        ? true
-        : _subRow.assetAssignedQty ===
-          tempSubRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0)
-        ? true
-        : false;
+          ? true
+          : _subRow.assetAssignedQty ===
+            tempSubRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0)
+            ? true
+            : false;
       subRows.push(_subRow);
       assetAssignedQtySUM += _subRow.serializedProduct ? _subRow.assetAssignedQty : 0;
     });
@@ -766,197 +765,199 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
 
   return (
     <Fragment>
-      {allowedToEdit && (
-        <Box display="flex" justifyContent="flex-end" m={1}>
-          <Box display="flex" alignItems="center" justifyContent={'flex-end'} gridColumnGap={8} flex={1}>
-            <Box display="flex" gridGap={'8px'}>
-              <Button
-                variant="contained"
-                color="primary"
-                type="button"
-                size="small"
-                disabled={disableAssignSerializedAssets()}
-                onClick={() => {
-                  if (isOffline) {
-                    setAddNonSerializedAssetDialog(true);
-                  } else {
-                    setAddSerializedAssetDialog({ open: true });
-                  }
-                }}
-              >
-                {`Assign ${routes.serializedAsset.title}`}
-              </Button>
-              {!isOffline && (
+      <Box display="flex" justifyContent="flex-end" m={1}>
+        <Box display="flex" alignItems="center" justifyContent={'flex-end'} gridColumnGap={8} flex={1}>
+          <Box display="flex" gridGap={'8px'}>
+            <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : ``}>
+              <span>
                 <Button
-                  variant="outlined"
-                  color="default"
-                  className="new-dropdown-v1"
+                  variant="contained"
+                  color="primary"
+                  type="button"
                   size="small"
-                  onClick={openActions}
-                  disabled={selectedRecords?.length ? false : true}
-                  aria-controls="action-menu"
-                  endIcon={<ExpandMore />}
-                >
-                  Actions
-                </Button>
-              )}
-              <Menu
-                anchorEl={anchorActionEl}
-                keepMounted
-                getContentAnchorEl={null}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'left'
-                }}
-                id="action-menu"
-                open={Boolean(anchorActionEl)}
-                onClose={closeActions}
-              >
-                {permissions?.bulkAssetCreation?.isCreate && (
-                  <MenuItem
-                    disabled={showOrderDialog?.products?.filter((e) => e.serialized === true)?.length === 0}
-                    onClick={() => {
-                      setOrderDialog((prevState) => ({ ...prevState, open: true, type: 'bulkAssetCreation' }));
-                      closeActions();
-                    }}
-                  >
-                    {`Create ${routes.bulkAssetCreation.title}`}
-                  </MenuItem>
-                )}
-                {permissions?.purchaseOrder?.isCreate && (
-                  <MenuItem
-                    disabled={showOrderDialog?.products?.filter((e) => e.serialized === false)?.length === 0}
-                    onClick={() => {
-                        setOrderDialog((prevState) => ({ ...prevState, open: true, type: 'purchaseOrder' }));
-                      closeActions();
-                    }}
-                  >
-                    {`Create ${routes.purchaseOrder.title}`}
-                  </MenuItem>
-                )}
-                {permissions?.sublease?.isCreate && (
-                  <MenuItem
-                    disabled={showOrderDialog?.products?.filter((e) => e.serialized === true)?.length === 0}
-                    onClick={() => {
-                        setOrderDialog((prevState) => ({ ...prevState, open: true, type: 'sublease' }));
-                      closeActions();
-                    }}
-                  >
-                    {`Create ${routes.sublease.title}`}
-                  </MenuItem>
-                )}
-                <MenuItem
-                  disabled={selectedRecords.length === 0 || nonSerializedAssetProduct?.length === 0}
+                  disabled={disableAssignSerializedAssets()}
                   onClick={() => {
+                    if (isOffline) {
                       setAddNonSerializedAssetDialog(true);
-                    closeActions();
+                    } else {
+                      setAddSerializedAssetDialog({ open: true });
+                    }
                   }}
                 >
-                  {`Assign Serial Number`}
-                </MenuItem>
-                <MenuItem
-                  disabled={flattenArray(selectedRecords)?.filter((d) => d.type === 'asset' && d.canRemove)?.length === 0}
-                  onClick={() => {
-                      const assets = flattenArray(selectedRecords)?.filter((d) => d.type === 'asset' && d.canRemove);
-                      const dataTodelete = [];
-                      assets?.forEach((element) => {
-                        let isTransferAsset = false;
-                        if (
-                          element?.transferData &&
-                          [TRANSFER_ASSET_STATUS.new, TRANSFER_ASSET_STATUS.inProgress]?.includes(element?.transferData?.status)
-                        ) {
-                          isTransferAsset = true;
-                        }
-                        dataTodelete.push({
-                          _id: element?.inventory,
-                          assetNumber: element?.detail,
-                          isNonSerializeAsset: element?.isNonSerializeAsset,
-                          isTransferAsset: isTransferAsset
-                        });
-                      });
-                      setDeleteData(dataTodelete);
-                      setShowConfirmBox(true);
-                    closeActions();
-                  }}
-                >
-                  {`Remove Asset/Serial Number`}
-                </MenuItem>
-              </Menu>
-              {(purchaseOrderCount > 0 || subleaseCount > 0 || transferAssetCount > 0 || bulkAssetCreationCount > 0) && (
-                <Button
-                  onClick={openLinkActions}
-                  variant="outlined"
-                  color="default"
-                  size="small"
-                  aria-controls="action-menu"
-                  className="normal-case"
-                  endIcon={<ExpandMore fontSize="inherit" />}
-                >
-                  Order(s)
+                  {`Assign ${routes.serializedAsset.title}`}
                 </Button>
-              )}
-              <Menu
-                anchorEl={anchorLinkActionEl}
-                keepMounted
-                getContentAnchorEl={null}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'right'
-                }}
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right'
-                }}
-                id="action-menu"
-                open={Boolean(anchorLinkActionEl)}
-                onClose={closeLinkActions}
+              </span>
+            </HtmlTooltip>
+            {!isOffline && (
+              <Button
+                variant="outlined"
+                color="default"
+                className="new-dropdown-v1"
+                size="small"
+                onClick={openActions}
+                disabled={selectedRecords?.length ? false : true}
+                aria-controls="action-menu"
+                endIcon={<ExpandMore />}
               >
-                {permissions?.purchaseOrder?.isRead && (
-                  <MenuItem
-                    disabled={purchaseOrderCount === 0}
-                    onClick={() => {
-                      OpenInNewWindow(routes.purchaseOrder.path);
-                    }}
-                  >
-                    {`Show ${routes.purchaseOrder.title}`}
-                  </MenuItem>
-                )}
-                {permissions?.bulkAssetCreation?.isRead && (
-                  <MenuItem
-                    disabled={bulkAssetCreationCount === 0}
-                    onClick={() => {
-                      OpenInNewWindow(routes.bulkAssetCreation.path);
-                    }}
-                  >
-                    {`Show ${routes.bulkAssetCreation.title}`}
-                  </MenuItem>
-                )}
+                Actions
+              </Button>
+            )}
+            <Menu
+              anchorEl={anchorActionEl}
+              keepMounted
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left'
+              }}
+              id="action-menu"
+              open={Boolean(anchorActionEl)}
+              onClose={closeActions}
+            >
+              {permissions?.bulkAssetCreation?.isCreate && (
+                <MenuItem
+                  disabled={showOrderDialog?.products?.filter((e) => e.serialized === true)?.length === 0}
+                  onClick={() => {
+                    setOrderDialog((prevState) => ({ ...prevState, open: true, type: 'bulkAssetCreation' }));
+                    closeActions();
+                  }}
+                >
+                  {`Create ${routes.bulkAssetCreation.title}`}
+                </MenuItem>
+              )}
+              {permissions?.purchaseOrder?.isCreate && (
+                <MenuItem
+                  disabled={showOrderDialog?.products?.filter((e) => e.serialized === false)?.length === 0}
+                  onClick={() => {
+                    setOrderDialog((prevState) => ({ ...prevState, open: true, type: 'purchaseOrder' }));
+                    closeActions();
+                  }}
+                >
+                  {`Create ${routes.purchaseOrder.title}`}
+                </MenuItem>
+              )}
+              {permissions?.sublease?.isCreate && (
+                <MenuItem
+                  disabled={showOrderDialog?.products?.filter((e) => e.serialized === true)?.length === 0}
+                  onClick={() => {
+                    setOrderDialog((prevState) => ({ ...prevState, open: true, type: 'sublease' }));
+                    closeActions();
+                  }}
+                >
+                  {`Create ${routes.sublease.title}`}
+                </MenuItem>
+              )}
+              <MenuItem
+                disabled={selectedRecords.length === 0 || nonSerializedAssetProduct?.length === 0}
+                onClick={() => {
+                  setAddNonSerializedAssetDialog(true);
+                  closeActions();
+                }}
+              >
+                {`Assign Serial Number`}
+              </MenuItem>
+              <MenuItem
+                disabled={flattenArray(selectedRecords)?.filter((d) => d.type === 'asset' && d.canRemove)?.length === 0}
+                onClick={() => {
+                  const assets = flattenArray(selectedRecords)?.filter((d) => d.type === 'asset' && d.canRemove);
+                  const dataTodelete = [];
+                  assets?.forEach((element) => {
+                    let isTransferAsset = false;
+                    if (
+                      element?.transferData &&
+                      [TRANSFER_ASSET_STATUS.new, TRANSFER_ASSET_STATUS.inProgress]?.includes(element?.transferData?.status)
+                    ) {
+                      isTransferAsset = true;
+                    }
+                    dataTodelete.push({
+                      _id: element?.inventory,
+                      assetNumber: element?.detail,
+                      isNonSerializeAsset: element?.isNonSerializeAsset,
+                      isTransferAsset: isTransferAsset
+                    });
+                  });
+                  setDeleteData(dataTodelete);
+                  setShowConfirmBox(true);
+                  closeActions();
+                }}
+              >
+                {`Remove Asset/Serial Number`}
+              </MenuItem>
+            </Menu>
+            {(purchaseOrderCount > 0 || subleaseCount > 0 || transferAssetCount > 0 || bulkAssetCreationCount > 0) && (
+              <Button
+                onClick={openLinkActions}
+                variant="outlined"
+                color="default"
+                size="small"
+                aria-controls="action-menu"
+                className="normal-case"
+                endIcon={<ExpandMore fontSize="inherit" />}
+              >
+                Order(s)
+              </Button>
+            )}
+            <Menu
+              anchorEl={anchorLinkActionEl}
+              keepMounted
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'right'
+              }}
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right'
+              }}
+              id="action-menu"
+              open={Boolean(anchorLinkActionEl)}
+              onClose={closeLinkActions}
+            >
+              {permissions?.purchaseOrder?.isRead && (
+                <MenuItem
+                  disabled={purchaseOrderCount === 0}
+                  onClick={() => {
+                    OpenInNewWindow(routes.purchaseOrder.path);
+                  }}
+                >
+                  {`Show ${routes.purchaseOrder.title}`}
+                </MenuItem>
+              )}
+              {permissions?.bulkAssetCreation?.isRead && (
+                <MenuItem
+                  disabled={bulkAssetCreationCount === 0}
+                  onClick={() => {
+                    OpenInNewWindow(routes.bulkAssetCreation.path);
+                  }}
+                >
+                  {`Show ${routes.bulkAssetCreation.title}`}
+                </MenuItem>
+              )}
 
-                {permissions?.sublease?.isRead && (
-                  <MenuItem
-                    disabled={subleaseCount === 0}
-                    onClick={() => {
-                      OpenInNewWindow(routes.sublease.path);
-                    }}
-                  >
-                    {`Show ${routes.sublease.title}`}
-                  </MenuItem>
-                )}
-                {permissions?.transferAsset?.isRead && (
-                  <MenuItem
-                    disabled={transferAssetCount === 0}
-                    onClick={() => {
-                      OpenInNewWindow(routes.transferAsset.path);
-                    }}
-                  >
-                    {`Show ${routes.transferAsset.title}`}
-                  </MenuItem>
-                )}
-              </Menu>
-            </Box>
+              {permissions?.sublease?.isRead && (
+                <MenuItem
+                  disabled={subleaseCount === 0}
+                  onClick={() => {
+                    OpenInNewWindow(routes.sublease.path);
+                  }}
+                >
+                  {`Show ${routes.sublease.title}`}
+                </MenuItem>
+              )}
+              {permissions?.transferAsset?.isRead && (
+                <MenuItem
+                  disabled={transferAssetCount === 0}
+                  onClick={() => {
+                    OpenInNewWindow(routes.transferAsset.path);
+                  }}
+                >
+                  {`Show ${routes.transferAsset.title}`}
+                </MenuItem>
+              )}
+            </Menu>
           </Box>
         </Box>
-      )}
+      </Box>
       <Grid container spacing={2}>
         <Grid item xs={12} md={12} sm={12}>
           {columns && rowsData ? (

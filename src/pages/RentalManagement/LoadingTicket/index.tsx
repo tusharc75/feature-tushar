@@ -74,6 +74,7 @@ const LoadingTicket = ({
   rentalManagementData,
   fetchRentalData,
   setNextStep,
+  setNextStepToolTip,
   renderedFrom,
   allowedToEdit,
   isProcessor,
@@ -129,6 +130,8 @@ const LoadingTicket = ({
 
   const fetchRecords = async () => {
     setNextStep(false);
+    setNextStepToolTip(null)
+
     try {
       localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
       if (gridApi) {
@@ -312,11 +315,11 @@ const LoadingTicket = ({
         }
       });
 
-      if (
-        productAssets.filter((e) => e.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length > 0 &&
-        productAssets?.some((e: any) => e.startDate)
-      ) {
+      if (productAssets.filter((e) => e.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length > 0 && productAssets?.some((e: any) => e.startDate)) {
         setNextStep(true);
+      }
+      else {
+        setNextStepToolTip(rentalManagementMessage.loadingCreatedAndDelivered)
       }
 
       setUniqueLoadingTicket([...new Set(productAssets.filter((d) => d.loadingTicketId !== undefined).map((d) => d.loadingTicketId))]);

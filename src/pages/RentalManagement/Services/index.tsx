@@ -30,6 +30,7 @@ import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 import EditIcon from '@material-ui/icons/Edit';
 
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
+import { ownerAndColaborator } from 'src/constants/messageHelpers';
 
 const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }: any) => {
   const toastConfig = useContext(CustomToastContext);
@@ -105,12 +106,12 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                ? row.original?.packageDetail.packageType === 'Product'
-                  ? '(Product)'
-                  : '(Service)'
-                : row.original.type === 'service'
-                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                : ''}
+                  ? row.original?.packageDetail.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === 'service'
+                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                    : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -273,16 +274,16 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
           parent.type === 'product'
             ? parent?.productDetail?.productName
             : parent.type === 'service'
-            ? parent?.serviceDetail?.serviceName
-            : parent?.packageDetail?.packageName;
+              ? parent?.serviceDetail?.serviceName
+              : parent?.packageDetail?.packageName;
         parent.description =
           parent.type === 'service'
             ? parent?.serviceDetail?.serviceDescription || ''
             : parent.type === 'product'
-            ? parent?.productDetail?.productDescription || ''
-            : parent.type === 'package'
-            ? parent?.packageDetail?.packageDescription || ''
-            : '';
+              ? parent?.productDetail?.productDescription || ''
+              : parent.type === 'package'
+                ? parent?.packageDetail?.packageDescription || ''
+                : '';
         parent.serializedProduct = parent.type === 'product' ? parent?.productDetail?.serializedProduct : false;
         parent.qtyDisplay = parent.qty;
         parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
@@ -316,16 +317,16 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow?.serviceDetail?.serviceName
-          : _subRow?.packageDetail?.packageName;
+            ? _subRow?.serviceDetail?.serviceName
+            : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.pricingConditionDisplay = _subRow.pricingCondition?.optionLabel;
@@ -513,111 +514,120 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
 
   return (
     <Fragment>
-      {allowedToEdit && (
-        <Box display="flex" justifyContent="space-between" my={1}>
-          <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
-            <Button variant={'outlined'} color="primary" size="small" startIcon={<Add />} onClick={openAddActions} aria-controls="add-menu">
-              {'Add'}
-              <ExpandMore fontSize="small" />
-            </Button>
-            <Menu
-              anchorEl={addAnchorEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
-              }}
-              id="add-menu"
-              open={Boolean(addAnchorEl)}
-              onClose={closeAddActions}
-            >
-              {permissions?.serviceMaster?.isRead && (
-                <MenuItem
-                  onClick={() => {
-                    closeAddActions();
-                    setAddExistingProductDialog({ open: true, type: 'service', parentId: null });
-                  }}
-                >
-                  Add Existing Services
-                </MenuItem>
-              )}
-              {permissions?.packages?.isRead && (
-                <MenuItem
-                  onClick={() => {
-                    closeAddActions();
-                    setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
-                  }}
-                >
-                  {`Add Existing Service Packages`}
-                </MenuItem>
-              )}
+      <Box display="flex" justifyContent="space-between" m={1}>
+        <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
+          <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : ``}>
+            <span>
+              <Button
+                variant={'outlined'}
+                color="primary"
+                size="small"
+                startIcon={<Add />}
+                onClick={openAddActions}
+                disabled={!allowedToEdit}
+                aria-controls="add-menu">
+                {'Add'}
+                <ExpandMore fontSize="small" />
+              </Button>
+            </span>
+          </HtmlTooltip>
+          <Menu
+            anchorEl={addAnchorEl}
+            keepMounted
+            getContentAnchorEl={null}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left'
+            }}
+            id="add-menu"
+            open={Boolean(addAnchorEl)}
+            onClose={closeAddActions}
+          >
+            {permissions?.serviceMaster?.isRead && (
               <MenuItem
                 onClick={() => {
                   closeAddActions();
-                  setAddExistingProductDialog({ open: true, type: 'newService', parentId: null });
+                  setAddExistingProductDialog({ open: true, type: 'service', parentId: null });
                 }}
               >
-                Add New Service
+                Add Existing Services
               </MenuItem>
+            )}
+            {permissions?.packages?.isRead && (
               <MenuItem
                 onClick={() => {
                   closeAddActions();
-                  setAddExistingProductDialog({ open: true, type: 'newPackage', parentId: null });
+                  setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
                 }}
               >
-                {`Add New Service Package`}
+                {`Add Existing Service Packages`}
               </MenuItem>
-            </Menu>
-          </Box>
-          <Box display="flex" ml={1}>
-            <Button
-              variant={'outlined'}
-              color="primary"
-              size="small"
-              onClick={handleClick}
-              disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
-              endIcon={<BiChevronDown />}
-              className="new-dropdown-v1"
-            >
-              Actions
-            </Button>
-            <Menu
-              anchorEl={anchorEl}
-              open={open}
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
+            )}
+            <MenuItem
+              onClick={() => {
+                closeAddActions();
+                setAddExistingProductDialog({ open: true, type: 'newService', parentId: null });
               }}
-              onClose={handleClose}
             >
-              <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
-                <MenuItem
-                  onClick={() => {
-                    setIsProductEdit({ open: true, data: null, showSaveAndNext: false });
-                    setIsBulkEdit(true);
-                    handleClose();
-                  }}
-                >
-                  Bulk Edit
-                </MenuItem>
-              </HtmlTooltip>
-              <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
-                <MenuItem
-                  disabled={isDeleting}
-                  onClick={() => {
-                    handleDeleteMultiple();
-                    handleClose();
-                  }}
-                >
-                  Delete
-                </MenuItem>
-              </HtmlTooltip>
-            </Menu>
-          </Box>
+              Add New Service
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                closeAddActions();
+                setAddExistingProductDialog({ open: true, type: 'newPackage', parentId: null });
+              }}
+            >
+              {`Add New Service Package`}
+            </MenuItem>
+          </Menu>
         </Box>
-      )}
+        <Box display="flex" ml={1}>
+          <Button
+            variant={'outlined'}
+            color="primary"
+            size="small"
+            onClick={handleClick}
+            disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
+            endIcon={<BiChevronDown />}
+            className="new-dropdown-v1"
+          >
+            Actions
+          </Button>
+          <Menu
+            anchorEl={anchorEl}
+            open={open}
+            getContentAnchorEl={null}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left'
+            }}
+            onClose={handleClose}
+          >
+            <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
+              <MenuItem
+                onClick={() => {
+                  setIsProductEdit({ open: true, data: null, showSaveAndNext: false });
+                  setIsBulkEdit(true);
+                  handleClose();
+                }}
+              >
+                Bulk Edit
+              </MenuItem>
+            </HtmlTooltip>
+            <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
+              <MenuItem
+                disabled={isDeleting}
+                onClick={() => {
+                  handleDeleteMultiple();
+                  handleClose();
+                }}
+              >
+                Delete
+              </MenuItem>
+            </HtmlTooltip>
+          </Menu>
+        </Box>
+      </Box>
       {columns && rowsData ? (
         <Box zIndex={5} width={'100%'}>
           <CustomReactTable
