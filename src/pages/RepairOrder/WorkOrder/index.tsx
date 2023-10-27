@@ -391,12 +391,12 @@ const WorkOrder = ({
       const products = deleteData?.filter((e) => e.type === MATERIAL_TYPE.product);
       if (products?.length) {
         const ids = products?.map((r) => r?._id);
-        axiosInstance().put(`${workOrder.api}/${workOrderId}/consumable/remove`, { ids: ids || [] })
+       await axiosInstance().put(`${workOrder.api}/${workOrderId}/consumable/remove`, { ids: ids || [] })
       }
       const servicePackage = deleteData?.filter((e) => [MATERIAL_TYPE.service, MATERIAL_TYPE.package]?.includes(e.type));
       if (servicePackage?.length) {
         const ids = servicePackage?.map((e) => e?.uniqueId);
-        axiosInstance().put(`${workOrder.api}/service/${workOrderId}/remove`, { uniqueIds: ids })
+      await axiosInstance().put(`${workOrder.api}/service/${workOrderId}/remove`, { uniqueIds: ids })
 
         if (isPostWorkService && repairOrderData?.type === REPAIR_ORDER_TYPE.external) {
           createNewVersionQuote(true);
