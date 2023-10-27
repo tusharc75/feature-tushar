@@ -24,7 +24,7 @@ import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import EditIcon from '@material-ui/icons/Edit';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
-import { notOwnerAndColaborator, subleaseMessage } from 'src/constants/messageHelpers';
+import { ownerAndColaborator, subleaseMessage } from 'src/constants/messageHelpers';
 
 const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchData, isIssued, renderedFrom, allowedToEdit, stepFullScreen }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -435,7 +435,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
     <Fragment>
       <div className="my-2 flex flex-wrap justify-between gap-2">
         <div className="flex flex-wrap gap-2 ">
-          <HtmlTooltip title={!allowedToEdit ? notOwnerAndColaborator : 'Add Products/Packages'}>
+          <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : 'Add Products/Packages'}>
             <div>
               <Button
                 variant={'outlined'}
@@ -483,7 +483,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
         <div className="flex flex-wrap gap-2">
           {material?.length && rowsData?.length && !isIssued && !rowsData?.some((f) => !f.isValid) && subleaseData?.type !== SUBLEASE_TYPE.interCompany ? (
             <Fragment>
-              <HtmlTooltip title={!allowedToEdit ? notOwnerAndColaborator : 'Start Sublease'}>
+              <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : 'Start Sublease'}>
                 <Button
                   variant={'contained'}
                   color="primary"
@@ -499,7 +499,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
               </HtmlTooltip>
             </Fragment>
           ) : null}
-          <HtmlTooltip title={!allowedToEdit ? notOwnerAndColaborator : 'Actions'}>
+          <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : 'Actions'}>
             <div>
               <Button
                 disabled={selectedProducts?.length || !allowedToEdit ? false : true}
