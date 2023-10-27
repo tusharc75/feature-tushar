@@ -1,6 +1,7 @@
 import routes from "src/components/Helpers/Routes";
 
-export const ownerAndColaborator = 'You have to be owner or colaborator to perform this!';
+export const ownerAndColaborator = 'You have to be either owner or collaborator to perform this action';
+export const actionSelection = 'Select at least one line item to enable this button';
 
 export const rentalManagementActions = {
     createLoadingTicket: 'Create Loading Ticket',
@@ -20,38 +21,38 @@ export const rentalManagementActions = {
 };
 
 export const rentalManagementMessage = {
-    addProductPackage: 'Add Products/Packages to proceed',
+    addProductPackage: 'Add Products or Packages to proceed',
     assignAssets: 'Assign Assets to proceed',
-    loadingCreatedAndDelivered: 'Loading Ticket Created And Delivered to proceed',
-    receivingCreatedAndDelivered: 'Receiving/Return Ticket Created And Delivered to proceed',
-    loadingAlreadyCreated: 'Loading Ticket Already Created',
-    loadingNotCreated: 'Loading Ticket Not Created Yet',
-    loadingAlreadyDelivered: 'Loading Ticket already delivered',
-    loadingNotDelivered: 'Loading Ticket not delivered yet',
-    receivingAlreadyCreated: 'Receiving Ticket Already Created',
-    receivingNotCreated: 'Receiving  Ticket Not Created Yet',
-    receivingAlreadyDelivered: 'Receiving Ticket already delivered',
-    receivingNotDeliverd: 'Receiving  Ticket Not Deliverd Yet',
-    returnAlreadyCreated: 'Return Ticket Already Created',
-    returnAlreadyDelivered: 'Return Ticket already delivered',
-    receivingOrReturnNotCreated: 'Receiving or Return Ticket Not Created Yet',
-    receivingOrReturnNotDelivered: 'Receiving or Return Ticket Not Delivered Yet',
-    receivingNotProduct: 'Can not create receiving Ticket for product',
-    receivingNotValidStatus: 'Can not create receiving Ticket not valid asset status',
-    ticketNotForLost: 'Can not create Ticket for lost assets',
-    notSubleaseAsset: 'Not Sublease Asset',
-    productsCanNotReplace: 'Can not replace Product',
-    loadingDeliveredForReplace: 'loading Ticket delivered for repalce asset',
-    onlyReplaceInUse: 'Only Replace InUse Assets',
-    canNotReplaceInvoiceCreated: 'Invoice Created Can Not Replace',
-    cancelInTransitLineItems: 'Only InTransit ticket Cancel',
-    statusInUseCancelLoading: 'Asset Status InUse For Cancel Loading Ticket',
-    rentalStatusInUseCancelLoading: 'Rental Asset Status InUse For Cancel Loading Ticket',
-    statusURForCancelReceiving: 'Asset Status UnderReview For Cancel Receiving Ticket',
-    rentalStatusCompleteCancelReceiving: 'Rental Asset Status Complete For Cancel Receiving Ticket',
-    repairCanForThisAsset: 'Under Review,Need Repair,Need Recert,Scrap',
-    repairSameWarehouse: `Repair can do for same ${routes.warehouse.title}`,
-    transferRentalForAsset: 'In-Use,Available,Under Review',
+    loadingCreatedAndDelivered: 'Create and Deliver at least one Loading Ticket to proceed',
+    receivingCreatedAndDelivered: 'Create and Receive at least one Receiving or Return Ticket to proceed',
+    loadingAlreadyCreated: 'Loading Ticket is already created',
+    loadingNotCreated: 'Loading Ticket is not created',
+    loadingAlreadyDelivered: 'Loading Ticket is already delivered',
+    loadingNotDelivered: 'Loading Ticket is not delivered',
+    receivingAlreadyCreated: 'Receiving Ticket is already created',
+    receivingNotCreated: 'Receiving Ticket is not created',
+    receivingAlreadyDelivered: 'Receiving Ticket is already delivered',
+    receivingNotDeliverd: 'Receiving Ticket is not deliverd',
+    returnAlreadyCreated: 'Return Ticket is already created',
+    returnAlreadyDelivered: 'Return Ticket is already delivered',
+    receivingOrReturnNotCreated: 'Receiving or Return Ticket is not created',
+    receivingOrReturnNotDelivered: 'Receiving or Return Ticket is not delivered',
+    receivingNotProduct: `Receiving Ticket cannot be created for product(s)`,
+    receivingNotValidStatus: `Receiving Ticket cannot be created as asset status is not valid`,
+    ticketNotForLost: `Ticket cannot be created for lost assets`,
+    notSubleaseAsset: "Sublease assets cannot be selected for this action",
+    productsCanNotReplace: 'Product(s) cannot be replaced',
+    loadingDeliveredForReplace: 'Loading Ticket must be delivered to replace assets',
+    onlyReplaceInUse: 'Only In-Use assets can be replaced',
+    canNotReplaceInvoiceCreated: 'Assets cannot be replaced, once invoice is created',
+    cancelInTransitLineItems: 'Only In-Transit tickets can be cancelled',
+    statusInUseCancelLoading: 'Receiving Ticket must be cancelled first',
+    rentalStatusInUseCancelLoading: 'Receiving Ticket must be cancelled first',
+    statusURForCancelReceiving: 'Receiving Ticket can be cancelled only for Under Review assets',
+    rentalStatusCompleteCancelReceiving: 'Receiving Ticket can be cancelled only for complete rental assets',
+    repairCanForThisAsset: 'Only Under Review, Need Repair, Need Recert and Scrap assets can be repaired',
+    repairSameWarehouse: `Selected assets must be in same ${routes.warehouse.title} to perform this action`,
+    transferRentalForAsset: 'Only In-Use, Available and Under Review assets can be transfered',
 };
 
 export const subleaseActions = {
