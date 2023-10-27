@@ -197,7 +197,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
     dispatch({ type: 'loading', loading: true });
     try {
       var data: any = [];
-      const response = await axiosInstance().get(`${routes.demandOrder.path}/material/${demandOrderData._id}`);
+      const response = await axiosInstance().get(`${routes.demandOrder.path}/materials/${demandOrderData._id}`);
       data = response?.data?.data;
       let rows = data.material.filter((e) => e.parentId === null);
       rows.forEach((parent, i) => {
@@ -459,7 +459,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
           </Box>
         </Box>
       )}
-      {columns && rowsData ? (
+      {columns ? (
         <>
           <Box py="6px" zIndex={5} width={'100%'}>
             <CustomReactTable

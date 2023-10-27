@@ -1,5 +1,5 @@
-import { Collapse, IconButton } from '@material-ui/core';
-import { Check, Edit } from '@material-ui/icons';
+import { CircularProgress, Collapse, IconButton } from '@material-ui/core';
+import { Check, Edit, Error } from '@material-ui/icons';
 import React, { FC, useState } from 'react';
 import { BsChevronContract, BsChevronExpand } from 'react-icons/bs';
 import { TInitialState } from '../CustomReactTableNew/useTableReducer';
@@ -30,6 +30,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
   handleCellClick,
   handleKeyDown
 }) => {
+  const { error } = state;
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [expanded, setExpanded] = React.useState<string | false>(false);
 
@@ -65,11 +66,22 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
     <>
       <div className="relative rounded-lg">
         {/* Loader */}
-        {loading ? (
+        {loading || error ? (
           <div className=" absolute inset-0 flex items-center justify-center bg-[rgba(255,255,255,0.54)] dark:bg-[rgba(5,9,19,0.54)] backdrop-blur-[10px]">
-            <div className="bg-[white] dark:bg-[var(--dark-secondary)] px-10 py-5 rounded-lg">
-              <div className="spinner"></div>
-              <p className="-ml-[3px] mt-2">Loading</p>
+            <div className="bg-[white] dark:bg-[var(--dark-secondary)] px-10 py-5 rounded-lg text-center shadow-md">
+              {error ? (
+                <>
+                  <Error className="mx-auto mb-2" />
+                  <p>Something Went Wrong</p>
+                </>
+              ) : loading ? (
+                <>
+                  <CircularProgress />
+                  <p>Loading...</p>
+                </>
+              ) : (
+                ''
+              )}
             </div>
           </div>
         ) : null}
@@ -211,7 +223,8 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                     </div>
                   );
                 })
-              : !loading && (
+              : !loading &&
+                !error && (
                   <div className=" absolute inset-0 flex items-center justify-center bg-[rgba(255,255,255,0.54)] dark:bg-[rgba(5,9,19,0.54)] backdrop-blur-[10px] rounded-lg">
                     <div className="bg-[white] dark:bg-[var(--dark-secondary)] px-10 py-5 rounded-lg">
                       <p>No Data Found.</p>
