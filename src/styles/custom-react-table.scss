@@ -53,9 +53,7 @@ $isAppliedBillDark: #234623;
 
   &.error {
     background: var(--error-bg);
-    [data-mode='dark'] & {
-      border-color: #8b5959 !important;
-    }
+    border-color: var(--error-border) !important;
   }
 }
 
