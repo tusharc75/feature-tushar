@@ -99,7 +99,7 @@ export const CreateEmail = ({
   onMinimizeMaximize,
   showManimizeMaximize,
   referenceType = '',
-  isAttachmentLoading = true
+  isAttachmentLoading = false
 }) => {
   const {
     state: { user }
