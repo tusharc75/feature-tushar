@@ -783,7 +783,7 @@ function CustomReactTable({
                 overflow: 'auto',
                 height: height ?? '100%'
               }}
-              className="border relative"
+              className="border"
             >
               {(loading || error) && (
                 <Box

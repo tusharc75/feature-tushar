@@ -781,7 +781,7 @@ export default function Attachment() {
           </div>
         )}
         <Box zIndex={5} width={'100%'}>
-          {dataRows ? (
+          {column ? (
             <CustomReactTable
               height={'calc(100vh - 300px)'}
               columns={column}
