@@ -302,40 +302,34 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
 
     const validateAction = (action) => {
         const errorMessages = [];
-        if (action === subleaseActions.createLoadingTicket) {
-            selectedRecords?.forEach((e) => {
+        selectedRecords?.forEach((e) => {
+            if (action === subleaseActions.createLoadingTicket) {
                 if (e.hasOwnProperty('LoadingTicketId')) {
                     errorMessages.push({ index: e.index, message: subleaseMessage.loadingAlreadyCreated });
                 }
-            });
-        }
-        else if (action === subleaseActions.createReceivingTicket) {
-            selectedRecords?.forEach((e) => {
+            }
+            else if (action === subleaseActions.createReceivingTicket) {
                 if (e.hasOwnProperty('ReceivingTicketId')) {
                     errorMessages.push({ index: e.index, message: subleaseMessage.loadingAlreadyCreated });
                 }
-            });
-        }
-        else if (action === subleaseActions.deliveredToPlant) {
-            selectedRecords?.forEach((e) => {
+            }
+            else if (action === subleaseActions.deliveredToWarehouse) {
                 if (!e.hasOwnProperty('LoadingTicketId')) {
                     errorMessages.push({ index: e.index, message: subleaseMessage.loadingNotCreated });
                 }
                 else if (e?.LoadingTicketStatus === DELIVERY_TICKET_STATUS.delivered) {
                     errorMessages.push({ index: e.index, message: subleaseMessage.loadingAlreadyDelivered });
                 }
-            });
-        }
-        else if (action === subleaseActions.receiveAtPlant) {
-            selectedRecords?.forEach((e) => {
+            }
+            else if (action === subleaseActions.receivedToWarehouse) {
                 if (!e.hasOwnProperty('ReceivingTicketId')) {
-                    errorMessages.push({ index: e.index, message: subleaseMessage.receivingOrReturnNotCreated });
+                    errorMessages.push({ index: e.index, message: subleaseMessage.receivingNotCreated });
                 }
                 else if (e?.ReceivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) {
                     errorMessages.push({ index: e.index, message: subleaseMessage.receivingAlreadyDelivered });
                 }
-            });
-        }
+            }
+        });
         if (errorMessages?.length) {
             setOpenMessageDialog({ open: true, errorMessages: errorMessages });
             return true;
@@ -373,52 +367,41 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
                                 open={Boolean(anchorActionEl)}
                                 onClose={closeActions}
                             >
-                                {
-                                    ticketType === DELIVERY_TICKET_TYPE.loading && (
-                                        <MenuItem
-                                            onClick={() => {
-                                                if (!validateAction(subleaseActions.createLoadingTicket)) {
-                                                    handleDeliveryTicketDialog();
-                                                }
-                                                closeActions();
-                                            }}
-                                        // disabled={selectedRecords.length === 0 || selectedRecords.some((f) => f.hasOwnProperty(`LoadingTicketId`))}
-                                        >
-                                            Create Loading Ticket
-                                        </MenuItem>
-                                    )
-                                }
-                                {
-                                    ticketType === DELIVERY_TICKET_TYPE.receiving && (
-                                        <MenuItem
-                                            onClick={() => {
-                                                if (!validateAction(subleaseActions.createReceivingTicket)) {
-                                                    handleDeliveryTicketDialog();
-                                                }
-                                                closeActions();
-                                            }}
-                                        // disabled={selectedRecords.length === 0 || (selectedRecords.some((f) => f.hasOwnProperty(`ReceivingTicketId`)) || !selectedRecords?.every((f) => f.hasOwnProperty(`LoadingTicketId`) || f.status !== ASSET_STATUS.available))}
-                                        >
-                                            Create Receiving Ticket
-                                        </MenuItem>
-                                    )
-                                }
+                                {ticketType === DELIVERY_TICKET_TYPE.loading && (
+                                    <MenuItem
+                                        onClick={() => {
+                                            if (!validateAction(subleaseActions.createLoadingTicket)) {
+                                                handleDeliveryTicketDialog();
+                                            }
+                                            closeActions();
+                                        }}
+                                    >
+                                        Create Loading Ticket
+                                    </MenuItem>
+                                )}
+                                {ticketType === DELIVERY_TICKET_TYPE.receiving && (
+                                    <MenuItem
+                                        onClick={() => {
+                                            if (!validateAction(subleaseActions.createReceivingTicket)) {
+                                                handleDeliveryTicketDialog();
+                                            }
+                                            closeActions();
+                                        }}
+                                    >
+                                        Create Receiving Ticket
+                                    </MenuItem>
+                                )}
                                 <MenuItem
-                                    // disabled={
-                                    //     selectedRecords.length === 0 ||
-                                    //     selectedRecords.filter((e: any) => e[`${ticketType}TicketStatus`] === DELIVERY_TICKET_STATUS.indTransit).length !== selectedRecords.length
-                                    // }
                                     onClick={() => {
-                                        if (ticketType === DELIVERY_TICKET_TYPE.loading && !validateAction(subleaseActions.deliveredToPlant)) {
+                                        if (ticketType === DELIVERY_TICKET_TYPE.loading && !validateAction(subleaseActions.deliveredToWarehouse)) {
                                             handelProcessTickets();
-                                        } else if (ticketType === DELIVERY_TICKET_TYPE.receiving && !validateAction(subleaseActions.receiveAtPlant)) {
+                                        }
+                                        else if (ticketType === DELIVERY_TICKET_TYPE.receiving && !validateAction(subleaseActions.receivedToWarehouse)) {
                                             handelProcessTickets();
                                         }
                                         closeActions();
                                     }}
-                                >{
-                                        ticketType === DELIVERY_TICKET_TYPE.loading ? 'Delivered to Plant' : 'Received at Plant'
-                                    }
+                                >{ticketType === DELIVERY_TICKET_TYPE.loading ? 'Delivered to Plant' : 'Received at Plant'}
                                 </MenuItem>
                             </Menu>
                             <Box mx={1} />
