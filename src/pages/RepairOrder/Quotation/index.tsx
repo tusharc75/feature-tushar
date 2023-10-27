@@ -325,11 +325,7 @@ const Quotation = ({
   };
 
   const generateNestedData = (material, parent) => {
-    var subRows: any = orderBy(
-      material?.filter((e) => e.parentId === parent._id),
-      ['preWork'],
-      ['desc']
-    );
+    var subRows: any = material?.filter((e) => e.parentId === parent._id);
 
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
@@ -358,6 +354,7 @@ const Quotation = ({
       _subRow.hideSelection = false;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
+
     if (subRows.length === 0 && parent.type === 'package') {
       parent.isValid = false;
     }
