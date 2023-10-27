@@ -459,7 +459,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
           </Box>
         </Box>
       )}
-      {columns && rowsData ? (
+      {columns ? (
         <>
           <Box py="6px" zIndex={5} width={'100%'}>
             <CustomReactTable
