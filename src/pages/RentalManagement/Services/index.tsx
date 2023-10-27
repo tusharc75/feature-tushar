@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, IconButton, CircularProgress, Menu, MenuItem, Chip, ListItemText, Tooltip } from '@material-ui/core';
+import { Grid, Box, Button, IconButton, CircularProgress, Menu, MenuItem, Chip, ListItemText, Tooltip, TextField } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
@@ -28,7 +28,10 @@ import { ExpandMore } from '@material-ui/icons';
 import ManagePackageDialog from 'src/pages/Packages/ManagePackageDialog';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 import EditIcon from '@material-ui/icons/Edit';
-
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import Technicians from './Technicians';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import { Autocomplete } from '@material-ui/lab';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 
 const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }: any) => {
@@ -54,6 +57,11 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
   const [isRateRequired, setIsRateRequired] = useState(false);
   const [isBulkEdit, setIsBulkEdit] = useState(false);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
+
+  const [tabValue, setTabValue] = useState(0);
+  const [serviceOption, setServiceOption] = useState(null);
+  const [selectedServiceOption, setSelectedServiceOption] = useState({ optionLabel: 'All', optionValue: 'All' });
+
 
   const { isOffline } = useContext(CustomOfflineContext);
 
@@ -105,12 +113,12 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                ? row.original?.packageDetail.packageType === 'Product'
-                  ? '(Product)'
-                  : '(Service)'
-                : row.original.type === 'service'
-                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                : ''}
+                  ? row.original?.packageDetail.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === 'service'
+                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                    : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -273,16 +281,16 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
           parent.type === 'product'
             ? parent?.productDetail?.productName
             : parent.type === 'service'
-            ? parent?.serviceDetail?.serviceName
-            : parent?.packageDetail?.packageName;
+              ? parent?.serviceDetail?.serviceName
+              : parent?.packageDetail?.packageName;
         parent.description =
           parent.type === 'service'
             ? parent?.serviceDetail?.serviceDescription || ''
             : parent.type === 'product'
-            ? parent?.productDetail?.productDescription || ''
-            : parent.type === 'package'
-            ? parent?.packageDetail?.packageDescription || ''
-            : '';
+              ? parent?.productDetail?.productDescription || ''
+              : parent.type === 'package'
+                ? parent?.packageDetail?.packageDescription || ''
+                : '';
         parent.serializedProduct = parent.type === 'product' ? parent?.productDetail?.serializedProduct : false;
         parent.qtyDisplay = parent.qty;
         parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
@@ -303,6 +311,19 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
       }
       setRowsData(rows);
       setSelectedProducts([]);
+      console.log(rows);
+
+      setServiceOption([{ optionLabel: 'All', optionValue: 'All' },
+      ...rows?.map((s) => {
+        return {
+          optionLabel: s?.detail,
+          optionValue: s?.materialId,
+          _id: s?._id
+        };
+      })]);
+      if (selectedServiceOption?.optionValue !== 'All' && !rows?.some((s) => s?.materialId === selectedServiceOption?.optionValue)) {
+        setSelectedServiceOption({ optionLabel: 'All', optionValue: 'All' });
+      }
     } catch (error) {
       console.error(error);
     }
@@ -316,16 +337,16 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow?.serviceDetail?.serviceName
-          : _subRow?.packageDetail?.packageName;
+            ? _subRow?.serviceDetail?.serviceName
+            : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.pricingConditionDisplay = _subRow.pricingCondition?.optionLabel;
@@ -511,6 +532,13 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
     setAddAnchorEl(null);
   };
 
+
+
+  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+    setTabValue(newValue);
+  };
+
+
   return (
     <Fragment>
       {allowedToEdit && (
@@ -619,27 +647,61 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
         </Box>
       )}
       {columns && rowsData ? (
-        <Box zIndex={5} width={'100%'}>
-          <CustomReactTable
-            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
-            columns={columns}
-            data={rowsData}
-            setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-            onSelect={setSelectedProducts}
-            childrenProperty="subRows"
-            uniqueKey="_id"
-            hideSelection={isOffline || !allowedToEdit}
-            hideAction={isOffline || !allowedToEdit}
-            renderedFrom="rental_management_sevices_1"
-            onSaveEdit={onSaveInlineEdit}
-            isClientSideGrid={true}
-          />
-        </Box>
+        <CustomReactTable
+          height={user?.user?.brandPolicy?.rentalProgressiveBilling ? '300px' : '100%'}
+          columns={columns}
+          setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
+          onSelect={setSelectedProducts}
+          childrenProperty="subRows"
+          renderedFrom={renderedFrom}
+          isClientSideGrid={true}
+          onSaveEdit={onSaveInlineEdit}
+          hideSelection={!allowedToEdit}
+          hideAction={!allowedToEdit}
+          expander={true}
+          state={state}
+          dispatch={dispatch}
+          allowPagination={false}
+        />
       ) : (
-        <Box py={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        <Box py={2} height={300}>
+          <CommonSkeleton lenArray={[...Array(3).keys()]} xs={12} sm={12} md={12} lg={12} />
         </Box>
       )}
+
+      {user?.user?.brandPolicy?.rentalProgressiveBilling && (
+        <div>
+          <Box style={{ maxWidth: '400px' }} mb={2} mt={2}>
+            <Autocomplete
+              size="small"
+              style={{ minWidth: '300px' }}
+              fullWidth
+              options={serviceOption ? serviceOption : []}
+              autoHighlight
+              value={selectedServiceOption}
+              getOptionLabel={(option: any) => option?.optionLabel || ''}
+              getOptionSelected={(option, val) => (option ? option?.optionLabel === val?.optionLabel : false)}
+              onChange={(_, val) => {
+                let value = val;
+                if (!val) {
+                  value = { optionLabel: 'All', optionValue: 'All' }
+                }
+                setSelectedServiceOption(value)
+              }}
+              renderInput={(params) => <TextField {...params} label={'Select Service'} variant="outlined" />}
+            />
+          </Box>
+          <Box mt={3}>
+            <CustomTabs value={tabValue} onChange={handleMainTabChange} style={{ marginBottom: -1 }}>
+              <CustomTab index={0} label={'Technicians'} value={0} primaryColor={true} />
+            </CustomTabs>
+            <TabPanel value={tabValue} index={0}>
+              <Technicians allowedToEdit={allowedToEdit} rentalManagementData={rentalManagementData} selectedService={selectedServiceOption} />
+            </TabPanel>
+          </Box>
+        </div>
+      )}
+
       {deleteData && (
         <ConfirmationDialog
           open={true}
