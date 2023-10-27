@@ -920,7 +920,7 @@ function CustomReactTable({
             page={page}
             rowCount={rowCount}
             expander={expander}
-            backgroundColor={setWholeRowsCellColor}
+            backgroundColorClass={setWholeRowsCellColor}
             renderedFrom={renderedFrom}
             handleCellSelection={handleCellSelection}
             IndeterminateCheckbox={IndeterminateCheckbox}
