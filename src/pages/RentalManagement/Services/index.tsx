@@ -657,7 +657,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
       </Box>
       {columns && rowsData ? (
         <CustomReactTable
-          height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
+          height={'300px'}
           columns={columns}
           data={rowsData}
           setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
@@ -672,7 +672,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
         />
       ) : (
         <Box py={2} height={300}>
-          <CommonSkeleton lenArray={[...Array(3).keys()]} xs={12} sm={12} md={12} lg={12} />
+          <CommonSkeleton lenArray={[...Array(2).keys()]} xs={12} sm={12} md={12} lg={12} />
         </Box>
       )}
 
@@ -703,7 +703,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
               <CustomTab index={0} label={'Technicians'} value={0} primaryColor={true} />
             </CustomTabs>
             <TabPanel value={tabValue} index={0}>
-              <Technicians allowedToEdit={allowedToEdit} rentalManagementData={rentalManagementData} selectedService={selectedServiceOption} />
+              <Technicians allowedToEdit={allowedToEdit} rentalManagementData={rentalManagementData} selectedService={selectedServiceOption} services={serviceOption} />
             </TabPanel>
           </Box>
         </div>
