@@ -3309,6 +3309,9 @@ body {
       border: none !important;
       width: 34px;
     }
+    &.with-border {
+      border: 1px solid var(--common-border-color) !important;
+    }
 
     & > span {
       line-height: 16px;

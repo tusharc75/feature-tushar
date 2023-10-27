@@ -420,7 +420,7 @@ export const RESOURCE_LABEL = {
   transferAsset: 'Transfer Assets',
   address: 'Addresses',
   sublease: 'Sublease',
-  subleaseInvoice: 'SubleaseInvoice',
+  subleaseInvoice: 'Sublease Invoice',
   transferInventory: 'Transfer Inventory',
   zone: 'Zone',
   wellMaster: 'Well Master',
@@ -486,7 +486,9 @@ export const RESOURCE_LABEL = {
   chartOfAccount: 'Chart Of Account',
   flash: 'Flash',
   accountsReceivable: 'Accounts Receivable',
-  creditMemo: 'Credit Memo'
+  creditMemo: 'Credit Memo',
+  generateInvoice : 'Generate Invoice',
+  repairOrderInvoice : 'Repair Order Invoice'
 };
 
 export const CHILD_RESOURCE = {

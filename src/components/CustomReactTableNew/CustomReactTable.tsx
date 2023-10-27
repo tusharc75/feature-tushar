@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import MaUTable from '@material-ui/core/Table';
-import { TableBody, IconButton, TableCell, TableHead, TableRow, Box, CircularProgress, Button } from '@material-ui/core';
-import { Check, Edit } from '@material-ui/icons';
+import { TableBody, IconButton, TableCell, TableHead, TableRow, Box, CircularProgress, Button, TableFooter } from '@material-ui/core';
+import { Check, Edit, Error } from '@material-ui/icons';
 import { FaAngleRight, FaAngleDown } from 'react-icons/fa';
 import { columnFilter } from './ReactTableHelpers';
 import { gridPageSizes } from '../../constants/helpers';
@@ -236,7 +236,8 @@ function CustomReactTable({
     pageSizes,
     search,
     filters: customFilters,
-    sorting
+    sorting,
+    error
   }: TInitialState = state;
   const isMobileView = isMobile && !isTablet;
   const defaultColumn = {
@@ -466,6 +467,7 @@ function CustomReactTable({
     toggleRowExpanded,
     toggleAllRowsExpanded,
     setColumnOrder,
+    footerGroups,
     setCellState,
     toggleAllRowsSelected,
     state: { rowState, pageIndex, sortBy, selectedRowIds, columnOrder }
@@ -781,9 +783,9 @@ function CustomReactTable({
                 overflow: 'auto',
                 height: height ?? '100%'
               }}
-              className="border "
+              className="border"
             >
-              {loading && (
+              {(loading || error) && (
                 <Box
                   bgcolor={'rgba(255,255,255,0.2)'}
                   width="100%"
@@ -796,10 +798,21 @@ function CustomReactTable({
                   justifyContent="center"
                   alignItems="center"
                 >
-                  <Box textAlign="center">
-                    <CircularProgress color="inherit" />
-                    <p>Loading...</p>
-                  </Box>
+                  <div className="bg-[white] dark:bg-[var(--dark-secondary)] px-10 py-5 rounded-lg text-center shadow-md">
+                    {error ? (
+                      <>
+                        <Error className="mx-auto mb-2" />
+                        <p>Something Went Wrong</p>
+                      </>
+                    ) : loading ? (
+                      <>
+                        <CircularProgress />
+                        <p>Loading...</p>
+                      </>
+                    ) : (
+                      ''
+                    )}
+                  </div>
                 </Box>
               )}
 
@@ -889,6 +902,19 @@ function CustomReactTable({
                     );
                   })}
                 </TableBody>
+                {rows?.length > 0 && footerGroups?.length > 0 && !allowPagination && (
+                  <TableFooter style={{ overflowY: 'auto', overflowX: 'hidden' }} className="footer ">
+                    {footerGroups.map((group) => (
+                      <TableRow {...group.getFooterGroupProps()} className="tr">
+                        {group.headers.map((column) => (
+                          <TableCell {...column.getHeaderProps()} className="th text-truncate font-weight-bold text-black">
+                            {column.render('Footer')}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
+                  </TableFooter>
+                )}
               </MaUTable>
             </div>
           )}
@@ -906,7 +932,7 @@ function CustomReactTable({
             page={page}
             rowCount={rowCount}
             expander={expander}
-            backgroundColor={setWholeRowsCellColor}
+            backgroundColorClass={setWholeRowsCellColor}
             renderedFrom={renderedFrom}
             handleCellSelection={handleCellSelection}
             IndeterminateCheckbox={IndeterminateCheckbox}

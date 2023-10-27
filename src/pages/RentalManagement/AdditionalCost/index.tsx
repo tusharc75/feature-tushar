@@ -17,6 +17,7 @@ import { calculateRowsField, fetch_rental_cost_fields } from '../../../component
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import { BiChevronDown } from 'react-icons/bi';
 import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
+import { ownerAndColaborator } from 'src/constants/messageHelpers';
 
 const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -226,59 +227,61 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
 
   return (
     <Fragment>
-      {allowedToEdit && (
-        <Box display="flex" justifyContent="space-between" m={1}>
-          <Box display="flex">
-            <Button
-              color="primary"
-              variant="contained"
-              size="small"
-              disabled={isOffline}
-              onClick={() => {
-                setShowCostDialog({ open: true, showSaveAndNext: false });
-                setSelectedCostData(null);
-              }}
-            >
-              Add
-            </Button>
-          </Box>
-          <Box display="flex" ml={1}>
-            <Button
-              variant={'outlined'}
-              color="primary"
-              size="small"
-              onClick={handleClick}
-              disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
-              endIcon={<BiChevronDown />}
-              className="new-dropdown-v1"
-            >
-              Actions
-            </Button>
-            <Menu
-              anchorEl={anchorEl}
-              open={open}
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
-              }}
-              onClose={handleClose}
-            >
-              <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
-                <MenuItem
-                  disabled={isDeleting}
-                  onClick={() => {
-                    setDeleteData(selectedProducts?.map(({ _id }: any) => _id));
-                    handleClose();
-                  }}
-                >
-                  Delete
-                </MenuItem>
-              </HtmlTooltip>
-            </Menu>
-          </Box>
+      <Box display="flex" justifyContent="space-between" m={1}>
+        <Box display="flex">
+          <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : ``}>
+            <span>
+              <Button
+                color="primary"
+                variant="contained"
+                size="small"
+                disabled={allowedToEdit && !isOffline ? false : true}
+                onClick={() => {
+                  setShowCostDialog({ open: true, showSaveAndNext: false });
+                  setSelectedCostData(null);
+                }}
+              >
+                Add
+              </Button>
+            </span>
+          </HtmlTooltip>
         </Box>
-      )}
+        <Box display="flex" ml={1}>
+          <Button
+            variant={'outlined'}
+            color="primary"
+            size="small"
+            onClick={handleClick}
+            disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
+            endIcon={<BiChevronDown />}
+            className="new-dropdown-v1"
+          >
+            Actions
+          </Button>
+          <Menu
+            anchorEl={anchorEl}
+            open={open}
+            getContentAnchorEl={null}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left'
+            }}
+            onClose={handleClose}
+          >
+            <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
+              <MenuItem
+                disabled={isDeleting}
+                onClick={() => {
+                  setDeleteData(selectedProducts?.map(({ _id }: any) => _id));
+                  handleClose();
+                }}
+              >
+                Delete
+              </MenuItem>
+            </HtmlTooltip>
+          </Menu>
+        </Box>
+      </Box>
       {columns && rowsData ? (
         <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}>
           <CustomReactTable

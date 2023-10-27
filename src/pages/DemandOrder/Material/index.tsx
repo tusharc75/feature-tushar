@@ -1,31 +1,30 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, IconButton, MenuItem, Menu } from '@material-ui/core';
-import axiosInstance from '../../../axios/axiosInstance';
-import routes from '../../../components/Helpers/Routes';
-import { useData } from '../../../StateProvider/Provider';
-import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import { Box, Button, Grid, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../../StateProvider/Provider';
+import axiosInstance from '../../../axios/axiosInstance';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
-// import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
-import CustomReactTable from 'src/components/CustomReactTableNew/CustomReactTable';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import routes from '../../../components/Helpers/Routes';
+
+import { ExpandMore } from '@material-ui/icons';
 import Add from '@material-ui/icons/Add';
-import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import { isMobile } from 'react-device-detect';
-import { ExpandMore } from '@material-ui/icons';
-import { startCase } from 'lodash';
-import { calculateRowsFieldNew } from 'src/components/RentalManagment/helper';
-import MaterialDialog from './MaterialDialog';
-import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
-import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
-import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import PreviewDownload from 'src/components/PreviewDownload';
-import { CHILD_RESOURCE, gridLoadingTimeout, sidebarResource } from 'src/constants/helpers';
-import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
+import { startCase } from 'lodash';
+import { isMobile } from 'react-device-detect';
+import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
+import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { useTableReducer } from 'src/components/CustomReactTableNew/useTableReducer';
+import PreviewDownload from 'src/components/PreviewDownload';
+import { calculateRowsFieldNew } from 'src/components/RentalManagment/helper';
+import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
+import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
+import { CHILD_RESOURCE, gridLoadingTimeout, sidebarResource } from 'src/constants/helpers';
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
+import MaterialDialog from './MaterialDialog';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
 
 const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -214,6 +213,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
       setRowsData(rows);
       setSelectedRecords([]);
     } catch (error) {
+      dispatch({ type: 'error', error: true });
       console.error(error);
     } finally {
       setTimeout(() => {
@@ -362,7 +362,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
   return (
     <Fragment>
       {allowedToEdit && (
-        <Box display="flex" justifyContent="space-between" m={1}>
+        <Box display="flex" justifyContent="space-between" my={1}>
           <Box display="flex" alignItems="center">
             <Button variant={'outlined'} color="primary" size="small" startIcon={<Add />} onClick={openAddActions} aria-controls="add-menu">
               {'Add'}
@@ -459,9 +459,9 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
           </Box>
         </Box>
       )}
-      {columns && rowsData ? (
+      {columns ? (
         <>
-          <Box p="6px" zIndex={5} width={'100%'}>
+          <Box py="6px" zIndex={5} width={'100%'}>
             <CustomReactTable
               height={'calc(100vh - 345px)'}
               columns={columns}

@@ -8,6 +8,55 @@ $isSubleaseDark: #826325;
 $isTransferAssetDark: #9b6c44;
 $isAppliedBillDark: #234623;
 
+.td-color {
+  &.isAppliedBill {
+    background: $isAppliedBill;
+    [data-mode='dark'] & {
+      background-color: $isAppliedBillDark;
+    }
+  }
+
+  &.isPurchaseOrder {
+    background: $isPurchaseOrder;
+    [data-mode='dark'] & {
+      background-color: $isPurchaseOrderDark;
+    }
+  }
+
+  &.isSublease {
+    background: $isSublease;
+    [data-mode='dark'] & {
+      background: $isSubleaseDark;
+    }
+  }
+
+  &.isTransferAsset {
+    background: $isTransferAsset;
+    [data-mode='dark'] & {
+      background-color: $isTransferAssetDark;
+    }
+  }
+
+  &.isTransferAsset {
+    background: $isTransferAsset;
+    [data-mode='dark'] & {
+      background-color: $isTransferAssetDark;
+    }
+  }
+
+  &.isService {
+    background: #fffaef;
+    [data-mode='dark'] & {
+      background-color: #23233d;
+    }
+  }
+
+  &.error {
+    background: var(--error-bg);
+    border-color: var(--error-border) !important;
+  }
+}
+
 .custom-react-table {
   // padding: 1rem;
   .MuiTableCell-root {
@@ -272,7 +321,7 @@ $isAppliedBillDark: #234623;
         }
 
         td.error {
-          background: var(--error-dark, #efcccc);
+          background: var(--error-bg);
         }
       }
 

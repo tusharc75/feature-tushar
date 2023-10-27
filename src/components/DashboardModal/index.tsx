@@ -102,10 +102,7 @@ const DashboardModal: FC<ModalProps> = ({
             </IconButton>
           </Box>
         </MuiDialogTitle>
-        <DialogContent
-          className={`${styles.dialogContent} ${className}`}
-          style={{ maxHeight: dialogProps?.maxWidth || dialogProps?.fullScreen ? 'calc(100vh - 300px)' : '250px' }}
-        >
+        <DialogContent className={`${styles.dialogContent} ${className}`} style={{ maxHeight: maximized ? 'calc(100vh - 135px)' : '250px' }}>
           {children && children}
         </DialogContent>
       </Box>

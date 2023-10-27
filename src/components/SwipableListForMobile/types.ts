@@ -15,7 +15,7 @@ export type TSwipableListInputProps = {
   prepareRow: any;
   handleCellSelection: any;
   IndeterminateCheckbox: any;
-  backgroundColor?: (data: any) => string | null;
+  backgroundColorClass?: (data: any) => string | null;
   submitInput: any;
   cellValue: any;
   setCellValue: any;

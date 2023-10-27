@@ -26,9 +26,11 @@ import { ExpandMore } from '@material-ui/icons';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
+import { subleaseActions, subleaseMessage } from 'src/constants/messageHelpers';
+import CustomMessageDialog from 'src/components/MessageDialog';
 
 
-const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, stepFullScreen, renderedFrom, allowedToEdit }) => {
+const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNextStepToolTip, stepFullScreen, renderedFrom, allowedToEdit }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const [columns, setColumns] = useState(null);
@@ -36,6 +38,7 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, stepF
     const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
     const [rowsData, setRowsData] = useState(null);
     const [selectedRecords, setSelectedRecords] = useState([]);
+    const [openMessageDialog, setOpenMessageDialog] = useState({ open: false, errorMessages: [] });
 
     useEffect(() => {
         fetchFields();
@@ -173,6 +176,7 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, stepF
 
     const fetchRecords = async () => {
         setNextStep(false);
+        setNextStepToolTip(null);
         try {
             var data: any = [];
 
@@ -200,9 +204,6 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, stepF
                             rows[index][`LoadingTicket`] = obj?.ticketName;
                             rows[index][`LoadingTicketId`] = obj?._id;
                             rows[index][`LoadingTicketStatus`] = obj?.status;
-                            if (obj?.status === DELIVERY_TICKET_STATUS.delivered && ticketType === DELIVERY_TICKET_TYPE.loading) {
-                                rows[index]['hideSelection'] = true;
-                            }
                         }
                     });
                 }
@@ -215,9 +216,7 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, stepF
                                 rows[index][`ReceivingTicket`] = obj?.ticketName;
                                 rows[index][`ReceivingTicketId`] = obj?._id;
                                 rows[index][`ReceivingTicketStatus`] = obj?.status;
-                                if (obj?.status === DELIVERY_TICKET_STATUS.delivered && ticketType === DELIVERY_TICKET_TYPE.receiving) {
-                                    rows[index]['hideSelection'] = true;
-                                }
+
                             }
                         });
                     }
@@ -226,6 +225,10 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, stepF
             setRowsData(rows);
             if (rows?.every((e) => e[`${ticketType}TicketStatus`] === DELIVERY_TICKET_STATUS.delivered)) {
                 setNextStep(true);
+                setNextStepToolTip(null);
+            } else {
+                setNextStep(false);
+                setNextStepToolTip(subleaseMessage.deliverLoadingTicketStep);
             }
         } catch (error) {
             toastConfig.setToastConfig(error);
@@ -297,12 +300,49 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, stepF
         }
     };
 
+    const validateAction = (action) => {
+        const errorMessages = [];
+        selectedRecords?.forEach((e) => {
+            if (action === subleaseActions.createLoadingTicket) {
+                if (e.hasOwnProperty('LoadingTicketId')) {
+                    errorMessages.push({ index: e.index, message: subleaseMessage.loadingAlreadyCreated });
+                }
+            }
+            else if (action === subleaseActions.createReceivingTicket) {
+                if (e.hasOwnProperty('ReceivingTicketId')) {
+                    errorMessages.push({ index: e.index, message: subleaseMessage.loadingAlreadyCreated });
+                }
+            }
+            else if (action === subleaseActions.deliveredToWarehouse) {
+                if (!e.hasOwnProperty('LoadingTicketId')) {
+                    errorMessages.push({ index: e.index, message: subleaseMessage.loadingNotCreated });
+                }
+                else if (e?.LoadingTicketStatus === DELIVERY_TICKET_STATUS.delivered) {
+                    errorMessages.push({ index: e.index, message: subleaseMessage.loadingAlreadyDelivered });
+                }
+            }
+            else if (action === subleaseActions.receivedToWarehouse) {
+                if (!e.hasOwnProperty('ReceivingTicketId')) {
+                    errorMessages.push({ index: e.index, message: subleaseMessage.receivingNotCreated });
+                }
+                else if (e?.ReceivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) {
+                    errorMessages.push({ index: e.index, message: subleaseMessage.receivingAlreadyDelivered });
+                }
+            }
+        });
+        if (errorMessages?.length) {
+            setOpenMessageDialog({ open: true, errorMessages: errorMessages });
+            return true;
+        }
+        return false;
+    };
+
     return (
         <>
-            <Box display="flex" justifyContent="flex-end" pt={1}>
-                <Box display="flex" alignItems="center" gridGap={8}>
+            <Box display="flex" justifyContent="flex-end">
+                <Box display="flex" alignItems="center" >
                     {allowedToEdit && (
-                        <Fragment>
+                        <div>
                             <Button
                                 variant="outlined"
                                 color="default"
@@ -327,48 +367,45 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, stepF
                                 open={Boolean(anchorActionEl)}
                                 onClose={closeActions}
                             >
-                                {
-                                    ticketType === DELIVERY_TICKET_TYPE.loading && (
-                                        <MenuItem
-                                            onClick={() => {
-                                                closeActions();
+                                {ticketType === DELIVERY_TICKET_TYPE.loading && (
+                                    <MenuItem
+                                        onClick={() => {
+                                            if (!validateAction(subleaseActions.createLoadingTicket)) {
                                                 handleDeliveryTicketDialog();
-                                            }}
-                                            disabled={selectedRecords.length === 0 || selectedRecords.some((f) => f.hasOwnProperty(`LoadingTicketId`))}
-                                        >
-                                            Create Loading Ticket
-                                        </MenuItem>
-                                    )
-                                }
-                                {
-                                    ticketType === DELIVERY_TICKET_TYPE.receiving && (
-                                        <MenuItem
-                                            onClick={() => {
-                                                closeActions();
+                                            }
+                                            closeActions();
+                                        }}
+                                    >
+                                        Create Loading Ticket
+                                    </MenuItem>
+                                )}
+                                {ticketType === DELIVERY_TICKET_TYPE.receiving && (
+                                    <MenuItem
+                                        onClick={() => {
+                                            if (!validateAction(subleaseActions.createReceivingTicket)) {
                                                 handleDeliveryTicketDialog();
-                                            }}
-                                            disabled={selectedRecords.length === 0 || (selectedRecords.some((f) => f.hasOwnProperty(`ReceivingTicketId`)) || !selectedRecords?.every((f) => f.hasOwnProperty(`LoadingTicketId`) || f.status !== ASSET_STATUS.available))}
-                                        >
-                                            Create Receiving Ticket
-                                        </MenuItem>
-                                    )
-                                }
+                                            }
+                                            closeActions();
+                                        }}
+                                    >
+                                        Create Receiving Ticket
+                                    </MenuItem>
+                                )}
                                 <MenuItem
-                                    disabled={
-                                        selectedRecords.length === 0 ||
-                                        selectedRecords.filter((e: any) => e[`${ticketType}TicketStatus`] === DELIVERY_TICKET_STATUS.indTransit).length !== selectedRecords.length
-                                    }
                                     onClick={() => {
-                                        handelProcessTickets();
+                                        if (ticketType === DELIVERY_TICKET_TYPE.loading && !validateAction(subleaseActions.deliveredToWarehouse)) {
+                                            handelProcessTickets();
+                                        }
+                                        else if (ticketType === DELIVERY_TICKET_TYPE.receiving && !validateAction(subleaseActions.receivedToWarehouse)) {
+                                            handelProcessTickets();
+                                        }
                                         closeActions();
                                     }}
-                                >{
-                                        ticketType === 'loading' ? 'Delivered to Plant' : 'Received at Plant'
-                                    }
+                                >{ticketType === DELIVERY_TICKET_TYPE.loading ? 'Delivered to Plant' : 'Received at Plant'}
                                 </MenuItem>
                             </Menu>
                             <Box mx={1} />
-                        </Fragment>
+                        </div>
                     )}
                 </Box>
             </Box>
@@ -409,6 +446,15 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, stepF
                     onSuccess={() => {
                         setShowTicketDialog({ open: false, data: {} });
                         fetchRecords();
+                    }}
+                />
+            )}
+            {openMessageDialog.open && (
+                <CustomMessageDialog
+                    open={openMessageDialog.open}
+                    errorMessages={openMessageDialog.errorMessages}
+                    onClose={() => {
+                        setOpenMessageDialog({ open: false, errorMessages: [] });
                     }}
                 />
             )}

@@ -12,8 +12,10 @@ function reducer(state: TInitialState, action: TActios) {
     case 'initialize':
       return {
         ...state,
+        error: false,
         dataRows: action.data,
-        rowCount: action.count
+        rowCount: action.count,
+        selectedRecords: action.selectedRecords || []
       };
 
     case 'selection':
@@ -64,7 +66,11 @@ function reducer(state: TInitialState, action: TActios) {
         page: 0,
         loading: true
       };
-
+    case 'error':
+      return {
+        ...state,
+        error: action.error
+      };
     case 'complete':
       return {
         ...state,
@@ -90,7 +96,8 @@ const intialState = {
   filters: {},
   sorting: [],
   selectedRecords: [],
-  currentEditingCellPosition: null
+  currentEditingCellPosition: null,
+  error: false
 };
 
 export type TInitialState = {
@@ -105,10 +112,11 @@ export type TInitialState = {
   sorting: any[];
   selectedRecords: any[];
   currentEditingCellPosition: { rowId: string; columnName: string } | null;
+  error: boolean;
 };
 export type TActios =
   | { type: 'loading'; loading: boolean }
-  | { type: 'initialize'; data: any[]; count: number }
+  | { type: 'initialize'; data: any[]; count: number; selectedRecords?: any[] }
   | { type: 'selection'; selectedRecords: any[] }
   | { type: 'update'; data: any[] }
   | { type: 'filter'; filters: any }
@@ -117,7 +125,8 @@ export type TActios =
   | { type: 'pageChange'; page: number }
   | { type: 'pageSizeChange'; limit: number }
   | { type: 'complete' }
-  | { type: 'currentEditingCellPosition'; cellPosition: { rowId: string; columnName: string } | null };
+  | { type: 'currentEditingCellPosition'; cellPosition: { rowId: string; columnName: string } | null }
+  | { type: 'error'; error: boolean };
 
 export const useTableReducer = () => {
   const [state, dispatch] = useReducer(reducer, intialState);

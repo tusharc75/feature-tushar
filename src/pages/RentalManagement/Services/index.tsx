@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, IconButton, CircularProgress, Menu, MenuItem, Chip, ListItemText, Tooltip } from '@material-ui/core';
+import { Grid, Box, Button, IconButton, CircularProgress, Menu, MenuItem, Chip, ListItemText, Tooltip, TextField } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
@@ -8,11 +8,10 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
-import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { rentalManagement } from '../../../constants/helpers';
+import { gridLoadingTimeout, rentalManagement } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
@@ -29,6 +28,11 @@ import { ExpandMore } from '@material-ui/icons';
 import ManagePackageDialog from 'src/pages/Packages/ManagePackageDialog';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 import EditIcon from '@material-ui/icons/Edit';
+import Technicians from './Technicians';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import { Autocomplete } from '@material-ui/lab';
+import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
+import { ownerAndColaborator } from 'src/constants/messageHelpers';
 
 const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }: any) => {
   const toastConfig = useContext(CustomToastContext);
@@ -53,6 +57,11 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
   const [isRateRequired, setIsRateRequired] = useState(false);
   const [isBulkEdit, setIsBulkEdit] = useState(false);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
+
+  const [tabValue, setTabValue] = useState(0);
+  const [serviceOption, setServiceOption] = useState(null);
+  const [selectedServiceOption, setSelectedServiceOption] = useState({ optionLabel: 'All', optionValue: 'All' });
+
 
   const { isOffline } = useContext(CustomOfflineContext);
 
@@ -128,7 +137,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
             ) : (
               <p
                 onClick={() => {
-                  openMaterial(row, rows)
+                  openMaterial(row, rows);
                 }}
                 className="link text-truncate"
                 title={row.original.detail}
@@ -198,51 +207,49 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
       Cell: ({ row, rows }) => {
         return (
           <>
-            <HtmlTooltip title={(isOffline || !allowedToEdit) ? '' : 'Edit'}>
+            <HtmlTooltip title={isOffline || !allowedToEdit ? '' : 'Edit'}>
               <IconButton
                 size="small"
                 aria-label="Details"
-                disabled={(isOffline || !allowedToEdit) ? true : false}
+                disabled={isOffline || !allowedToEdit ? true : false}
                 onClick={() => {
-                  openMaterial(row, rows)
+                  openMaterial(row, rows);
                 }}
               >
-                <EditIcon fontSize="small" color={(isOffline || !allowedToEdit) ? 'disabled' : 'primary'} />
+                <EditIcon fontSize="small" color={isOffline || !allowedToEdit ? 'disabled' : 'primary'} />
               </IconButton>
             </HtmlTooltip>
-            {
-              allowedToEdit ? (
-                row.original.hideSelection ? (
-                  <HtmlTooltip title={'Asset is already assigned'}>
-                    <span>
-                      <IconButton size="small" aria-label="Details" disabled={true}>
-                        <DeleteIcon fontSize="small" color={'disabled'} />
-                      </IconButton>
-                    </span>
-                  </HtmlTooltip>
-                ) : (
-                  <HtmlTooltip title={'Delete'}>
-                    <span>
-                      <IconButton
-                        size="small"
-                        aria-label="Details"
-                        onClick={() => {
-                          const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                          getNestedSubRows(obj, row.original);
-                          setDeleteData(obj);
-                        }}
-                      >
-                        <DeleteIcon fontSize="small" color={'error'} />
-                      </IconButton>
-                    </span>
-                  </HtmlTooltip>
-                )
+            {allowedToEdit ? (
+              row.original.hideSelection ? (
+                <HtmlTooltip title={'Asset is already assigned'}>
+                  <span>
+                    <IconButton size="small" aria-label="Details" disabled={true}>
+                      <DeleteIcon fontSize="small" color={'disabled'} />
+                    </IconButton>
+                  </span>
+                </HtmlTooltip>
               ) : (
-                ''
+                <HtmlTooltip title={'Delete'}>
+                  <span>
+                    <IconButton
+                      size="small"
+                      aria-label="Details"
+                      onClick={() => {
+                        const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                        getNestedSubRows(obj, row.original);
+                        setDeleteData(obj);
+                      }}
+                    >
+                      <DeleteIcon fontSize="small" color={'error'} />
+                    </IconButton>
+                  </span>
+                </HtmlTooltip>
               )
-            }
+            ) : (
+              ''
+            )}
           </>
-        )
+        );
       }
     });
     setColumns(column);
@@ -250,59 +257,75 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
 
   const fetchProductInventory = async () => {
     setNextStep(false);
-    var data: any = [];
-    var inventory: any = [];
-    var nonSerializeAsset: any = [];
+    try {
+      var data: any = [];
+      var inventory: any = [];
+      var nonSerializeAsset: any = [];
 
-    if (isOffline) {
-      data = await findOne(objectStore.rentalManagement, rentalManagementData._id);
-      inventory = data.productInventory;
-    } else {
-      const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`);
-      data = response?.data?.data;
-      setMaterial(JSON.parse(JSON.stringify(data.material)));
-      inventory = data.inventory?.filter((e) => !e.isReplaced);
-      nonSerializeAsset = data.nonSerializeAsset;
-    }
-    let rows = data.material.filter((e) => e.parentId === null);
-    rows = rows.filter((e) => e.type === 'service' || (e.type === 'package' && e.packageDetail?.packageType === 'Service'));
+      if (isOffline) {
+        data = await findOne(objectStore.rentalManagement, rentalManagementData._id);
+        inventory = data.productInventory;
+      } else {
+        const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`);
+        data = response?.data?.data;
+        setMaterial(JSON.parse(JSON.stringify(data.material)));
+        inventory = data.inventory?.filter((e) => !e.isReplaced);
+        nonSerializeAsset = data.nonSerializeAsset;
+      }
+      let rows = data.material.filter((e) => e.parentId === null);
+      rows = rows.filter((e) => e.type === 'service' || (e.type === 'package' && e.packageDetail?.packageType === 'Service'));
 
-    rows.forEach((parent, i) => {
-      parent.index = i + 1;
-      parent.detail =
-        parent.type === 'product'
-          ? parent?.productDetail?.productName
-          : parent.type === 'service'
-            ? parent?.serviceDetail?.serviceName
-            : parent?.packageDetail?.packageName;
-      parent.description =
-        parent.type === 'service'
-          ? parent?.serviceDetail?.serviceDescription || ''
-          : parent.type === 'product'
-            ? parent?.productDetail?.productDescription || ''
-            : parent.type === 'package'
-              ? parent?.packageDetail?.packageDescription || ''
-              : '';
-      parent.serializedProduct = parent.type === 'product' ? parent?.productDetail?.serializedProduct : false;
-      parent.qtyDisplay = parent.qty;
-      parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
-      parent.assetQty = parent.serializedProduct
-        ? inventory?.filter((e) => e._id === parent._id).length
-        : nonSerializeAsset?.filter((e) => e._id === parent._id).length;
-      parent.hideSelection = parent.assetQty > 0 ? true : parent?.status ? true : false;
-      parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent);
-    });
+      rows.forEach((parent, i) => {
+        parent.index = i + 1;
+        parent.detail =
+          parent.type === 'product'
+            ? parent?.productDetail?.productName
+            : parent.type === 'service'
+              ? parent?.serviceDetail?.serviceName
+              : parent?.packageDetail?.packageName;
+        parent.description =
+          parent.type === 'service'
+            ? parent?.serviceDetail?.serviceDescription || ''
+            : parent.type === 'product'
+              ? parent?.productDetail?.productDescription || ''
+              : parent.type === 'package'
+                ? parent?.packageDetail?.packageDescription || ''
+                : '';
+        parent.serializedProduct = parent.type === 'product' ? parent?.productDetail?.serializedProduct : false;
+        parent.qtyDisplay = parent.qty;
+        parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
+        parent.assetQty = parent.serializedProduct
+          ? inventory?.filter((e) => e._id === parent._id).length
+          : nonSerializeAsset?.filter((e) => e._id === parent._id).length;
+        parent.hideSelection = parent.assetQty > 0 ? true : parent?.status ? true : false;
+        parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent);
+      });
 
-    if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
-      setNextStep(false);
-    } else {
-      setNextStep(true);
+      if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
+        setNextStep(false);
+      } else {
+        setNextStep(true);
+      }
+      if (rows?.length === 0) {
+        setNextStep(true);
+      }
+      setRowsData(rows);
+      setSelectedProducts([]);
+
+      setServiceOption([{ optionLabel: 'All', optionValue: 'All' },
+      ...rows?.map((s) => {
+        return {
+          optionLabel: s?.detail,
+          optionValue: s?.materialId,
+          _id: s?._id
+        };
+      })]);
+      if (selectedServiceOption?.optionValue !== 'All' && !rows?.some((s) => s?.materialId === selectedServiceOption?.optionValue)) {
+        setSelectedServiceOption({ optionLabel: 'All', optionValue: 'All' });
+      }
+    } catch (error) {
+      console.error(error);
     }
-    if (rows?.length === 0) {
-      setNextStep(true);
-    }
-    setRowsData(rows);
-    setSelectedProducts([]);
   };
 
   const generateNestedData = (material, inventory, nonSerializeAsset, parent) => {
@@ -508,135 +531,183 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
     setAddAnchorEl(null);
   };
 
+
+
+  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+    setTabValue(newValue);
+  };
+
+
   return (
     <Fragment>
-      {allowedToEdit && (
-        <Box display="flex" justifyContent="space-between" m={1}>
-          <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
-            <Button variant={'outlined'} color="primary" size="small" startIcon={<Add />} onClick={openAddActions} aria-controls="add-menu">
-              {'Add'}
-              <ExpandMore fontSize="small" />
-            </Button>
-            <Menu
-              anchorEl={addAnchorEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
-              }}
-              id="add-menu"
-              open={Boolean(addAnchorEl)}
-              onClose={closeAddActions}
-            >
-              {permissions?.serviceMaster?.isRead && (
-                <MenuItem
-                  onClick={() => {
-                    closeAddActions()
-                    setAddExistingProductDialog({ open: true, type: 'service', parentId: null });
-                  }}
-                >
-                  Add Existing Services
-                </MenuItem>
-              )}
-              {permissions?.packages?.isRead && (
-                <MenuItem
-                  onClick={() => {
-                    closeAddActions()
-                    setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
-                  }}
-                >
-                  {`Add Existing Service Packages`}
-                </MenuItem>
-              )}
+      <Box display="flex" justifyContent="space-between" m={1}>
+        <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
+          <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : ``}>
+            <span>
+              <Button
+                variant={'outlined'}
+                color="primary"
+                size="small"
+                startIcon={<Add />}
+                onClick={openAddActions}
+                disabled={!allowedToEdit}
+                aria-controls="add-menu">
+                {'Add'}
+                <ExpandMore fontSize="small" />
+              </Button>
+            </span>
+          </HtmlTooltip>
+          <Menu
+            anchorEl={addAnchorEl}
+            keepMounted
+            getContentAnchorEl={null}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left'
+            }}
+            id="add-menu"
+            open={Boolean(addAnchorEl)}
+            onClose={closeAddActions}
+          >
+            {permissions?.serviceMaster?.isRead && (
               <MenuItem
                 onClick={() => {
                   closeAddActions();
-                  setAddExistingProductDialog({ open: true, type: 'newService', parentId: null });
+                  setAddExistingProductDialog({ open: true, type: 'service', parentId: null });
                 }}
               >
-                Add New Service
+                Add Existing Services
               </MenuItem>
+            )}
+            {permissions?.packages?.isRead && (
               <MenuItem
                 onClick={() => {
                   closeAddActions();
-                  setAddExistingProductDialog({ open: true, type: 'newPackage', parentId: null });
+                  setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
                 }}
               >
-                {`Add New Service Package`}
+                {`Add Existing Service Packages`}
               </MenuItem>
-            </Menu>
-          </Box>
-          <Box display="flex" ml={1}>
-            <Button
-              variant={'outlined'}
-              color="primary"
-              size="small"
-              onClick={handleClick}
-              disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
-              endIcon={<BiChevronDown />}
-              className="new-dropdown-v1"
-            >
-              Actions
-            </Button>
-            <Menu
-              anchorEl={anchorEl}
-              open={open}
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
+            )}
+            <MenuItem
+              onClick={() => {
+                closeAddActions();
+                setAddExistingProductDialog({ open: true, type: 'newService', parentId: null });
               }}
-              onClose={handleClose}
             >
-              <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
-                <MenuItem
-                  onClick={() => {
-                    setIsProductEdit({ open: true, data: null, showSaveAndNext: false });
-                    setIsBulkEdit(true);
-                    handleClose();
-                  }}
-                >
-                  Bulk Edit
-                </MenuItem>
-              </HtmlTooltip>
-              <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
-                <MenuItem
-                  disabled={isDeleting}
-                  onClick={() => {
-                    handleDeleteMultiple();
-                    handleClose();
-                  }}
-                >
-                  Delete
-                </MenuItem>
-              </HtmlTooltip>
-            </Menu>
-          </Box>
+              Add New Service
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                closeAddActions();
+                setAddExistingProductDialog({ open: true, type: 'newPackage', parentId: null });
+              }}
+            >
+              {`Add New Service Package`}
+            </MenuItem>
+          </Menu>
         </Box>
-      )}
+        <Box display="flex" ml={1}>
+          <Button
+            variant={'outlined'}
+            color="primary"
+            size="small"
+            onClick={handleClick}
+            disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
+            endIcon={<BiChevronDown />}
+            className="new-dropdown-v1"
+          >
+            Actions
+          </Button>
+          <Menu
+            anchorEl={anchorEl}
+            open={open}
+            getContentAnchorEl={null}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left'
+            }}
+            onClose={handleClose}
+          >
+            <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
+              <MenuItem
+                onClick={() => {
+                  setIsProductEdit({ open: true, data: null, showSaveAndNext: false });
+                  setIsBulkEdit(true);
+                  handleClose();
+                }}
+              >
+                Bulk Edit
+              </MenuItem>
+            </HtmlTooltip>
+            <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
+              <MenuItem
+                disabled={isDeleting}
+                onClick={() => {
+                  handleDeleteMultiple();
+                  handleClose();
+                }}
+              >
+                Delete
+              </MenuItem>
+            </HtmlTooltip>
+          </Menu>
+        </Box>
+      </Box>
       {columns && rowsData ? (
-        <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}>
-          <CustomReactTable
-            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
-            columns={columns}
-            data={rowsData}
-            setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-            onSelect={setSelectedProducts}
-            childrenProperty="subRows"
-            uniqueKey="_id"
-            hideSelection={isOffline || !allowedToEdit}
-            hideAction={isOffline || !allowedToEdit}
-            renderedFrom="rental_management_sevices_1"
-            onSaveEdit={onSaveInlineEdit}
-            isClientSideGrid={true}
-          />
-        </Box>
+        <CustomReactTable
+          height={'300px'}
+          columns={columns}
+          data={rowsData}
+          setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
+          onSelect={setSelectedProducts}
+          childrenProperty="subRows"
+          uniqueKey="_id"
+          hideSelection={isOffline || !allowedToEdit}
+          hideAction={isOffline || !allowedToEdit}
+          renderedFrom="rental_management_sevices_1"
+          onSaveEdit={onSaveInlineEdit}
+          isClientSideGrid={true}
+        />
       ) : (
-        <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        <Box py={2} height={300}>
+          <CommonSkeleton lenArray={[...Array(2).keys()]} xs={12} sm={12} md={12} lg={12} />
         </Box>
       )}
+
+      {user?.user?.brandPolicy?.rentalProgressiveBilling && (
+        <div>
+          <Box style={{ maxWidth: '400px' }} mb={2} mt={2}>
+            <Autocomplete
+              size="small"
+              style={{ minWidth: '300px' }}
+              fullWidth
+              options={serviceOption ? serviceOption : []}
+              autoHighlight
+              value={selectedServiceOption}
+              getOptionLabel={(option: any) => option?.optionLabel || ''}
+              getOptionSelected={(option, val) => (option ? option?.optionLabel === val?.optionLabel : false)}
+              onChange={(_, val) => {
+                let value = val;
+                if (!val) {
+                  value = { optionLabel: 'All', optionValue: 'All' }
+                }
+                setSelectedServiceOption(value)
+              }}
+              renderInput={(params) => <TextField {...params} label={'Select Service'} variant="outlined" />}
+            />
+          </Box>
+          <Box mt={3}>
+            <CustomTabs value={tabValue} onChange={handleMainTabChange} style={{ marginBottom: -1 }}>
+              <CustomTab index={0} label={'Technicians'} value={0} primaryColor={true} />
+            </CustomTabs>
+            <TabPanel value={tabValue} index={0}>
+              <Technicians allowedToEdit={allowedToEdit} rentalManagementData={rentalManagementData} selectedService={selectedServiceOption} services={serviceOption} />
+            </TabPanel>
+          </Box>
+        </div>
+      )}
+
       {deleteData && (
         <ConfirmationDialog
           open={true}
@@ -694,7 +765,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
           packageId={null}
           onClose={() => setAddExistingProductDialog({ open: false, type: '', parentId: null })}
           onSuccess={(data) => {
-            data.type = 'package'
+            data.type = 'package';
             data.unitMain = data?.unit;
             data.pricingMethodMain = data?.pricingMethod;
             handleAdd([data]);
@@ -709,8 +780,8 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
           serviceMasterId={null}
           onClose={() => setAddExistingProductDialog({ open: false, type: '', parentId: null })}
           onSuccess={(data) => {
-            const row = data?.data
-            row.type = 'service'
+            const row = data?.data;
+            row.type = 'service';
             row.unitMain = row?.unit;
             row.pricingMethodMain = row?.pricingMethod;
             handleAdd([row]);

@@ -54,6 +54,8 @@ import { IoMdDownload } from 'react-icons/io';
 import Steps, { getIndex } from 'src/components/Steps';
 import EditIcon from '@material-ui/icons/Edit';
 import CloseIcon from '@material-ui/icons/Close';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { ownerAndColaborator } from 'src/constants/messageHelpers';
 
 const RentalManagementDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -521,9 +523,7 @@ const RentalManagementDetailsPage = () => {
                       Re-Open
                     </Button>
                   )}
-                  {permissions?.rentalManagement?.isUpdate &&
-                    allowedToEdit &&
-                    !isOffline &&
+                  {permissions?.rentalManagement?.isUpdate && !isOffline &&
                     ![RENTAL_STATUS.cancelled, RENTAL_STATUS.closed].includes(rentalManagementData?.status) &&
                     !(
                       [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
@@ -531,9 +531,17 @@ const RentalManagementDetailsPage = () => {
                       ) && ['Add Products', 'Add Services', 'Add-on'].includes(rentalSteps[currentStep]?.name)
                     ) && (
                       <Fragment>
-                        <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className={'btn-outline-v1'} onClick={handleOpenUpdateDialog}>
-                          {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
-                        </Button>
+                        <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : 'Edit'}>
+                          <span>
+                            <Button
+                              disabled={allowedToEdit ? false : true}
+                              variant={isMobile && !isTablet ? 'text' : 'contained'}
+                              className={'btn-outline-v1'}
+                              onClick={handleOpenUpdateDialog}>
+                              {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
+                            </Button>
+                          </span>
+                        </HtmlTooltip>
                       </Fragment>
                     )}
                 </Fragment>
@@ -723,6 +731,7 @@ const RentalManagementDetailsPage = () => {
                   rentalManagementData={rentalManagementData}
                   currentStep={currentStep}
                   setNextStep={setNextStep}
+                  setNextStepToolTip={setNextStepToolTip}
                   renderedFrom={`${renderedFrom}_grid-3`}
                   allowedToEdit={allowedToEdit}
                   isProcessor={isProcessor}
@@ -736,6 +745,7 @@ const RentalManagementDetailsPage = () => {
                   rentalManagementData={rentalManagementData}
                   currentStep={currentStep}
                   setNextStep={setNextStep}
+                  setNextStepToolTip={setNextStepToolTip}
                   renderedFrom={`${renderedFrom}_grid-4`}
                   allowedToEdit={allowedToEdit}
                   isProcessor={isProcessor}

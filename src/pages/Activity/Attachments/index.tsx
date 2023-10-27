@@ -1,44 +1,40 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
+import { Button, Chip, IconButton, Menu, MenuItem, MenuList, Popover, TextField } from '@material-ui/core';
 import Box from '@material-ui/core/Box';
-import Grid from '@material-ui/core/Grid';
-import { SearchFilter } from '../../../components/Activity/Report/SearchFilter';
-import { useHistory } from 'react-router-dom';
-import queryString from 'query-string';
-import { GetReferenceName } from '../../../axios/activity';
-import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
-import axiosInstance from '../../../axios/axiosInstance';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import Dialog from '@material-ui/core/Dialog';
-import ManageAttachment from '../../../components/Activity/Attachments/ManageAttachment';
-import CustomContainer from '../../../components/CustomContainer';
-import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { AiOutlinePaperClip } from 'react-icons/ai';
-import { AddOutlined } from '@material-ui/icons';
-import { Button, IconButton, MenuItem, Menu, TextField, Chip, Link, Popover, MenuList } from '@material-ui/core';
-import { useData } from '../../../StateProvider/Provider';
-import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, gridLoadingTimeout, sidebarResource } from '../../../constants/helpers';
-import { Delete as DeleteIcon } from '@material-ui/icons';
-import { gridPageSizes, isObjectEmpty, displayDate } from '../../../constants/helpers';
-import { ExpandMore } from '@material-ui/icons';
-import routes from '../../../components/Helpers/Routes';
+import { AddOutlined, Delete as DeleteIcon, ExpandMore } from '@material-ui/icons';
 import GetAppIcon from '@material-ui/icons/GetApp';
 import { Autocomplete } from '@material-ui/lab';
-import NoDataCell from '../../../components/Helpers/NoDataCell';
+import queryString from 'query-string';
+import { useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { AiOutlinePaperClip } from 'react-icons/ai';
+import { useHistory } from 'react-router-dom';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../../StateProvider/Provider';
+import { GetReferenceName } from '../../../axios/activity';
+import axiosInstance from '../../../axios/axiosInstance';
+import ManageAttachment from '../../../components/Activity/Attachments/ManageAttachment';
 import { get_activity_resource } from '../../../components/Activity/Helpers/utils';
-import CustomReactTable from 'src/components/CustomReactTableNew/CustomReactTable';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { SearchFilter } from '../../../components/Activity/Report/SearchFilter';
+import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
+import CustomContainer from '../../../components/CustomContainer';
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
+import NoDataCell from '../../../components/Helpers/NoDataCell';
+import routes from '../../../components/Helpers/Routes';
+import { CustomDialogTransition, displayDate, gridLoadingTimeout, isObjectEmpty, sidebarResource } from '../../../constants/helpers';
+
+import FolderIcon from '@material-ui/icons/Folder';
+import InsertDriveFileOutlinedIcon from '@material-ui/icons/InsertDriveFileOutlined';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import SendIcon from '@material-ui/icons/Send';
 import PreviewIcon from '@material-ui/icons/Visibility';
 import _ from 'lodash';
-import InsertDriveFileOutlinedIcon from '@material-ui/icons/InsertDriveFileOutlined';
-import FolderIcon from '@material-ui/icons/Folder';
-import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
-import SendIcon from '@material-ui/icons/Send';
-import { CreateEmail } from 'src/components/Activity/Email/CreateEmail';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import mime from 'mime';
-import { useTableReducer } from 'src/components/CustomReactTableNew/useTableReducer';
+import { CreateEmail } from 'src/components/Activity/Email/CreateEmail';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 
 export default function Attachment() {
   const history = useHistory();
@@ -54,6 +50,7 @@ export default function Attachment() {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [sendMail, setSendMail] = useState(false);
+  const [isAttachmentLoading, setIsAttachmentLoading] = useState(true);
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -201,6 +198,7 @@ export default function Attachment() {
               <IconButton
                 size="small"
                 onClick={() => {
+                  setSendMail(true);
                   if (row.original.type === 'folder') {
                     handleMailForFolder(row.original?._id, row.original?.name);
                   } else {
@@ -374,33 +372,40 @@ export default function Attachment() {
     }
   };
 
-  const handleMail = (data) => {
+  const handleMail = async (data) => {
     const attachments: any = [];
-    Promise.all(
-      data?.file.map(async (file) => {
-        await axiosInstance()
-          .get(`user/download?fileName=${file?.url}`, { responseType: 'blob' })
-          .then(({ data }) => {
+    try {
+      await Promise.all(
+        data?.file.map(async (file) => {
+          try {
+            const response = await axiosInstance().get(`user/download?fileName=${file?.url}`, { responseType: 'blob' });
+            const data = response.data;
+
             let reader = new FileReader();
             reader.readAsDataURL(new Blob([data], { type: mime.getType(file.url.split('.')?.pop()) }));
-            reader.onloadend = function () {
-              let base64data: any = reader.result;
-              attachments.push({
-                base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
-                contentType: base64data.split(';')[0].split(':')[1],
-                extension: `.${file.url.split('.')?.pop()}`,
-                name: file.name
-              });
-            };
-          })
-          .catch((err) => {
+
+            await new Promise<void>((resolve) => {
+              reader.onloadend = function () {
+                let base64data: any = reader.result;
+                attachments.push({
+                  base64: base64data.substring(base64data.indexOf(',') + 1),
+                  contentType: base64data.split(';')[0].split(':')[1],
+                  extension: `.${file.url.split('.')?.pop()}`,
+                  name: file.name
+                });
+                resolve();
+              };
+            });
+          } catch (err) {
             toastConfig.setToastConfig(err);
-          });
-      })
-    ).finally(() => {
+          }
+        })
+      );
       setEmailAttachment(attachments);
-      setSendMail(true);
-    });
+      setIsAttachmentLoading(false);
+    } catch (err) {
+      toastConfig.setToastConfig(err);
+    }
   };
 
   const handleMailForFolder = (_id, name) => {
@@ -429,7 +434,7 @@ export default function Attachment() {
         }
       ];
       setEmailAttachment(attachments);
-      setSendMail(true);
+      setIsAttachmentLoading(false);
     };
   };
 
@@ -552,14 +557,16 @@ export default function Attachment() {
             };
           });
           dispatch({ type: 'initialize', data: parentRows, count: count });
-          setTimeout(() => {
-            dispatch({ type: 'loading', loading: false });
-          }, gridLoadingTimeout);
         }
       )
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        dispatch({ type: 'loading', loading: false });
+        dispatch({ type: 'error', error: true });
+      })
+      .finally(() => {
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
       });
   };
 
@@ -774,7 +781,7 @@ export default function Attachment() {
           </div>
         )}
         <Box zIndex={5} width={'100%'}>
-          {dataRows ? (
+          {column ? (
             <CustomReactTable
               height={'calc(100vh - 300px)'}
               columns={column}
@@ -901,6 +908,8 @@ export default function Attachment() {
             onClose={() => {
               setSendMail(false);
               setFullScreen(false);
+              setIsAttachmentLoading(true);
+              setEmailAttachment(null);
             }}
             fullWidth
           >
@@ -910,10 +919,14 @@ export default function Attachment() {
               handleClose={() => {
                 setSendMail(false);
                 setFullScreen(false);
+                setIsAttachmentLoading(true);
+                setEmailAttachment(null);
               }}
               fetchData={() => {
                 setSendMail(false);
                 setFullScreen(false);
+                setIsAttachmentLoading(true);
+                setEmailAttachment(null);
               }}
               onMinimizeMaximize={() => {
                 setFullScreen((prevState) => !prevState);
@@ -922,6 +935,7 @@ export default function Attachment() {
               showManimizeMaximize={true}
               qouteBuilderAttachments={emailAttachment}
               isQuoteBuilder={true}
+              isAttachmentLoading={isAttachmentLoading}
             />
           </Dialog>
         )}

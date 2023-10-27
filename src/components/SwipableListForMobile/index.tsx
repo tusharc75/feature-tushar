@@ -1,5 +1,5 @@
-import { Collapse, IconButton } from '@material-ui/core';
-import { Check, Edit } from '@material-ui/icons';
+import { CircularProgress, Collapse, IconButton } from '@material-ui/core';
+import { Check, Edit, Error } from '@material-ui/icons';
 import React, { FC, useState } from 'react';
 import { BsChevronContract, BsChevronExpand } from 'react-icons/bs';
 import { TInitialState } from '../CustomReactTableNew/useTableReducer';
@@ -18,7 +18,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
   page,
   loading,
   expander,
-  backgroundColor = null,
+  backgroundColorClass = null,
   prepareRow,
   handleCellSelection,
   IndeterminateCheckbox,
@@ -30,6 +30,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
   handleCellClick,
   handleKeyDown
 }) => {
+  const { error } = state;
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [expanded, setExpanded] = React.useState<string | false>(false);
 
@@ -65,11 +66,22 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
     <>
       <div className="relative rounded-lg">
         {/* Loader */}
-        {loading ? (
+        {loading || error ? (
           <div className=" absolute inset-0 flex items-center justify-center bg-[rgba(255,255,255,0.54)] dark:bg-[rgba(5,9,19,0.54)] backdrop-blur-[10px]">
-            <div className="bg-[white] dark:bg-[var(--dark-secondary)] px-10 py-5 rounded-lg">
-              <div className="spinner"></div>
-              <p className="-ml-[3px] mt-2">Loading</p>
+            <div className="bg-[white] dark:bg-[var(--dark-secondary)] px-10 py-5 rounded-lg text-center shadow-md">
+              {error ? (
+                <>
+                  <Error className="mx-auto mb-2" />
+                  <p>Something Went Wrong</p>
+                </>
+              ) : loading ? (
+                <>
+                  <CircularProgress />
+                  <p>Loading...</p>
+                </>
+              ) : (
+                ''
+              )}
             </div>
           </div>
         ) : null}
@@ -87,9 +99,9 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                   if (row.depth !== 0) return null;
                   return (
                     <div
-                      className={`shadow-[0px_3px_26px_0px_rgba(0,0,0,0.06)] rounded-md my-2 px-3 py-2 [--left-gutter:20px] dark:bg-[var(--dark-secondary)] ${backgroundColor(
-                        row.original
-                      )}`}
+                      className={`shadow-[0px_3px_26px_0px_rgba(0,0,0,0.06)] rounded-md my-2 px-3 py-2 [--left-gutter:20px] dark:bg-[var(--dark-secondary)] ${
+                        backgroundColorClass && backgroundColorClass(row.original) + ' td-color'
+                      }`}
                       key={row.original._id}
                       style={{
                         border: '1px solid var(--common-border-color)',
@@ -181,7 +193,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                                     dataRows: row.subRows || [],
                                     renderedFrom,
                                     expander,
-                                    backgroundColor,
+                                    backgroundColorClass,
                                     otherFieldsLength,
                                     handleCollapse,
                                     expanderCol,
@@ -211,7 +223,8 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                     </div>
                   );
                 })
-              : !loading && (
+              : !loading &&
+                !error && (
                   <div className=" absolute inset-0 flex items-center justify-center bg-[rgba(255,255,255,0.54)] dark:bg-[rgba(5,9,19,0.54)] backdrop-blur-[10px] rounded-lg">
                     <div className="bg-[white] dark:bg-[var(--dark-secondary)] px-10 py-5 rounded-lg">
                       <p>No Data Found.</p>
@@ -230,7 +243,7 @@ const RenderSubCard = ({
   allowSelection,
   renderedFrom,
   expander,
-  backgroundColor,
+  backgroundColorClass,
   otherFieldsLength,
   handleCollapse,
   expanderCol,
@@ -255,9 +268,9 @@ const RenderSubCard = ({
   if (row.depth !== depth) return null;
   return (
     <div
-      className={`shadow-[0px_3px_26px_0px_rgba(0,0,0,0.06)] rounded-md my-2 px-3 py-2 [--left-gutter:20px] dark:bg-[var(--dark-secondary)] ${backgroundColor(
-        row.original
-      )}`}
+      className={`shadow-[0px_3px_26px_0px_rgba(0,0,0,0.06)] rounded-md my-2 px-3 py-2 [--left-gutter:20px] dark:bg-[var(--dark-secondary)] ${
+        backgroundColorClass && backgroundColorClass(row.original) + ' td-color'
+      }`}
       key={row.original._id}
       style={{
         border: '1px solid var(--common-border-color)',
@@ -349,7 +362,7 @@ const RenderSubCard = ({
                     dataRows: row.subRows || [],
                     renderedFrom,
                     expander,
-                    backgroundColor,
+                    backgroundColorClass,
                     otherFieldsLength,
                     handleCollapse,
                     expanderCol,

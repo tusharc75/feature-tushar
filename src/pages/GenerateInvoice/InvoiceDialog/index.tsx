@@ -1,11 +1,11 @@
 
 import { CustomDialogTransition } from 'src/constants/helpers';
-import Invoices from '../../Sublease/Invoices';
+import Invoices from './Invoices';
 import { Dialog } from '@material-ui/core';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 
-const InvoiceDialog = ({ subleaseId, subleaseName, handleClose }) => {
+const InvoiceDialog = ({ resourceId, selectedResource, handleClose, headerName }) => {
   return (
     <>
       <Dialog
@@ -14,14 +14,15 @@ const InvoiceDialog = ({ subleaseId, subleaseName, handleClose }) => {
         aria-labelledby="customized-dialog-title"
         open={true}>
         <CustomDialogHeader
-          title={`Invoices : ${subleaseName}`}
+          title={`Invoices: ${headerName}`}
           onClose={() => {
             handleClose()
           }}
           showRequiredLabel={false} />
         <CustomDialogContent>
           <Invoices
-            subleaseId={subleaseId}
+            resourceId={resourceId}
+            resourceName={selectedResource.key}
           />
         </CustomDialogContent>
       </Dialog>
