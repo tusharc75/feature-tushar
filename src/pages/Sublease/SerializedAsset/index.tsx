@@ -271,7 +271,7 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, fetchD
                 setNextStepToolTip(null)
             } else {
                 setNextStep(false)
-                setNextStepToolTip(subleaseMessage.assignAssetsStep)
+                setNextStepToolTip(subleaseMessage.assignAssets)
             }
             setSelectedRecords([]);
         } catch (error) {

@@ -32,7 +32,7 @@ export const rentalManagementMessage = {
     receivingAlreadyCreated: 'Receiving Ticket is already created',
     receivingNotCreated: 'Receiving Ticket is not created',
     receivingAlreadyDelivered: 'Receiving Ticket is already delivered',
-    receivingNotDeliverd: 'Receiving Ticket is not deliverd',
+    receivingNotDeliverd: 'Receiving Ticket is not delivered',
     returnAlreadyCreated: 'Return Ticket is already created',
     returnAlreadyDelivered: 'Return Ticket is already delivered',
     receivingOrReturnNotCreated: 'Receiving or Return Ticket is not created',
@@ -49,29 +49,33 @@ export const rentalManagementMessage = {
     statusInUseCancelLoading: 'Receiving Ticket must be cancelled first',
     rentalStatusInUseCancelLoading: 'Receiving Ticket must be cancelled first',
     statusURForCancelReceiving: 'Receiving Ticket can be cancelled only for Under Review assets',
-    rentalStatusCompleteCancelReceiving: 'Receiving Ticket can be cancelled only for complete rental assets',
+    rentalStatusCompleteCancelReceiving: 'Receiving Ticket can be cancelled only for Complete Rental assets',
     repairCanForThisAsset: 'Only Under Review, Need Repair, Need Recert and Scrap assets can be repaired',
-    repairSameWarehouse: `Selected assets must be in same ${routes.warehouse.title} to perform this action`,
+    repairSameWarehouse: `Selected assets must be in same ${routes. warehouse. title} to perform this action`,
     transferRentalForAsset: 'Only In-Use, Available and Under Review assets can be transfered',
 };
 
 export const subleaseActions = {
     createLoadingTicket: 'Create Loading Ticket',
-    deliveredToPlant: 'Delivered to Plant',
+    deliveredToWarehouse: 'Delivered to Warehouse',
     createReceivingTicket: 'Create Receiving Ticket',
-    receiveAtPlant: 'Receive at Plant',
+    receivedToWarehouse: 'Received at Warehouse',
 };
 
 export const subleaseMessage = {
-    addProductPackageStep: 'Add Products/Packages to proceed',
-    assignAssetsStep: 'Assign Assets to proceed',
+    addProductPackage: 'Add Products or Packages to proceed',
+    assignAssets: 'Assign Assets to proceed',
+    loadingNotCreated: 'Loading Ticket is not created',
+    loadingAlreadyDelivered: 'Loading Ticket is already delivered',
+    loadingNotDelivered: 'Loading Ticket is not delivered',
+
+    receivingNotCreated: 'Receiving Ticket is not created',
+    receivingAlreadyDelivered: 'Receiving Ticket is already delivered',
+    receivingNotDeliverd: 'Receiving Ticket is not delivered',
+    receivingAlreadyCreated: 'Receiving Ticket Already Created',
+
     deliverLoadingTicketStep: 'Create & Deliver Loading Ticket to proceed',
     subleaseProcessStep: 'There maybe some reasons that i dont konw',
     loadingAlreadyCreated: 'Loading Ticket Already Created',
-    loadingNotCreated: 'Loading Ticket Not Created Yet',
-    loadingAlreadyDelivered: 'Loading Ticket already delivered',
-    loadingNotDelivered: 'Loading Ticket not delivered yet',
-    receivingAlreadyCreated: 'Receiving Ticket Already Created',
-    receivingOrReturnNotCreated: 'Receiving or Return Ticket Not Created Yet',
-    receivingAlreadyDelivered: 'Receiving Ticket already delivered',
+    
 };

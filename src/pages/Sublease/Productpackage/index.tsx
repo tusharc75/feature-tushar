@@ -243,7 +243,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
     });
     if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
       setNextStep(false);
-      setNextStepToolTip(subleaseMessage.addProductPackageStep);
+      setNextStepToolTip(subleaseMessage.addProductPackage);
     } else {
       setNextStep(true);
       setNextStepToolTip(null)
