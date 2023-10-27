@@ -28,7 +28,7 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { useHistory } from 'react-router-dom';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import useColumns, { getStaticFields } from '../../components/CustomReactTableNew/useColumnsReactTable';
+import CustomReactTable, { useColumns, getStaticFields, useTableReducer, gridFilterParser } from 'src/components/CustomReactTableNew';
 import { prepareDataForGrid } from '../../constants/helpers';
 import { isMobile } from 'react-device-detect';
 import { Autocomplete } from '@material-ui/lab';
@@ -38,10 +38,7 @@ import { camelCase } from 'lodash';
 import { Link } from 'react-router-dom';
 import WarningIcon from '@material-ui/icons/Warning';
 import moment from 'moment';
-import CustomReactTable from 'src/components/CustomReactTableNew/CustomReactTable';
 import { sidebarResource } from '../../constants/helpers';
-import { gridFilterParser } from 'src/constants/useColumns';
-import { useTableReducer } from 'src/components/CustomReactTableNew/useTableReducer';
 
 const SerializedAssetTest = () => {
   const renderedFrom = camelCase(routes?.serializedAsset.title);
@@ -244,13 +241,15 @@ const SerializedAssetTest = () => {
           count: data.count,
           selectedRecords: rows.filter((f) => f.isChecked === true)
         });
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        dispatch({ type: 'loading', loading: false });
+        dispatch({ type: 'error', error: true });
+      })
+      .finally(() => {
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
       });
   };
 
@@ -645,7 +644,6 @@ const SerializedAssetTest = () => {
             <CustomReactTable
               height={'calc(100vh - 200px)'}
               columns={columns}
-              data={dataRows}
               onSelect={(newSelectedRecords) => {
                 // dispatch({ type: "selection", selectedRecords: newSelectedRecords })
               }}
