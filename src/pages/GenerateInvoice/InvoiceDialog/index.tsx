@@ -5,7 +5,7 @@ import { Dialog } from '@material-ui/core';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 
-const InvoiceDialog = ({ resourceId, resourceName, handleClose, headerName }) => {
+const InvoiceDialog = ({ resourceId, selectedResource, handleClose, headerName }) => {
   return (
     <>
       <Dialog
@@ -22,7 +22,7 @@ const InvoiceDialog = ({ resourceId, resourceName, handleClose, headerName }) =>
         <CustomDialogContent>
           <Invoices
             resourceId={resourceId}
-            resourceName={resourceName}
+            resourceName={selectedResource.key}
           />
         </CustomDialogContent>
       </Dialog>

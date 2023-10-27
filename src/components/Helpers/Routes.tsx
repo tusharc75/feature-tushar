@@ -1137,6 +1137,10 @@ const routes = {
     title: storedRoutes && storedRoutes.generateInvoice && storedRoutes.generateInvoice.title ? storedRoutes.generateInvoice?.title : RESOURCE_LABEL.generateInvoice,
     path: '/generate-invoice'
   },
+  repairOrderInvoice: {
+    title: storedRoutes && storedRoutes.repairOrderInvoice && storedRoutes.repairOrderInvoice.title ? storedRoutes.repairOrderInvoice?.title : RESOURCE_LABEL.repairOrderInvoice,
+    path: '/repair-order-invoice'
+  },
 };
 
 export default routes;

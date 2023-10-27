@@ -11,7 +11,8 @@ import {
     CustomDialogTransition,
     dateFormat,
     quotation,
-    repairOrder
+    repairOrder,
+    sublease
 } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -19,7 +20,7 @@ import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { MuiPickersUtilsProvider, KeyboardDatePicker, KeyboardTimePicker } from '@material-ui/pickers';
+import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
 import MomentUtils from '@date-io/moment';
 import { autoCalculateSpecificFields, CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import styles from '../../Leads/Header.module.scss';
@@ -29,7 +30,7 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { generateCustomTableColumns } from 'src/constants/columns';
 import moment from 'moment';
 
-const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resourceName, category }) => {
+const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, selectedResource }) => {
 
     const toastConfig = useContext(CustomToastContext);
 
@@ -67,7 +68,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resourceName, c
     const fetchFields = async () => {
         setColumns(null);
         let data;
-        const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE[matchChildResource[resourceName]]}`);
+        const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE[matchChildResource[selectedResource?.key]]}`);
         data = response?.data?.data;
         data = CURReplaceByCurrencySingle(data, resourceData.currency ? resourceData.currency : "USD");
 
@@ -215,14 +216,14 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resourceName, c
 
         let response: any = {};
 
-        if (resourceName === "sublease") {
-            response = await axiosInstance().get(`/sublease-invoice/material/${resourceData._id}`);
+        if (selectedResource.key === "sublease") {
+            response = await axiosInstance().get(`${sublease.api}/productpackage/${resourceData._id}`);
 
-            const invoiceResponse = await axiosInstance().get(`/generate-invoice/${resourceData?._id}/invoice/material-end-date-qty?resource=${resourceName}`);
+            const invoiceResponse = await axiosInstance().get(`/generate-invoice/${resourceData?._id}/invoice/material-end-date-qty?resource=${selectedResource.key}`);
             invoicedProducts = invoiceResponse?.data?.data?.material;
 
             manageMaterial(response?.data?.data?.material, 'sublease', invoicedProducts)
-        } else if (resourceName === "repairOrder") {
+        } else if (selectedResource.key === "repairOrder") {
             const quotationResponse = axiosInstance().get(
                 `${repairOrder.api}/${resourceData?._id}/check-create/quotation?approval=${resourceData?.addQuotationStep ? 1 : 0}`
             );
@@ -304,7 +305,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resourceName, c
     const handleApplyDate = async () => {
         let tempValues: any = { actualEndDate: endDate };
 
-        const invoiceResponse = await axiosInstance().get(`/generate-invoice/${resourceData?._id}/invoice/material-end-date-qty?resource=${resourceName}`);
+        const invoiceResponse = await axiosInstance().get(`/generate-invoice/${resourceData?._id}/invoice/material-end-date-qty?resource=${selectedResource.key}`);
         const invoicedProducts = invoiceResponse?.data?.data?.material;
 
         let rows: any = [];
@@ -357,7 +358,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resourceName, c
     };
 
     const handleCreateBill = () => {
-        if (category === "progressiveType") {
+        if (selectedResource.progressiveBilling) {
             rowsApplied?.forEach((element) => {
                 delete element?.index;
                 delete element?.detail;
@@ -373,7 +374,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resourceName, c
             });
             setUpdating(true);
             axiosInstance()
-                .post(`/generate-invoice/${resourceData._id}/progressive-invoice?resource=${resourceName}`, {
+                .post(`/generate-invoice/${resourceData._id}/progressive-invoice?resource=${selectedResource.key}`, {
                     material: rowsApplied,
                 })
                 .then(() => {
@@ -386,7 +387,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resourceName, c
                 });
         } else {
            
-            axiosInstance().post(`generate-invoice/invoice?resource=${resourceName}`, {
+            axiosInstance().post(`generate-invoice/invoice?resource=${selectedResource.key}`, {
                 resourceId: resourceData?._id,
             }).then(({ data }) => {
                 toastConfig.setToastConfig({
@@ -409,7 +410,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resourceName, c
                 <CustomDialogHeader title={`Create Invoice`} onClose={onClose} showRequiredLabel={false}></CustomDialogHeader>
                 <CustomDialogContent>
                     <Fragment>
-                        {category === "progressiveType" && <MuiPickersUtilsProvider utils={MomentUtils}>
+                        {selectedResource?.progressiveBilling && <MuiPickersUtilsProvider utils={MomentUtils}>
                             <Grid container className={styles.rental_header_layout}>
                                 <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center gap-1 layout-for-tablet"></Grid>
                                 <Grid item xs={12} sm={12} md={6} className={styles.filter_side}>
@@ -494,9 +495,9 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resourceName, c
                     </Button>
                     <HtmlTooltip
                         title={
-                            !appliedDate && category === "progressiveType"
+                            !appliedDate && selectedResource.progressiveBilling
                                 ? 'Please select items and apply end date'
-                                : rowsApplied?.some((d) => d.invalidDate === true) && category === "progressiveType"
+                                : rowsApplied?.some((d) => d.invalidDate === true) && selectedResource.progressiveBilling
                                     ? 'Please select an appropriate date !'
                                     : 'Create Invoice'
                         }
@@ -507,7 +508,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resourceName, c
                                 variant="contained"
                                 color="primary"
                                 size="small"
-                                disabled={category === "progressiveType" ? (isUpdating || !appliedDate || rowsApplied.some((d) => d.invalidDate === true)) : false}
+                                disabled={selectedResource.progressiveBilling ? (isUpdating || !appliedDate || rowsApplied.some((d) => d.invalidDate === true)) : false}
                                 onClick={() => {
                                     handleCreateBill();
                                 }}
