@@ -57,6 +57,8 @@ const SubleaseDetailsPage = () => {
   const [tabValue, setTabValue] = useState(Number(parsed?.tab || 0));
   const [isIssued, setIsIssued] = useState(false);
   const [stepFullScreen, setStepFullScreen] = useState(false);
+  const [nextStepToolTip, setNextStepToolTip] = useState(null);
+
 
   // const subleaseStepsNames = React.useMemo(() => {
   //   return subleaseSteps.map((item) => item.name);
@@ -253,6 +255,7 @@ const SubleaseDetailsPage = () => {
                   isNextStep={false}
                   nextStep={nextStep}
                   steps={subleaseSteps}
+                  nextStepToolTip={nextStepToolTip}
                   currentStep={currentStep}
                   setCurrentStep={setCurrentStep}
                   isStepEnded={[SUBLEASE_STATUS.completed].includes(subleaseData?.status)}
@@ -265,6 +268,7 @@ const SubleaseDetailsPage = () => {
                       setNextStep={setNextStep}
                       fetchData={fetchData}
                       isIssued={isIssued}
+                      setNextStepToolTip={setNextStepToolTip}
                       renderedFrom={`${renderedFrom}_grid-1`}
                       allowedToEdit={allowedToEdit}
                       stepFullScreen={stepFullScreen}
@@ -276,6 +280,7 @@ const SubleaseDetailsPage = () => {
                       subleaseData={subleaseData}
                       setNextStep={setNextStep}
                       currentStep={currentStep}
+                      setNextStepToolTip={setNextStepToolTip}
                       renderedFrom={`${renderedFrom}_grid-2`}
                       allowedToEdit={allowedToEdit}
                       isProcessor={isProcessor}
@@ -288,6 +293,7 @@ const SubleaseDetailsPage = () => {
                         setNextStep={setNextStep}
                         fetchData={fetchData}
                         isIssued={isIssued}
+                        setNextStepToolTip={setNextStepToolTip}
                         renderedFrom={`${renderedFrom}_grid-1`}
                         allowedToEdit={allowedToEdit}
                         stepFullScreen={stepFullScreen}
@@ -300,6 +306,7 @@ const SubleaseDetailsPage = () => {
                         subleaseData={subleaseData}
                         setNextStep={setNextStep}
                         fetchData={fetchData}
+                        setNextStepToolTip={setNextStepToolTip}
                         ticketType={DELIVERY_TICKET_TYPE.loading}
                         renderedFrom={`${renderedFrom}_grid-1`}
                         allowedToEdit={allowedToEdit}
@@ -313,6 +320,7 @@ const SubleaseDetailsPage = () => {
                         subleaseData={subleaseData}
                         setNextStep={setNextStep}
                         fetchData={fetchData}
+                        setNextStepToolTip={setNextStepToolTip}
                         ticketType={DELIVERY_TICKET_TYPE.receiving}
                         renderedFrom={`${renderedFrom}_grid-1`}
                         allowedToEdit={allowedToEdit}

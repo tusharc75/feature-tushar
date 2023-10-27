@@ -1293,6 +1293,28 @@ const ReceivingTicket = ({
           errorMessages.push({ index: e.index, message: rentalManagementMessage.ticketNotCreateForLostAssets });
         }
       }
+      else if (action === rentalManagementActions.cancelInTransitReceivingTicket) {
+        if (!e.hasOwnProperty('receivingTicketId')) {
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.receivingTicketNotCreated });
+        }
+        else if (e?.receivingTicketStatus !== DELIVERY_TICKET_STATUS.indTransit) {
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.cancelInTransitLineItems });
+        }
+      }
+      else if (action === rentalManagementActions.cancelDeliveredReceivingTicket) {
+        if (!e.hasOwnProperty('receivingTicketId')) {
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.receivingTicketNotCreated });
+        }
+        else if (e?.receivingTicketStatus !== DELIVERY_TICKET_STATUS.delivered) {
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.receivingTicketNotDeliverd });
+        }
+        else if (![ASSET_STATUS.underReview]?.includes(e?.status)) {
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.assetStatusUnderReviewForCancelReceivingTicket });
+        }
+        else if (![RENTAL_INTERNAL_ASSET_STATUS.complete]?.includes(e?.rentalAssetStatus)) {
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.rentalAssetStatusCompleteForCancelReceivingTicket });
+        }
+      }
     });
     if (errorMessages?.length) {
       setOpenMessageDialog({ open: true, errorMessages: errorMessages });
@@ -1300,6 +1322,7 @@ const ReceivingTicket = ({
     }
     return false;
   };
+
 
   return (
     <>
@@ -1505,7 +1528,6 @@ const ReceivingTicket = ({
               }} >
               Create Supplier Delivery Ticket
             </MenuItem>
-
             <MenuItem
               onClick={() => {
                 setIsExistingRentalJob(true);
@@ -1564,77 +1586,37 @@ const ReceivingTicket = ({
               </MenuItem>
             ) : null}
 
-            {/* <MenuItem
+
+            <MenuItem
               onClick={() => {
-                const products = [];
-                selectedRecords?.forEach((element) => {
-                  const foundProduct = products.filter((e) => e._id === element?.product?.optionValue);
-                  if (foundProduct.length) {
-                    foundProduct[0].qty += 1;
-                  } else {
-                    products.push({
-                      _id: element?.product?.optionValue,
-                      id: element?.product?.optionValue,
-                      productName: element?.product?.optionLabel,
-                      qty: 1
-                    });
-                  }
-                });
-                setAddSerializedAssetDialog({ open: true, products: products });
+                if (!validateAction(rentalManagementActions.cancelInTransitReceivingTicket)) {
+                  setShowConformationRevertTicket(true);
+                }
                 closeActions();
               }}
-              disabled={
-                selectedRecords.length === 0 ||
-                isOffline ||
-                selectedRecords.some(
-                  (f: any) =>
-                    f.type !== 'Asset' ||
-                    !f.hasOwnProperty('loadingTicketId') ||
-                    f.hasOwnProperty('receivingTicketId') ||
-                    f.hasOwnProperty('returnTicketId')
-                )
-              }
             >
-              Replace Products
-            </MenuItem> */}
-            {selectedRecords.length &&
-              selectedRecords?.filter((f) => f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.indTransit)
-                ?.length === selectedRecords?.length ? (
-              <Fragment>
-                <MenuItem
-                  onClick={() => {
-                    closeActions();
-                    setShowConformationRevertTicket(true);
-                  }}
-                >
-                  Revert Line Items
-                </MenuItem>
-                <MenuItem
-                  onClick={() => {
-                    closeActions();
-                    setShowConformationCancleTicket({ open: true, type: 'Non-Delivered' });
-                  }}
-                >
-                  Cancel Receiving Ticket(s)
-                </MenuItem>
-              </Fragment>
-            ) : null}
-            {selectedRecords.length > 0 &&
-              selectedRecords.filter(
-                (e: any) =>
-                  e?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered &&
-                  e?.status === ASSET_STATUS.underReview &&
-                  e?.rentalAssetStatus === RENTAL_INTERNAL_ASSET_STATUS.complete
-              )?.length === selectedRecords?.length ? (
-              <MenuItem
-                onClick={() => {
-                  closeActions();
+              Cancel In-Transit Line Items
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                if (!validateAction(rentalManagementActions.cancelInTransitReceivingTicket)) {
+                  setShowConformationCancleTicket({ open: true, type: 'Non-Delivered' });
+                }
+                closeActions();
+              }}
+            >
+              Cancel In-Transit Receiving Ticket(s)
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                if (!validateAction(rentalManagementActions.cancelDeliveredReceivingTicket)) {
                   setShowConformationCancleTicket({ open: true, type: 'Delivered' });
-                }}
-              >
-                Cancel Receiving Ticket(s)
-              </MenuItem>
-            ) : null}
+                }
+                closeActions();
+              }}
+            >
+              Cancel Delivered Receiving Ticket(s)
+            </MenuItem>
             {selectedRecords?.filter(
               (f) =>
                 f.type === 'Product' &&
