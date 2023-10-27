@@ -850,37 +850,37 @@ const LoadingTicket = ({
     selectedRecords?.forEach((e) => {
       if (action === rentalManagementActions.createLoadingTicket) {
         if (e.hasOwnProperty('loadingTicketId')) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingTicketAlreadyCreated });
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingAlreadyCreated });
         }
       }
       else if (action === rentalManagementActions.deliveredToCustomer) {
         if (!e.hasOwnProperty('loadingTicketId')) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingTicketNotCreated });
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotCreated });
         }
         else if (e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingTicketAlreadyDelivered });
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingAlreadyDelivered });
         }
       }
       else if (action === rentalManagementActions.replaceAsset) {
         if (e?.type !== 'Asset') {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.canNotReplaceProducts });
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.productsCanNotReplace });
         }
         else if (!e.hasOwnProperty('loadingTicketId')) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingTicketNotCreated });
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotCreated });
         }
         else if (e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingTicketDeliveredForReplaceAseet });
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingDeliveredForReplace });
         }
         else if (e?.status !== ASSET_STATUS.inUse) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.onlyReplaceInUseAssets });
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.onlyReplaceInUse });
         }
         else if (!e?.isReplaceable) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.invoiceCreateCanNotReplace });
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.canNotReplaceInvoiceCreated });
         }
       }
       else if (action === rentalManagementActions.cancelInTransitLoadingTicket) {
         if (!e.hasOwnProperty('loadingTicketId')) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingTicketNotCreated });
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotCreated });
         }
         else if (e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.indTransit) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.cancelInTransitLineItems });
@@ -888,16 +888,16 @@ const LoadingTicket = ({
       }
       else if (action === rentalManagementActions.cancelDeliveredLoadingTicket) {
         if (!e.hasOwnProperty('loadingTicketId')) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingTicketNotCreated });
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotCreated });
         }
         else if (e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingTicketNotDeliveredYet });
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotDelivered });
         }
         else if (e?.type === 'Asset' && ![ASSET_STATUS.inUse, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable]?.includes(e?.status)) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.assetStatusInUseForCancelLoadingTicket });
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.statusInUseCancelLoading });
         }
         else if (e?.type === 'Asset' && ![RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy, RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable]?.includes(e?.rentalAssetStatus)) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.rentalAssetStatusInUseForCancelLoadingTicket });
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.rentalStatusInUseCancelLoading });
         }
       }
     });
