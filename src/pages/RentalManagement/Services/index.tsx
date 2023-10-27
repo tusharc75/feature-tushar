@@ -628,7 +628,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
         </Box>
       )}
       {columns && rowsData ? (
-        <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}>
+        <Box zIndex={5} width={'100%'}>
           {/* <CustomReactTable
             height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
             columns={columns}
@@ -644,7 +644,6 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
             isClientSideGrid={true}
           /> */}
           <CustomReactTable
-            height={'100%'}
             columns={columns}
             setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
             onSelect={setSelectedProducts}
