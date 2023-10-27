@@ -8,11 +8,10 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
-import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { rentalManagement } from '../../../constants/helpers';
+import { gridLoadingTimeout, rentalManagement } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
@@ -30,11 +29,16 @@ import ManagePackageDialog from 'src/pages/Packages/ManagePackageDialog';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 import EditIcon from '@material-ui/icons/Edit';
 
+// import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+
 const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }: any) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
   }: any = useData();
+
+  const { state, dispatch } = useTableReducer();
 
   const [isUpdating, setUpdating] = useState(false);
 
@@ -104,12 +108,12 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                  ? row.original?.packageDetail.packageType === 'Product'
-                    ? '(Product)'
-                    : '(Service)'
-                  : row.original.type === 'service'
-                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                    : ''}
+                ? row.original?.packageDetail.packageType === 'Product'
+                  ? '(Product)'
+                  : '(Service)'
+                : row.original.type === 'service'
+                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -128,7 +132,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
             ) : (
               <p
                 onClick={() => {
-                  openMaterial(row, rows)
+                  openMaterial(row, rows);
                 }}
                 className="link text-truncate"
                 title={row.original.detail}
@@ -198,51 +202,49 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
       Cell: ({ row, rows }) => {
         return (
           <>
-            <HtmlTooltip title={(isOffline || !allowedToEdit) ? '' : 'Edit'}>
+            <HtmlTooltip title={isOffline || !allowedToEdit ? '' : 'Edit'}>
               <IconButton
                 size="small"
                 aria-label="Details"
-                disabled={(isOffline || !allowedToEdit) ? true : false}
+                disabled={isOffline || !allowedToEdit ? true : false}
                 onClick={() => {
-                  openMaterial(row, rows)
+                  openMaterial(row, rows);
                 }}
               >
-                <EditIcon fontSize="small" color={(isOffline || !allowedToEdit) ? 'disabled' : 'primary'} />
+                <EditIcon fontSize="small" color={isOffline || !allowedToEdit ? 'disabled' : 'primary'} />
               </IconButton>
             </HtmlTooltip>
-            {
-              allowedToEdit ? (
-                row.original.hideSelection ? (
-                  <HtmlTooltip title={'Asset is already assigned'}>
-                    <span>
-                      <IconButton size="small" aria-label="Details" disabled={true}>
-                        <DeleteIcon fontSize="small" color={'disabled'} />
-                      </IconButton>
-                    </span>
-                  </HtmlTooltip>
-                ) : (
-                  <HtmlTooltip title={'Delete'}>
-                    <span>
-                      <IconButton
-                        size="small"
-                        aria-label="Details"
-                        onClick={() => {
-                          const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                          getNestedSubRows(obj, row.original);
-                          setDeleteData(obj);
-                        }}
-                      >
-                        <DeleteIcon fontSize="small" color={'error'} />
-                      </IconButton>
-                    </span>
-                  </HtmlTooltip>
-                )
+            {allowedToEdit ? (
+              row.original.hideSelection ? (
+                <HtmlTooltip title={'Asset is already assigned'}>
+                  <span>
+                    <IconButton size="small" aria-label="Details" disabled={true}>
+                      <DeleteIcon fontSize="small" color={'disabled'} />
+                    </IconButton>
+                  </span>
+                </HtmlTooltip>
               ) : (
-                ''
+                <HtmlTooltip title={'Delete'}>
+                  <span>
+                    <IconButton
+                      size="small"
+                      aria-label="Details"
+                      onClick={() => {
+                        const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                        getNestedSubRows(obj, row.original);
+                        setDeleteData(obj);
+                      }}
+                    >
+                      <DeleteIcon fontSize="small" color={'error'} />
+                    </IconButton>
+                  </span>
+                </HtmlTooltip>
               )
-            }
+            ) : (
+              ''
+            )}
           </>
-        )
+        );
       }
     });
     setColumns(column);
@@ -250,59 +252,69 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
 
   const fetchProductInventory = async () => {
     setNextStep(false);
-    var data: any = [];
-    var inventory: any = [];
-    var nonSerializeAsset: any = [];
+    dispatch({ type: 'loading', loading: true });
+    try {
+      var data: any = [];
+      var inventory: any = [];
+      var nonSerializeAsset: any = [];
 
-    if (isOffline) {
-      data = await findOne(objectStore.rentalManagement, rentalManagementData._id);
-      inventory = data.productInventory;
-    } else {
-      const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`);
-      data = response?.data?.data;
-      setMaterial(JSON.parse(JSON.stringify(data.material)));
-      inventory = data.inventory?.filter((e) => !e.isReplaced);
-      nonSerializeAsset = data.nonSerializeAsset;
-    }
-    let rows = data.material.filter((e) => e.parentId === null);
-    rows = rows.filter((e) => e.type === 'service' || (e.type === 'package' && e.packageDetail?.packageType === 'Service'));
+      if (isOffline) {
+        data = await findOne(objectStore.rentalManagement, rentalManagementData._id);
+        inventory = data.productInventory;
+      } else {
+        const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`);
+        data = response?.data?.data;
+        setMaterial(JSON.parse(JSON.stringify(data.material)));
+        inventory = data.inventory?.filter((e) => !e.isReplaced);
+        nonSerializeAsset = data.nonSerializeAsset;
+      }
+      let rows = data.material.filter((e) => e.parentId === null);
+      rows = rows.filter((e) => e.type === 'service' || (e.type === 'package' && e.packageDetail?.packageType === 'Service'));
 
-    rows.forEach((parent, i) => {
-      parent.index = i + 1;
-      parent.detail =
-        parent.type === 'product'
-          ? parent?.productDetail?.productName
-          : parent.type === 'service'
+      rows.forEach((parent, i) => {
+        parent.index = i + 1;
+        parent.detail =
+          parent.type === 'product'
+            ? parent?.productDetail?.productName
+            : parent.type === 'service'
             ? parent?.serviceDetail?.serviceName
             : parent?.packageDetail?.packageName;
-      parent.description =
-        parent.type === 'service'
-          ? parent?.serviceDetail?.serviceDescription || ''
-          : parent.type === 'product'
+        parent.description =
+          parent.type === 'service'
+            ? parent?.serviceDetail?.serviceDescription || ''
+            : parent.type === 'product'
             ? parent?.productDetail?.productDescription || ''
             : parent.type === 'package'
-              ? parent?.packageDetail?.packageDescription || ''
-              : '';
-      parent.serializedProduct = parent.type === 'product' ? parent?.productDetail?.serializedProduct : false;
-      parent.qtyDisplay = parent.qty;
-      parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
-      parent.assetQty = parent.serializedProduct
-        ? inventory?.filter((e) => e._id === parent._id).length
-        : nonSerializeAsset?.filter((e) => e._id === parent._id).length;
-      parent.hideSelection = parent.assetQty > 0 ? true : parent?.status ? true : false;
-      parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent);
-    });
+            ? parent?.packageDetail?.packageDescription || ''
+            : '';
+        parent.serializedProduct = parent.type === 'product' ? parent?.productDetail?.serializedProduct : false;
+        parent.qtyDisplay = parent.qty;
+        parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
+        parent.assetQty = parent.serializedProduct
+          ? inventory?.filter((e) => e._id === parent._id).length
+          : nonSerializeAsset?.filter((e) => e._id === parent._id).length;
+        parent.hideSelection = parent.assetQty > 0 ? true : parent?.status ? true : false;
+        parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent);
+      });
 
-    if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
-      setNextStep(false);
-    } else {
-      setNextStep(true);
+      if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
+        setNextStep(false);
+      } else {
+        setNextStep(true);
+      }
+      if (rows?.length === 0) {
+        setNextStep(true);
+      }
+      setRowsData(rows);
+      dispatch({ type: 'initialize', data: rows, count: data.length });
+      setSelectedProducts([]);
+    } catch (error) {
+      dispatch({ type: 'error', error: true });
+    } finally {
+      setTimeout(() => {
+        dispatch({ type: 'loading', loading: false });
+      }, gridLoadingTimeout);
     }
-    if (rows?.length === 0) {
-      setNextStep(true);
-    }
-    setRowsData(rows);
-    setSelectedProducts([]);
   };
 
   const generateNestedData = (material, inventory, nonSerializeAsset, parent) => {
@@ -313,16 +325,16 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productName
           : _subRow.type === 'service'
-            ? _subRow?.serviceDetail?.serviceName
-            : _subRow?.packageDetail?.packageName;
+          ? _subRow?.serviceDetail?.serviceName
+          : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === 'package'
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+          ? _subRow?.productDetail?.productDescription || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.pricingConditionDisplay = _subRow.pricingCondition?.optionLabel;
@@ -532,7 +544,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
               {permissions?.serviceMaster?.isRead && (
                 <MenuItem
                   onClick={() => {
-                    closeAddActions()
+                    closeAddActions();
                     setAddExistingProductDialog({ open: true, type: 'service', parentId: null });
                   }}
                 >
@@ -542,7 +554,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
               {permissions?.packages?.isRead && (
                 <MenuItem
                   onClick={() => {
-                    closeAddActions()
+                    closeAddActions();
                     setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
                   }}
                 >
@@ -617,7 +629,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
       )}
       {columns && rowsData ? (
         <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}>
-          <CustomReactTable
+          {/* <CustomReactTable
             height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
             columns={columns}
             data={rowsData}
@@ -630,10 +642,26 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
             renderedFrom="rental_management_sevices_1"
             onSaveEdit={onSaveInlineEdit}
             isClientSideGrid={true}
+          /> */}
+          <CustomReactTable
+            height={'100%'}
+            columns={columns}
+            setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
+            onSelect={setSelectedProducts}
+            childrenProperty="subRows"
+            renderedFrom={renderedFrom}
+            isClientSideGrid={true}
+            onSaveEdit={onSaveInlineEdit}
+            hideSelection={!allowedToEdit}
+            hideAction={!allowedToEdit}
+            expander={true}
+            state={state}
+            dispatch={dispatch}
+            allowPagination={false}
           />
         </Box>
       ) : (
-        <Box p={2} height={500}>
+        <Box py={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
@@ -694,7 +722,7 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
           packageId={null}
           onClose={() => setAddExistingProductDialog({ open: false, type: '', parentId: null })}
           onSuccess={(data) => {
-            data.type = 'package'
+            data.type = 'package';
             data.unitMain = data?.unit;
             data.pricingMethodMain = data?.pricingMethod;
             handleAdd([data]);
@@ -709,8 +737,8 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
           serviceMasterId={null}
           onClose={() => setAddExistingProductDialog({ open: false, type: '', parentId: null })}
           onSuccess={(data) => {
-            const row = data?.data
-            row.type = 'service'
+            const row = data?.data;
+            row.type = 'service';
             row.unitMain = row?.unit;
             row.pricingMethodMain = row?.pricingMethod;
             handleAdd([row]);
