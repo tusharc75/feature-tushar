@@ -28,7 +28,6 @@ import { ExpandMore } from '@material-ui/icons';
 import ManagePackageDialog from 'src/pages/Packages/ManagePackageDialog';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 import EditIcon from '@material-ui/icons/Edit';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
 import Technicians from './Technicians';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { Autocomplete } from '@material-ui/lab';
@@ -658,20 +657,18 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
       </Box>
       {columns && rowsData ? (
         <CustomReactTable
-          height={user?.user?.brandPolicy?.rentalProgressiveBilling ? '300px' : '100%'}
+          height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
           columns={columns}
+          data={rowsData}
           setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
           onSelect={setSelectedProducts}
           childrenProperty="subRows"
-          renderedFrom={renderedFrom}
-          isClientSideGrid={true}
+          uniqueKey="_id"
+          hideSelection={isOffline || !allowedToEdit}
+          hideAction={isOffline || !allowedToEdit}
+          renderedFrom="rental_management_sevices_1"
           onSaveEdit={onSaveInlineEdit}
-          hideSelection={!allowedToEdit}
-          hideAction={!allowedToEdit}
-          expander={true}
-          state={state}
-          dispatch={dispatch}
-          allowPagination={false}
+          isClientSideGrid={true}
         />
       ) : (
         <Box py={2} height={300}>
