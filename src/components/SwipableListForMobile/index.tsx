@@ -18,7 +18,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
   page,
   loading,
   expander,
-  backgroundColor = null,
+  backgroundColorClass = null,
   prepareRow,
   handleCellSelection,
   IndeterminateCheckbox,
@@ -87,9 +87,9 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                   if (row.depth !== 0) return null;
                   return (
                     <div
-                      className={`shadow-[0px_3px_26px_0px_rgba(0,0,0,0.06)] rounded-md my-2 px-3 py-2 [--left-gutter:20px] dark:bg-[var(--dark-secondary)] ${backgroundColor(
-                        row.original
-                      )}`}
+                      className={`shadow-[0px_3px_26px_0px_rgba(0,0,0,0.06)] rounded-md my-2 px-3 py-2 [--left-gutter:20px] dark:bg-[var(--dark-secondary)] ${
+                        backgroundColorClass && backgroundColorClass(row.original) + ' td-color'
+                      }`}
                       key={row.original._id}
                       style={{
                         border: '1px solid var(--common-border-color)',
@@ -181,7 +181,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                                     dataRows: row.subRows || [],
                                     renderedFrom,
                                     expander,
-                                    backgroundColor,
+                                    backgroundColorClass,
                                     otherFieldsLength,
                                     handleCollapse,
                                     expanderCol,
@@ -230,7 +230,7 @@ const RenderSubCard = ({
   allowSelection,
   renderedFrom,
   expander,
-  backgroundColor,
+  backgroundColorClass,
   otherFieldsLength,
   handleCollapse,
   expanderCol,
@@ -255,9 +255,9 @@ const RenderSubCard = ({
   if (row.depth !== depth) return null;
   return (
     <div
-      className={`shadow-[0px_3px_26px_0px_rgba(0,0,0,0.06)] rounded-md my-2 px-3 py-2 [--left-gutter:20px] dark:bg-[var(--dark-secondary)] ${backgroundColor(
-        row.original
-      )}`}
+      className={`shadow-[0px_3px_26px_0px_rgba(0,0,0,0.06)] rounded-md my-2 px-3 py-2 [--left-gutter:20px] dark:bg-[var(--dark-secondary)] ${
+        backgroundColorClass && backgroundColorClass(row.original) + ' td-color'
+      }`}
       key={row.original._id}
       style={{
         border: '1px solid var(--common-border-color)',
@@ -349,7 +349,7 @@ const RenderSubCard = ({
                     dataRows: row.subRows || [],
                     renderedFrom,
                     expander,
-                    backgroundColor,
+                    backgroundColorClass,
                     otherFieldsLength,
                     handleCollapse,
                     expanderCol,
