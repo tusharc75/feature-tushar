@@ -243,7 +243,6 @@ import ChartOfAccount from './pages/ChartOfAccount';
 import ChartOfAccountDetail from './pages/ChartOfAccount/ChartOfAccountDetail';
 import Flash from './pages/Flash';
 import FlashDetailsPage from './pages/Flash/FlashDetailsPage';
-import SubleaseInvoice from './pages/SubleaseInvoice';
 import RentalManagementInvoice from './pages/RentalMangementInvoice';
 import CreditMemo from './pages/CreditMemo';
 import CreditMemoDetail from './pages/CreditMemo/CreditMemoDetail';
@@ -572,7 +571,10 @@ function App() {
               <SubleaseDetailsPage />
             </PrivateRoute>
             <PrivateRoute exact path={routes.subleaseInvoice.path}>
-              <SubleaseInvoice />
+              <GenerateInvoice resourceRendered="sublease" />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.repairOrderInvoice.path}>
+              <GenerateInvoice resourceRendered="repairOrder" />
             </PrivateRoute>
             <PrivateRoute exact path={routes.productCategory.path}>
               <ProductCategory />
