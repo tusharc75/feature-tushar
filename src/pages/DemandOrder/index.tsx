@@ -110,7 +110,6 @@ const DemandOrder = () => {
     data = response?.data?.data;
     let columns = [];
     let rendererNames = [];
-    console.log(data);
     data.forEach((o) => {
       let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.demandOrderDetail.path, true);
       if (currentColumn !== null) {
