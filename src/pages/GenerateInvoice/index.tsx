@@ -19,8 +19,17 @@ import { Autocomplete } from '@material-ui/lab';
 import CreateInvoiceDialog from './CreateInvoice';
 import InvoiceDialog from './InvoiceDialog';
 import CreateBillingDialog from '../RentalManagement/ProgressiveBilling/CreateBillingDialog';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const GENERATE_RESOURCE = [
+    {
+        key: 'rentalManagement',
+        resource: sidebarResource.rentalManagement,
+        fieldName: 'rentalJobName',
+        progressiveBilling: true,
+        path: routes.rentalManagementDetail.path,
+        title: routes.rentalManagement.title,
+    },
     {
         key: 'sublease',
         resource: sidebarResource.sublease,
@@ -36,31 +45,21 @@ const GENERATE_RESOURCE = [
         progressiveBilling: false,
         path: routes.repairOrderDetail.path,
         title: routes.repairOrder.title,
-    },
-    {
-        key: 'rentalManagement',
-        resource: sidebarResource.rentalManagement,
-        fieldName: 'rentalJobName',
-        progressiveBilling: true,
-        path: routes.rentalManagementDetail.path,
-        title: routes.rentalManagement.title,
     }
-
 ]
 
 const GenerateInvoice = ({ resourceRendered = null }) => {
 
-    const renderedFrom = resourceRendered ? `${camelCase(routes[resourceRendered].title + " Invoice")}` : `${camelCase(routes?.generateInvoice.title)}`;
+    const renderedFrom = resourceRendered ? `${camelCase(routes[`${resourceRendered}Invoice`].title + " Invoice")}` : `${camelCase(routes?.generateInvoice.title)}`;
     const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
-    const {
-        state: { permissions, selectedEntity }
-    }: any = useData();
+    const { state: { permissions, selectedEntity } }: any = useData();
+
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
         state;
     const [frameWorkComponent, setFrameWorkComponent] = useState({});
-    const [columns, setColumns] = useState([]);
+    const [columns, setColumns] = useState(null);
     const [gridApi, setGridApi] = useState(null);
     const { getColumnData } = useColumns();
 
@@ -68,7 +67,6 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
     const [viewInvoiceDialog, setViewInvoiceDialog] = useState({ open: false, data: null });
     const [selectedResource, setSelectedResource] = useState(resourceRendered ? GENERATE_RESOURCE.find((r) => r.key === resourceRendered) : GENERATE_RESOURCE[0]);
     const [resourceList, setResourceList] = useState([])
-
 
     useEffect(() => {
         const options: any = [];
@@ -80,7 +78,17 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
         setResourceList(options)
     }, [])
 
+    useEffect(() => {
+        fetchGridColumns();
+    }, [selectedResource]);
+
+    useEffect(() => {
+        fetchData();
+    }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedResource]);
+
+
     const fetchGridColumns = async () => {
+        setColumns(null);
         const response = await axiosInstance().get(`/field?resource=${selectedResource.resource}`);
         let data = response?.data?.data;
         let columns = [];
@@ -106,10 +114,9 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
 
     const fetchData = async () => {
         dispatch({ type: 'loading', loading: true });
-
         let queryString = getQueryString();
         if (selectedResource.resource === sidebarResource.rentalManagement) {
-            queryString = `/rental-management-invoice${queryString}`
+            queryString = `/rental-management${queryString}`
         }
         if (gridApi) {
             gridApi.setRowData([]);
@@ -147,7 +154,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
     };
 
     const getQueryString = (isExport = false) => {
-        let deepFilter = !isExport ? `?page=${page}&limit=${limit}&resource=${selectedResource?.key}` : '?';
+        let deepFilter = !isExport ? `?page=${page}&limit=${limit}&resource=${selectedResource?.resource}` : '?';
 
         if (selectedEntity) {
             deepFilter = `${deepFilter}&entity=${selectedEntity}`;
@@ -181,8 +188,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
 
     const ActionsRenderer = (params) => (
         <Fragment>
-
-            {params.data?.subleaseName || params.data?.rentalJobName ? (
+            {selectedResource?.progressiveBilling ? (
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <HtmlTooltip title="Create Invoice">
                         <IconButton
@@ -207,48 +213,31 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
                         </HtmlTooltip>
                     </Box>
                 </div>
+            ) : ((params.data?.status === INVOICE_STATUS.readyToInvoice ? (
+                <HtmlTooltip title="Create Invoice">
+                    <IconButton
+                        size="small"
+                        onClick={() => {
+                            setCreateInvoiceDialog({ open: true, data: params.data });
+                        }}
+                    >
+                        <NoteAddIcon fontSize="small" color="primary" />
+                    </IconButton>
+                </HtmlTooltip>
             ) : (
-                params.data?.repairOrderNumber &&
-                (
-                    params.data?.status === INVOICE_STATUS.readyToInvoice ? (
-                        <HtmlTooltip title="Create Invoice">
-                            <IconButton
-                                size="small"
-                                onClick={() => {
-                                    setCreateInvoiceDialog({ open: true, data: params.data });
-                                }}
-                            >
-                                <NoteAddIcon fontSize="small" color="primary" />
-                            </IconButton>
-                        </HtmlTooltip>
-                    ) : (
-                        <HtmlTooltip title="View Invoice">
-                            <IconButton
-                                size="small"
-                                onClick={() => {
-                                    setViewInvoiceDialog({ open: true, data: params.data });
-                                }}
-                            >
-                                <VisibilityIcon fontSize="small" color="primary" />
-                            </IconButton>
-                        </HtmlTooltip>
-                    )
-                )
-            )
-            }
-
+                <HtmlTooltip title="View Invoice">
+                    <IconButton
+                        size="small"
+                        onClick={() => {
+                            setViewInvoiceDialog({ open: true, data: params.data });
+                        }}
+                    >
+                        <VisibilityIcon fontSize="small" color="primary" />
+                    </IconButton>
+                </HtmlTooltip>
+            )))}
         </Fragment>
     );
-
-    useEffect(() => {
-        setColumns([]);
-        fetchGridColumns();
-    }, [selectedResource]);
-
-    useEffect(() => {
-        fetchData();
-    }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedResource]);
-
 
     const handleSearch = (e) => {
         dispatch({ type: 'search', search: e.target.value });
@@ -258,7 +247,9 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
         <Fragment>
             <Grid container className="headerbox">
                 <Grid item md={4} sm={11} xs={10}>
-                    <CustomBreadCrumbs routes={[{ title: resourceRendered ? routes[resourceRendered]?.title + " Invoice" : routes.generateInvoice.title }]} />
+                    <CustomBreadCrumbs routes={[{
+                        title: resourceRendered ? routes[`${resourceRendered}Invoice`] ? routes[`${resourceRendered}Invoice`]?.title : "Invoice" : routes.generateInvoice.title
+                    }]} />
                 </Grid>
                 <Grid item md={8} sm={1} xs={2} />
             </Grid>
@@ -283,11 +274,11 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
                                 onChange={(e, val) => {
                                     setSelectedResource(val);
                                 }}
+                                disableClearable={true}
                                 value={selectedResource}
                             />
                         </div>
                     )}
-
                     <Grid container className={styles.filter_side_container}>
                         <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
                         </Grid>
@@ -303,8 +294,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
                         </Grid>
                     </Grid>
                 </div>
-
-                {Object.keys(frameWorkComponent).length > 0 ? (
+                {columns && Object.keys(frameWorkComponent).length > 0 ? (
                     <CustomAgGrid
                         columns={columns}
                         dataRows={dataRows}
@@ -324,9 +314,9 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
                         resource={sidebarResource.sublease}
                         allowSelection={false}
                     />
-                )
-                    : null}
-
+                ) : <Box p={2} height={500}>
+                    <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                </Box>}
                 {createInvoiceDialog.open && (
                     selectedResource.resource === sidebarResource.rentalManagement ? (
                         <CreateBillingDialog
@@ -339,18 +329,17 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
                                 fetchData();
                             }}
                         />
-
-                    ) : (
-                        <CreateInvoiceDialog
-                            resourceData={createInvoiceDialog?.data}
-                            onClose={() => setCreateInvoiceDialog({ open: false, data: null })}
-                            selectedResource={selectedResource}
-                            onSuccess={() => {
-                                setCreateInvoiceDialog({ open: false, data: null });
-                                removeLocalStorage(localStorageSelectedRecords);
-                                fetchData();
-                            }}
-                        />
+                    ) : (<CreateInvoiceDialog
+                        resourceData={createInvoiceDialog?.data}
+                        onClose={() => setCreateInvoiceDialog({ open: false, data: null })}
+                        resource={selectedResource.resource}
+                        progressiveBilling={selectedResource.progressiveBilling}
+                        onSuccess={() => {
+                            setCreateInvoiceDialog({ open: false, data: null });
+                            removeLocalStorage(localStorageSelectedRecords);
+                            fetchData();
+                        }}
+                    />
                     )
                 )}
                 {viewInvoiceDialog.open && (
