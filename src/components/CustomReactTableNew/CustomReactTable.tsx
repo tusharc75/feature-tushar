@@ -367,7 +367,7 @@ function CustomReactTable({
                 <IndeterminateCheckbox
                   onClick={(e) => handleAllSelect(getToggleAllRowsSelectedProps()?.checked)}
                   {...getToggleAllRowsSelectedProps()}
-                  style={{ marginLeft: '6px' }}
+                  className="mx-auto text-center"
                 />
               ),
               Cell: ({ row }) => (
@@ -377,7 +377,7 @@ function CustomReactTable({
                       paddingLeft: isMobileView ? 0 : `${row.depth * 15}px`
                     }
                   }}
-                  className="ml-[6px]"
+                  className="mx-auto text-center"
                 >
                   <IndeterminateCheckbox onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps()} />
                 </div>
@@ -398,10 +398,21 @@ function CustomReactTable({
                 <IndeterminateCheckbox
                   onClick={(e) => handleAllSelect(getToggleAllRowsSelectedProps()?.checked)}
                   {...getToggleAllRowsSelectedProps()}
-                  style={{ marginLeft: '7px' }}
+                  className="mx-auto text-center"
                 />
               ),
-              Cell: ({ row }) => <IndeterminateCheckbox onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps()} />
+              Cell: ({ row }) => (
+                <div
+                  {...{
+                    style: {
+                      paddingLeft: isMobileView ? 0 : `${row.depth * 15}px`
+                    }
+                  }}
+                  className="mx-auto text-center"
+                >
+                  <IndeterminateCheckbox onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps()} />
+                </div>
+              )
             },
             ...baseColumns.map((m) => {
               return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' };
@@ -1073,7 +1084,11 @@ const DraggableHeader: React.FC<DraggableHeaderProps> = ({ column, index, reorde
 
   return (
     <TableCell {...column.getHeaderProps()} className="th text-truncate table-header">
-      <div ref={ref} className="d-flex align-items-center justify-content-space-between pos-rel" style={{ width: '100%' }}>
+      <div
+        ref={ref}
+        className={`d-flex items-center ${column.id === 'selection' ? 'justify-center' : 'justify-between'} pos-rel`}
+        style={{ width: '100%' }}
+      >
         <div
           style={{ opacity: isDragging ? 0.2 : 1 }}
           className="d-flex gap-2 align-items-center"
