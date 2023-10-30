@@ -9,9 +9,11 @@ import routes from 'src/components/Helpers/Routes';
 import {
     CHILD_RESOURCE,
     CustomDialogTransition,
+    MATERIAL_TYPE,
     dateFormat,
     quotation,
     repairOrder,
+    sidebarResource,
     sublease
 } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -30,7 +32,7 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { generateCustomTableColumns } from 'src/constants/columns';
 import moment from 'moment';
 
-const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, selectedResource }) => {
+const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progressiveBilling }) => {
 
     const toastConfig = useContext(CustomToastContext);
 
@@ -49,12 +51,6 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, selectedResourc
 
     const renderedFrom = `${camelCase(routes?.generateInvoice.title)}_create`;
 
-    const matchChildResource = {
-        sublease: 'subleaseProduct',
-        repairOrder : 'quotationProduct'
-    }
-
-
     useEffect(() => {
         fetchFields();
     }, []);
@@ -68,10 +64,12 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, selectedResourc
     const fetchFields = async () => {
         setColumns(null);
         let data;
-        const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE[matchChildResource[selectedResource?.key]]}`);
+
+        const childResourceName = resource === sidebarResource.sublease ? CHILD_RESOURCE.subleaseProduct : CHILD_RESOURCE.quotationProduct;
+
+        const response = await axiosInstance().get(`/field/child?resource=${childResourceName}`);
         data = response?.data?.data;
         data = CURReplaceByCurrencySingle(data, resourceData.currency ? resourceData.currency : "USD");
-
         data?.forEach((e) => {
             e.isColumnEditable = false;
         });
@@ -98,15 +96,15 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, selectedResourc
                     row.original['type'] ? (
                         <p>
                             {`${startCase(row.original?.type)} `}
-                            {row.original['type'] === 'product'
+                            {row.original['type'] === MATERIAL_TYPE.product
                                 ? row.original?.productDetail?.serializedProduct
                                     ? '(Serialized)'
                                     : '(Non-Serialized)'
-                                : row.original?.type === 'package'
+                                : row.original?.type === MATERIAL_TYPE.package
                                     ? row.original?.packageDetail?.packageType === 'Product'
                                         ? '(Product)'
                                         : '(Service)'
-                                    : row.original.type === 'service'
+                                    : row.original.type === MATERIAL_TYPE.service
                                         ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
                                         : ''}
                         </p>
@@ -131,11 +129,11 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, selectedResourc
                         <IconButton
                             size="small"
                             onClick={() => {
-                                if (row.original.type === 'service') {
+                                if (row.original.type === MATERIAL_TYPE.service) {
                                     window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                                } else if (row.original.type === 'product') {
+                                } else if (row.original.type === MATERIAL_TYPE.product) {
                                     window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                                } else if (row.original.type === 'serializedAsset') {
+                                } else if (row.original.type === MATERIAL_TYPE.serializedAsset) {
                                     window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
                                 } else {
                                     window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
@@ -160,10 +158,10 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, selectedResourc
         setColumns(column);
     };
 
-    const manageMaterial = (material, resourceName, invoicedProducts)=>{
+    const manageMaterial = (material, resourceName, invoicedProducts) => {
         let newMaterial: any = [];
 
-        if(resourceName === "sublease"){
+        if (resourceName === "sublease") {
 
             material?.forEach((d) => {
                 if (d?.type === 'service' && d?.parentId === null && !d?.actualStartDate) {
@@ -173,7 +171,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, selectedResourc
                     d['actualStartDate'] = d?.estimateStartDate;
                 }
             });
-    
+
             material
                 ?.filter((d) => d.actualStartDate)
                 ?.forEach((element) => {
@@ -183,16 +181,16 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, selectedResourc
                     const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
                     newMaterial.push({ ...element, ...calValues });
                 });
-    
-           material = newMaterial;
+
+            material = newMaterial;
             if (invoicedProducts?.length) {
                 material = material
                     ?.map((e) => {
                         let materialData: any = { ...e };
-    
+
                         let pMethod = materialData?.pricingMethod?.split(',') || [];
                         pMethod = pMethod.map((m) => m?.trim()).find((m) => !['Per Day', 'Per Week', 'Per Month'].includes(m));
-    
+
                         const product = invoicedProducts?.find((p) => p._id === e._id);
                         if (product) {
                             const actualEndDate = new Date(product?.endDate)?.setDate(new Date(product?.endDate)?.getDate() + 1);
@@ -200,7 +198,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, selectedResourc
                         } else {
                             materialData.actualStartDate = materialData.manualStartDate ? materialData.manualStartDate : new Date().setDate(new Date().getDate() + 1);
                         }
-    
+
                         return materialData;
                     })
                     .filter((d) => d.qty > 0);
@@ -210,20 +208,19 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, selectedResourc
         initializeTable(material);
     }
 
-
     const fetchData = async () => {
         let invoicedProducts: any = [];
 
         let response: any = {};
 
-        if (selectedResource.key === "sublease") {
+        if (resource === sidebarResource.sublease) {
             response = await axiosInstance().get(`${sublease.api}/productpackage/${resourceData._id}`);
 
-            const invoiceResponse = await axiosInstance().get(`/generate-invoice/${resourceData?._id}/invoice/material-end-date-qty?resource=${selectedResource.key}`);
+            const invoiceResponse = await axiosInstance().get(`/generate-invoice/${resourceData?._id}/invoice/material-end-date-qty?resource=${resource}`);
             invoicedProducts = invoiceResponse?.data?.data?.material;
 
             manageMaterial(response?.data?.data?.material, 'sublease', invoicedProducts)
-        } else if (selectedResource.key === "repairOrder") {
+        } else if (resource === sidebarResource.repairOrder) {
             const quotationResponse = axiosInstance().get(
                 `${repairOrder.api}/${resourceData?._id}/check-create/quotation?approval=${resourceData?.addQuotationStep ? 1 : 0}`
             );
@@ -239,9 +236,8 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, selectedResourc
             const [quotationResult, productPackageResult] = await Promise.all([quotationResponse, productPackageResponse]);
 
             response = productPackageResult.data;
-            manageMaterial( response?.data?.material, 'repairOrder', invoicedProducts)
-            // data = response?.data
-    }
+            manageMaterial(response?.data?.material, 'repairOrder', invoicedProducts)
+        }
 
     };
 
@@ -250,21 +246,21 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, selectedResourc
         rows.forEach((parent, i) => {
             parent.index = i + 1;
             parent.detail =
-                parent.type === 'product'
+                parent.type === MATERIAL_TYPE.product
                     ? parent.productDetail?.productName
-                    : parent.type === 'service'
+                    : parent.type === MATERIAL_TYPE.service
                         ? parent?.serviceDetail?.serviceName
-                        : parent.type === 'serializedAsset'
-                            ? parent?.inventoryDetail?.assetNumber
+                        : parent.type === MATERIAL_TYPE.serializedAsset
+                            ? parent?.serializedAssetDetail?.assetNumber
                             : parent.packageDetail?.packageName;
             parent.description =
-                parent.type === 'product'
+                parent.type === MATERIAL_TYPE.product
                     ? parent?.productDetail?.productDescription || ''
-                    : parent.type === 'service'
+                    : parent.type === MATERIAL_TYPE.service
                         ? parent?.serviceDetail?.serviceDescription || ''
-                        : parent.type === 'package'
+                        : parent.type === MATERIAL_TYPE.package
                             ? parent?.packageDetail?.packageDescription || ''
-                            : parent.type === 'serializedAsset'
+                            : parent.type === MATERIAL_TYPE.serializedAsset
                                 ? parent?.description || ''
                                 : '';
             parent.qtyDisplay = parent.qty;
@@ -305,7 +301,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, selectedResourc
     const handleApplyDate = async () => {
         let tempValues: any = { actualEndDate: endDate };
 
-        const invoiceResponse = await axiosInstance().get(`/generate-invoice/${resourceData?._id}/invoice/material-end-date-qty?resource=${selectedResource.key}`);
+        const invoiceResponse = await axiosInstance().get(`/generate-invoice/${resourceData?._id}/invoice/material-end-date-qty?resource=${resource}`);
         const invoicedProducts = invoiceResponse?.data?.data?.material;
 
         let rows: any = [];
@@ -357,8 +353,8 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, selectedResourc
         setAppliedDate(true);
     };
 
-    const handleCreateBill = () => {
-        if (selectedResource.progressiveBilling) {
+    const handleCreateInvoice = () => {
+        if (progressiveBilling) {
             rowsApplied?.forEach((element) => {
                 delete element?.index;
                 delete element?.detail;
@@ -374,7 +370,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, selectedResourc
             });
             setUpdating(true);
             axiosInstance()
-                .post(`/generate-invoice/${resourceData._id}/progressive-invoice?resource=${selectedResource.key}`, {
+                .post(`/generate-invoice/${resourceData._id}/progressive-invoice?resource=${resource}`, {
                     material: rowsApplied,
                 })
                 .then(() => {
@@ -386,8 +382,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, selectedResourc
                     toastConfig.setToastConfig(error);
                 });
         } else {
-           
-            axiosInstance().post(`generate-invoice/invoice?resource=${selectedResource.key}`, {
+            axiosInstance().post(`generate-invoice/invoice?resource=${resource}`, {
                 resourceId: resourceData?._id,
             }).then(({ data }) => {
                 toastConfig.setToastConfig({
@@ -396,7 +391,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, selectedResourc
                     message: data.message,
                 });
                 onSuccess();
-            }) 
+            })
                 .catch((error) => {
                     toastConfig.setToastConfig(error);
                 });
@@ -410,7 +405,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, selectedResourc
                 <CustomDialogHeader title={`Create Invoice`} onClose={onClose} showRequiredLabel={false}></CustomDialogHeader>
                 <CustomDialogContent>
                     <Fragment>
-                        {selectedResource?.progressiveBilling && <MuiPickersUtilsProvider utils={MomentUtils}>
+                        {progressiveBilling && <MuiPickersUtilsProvider utils={MomentUtils}>
                             <Grid container className={styles.rental_header_layout}>
                                 <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center gap-1 layout-for-tablet"></Grid>
                                 <Grid item xs={12} sm={12} md={6} className={styles.filter_side}>
@@ -472,6 +467,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, selectedResourc
                                     uniqueKey="_id"
                                     renderedFrom={renderedFrom}
                                     isClientSideGrid={true}
+                                    hideSelection={!progressiveBilling}
                                 />
                             </Box>
                         ) : (
@@ -495,9 +491,9 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, selectedResourc
                     </Button>
                     <HtmlTooltip
                         title={
-                            !appliedDate && selectedResource.progressiveBilling
+                            !appliedDate && progressiveBilling
                                 ? 'Please select items and apply end date'
-                                : rowsApplied?.some((d) => d.invalidDate === true) && selectedResource.progressiveBilling
+                                : rowsApplied?.some((d) => d.invalidDate === true) && progressiveBilling
                                     ? 'Please select an appropriate date !'
                                     : 'Create Invoice'
                         }
@@ -508,9 +504,9 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, selectedResourc
                                 variant="contained"
                                 color="primary"
                                 size="small"
-                                disabled={selectedResource.progressiveBilling ? (isUpdating || !appliedDate || rowsApplied.some((d) => d.invalidDate === true)) : false}
+                                disabled={progressiveBilling ? (isUpdating || !appliedDate || rowsApplied.some((d) => d.invalidDate === true)) : false}
                                 onClick={() => {
-                                    handleCreateBill();
+                                    handleCreateInvoice();
                                 }}
                             >
                                 Create Invoice
