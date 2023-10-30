@@ -110,7 +110,7 @@ export const staticColumns = ['createdBy', 'updatedBy'];
 const getColumnWidth = (text) => {
   const textLength = text.length;
   const characterWidth = 8;
-  const searchIconWidth = 24;
+  const searchIconWidth = 30;
   const searchIconMargin = 10;
   const tempWidth = textLength * characterWidth + searchIconWidth + searchIconMargin;
   const width = Math.max(tempWidth, 150);
