@@ -1,4 +1,4 @@
-import { Box, IconButton } from '@material-ui/core';
+import { Box, IconButton, TextField } from '@material-ui/core';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -11,21 +11,57 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import AssignTechnicianDialog from '../Roadmap/AssignTechnicianDialog';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
+import { Autocomplete } from '@material-ui/lab';
+import { useData } from 'src/StateProvider/Provider';
+
+const TECHNICIAN_RESOURCE = [
+  {
+    key: 'rentalManagement',
+    resource: sidebarResource.rentalManagement,
+    title: routes.rentalManagementDetail.title,
+  },
+  {
+    key: 'fieldTicket',
+    resource: sidebarResource.fieldTicket,
+    title: routes.fieldTicketDetail.title,
+  }
+]
 
 function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, selectedRecords, setSelectedRecords }) {
+
+  const {
+    state: { permissions }
+  }: any = useData();
+
   const toastConfig = useContext(CustomToastContext);
   const [rowsData, setRowsData] = useState(null);
-  const [tabValue, setTabValue] = useState(0);
   const [columns, setColumns] = useState([])
+  const [serviceTypes, setServiceTypes] = useState([]);
+  const [selectedType, setSelectedType] = useState(serviceTypes[0]?.key || '');
+
+
+  useEffect(() => {
+    const options: any = [];
+    TECHNICIAN_RESOURCE?.forEach((item) => {
+      if (permissions[item.key] && permissions[item.key]?.isRead === true) {
+        options.push({ ...item, title: routes[item.key] ? routes[item.key]?.title : item.title })
+      }
+    })
+    setServiceTypes(options);
+    setSelectedType(options[0]?.key || '');
+  }, [])
 
   useEffect(() => {
     fetchData();
     fetchColumns();
-  }, [tabValue]);
+  }, [selectedType]);
 
-  const fetchData = () => {
+  const fetchData = (type = '') => {
+    if (type === '') {
+      type = serviceTypes?.find((e) => e.key === selectedType)?.resource || serviceTypes[0]?.resource || '';
+    }
+    setSelectedRecords([]);
     setRowsData(null);
-    const type = tabValue === 0 ? sidebarResource.fieldTicket : sidebarResource.rentalManagement;
     axiosInstance()
       .get(`/technician-scheduler/un-assign-service?type=${type}`)
       .then(({ data: { data } }) => {
@@ -63,7 +99,7 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, selec
         width: 50,
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
       },
-      ...(tabValue === 0 ? [{
+      ...(selectedType === 'fieldTicket' ? [{
         accessor: 'fieldServiceOrderNumber',
         Header: 'Field Service Order',
         width: 200,
@@ -105,7 +141,7 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, selec
           ) : (
             <NoDataCell />
           )
-      }] : [
+      }] : selectedType === 'rentalManagement' ? [
         {
           accessor: 'rentalJobName',
           Header: 'Rental Job',
@@ -129,7 +165,7 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, selec
               <NoDataCell />
             )
         }
-      ]),
+      ] : []),
       {
         accessor: 'serviceName',
         Header: 'Service Name',
@@ -216,19 +252,26 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, selec
   }
 
   const height = 400;
-
-
-  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
-    setTabValue(newValue);
-  };
-
-
   return (
     <Box pt={3}>
-      <CustomTabs value={tabValue} onChange={handleMainTabChange} style={{ marginBottom: -1 }}>
-        <CustomTab index={0} label={'Field Ticket'} value={0} primaryColor={true} />
-        <CustomTab index={1} label={'Rental Job'} value={1} primaryColor={true} />
-      </CustomTabs>
+      <Box style={{ maxWidth: '400px' }} mb={2} mt={2}>
+        <Autocomplete
+          size="small"
+          style={{ minWidth: '300px' }}
+          fullWidth
+          options={serviceTypes || []}
+          autoHighlight
+          value={serviceTypes?.find((e) => e.key === selectedType) || null}
+          getOptionLabel={(option: any) => option?.title || ''}
+          getOptionSelected={(option, val) => (option ? option?.title === val?.title : false)}
+          onChange={(_, val) => {
+            setSelectedType(val.key);
+            fetchData(val.resource);
+          }}
+          renderInput={(params) => <TextField {...params} label={'Select Type'} variant="outlined" />}
+        />
+      </Box>
+
       {columns && rowsData ? (
         <Box zIndex={5} width={'100%'}>
           <CustomReactTable

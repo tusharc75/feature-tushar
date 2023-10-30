@@ -339,74 +339,69 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
 
     return (
         <>
-            <Box display="flex" justifyContent="flex-end">
+            <Box display="flex" justifyContent="flex-end" m={1}>
                 <Box display="flex" alignItems="center" >
-                    {allowedToEdit && (
-                        <div>
-                            <Button
-                                variant="outlined"
-                                color="default"
-                                size="small"
-                                onClick={openActions}
-                                aria-controls="action-menu"
-                                disabled={selectedRecords.length === 0}
-                                endIcon={<ExpandMore />}
-                                className="new-dropdown-v1"
-                            >
-                                Actions
-                            </Button>
-                            <Menu
-                                anchorEl={anchorActionEl}
-                                keepMounted
-                                getContentAnchorEl={null}
-                                anchorOrigin={{
-                                    vertical: 'bottom',
-                                    horizontal: 'left'
+                    <Button
+                        variant="outlined"
+                        color="default"
+                        size="small"
+                        onClick={openActions}
+                        aria-controls="action-menu"
+                        disabled={selectedRecords.length === 0}
+                        endIcon={<ExpandMore />}
+                        className="new-dropdown-v1"
+                    >
+                        Actions
+                    </Button>
+                    <Menu
+                        anchorEl={anchorActionEl}
+                        keepMounted
+                        getContentAnchorEl={null}
+                        anchorOrigin={{
+                            vertical: 'bottom',
+                            horizontal: 'left'
+                        }}
+                        id="action-menu"
+                        open={Boolean(anchorActionEl)}
+                        onClose={closeActions}
+                    >
+                        {ticketType === DELIVERY_TICKET_TYPE.loading && (
+                            <MenuItem
+                                onClick={() => {
+                                    if (!validateAction(subleaseActions.createLoadingTicket)) {
+                                        handleDeliveryTicketDialog();
+                                    }
+                                    closeActions();
                                 }}
-                                id="action-menu"
-                                open={Boolean(anchorActionEl)}
-                                onClose={closeActions}
                             >
-                                {ticketType === DELIVERY_TICKET_TYPE.loading && (
-                                    <MenuItem
-                                        onClick={() => {
-                                            if (!validateAction(subleaseActions.createLoadingTicket)) {
-                                                handleDeliveryTicketDialog();
-                                            }
-                                            closeActions();
-                                        }}
-                                    >
-                                        Create Loading Ticket
-                                    </MenuItem>
-                                )}
-                                {ticketType === DELIVERY_TICKET_TYPE.receiving && (
-                                    <MenuItem
-                                        onClick={() => {
-                                            if (!validateAction(subleaseActions.createReceivingTicket)) {
-                                                handleDeliveryTicketDialog();
-                                            }
-                                            closeActions();
-                                        }}
-                                    >
-                                        Create Receiving Ticket
-                                    </MenuItem>
-                                )}
-                                <MenuItem
-                                    onClick={() => {
-                                        if (ticketType === DELIVERY_TICKET_TYPE.loading && !validateAction(subleaseActions.deliveredToWarehouse)) {
-                                            handelProcessTickets();
-                                        }
-                                        else if (ticketType === DELIVERY_TICKET_TYPE.receiving && !validateAction(subleaseActions.receivedToWarehouse)) {
-                                            handelProcessTickets();
-                                        }
-                                        closeActions();
-                                    }}
-                                >{ticketType === DELIVERY_TICKET_TYPE.loading ? 'Delivered to Plant' : 'Received at Plant'}
-                                </MenuItem>
-                            </Menu>
-                            <Box mx={1} />
-                        </div>
-                    )}
+                                Create Loading Ticket
+                            </MenuItem>
+                        )}
+                        {ticketType === DELIVERY_TICKET_TYPE.receiving && (
+                            <MenuItem
+                                onClick={() => {
+                                    if (!validateAction(subleaseActions.createReceivingTicket)) {
+                                        handleDeliveryTicketDialog();
+                                    }
+                                    closeActions();
+                                }}
+                            >
+                                Create Receiving Ticket
+                            </MenuItem>
+                        )}
+                        <MenuItem
+                            onClick={() => {
+                                if (ticketType === DELIVERY_TICKET_TYPE.loading && !validateAction(subleaseActions.deliveredToWarehouse)) {
+                                    handelProcessTickets();
+                                }
+                                else if (ticketType === DELIVERY_TICKET_TYPE.receiving && !validateAction(subleaseActions.receivedToWarehouse)) {
+                                    handelProcessTickets();
+                                }
+                                closeActions();
+                            }}
+                        >{ticketType === DELIVERY_TICKET_TYPE.loading ? 'Delivered to Plant' : 'Received at Plant'}
+                        </MenuItem>
+                    </Menu>
                 </Box>
             </Box>
             <Grid item xs={12} md={12} sm={12} className="mt-3">
