@@ -66,7 +66,6 @@ const CustomSwitch = withStyles((theme: Theme) =>
   );
 });
 
-
 function CustomReactTableHeaderOptions({
   columns,
   renderedFrom = null,
@@ -178,4 +177,3 @@ function CustomReactTableHeaderOptions({
 }
 
 export default CustomReactTableHeaderOptions;
-
