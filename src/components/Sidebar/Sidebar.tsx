@@ -126,23 +126,21 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
       <Header toggleDrawer={handleToggleDrawer} isDrawerOpen={toggleDrawer} />
       <Drawer
         // onClick={() => {
-        //   toggleTimeout = setTimeout(() => setToggleDrawer((prev) => !prev), 300);
+        //   // setToggleDrawer(true);
+        //   // toggleTimeout = setTimeout(() => setToggleDrawer(true), 300);
         // }}
-        onClick={() => {
-          toggleTimeout = setTimeout(() => setToggleDrawer(true), 300);
-        }}
-        onMouseEnter={() => {
-          toggleTimeout = setTimeout(() => setToggleDrawer(true), 300);
-        }}
-        onMouseLeave={() => {
-          if (toggleTimeout) {
-            clearTimeout(toggleTimeout);
-          }
-          if (toggleDrawer)
-            setTimeout(() => {
-              setToggleDrawer(false);
-            }, 500);
-        }}
+        // onMouseEnter={() => {
+        //   toggleTimeout = setTimeout(() => setToggleDrawer(true), 300);
+        // }}
+        // onMouseLeave={() => {
+        //   if (toggleTimeout) {
+        //     clearTimeout(toggleTimeout);
+        //   }
+        //   if (toggleDrawer)
+        //     setTimeout(() => {
+        //       setToggleDrawer(false);
+        //     }, 500);
+        // }}
         variant="permanent"
         className={clsx(styles.drawer, 'sidebar-drawer', {
           [classes.drawerOpen]: toggleDrawer,
@@ -173,7 +171,11 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
               <img className={styles.logo} src={SVG('LogoNewShort')} onClick={() => history.push('/')} alt="equip logo" title="eQuipt Logo" />
             )}
           </div>
-          <List className={`${styles.listContainer} sidebar-list`}>
+          <List
+            className={`${styles.listContainer} sidebar-list max-h-[calc(100vh-150px)] ${
+              toggleDrawer ? 'overflow-y-auto' : 'overflow-y-hidden'
+            } overflow-x-hidden`}
+          >
             <ListItem
               button
               selected={location.pathname === '/'}
@@ -182,6 +184,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                 setItemToAddActiveClass(NaN);
                 setSubItemToAddActiveClass(NaN);
                 history.push('/');
+                setToggleDrawer((prev) => !prev);
               }}
             >
               {location.pathname === '/' && (
@@ -215,6 +218,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                 onClick={() => {
                   setItemToAddActiveClass(NaN);
                   setSubItemToAddActiveClass(NaN);
+                  setToggleDrawer((prev) => !prev);
                 }}
               >
                 <Tooltip title={!toggleDrawer ? 'Dashboards' : ''}>
@@ -243,6 +247,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                 onClick={() => {
                   setItemToAddActiveClass(NaN);
                   setSubItemToAddActiveClass(NaN);
+                  setToggleDrawer((prev) => !prev);
                 }}
               >
                 <Tooltip title={!toggleDrawer ? 'Reports' : ''}>
@@ -279,6 +284,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                         key={listItem.section + '' + i}
                         onClick={() => {
                           handleCollapse(listItem.section);
+
                           if (!toggleDrawer) {
                             handleToggleDrawer();
                           }
@@ -315,6 +321,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                             onClick={() => {
                               setItemToAddActiveClass(i);
                               setSubItemToAddActiveClass(j);
+                              setToggleDrawer((prev) => !prev);
                             }}
                             to={handleRoutes(item)}
                           >
