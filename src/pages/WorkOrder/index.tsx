@@ -510,6 +510,11 @@ const WorkOrder = () => {
             showClone={false}
             onClone={() => {}}
             renderedFrom={renderedFrom}
+            backgroundColorClass={(d) => (d.deleted ? 'red-data-row' : '')}
+            actionCol={(data) => {
+              const params = { data };
+              return <ActionsRenderer {...params} />;
+            }}
           />
         ) : Object.keys(frameWorkComponent).length > 0 ? (
           <CustomAgGrid
@@ -531,6 +536,7 @@ const WorkOrder = () => {
             showOnlyShowFilteredRecordSwitch={true}
             rowClassRules={{
               'red-data-row': function (params) {
+                console.log(params);
                 return params.data.deleted;
               }
             }}

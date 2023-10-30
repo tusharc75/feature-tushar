@@ -190,14 +190,16 @@ const Quotation = () => {
           {moment(params.data?.estimateEndDate).isBefore(moment(), 'day') && (
             <Box ml={1}>
               <HtmlTooltip title={`${routes.quotation.title} Expired`}>
-                <Warning style={{ fontSize: '14px' }} fontSize="small" color="error" />
+                <Warning style={{ fontSize: '14px' }} className=" cursor-pointer" fontSize="small" color="error" />
               </HtmlTooltip>
             </Box>
           )}
           {isDateWithinNext15Days(params.data?.estimateEndDate) && (
             <Box ml={1}>
               <HtmlTooltip title={`${routes.quotation.title} about to renew`}>
-                <HelpOutlineIcon style={{ fontSize: '14px', backgroundColor: 'yellow' }} fontSize="small" />
+                <span className=" text-yellow-500 rounded-sm p-[2px] cursor-pointer block">
+                  <HelpOutlineIcon style={{ fontSize: '14px' }} fontSize="small" />
+                </span>
               </HtmlTooltip>
             </Box>
           )}
