@@ -47,22 +47,15 @@ const SubleaseDetailsPage = () => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState([]);
-  const [statusOptions, setStatusOptions] = useState([]);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [isProcessor, setIsProcessor] = useState(false);
   const [currentStep, setCurrentStep] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [nextStep, setNextStep] = useState(true);
 
   const [tabValue, setTabValue] = useState(Number(parsed?.tab || 0));
   const [isIssued, setIsIssued] = useState(false);
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [nextStepToolTip, setNextStepToolTip] = useState(null);
-
-
-  // const subleaseStepsNames = React.useMemo(() => {
-  //   return subleaseSteps.map((item) => item.name);
-  // }, [subleaseSteps]);
 
   function a11yProps(index: any) {
     return {
@@ -105,14 +98,6 @@ const SubleaseDetailsPage = () => {
       .get('/field?resource=Sublease')
       .then(({ data }) => {
         setFields(data.data);
-        if (data.data && data.data.length) {
-          data.data.some((o) => {
-            if (o?.fieldData?.fieldName === 'status') {
-              setStatusOptions([...o.fieldData.option]);
-              return true;
-            }
-          });
-        }
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -157,13 +142,6 @@ const SubleaseDetailsPage = () => {
       });
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
 
   return (
     <Box className="main-container-v1">
@@ -238,7 +216,9 @@ const SubleaseDetailsPage = () => {
         <TabPanel value={tabValue} index={0}>
           <Box>
             {subleaseData && fields.length ? (
-              <DetailsPage data={subleaseData} fields={fields} />
+              <DetailsPage data={subleaseData} fields={
+                subleaseData?.type === SUBLEASE_TYPE.interCompany ? fields?.filter((e) => e?.fieldData?.fieldName !== 'warehouse') :
+                  fields?.filter((e) => !['fromWarehouse', 'toWarehouse']?.includes(e?.fieldData?.fieldName))} />
             ) : (
               <Grid container spacing={2} style={{ padding: '8px' }}>
                 <CommonSkeleton lenArray={[...Array(7).keys()]} />

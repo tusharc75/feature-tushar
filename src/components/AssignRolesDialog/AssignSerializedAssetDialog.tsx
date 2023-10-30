@@ -5,7 +5,14 @@ import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import SearchBox from '../Helpers/SearchBox';
-import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, getLocalStorageArrayData, serializedAsset, SUBLEASE_TYPE } from 'src/constants/helpers';
+import {
+  gridLoadingTimeout,
+  isObjectEmpty,
+  prepareDataForGrid,
+  getLocalStorageArrayData,
+  serializedAsset,
+  SUBLEASE_TYPE
+} from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import routes from '../Helpers/Routes';
 import styles from 'src/pages/Leads/Header.module.scss';
@@ -132,7 +139,7 @@ const AssignSerializedAssetDialog = ({
     let deepFilter = `?page=${page}&limit=${limit}&ignoreIds=${JSON.stringify(ignoreIds)}`;
 
     if (reference === 'job') {
-      deepFilter += '&job=1'
+      deepFilter += '&job=1';
     }
     if (reference === 'repairOrder') {
       deepFilter = `${deepFilter}`;
@@ -159,6 +166,9 @@ const AssignSerializedAssetDialog = ({
     }
     if (reference === 'sublease') {
       deepFilter = `${deepFilter}&masterSubleaseAsset=true&subleaseAsset=0`;
+      if (referenceData?.warehouse) {
+        deepFilter = `${deepFilter}&plant=${referenceData?.warehouse}`;
+      }
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
@@ -254,7 +264,7 @@ const AssignSerializedAssetDialog = ({
                   : null}
               </Box>
             </Grid>
-            <Grid item xs={6} className={styles.filter_side}>
+            <Grid item xs={12} md={6} className={styles.filter_side}>
               <Box className={styles.filter_side_header} component="div">
                 <SearchBox onChange={handleSearch} className={styles.search_box_input} width="242px" size="small" value={search} />
                 <Button
