@@ -1097,16 +1097,16 @@ const DraggableHeader: React.FC<DraggableHeaderProps> = ({ column, index, reorde
           <span>{column.render('Header')}</span>
           {column.isSorted ? column.isSortedDesc ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" /> : ''}
         </div>
-        <div>
-          {column.canFilter ? (
+        {column.canFilter ? (
+          <div>
             <TempFilter
               filterValue={filters.find((filter) => filter.id === column.id)?.value || ''}
               id={column?.id}
               setFilters={setFilters}
               customFilters={customFilters}
             />
-          ) : null}
-        </div>
+          </div>
+        ) : null}
       </div>
       <div {...column.getResizerProps()} className="resizer" />
     </TableCell>
