@@ -18,6 +18,7 @@ import SearchBox from 'src/components/Helpers/SearchBox';
 import { Autocomplete } from '@material-ui/lab';
 import CreateInvoiceDialog from './CreateInvoice';
 import InvoiceDialog from './InvoiceDialog';
+import CreateBillingDialog from '../RentalManagement/ProgressiveBilling/CreateBillingDialog';
 
 const GENERATE_RESOURCE = [
     {
@@ -35,13 +36,21 @@ const GENERATE_RESOURCE = [
         progressiveBilling: false,
         path: routes.repairOrderDetail.path,
         title: routes.repairOrder.title,
+    },
+    {
+        key: 'rentalManagement',
+        resource: sidebarResource.rentalManagement,
+        fieldName: 'rentalJobName',
+        progressiveBilling: true,
+        path: routes.rentalManagementDetail.path,
+        title: routes.rentalManagement.title,
     }
 
 ]
 
-const GenerateInvoice = ({resourceRendered = null}) => {
+const GenerateInvoice = ({ resourceRendered = null }) => {
 
-    const renderedFrom = `${camelCase(routes?.generateInvoice.title)}`;
+    const renderedFrom = resourceRendered ? `${camelCase(routes[resourceRendered].title + " Invoice")}` : `${camelCase(routes?.generateInvoice.title)}`;
     const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
     const {
@@ -57,7 +66,7 @@ const GenerateInvoice = ({resourceRendered = null}) => {
 
     const [createInvoiceDialog, setCreateInvoiceDialog] = useState({ open: false, data: null });
     const [viewInvoiceDialog, setViewInvoiceDialog] = useState({ open: false, data: null });
-    const [selectedResource, setSelectedResource] = useState(resourceRendered ? GENERATE_RESOURCE.find((r)=>r.key === resourceRendered) : GENERATE_RESOURCE[0]);
+    const [selectedResource, setSelectedResource] = useState(resourceRendered ? GENERATE_RESOURCE.find((r) => r.key === resourceRendered) : GENERATE_RESOURCE[0]);
     const [resourceList, setResourceList] = useState([])
 
 
@@ -97,7 +106,11 @@ const GenerateInvoice = ({resourceRendered = null}) => {
 
     const fetchData = async () => {
         dispatch({ type: 'loading', loading: true });
-        const queryString = getQueryString();
+
+        let queryString = getQueryString();
+        if (selectedResource.resource === sidebarResource.rentalManagement) {
+            queryString = `/rental-management-invoice${queryString}`
+        }
         if (gridApi) {
             gridApi.setRowData([]);
         }
@@ -169,13 +182,13 @@ const GenerateInvoice = ({resourceRendered = null}) => {
     const ActionsRenderer = (params) => (
         <Fragment>
 
-            {params.data?.subleaseName && params.data.status === SUBLEASE_STATUS.issued ? (
+            {params.data?.subleaseName || params.data?.rentalJobName ? (
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <HtmlTooltip title="Create Invoice">
                         <IconButton
                             size="small"
                             onClick={() => {
-                                setCreateInvoiceDialog({ open: true, data: [params.data] });
+                                setCreateInvoiceDialog({ open: true, data: params.data });
                             }}
                         >
                             <NoteAddIcon fontSize="small" color="primary" />
@@ -202,7 +215,7 @@ const GenerateInvoice = ({resourceRendered = null}) => {
                             <IconButton
                                 size="small"
                                 onClick={() => {
-                                    setCreateInvoiceDialog({ open: true, data: [params.data] });
+                                    setCreateInvoiceDialog({ open: true, data: params.data });
                                 }}
                             >
                                 <NoteAddIcon fontSize="small" color="primary" />
@@ -221,8 +234,8 @@ const GenerateInvoice = ({resourceRendered = null}) => {
                         </HtmlTooltip>
                     )
                 )
-
-            )}
+            )
+            }
 
         </Fragment>
     );
@@ -245,34 +258,34 @@ const GenerateInvoice = ({resourceRendered = null}) => {
         <Fragment>
             <Grid container className="headerbox">
                 <Grid item md={4} sm={11} xs={10}>
-                    <CustomBreadCrumbs routes={[{ title: resourceRendered ? routes[resourceRendered]?.title + " " + "Invoice" : routes.generateInvoice.title }]} />
+                    <CustomBreadCrumbs routes={[{ title: resourceRendered ? routes[resourceRendered]?.title + " Invoice" : routes.generateInvoice.title }]} />
                 </Grid>
                 <Grid item md={8} sm={1} xs={2} />
             </Grid>
             <CustomContainer>
                 <div className="header-panel" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     {!resourceRendered && (
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <Autocomplete
-                            id="generate-invoice"
-                            style={{ width: '300px' }}
-                            options={resourceList?.map((item) => item)}
-                            renderInput={(params) => (
-                                <TextField
-                                    {...params}
-                                    variant="outlined"
-                                    label="Resource"
-                                    margin="dense"
-                                    required={true}
-                                />
-                            )}
-                            getOptionLabel={(option) => option?.title}
-                            onChange={(e, val) => {
-                                setSelectedResource(val);
-                            }}
-                            value={selectedResource}
-                        />
-                    </div>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <Autocomplete
+                                id="generate-invoice"
+                                style={{ width: '300px' }}
+                                options={resourceList?.map((item) => item)}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        variant="outlined"
+                                        label="Resource"
+                                        margin="dense"
+                                        required={true}
+                                    />
+                                )}
+                                getOptionLabel={(option) => option?.title}
+                                onChange={(e, val) => {
+                                    setSelectedResource(val);
+                                }}
+                                value={selectedResource}
+                            />
+                        </div>
                     )}
 
                     <Grid container className={styles.filter_side_container}>
@@ -313,23 +326,37 @@ const GenerateInvoice = ({resourceRendered = null}) => {
                     />
                 )
                     : null}
+
                 {createInvoiceDialog.open && (
-                    <CreateInvoiceDialog
-                        resourceData={createInvoiceDialog?.data[0]}
-                        onClose={() => setCreateInvoiceDialog({ open: false, data: null })}
-                        selectedResource={selectedResource}
-                        onSuccess={() => {
-                            setCreateInvoiceDialog({ open: false, data: null });
-                            removeLocalStorage(localStorageSelectedRecords);
-                            fetchData();
-                        }}
-                    />
+                    selectedResource.resource === sidebarResource.rentalManagement ? (
+                        <CreateBillingDialog
+                            rentalManagementData={createInvoiceDialog.data}
+                            onClose={() => {
+                                setCreateInvoiceDialog({ open: false, data: null });
+                            }}
+                            onSuccess={() => {
+                                setCreateInvoiceDialog({ open: false, data: null });
+                                fetchData();
+                            }}
+                        />
+
+                    ) : (
+                        <CreateInvoiceDialog
+                            resourceData={createInvoiceDialog?.data}
+                            onClose={() => setCreateInvoiceDialog({ open: false, data: null })}
+                            selectedResource={selectedResource}
+                            onSuccess={() => {
+                                setCreateInvoiceDialog({ open: false, data: null });
+                                removeLocalStorage(localStorageSelectedRecords);
+                                fetchData();
+                            }}
+                        />
+                    )
                 )}
                 {viewInvoiceDialog.open && (
                     <InvoiceDialog
-                        resourceId={viewInvoiceDialog?.data?._id}
+                        resourceData={viewInvoiceDialog?.data}
                         selectedResource={selectedResource}
-                        headerName={viewInvoiceDialog?.data[selectedResource?.fieldName]}
                         handleClose={() => {
                             setViewInvoiceDialog({ open: false, data: null });
                         }}
