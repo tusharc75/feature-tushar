@@ -79,7 +79,7 @@ function reducer(state: TInitialState, action: TActios) {
     case 'currentEditingCellPosition':
       return { ...state, currentEditingCellPosition: action.cellPosition };
     case 'showFilteredRecordsOnly':
-      return { ...state, showFilteredRecordsOnly: action.showFilteredRecordsOnly };
+      return { ...state, showFilteredRecordsOnly: !state.showFilteredRecordsOnly };
 
     default:
       break;

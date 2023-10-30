@@ -49,7 +49,7 @@ const SerializedAssetTest = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [columns, setColumns] = useState(null);
   const { state, dispatch } = useTableReducer();
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } =
     state;
   const [productCategoryList, setProductCategoryList] = useState([]);
   const [productFilterList, setProductFilterList] = useState([]);

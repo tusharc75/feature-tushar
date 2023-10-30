@@ -32,8 +32,8 @@ import { ToggleButtonGroup, ToggleButton } from '@material-ui/lab';
 let searchTimeout;
 
 const DemandOrder = () => {
-  const { state: tableState, dispatch } = useTableReducer();
-  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = tableState;
+  const { state, dispatch } = useTableReducer();
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   const DemandOrderType = [
     {
@@ -54,7 +54,6 @@ const DemandOrder = () => {
     state: { user, permissions, selectedEntity }
   }: any = useData();
   const [selectedType, setSelectedType] = useState(1);
-  const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState<any>({});
@@ -87,9 +86,7 @@ const DemandOrder = () => {
   }, [search]);
 
   useEffect(() => {
-    if (renderCount > 0) {
       fetchData();
-    } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
@@ -404,7 +401,7 @@ const DemandOrder = () => {
             height={'calc(100vh - 200px)'}
             columns={columns}
             onSelect={() => {}}
-            state={tableState}
+            state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             isClientSideGrid={false}
