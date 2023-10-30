@@ -92,7 +92,6 @@ const DemandOrder = () => {
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
-
   const fetchGridColumns = async () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=Demand Order`);
@@ -294,14 +293,12 @@ const DemandOrder = () => {
     setAnchorEl(null);
   };
 
-
   const onTypeChange = (event, type) => {
     dispatch({ type: 'pageChange', page: 0 });
     const value = DemandOrderType.find((d) => d.key === type).value;
     setSelectedType(value);
     history.push(`?type=${value}`);
   };
-
 
   return (
     <section className="main-container-v1">
@@ -311,7 +308,7 @@ const DemandOrder = () => {
           permissions={permissions?.demandOrder}
           module="demandOrder"
           api={demandOrder.api}
-          afterImportCompleted={() => { }}
+          afterImportCompleted={() => {}}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
@@ -346,11 +343,7 @@ const DemandOrder = () => {
             </ToggleButtonGroup>
           </div>
           <div className="flex flex-wrap gap-[8px]  justify-end">
-            <SearchBox
-              onChange={handleSearch}
-              className={styles.search_box_input}
-              value={search}
-              size="small" />
+            <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
             <div className="flex gap-[8px] flex-wrap items-center">
               <Button
                 variant={'contained'}
@@ -360,7 +353,8 @@ const DemandOrder = () => {
                 onClick={() => {
                   setShowManageSalesOrderDialog({ open: true, isClone: false, idToClone: null });
                 }}
-                startIcon={<AddOutlined />}>
+                startIcon={<AddOutlined />}
+              >
                 Add
               </Button>
               {permissions?.demandOrder?.isDelete && (
@@ -407,8 +401,7 @@ const DemandOrder = () => {
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => {
-            }}
+            onSelect={() => {}}
             state={tableState}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
