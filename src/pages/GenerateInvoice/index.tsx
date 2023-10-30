@@ -228,6 +228,7 @@ const GenerateInvoice = ({resourceRendered = null}) => {
     );
 
     useEffect(() => {
+        setColumns([]);
         fetchGridColumns();
     }, [selectedResource]);
 
