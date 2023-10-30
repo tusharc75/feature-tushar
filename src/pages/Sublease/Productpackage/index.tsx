@@ -317,6 +317,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
       delete element.productDetail;
       delete element.packageDetail;
       delete element.subRows;
+      delete element.description;
     });
     setUpdating(true);
     axiosInstance()
@@ -433,9 +434,9 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
 
   return (
     <Fragment>
-      <div className="my-2 flex flex-wrap justify-between gap-2">
-        <div className="flex flex-wrap gap-2 ">
-          <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : 'Add Products/Packages'}>
+      <Box display="flex" justifyContent="space-between" m={1}>
+        <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
+          <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : ''}>
             <div>
               <Button
                 variant={'outlined'}
@@ -479,10 +480,10 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
               Add Existing Packages
             </MenuItem>
           </Menu>
-        </div>
-        <div className="flex flex-wrap gap-2">
+        </Box>
+        <Box display="flex">
           {material?.length && rowsData?.length && !isIssued && !rowsData?.some((f) => !f.isValid) && subleaseData?.type !== SUBLEASE_TYPE.interCompany ? (
-            <Fragment>
+            <Box ml={1}>
               <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : 'Start Sublease'}>
                 <Button
                   variant={'contained'}
@@ -497,10 +498,10 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
                   {isMobile && !isTablet ? <MdDelete size={20} /> : 'Start Sublease'}
                 </Button>
               </HtmlTooltip>
-            </Fragment>
+            </Box>
           ) : null}
-          <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : 'Actions'}>
-            <div>
+          <Box ml={1}>
+            <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : 'Actions'}>
               <Button
                 disabled={selectedProducts?.length || !allowedToEdit ? false : true}
                 variant={'outlined'}
@@ -513,8 +514,8 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
               >
                 Actions
               </Button>
-            </div>
-          </HtmlTooltip>
+            </HtmlTooltip>
+          </Box>
           <Menu
             anchorEl={anchorEl}
             keepMounted
@@ -558,8 +559,8 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
               {'Delete'}
             </MenuItem>
           </Menu>
-        </div>
-      </div>
+        </Box>
+      </Box>
       {columns && rowsData ? (
         <Box zIndex={5} width={'100%'}>
           <CustomReactTable
@@ -581,32 +582,37 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
         <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
-      )}
-      {deleteData && (
-        <ConfirmationDialog
-          open={true}
-          message={`Are you sure you want to delete the record(s)?`}
-          onClose={() => setDeleteData(null)}
-          onOk={() => handleDelete(deleteData)}
-          okBtnLoading={isDeleting}
-        />
-      )}
-      {isProductEdit.open && (
-        <QtyDialog
-          calculatePrice={calculatePrice}
-          onClose={() => {
-            setIsProductEdit({ open: false, isBulkedit: false });
-            setRecordToUpdate(null);
-          }}
-          isBulkedit={isProductEdit.isBulkedit}
-          handleSaveData={handleSaveData}
-          rentalManagementData={subleaseData}
-          rowData={recordToUpdate}
-          material={material}
-          selectedProducts={selectedProducts}
-          loading={isUpdating}
-        />
-      )}
+      )
+      }
+      {
+        deleteData && (
+          <ConfirmationDialog
+            open={true}
+            message={`Are you sure you want to delete the record(s)?`}
+            onClose={() => setDeleteData(null)}
+            onOk={() => handleDelete(deleteData)}
+            okBtnLoading={isDeleting}
+          />
+        )
+      }
+      {
+        isProductEdit.open && (
+          <QtyDialog
+            calculatePrice={calculatePrice}
+            onClose={() => {
+              setIsProductEdit({ open: false, isBulkedit: false });
+              setRecordToUpdate(null);
+            }}
+            isBulkedit={isProductEdit.isBulkedit}
+            handleSaveData={handleSaveData}
+            rentalManagementData={subleaseData}
+            rowData={recordToUpdate}
+            material={material}
+            selectedProducts={selectedProducts}
+            loading={isUpdating}
+          />
+        )
+      }
       {
         addExistingProductDialog.open && addExistingProductDialog.type === 'product' && (
           <AssignProductDialog
@@ -631,7 +637,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
           />
         )
       }
-    </Fragment>
+    </Fragment >
   );
 };
 
