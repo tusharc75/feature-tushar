@@ -166,6 +166,9 @@ const AssignSerializedAssetDialog = ({
     }
     if (reference === 'sublease') {
       deepFilter = `${deepFilter}&masterSubleaseAsset=true&subleaseAsset=0`;
+      if (referenceData?.warehouse) {
+        deepFilter = `${deepFilter}&plant=${referenceData?.warehouse}`;
+      }
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
@@ -232,32 +235,32 @@ const AssignSerializedAssetDialog = ({
               <Box style={{ display: 'inline' }}>
                 {products.length > 0
                   ? products?.map((d) => (
-                      <Box
-                        m={0.5}
-                        p={1}
-                        border={1}
-                        className="cursor-pointer"
-                        borderColor="var(--common-border-color)"
-                        onClick={() => {
-                          if (selectedProduct === d.id) {
-                            setSelectedProduct(null);
-                          } else {
-                            setSelectedProduct(d.id);
-                          }
-                        }}
-                        style={{ display: 'inline-block' }}
-                        bgcolor={d.id === selectedProduct && 'primary.main'}
-                        color={d.id === selectedProduct && 'white'}
-                      >
-                        {d?.qty < 0 ? (
-                          <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
-                        ) : d?.qty === 0 ? (
-                          <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
-                        ) : (
-                          <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
-                        )}
-                      </Box>
-                    ))
+                    <Box
+                      m={0.5}
+                      p={1}
+                      border={1}
+                      className="cursor-pointer"
+                      borderColor="var(--common-border-color)"
+                      onClick={() => {
+                        if (selectedProduct === d.id) {
+                          setSelectedProduct(null);
+                        } else {
+                          setSelectedProduct(d.id);
+                        }
+                      }}
+                      style={{ display: 'inline-block' }}
+                      bgcolor={d.id === selectedProduct && 'primary.main'}
+                      color={d.id === selectedProduct && 'white'}
+                    >
+                      {d?.qty < 0 ? (
+                        <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                      ) : d?.qty === 0 ? (
+                        <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
+                      ) : (
+                        <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
+                      )}
+                    </Box>
+                  ))
                   : null}
               </Box>
             </Grid>
@@ -319,7 +322,7 @@ const AssignSerializedAssetDialog = ({
             allowAction={false}
             loading={loading}
             allowSelection={true}
-            onCellValueChanged={() => {}}
+            onCellValueChanged={() => { }}
             showOnlyShowFilteredRecordSwitch={true}
             refreshGrid={fetchData}
             renderedFrom={renderedFrom}

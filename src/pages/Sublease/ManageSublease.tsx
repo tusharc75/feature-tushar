@@ -147,7 +147,11 @@ const ManageSublease = ({
   }, [subleaseId]);
 
   useEffect(() => {
-    setFormsData(setFieldsInAscendingOrder(initialData.fields));
+    if (initialData.values['type']) {
+      handleTypeChange(initialData.values['type']);
+    } else {
+      setFormsData(setFieldsInAscendingOrder(initialData.fields));
+    }
   }, [initialData.fields]);
 
   const handleSubmit = (values) => {
@@ -236,13 +240,34 @@ const ManageSublease = ({
       if (!values?.fromWarehouse && fromWarehouseField) {
         errors['fromWarehouse'] = `${fromWarehouseField?.fieldLabel} is required`;
       }
+      const toWarehouseField = initialData?.fields?.find((e) => e.fieldName === 'toWarehouse')
+      if (!values?.toWarehouse && toWarehouseField) {
+        errors['toWarehouse'] = `${toWarehouseField?.fieldLabel} is required`;
+      }
+
+      if (values?.fromWarehouse && values?.toWarehouse) {
+        if (values?.fromWarehouse === values?.toWarehouse) {
+          errors['toWarehouse'] = `${fromWarehouseField?.fieldLabel} and ${toWarehouseField?.fieldLabel} should not be same`;
+        }
+      }
+    }
+    else {
       const warehouseField = initialData?.fields?.find((e) => e.fieldName === 'warehouse')
-      if (values?.fromWarehouse === values?.warehouse) {
-        errors['warehouse'] = `From and To ${warehouseField?.fieldLabel} should not be same`;
+      if (!values?.warehouse) {
+        errors['warehouse'] = `${warehouseField?.fieldLabel} is required`;
       }
     }
     return errors;
   }
+
+  const handleTypeChange = (type) => {
+    if (type === SUBLEASE_TYPE.interCompany) {
+      setFormsData(setFieldsInAscendingOrder(initialData.fields.filter((e) => e.fieldName !== 'warehouse')));
+    }
+    else {
+      setFormsData(setFieldsInAscendingOrder(initialData.fields.filter((d) => !['fromWarehouse', 'toWarehouse']?.includes(d.fieldName))))
+    }
+  };
 
   return (
     <Dialog
@@ -297,7 +322,7 @@ const ManageSublease = ({
                           <Grid spacing={3} container>
                             {form.sectionFields.map((field, index2) => (
                               <Grid key={index2} item xs={12} sm={6} md={6}>
-                                {field.fieldName === 'fromWarehouse' ? (
+                                {field.fieldName === 'estimateStartDate' ? (
                                   <FormTypes
                                     {...field}
                                     values={values}
@@ -310,95 +335,79 @@ const ManageSublease = ({
                                     setFieldValue={(name, value) => {
                                       setFieldValue(name, value);
                                     }}
-                                    required={values?.type === SUBLEASE_TYPE.interCompany}
+                                    required={field.required}
                                     fullWidth
                                     isTooltip={field?.isTooltip || false}
                                     tooltipMessage={field?.tooltipMessage}
                                     size="small"
                                   />
-                                )
-                                  : field.fieldName === 'estimateStartDate' ? (
-                                    <FormTypes
-                                      {...field}
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={field.option}
-                                      setFieldValue={(name, value) => {
-                                        setFieldValue(name, value);
-                                      }}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={field?.isTooltip || false}
-                                      tooltipMessage={field?.tooltipMessage}
-                                      size="small"
-                                    />
-                                  ) : field.fieldName === 'estimateEndDate' ? (
-                                    <FormTypes
-                                      {...field}
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={field.option}
-                                      setFieldValue={(name, value) => {
-                                        setFieldValue(name, value);
-                                      }}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={field?.isTooltip || false}
-                                      tooltipMessage={field?.tooltipMessage}
-                                      size="small"
-                                    />
-                                  ) : ['actualStartDate', 'actualEndDate'].includes(field.fieldName) ? (
-                                    <FormTypes
-                                      {...field}
-                                      fieldData={field}
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={field.option}
-                                      setFieldValue={(name, value) => {
-                                        setFieldValue(name, value);
-                                      }}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={field?.isTooltip || false}
-                                      tooltipMessage={field?.tooltipMessage}
-                                      size="small"
-                                    />
-                                  ) : (
-                                    <FormTypes
-                                      isNew={Boolean(subleaseId)}
-                                      {...field}
-                                      fieldData={field}
-                                      disabled={Boolean(subleaseId) && field.disableOnEdit && !isClone}
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      fields={initialData.fields}
-                                      type={field.type}
-                                      options={field.option}
-                                      setFieldValue={(name, value) => {
-                                        setFieldValue(name, value);
-                                      }}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={field?.isTooltip || false}
-                                      tooltipMessage={field?.tooltipMessage}
-                                      size="small"
-                                    />
-                                  )}
+                                ) : field.fieldName === 'estimateEndDate' ? (
+                                  <FormTypes
+                                    {...field}
+                                    values={values}
+                                    errors={errors}
+                                    touched={touched}
+                                    label={field.fieldLabel}
+                                    name={field.fieldName}
+                                    type={field.type}
+                                    options={field.option}
+                                    setFieldValue={(name, value) => {
+                                      setFieldValue(name, value);
+                                    }}
+                                    required={field.required}
+                                    fullWidth
+                                    isTooltip={field?.isTooltip || false}
+                                    tooltipMessage={field?.tooltipMessage}
+                                    size="small"
+                                  />
+                                ) : ['actualStartDate', 'actualEndDate'].includes(field.fieldName) ? (
+                                  <FormTypes
+                                    {...field}
+                                    fieldData={field}
+                                    values={values}
+                                    errors={errors}
+                                    touched={touched}
+                                    label={field.fieldLabel}
+                                    name={field.fieldName}
+                                    type={field.type}
+                                    options={field.option}
+                                    setFieldValue={(name, value) => {
+                                      setFieldValue(name, value);
+                                    }}
+                                    required={field.required}
+                                    fullWidth
+                                    isTooltip={field?.isTooltip || false}
+                                    tooltipMessage={field?.tooltipMessage}
+                                    size="small"
+                                  />
+                                ) : (
+                                  <FormTypes
+                                    isNew={Boolean(subleaseId)}
+                                    {...field}
+                                    fieldData={field}
+                                    disabled={Boolean(subleaseId) && field.disableOnEdit && !isClone}
+                                    values={values}
+                                    errors={errors}
+                                    touched={touched}
+                                    label={field.fieldLabel}
+                                    name={field.fieldName}
+                                    fields={initialData.fields}
+                                    type={field.type}
+                                    options={field.option}
+                                    setFieldValue={(name, value) => {
+                                      setFieldValue(name, value);
+                                      if (field.fieldName === 'type') {
+                                        handleTypeChange(value);
+                                      }
+                                    }}
+                                    required={['fromWarehouse', 'toWarehouse']?.includes(field.fieldName) && values.type === SUBLEASE_TYPE.interCompany ?
+                                      true : values.type === SUBLEASE_TYPE.vendor && field.fieldName === 'warehouse' ? true : field.required}
+                                    fullWidth
+                                    isTooltip={field?.isTooltip || false}
+                                    tooltipMessage={field?.tooltipMessage}
+                                    size="small"
+                                  />
+                                )}
                               </Grid>
                             ))}
                           </Grid>
