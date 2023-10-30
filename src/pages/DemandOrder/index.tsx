@@ -1,39 +1,38 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import { Link, useHistory } from 'react-router-dom';
-import { Chip, Grid, IconButton, Tooltip, Box } from '@material-ui/core';
+import { IconButton, Tooltip } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { useContext, useEffect, useState } from 'react';
 import { BsListCheck } from 'react-icons/all';
-import {
-  isObjectEmpty,
-  gridLoadingTimeout,
-  prepareDataForGrid,
-  getLocalStorageArrayData,
-  removeLocalStorage,
-  demandOrder,
-  sidebarResource
-} from '../../constants/helpers';
-import CustomContainer from '../../components/CustomContainer';
-import routes from './../../components/Helpers/Routes';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import MessageDialog from '../../components/Helpers/MessageDialog';
-import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import SalesOrderHeader from './DemandOrderHeader';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { isMobile, isTablet } from 'react-device-detect';
+import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField, gridFilterParser } from '../../constants/useColumns';
-import ManageSalesOrderDialog from './ManageDemandOrderDialog';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import CustomContainer from '../../components/CustomContainer';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
+import MessageDialog from '../../components/Helpers/MessageDialog';
+import {
+  demandOrder,
+  getLocalStorageArrayData,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  removeLocalStorage,
+  sidebarResource
+} from '../../constants/helpers';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import routes from './../../components/Helpers/Routes';
+import SalesOrderHeader from './DemandOrderHeader';
+// import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField, gridFilterParser } from '../../constants/useColumns';
 import { camelCase } from 'lodash';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import ManageSalesOrderDialog from './ManageDemandOrderDialog';
 
 let searchTimeout;
 
 const DemandOrder = () => {
+  const { state: tableState, dispatch } = useTableReducer();
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = tableState;
+
   const DemandOrderType = [
     {
       key: `My ${routes.demandOrder.title}`,
@@ -65,9 +64,6 @@ const DemandOrder = () => {
     show: false,
     demandOrderNumber: ''
   });
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   const { getColumnData } = useColumns();
   const [frameworkComponent, setFrameworkComponent] = useState({});
@@ -76,6 +72,37 @@ const DemandOrder = () => {
   useEffect(() => {
     fetchGridColumns();
   }, []);
+
+  // const fetchGridColumns = async () => {
+  //   let data;
+  //   const response = await axiosInstance().get(`/field?resource=Demand Order`);
+  //   data = response?.data?.data;
+  //   let columns = [];
+  //   let rendererNames = [];
+  //   data.forEach((o) => {
+  //     let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.demandOrderDetail.path, true);
+  //     if (currentColumn !== null) {
+  //       columns = [...columns, currentColumn?.columnData];
+  //       if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+  //         rendererNames.push(currentColumn?.rendererName);
+  //       }
+  //     }
+  //     return o?.fieldData;
+  //   });
+  //   let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
+  //   tempFrameworkComponent = {
+  //     ...tempFrameworkComponent,
+  //     demandOrderRenderer: DemandOrderRenderer,
+  //     actionsRenderer: ActionsRenderer
+  //   };
+  //   setFrameworkComponent({ ...tempFrameworkComponent });
+  //   let staticFields = getStaticFields();
+  //   staticFields.forEach((field) => {
+  //     columns.push(checkStaticField(routes.projectSales.title, field));
+  //   });
+  //   setColumns([...columns]);
+  //   console.log(columns);
+  // };
 
   const fetchGridColumns = async () => {
     let data;
@@ -93,18 +120,8 @@ const DemandOrder = () => {
       }
       return o?.fieldData;
     });
-    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-    tempFrameworkComponent = {
-      ...tempFrameworkComponent,
-      demandOrderRenderer: DemandOrderRenderer,
-      actionsRenderer: ActionsRenderer
-    };
-    setFrameworkComponent({ ...tempFrameworkComponent });
-    let staticFields = getStaticFields();
-    staticFields.forEach((field) => {
-      columns.push(checkStaticField(routes.projectSales.title, field));
-    });
-    setColumns([...columns]);
+    columns = [...columns, ...getStaticFields(), ActionsRenderer];
+    setColumns(columns);
   };
 
   useEffect(() => {
@@ -146,49 +163,51 @@ const DemandOrder = () => {
       });
   };
 
-  const DemandOrderRenderer = (params) => (
-    <Link className="link" title={params.value} to={`${routes.demandOrder.path}/detail/${params.data._id}`}>
-      {params.value}
-    </Link>
-  );
-
-  const ActionsRenderer = (params) => (
-    <>
-      {permissions?.demandOrder?.isCreate ? (
-        <Tooltip title="Clone">
-          <IconButton
-            size="small"
-            aria-label="Clone"
-            onClick={() => {
-              setShowManageSalesOrderDialog({ open: true, isClone: true, idToClone: params.data._id });
-            }}
-          >
-            <FileCopyIcon fontSize="small" color="primary" />
-          </IconButton>
-        </Tooltip>
-      ) : (
-        <Tooltip className="cursor-stop" title="You do not have permission to clone/create">
-          <IconButton aria-label="Clone" size="small">
-            <FileCopyIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      )}
-      <GridDeleteIcon
-        hasDeletePermission={permissions?.demandOrder?.isDelete}
-        ownerId={user?.user?._id}
-        userId={user?.user?._id}
-        onDelete={() =>
-          setSingleSalesOrderDelete({
-            show: true,
-            id: params.data._id,
-            demandOrderNumber: `${params.data.demandOrderNumber}`
-          })
-        }
-        entity="demand order"
-      />
-    </>
-  );
-
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 100,
+    sticky: 'right',
+    disableFilters: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        {permissions?.demandOrder?.isCreate ? (
+          <Tooltip title="Clone">
+            <IconButton
+              size="small"
+              aria-label="Clone"
+              onClick={() => {
+                setShowManageSalesOrderDialog({ open: true, isClone: true, idToClone: row.original._id });
+              }}
+            >
+              <FileCopyIcon fontSize="small" color="primary" />
+            </IconButton>
+          </Tooltip>
+        ) : (
+          <Tooltip className="cursor-stop" title="You do not have permission to clone/create">
+            <IconButton aria-label="Clone" size="small">
+              <FileCopyIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        )}
+        <GridDeleteIcon
+          hasDeletePermission={permissions?.demandOrder?.isDelete}
+          ownerId={user?.user?._id}
+          userId={user?.user?._id}
+          onDelete={() =>
+            setSingleSalesOrderDelete({
+              show: true,
+              id: row.original._id,
+              demandOrderNumber: `${row.original.demandOrderNumber}`
+            })
+          }
+          entity="demand order"
+        />
+      </>
+    )
+  };
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
 
@@ -233,10 +252,6 @@ const DemandOrder = () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
 
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
-
     axiosInstance()
       .get(`${demandOrder.api}${queryString}`)
       .then(({ data: { data, count } }) => {
@@ -248,13 +263,14 @@ const DemandOrder = () => {
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      })
+      .finally(() => {
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
-      })
-      .catch((error) => {
-        dispatch({ type: 'loading', loading: false });
-        toastConfig.setToastConfig(error);
       });
   };
 
@@ -342,8 +358,7 @@ const DemandOrder = () => {
               : []
           }
           onExportToExcelSuccess={() => {
-            if (gridApi) gridApi.deselectAll();
-            else fetchData();
+            fetchData();
           }}
           additionalParams={getQueryString(true)}
         />
@@ -372,61 +387,41 @@ const DemandOrder = () => {
             ></SalesOrderHeader>
           )}
         </div>
-        {Object.keys(frameworkComponent).length > 0 && columns ? (
-          isMobile && !isTablet ? (
-            <CustomSwipableList
-              key={selectedType}
-              allowSelection={true}
-              allowSwipe={true}
-              permissions={permissions?.demandOrder}
-              primaryField={columns?.find((d) => d.field === 'demandOrderNumber')}
-              onClick={(data) => {
-                history.push(`${routes.demandOrderDetail.path}/${data._id}`);
-              }}
-              dataRows={dataRows}
-              selectedRecords={selectedRecords}
-              dispatch={dispatch}
-              onEdit={(data) => {
-                history.push(`${routes.demandOrderDetail.path}/${data._id}`);
-              }}
-              extraParamsToCheckDelete={true}
-              onDelete={(data) => {
-                setSingleSalesOrderDelete({
-                  show: true,
-                  id: data._id,
-                  demandOrderNumber: `${data.demandOrderNumber}`
-                });
-              }}
-              rowCount={rowCount}
-              page={page}
-              loading={loading}
-              chips={[]}
-              owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-              onCreate={false}
-              showClone={true}
-              onClone={(data) => {
-                setShowManageSalesOrderDialog({ open: true, isClone: true, idToClone: data._id });
-              }}
-              renderedFrom={renderedFrom}
-            />
-          ) : (
-            <CustomAgGrid
+        {columns ? (
+          <>
+            {/* <CustomAgGrid
+             columns={columns}
+             dataRows={dataRows}
+             frameworkComponents={frameworkComponent}
+             setGridApi={setGridApi}
+             dispatch={dispatch}
+             rowCount={rowCount}
+             limit={limit}
+             pageSizes={pageSizes}
+             page={page}
+             actionWidth={100}
+             loading={loading}
+             renderedFrom={renderedFrom}
+             refreshGrid={fetchData}
+             showOnlyShowFilteredRecordSwitch={true}
+           /> */}
+            <CustomReactTable
+              height={'calc(100vh - 200px)'}
               columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameworkComponent}
-              setGridApi={setGridApi}
+              onSelect={(newSelectedRecords) => {
+                // dispatch({ type: "selection", selectedRecords: newSelectedRecords })
+              }}
+              state={tableState}
               dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              actionWidth={100}
-              loading={loading}
+              setWholeRowsCellColor={() => {}}
               renderedFrom={renderedFrom}
+              isClientSideGrid={false}
               refreshGrid={fetchData}
               showOnlyShowFilteredRecordSwitch={true}
+              showFilters={false}
+              resource={sidebarResource.serializedAsset}
             />
-          )
+          </>
         ) : null}
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
