@@ -106,6 +106,20 @@ export const getSortedColumns = (columns = []) => {
   });
 };
 export const staticColumns = ['createdBy', 'updatedBy'];
+
+const getColumnWidth = (text) => {
+  const textLength = text.length;
+  const characterWidth = 8;
+  const searchIconWidth = 30;
+  const searchIconMargin = 10;
+  const tempWidth = textLength * characterWidth + searchIconWidth + searchIconMargin;
+  const width = Math.max(tempWidth, 150);
+  const minWidth = 80;
+  return {
+    minWidth,
+    width
+  };
+};
 export default function useColumns() {
   const {
     state: { permissions, user, selectedEntity }
@@ -130,6 +144,7 @@ export default function useColumns() {
       let commonFieldData = {
         accessor: field?.fieldName,
         Header: fieldHeaderName,
+        ...getColumnWidth(fieldHeaderName),
         show: gridMetaData[title]?.hide && gridMetaData[title]?.hide.indexOf(field?.fieldName) >= 0 ? false : true,
         disabled: gridMetaData[title]?.disabled && gridMetaData[title]?.disabled.indexOf(field?.fieldName) >= 0 ? true : false,
         primaryField: field?.primaryField ?? false

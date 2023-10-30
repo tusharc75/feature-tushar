@@ -536,7 +536,6 @@ const WorkOrder = () => {
             showOnlyShowFilteredRecordSwitch={true}
             rowClassRules={{
               'red-data-row': function (params) {
-                console.log(params);
                 return params.data.deleted;
               }
             }}
