@@ -92,7 +92,6 @@ const DemandOrder = () => {
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
-
   const fetchGridColumns = async () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=Demand Order`);
@@ -294,14 +293,12 @@ const DemandOrder = () => {
     setAnchorEl(null);
   };
 
-
   const onTypeChange = (event, type) => {
     dispatch({ type: 'pageChange', page: 0 });
     const value = DemandOrderType.find((d) => d.key === type).value;
     setSelectedType(value);
     history.push(`?type=${value}`);
   };
-
 
   return (
     <section className="main-container-v1">
@@ -311,7 +308,7 @@ const DemandOrder = () => {
           permissions={permissions?.demandOrder}
           module="demandOrder"
           api={demandOrder.api}
-          afterImportCompleted={() => { }}
+          afterImportCompleted={() => {}}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
@@ -328,78 +325,77 @@ const DemandOrder = () => {
       </div>
       <CustomContainer>
         <div className="header-panel">
-          <div className={'flex justify-between align-items-center gap-1 w-full'}>
-            <ToggleButtonGroup
-              size="small"
-              className="align-items-center gap-1 "
-              value={DemandOrderType[selectedType - 1].key}
-              exclusive
-              onChange={onTypeChange}
-            >
-              {DemandOrderType.map((k, index) => {
-                return (
-                  <ToggleButton value={k.key} key={index}>
-                    {k.key}
-                  </ToggleButton>
-                );
-              })}
-            </ToggleButtonGroup>
-          </div>
-          <div className="flex flex-wrap gap-[8px]  justify-end">
-            <SearchBox
-              onChange={handleSearch}
-              className={styles.search_box_input}
-              value={search}
-              size="small" />
-            <div className="flex gap-[8px] flex-wrap items-center">
-              <Button
-                variant={'contained'}
-                color="primary"
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className={'flex justify-between align-items-center gap-1 w-full'}>
+              <ToggleButtonGroup
                 size="small"
-                className={`no-shadow`}
-                onClick={() => {
-                  setShowManageSalesOrderDialog({ open: true, isClone: false, idToClone: null });
-                }}
-                startIcon={<AddOutlined />}>
-                Add
-              </Button>
-              {permissions?.demandOrder?.isDelete && (
-                <>
-                  <Button
-                    variant={'outlined'}
-                    color="default"
-                    size="small"
-                    onClick={openActions}
-                    className={`new-dropdown-v1`}
-                    aria-controls="action-menu"
-                    endIcon={<ExpandMore />}
-                    disabled={selectedRecords?.length ? false : true}
-                  >
-                    Actions
-                  </Button>
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
-                    }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
-                  >
-                    <MenuItem
-                      onClick={() => {
-                        closeActions();
-                        showConfirmBox(null);
-                      }}
+                className="align-items-center gap-1 "
+                value={DemandOrderType[selectedType - 1].key}
+                exclusive
+                onChange={onTypeChange}
+              >
+                {DemandOrderType.map((k, index) => {
+                  return (
+                    <ToggleButton value={k.key} key={index}>
+                      {k.key}
+                    </ToggleButton>
+                  );
+                })}
+              </ToggleButtonGroup>
+            </div>
+            <div className="flex flex-wrap gap-[8px]  justify-end">
+              <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
+              <div className="flex gap-[8px] flex-wrap items-center">
+                <Button
+                  variant={'contained'}
+                  color="primary"
+                  size="small"
+                  className={`no-shadow`}
+                  onClick={() => {
+                    setShowManageSalesOrderDialog({ open: true, isClone: false, idToClone: null });
+                  }}
+                  startIcon={<AddOutlined />}
+                >
+                  Add
+                </Button>
+                {permissions?.demandOrder?.isDelete && (
+                  <>
+                    <Button
+                      variant={'outlined'}
+                      color="default"
+                      size="small"
+                      onClick={openActions}
+                      className={`new-dropdown-v1`}
+                      aria-controls="action-menu"
+                      endIcon={<ExpandMore />}
+                      disabled={selectedRecords?.length ? false : true}
                     >
-                      Delete
-                    </MenuItem>
-                  </Menu>
-                </>
-              )}
+                      Actions
+                    </Button>
+                    <Menu
+                      anchorEl={anchorEl}
+                      keepMounted
+                      getContentAnchorEl={null}
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left'
+                      }}
+                      id="action-menu"
+                      open={Boolean(anchorEl)}
+                      onClose={closeActions}
+                    >
+                      <MenuItem
+                        onClick={() => {
+                          closeActions();
+                          showConfirmBox(null);
+                        }}
+                      >
+                        Delete
+                      </MenuItem>
+                    </Menu>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -407,8 +403,7 @@ const DemandOrder = () => {
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => {
-            }}
+            onSelect={() => {}}
             state={tableState}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
