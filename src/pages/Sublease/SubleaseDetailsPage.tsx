@@ -286,48 +286,40 @@ const SubleaseDetailsPage = () => {
                       isProcessor={isProcessor}
                     />
                   )}
-                  {
-                    ['Serialized Asset'].includes(subleaseStepsNames[currentStep]) && subleaseData && (
-                      <SerializedAsset
-                        subleaseData={subleaseData}
-                        setNextStep={setNextStep}
-                        fetchData={fetchData}
-                        isIssued={isIssued}
-                        setNextStepToolTip={setNextStepToolTip}
-                        renderedFrom={`${renderedFrom}_grid-1`}
-                        allowedToEdit={allowedToEdit}
-                        stepFullScreen={stepFullScreen}
-                      />
-                    )
-                  }
-                  {
-                    ['Loading Ticket'].includes(subleaseStepsNames[currentStep]) && subleaseData && (
-                      <LoadingTicket
-                        subleaseData={subleaseData}
-                        setNextStep={setNextStep}
-                        fetchData={fetchData}
-                        setNextStepToolTip={setNextStepToolTip}
-                        ticketType={DELIVERY_TICKET_TYPE.loading}
-                        renderedFrom={`${renderedFrom}_grid-1`}
-                        allowedToEdit={allowedToEdit}
-                        stepFullScreen={stepFullScreen}
-                      />
-                    )
-                  }
-                  {
-                    ['Receiving Ticket'].includes(subleaseStepsNames[currentStep]) && subleaseData && (
-                      <LoadingTicket
-                        subleaseData={subleaseData}
-                        setNextStep={setNextStep}
-                        fetchData={fetchData}
-                        setNextStepToolTip={setNextStepToolTip}
-                        ticketType={DELIVERY_TICKET_TYPE.receiving}
-                        renderedFrom={`${renderedFrom}_grid-1`}
-                        allowedToEdit={allowedToEdit}
-                        stepFullScreen={stepFullScreen}
-                      />
-                    )
-                  }
+                  {['Serialized Asset'].includes(subleaseStepsNames[currentStep]) && subleaseData && (
+                    <SerializedAsset
+                      subleaseData={subleaseData}
+                      setNextStep={setNextStep}
+                      setNextStepToolTip={setNextStepToolTip}
+                      renderedFrom={`${renderedFrom}_grid-3`}
+                      allowedToEdit={allowedToEdit}
+                      stepFullScreen={stepFullScreen}
+                    />
+                  )}
+                  {['Loading Ticket'].includes(subleaseStepsNames[currentStep]) && subleaseData && (
+                    <LoadingTicket
+                      subleaseData={subleaseData}
+                      setNextStep={setNextStep}
+                      fetchData={fetchData}
+                      setNextStepToolTip={setNextStepToolTip}
+                      ticketType={DELIVERY_TICKET_TYPE.loading}
+                      renderedFrom={`${renderedFrom}_grid-4`}
+                      allowedToEdit={allowedToEdit}
+                      stepFullScreen={stepFullScreen}
+                    />
+                  )}
+                  {['Receiving Ticket'].includes(subleaseStepsNames[currentStep]) && subleaseData && (
+                    <LoadingTicket
+                      subleaseData={subleaseData}
+                      setNextStep={setNextStep}
+                      fetchData={fetchData}
+                      setNextStepToolTip={setNextStepToolTip}
+                      ticketType={DELIVERY_TICKET_TYPE.receiving}
+                      renderedFrom={`${renderedFrom}_grid-5`}
+                      allowedToEdit={allowedToEdit}
+                      stepFullScreen={stepFullScreen}
+                    />
+                  )}
                 </ContentFullScreen>
               </Grid>
             ) : (

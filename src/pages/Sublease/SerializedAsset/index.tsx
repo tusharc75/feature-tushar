@@ -19,7 +19,8 @@ import { fetch_sublease_product_fields } from 'src/components/Sublease/helper';
 import { subleaseMessage } from 'src/constants/messageHelpers';
 
 
-function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, fetchData, isIssued, renderedFrom, allowedToEdit, stepFullScreen }) {
+function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowedToEdit, stepFullScreen, renderedFrom }) {
+
     const toastConfig = useContext(CustomToastContext);
 
     const [columns, setColumns] = useState(null);
@@ -32,7 +33,6 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, fetchD
     const [deleteData, setDeleteData] = useState([]);
     const [showConfirmBox, setShowConfirmBox] = useState(false);
     const [deleting, setDeleting] = useState(false);
-
 
     useEffect(() => {
         fetchFields();
@@ -187,17 +187,9 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, fetchD
         setNextStepToolTip(null);
         try {
             var data: any = [];
-            var transferAssets: any = [];
-            var purchaseOrderProduct: any = [];
-            var bulkAssetCreationProduct: any = [];
-            var subleaseProduct: any = [];
-            var offlineAssetErrorLog: any = [];
-
 
             const response = await axiosInstance().get(`${sublease.api}/productpackage/${subleaseData._id}`);
             data = response?.data?.data;
-            data.inventory = data.inventory?.filter((e) => !e.isReplaced);
-
 
             const material = data.material;
             let rows = data.material.filter((e) => e.parentId === null)?.filter((ele) => checkProductInside(ele, material) === true);
@@ -220,22 +212,10 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, fetchD
                                 : '';
                 parent.serializedProduct = parent.type === 'product' ? parent?.productDetail?.serializedProduct : false;
                 parent.assetQty = parent.qty;
-                parent.assetAssignedQty = parent.serializedProduct
-                    ? data.inventory?.filter((e) => e._id === parent._id).length
-                    : data.nonSerializeAsset?.filter((e) => e._id === parent._id).length;
+                parent.assetAssignedQty = parent.serializedProduct ? data.inventory?.filter((e) => e._id === parent._id).length : 0;
                 parent.realAssetQty = parent.assetQty;
                 parent.realAssetAssignedQty = parent.assetAssignedQty;
-                parent.subRows = generateNestedData(
-                    data.material,
-                    data.inventory,
-                    data?.nonSerializeAsset,
-                    parent,
-                    transferAssets,
-                    subleaseProduct,
-                    purchaseOrderProduct,
-                    bulkAssetCreationProduct,
-                    offlineAssetErrorLog
-                );
+                parent.subRows = generateNestedData(data.material, data.inventory, parent);
                 parent.assetQty =
                     parent.subRows.filter((d) => d.type !== 'asset').length === 0
                         ? parent.assetQty
@@ -279,17 +259,7 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, fetchD
         }
     };
 
-    const generateNestedData = (
-        material,
-        inventory,
-        nonSerializeAsset,
-        parent,
-        transferAssets,
-        subleaseProduct,
-        purchaseOrderProduct,
-        bulkAssetCreationProduct,
-        offlineAssetErrorLog
-    ) => {
+    const generateNestedData = (material, inventory, parent) => {
         const subRows: any = [];
         const inventory_result = inventory?.filter((e) => e._id === parent._id);
         inventory_result?.forEach((_inventory, k) => {
@@ -306,23 +276,6 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, fetchD
                 warehouse: _inventory.inventoryDetail?.warehouse,
                 _id: _inventory.inventory,
                 isValid: _inventory.inventoryDetail?.manualStatus === ASSET_STATUS.reserved ? false : true,
-                canRemove: true
-            });
-        });
-
-        const nonSerializeAsset_result = nonSerializeAsset?.filter((e) => e._id === parent._id);
-        nonSerializeAsset_result?.forEach((_inventory, k) => {
-            subRows.push({
-                _id: _inventory.id,
-                inventory: _inventory.id,
-                index: `${parent.index}.${k + 1}`,
-                detail: _inventory?.assetNumber,
-                description: parent?.description,
-                type: 'asset',
-                isNonSerializeAsset: true,
-                status: _inventory?.status,
-                warehouse: subleaseData?.warehouse?.optionValue,
-                isValid: true,
                 canRemove: true
             });
         });
@@ -347,30 +300,16 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, fetchD
                             ? _subRow?.packageDetail?.packageDescription || ''
                             : '';
             _subRow.serializedProduct = _subRow.type === 'product' ? _subRow?.productDetail?.serializedProduct : false;
-            // _subRow.assetQty = _subRow.type === 'product' || _subRow.type === 'package' ? _subRow.qty * parent.assetQty : 0;
             _subRow.assetQty =
                 _subRow.type === 'product' || _subRow.type === 'package'
                     ? parent.type === 'product' || parent.type === 'package'
                         ? _subRow.qty * parent.assetQty
                         : _subRow.qty * parent.qty
                     : 0;
-            _subRow.assetAssignedQty = _subRow.serializedProduct
-                ? inventory?.filter((e) => e._id === _subRow._id).length
-                : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
+            _subRow.assetAssignedQty = _subRow.serializedProduct ? inventory?.filter((e) => e._id === _subRow._id).length : 0;
             _subRow.realAssetQty = _subRow.type === 'product' || _subRow.type === 'package' ? _subRow.qty * parent.realAssetQty : 0;
             _subRow.realAssetAssignedQty = _subRow.assetAssignedQty;
-            // _subRow.isValid = _subRow.serializedProduct ? (_subRow.assetAssignedQty === _subRow.assetQty ? true : false) : true;
-            let tempSubRows = generateNestedData(
-                material,
-                inventory,
-                nonSerializeAsset,
-                _subRow,
-                transferAssets,
-                subleaseProduct,
-                purchaseOrderProduct,
-                bulkAssetCreationProduct,
-                offlineAssetErrorLog
-            );
+            let tempSubRows = generateNestedData(material, inventory, _subRow);
             _subRow.subRows = tempSubRows;
             _subRow.assetQty =
                 tempSubRows.filter((d) => d.type !== 'asset').length === 0
@@ -397,20 +336,15 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, fetchD
         return subRows;
     };
 
-    const handleAddSerializedAsset = (assets) => {
-        setNextStep(false);
+    const handleAssignAssets = (assets) => {
         var data = [];
         assets.forEach((e) => {
-            data.push({
-                ...e,
-                qty: 1,
-                inventory: e.asset,
-            });
+            data.push({ _id: e?._id, inventory: e.asset });
         });
         if (data.length) {
             setAdding(true);
             axiosInstance()
-                .post(`${sublease.api}/asset/${subleaseData._id}`, { products: data })
+                .post(`${sublease.api}/asset/${subleaseData._id}`, { assets: data })
                 .then(({ data }) => {
                     setAddSerializedAssetDialog(false);
                     fetchRowData()
@@ -422,12 +356,10 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, fetchD
                         type: 'success',
                         message: data.message
                     });
-                    setNextStep(true);
                 })
                 .catch((error) => {
                     setAdding(false);
                     toastConfig.setToastConfig(error);
-                    setNextStep(true);
                 });
         }
     };
@@ -540,7 +472,7 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, fetchD
                                 uniqueKey="_id"
                                 hideSelection={!allowedToEdit}
                                 hideAction={false}
-                                renderedFrom="sublease_asset"
+                                renderedFrom={renderedFrom}
                                 isClientSideGrid={true}
                             />
                         </Box>
@@ -559,11 +491,9 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, fetchD
                         setAddSerializedAssetDialog(false);
                         setAssetAssignedProduct([]);
                     }}
-                    ids={flattenArray(rowsData)
-                        ?.filter((e) => e.type === 'serializedAsset')
-                        ?.map((e) => e.materialId)}
+                    ids={flattenArray(rowsData)?.filter((e) => e.type === 'serializedAsset')?.map((e) => e.materialId)}
                     handleSucess={(rows) => {
-                        handleAddSerializedAsset(rows);
+                        handleAssignAssets(rows);
                     }}
                     isAssigning={isAdding}
                     selectedProducts={assetAssignedProduct?.map((i) => {
