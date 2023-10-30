@@ -398,6 +398,11 @@ const ManageSublease = ({
                                       setFieldValue(name, value);
                                       if (field.fieldName === 'type') {
                                         handleTypeChange(value);
+                                        ['warehouse', 'fromWarehouse', 'toWarehouse']?.forEach((fieldName) => {
+                                          if (initialData.fields?.find((ele) => ele.fieldName === fieldName)) {
+                                            setFieldValue(fieldName, '');
+                                          }
+                                        })
                                       }
                                     }}
                                     required={['fromWarehouse', 'toWarehouse']?.includes(field.fieldName) && values.type === SUBLEASE_TYPE.interCompany ?
