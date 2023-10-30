@@ -495,6 +495,9 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
                     handleSucess={(rows) => {
                         handleAssignAssets(rows);
                     }}
+                    referenceData={{
+                        warehouse: subleaseData?.fromWarehouse?.optionValue
+                    }}
                     isAssigning={isAdding}
                     selectedProducts={assetAssignedProduct?.map((i) => {
                         return { _id: i._id, product: i.materialId, productName: i.detail, qty: i.assetQty - i.assetAssignedQty };

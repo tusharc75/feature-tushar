@@ -215,7 +215,6 @@ const SerializedAssetTest = () => {
           }
         });
         columns = [...columns, ...getStaticFields(), ActionsRenderer];
-        console.log(columns);
         setColumns([...columns]);
       });
   };

@@ -254,18 +254,18 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
             data['isDeliveryToDisable'] = true;
             if (ticketType === DELIVERY_TICKET_TYPE.loading) {
                 data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.plant;
-                data['pickupFrom'] = subleaseData?.warehouse?.optionValue;
-                data['pickupFromAddress'] = subleaseData?.warehouse?.optionValue;
-                data['deliveryToType'] = DELIVERY_FROM_TO_TYPE.plant;
-                data['deliveryTo'] = subleaseData?.fromWarehouse?.optionValue;
-                data['deliveryToAddress'] = subleaseData?.fromWarehouse?.optionValue;
-            } else {
-                data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.plant;
                 data['pickupFrom'] = subleaseData?.fromWarehouse?.optionValue;
                 data['pickupFromAddress'] = subleaseData?.fromWarehouse?.optionValue;
                 data['deliveryToType'] = DELIVERY_FROM_TO_TYPE.plant;
-                data['deliveryTo'] = subleaseData?.warehouse?.optionValue;
-                data['deliveryToAddress'] = subleaseData?.warehouse?.optionValue;
+                data['deliveryTo'] = subleaseData?.toWarehouse?.optionValue;
+                data['deliveryToAddress'] = subleaseData?.toWarehouse?.optionValue;
+            } else {
+                data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.plant;
+                data['pickupFrom'] = subleaseData?.toWarehouse?.optionValue;
+                data['pickupFromAddress'] = subleaseData?.toWarehouse?.optionValue;
+                data['deliveryToType'] = DELIVERY_FROM_TO_TYPE.plant;
+                data['deliveryTo'] = subleaseData?.fromWarehouse?.optionValue;
+                data['deliveryToAddress'] = subleaseData?.fromWarehouse?.optionValue;
             }
             if (subleaseData?.processor?.optionValue) {
                 data['processor'] = subleaseData?.processor?.optionValue;
@@ -282,7 +282,6 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
             data['_ids'] = loadingTicketIds?.map((e) => e);
             data['status'] = DELIVERY_TICKET_STATUS.delivered;
             data['signatures'] = [];
-            data['warehouse'] = subleaseData?.warehouse?.optionValue;
             axiosInstance()
                 .post(`${deliveryTicket.api}/updatebulk`, data)
                 .then(({ data: { data } }) => {
