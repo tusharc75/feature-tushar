@@ -122,10 +122,10 @@ const getColumnWidth = (text) => {
 };
 export default function useColumns() {
   const {
-    state: { permissions, user, selectedEntity }
+    state: { permissions }
   }: any = useData();
 
-  const getColumnData = (title, field, detailScreenRoute = null, hasPopup = false) => {
+  const getColumnData = (title, field, detailScreenRoute = null, masterPage = false) => {
     let data = localStorage.getItem('gridMetaData');
 
     let gridMetaData = data == 'undefined' ? {} : JSON.parse(data);
@@ -182,8 +182,6 @@ export default function useColumns() {
             ...commonFieldData,
             disabled: true,
             accessor: field?.fieldName === 'firstName' ? 'concatedName' : field.fieldName,
-            cellRenderer: permissions[permissionForLinks[field?.resource]]?.isRead ? 'linkRenderer' : 'commonRenderer',
-            cellRendererParams: { pathName: detailScreenRoute, property: '_id' },
             Cell: ({ row }) =>
               permissions[permissionForLinks[field?.resource]]?.isRead ? (
                 <Fragment>
@@ -192,7 +190,7 @@ export default function useColumns() {
                       className="link text-truncate"
                       title={row?.original?.[field?.fieldName]}
                       to={`${detailScreenRoute}/${row?.original?._id}`}
-                      target="_blank"
+                      target = {masterPage ? "_self" : "_blank"}
                       rel="noopener noreferrer"
                     >
                       {row?.original?.[field?.fieldName]}
@@ -226,12 +224,6 @@ export default function useColumns() {
         return {
           columnData: {
             ...commonFieldData,
-            cellRenderer: permissions[permissionForLinks[field?.lookupResource]]?.isRead ? 'linkRenderer' : 'commonRenderer',
-            cellRendererParams: {
-              pathName: pathName,
-              property: joinedFieldName + 'Id',
-              more: `rest${joinedFieldName}`
-            },
             Cell: ({ row }) =>
               permissions[permissionForLinks[field?.lookupResource]]?.isRead ? (
                 <Fragment>
@@ -258,7 +250,6 @@ export default function useColumns() {
         return {
           columnData: {
             ...commonFieldData,
-            cellRenderer: 'commonRendererWithCopy',
             Cell: ({ row }) =>
               row?.original?.[field?.fieldName] ? (
                 <h5
@@ -279,7 +270,6 @@ export default function useColumns() {
             ...commonFieldData,
             filter: false,
             sortable: false,
-            cellRenderer: 'imageRenderer',
             Cell: ({ row }) => <Avatar className="grid-avatar" src={row?.original?.[field?.fieldName]} />,
             width: 100
           }
@@ -288,7 +278,6 @@ export default function useColumns() {
         return {
           columnData: {
             ...commonFieldData,
-            cellRenderer: 'dateRenderer',
             Cell: ({ row }) => (
               <p className="text-truncate">
                 {row?.original?.[field?.fieldName] ? <p>{moment(row?.original?.[field?.fieldName]).format(dateFormat)}</p> : <NoDataCell />}
@@ -301,15 +290,13 @@ export default function useColumns() {
         return {
           columnData: {
             ...commonFieldData,
-            Cell: ({ row }) => <span>{Boolean(row?.original?.[field?.fieldName]) ? 'Yes' : 'No'}</span>,
-            cellRenderer: 'checkboxRenderer'
+            Cell: ({ row }) => <span>{Boolean(row?.original?.[field?.fieldName]) ? 'Yes' : 'No'}</span>
           }
         };
       } else if (field?.type === 'colorPicker') {
         return {
           columnData: {
             ...commonFieldData,
-            cellRenderer: 'commonRenderer',
             filter: false,
             Cell: ({ row }) => (
               <p className="text-truncate">{row?.original?.[field?.fieldName] ? <p>{row?.original?.[field?.fieldName]}</p> : <NoDataCell />}</p>
@@ -320,7 +307,6 @@ export default function useColumns() {
         return {
           columnData: {
             ...commonFieldData,
-            cellRenderer: 'commonRenderer',
             Cell: ({ row }) => (
               <p className="text-truncate">{row?.original?.[field?.fieldName] ? <p>{row?.original?.[field?.fieldName]}</p> : <NoDataCell />}</p>
             )

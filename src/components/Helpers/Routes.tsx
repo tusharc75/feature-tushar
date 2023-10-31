@@ -280,13 +280,6 @@ const routes = {
         : RESOURCE_LABEL.rentalManagement,
     path: '/rental-management'
   },
-  rentalManagementInvoice: {
-    title:
-      storedRoutes && storedRoutes.rentalManagementInvoice && storedRoutes.rentalManagementInvoice
-        ? storedRoutes.rentalManagementInvoice.title
-        : RESOURCE_LABEL.rentalManagementInvoice,
-    path: '/rental-management-invoice'
-  },
   rentalManagementDetail: {
     title:
       storedRoutes && storedRoutes.rentalManagement && storedRoutes.rentalManagement
@@ -902,10 +895,6 @@ const routes = {
     title: storedRoutes && storedRoutes.fieldTicket && storedRoutes.fieldTicket.title ? storedRoutes.fieldTicket?.title : RESOURCE_LABEL.fieldTicket,
     path: '/field-ticket/detail'
   },
-  fieldTicketInvoice: {
-    title: storedRoutes && storedRoutes.fieldTicketInvoice && storedRoutes.fieldTicketInvoice.title ? storedRoutes.fieldTicketInvoice?.title : RESOURCE_LABEL.fieldTicketInvoice,
-    path: '/field-ticket-invoice'
-  },
   fieldServiceTechnician: {
     title:
       storedRoutes && storedRoutes.fieldServiceTechnician && storedRoutes.fieldServiceTechnician.title
@@ -1050,7 +1039,7 @@ const routes = {
       : RESOURCE_LABEL.iotReport,
     path: '/iot-report'
   },
-  accountsReceivable : {
+  accountsReceivable: {
     title:
       storedRoutes && storedRoutes.accountsReceivable && storedRoutes.accountsReceivable.title
         ? storedRoutes.accountsReceivable?.title
@@ -1107,19 +1096,15 @@ const routes = {
         : RESOURCE_LABEL.chartOfAccount,
     path: '/chart-of-account/detail'
   },
-  flash : {
-    title : storedRoutes && storedRoutes.flash && storedRoutes.flash.title
-    ? storedRoutes.flash?.title
-    : RESOURCE_LABEL.flash,
-    path : '/flash'
+  flash: {
+    title: storedRoutes && storedRoutes.flash && storedRoutes.flash.title
+      ? storedRoutes.flash?.title
+      : RESOURCE_LABEL.flash,
+    path: '/flash'
   },
   flashDetail: {
     title: storedRoutes && storedRoutes.flash && storedRoutes.flash.title ? storedRoutes.flash?.title : RESOURCE_LABEL.flash,
     path: '/flash/detail'
-  },
-  subleaseInvoice: {
-    title: storedRoutes && storedRoutes.subleaseInvoice && storedRoutes.subleaseInvoice.title ? storedRoutes.subleaseInvoice?.title : RESOURCE_LABEL.subleaseInvoice,
-    path: '/sublease-invoice'
   },
   creditMemo: {
     title: storedRoutes && storedRoutes.creditMemo && storedRoutes.creditMemo?.title ? storedRoutes.creditMemo?.title
@@ -1137,9 +1122,24 @@ const routes = {
     title: storedRoutes && storedRoutes.generateInvoice && storedRoutes.generateInvoice.title ? storedRoutes.generateInvoice?.title : RESOURCE_LABEL.generateInvoice,
     path: '/generate-invoice'
   },
+  rentalManagementInvoice: {
+    title:
+      storedRoutes && storedRoutes.rentalManagementInvoice && storedRoutes.rentalManagementInvoice
+        ? storedRoutes.rentalManagementInvoice.title
+        : RESOURCE_LABEL.rentalManagementInvoice,
+    path: '/rental-management-invoice'
+  },
   repairOrderInvoice: {
     title: storedRoutes && storedRoutes.repairOrderInvoice && storedRoutes.repairOrderInvoice.title ? storedRoutes.repairOrderInvoice?.title : RESOURCE_LABEL.repairOrderInvoice,
     path: '/repair-order-invoice'
+  },
+  subleaseInvoice: {
+    title: storedRoutes && storedRoutes.subleaseInvoice && storedRoutes.subleaseInvoice.title ? storedRoutes.subleaseInvoice?.title : RESOURCE_LABEL.subleaseInvoice,
+    path: '/sublease-invoice'
+  },
+  fieldTicketInvoice: {
+    title: storedRoutes && storedRoutes.fieldTicketInvoice && storedRoutes.fieldTicketInvoice.title ? storedRoutes.fieldTicketInvoice?.title : RESOURCE_LABEL.fieldTicketInvoice,
+    path: '/field-ticket-invoice'
   },
 };
 
