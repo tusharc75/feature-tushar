@@ -48,6 +48,7 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
   showSaveAndNext,
   loadingEdit
 }) => {
+  console.log(rowData, material);
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [allFields, setAllFields] = useState([]);
@@ -123,7 +124,7 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
       });
       setInitialData({
         fields: data,
-        values: { ...getObjKeys('', data), estimateStartDate: quotationData.estimateStartDate, estimateEndDate: '', actualStartDate: '', actualEndDate: '', tenure: '' }
+        values: { ...getObjKeys('', data), estimateStartDate: quotationData.estimateStartDate, estimateEndDate: '', actualStartDate: '', actualEndDate: '', tenure: '', unit: 'Piece' }
       });
     } else {
       let unitOptions: any = [];
@@ -137,15 +138,35 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
       setPriceMethodList(pricingMethodOptions);
       let pricingConditionOptions = await getPricing(rowData, pricingMethodOptions);
       data.forEach((element) => {
-        if (element.fieldName === 'unit') {
-          element.option = unitOptions;
-        }
-        if (element.fieldName === 'pricingMethod') {
-          element.option = pricingMethodOptions;
-        }
-        if (element.fieldName === 'pricingCondition') {
-          if (Array.isArray(pricingConditionOptions)) {
-            element.option = pricingConditionOptions;
+        if (rowData?.type === 'serializedAsset') {
+          if (element.fieldName === 'qty') {
+            element.disabled = true;
+          }
+          if (element.fieldName === 'unit') {
+            element.option = [{
+              optionLabel: 'Piece',
+              optionValue: 'Piece'
+            }]
+            element.value = 'Piece'
+          }
+          if (element.fieldName === 'pricingMethod') {
+            element.option = [{
+              optionValue: 'Per Job',
+              optionLabel: 'Per Job'
+            }]
+            element.value = 'Per Job'
+          }
+        } else {
+          if (element.fieldName === 'unit') {
+            element.option = unitOptions;
+          }
+          if (element.fieldName === 'pricingMethod') {
+            element.option = pricingMethodOptions;
+          }
+          if (element.fieldName === 'pricingCondition') {
+            if (Array.isArray(pricingConditionOptions)) {
+              element.option = pricingConditionOptions;
+            }
           }
         }
       });
