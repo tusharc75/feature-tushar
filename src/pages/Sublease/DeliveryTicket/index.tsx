@@ -228,7 +228,11 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
                 setNextStepToolTip(null);
             } else {
                 setNextStep(false);
-                setNextStepToolTip(subleaseMessage.deliverLoadingTicketStep);
+                if (ticketType === DELIVERY_TICKET_TYPE.loading) {
+                    setNextStepToolTip(subleaseMessage.deliverLoadingTicketStep);
+                } else if (ticketType === DELIVERY_TICKET_TYPE.receiving) {
+                    setNextStepToolTip(subleaseMessage.deliverReceivingTicketStep);
+                }
             }
         } catch (error) {
             toastConfig.setToastConfig(error);

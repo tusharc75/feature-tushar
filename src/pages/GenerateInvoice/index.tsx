@@ -7,7 +7,15 @@ import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser }
 import { useData } from 'src/StateProvider/Provider';
 import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { SUBLEASE_STATUS, gridLoadingTimeout, prepareDataForGrid, removeLocalStorage, sidebarResource, INVOICE_STATUS, FIELD_TICKET_STATUS } from 'src/constants/helpers';
+import {
+  SUBLEASE_STATUS,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  removeLocalStorage,
+  sidebarResource,
+  INVOICE_STATUS,
+  FIELD_TICKET_STATUS
+} from 'src/constants/helpers';
 import NoteAddIcon from '@material-ui/icons/NoteAdd';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -137,9 +145,6 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     let queryString = getQueryString();
-    if (selectedResource.resource === sidebarResource.rentalManagement) {
-      queryString = `/rental-management${queryString}`;
-    }
     if (gridApi) {
       gridApi.setRowData([]);
     }
@@ -441,7 +446,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
             }}
             onSuccess={() => {
               setViewSingleInvoiceDialog({ open: false, invoice: null });
-               fetchData();
+              fetchData();
             }}
             resource={selectedResource.resource}
           />

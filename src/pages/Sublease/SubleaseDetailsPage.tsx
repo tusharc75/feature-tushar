@@ -28,6 +28,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import Invoices from './Invoices';
 import SerializedAsset from './SerializedAsset';
 import LoadingTicket from './DeliveryTicket';
+import Slip from './Slip';
 
 const SubleaseDetailsPage = () => {
   const renderedFrom = camelCase(routes?.sublease.title);
@@ -141,7 +142,6 @@ const SubleaseDetailsPage = () => {
         setShowConfirmBox(false);
       });
   };
-
 
   return (
     <Box className="main-container-v1">
@@ -300,6 +300,12 @@ const SubleaseDetailsPage = () => {
                       stepFullScreen={stepFullScreen}
                     />
                   )}
+                  {['Final Slip'].includes(subleaseStepsNames[currentStep]) && subleaseData && (
+                    <Slip
+                      subleaseData={subleaseData}
+                      renderedFrom={`${renderedFrom}_grid-6`}
+                      stepFullScreen={stepFullScreen}
+                    />)}
                 </ContentFullScreen>
               </Grid>
             ) : (

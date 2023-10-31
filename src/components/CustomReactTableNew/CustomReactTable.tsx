@@ -248,8 +248,6 @@ function CustomReactTable({
   };
 
   const [cellValue, setCellValue] = React.useState('');
-  const [isCellEditing, setIsCellEditing] = React.useState(false);
-  const [currentRowEditing, setCurrentRowEditing] = React.useState(null);
   const [baseColumns, setBaseColumns] = React.useState([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState(null);
@@ -415,7 +413,7 @@ function CustomReactTable({
               )
             },
             ...baseColumns.map((m) => {
-              return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' };
+              return m.canFilter === false ? {  ...m,columnFilterable : false, filter: 'filterRowsWithSubrows' } : { ...m, columnFilterable : true };
             })
           ],
     [baseColumns]
@@ -749,7 +747,7 @@ function CustomReactTable({
               !hideSelection &&
               mobileSelectAllHeader && (
                 <>
-                  <label className="flex items-center gap-2 cursor-pointer -ml-2">
+                  <label className="flex items-center gap-2 cursor-pointer ml-[13px]">
                     {mobileSelectAllHeader.render('Header')} <span>Select All</span>
                   </label>
                 </>
@@ -1097,7 +1095,7 @@ const DraggableHeader: React.FC<DraggableHeaderProps> = ({ column, index, reorde
           <span>{column.render('Header')}</span>
           {column.isSorted ? column.isSortedDesc ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" /> : ''}
         </div>
-        {column.canFilter ? (
+        {column?.columnFilterable ? (
           <div>
             <TempFilter
               filterValue={filters.find((filter) => filter.id === column.id)?.value || ''}
