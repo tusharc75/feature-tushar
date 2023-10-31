@@ -1,13 +1,13 @@
-import React, { useEffect, useState, useContext, useRef } from 'react';
+import { Collapse, CssBaseline, Drawer, List, ListItem, ListItemIcon, ListItemText, Toolbar, Tooltip } from '@material-ui/core';
+import { ChevronRight, ExpandLess, ExpandMore } from '@material-ui/icons';
 import clsx from 'clsx';
-import { CssBaseline, Drawer, List, ListItem, ListItemText, Toolbar, Collapse, ListItemIcon, Tooltip } from '@material-ui/core';
-import { Link, withRouter, useHistory } from 'react-router-dom';
-import Header from '../Header/Header';
-import { useData } from '../../StateProvider/Provider';
-import { GlobalChatContext } from '../../StateProvider/GlobalChatContext';
-import { ChevronRight, ExpandMore, ExpandLess } from '@material-ui/icons';
-import { kebabCase, lowerCase, sortBy } from 'lodash';
+import { kebabCase, lowerCase } from 'lodash';
+import React, { useContext, useEffect, useState } from 'react';
+import { Link, useHistory, withRouter } from 'react-router-dom';
 import { setDataBySectionName } from 'src/pages/Home/helpers';
+import { GlobalChatContext } from '../../StateProvider/GlobalChatContext';
+import { useData } from '../../StateProvider/Provider';
+import Header from '../Header/Header';
 
 import { FaRegUserCircle } from 'react-icons/fa';
 import { MdOutlineDashboard } from 'react-icons/md';
@@ -18,9 +18,9 @@ import { staticHiddenResource } from '../../constants/helpers';
 
 import { AiOutlineFileText } from 'react-icons/ai';
 
-import useStyles from './style';
-import routes from '../Helpers/Routes';
 import { SVG } from 'src/assets';
+import routes from '../Helpers/Routes';
+import useStyles from './style';
 
 import styles from './sidebar.module.scss';
 
@@ -44,8 +44,6 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
     let { sideBarIcon } = setDataBySectionName(sectionName);
     return sideBarIcon;
   };
-
-  let toggleTimeout;
 
   const handleToggleDrawer = () => {
     setToggleDrawer(!toggleDrawer);
@@ -125,22 +123,6 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
       <CssBaseline />
       <Header toggleDrawer={handleToggleDrawer} isDrawerOpen={toggleDrawer} />
       <Drawer
-        // onClick={() => {
-        //   // setToggleDrawer(true);
-        //   // toggleTimeout = setTimeout(() => setToggleDrawer(true), 300);
-        // }}
-        // onMouseEnter={() => {
-        //   toggleTimeout = setTimeout(() => setToggleDrawer(true), 300);
-        // }}
-        // onMouseLeave={() => {
-        //   if (toggleTimeout) {
-        //     clearTimeout(toggleTimeout);
-        //   }
-        //   if (toggleDrawer)
-        //     setTimeout(() => {
-        //       setToggleDrawer(false);
-        //     }, 500);
-        // }}
         variant="permanent"
         className={clsx(styles.drawer, 'sidebar-drawer', {
           [classes.drawerOpen]: toggleDrawer,
@@ -157,6 +139,12 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
             'sidebar-drawer': true
           })
         }}
+        open={toggleDrawer}
+        onClose={(e, reason) => {
+          if (reason !== 'backdropClick') {
+          }
+        }}
+        keepMounted
       >
         <Toolbar />
         <div id="sidebarOrDrawer" style={{ borderTop: '1px solid #485B64' }}>
@@ -184,7 +172,6 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                 setItemToAddActiveClass(NaN);
                 setSubItemToAddActiveClass(NaN);
                 history.push('/');
-                setToggleDrawer((prev) => !prev);
               }}
             >
               {location.pathname === '/' && (
@@ -209,7 +196,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
               <ListItemText
                 onClick={() => {}}
                 primary={[user?.user?.firstName, user?.user?.lastName].filter((f) => f).join(' ')}
-                // className={`wordWrap`}
+                className={`line-clamp-1`}
               />
             </ListItem>
             {permissions?.dashboard?.isRead && !isOffline && (
@@ -218,7 +205,6 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                 onClick={() => {
                   setItemToAddActiveClass(NaN);
                   setSubItemToAddActiveClass(NaN);
-                  setToggleDrawer((prev) => !prev);
                 }}
               >
                 <Tooltip title={!toggleDrawer ? 'Dashboards' : ''}>
@@ -236,7 +222,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                     <ListItemIcon className={styles.listIcon}>
                       <MdOutlineDashboard size={20} className={styles.sidebarIcon} />
                     </ListItemIcon>
-                    <ListItemText primary="Dashboards" className={`wordWrap`} />
+                    <ListItemText primary="Dashboards" className={`wordWrap line-clamp-1`} />
                   </ListItem>
                 </Tooltip>
               </Link>
@@ -247,7 +233,6 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                 onClick={() => {
                   setItemToAddActiveClass(NaN);
                   setSubItemToAddActiveClass(NaN);
-                  setToggleDrawer((prev) => !prev);
                 }}
               >
                 <Tooltip title={!toggleDrawer ? 'Reports' : ''}>
@@ -265,11 +250,13 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                     <ListItemIcon className={styles.listIcon}>
                       <AiOutlineFileText size={20} className={styles.sidebarIcon} />
                     </ListItemIcon>
-                    <ListItemText primary="Reports" className={`wordWrap`} />
+                    <ListItemText primary="Reports" className={`wordWrap  line-clamp-1`} />
                   </ListItem>
                 </Tooltip>
               </Link>
             )}
+
+            {console.log(listItems)}
 
             {user &&
               listItems().map((listItem, i) => {
@@ -284,10 +271,6 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                         key={listItem.section + '' + i}
                         onClick={() => {
                           handleCollapse(listItem.section);
-
-                          if (!toggleDrawer) {
-                            handleToggleDrawer();
-                          }
                         }}
                       >
                         {items.some((item) => pathName === item) && (
@@ -301,7 +284,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                           primary={
                             listItem.section === 'Activities' || listItem.section === 'Collaboration Tools' ? 'Collaboration Tools' : listItem.section
                           }
-                          className={`wordWrap `}
+                          className={`wordWrap  line-clamp-1`}
                         />
                         {open[listItem.section] ? <ExpandLess className={styles.listArrowIcon} /> : <ExpandMore className={styles.listArrowIcon} />}
                       </ListItem>
@@ -315,13 +298,13 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                         {listItem.items.map((item, j) => (
                           <Link
                             className={`sub-list ${pathName === item.name.toLowerCase().split(' ').join('-') && styles.active_sub} ${
-                              itemToAddActiveClass == i && subItemToAddActiveClass == j ? 'active_sub' : ''
+                              itemToAddActiveClass === i && subItemToAddActiveClass === j ? 'active_sub' : ''
                             }`}
                             key={j}
                             onClick={() => {
                               setItemToAddActiveClass(i);
                               setSubItemToAddActiveClass(j);
-                              setToggleDrawer((prev) => !prev);
+                              setOpen({});
                             }}
                             to={handleRoutes(item)}
                           >
@@ -338,7 +321,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                                   stroke="currentcolor"
                                 ></path>
                               </svg>
-                              <ListItemText primary={item.resourceLabel || item.name} />
+                              <ListItemText primary={item.resourceLabel || item.name} className={`line-clamp-1`} />
                             </ListItem>
                           </Link>
                         ))}
