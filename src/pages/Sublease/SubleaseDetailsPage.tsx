@@ -9,7 +9,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { sublease, SUBLEASE_STATUS, sublease_Vendor_Steps, sublease_InterCompany_Steps, ACTIVITY_RESOURCE, SUBLEASE_TYPE, DELIVERY_TICKET_TYPE } from '../../constants/helpers';
+import { sublease, SUBLEASE_STATUS, sublease_Vendor_Steps, sublease_InterCompany_Steps, ACTIVITY_RESOURCE, SUBLEASE_TYPE, DELIVERY_TICKET_TYPE, sidebarResource } from '../../constants/helpers';
 import ManageSublease from './ManageSublease';
 import { FaWpforms } from 'react-icons/fa';
 import { BiFoodMenu } from 'react-icons/bi';
@@ -25,7 +25,7 @@ import ContentFullScreen from 'src/components/ContentFullScreen';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import Steps, { getIndex } from 'src/components/Steps';
 import EditIcon from '@material-ui/icons/Edit';
-import Invoices from './Invoices';
+import Invoices from '../GenerateInvoice/InvoiceDialog/Invoices';
 import SerializedAsset from './SerializedAsset';
 import LoadingTicket from './DeliveryTicket';
 import Slip from './Slip';
@@ -57,6 +57,8 @@ const SubleaseDetailsPage = () => {
   const [isIssued, setIsIssued] = useState(false);
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [nextStepToolTip, setNextStepToolTip] = useState(null);
+  const [statusOptions, setStatusOptions] = useState([]);
+
 
   function a11yProps(index: any) {
     return {
@@ -79,9 +81,21 @@ const SubleaseDetailsPage = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${sublease.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
+      .then(({ data }) => {
+      })
       .catch((error) => { });
   };
+
+  const updateStatus = (status) => {
+    axiosInstance()
+      .put(`${sublease.api}/${id}/status`, {
+        status: status
+      })
+      .then(({ data }) => {
+        fetchData();
+      })
+      .catch((error) => { });
+  }
 
   useEffect(() => {
     if (parsed) {
@@ -98,6 +112,12 @@ const SubleaseDetailsPage = () => {
     axiosInstance()
       .get('/field?resource=Sublease')
       .then(({ data }) => {
+        data?.data?.map((o) => {
+          if (o?.fieldData?.fieldName === 'status') {
+            setStatusOptions([...o.fieldData.option?.filter((e) => ![SUBLEASE_STATUS.closed].includes(e.optionLabel))]);
+            return true;
+          }
+        });
         setFields(data.data);
       })
       .catch((err) => {
@@ -119,7 +139,7 @@ const SubleaseDetailsPage = () => {
         isAllowedToEdit = true;
       }
       const isProcessorToEdit = [data.processor].some((d) => d?.optionValue === user?.user?._id);
-      if (data?.productInventory?.length) {
+      if (data.status === SUBLEASE_STATUS.issued) {
         setIsIssued(true);
       }
       setAllowedToEdit(isAllowedToEdit);
@@ -305,6 +325,8 @@ const SubleaseDetailsPage = () => {
                       subleaseData={subleaseData}
                       renderedFrom={`${renderedFrom}_grid-6`}
                       stepFullScreen={stepFullScreen}
+                      statusNames={statusOptions}
+                      updateStatus={updateStatus}
                     />)}
                 </ContentFullScreen>
               </Grid>
@@ -329,7 +351,11 @@ const SubleaseDetailsPage = () => {
         <TabPanel value={tabValue} index={3}>
           <Grid item xs={12} sm={12} md={12} lg={12}>
             {subleaseData ? (
-              <Invoices subleaseId={id} />
+              <Invoices
+                resourceId={id}
+                resource={sidebarResource.sublease}
+                invoiceFieldName='sublease'
+              />
             ) : (
               <Grid container spacing={2} style={{ padding: '8px' }}>
                 <CommonSkeleton lenArray={[...Array(7).keys()]} />

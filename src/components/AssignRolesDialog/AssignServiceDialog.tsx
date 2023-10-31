@@ -25,7 +25,6 @@ import { camelCase } from 'lodash';
 let searchTimeout;
 
 const AssignServiceDialog = ({ onSuccess, handleClose, ids = [], extraStaticFilter = [], isSubmitting = false }) => {
-
   const renderedFrom = `${camelCase(routes.serviceMaster?.title)}_assign`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -212,8 +211,7 @@ const AssignServiceDialog = ({ onSuccess, handleClose, ids = [], extraStaticFilt
       <CustomDialogContent>
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
-            <Grid item xs={6} className="d-flex align-items-center gap-1"></Grid>
-            <Grid item xs={6} className={styles.filter_side}>
+            <Grid item xs={12} className={styles.filter_side}>
               <Box className={styles.filter_side_header} component="div">
                 <SearchBox onChange={handleSearch} className={styles.search_box_input} width="242px" size="small" value={search} />
                 <Button

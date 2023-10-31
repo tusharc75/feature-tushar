@@ -235,9 +235,14 @@ const CreateFormBuilder = () => {
     setIsUpdating(true);
     axiosInstance()
       .put(`/sa-formbuilder/resourcedata`, sendData)
-      .then(({ data: { data } }) => {
+      .then(({ data: { message } }) => {
         setIsUpdating(false);
-        history.push({ pathname: routes.formBuilder.path });
+        fetchBrandResourceData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: message
+        })
       })
       .catch((error) => {
         setIsUpdating(false);

@@ -217,7 +217,9 @@ export default function CustomSwipableList({
                         d[a.field] !== undefined && (
                           <div key={index} className="ml-2 my-1">
                             <div className="flex flex-wrap gap-1 items-center">
-                              <span className="flex items-center text-[#6B6B6B] dark:text-gray-300 max-w-[15px] max-h-[15px]">{a.icon}</span>
+                              {a.icon && (
+                                <span className="flex items-center text-[#6B6B6B] dark:text-gray-300 max-w-[15px] max-h-[15px]">{a.icon}</span>
+                              )}
                               <h5 className="text-truncate font-medium text-[13px] dark:text-gray-300" style={{ paddingTop: '2px', fontWeight: 500 }}>
                                 {a.label ?? `${a.label || ''}`}
                                 {d[a.field] ?? ''}

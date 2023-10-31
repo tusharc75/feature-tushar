@@ -226,7 +226,7 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
                     )}
                   />
                 </Grid>
-                <Grid item xs={6} className={styles.filter_side}>
+                <Grid item xs={12} md={6} className={styles.filter_side}>
                   <Box className={styles.filter_side_header} component="div">
                     <SearchBox onChange={handleSearch} className={styles.search_box_input} width="242px" size="small" value={search} />
                     <Button

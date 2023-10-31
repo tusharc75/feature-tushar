@@ -280,7 +280,7 @@ const Activity = (props) => {
                         <Grid item xs={4} container justify="flex-end" alignItems="center">
                           {data === 'Attachment' && (
                             <Box mr={1}>
-                              <HtmlTooltip title={'Add Folder'}>
+                              <HtmlTooltip title={'Add Folder'} enterTouchDelay={0}>
                                 <IconButton size="small" onClick={(event) => handleCreateActivity(event, 'AttachmentFolder')}>
                                   <CreateNewFolderIcon style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#2A3042)' }} />
                                 </IconButton>
@@ -290,6 +290,7 @@ const Activity = (props) => {
                           {data === 'Email' && user?.user?.brandPolicy?.inboundEmail && isEmpty(user?.user?.brandPolicy?.inboundEmail) && (
                             <Box mr={1}>
                               <HtmlTooltip
+                                enterTouchDelay={0}
                                 title={`support+${relatedTo[0].type}_${relatedTo[0].referenceId}_${user?.user?.brand}${user?.user?.brandPolicy?.inboundEmail}`}
                               >
                                 <IconButton
