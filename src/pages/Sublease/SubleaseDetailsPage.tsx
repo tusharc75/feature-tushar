@@ -9,7 +9,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { sublease, SUBLEASE_STATUS, sublease_Vendor_Steps, sublease_InterCompany_Steps, ACTIVITY_RESOURCE, SUBLEASE_TYPE, DELIVERY_TICKET_TYPE } from '../../constants/helpers';
+import { sublease, SUBLEASE_STATUS, sublease_Vendor_Steps, sublease_InterCompany_Steps, ACTIVITY_RESOURCE, SUBLEASE_TYPE, DELIVERY_TICKET_TYPE, sidebarResource } from '../../constants/helpers';
 import ManageSublease from './ManageSublease';
 import { FaWpforms } from 'react-icons/fa';
 import { BiFoodMenu } from 'react-icons/bi';
@@ -25,7 +25,7 @@ import ContentFullScreen from 'src/components/ContentFullScreen';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import Steps, { getIndex } from 'src/components/Steps';
 import EditIcon from '@material-ui/icons/Edit';
-import Invoices from './Invoices';
+import Invoices from '../GenerateInvoice/InvoiceDialog/Invoices';
 import SerializedAsset from './SerializedAsset';
 import LoadingTicket from './DeliveryTicket';
 import Slip from './Slip';
@@ -351,7 +351,11 @@ const SubleaseDetailsPage = () => {
         <TabPanel value={tabValue} index={3}>
           <Grid item xs={12} sm={12} md={12} lg={12}>
             {subleaseData ? (
-              <Invoices subleaseId={id} />
+              <Invoices
+                resourceId={id}
+                resource={sidebarResource.sublease}
+                invoiceFieldName='sublease'
+              />
             ) : (
               <Grid container spacing={2} style={{ padding: '8px' }}>
                 <CommonSkeleton lenArray={[...Array(7).keys()]} />
