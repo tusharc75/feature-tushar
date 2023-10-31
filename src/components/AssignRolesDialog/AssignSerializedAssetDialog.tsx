@@ -235,32 +235,32 @@ const AssignSerializedAssetDialog = ({
               <Box style={{ display: 'inline' }}>
                 {products.length > 0
                   ? products?.map((d) => (
-                    <Box
-                      m={0.5}
-                      p={1}
-                      border={1}
-                      className="cursor-pointer"
-                      borderColor="var(--common-border-color)"
-                      onClick={() => {
-                        if (selectedProduct === d.id) {
-                          setSelectedProduct(null);
-                        } else {
-                          setSelectedProduct(d.id);
-                        }
-                      }}
-                      style={{ display: 'inline-block' }}
-                      bgcolor={d.id === selectedProduct && 'primary.main'}
-                      color={d.id === selectedProduct && 'white'}
-                    >
-                      {d?.qty < 0 ? (
-                        <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
-                      ) : d?.qty === 0 ? (
-                        <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
-                      ) : (
-                        <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
-                      )}
-                    </Box>
-                  ))
+                      <Box
+                        m={0.5}
+                        p={1}
+                        border={1}
+                        className={`cursor-pointer rounded-sm ${
+                          selectedProduct ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'dark:text-gray-300'
+                        }`}
+                        borderColor="var(--common-border-color)"
+                        onClick={() => {
+                          if (selectedProduct === d.id) {
+                            setSelectedProduct(null);
+                          } else {
+                            setSelectedProduct(d.id);
+                          }
+                        }}
+                        style={{ display: 'inline-block' }}
+                      >
+                        {d?.qty < 0 ? (
+                          <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                        ) : d?.qty === 0 ? (
+                          <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
+                        ) : (
+                          <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
+                        )}
+                      </Box>
+                    ))
                   : null}
               </Box>
             </Grid>
@@ -306,6 +306,11 @@ const AssignSerializedAssetDialog = ({
                 </Button>
               </Box>
             </Grid>
+            {products.length > 0 && products.some((s) => s.qty < 0) ? (
+              <div className="text-error font-weight-bold">You have selected more assets than required</div>
+            ) : (
+              ''
+            )}
           </Grid>
         </div>
         {frameWorkComponent && Object.keys(frameWorkComponent).length > 0 ? (
@@ -322,7 +327,7 @@ const AssignSerializedAssetDialog = ({
             allowAction={false}
             loading={loading}
             allowSelection={true}
-            onCellValueChanged={() => { }}
+            onCellValueChanged={() => {}}
             showOnlyShowFilteredRecordSwitch={true}
             refreshGrid={fetchData}
             renderedFrom={renderedFrom}
