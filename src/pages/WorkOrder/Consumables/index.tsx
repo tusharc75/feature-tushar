@@ -23,9 +23,17 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import { BiChevronDown } from 'react-icons/bi';
 
-const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service, uniqueId, stepId, serviceName, materialSubType = MATERIAL_SUB_TYPE.consumable }) => {
-
-
+const Consumables = ({
+  workOrderId,
+  warehouse,
+  isCreate,
+  allowedToEdit,
+  service,
+  uniqueId,
+  stepId,
+  serviceName,
+  materialSubType = MATERIAL_SUB_TYPE.consumable
+}) => {
   const toastConfig = useContext(CustomToastContext);
   const [dataRows, setDataRows] = useState(null);
   const [columns, setColumns] = useState(null);
@@ -48,15 +56,16 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
   useEffect(() => {
     var allowRequest = false;
     if (user?.user?.brandPolicy?.workOrderConsumableRequest) {
-      if ((warehouse?.manager && warehouse?.manager?.includes(user?.user?._id))
-        || (warehouse?.materialHandlers && warehouse?.materialHandlers?.includes(user?.user?._id))) {
+      if (
+        (warehouse?.manager && warehouse?.manager?.includes(user?.user?._id)) ||
+        (warehouse?.materialHandlers && warehouse?.materialHandlers?.includes(user?.user?._id))
+      ) {
         allowRequest = false;
-      }
-      else {
+      } else {
         allowRequest = true;
       }
     }
-    setConsumeRequest(allowRequest)
+    setConsumeRequest(allowRequest);
     fetchColumns();
     fetchData();
   }, [allowedToEdit, workOrderId, consumeRequest]);
@@ -84,13 +93,11 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
           Cell: ({ row }) => {
             return row.original[e?.fieldName] ? (
               <div className="d-flex gap-2 align-items-center">
-                <p className="text-truncate">
-                  {row.original[e?.fieldName]}
-                </p>
+                <p className="text-truncate">{row.original[e?.fieldName]}</p>
                 <IconButton
                   size="small"
                   onClick={() => {
-                    window.open(`${routes.productDetail.path}/${row.original?.productId}`)
+                    window.open(`${routes.productDetail.path}/${row.original?.productId}`);
                   }}
                 >
                   <OpenInNewIcon fontSize="small" color={'primary'} />
@@ -121,13 +128,11 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
         Cell: ({ row }) =>
           row?.original?.service ? (
             <div className="d-flex gap-2 align-items-center">
-              <p className="text-truncate">
-                {row.original.service}
-              </p>
+              <p className="text-truncate">{row.original.service}</p>
               <IconButton
                 size="small"
                 onClick={() => {
-                  window.open(`${routes.serviceMasterDetail.path}/${row.original.serviceId}`)
+                  window.open(`${routes.serviceMasterDetail.path}/${row.original.serviceId}`);
                 }}
               >
                 <OpenInNewIcon fontSize="small" color={'primary'} />
@@ -153,13 +158,13 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
       },
       ...(user?.user?.brandPolicy?.workOrderConsumableRequest
         ? [
-          {
-            accessor: 'requestedQty',
-            Header: 'Requested Qty',
-            width: 150,
-            Cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
-          }
-        ]
+            {
+              accessor: 'requestedQty',
+              Header: 'Requested Qty',
+              width: 150,
+              Cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
+            }
+          ]
         : []),
       {
         accessor: 'consumedQty',
@@ -242,10 +247,9 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
       .get(`${workOrder.api}/${workOrderId}/consumable${query}`)
       .then(({ data: { data } }) => {
         if (materialSubType === MATERIAL_SUB_TYPE.bom) {
-          data = data?.filter((e) => e?.subType === materialSubType)
-        }
-        else {
-          data = data?.filter((e) => e?.subType !== MATERIAL_SUB_TYPE.bom)
+          data = data?.filter((e) => e?.subType === materialSubType);
+        } else {
+          data = data?.filter((e) => e?.subType !== MATERIAL_SUB_TYPE.bom);
         }
         let rows = data?.map((u) => {
           let res: any = {
@@ -267,7 +271,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
   };
 
   const handleSubmit = async (rows) => {
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     const data: any = [];
     rows?.forEach((e) => {
       if (parseInt(e.qty)) {
@@ -278,7 +282,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
       .post(`${workOrder.api}/${workOrderId}/consumable`, data)
       .then(({ data }) => {
         fetchData();
-        setIsSubmitting(false)
+        setIsSubmitting(false);
         setConsumablesDialog(false);
         toastConfig.setToastConfig({
           open: true,
@@ -287,7 +291,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
         });
       })
       .catch((error) => {
-        setIsSubmitting(false)
+        setIsSubmitting(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -312,12 +316,13 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
   };
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
-    if (parseInt(inputField.qty) < ((updatedData?.consumedQty || 0) + (updatedData?.requestedQty || 0))) {
+    if (parseInt(inputField.qty) < (updatedData?.consumedQty || 0) + (updatedData?.requestedQty || 0)) {
       toastConfig.setToastConfig({
         open: true,
         type: 'error',
-        message: user?.user?.brandPolicy?.workOrderConsumableRequest ? 'Qty can not be less than consumed qty plus requested qty' :
-          'Qty can not be less than consumed qty'
+        message: user?.user?.brandPolicy?.workOrderConsumableRequest
+          ? 'Qty can not be less than consumed qty plus requested qty'
+          : 'Qty can not be less than consumed qty'
       });
       return;
     } else if (parseInt(inputField.qty) === 0) {
@@ -361,15 +366,13 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
   return (
     <>
       {allowedToEdit && (
-        <Box display="flex" justifyContent="space-between" mb={2}>
-          <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
-            {(isCreate && permissions?.product?.isRead) && (
-              <Button variant={'contained'} color="primary" size="small" onClick={() => setConsumablesDialog(true)}>
-                Add Products/Consumables
-              </Button>
-            )}
-          </Box>
-          <Box display="flex" ml={1}>
+        <Box className="flex flex-wrap mb-2 justify-between gap-2">
+          {isCreate && permissions?.product?.isRead && (
+            <Button variant={'contained'} color="primary" size="small" onClick={() => setConsumablesDialog(true)}>
+              Add Products/Consumables
+            </Button>
+          )}
+          <Box display="flex" ml={'auto'}>
             <Box ml={1}></Box>
             <Button
               disabled={selectedRecords?.filter((e) => !e?.hideSelection).length === 0}
@@ -406,9 +409,9 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
               onClose={handleCloseAction}
             >
               <MenuItem
-                disabled={selectedRecords?.find(s => s?.consumedQty || s?.requestedQty) ? true : false}
+                disabled={selectedRecords?.find((s) => s?.consumedQty || s?.requestedQty) ? true : false}
                 onClick={() => {
-                  handleDelete(selectedRecords?.filter(s => !s?.consumedQty && !s?.requestedQty))
+                  handleDelete(selectedRecords?.filter((s) => !s?.consumedQty && !s?.requestedQty));
                   handleCloseAction();
                 }}
               >
