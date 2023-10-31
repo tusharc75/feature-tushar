@@ -99,6 +99,8 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
     setOpen(tempdata);
   };
 
+  let toggleTimeout;
+
   return (
     <div>
       <CssBaseline />
@@ -120,10 +122,17 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
             'sidebar-drawer': true
           })
         }}
-        open={toggleDrawer}
-        onClose={(e, reason) => {
-          if (reason !== 'backdropClick') {
+        onMouseEnter={() => {
+          toggleTimeout = setTimeout(() => setToggleDrawer(true), 300);
+        }}
+        onMouseLeave={() => {
+          if (toggleTimeout) {
+            clearTimeout(toggleTimeout);
           }
+          if (toggleDrawer)
+            setTimeout(() => {
+              setToggleDrawer(false);
+            }, 500);
         }}
         keepMounted
       >
