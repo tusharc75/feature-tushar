@@ -143,7 +143,6 @@ const SubleaseDetailsPage = () => {
       });
   };
 
-
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -301,14 +300,12 @@ const SubleaseDetailsPage = () => {
                       stepFullScreen={stepFullScreen}
                     />
                   )}
-                  {['Final Slip'].includes(subleaseStepsNames[currentStep]) && subleaseData && (<Slip
-                    subleaseData={subleaseData}
-                    setNextStep={setNextStep}
-                    setNextStepToolTip={setNextStepToolTip}
-                    renderedFrom={`${renderedFrom}_grid-3`}
-                    allowedToEdit={allowedToEdit}
-                    stepFullScreen={stepFullScreen}
-                  />)}
+                  {['Final Slip'].includes(subleaseStepsNames[currentStep]) && subleaseData && (
+                    <Slip
+                      subleaseData={subleaseData}
+                      renderedFrom={`${renderedFrom}_grid-6`}
+                      stepFullScreen={stepFullScreen}
+                    />)}
                 </ContentFullScreen>
               </Grid>
             ) : (
