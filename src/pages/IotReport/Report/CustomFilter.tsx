@@ -518,8 +518,8 @@ const CustomFilter = ({ field, setFilterQuery, showGrid, setShowGrid, loadingDat
                                           : new Date()
                                       }
                                       required={field?.required}
-                                      error={error && error[`from_${field.fieldName}`] && Boolean(error[`from_${field.fieldName}`])}
-                                      helperText={error && Boolean(error[`from_${field.fieldName}`]) && error[`from_${field.fieldName}`]}
+                                      error={error && error[`to_${field.fieldName}`] && Boolean(error[`to_${field.fieldName}`])}
+                                      helperText={error && Boolean(error[`to_${field.fieldName}`]) && error[`to_${field.fieldName}`]}
                                     />
                                   </Grid>
                                 </>
