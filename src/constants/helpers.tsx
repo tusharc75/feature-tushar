@@ -2009,7 +2009,10 @@ export const SUBLEASE_STATUS = {
   new: 'New',
   inProgress: 'In-Progress',
   issued: 'Issued',
-  completed: 'Completed'
+  completed: 'Completed',
+  readyToInvoice: 'Ready to Invoice',
+  invoiced: 'Invoiced',
+  closed: 'Closed',
 };
 
 export const PURCHASE_ORDER_STATUS = {
