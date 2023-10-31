@@ -145,7 +145,7 @@ const Invoices = ({ resourceId, resource, invoiceFieldName }) => {
   }, [page, limit, filters, sorting]);
 
 
-  const getQueryString = (isExport = false) => {
+  const getQueryString = () => {
 
     let deepFilter = `?page=${page}&limit=${limit}&${invoiceFieldName}=${resourceId}`;
     if (showFilteredRecordsOnly) {
