@@ -48,7 +48,6 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
   showSaveAndNext,
   loadingEdit
 }) => {
-  console.log(rowData, material);
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [allFields, setAllFields] = useState([]);
