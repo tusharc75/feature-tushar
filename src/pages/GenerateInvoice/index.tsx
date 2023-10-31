@@ -395,7 +395,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
             refreshGrid={fetchData}
             showFilters={true}
             actionWidth={120}
-            resource={sidebarResource.sublease}
+            resource={selectedResource.resource}
             allowSelection={selectedResource.resource === sidebarResource.fieldTicket ? true : false}
           />
         ) : (
