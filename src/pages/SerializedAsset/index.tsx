@@ -210,9 +210,18 @@ const SerializedAsset = () => {
           let finalObject = prepareDataForGrid(u);
           finalObject['isChecked'] = [...getLocalStorageArrayData(localStorageSelectedRecords)].some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions?.serializedAsset.isUpdate;
-          finalObject['canDelete'] = permissions?.serializedAsset?.isDelete &&
-            ![ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.lost, ASSET_STATUS.customerPossession, ASSET_STATUS.onPO,
-            ASSET_STATUS.scrap]?.includes(u?.status) ? false : true;
+          finalObject['canDelete'] =
+            permissions?.serializedAsset?.isDelete &&
+            ![
+              ASSET_STATUS.new,
+              ASSET_STATUS.available,
+              ASSET_STATUS.lost,
+              ASSET_STATUS.customerPossession,
+              ASSET_STATUS.onPO,
+              ASSET_STATUS.scrap
+            ]?.includes(u?.status)
+              ? false
+              : true;
           return {
             ...finalObject
           };
@@ -450,6 +459,34 @@ const SerializedAsset = () => {
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
+  };
+
+  const backgroundColorClass = (data) => {
+    let className = '';
+    if (data?.recertDate || data?.certificateExpiryDate) {
+      var a = moment(data?.recertDate || data?.certificateExpiryDate);
+      var b = moment();
+      const days = a.diff(b, 'days');
+
+      switch (true) {
+        case days < 15:
+          className = 'light-red-data-row';
+          break;
+        case days < 30 && days >= 15:
+          className = 'light-yellow-data-row';
+          break;
+        case days <= 60 && days >= 30:
+          className = 'light-green-data-row';
+          break;
+        default:
+          break;
+      }
+    }
+    if (data.status === 'Scrap') {
+      className = 'light-yellow-data-row';
+    }
+
+    return className;
   };
 
   return (
@@ -797,30 +834,43 @@ const SerializedAsset = () => {
               dataRows={dataRows}
               selectedRecords={selectedRecords}
               dispatch={dispatch}
-              onEdit={(d) => {
-                history.push(`${routes.serializedAssetDetail.path}/${d._id}`);
-              }}
+              // onEdit={(d) => {
+              //   history.push(`${routes.serializedAssetDetail.path}/${d._id}`);
+              // }}
+              additionalDetails={[]}
               extraParamsToCheckDelete={false}
-              onDelete={(d) => {
-                setDeleteRecord(d);
-                setShowDeleteConfirmBox(true);
+              // onDelete={(d) => {
+              //   setDeleteRecord(d);
+              //   setShowDeleteConfirmBox(true);
+              // }}
+              actionCol={(data) => {
+                const params = { data };
+                return <ActionsRenderer {...params} />;
               }}
               rowCount={rowCount}
               page={page}
               loading={loading}
-              additionalDetails={[]}
               chips={[
                 {
                   label: 'Serial Number : ',
                   field: 'serialNumber'
+                },
+                {
+                  label: 'Status : ',
+                  field: 'status'
+                },
+                {
+                  label: 'Cost : ',
+                  field: 'cost'
                 }
               ]}
               owerCollaboratorInitialsOrImages=""
               onCreate={false}
               showClone={true}
-              onClone={(data) => {
-                setShowManageProductInventoryDialog({ open: true, isClone: true, idToClone: data._id });
-              }}
+              // onClone={(data) => {
+              //   setShowManageProductInventoryDialog({ open: true, isClone: true, idToClone: data._id });
+              // }}
+              backgroundColorClass={(data) => backgroundColorClass(data)}
               renderedFrom={renderedFrom}
             />
           ) : Object.keys(frameWorkComponent).length > 0 && columns ? (
@@ -900,8 +950,9 @@ const SerializedAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ''
-            } ? `}
+          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${
+            deleteRecord?._id ? deleteRecord?.assetNumber : ''
+          } ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
@@ -923,7 +974,7 @@ const SerializedAsset = () => {
           path={routes?.supplierAccount?.path}
         />
       )}
-       {showReasonDialog && (
+      {showReasonDialog && (
         <ReasonDialog
           onClose={() => setShowReasonDialog(false)}
           status={status}

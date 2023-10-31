@@ -146,7 +146,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
             />
           </div>
           <List
-            className={`${styles.listContainer} sidebar-list max-h-[calc(100vh-150px)] ${
+            className={`${styles.listContainer} sidebar-list max-h-[calc(100vh-80px)] ${
               toggleDrawer ? 'overflow-y-auto' : 'overflow-y-hidden'
             } overflow-x-hidden`}
           >
@@ -176,7 +176,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                         </>
                       )}
                       <ListItemIcon className={styles.listIcon}>{listItem.icon}</ListItemIcon>
-                      <ListItemText primary={listItem.name} className={`wordWrap  line-clamp-1`} />
+                      <ListItemText primary={listItem.name} className={`wordWrap  `} />
                       {hasChild && (
                         <>{open[listItem.name] ? <ExpandLess className={styles.listArrowIcon} /> : <ExpandMore className={styles.listArrowIcon} />}</>
                       )}
@@ -227,7 +227,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
             })}
           </List>
         </div>
-        {!isOffline && (
+        {/* {!isOffline && (
           <List style={{ bottom: '0px', marginTop: 'auto' }}>
             <ListItem style={{ paddingLeft: '31px', paddingBlock: '12px' }} button onClick={() => setChatOpen((prevState) => !prevState)}>
               <ListItemIcon className={styles.listIcon}>
@@ -236,7 +236,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
               <ListItemText primary="Chat" />
             </ListItem>
           </List>
-        )}
+        )} */}
       </Drawer>
     </div>
   );
