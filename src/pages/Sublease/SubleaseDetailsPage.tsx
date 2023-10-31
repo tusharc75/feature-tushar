@@ -79,7 +79,11 @@ const SubleaseDetailsPage = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${sublease.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
+      .then(({ data }) => {
+        if (processStatus === 'Final Slip') {
+          fetchData();
+        }
+      })
       .catch((error) => { });
   };
 
@@ -119,7 +123,7 @@ const SubleaseDetailsPage = () => {
         isAllowedToEdit = true;
       }
       const isProcessorToEdit = [data.processor].some((d) => d?.optionValue === user?.user?._id);
-      if (data?.productInventory?.length) {
+      if (data.status === SUBLEASE_STATUS.issued) {
         setIsIssued(true);
       }
       setAllowedToEdit(isAllowedToEdit);
