@@ -406,7 +406,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
         {createInvoiceDialog.open &&
           (selectedResource.resource === sidebarResource.rentalManagement ? (
             <CreateBillingDialog
-              rentalManagementData={createInvoiceDialog.data}
+              rentalManagementData={createInvoiceDialog.data[0]}
               onClose={() => {
                 setCreateInvoiceDialog({ open: false, data: null });
               }}
