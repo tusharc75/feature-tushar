@@ -10,7 +10,7 @@ import CustomReactTable from '../../../components/CustomReactTable/CustomReactTa
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { sublease, pricingCondition, SUBLEASE_TYPE } from '../../../constants/helpers';
+import { sublease, pricingCondition, SUBLEASE_TYPE, SUBLEASE_STATUS } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import QtyDialog from './QtyDialog';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
@@ -160,19 +160,19 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
             <IconButton
               size="small"
               aria-label="Delete"
-              disabled={!allowedToEdit}
+              disabled={!allowedToEdit || (subleaseData.type === SUBLEASE_TYPE.vendor && isIssued)}
               onClick={() => {
                 openMaterial(row.original);
               }}
             >
-              <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
+              <EditIcon fontSize="small" color={!allowedToEdit || (subleaseData.type === SUBLEASE_TYPE.vendor && isIssued) ? 'disabled' : 'primary'} />
             </IconButton>
           </HtmlTooltip>
 
           <IconButton
             size="small"
             aria-label="Details"
-            disabled={row.original.hideSelection || !allowedToEdit || row.original?.assetQty > 0}
+            disabled={row.original.hideSelection || !allowedToEdit || row.original?.assetQty > 0 || (subleaseData.type === SUBLEASE_TYPE.vendor && isIssued)}
             onClick={() => {
               const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
               if (row.original?.type === 'package' && row.original?.subRows?.length) {
@@ -183,7 +183,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
               setDeleteData(obj);
             }}
           >
-            <DeleteIcon fontSize="small" color={row.original.hideSelection || !allowedToEdit || row.original?.assetQty > 0 ? "disabled" : "error"} />
+            <DeleteIcon fontSize="small" color={row.original.hideSelection || !allowedToEdit || row.original?.assetQty > 0 || (subleaseData.type === SUBLEASE_TYPE.vendor && isIssued) ? "disabled" : "error"} />
           </IconButton>
 
         </>
@@ -253,7 +253,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
           setNextStepToolTip(null);
         }
         else {
-          setNextStep(true);
+          setNextStep(false);
           setNextStepToolTip(subleaseMessage.startSublease);
         }
       }
@@ -313,6 +313,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
       .then(() => {
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
         fetchProductInventory();
+        fetchData();
         setIsSubmitting(false);
       })
       .catch((error) => {
@@ -448,7 +449,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
 
   return (
     <Fragment>
-      <Box display="flex" justifyContent="space-between" m={1}>
+      <Box display="flex" justifyContent="space-between" mb={1}>
         <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
           <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : ''}>
             <div>
@@ -457,7 +458,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
                 color="primary"
                 size="small"
                 startIcon={<Add />}
-                disabled={!allowedToEdit}
+                disabled={!allowedToEdit || (subleaseData.type === SUBLEASE_TYPE.vendor && subleaseData.status === SUBLEASE_STATUS.issued)}
                 onClick={openAddActions}
                 aria-controls="add-menu">
                 {'Add'}
@@ -517,7 +518,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
           <Box ml={1}>
             <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : 'Actions'}>
               <Button
-                disabled={selectedProducts?.length || !allowedToEdit ? false : true}
+                disabled={selectedProducts?.length || !allowedToEdit || (subleaseData.type === SUBLEASE_TYPE.vendor && !isIssued) ? false : true}
                 variant={'outlined'}
                 color="default"
                 size="small"

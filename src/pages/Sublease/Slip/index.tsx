@@ -6,7 +6,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { generateCustomTableColumns } from 'src/constants/columns';
-import { MATERIAL_TYPE, sidebarResource, sublease } from 'src/constants/helpers';
+import { MATERIAL_TYPE, SUBLEASE_STATUS, sidebarResource, sublease } from 'src/constants/helpers';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
@@ -15,12 +15,23 @@ import { fetch_sublease_product_fields } from 'src/components/Sublease/helper';
 import PreviewDownload from 'src/components/PreviewDownload';
 
 
-function Slip({ subleaseData, stepFullScreen, renderedFrom }) {
+function Slip({ subleaseData, stepFullScreen, renderedFrom, statusNames, updateStatus }) {
 
     const toastConfig = useContext(CustomToastContext);
 
     const [columns, setColumns] = useState(null);
     const [rowsData, setRowsData] = useState(null);
+
+    useEffect(() => {
+        if (
+            statusNames.findIndex((s) => s.optionLabel === SUBLEASE_STATUS.readyToInvoice) >
+            statusNames.findIndex((s) => s.optionLabel === subleaseData?.status)
+        ) {
+            if (![SUBLEASE_STATUS.closed, SUBLEASE_STATUS.completed].includes(subleaseData?.status)) {
+                updateStatus(SUBLEASE_STATUS.readyToInvoice);
+            }
+        }
+    }, []);
 
     useEffect(() => {
         fetchFields();
