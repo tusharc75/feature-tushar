@@ -27,6 +27,7 @@ import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageD
 import { ownerAndColaborator, subleaseMessage } from 'src/constants/messageHelpers';
 
 const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchData, isIssued, renderedFrom, allowedToEdit, stepFullScreen }) => {
+
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -36,7 +37,6 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
 
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [isProductEdit, setIsProductEdit] = useState({ open: false, isBulkedit: false });
-  const [isAddingProducts, setAddingProducts] = useState(false);
 
   const [recordToUpdate, setRecordToUpdate] = useState(null);
 
@@ -241,22 +241,33 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
         parent.subRows = subRows;
       }
     });
-    if (subleaseData?.type === SUBLEASE_TYPE.vendor) {
-      setNextStep(false);
-      setNextStepToolTip(subleaseMessage.startSublease);
-    } else if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
+
+    if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
       setNextStep(false);
       setNextStepToolTip(subleaseMessage.addProductPackage);
-    } else {
-      setNextStep(true);
-      setNextStepToolTip(null)
+    }
+    else {
+      if (subleaseData?.type === SUBLEASE_TYPE.vendor) {
+        if (isIssued) {
+          setNextStep(true);
+          setNextStepToolTip(null);
+        }
+        else {
+          setNextStep(true);
+          setNextStepToolTip(subleaseMessage.startSublease);
+        }
+      }
+      else {
+        setNextStep(true);
+        setNextStepToolTip(null);
+      }
     }
     setRowsData(rows);
     setSelectedProducts([]);
   };
 
   const handleAdd = async (rows) => {
-    setAddingProducts(true);
+    setIsSubmitting(true);
     const material: any = [];
     rows.forEach((d) => {
       const element: any = {};
@@ -302,11 +313,11 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
       .then(() => {
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
         fetchProductInventory();
-        setAddingProducts(false);
+        setIsSubmitting(false);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        setAddingProducts(false);
+        setIsSubmitting(false);
       });
   };
 

@@ -64,7 +64,7 @@ export const subleaseActions = {
 
 export const subleaseMessage = {
     addProductPackage: 'Add Products or Packages to proceed',
-    startSublease: 'Add Products or Packages and Start Sublease to proceed',
+    startSublease: 'Start Sublease to proceed',
     assignAssets: 'Assign Assets to proceed',
     subleaseProcessStep: 'Send to Supplier to proceed',
     deliverLoadingTicketStep: 'Create & Deliver Loading Ticket to proceed',
