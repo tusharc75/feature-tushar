@@ -51,7 +51,7 @@ export const rentalManagementMessage = {
     statusURForCancelReceiving: 'Receiving Ticket can be cancelled only for Under Review assets',
     rentalStatusCompleteCancelReceiving: 'Receiving Ticket can be cancelled only for Complete Rental assets',
     repairCanForThisAsset: 'Only Under Review, Need Repair, Need Recert and Scrap assets can be repaired',
-    repairSameWarehouse: `Selected assets must be in same ${routes. warehouse. title} to perform this action`,
+    repairSameWarehouse: `Selected assets must be in same ${routes.warehouse.title} to perform this action`,
     transferRentalForAsset: 'Only In-Use, Available and Under Review assets can be transfered',
 };
 
@@ -64,18 +64,19 @@ export const subleaseActions = {
 
 export const subleaseMessage = {
     addProductPackage: 'Add Products or Packages to proceed',
+    startSublease: 'Add Products or Packages and Start Sublease to proceed',
     assignAssets: 'Assign Assets to proceed',
+    subleaseProcessStep: 'Send to Supplier to proceed',
+    deliverLoadingTicketStep: 'Create & Deliver Loading Ticket to proceed',
+    deliverReceivingTicketStep: 'Create & Receive Receiving Ticket to proceed',
+
     loadingNotCreated: 'Loading Ticket is not created',
     loadingAlreadyDelivered: 'Loading Ticket is already delivered',
     loadingNotDelivered: 'Loading Ticket is not delivered',
+    loadingAlreadyCreated: 'Loading Ticket Already Created',
 
     receivingNotCreated: 'Receiving Ticket is not created',
     receivingAlreadyDelivered: 'Receiving Ticket is already delivered',
     receivingNotDeliverd: 'Receiving Ticket is not delivered',
     receivingAlreadyCreated: 'Receiving Ticket Already Created',
-
-    deliverLoadingTicketStep: 'Create & Deliver Loading Ticket to proceed',
-    subleaseProcessStep: 'There maybe some reasons that i dont konw',
-    loadingAlreadyCreated: 'Loading Ticket Already Created',
-    
 };
