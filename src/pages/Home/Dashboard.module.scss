@@ -106,7 +106,8 @@
     }
     display: grid;
     isolation: isolate;
-    grid-template-columns: var(--grid-columns, 1fr);
+    // grid-template-columns: var(--grid-columns, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(min(250px, 100%), 1fr));
     column-gap: var(--ver-gap, 15px);
     row-gap: var(--hor-gap, 15px);
     .singlecard {
