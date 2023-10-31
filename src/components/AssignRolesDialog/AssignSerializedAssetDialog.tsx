@@ -231,7 +231,7 @@ const AssignSerializedAssetDialog = ({
       <CustomDialogContent>
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
-            <Grid item xs={6} className="d-flex align-items-center gap-1">
+            <Grid item xs={6} md={6} className="d-flex align-items-center gap-1">
               <Box style={{ display: 'inline' }}>
                 {products.length > 0
                   ? products?.map((d) => (
