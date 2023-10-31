@@ -76,13 +76,13 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
   const fetchFields = async () => {
     setColumns(null);
-    var data = await fetch_rental_product_fields(rentalManagementData?.currency, false);
+    var data = await fetch_rental_product_fields(rentalManagementData[0]?.currency, false);
     data?.forEach((e) => {
       e.isColumnEditable = false;
     });
     setAllFields(JSON.parse(JSON.stringify(data)));
 
-    let newColumns = generateCustomTableColumns(data, rentalManagementData?.currency, renderedFrom);
+    let newColumns = generateCustomTableColumns(data, rentalManagementData[0]?.currency, renderedFrom);
 
     let coloum: any = [
       {
@@ -225,24 +225,24 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     let data: any = {};
     let invoicedProducts: any = [];
     let additionalCost: any = [];
-    const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`);
+    const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData[0]._id}`);
     data = response?.data?.data;
 
-    const invoiceResponse = await axiosInstance().get(`/rental-management/${rentalManagementData?._id}/invoice/material-end-date-qty`);
+    const invoiceResponse = await axiosInstance().get(`/rental-management/${rentalManagementData[0]?._id}/invoice/material-end-date-qty`);
     invoicedProducts = invoiceResponse?.data?.data?.material;
     additionalCost = invoiceResponse?.data?.data?.additionalCost;
 
-    const queryString = `?rentalJob=${rentalManagementData._id}`
+    const queryString = `?rentalJob=${rentalManagementData[0]._id}`
     const invoiceDataResponce = await axiosInstance().get(`${invoice.api}${queryString}`)
     const invoiceData = invoiceDataResponce?.data?.data
 
-    const responseAdditionalCostData = await axiosInstance().get(`${rentalManagement.api}/additionalcost/${rentalManagementData._id}`);
+    const responseAdditionalCostData = await axiosInstance().get(`${rentalManagement.api}/additionalcost/${rentalManagementData[0]._id}`);
     let additionalCostData = responseAdditionalCostData?.data?.data;
     if (additionalCost?.length > 0) {
       additionalCostData = additionalCostData.filter((d) => !additionalCost?.some((obj) => obj._id === d._id));
     }
     const result = await axiosInstance().get(
-      `${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}&referenceId=${rentalManagementData._id}`
+      `${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}&referenceId=${rentalManagementData[0]._id}`
     );
     const returnTicketProducts = {};
     result?.data?.data?.forEach((element) => {
@@ -465,7 +465,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           assetList.push({ asset: e._id, startDate: moment(e.actualStartDate)?.format('MM/DD/YYYY'), endDate: moment(endDate)?.format('MM/DD/YYYY') })
         }
       })
-      const inUseStandByDaysResponce = await axiosInstance().put(`/rental-management/${rentalManagementData?._id}/progressive-billing/date-range-status-count`, assetList);
+      const inUseStandByDaysResponce = await axiosInstance().put(`/rental-management/${rentalManagementData[0]?._id}/progressive-billing/date-range-status-count`, assetList);
       inUseStandByDays = inUseStandByDaysResponce?.data?.data;
 
       inUseStandByDays?.forEach((e) => {
@@ -477,7 +477,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
       })
     }
 
-    const invoiceResponse = await axiosInstance().get(`/rental-management/${rentalManagementData?._id}/invoice/material-end-date-qty`);
+    const invoiceResponse = await axiosInstance().get(`/rental-management/${rentalManagementData[0]?._id}/invoice/material-end-date-qty`);
     const invoicedProducts = invoiceResponse?.data?.data?.material;
 
     let rows: any = [];
@@ -600,7 +600,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     });
     setUpdating(true);
     axiosInstance()
-      .post(`${rentalManagement.api}/${rentalManagementData._id}/progressive-billing`, {
+      .post(`${rentalManagement.api}/${rentalManagementData[0]._id}/progressive-billing`, {
         material: rowsApplied.filter((d) => d.type !== 'manualEntry'),
         additionalCost: rowsApplied.filter((d) => d.type === 'manualEntry')
       })
@@ -799,7 +799,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           }}
           isBulkedit={false}
           handleSaveData={handleSaveData}
-          rentalManagementData={rentalManagementData}
+          rentalManagementData={rentalManagementData[0]}
           rowData={orginalMaterial.find((d) => d._id === isProductEdit.rowData._id)}
           material={material}
           selectedProducts={[]}

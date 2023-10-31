@@ -242,7 +242,15 @@ export default function useColumns() {
                   )}
                 </Fragment>
               ) : (
-                <p className="text-truncate">{row?.original?.[field?.fieldName] ? <p>{row?.original?.[field?.fieldName]}</p> : <NoDataCell />}</p>
+                <>
+                  {row?.original?.[field?.fieldName] ? (
+                    <h5 className="text-truncate" title={row?.original?.[field?.fieldName]}>
+                      {row?.original?.[field?.fieldName]}
+                    </h5>
+                  ) : (
+                    <NoDataCell />
+                  )}
+                </>
               )
           }
         };
@@ -268,7 +276,7 @@ export default function useColumns() {
         return {
           columnData: {
             ...commonFieldData,
-            filter: false,
+            canFilter: false,
             sortable: false,
             Cell: ({ row }) => <Avatar className="grid-avatar" src={row?.original?.[field?.fieldName]} />,
             width: 100
@@ -279,11 +287,17 @@ export default function useColumns() {
           columnData: {
             ...commonFieldData,
             Cell: ({ row }) => (
-              <p className="text-truncate">
-                {row?.original?.[field?.fieldName] ? <p>{moment(row?.original?.[field?.fieldName]).format(dateFormat)}</p> : <NoDataCell />}
-              </p>
+              <>
+                {row?.original?.[field?.fieldName] ? (
+                  <h5 className="createBy" title={`${moment(row?.original?.[field?.fieldName]).format(dateFormat)}`}>
+                    {moment(row?.original?.[field?.fieldName])?.format(dateFormat)}
+                  </h5>
+                ) : (
+                  <NoDataCell />
+                )}
+              </>
             ),
-            filter: false
+            canFilter: false
           }
         };
       } else if (field?.type === 'checkBox') {
@@ -297,9 +311,17 @@ export default function useColumns() {
         return {
           columnData: {
             ...commonFieldData,
-            filter: false,
+            canFilter: false,
             Cell: ({ row }) => (
-              <p className="text-truncate">{row?.original?.[field?.fieldName] ? <p>{row?.original?.[field?.fieldName]}</p> : <NoDataCell />}</p>
+              <>
+                {row?.original?.[field?.fieldName] ? (
+                  <h5 className="text-truncate" title={row?.original?.[field?.fieldName]}>
+                    {row?.original?.[field?.fieldName]}
+                  </h5>
+                ) : (
+                  <NoDataCell />
+                )}
+              </>
             )
           }
         };
@@ -308,8 +330,16 @@ export default function useColumns() {
           columnData: {
             ...commonFieldData,
             Cell: ({ row }) => (
-              <p className="text-truncate">{row?.original?.[field?.fieldName] ? <p>{row?.original?.[field?.fieldName]}</p> : <NoDataCell />}</p>
-            )
+              <>
+                {row?.original?.[field?.fieldName] ? (
+                  <h5 className="text-truncate" title={row?.original?.[field?.fieldName]}>
+                    {row?.original?.[field?.fieldName]}
+                  </h5>
+                ) : (
+                  <NoDataCell />
+                )}
+              </>
+            )            
           }
         };
       }

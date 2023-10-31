@@ -25,7 +25,6 @@ import { generateCustomTableColumns } from 'src/constants/columns';
 import { useData } from 'src/StateProvider/Provider';
 
 const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
-
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = `${camelCase(routes?.invoice.title)}_view`;
 
@@ -48,7 +47,8 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
   };
 
   useEffect(() => {
-    axiosInstance().get(`${invoice.api}/${invoiceId}`)
+    axiosInstance()
+      .get(`${invoice.api}/${invoiceId}`)
       .then(({ data: { data } }) => {
         setInvoiceData(data);
       })
@@ -70,7 +70,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
       data?.forEach((e) => {
         e.isColumnEditable = false;
       });
-      const newColumns = generateCustomTableColumns(data, invoiceData.currency ? invoiceData.currency : "USD", renderedFrom);
+      const newColumns = generateCustomTableColumns(data, invoiceData.currency ? invoiceData.currency : 'USD', renderedFrom);
       let qtyIndex = newColumns?.findIndex((d) => d.accessor === 'qty');
       if (qtyIndex > -1) {
         newColumns[qtyIndex].accessor = 'qtyDisplay';
@@ -158,24 +158,25 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
     const rows = data.material.filter((e) => !e.parentId);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === 'product'
-        ? parent.productDetail?.productName
-        : parent.type === 'package'
+      parent.detail = `${
+        parent.type === 'product'
+          ? parent.productDetail?.productName
+          : parent.type === 'package'
           ? parent.packageDetail?.packageName
           : parent.type === 'serializedAsset'
-            ? parent.serializedAssetDetail?.assetNumber
-            : parent.serviceDetail?.serviceName
-        }`;
+          ? parent.serializedAssetDetail?.assetNumber
+          : parent.serviceDetail?.serviceName
+      }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-            ? parent?.productDetail?.productDescription || ''
-            : parent.type === 'package'
-              ? parent?.packageDetail?.packageDescription || ''
-              : parent.type === 'serializedAsset'
-                ? parent.serializedAssetDetail?.product?.productDescription || ''
-                : '';
+          ? parent?.productDetail?.productDescription || ''
+          : parent.type === 'package'
+          ? parent?.packageDetail?.packageDescription || ''
+          : parent.type === 'serializedAsset'
+          ? parent.serializedAssetDetail?.product?.productDescription || ''
+          : '';
       parent.qtyDisplay = parent.qty;
       parent.subRows = generateNestedData(data.material, parent);
     });
@@ -197,24 +198,25 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${_subRow?.type === 'product'
-        ? _subRow?.productDetail?.productName
-        : _subRow?.type === 'package'
+      _subRow.detail = `${
+        _subRow?.type === 'product'
+          ? _subRow?.productDetail?.productName
+          : _subRow?.type === 'package'
           ? _subRow?.packageDetail?.packageName
           : _subRow?.type === 'serializedAsset'
-            ? _subRow?.serializedAssetDetail?.assetNumber
-            : _subRow?.serviceDetail?.serviceName
-        }`;
+          ? _subRow?.serializedAssetDetail?.assetNumber
+          : _subRow?.serviceDetail?.serviceName
+      }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === 'package'
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : _subRow.type === 'serializedAsset'
-                ? _subRow.serializedAssetDetail?.product?.productDescription || ''
-                : '';
+          ? _subRow?.productDetail?.productDescription || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : _subRow.type === 'serializedAsset'
+          ? _subRow.serializedAssetDetail?.product?.productDescription || ''
+          : '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
@@ -266,10 +268,17 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
   };
 
   const handleCancelInvoice = async (data) => {
+    let api = `${routes?.fieldTicketInvoice.path}/invoice/cancle`;
+    if (resource === sidebarResource.fieldTicket) {
+      api = `${routes?.generateInvoice.path}/cancel`;
+    }
     axiosInstance()
-      .patch(`${routes?.fieldTicketInvoice.path}/invoice/cancle`, {
+      .patch(api, {
         invoice: invoiceData?._id,
-        comment: data
+        comment: data,
+        ...(resource === sidebarResource.fieldTicket && {
+          resource: sidebarResource.fieldTicket
+        })
       })
       .then(({ data }) => {
         onSuccess();
@@ -293,14 +302,14 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
               height={'calc(100vh - 200px)'}
               columns={columns}
               data={rowsData}
-              onSelect={() => { }}
+              onSelect={() => {}}
               childrenProperty="subRows"
               uniqueKey="_id"
               hideSelection={true}
               hideAction={true}
               renderedFrom={renderedFrom}
               isClientSideGrid={true}
-              hideExpander={true}
+              hideExpander={resource === sidebarResource.fieldTicketInvoice || resource === sidebarResource.fieldTicket ? true : false}
             />
           </Box>
         ) : (
@@ -326,7 +335,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
                     resource={sidebarResource.invoice}
                     referenceId={invoiceData?._id}
                     columns={columns}
-                    hideDetailButton={true}
+                    hideDetailButton={resource === sidebarResource.fieldTicketInvoice || resource === sidebarResource.fieldTicket ? true : false}
                     isSendEmail={true}
                     defaultColumns={[
                       'type',
@@ -344,7 +353,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
                       `finalPrice_${invoiceData?.currency?.toLowerCase()}`
                     ]}
                   />
-                  {resource === sidebarResource.fieldTicketInvoice && (
+                  {(resource === sidebarResource.fieldTicketInvoice || resource === sidebarResource.fieldTicket) && (
                     <>
                       <Button
                         variant={isMobile && !isTablet ? 'text' : 'outlined'}
@@ -377,14 +386,16 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
                 </Box>
               )}
               <div className="ml-auto">
-                {rowsData && rowsData?.length > 0 && resource === sidebarResource.fieldTicketInvoice &&
+                {rowsData &&
+                  rowsData?.length > 0 &&
+                  (resource === sidebarResource.fieldTicketInvoice || resource === sidebarResource.fieldTicket) &&
                   ![INVOICE_STATUS.closed, INVOICE_STATUS.cancelled]?.includes(invoiceData?.status) && (
                     <DeleteButton text="Cancel Invoice" onClick={() => setCommentDialog(true)} />
                   )}
               </div>
             </div>
             <Box pt={1}>
-              {resource === sidebarResource.fieldTicketInvoice && permissions?.creditMemo?.isRead ? (
+              {(resource === sidebarResource.fieldTicketInvoice || resource === sidebarResource.fieldTicket) && permissions?.creditMemo?.isRead ? (
                 <>
                   <Tabs
                     className="new-tab-container-v1"

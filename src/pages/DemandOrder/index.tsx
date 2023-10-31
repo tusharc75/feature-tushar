@@ -1,4 +1,4 @@
-import { Button, IconButton, Tooltip } from '@material-ui/core';
+import { Button, IconButton } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -7,9 +7,7 @@ import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import MessageDialog from '../../components/Helpers/MessageDialog';
 import {
   demandOrder,
   getLocalStorageArrayData,
@@ -28,14 +26,18 @@ import styles from '../Leads/Header.module.scss';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import { Menu, MenuItem } from '@material-ui/core';
 import { ToggleButtonGroup, ToggleButton } from '@material-ui/lab';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import DeleteIcon from '@material-ui/icons/Delete';
 
 let searchTimeout;
 
 const DemandOrder = () => {
-  const { state, dispatch } = useTableReducer();
-  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
-  const DemandOrderType = [
+  const renderedFrom = camelCase(routes?.demandOrder.title);
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
+  const toastConfig = useContext(CustomToastContext);
+
+  const types = [
     {
       key: `My ${routes.demandOrder.title}`,
       value: 1
@@ -46,29 +48,20 @@ const DemandOrder = () => {
     }
   ];
 
-  const renderedFrom = camelCase(routes?.demandOrder.title);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
-  const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
-  const {
-    state: { user, permissions, selectedEntity }
-  }: any = useData();
-  const [selectedType, setSelectedType] = useState(1);
-  const [deleteLoading, setDeleteLoading] = useState(false);
-  const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
-  const [deleteRecord, setDeleteRecord] = useState<any>({});
-  const [showManageSalesOrderDialog, setShowManageSalesOrderDialog] = useState({ open: false, isClone: false, idToClone: null });
-  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
-
-  const [singleSalesOrderDelete, setSingleSalesOrderDelete] = useState({
-    id: null,
-    show: false,
-    demandOrderNumber: ''
-  });
-
+  const { state, dispatch } = useTableReducer();
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { getColumnData } = useColumns();
-  const [columns, setColumns] = useState(null);
 
+  const { state: { user, permissions, selectedEntity } }: any = useData();
+
+  const [selectedType, setSelectedType] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
+  const [deleteRecord, setDeleteRecord] = useState(null);
+
+  const [columns, setColumns] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
 
   useEffect(() => {
@@ -86,7 +79,7 @@ const DemandOrder = () => {
   }, [search]);
 
   useEffect(() => {
-      fetchData();
+    fetchData();
   }, [page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
@@ -105,28 +98,6 @@ const DemandOrder = () => {
     setColumns(columns);
   };
 
-  const handleSingleDeleteSalesOrder = async () => {
-    dispatch({ type: 'loading', loading: true });
-    axiosInstance()
-      .put(`${demandOrder.api}/remove`, {
-        ids: [singleSalesOrderDelete.id]
-      })
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-        fetchData();
-        dispatch({ type: 'loading', loading: false });
-        setSingleSalesOrderDelete({ id: null, show: false, demandOrderNumber: '' });
-      })
-      .catch((error) => {
-        dispatch({ type: 'loading', loading: false });
-        toastConfig.setToastConfig(error);
-      });
-  };
-
   const ActionsRenderer = {
     accessor: 'action',
     Header: 'Actions',
@@ -138,37 +109,38 @@ const DemandOrder = () => {
     Cell: ({ row }) => (
       <>
         {permissions?.demandOrder?.isCreate ? (
-          <Tooltip title="Clone">
+          <HtmlTooltip title="Clone">
             <IconButton
               size="small"
               aria-label="Clone"
               onClick={() => {
-                setShowManageSalesOrderDialog({ open: true, isClone: true, idToClone: row.original._id });
+                setShowManageDialog({ open: true, isClone: true, idToClone: row.original._id });
               }}
             >
               <FileCopyIcon fontSize="small" color="primary" />
             </IconButton>
-          </Tooltip>
+          </HtmlTooltip>
         ) : (
-          <Tooltip className="cursor-stop" title="You do not have permission to clone/create">
+          <HtmlTooltip className="cursor-stop" title="You do not have permission to clone/create">
             <IconButton aria-label="Clone" size="small">
               <FileCopyIcon fontSize="small" />
             </IconButton>
-          </Tooltip>
+          </HtmlTooltip>
         )}
-        <GridDeleteIcon
-          hasDeletePermission={permissions?.demandOrder?.isDelete}
-          ownerId={user?.user?._id}
-          userId={user?.user?._id}
-          onDelete={() =>
-            setSingleSalesOrderDelete({
-              show: true,
-              id: row.original._id,
-              demandOrderNumber: `${row.original.demandOrderNumber}`
-            })
-          }
-          entity="demand order"
-        />
+        {permissions?.demandOrder?.isDelete && (
+          <HtmlTooltip title="Delete">
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              onClick={() => {
+                setDeleteRecord(row.original);
+                setShowDeleteConfirmBox(true);
+              }}
+            >
+              <DeleteIcon color="error" />
+            </IconButton>
+          </HtmlTooltip>
+        )}
       </>
     )
   };
@@ -234,52 +206,28 @@ const DemandOrder = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-  const showConfirmBox = (row) => {
-    if (row) {
-      setIsConformDialogVisible(true);
-      if (row && row._id) {
-        setDeleteRecord(row);
-      }
+  const handleDelete = () => {
+    setIsSubmitting(true)
+    let ids = [];
+    if (deleteRecord) {
+      ids.push(deleteRecord._id);
     } else {
-      if (selectedRecords.find((d) => d.canDelete === false)) {
-        setShowDeleteWarningConfirmBox(true);
-      } else {
-        setIsConformDialogVisible(true);
-      }
+      ids = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((d) => d._id);
     }
-  };
-
-  const handleDeleteSalesOrder = async () => {
-    setDeleteLoading(true);
-    let recordsToDelete = [];
-    if (deleteRecord?._id) {
-      recordsToDelete.push(deleteRecord?._id);
-    } else {
-      recordsToDelete = selectedRecords.map((o) => o._id);
-    }
-    if (recordsToDelete.length > 0) {
-      axiosInstance()
-        .put(`${demandOrder.api}/remove`, {
-          ids: recordsToDelete
-        })
-        .then(({ data }) => {
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-          removeLocalStorage(localStorageSelectedRecords);
-          setIsConformDialogVisible(false);
-          setDeleteLoading(false);
-          if (deleteRecord) setDeleteRecord({});
-          fetchData();
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-          setIsConformDialogVisible(false);
-          setDeleteLoading(false);
-        });
-    }
+    axiosInstance()
+      .put(`${demandOrder.api}/remove`, { ids: ids })
+      .then(() => {
+        removeLocalStorage(localStorageSelectedRecords)
+        fetchData();
+        setShowDeleteConfirmBox(false);
+        setDeleteRecord(null);
+        setAnchorEl(null);
+        setIsSubmitting(false)
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setIsSubmitting(false)
+      });
   };
 
   const openActions = (event) => {
@@ -292,7 +240,7 @@ const DemandOrder = () => {
 
   const onTypeChange = (event, type) => {
     dispatch({ type: 'pageChange', page: 0 });
-    const value = DemandOrderType.find((d) => d.key === type).value;
+    const value = types.find((d) => d.key === type).value;
     setSelectedType(value);
     history.push(`?type=${value}`);
   };
@@ -305,7 +253,7 @@ const DemandOrder = () => {
           permissions={permissions?.demandOrder}
           module="demandOrder"
           api={demandOrder.api}
-          afterImportCompleted={() => {}}
+          afterImportCompleted={() => { }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
@@ -327,11 +275,11 @@ const DemandOrder = () => {
               <ToggleButtonGroup
                 size="small"
                 className="align-items-center gap-1 "
-                value={DemandOrderType[selectedType - 1].key}
+                value={types[selectedType - 1].key}
                 exclusive
                 onChange={onTypeChange}
               >
-                {DemandOrderType.map((k, index) => {
+                {types.map((k, index) => {
                   return (
                     <ToggleButton value={k.key} key={index}>
                       {k.key}
@@ -340,7 +288,7 @@ const DemandOrder = () => {
                 })}
               </ToggleButtonGroup>
             </div>
-            <div className="flex flex-wrap gap-[8px]  justify-end">
+            <div className="flex flex-wrap gap-[8px] justify-end">
               <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
               <div className="flex gap-[8px] flex-wrap items-center">
                 <Button
@@ -349,7 +297,7 @@ const DemandOrder = () => {
                   size="small"
                   className={`no-shadow`}
                   onClick={() => {
-                    setShowManageSalesOrderDialog({ open: true, isClone: false, idToClone: null });
+                    setShowManageDialog({ open: true, isClone: false, idToClone: null });
                   }}
                   startIcon={<AddOutlined />}
                 >
@@ -384,7 +332,7 @@ const DemandOrder = () => {
                       <MenuItem
                         onClick={() => {
                           closeActions();
-                          showConfirmBox(null);
+                          setShowDeleteConfirmBox(true);
                         }}
                       >
                         Delete
@@ -400,7 +348,7 @@ const DemandOrder = () => {
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => {}}
+            onSelect={() => { }}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
@@ -411,49 +359,28 @@ const DemandOrder = () => {
             resource={sidebarResource.demandOrder}
           />
         ) : null}
-        {showDeleteWarningConfirmBox ? (
-          <MessageDialog
-            open={showDeleteWarningConfirmBox}
-            message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
-            onClose={() => setShowDeleteWarningConfirmBox(false)}
-          />
-        ) : null}
-        {isConfirmDialogVisible ? (
-          <ConfirmationDialog
-            open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${routes?.demandOrder?.title?.toLowerCase()} ${deleteRecord?.salesOrderName || ''} ?`}
-            onClose={() => {
-              setDeleteRecord(null);
-              setIsConformDialogVisible(false);
-            }}
-            okBtnLoading={deleteLoading}
-            onOk={handleDeleteSalesOrder}
-          />
-        ) : null}
-        {singleSalesOrderDelete.show ? (
-          <ConfirmationDialog
-            open={singleSalesOrderDelete.show}
-            message={`Are you sure you want to delete Demand Order: ${singleSalesOrderDelete.demandOrderNumber}?`}
-            onClose={() =>
-              setSingleSalesOrderDelete({
-                id: null,
-                show: false,
-                demandOrderNumber: ''
-              })
-            }
-            onOk={handleSingleDeleteSalesOrder}
-          />
-        ) : null}
       </CustomContainer>
-      {showManageSalesOrderDialog.open && (
+      {showDeleteConfirmBox && (
+        <ConfirmationDialog
+          open={showDeleteConfirmBox}
+          message={`Are you sure you want to delete ${routes?.demandOrder?.title} ${deleteRecord?.demandOrderNumber || ''} ?`}
+          onClose={() => {
+            setDeleteRecord(null);
+            setShowDeleteConfirmBox(false);
+          }}
+          okBtnLoading={isSubmitting}
+          onOk={handleDelete}
+        />
+      )}
+      {showManageDialog.open && (
         <ManageDemandOrderDialog
-          isClone={showManageSalesOrderDialog.isClone}
-          open={showManageSalesOrderDialog.open}
-          demandOrderId={showManageSalesOrderDialog.idToClone}
-          onClose={() => setShowManageSalesOrderDialog({ open: false, isClone: false, idToClone: null })}
+          isClone={showManageDialog.isClone}
+          open={showManageDialog.open}
+          demandOrderId={showManageDialog.idToClone}
+          onClose={() => setShowManageDialog({ open: false, isClone: false, idToClone: null })}
           onSuccess={() => {
             fetchData();
-            setShowManageSalesOrderDialog({ open: false, isClone: false, idToClone: null });
+            setShowManageDialog({ open: false, isClone: false, idToClone: null });
           }}
         />
       )}

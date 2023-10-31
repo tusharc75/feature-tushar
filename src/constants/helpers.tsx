@@ -105,6 +105,7 @@ export const sublease_InterCompany_Steps: stepInterface[] = [
   { name: 'Serialized Asset', title: 'Asset', icon: 'serializedAssets' },
   { name: 'Loading Ticket', title: 'Loading', icon: 'ticket' },
   { name: 'Receiving Ticket', title: 'Receiving', icon: 'receivingTicket' },
+  { name: 'Final Slip', title: 'Slip', icon: 'invoice' }
 ];
 
 export const quotationProcessSteps: stepInterface[] = [
@@ -352,7 +353,7 @@ export const sidebarResource = {
   deviceTemplateAlert: 'Device Template Alert',
   chartOfAccount: 'Chart Of Account',
   flash: 'Flash',
-  rentalManagementInvoice : 'Rental Management Invoice',
+  rentalManagementInvoice: 'Rental Management Invoice',
   creditMemo: 'Credit Memo'
 };
 
@@ -408,7 +409,7 @@ export const RESOURCE_LABEL = {
   marketSegment: 'Market Segments',
   quotePdfTemplate: 'PDF Templates',
   rentalManagement: 'Rental Job',
-  rentalManagementInvoice : 'Rental Management Invoice',
+  rentalManagementInvoice: 'Rental Management Invoice',
   deliveryTicket: 'Delivery Tickets',
   pricingCondition: 'Pricing Setup',
   repairJob: 'Repair Jobs',
@@ -487,8 +488,8 @@ export const RESOURCE_LABEL = {
   flash: 'Flash',
   accountsReceivable: 'Accounts Receivable',
   creditMemo: 'Credit Memo',
-  generateInvoice : 'Generate Invoice',
-  repairOrderInvoice : 'Repair Order Invoice'
+  generateInvoice: 'Generate Invoice',
+  repairOrderInvoice: 'Repair Order Invoice'
 };
 
 export const CHILD_RESOURCE = {
@@ -2711,7 +2712,7 @@ export const SERVICE_TYPE = {
 };
 
 export const SUBLEASE_TYPE = {
-  vendor: 'Vender',
+  vendor: 'Vendor',
   interCompany: 'Inter Company'
 }
 
