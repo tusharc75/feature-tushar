@@ -20,12 +20,14 @@ import CreateInvoiceDialog from './CreateInvoice';
 import InvoiceDialog from './InvoiceDialog';
 import CreateBillingDialog from '../RentalManagement/ProgressiveBilling/CreateBillingDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ViewInvoice from '../Invoice/ViewInvoice';
 
 const GENERATE_RESOURCE = [
     {
         key: 'rentalManagement',
         resource: sidebarResource.rentalManagement,
         fieldName: 'rentalJobName',
+        invoiceFieldName: 'rentalJob',
         progressiveBilling: true,
         path: routes.rentalManagementDetail.path,
         title: routes.rentalManagement.title,
@@ -34,6 +36,7 @@ const GENERATE_RESOURCE = [
         key: 'sublease',
         resource: sidebarResource.sublease,
         fieldName: 'subleaseName',
+        invoiceFieldName: 'sublease',
         progressiveBilling: true,
         path: routes.subleaseDetail.path,
         title: routes.sublease.title,
@@ -42,6 +45,7 @@ const GENERATE_RESOURCE = [
         key: 'repairOrder',
         resource: sidebarResource.repairOrder,
         fieldName: 'repairOrderNumber',
+        invoiceFieldName: 'repairOrder',
         progressiveBilling: false,
         path: routes.repairOrderDetail.path,
         title: routes.repairOrder.title,
@@ -64,7 +68,11 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
     const { getColumnData } = useColumns();
 
     const [createInvoiceDialog, setCreateInvoiceDialog] = useState({ open: false, data: null });
+
     const [viewInvoiceDialog, setViewInvoiceDialog] = useState({ open: false, data: null });
+    const [viewSingleInvoiceDialog, setViewSingleInvoiceDialog] = useState({ open: false, invoice: null });
+
+
     const [selectedResource, setSelectedResource] = useState(resourceRendered ? GENERATE_RESOURCE.find((r) => r.key === resourceRendered) : GENERATE_RESOURCE[0]);
     const [resourceList, setResourceList] = useState([])
 
@@ -229,7 +237,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
                     <IconButton
                         size="small"
                         onClick={() => {
-                            setViewInvoiceDialog({ open: true, data: params.data });
+                            setViewSingleInvoiceDialog({ open: true, invoice: params.data?.invoiceId || params.data?.invoice });
                         }}
                     >
                         <VisibilityIcon fontSize="small" color="primary" />
@@ -349,6 +357,19 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
                         handleClose={() => {
                             setViewInvoiceDialog({ open: false, data: null });
                         }}
+                    />
+                )}
+
+                {viewSingleInvoiceDialog.open && (
+                    <ViewInvoice
+                        invoiceId={viewSingleInvoiceDialog.invoice}
+                        onClose={() => {
+                            setViewSingleInvoiceDialog({ open: false, invoice: null });
+                        }}
+                        onSuccess={() => {
+                            setViewSingleInvoiceDialog({ open: false, invoice: null });
+                        }}
+                        resource={selectedResource.resource}
                     />
                 )}
             </CustomContainer>
