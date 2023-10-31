@@ -30,10 +30,10 @@ const InvoiceDialog = ({ resourceData, selectedResource, handleClose }) => {
           ) : (
             <Invoices
               resourceId={resourceData?._id}
-              resourceName={selectedResource.key}
+              resource={selectedResource.resource}
+              invoiceFieldName={selectedResource.invoiceFieldName}
             />
           )}
-
         </CustomDialogContent>
       </Dialog>
     </>

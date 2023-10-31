@@ -280,7 +280,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
                     : _subRow.type === 'service'
                         ? _subRow?.serviceDetail?.serviceName
                         : _subRow.type === 'serializedAsset'
-                            ? _subRow?.inventoryDetail?.assetNumber
+                            ? _subRow?.serializedAssetDetail?.assetNumber
                             : _subRow?.packageDetail?.packageName;
             _subRow.description =
                 _subRow.type === 'product'
@@ -355,6 +355,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
 
     const handleCreateInvoice = () => {
         if (progressiveBilling) {
+            setUpdating(true);
             rowsApplied?.forEach((element) => {
                 delete element?.index;
                 delete element?.detail;
@@ -363,12 +364,11 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
                 delete element?.productDetail;
                 delete element?.packageDetail;
                 delete element?.serviceDetail;
-                delete element?.inventoryDetail;
+                delete element?.serializedAssetDetail;
                 delete element?.description;
                 delete element?.subRows;
                 delete element?.manualEndDate;
             });
-            setUpdating(true);
             axiosInstance()
                 .post(`/generate-invoice/${resourceData._id}/progressive-invoice?resource=${resource}`, {
                     material: rowsApplied,
@@ -382,9 +382,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
                     toastConfig.setToastConfig(error);
                 });
         } else {
-            axiosInstance().post(`generate-invoice/invoice?resource=${resource}`, {
-                resourceId: resourceData?._id,
-            }).then(({ data }) => {
+            axiosInstance().post(`/generate-invoice/invoice?resource=${resource}`, { referenceId: resourceData?._id }).then(({ data }) => {
                 toastConfig.setToastConfig({
                     open: true,
                     type: 'success',

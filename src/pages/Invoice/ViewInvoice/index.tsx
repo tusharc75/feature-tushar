@@ -300,7 +300,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
               hideAction={true}
               renderedFrom={renderedFrom}
               isClientSideGrid={true}
-              hideExpander={true}
+              hideExpander={resource === sidebarResource.fieldTicketInvoice ? true : false}
             />
           </Box>
         ) : (
@@ -326,7 +326,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
                     resource={sidebarResource.invoice}
                     referenceId={invoiceData?._id}
                     columns={columns}
-                    hideDetailButton={true}
+                    hideDetailButton={resource === sidebarResource.fieldTicketInvoice ? true : false}
                     isSendEmail={true}
                     defaultColumns={[
                       'type',
