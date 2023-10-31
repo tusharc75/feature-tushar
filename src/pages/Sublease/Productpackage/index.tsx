@@ -241,7 +241,10 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
         parent.subRows = subRows;
       }
     });
-    if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
+    if (subleaseData?.type === SUBLEASE_TYPE.vendor) {
+      setNextStep(false);
+      setNextStepToolTip(subleaseMessage.startSublease);
+    } else if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
       setNextStep(false);
       setNextStepToolTip(subleaseMessage.addProductPackage);
     } else {
