@@ -368,8 +368,15 @@ export default function NewCreateQuotePdfTemplate() {
             setIsUpdatingAndPreview(false);
             history.push(`${routes.quotePdfTemplateDetail.path}/${data._id}`);
           } else {
-            history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.quotePdfTemplate.path });
+            if (isBreakCrumbPath) {
+              history.push({ pathname: isBreakCrumbPath });
+            }            
             setIsUpdating(false);
+            toastConfig.setToastConfig({
+              open: true,
+              type: 'success',
+              message: 'Changes Saved'
+            })
           }
         })
         .catch((error) => {
@@ -419,8 +426,15 @@ export default function NewCreateQuotePdfTemplate() {
                 tabValue: 1
               });
             } else {
-              history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.quotePdfTemplate.path });
+              if (isBreakCrumbPath) {
+                history.push({ pathname: isBreakCrumbPath });
+              }              
             }
+            toastConfig.setToastConfig({
+              open: true,
+              type: 'success',
+              message: 'Changes Saved'
+            })
             setIsUpdating(false);
           }
         })
