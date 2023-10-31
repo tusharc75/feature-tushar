@@ -31,8 +31,10 @@ import { camelCase, startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { generateCustomTableColumns } from 'src/constants/columns';
 import moment from 'moment';
+import { useData } from 'src/StateProvider/Provider';
 
 const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progressiveBilling }) => {
+
   const toastConfig = useContext(CustomToastContext);
 
   const [isUpdating, setUpdating] = useState(false);
@@ -47,6 +49,11 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
   const [allFields, setAllFields] = useState([]);
   const [appliedDate, setAppliedDate] = useState(false);
   const [rowsApplied, setRowsApplied] = useState([]);
+
+
+  const {
+    state: { permissions, selectedEntity }
+  }: any = useData();
 
   const renderedFrom = `${camelCase(routes?.generateInvoice.title)}_create`;
 
@@ -68,8 +75,8 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
       resource === sidebarResource.sublease
         ? CHILD_RESOURCE.subleaseProduct
         : resource === sidebarResource.fieldTicket
-        ? CHILD_RESOURCE.fieldTicketMateial
-        : CHILD_RESOURCE.quotationProduct;
+          ? CHILD_RESOURCE.fieldTicketMateial
+          : CHILD_RESOURCE.quotationProduct;
 
     const response = await axiosInstance().get(`/field/child?resource=${childResourceName}`);
     data = response?.data?.data;
@@ -94,34 +101,53 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
         accessor: 'type',
         Header: 'Type',
         sticky: isMobile ? 'none' : 'left',
-        width: 200,
+        width: 100,
         disableFilters: true,
         Cell: ({ row }) =>
           row.original['type'] ? (
             <p>
               {`${startCase(row.original?.type)} `}
-              {row.original['type'] === MATERIAL_TYPE.product
+              {/* {row.original['type'] === MATERIAL_TYPE.product
                 ? row.original?.productDetail?.serializedProduct
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === MATERIAL_TYPE.package
-                ? row.original?.packageDetail?.packageType === 'Product'
-                  ? '(Product)'
-                  : '(Service)'
-                : row.original.type === MATERIAL_TYPE.service
-                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                : ''}
+                  ? row.original?.packageDetail?.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === MATERIAL_TYPE.service
+                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                    : ''} */}
             </p>
           ) : (
             <NoDataCell />
           )
       },
+      ...(resource === sidebarResource.fieldTicket ? [{
+        accessor: 'fieldTicketNumber',
+        Header: 'Field Ticket',
+        Cell: ({ row }) =>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <p className="text-truncate">{row.original.fieldTicketNumber}</p>
+            {permissions?.fieldTicket?.isRead &&
+              <Box ml={1}>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    window.open(`${routes.fieldTicketDetail.path}/${row.original.fieldTicketId}`);
+                  }}
+                >
+                  <OpenInNewIcon fontSize="small" color="primary" />
+                </IconButton>
+              </Box>
+            }
+          </div>
+      }] : []),
       {
         accessor: 'detail',
         Header: 'Details',
         minWidth: 300,
         width: 300,
-        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p>{row.original.detail}</p>
@@ -164,57 +190,40 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
     setColumns(column);
   };
 
-  const manageMaterial = (material, resourceName, invoicedProducts) => {
+  const manageMaterial = (material, invoicedProducts) => {
     let newMaterial: any = [];
-
-    if (resourceName === 'sublease') {
-      material?.forEach((d) => {
-        if (d?.type === 'service' && d?.parentId === null && !d?.actualStartDate) {
-          d['actualStartDate'] = d?.estimateStartDate;
-        }
-        if (d?.type === 'package' && d?.packageDetail?.packageType === 'Service' && d?.parentId === null && !d?.actualStartDate) {
-          d['actualStartDate'] = d?.estimateStartDate;
-        }
+    if (resource === sidebarResource.sublease) {
+      material?.filter((d) => d.actualStartDate)?.forEach((element) => {
+        let values: any = {};
+        values['actualEndDate'] = element?.actualEndDate || element?.estimateEndDate;
+        values['manualEndDate'] = element?.actualEndDate;
+        const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
+        newMaterial.push({ ...element, ...calValues });
       });
-
-      material
-        ?.filter((d) => d.actualStartDate)
-        ?.forEach((element) => {
-          let values: any = {};
-          values['actualEndDate'] = element?.actualEndDate || element?.estimateEndDate;
-          values['manualEndDate'] = element?.actualEndDate;
-          const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
-          newMaterial.push({ ...element, ...calValues });
-        });
 
       material = newMaterial;
       if (invoicedProducts?.length) {
-        material = material
-          ?.map((e) => {
-            let materialData: any = { ...e };
+        material = material?.map((e) => {
+          let materialData: any = { ...e };
 
-            let pMethod = materialData?.pricingMethod?.split(',') || [];
-            pMethod = pMethod.map((m) => m?.trim()).find((m) => !['Per Day', 'Per Week', 'Per Month'].includes(m));
+          let pMethod = materialData?.pricingMethod?.split(',') || [];
+          pMethod = pMethod.map((m) => m?.trim()).find((m) => !['Per Day', 'Per Week', 'Per Month'].includes(m));
 
-            const product = invoicedProducts?.find((p) => p._id === e._id);
-            if (product) {
-              const actualEndDate = new Date(product?.endDate)?.setDate(new Date(product?.endDate)?.getDate() + 1);
-              materialData.actualStartDate = actualEndDate;
-            } else {
-              materialData.actualStartDate = materialData.manualStartDate
-                ? materialData.manualStartDate
-                : new Date().setDate(new Date().getDate() + 1);
-            }
-
-            return materialData;
-          })
-          .filter((d) => d.qty > 0);
+          const product = invoicedProducts?.find((p) => p._id === e._id);
+          if (product) {
+            const actualEndDate = new Date(product?.endDate)?.setDate(new Date(product?.endDate)?.getDate() + 1);
+            materialData.actualStartDate = actualEndDate;
+          } else {
+            materialData.actualStartDate = materialData.manualStartDate ? materialData.manualStartDate : new Date().setDate(new Date().getDate() + 1);
+          }
+          return materialData;
+        }).filter((d) => d.qty > 0);
       }
-    } else if (resourceName === sidebarResource.fieldTicket) {
+    }
+    else if (resource === sidebarResource.fieldTicket) {
       material?.cost?.forEach((ele, i) => {
         ele.type = 'manualEntry';
       });
-
       material = [...material?.material, ...material?.cost];
     }
     setMaterial(material);
@@ -234,7 +243,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
       );
       invoicedProducts = invoiceResponse?.data?.data?.material;
 
-      manageMaterial(response?.data?.data?.material, 'sublease', invoicedProducts);
+      manageMaterial(response?.data?.data?.material, invoicedProducts);
     } else if (resource === sidebarResource.repairOrder) {
       const quotationResponse = axiosInstance().get(
         `${repairOrder.api}/${resourceData[0]?._id}/check-create/quotation?approval=${resourceData[0]?.addQuotationStep ? 1 : 0}`
@@ -251,14 +260,14 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
       const [quotationResult, productPackageResult] = await Promise.all([quotationResponse, productPackageResponse]);
 
       response = productPackageResult.data;
-      manageMaterial(response?.data?.material, 'repairOrder', invoicedProducts);
+      manageMaterial(response?.data?.material, invoicedProducts);
     } else if (resource === sidebarResource.fieldTicket) {
       const referenceIds = resourceData?.map((d) => d._id);
 
       const {
         data: { data: data }
       } = await axiosInstance().get(`${routes?.generateInvoice.path}/material?referenceIds=${JSON.stringify(referenceIds)}`);
-      manageMaterial(data, sidebarResource.fieldTicket, []);
+      manageMaterial(data, []);
     }
   };
 
@@ -270,24 +279,24 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
         parent.type === MATERIAL_TYPE.product
           ? parent.productDetail?.productName
           : parent.type === MATERIAL_TYPE.service
-          ? parent?.serviceDetail?.serviceName
-          : parent.type === MATERIAL_TYPE.serializedAsset
-          ? parent?.serializedAssetDetail?.assetNumber
-          : parent.type === 'manualEntry'
-          ? parent?.description
-          : parent.packageDetail?.packageName;
+            ? parent?.serviceDetail?.serviceName
+            : parent.type === MATERIAL_TYPE.serializedAsset
+              ? parent?.serializedAssetDetail?.assetNumber
+              : parent.type === 'manualEntry'
+                ? parent?.description
+                : parent.packageDetail?.packageName;
       parent.description =
         parent.type === MATERIAL_TYPE.product
           ? parent?.productDetail?.productDescription || ''
           : parent.type === MATERIAL_TYPE.service
-          ? parent?.serviceDetail?.serviceDescription || ''
-          : parent.type === MATERIAL_TYPE.package
-          ? parent?.packageDetail?.packageDescription || ''
-          : parent.type === MATERIAL_TYPE.serializedAsset
-          ? parent?.description || ''
-          : parent.type === 'manualEntry'
-          ? parent?.description || ''
-          : '';
+            ? parent?.serviceDetail?.serviceDescription || ''
+            : parent.type === MATERIAL_TYPE.package
+              ? parent?.packageDetail?.packageDescription || ''
+              : parent.type === MATERIAL_TYPE.serializedAsset
+                ? parent?.description || ''
+                : parent.type === 'manualEntry'
+                  ? parent?.description || ''
+                  : '';
       parent.qtyDisplay = parent.qty;
       parent.subRows = generateNestedData(material, parent);
     });
@@ -300,23 +309,23 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
       _subRow.detail =
-        _subRow.type === 'product'
+        _subRow.type === MATERIAL_TYPE.product
           ? _subRow?.productDetail?.productName
-          : _subRow.type === 'service'
-          ? _subRow?.serviceDetail?.serviceName
-          : _subRow.type === 'serializedAsset'
-          ? _subRow?.serializedAssetDetail?.assetNumber
-          : _subRow?.packageDetail?.packageName;
+          : _subRow.type === MATERIAL_TYPE.service
+            ? _subRow?.serviceDetail?.serviceName
+            : _subRow.type === MATERIAL_TYPE.serializedAsset
+              ? _subRow?.serializedAssetDetail?.assetNumber
+              : _subRow?.packageDetail?.packageName;
       _subRow.description =
-        _subRow.type === 'product'
+        _subRow.type === MATERIAL_TYPE.product
           ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'service'
-          ? _subRow?.serviceDetail?.serviceDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : _subRow.type === 'serializedAsset'
-          ? _subRow?.description || ''
-          : '';
+          : _subRow.type === MATERIAL_TYPE.service
+            ? _subRow?.serviceDetail?.serviceDescription || ''
+            : _subRow.type === MATERIAL_TYPE.package
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : _subRow.type === MATERIAL_TYPE.serializedAsset
+                ? _subRow?.description || ''
+                : '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
@@ -393,21 +402,20 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
         delete element?.subRows;
         delete element?.manualEndDate;
       });
-      axiosInstance()
-        .post(`/generate-invoice/${resourceData[0]?._id}/progressive-invoice?resource=${resource}`, {
-          material: rowsApplied
-        })
-        .then(() => {
-          setUpdating(false);
-          onSuccess();
-        })
+      axiosInstance().post(`/generate-invoice/create-progressive`, {
+        resource: resource,
+        referenceId: resourceData[0]?._id,
+        material: rowsApplied
+      }).then(() => {
+        setUpdating(false);
+        onSuccess();
+      })
         .catch((error) => {
           setUpdating(false);
           toastConfig.setToastConfig(error);
         });
     } else {
-      axiosInstance()
-        .post(`/generate-invoice/invoice`, { resource: resource, referenceIds: [resourceData[0]?._id] })
+      axiosInstance().post(`/generate-invoice/create`, { resource: resource, referenceIds: resourceData?.map((e) => e._id) })
         .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
@@ -477,9 +485,9 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
               </MuiPickersUtilsProvider>
             )}
             {columns && rowsData ? (
-              <Box zIndex={5} width={'100%'} height={'calc(100vh - 285px)'} p={1}>
+              <Box zIndex={5} width={'100%'} p={1}>
                 <CustomReactTable
-                  height={'calc(100vh - 285px)'}
+                  height={progressiveBilling ? 'calc(100vh - 285px)' : 'calc(100vh - 180px)'}
                   columns={columns}
                   data={rowsData}
                   setWholeRowsCellColor={(rowData) => {
@@ -520,8 +528,8 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
               !appliedDate && progressiveBilling
                 ? 'Please select items and apply end date'
                 : rowsApplied?.some((d) => d.invalidDate === true) && progressiveBilling
-                ? 'Please select an appropriate date !'
-                : 'Create Invoice'
+                  ? 'Please select an appropriate date !'
+                  : 'Create Invoice'
             }
           >
             <span>
