@@ -1232,8 +1232,7 @@ const ReceivingTicket = ({
           errorMessages.push({ index: e.index, message: rentalManagementMessage.ticketNotForLost });
         }
         else if (![ASSET_STATUS.inUse, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable,
-        ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert, ASSET_STATUS.notApplied]?.includes(e?.status)
-        ) {
+        ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert, ASSET_STATUS.notApplied]?.includes(e?.status) && !e?.isReplaced) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.receivingNotValidStatus });
         }
       }
