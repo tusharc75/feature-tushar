@@ -123,7 +123,7 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
       });
       setInitialData({
         fields: data,
-        values: { ...getObjKeys('', data), estimateStartDate: quotationData.estimateStartDate, estimateEndDate: '', actualStartDate: '', actualEndDate: '', tenure: '', unit: 'Piece' }
+        values: { ...getObjKeys('', data), estimateStartDate: quotationData.estimateStartDate, estimateEndDate: '', actualStartDate: '', actualEndDate: '', tenure: '', }
       });
     } else {
       let unitOptions: any = [];
