@@ -123,9 +123,6 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
     const fetchData = async () => {
         dispatch({ type: 'loading', loading: true });
         let queryString = getQueryString();
-        if (selectedResource.resource === sidebarResource.rentalManagement) {
-            queryString = `/rental-management${queryString}`
-        }
         if (gridApi) {
             gridApi.setRowData([]);
         }
