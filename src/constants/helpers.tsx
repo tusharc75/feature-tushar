@@ -2711,7 +2711,7 @@ export const SERVICE_TYPE = {
 };
 
 export const SUBLEASE_TYPE = {
-  vendor: 'Vender',
+  vendor: 'Vendor',
   interCompany: 'Inter Company'
 }
 
