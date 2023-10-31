@@ -362,7 +362,7 @@ export default function NewCreateQuotePdfTemplate() {
           landscape: values?.landscape,
           productColumns: parseInt(values?.productColumns)
         })
-        .then(({ data: { data } }) => {
+        .then(({ data: { data, message } }) => {
           if (isPreview === true) {
             previewPdfTemplate(data._id);
             setIsUpdatingAndPreview(false);
@@ -370,12 +370,12 @@ export default function NewCreateQuotePdfTemplate() {
           } else {
             if (isBreakCrumbPath) {
               history.push({ pathname: isBreakCrumbPath });
-            }            
+            }       
             setIsUpdating(false);
             toastConfig.setToastConfig({
               open: true,
               type: 'success',
-              message: 'Changes Saved'
+              message: message
             })
           }
         })
@@ -407,7 +407,7 @@ export default function NewCreateQuotePdfTemplate() {
           landscape: values?.landscape,
           productColumns: parseInt(values?.productColumns)
         })
-        .then(({ data: { data } }) => {
+        .then(({ data: { data, message } }) => {
           if (isPreview === true) {
             previewPdfTemplate(data._id);
             setIsUpdatingAndPreview(false);
@@ -428,12 +428,12 @@ export default function NewCreateQuotePdfTemplate() {
             } else {
               if (isBreakCrumbPath) {
                 history.push({ pathname: isBreakCrumbPath });
-              }              
+              }           
             }
             toastConfig.setToastConfig({
               open: true,
               type: 'success',
-              message: 'Changes Saved'
+              message: message
             })
             setIsUpdating(false);
           }
