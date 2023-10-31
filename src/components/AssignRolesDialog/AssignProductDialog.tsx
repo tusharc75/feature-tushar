@@ -5,13 +5,7 @@ import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import SearchBox from '../Helpers/SearchBox';
-import {
-  gridLoadingTimeout,
-  isObjectEmpty,
-  product,
-  prepareDataForGrid,
-  getLocalStorageArrayData
-} from 'src/constants/helpers';
+import { gridLoadingTimeout, isObjectEmpty, product, prepareDataForGrid, getLocalStorageArrayData } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import routes from '../Helpers/Routes';
 import styles from 'src/pages/Leads/Header.module.scss';
@@ -32,7 +26,6 @@ const AssignProductDialog = ({
   extraFilterById = [],
   isSubmitting = false
 }) => {
-
   const renderedFrom = `${camelCase(routes.product?.title)}_assign`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -244,14 +237,11 @@ const AssignProductDialog = ({
         <>
           <div className="header-panel">
             <Grid container className={styles.filter_side_container}>
-              <Grid item xs={6} className="d-flex align-items-center gap-1"></Grid>
-              <Grid item xs={6} className={styles.filter_side}>
+              <Grid item xs={12} md={6} className={styles.filter_side}>
                 <Box className={styles.filter_side_header} component="div">
                   <SearchBox onChange={handleSearch} className={styles.search_box_input} width="242px" size="small" value={search} />
                   <Button
-                    disabled={
-                      isSubmitting || disableSaveButton || [...getLocalStorageArrayData(localStorageSelectedRecords)].length === 0
-                    }
+                    disabled={isSubmitting || disableSaveButton || [...getLocalStorageArrayData(localStorageSelectedRecords)].length === 0}
                     onClick={() => {
                       onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]);
                     }}
