@@ -482,6 +482,9 @@ const SerializedAsset = () => {
           break;
       }
     }
+    if (data.status === 'Scrap') {
+      className = 'light-yellow-data-row';
+    }
 
     return className;
   };
@@ -831,30 +834,42 @@ const SerializedAsset = () => {
               dataRows={dataRows}
               selectedRecords={selectedRecords}
               dispatch={dispatch}
-              onEdit={(d) => {
-                history.push(`${routes.serializedAssetDetail.path}/${d._id}`);
-              }}
+              // onEdit={(d) => {
+              //   history.push(`${routes.serializedAssetDetail.path}/${d._id}`);
+              // }}
+              additionalDetails={[]}
               extraParamsToCheckDelete={false}
-              onDelete={(d) => {
-                setDeleteRecord(d);
-                setShowDeleteConfirmBox(true);
+              // onDelete={(d) => {
+              //   setDeleteRecord(d);
+              //   setShowDeleteConfirmBox(true);
+              // }}
+              actionCol={(data) => {
+                const params = { data };
+                return <ActionsRenderer {...params} />;
               }}
               rowCount={rowCount}
               page={page}
               loading={loading}
-              additionalDetails={[]}
               chips={[
                 {
                   label: 'Serial Number : ',
                   field: 'serialNumber'
+                },
+                {
+                  label: 'Status : ',
+                  field: 'status'
+                },
+                {
+                  label: 'Cost : ',
+                  field: 'cost'
                 }
               ]}
               owerCollaboratorInitialsOrImages=""
               onCreate={false}
               showClone={true}
-              onClone={(data) => {
-                setShowManageProductInventoryDialog({ open: true, isClone: true, idToClone: data._id });
-              }}
+              // onClone={(data) => {
+              //   setShowManageProductInventoryDialog({ open: true, isClone: true, idToClone: data._id });
+              // }}
               backgroundColorClass={(data) => backgroundColorClass(data)}
               renderedFrom={renderedFrom}
             />
