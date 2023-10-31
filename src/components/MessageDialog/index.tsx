@@ -66,11 +66,11 @@ export default function CustomMessageDialog({
           >
             <div title={d?.indexes?.toString()} className="cursor-help">
               <p className="text-[13px] mb-[8px]">Index</p>
-              <h6 className="text-[16px] line-clamp-1">{d?.indexes?.toString()}</h6>
+              <h6 className="text-[16px]">{d?.indexes?.toString()}</h6>
             </div>
             <div title={d?.message} className=" cursor-help">
               <p className="text-[13px] mb-[8px]">Message</p>
-              <p className="text-[16px] line-clamp-1">{d?.message}</p>
+              <p className="text-[16px]">{d?.message}</p>
             </div>
           </div>
         ))}
