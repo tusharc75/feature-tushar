@@ -30,6 +30,8 @@ import update from 'immutability-helper';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { debounce, uniq } from 'lodash';
+import { ExpandMore as ExpandMoreIcon } from '@material-ui/icons';
+import { Accordion, AccordionSummary, AccordionDetails } from 'src/components/CustomAccordion';
 
 const ItemTypes = {
   CARD: 'card',
@@ -187,24 +189,36 @@ const ArrangeView = (props) => {
               key={section + ' - ' + sectionIndex}
               moveSection={moveSection}
             >
-              <List disablePadding className={classes.root}>
-                <Box paddingLeft={2} pt={1} color="#555">
-                  <h3>{section}</h3>
-                </Box>
+              <Accordion>
+                <AccordionSummary
+                  expandIcon={<ExpandMoreIcon />}
+                  aria-controls={`section-${sectionIndex}-content`}
+                  id={`section-${sectionIndex}-header`}
+                >
+                  <Typography variant="h6">{section}</Typography>
+                </AccordionSummary>
 
-                {getSection(sectionIndex).map((sectionData, index) => (
-                  <RenderListItems
-                    key={sectionData.name}
-                    sectionData={sectionData}
-                    moveItem={moveItem}
-                    index={index}
-                    id={sectionData.id}
-                    section={section}
-                    data={resourceData}
-                    isDivider={getSection(sectionIndex).length !== index + 1}
-                  />
-                ))}
-              </List>
+                <AccordionDetails>
+                  <List disablePadding className={classes.root}>
+                    {/* <Box paddingLeft={2} pt={1} color="#555">
+                  <h3>{section}</h3>
+                </Box> */}
+
+                    {getSection(sectionIndex).map((sectionData, index) => (
+                      <RenderListItems
+                        key={sectionData.name}
+                        sectionData={sectionData}
+                        moveItem={moveItem}
+                        index={index}
+                        id={sectionData.id}
+                        section={section}
+                        data={resourceData}
+                        isDivider={getSection(sectionIndex).length !== index + 1}
+                      />
+                    ))}
+                  </List>
+                </AccordionDetails>
+              </Accordion>
             </SectionDrag>
           ))}
         </DndProvider>
@@ -318,7 +332,6 @@ const SectionDrag = (props) => {
   const style = {
     cursor: 'move'
   };
-
   const { index, id, moveSection, isDivider } = props;
   const ref = React.useRef<HTMLDivElement>(null);
   const [{ handlerId }, drop] = useDrop({
@@ -369,7 +382,6 @@ const SectionDrag = (props) => {
       isDragging: monitor.isDragging()
     })
   });
-
   const opacity = isDragging ? 0.6 : 1;
   drag(drop(ref));
 
