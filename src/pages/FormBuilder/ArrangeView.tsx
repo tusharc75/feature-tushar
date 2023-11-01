@@ -19,7 +19,7 @@ import {
   CircularProgress,
   Typography
 } from '@material-ui/core';
-import { DragHandle } from '@material-ui/icons';
+import { DragHandle,ExpandMore } from '@material-ui/icons';
 import { XYCoord } from 'dnd-core';
 import { DndProvider, useDrag, useDrop, DropTargetMonitor } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -30,7 +30,6 @@ import update from 'immutability-helper';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { debounce, uniq } from 'lodash';
-import { ExpandMore as ExpandMoreIcon } from '@material-ui/icons';
 import { Accordion, AccordionSummary, AccordionDetails } from 'src/components/CustomAccordion';
 
 const ItemTypes = {
@@ -191,7 +190,7 @@ const ArrangeView = (props) => {
             >
               <Accordion>
                 <AccordionSummary
-                  expandIcon={<ExpandMoreIcon />}
+                  expandIcon={<ExpandMore />}
                   aria-controls={`section-${sectionIndex}-content`}
                   id={`section-${sectionIndex}-header`}
                 >
