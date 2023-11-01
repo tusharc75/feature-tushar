@@ -149,7 +149,7 @@ function SideBar({ location }) {
             <div className={`max-[768px]:pr-[50px] ${styles.logo}`}>
               <img
                 className={` ${isSidebarOpen ? 'block' : 'hidden'} ml-[22px] max-h-[33px]`}
-                src={user.brandLogo || SVG('LogoNew')}
+                src={user?.brandLogo || SVG('LogoNew')}
                 onClick={() => history.push('/')}
                 alt="equip logo"
                 title="eQuipt Logo"

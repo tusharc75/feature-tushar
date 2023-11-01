@@ -34,9 +34,9 @@ import ActivityButton from 'src/components/Activity/ActivityButton';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ServiceOrderViews from './RoadMapViews';
 import FieldTicket from './FieldTicket';
-import FieldTicketInvoice from './FieldTicketInvoice';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import ButtonWithPulse from 'src/components/ButtonWithPulse';
+import Invoices from '../GenerateInvoice/InvoiceDialog/Invoices';
 
 const ServiceOrderDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -366,9 +366,10 @@ const ServiceOrderDetailsPage = () => {
               />
             )}
             {steps[currentStep]?.name === serviceOrderSteps[6]?.name && serviceOrderData && (
-              <FieldTicketInvoice
-                fieldServiceOrderData={serviceOrderData}
-                renderedFrom={`${renderedFrom}_grid-6`}
+              <Invoices
+                resourceId={serviceOrderData?._id}
+                resource={sidebarResource.fieldTicket}
+                invoiceFieldName='fieldServiceOrder'
               />
             )}
           </ContentFullScreen>
