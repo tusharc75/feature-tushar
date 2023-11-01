@@ -64,7 +64,8 @@ const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, rende
 
             const response = await axiosInstance().get(`${productionOrder.api}/material/${productionOrderData._id}`);
             data = response?.data?.data;
-            let rows = data.material.filter((e) => e.parentId === null);
+            // let rows = data.material.filter((e) => e.parentId === null);
+            let rows = data.material.filter((e) => e.type === 'product');
 
             const {
                 data: { data: deliveryTicketList }
