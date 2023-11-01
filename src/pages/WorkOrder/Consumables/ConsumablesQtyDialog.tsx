@@ -310,15 +310,15 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
                                 style={{ border: '1px solid var(--common-border-color)' }}
                                 key={value._id}
                               >
-                                <h5>Index:</h5>
+                                <h5 className="text-[#aaa]">Index:</h5>
                                 <p>{index + 1}</p>
 
-                                <h5>Product:</h5>
+                                <h5 className="text-[#aaa]">Product:</h5>
                                 <p className="pb-1">{value['product']}</p>
 
                                 {user?.user?.brandPolicy?.storageLocation && (
                                   <>
-                                    <h5 className="mt-2">Storage Location:</h5>
+                                    <h5 className="mt-2 text-[#aaa]">Storage Location:</h5>
                                     <div>
                                       <Autocomplete
                                         options={storageLocationOptions}
@@ -356,7 +356,7 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
                                   </>
                                 )}
 
-                                <h5 className="mt-2">Qty:</h5>
+                                <h5 className="mt-2 text-[#aaa]">Qty:</h5>
                                 <div>
                                   <TextField
                                     fullWidth
@@ -372,7 +372,7 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
                                   />
                                 </div>
 
-                                <h5 className="mt-2">Consumed Qty:</h5>
+                                <h5 className="mt-2 text-[#aaa]">Consumed Qty:</h5>
                                 <div>
                                   <TextField
                                     fullWidth
