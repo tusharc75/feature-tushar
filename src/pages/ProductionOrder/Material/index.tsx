@@ -174,7 +174,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
             </IconButton>
           </HtmlTooltip>
 
-          <HtmlTooltip title={allowedToDelete && row.original?.allowedToDelete ? 'Delete' : 'Product is already assigned'}>
+          <HtmlTooltip title={allowedToDelete && row.original?.canDelete ? 'Delete' : 'Work Order is already assigned'}>
             <IconButton
               size="small"
               aria-label="Details"
@@ -182,9 +182,9 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
                 const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
                 setDeleteData(obj);
               }}
-              disabled={!(allowedToDelete && row.original?.allowedToDelete)}
+              disabled={!(allowedToDelete && row.original?.canDelete)}
             >
-              <DeleteIcon fontSize="small" color={allowedToDelete && row.original?.allowedToDelete ? 'error' : 'disabled'} />
+              <DeleteIcon fontSize="small" color={allowedToDelete && row.original?.canDelete ? 'error' : 'disabled'} />
             </IconButton>
           </HtmlTooltip>
         </>
@@ -207,7 +207,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
       parent.description = parent.type === 'product' ? parent?.productDetail?.productDescription : parent?.packageDetail?.packageDescription;
       parent.qty = parent.qty;
       parent.qtyDisplay = parent.qty;
-      parent.allowedToDelete = parent?.workOrder ? false : true;
+      parent.canDelete = parent?.workOrder ? false : true;
       parent.subRows = generateNestedData(data.material, parent);
     });
 
@@ -240,7 +240,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
       _subRow.description = _subRow.type === 'product' ? _subRow?.productDetail?.productDescription : _subRow?.packageDetail?.packageDescription;
       _subRow.qty = _subRow.qty;
       _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
-      _subRow.allowedToDelete = _subRow?.workOrder ? false : true;
+      _subRow.canDelete = _subRow?.workOrder ? false : true;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
     return subRows;
@@ -440,10 +440,10 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
                 Bulk Edit
               </MenuItem>
               <MenuItem
-                disabled={allowedToDelete ? (selectedRecords?.filter((e) => e.allowedToDelete)?.length > 0 ? false : true) : true}
+                disabled={allowedToDelete ? (selectedRecords?.filter((e) => e.canDelete)?.length > 0 ? false : true) : true}
                 onClick={() => {
                   const dataToDelete = selectedRecords
-                    ?.filter((e) => !e.hideSelection && e.allowedToDelete)
+                    ?.filter((e) => !e.hideSelection && e.canDelete)
                     .map((rec: any) => {
                       const obj: any = {};
                       obj.id = rec._id;
