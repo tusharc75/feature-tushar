@@ -42,21 +42,28 @@ export const PreviewDialog = ({
   const [visibleColumnsExcel, setVisibleColumnsExcel] = useState([]);
 
   useEffect(() => {
-    const temp = defaultColumns?.length > 0 ? allColumn?.filter((e: any) => defaultColumns?.includes(e?.fieldName)) : allColumn;
-    setVisibleColumnsPdf([...temp]);
-    setVisibleColumnsExcel([...temp]);
+    setDefaultColumns()
   }, [columns]);
 
   useEffect(() => {
     fetchUserViews();
   }, []);
 
+  const setDefaultColumns = () => {
+    const temp = defaultColumns?.length > 0 ? allColumn?.filter((e: any) => defaultColumns?.includes(e?.fieldName)) : allColumn;
+    setVisibleColumnsPdf([...temp]);
+    setVisibleColumnsExcel([...temp]);
+  }
+
   const fetchUserViews = () => {
     axiosInstance()
       .get(`/pdf/view?resource=${resource}`)
       .then(({ data: { data } }) => {
         setViews(data);
-        if (data?.length && selectedPdfView && data?.find((e) => e._id === selectedPdfView?._id)) {
+        if (!selectedPdfView && data?.length === 1) {
+          handleSelectView(data[0])
+        }
+        if (selectedPdfView && data?.length && data?.find((e) => e._id === selectedPdfView?._id)) {
           handleSelectView(data?.find((e) => e._id === selectedPdfView?._id))
         }
       })
