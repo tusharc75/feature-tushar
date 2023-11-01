@@ -240,7 +240,7 @@ const AssignSerializedAssetDialog = ({
                         p={1}
                         border={1}
                         className={`cursor-pointer rounded-sm ${
-                          selectedProduct ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'dark:text-gray-300'
+                          selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'dark:text-gray-300'
                         }`}
                         borderColor="var(--common-border-color)"
                         onClick={() => {
