@@ -30,6 +30,7 @@ import EditIcon from '@material-ui/icons/Edit';
 const Quotation = ({
   repairOrderData,
   setNextStep,
+  setPrevStep,
   renderedFrom,
   stepFullScreen,
   allowedToEdit,
@@ -73,11 +74,16 @@ const Quotation = ({
   }, [repairOrderData]);
 
   useEffect(() => {
-    if (
-      invoiceStep &&
-      ![REPAIR_ORDER_STATUS.invoiced, REPAIR_ORDER_STATUS.readyToInvoice, REPAIR_ORDER_STATUS.completed]?.includes(repairOrderData?.status)
+    if (invoiceStep && ![REPAIR_ORDER_STATUS.invoiced, REPAIR_ORDER_STATUS.readyToInvoice,
+    REPAIR_ORDER_STATUS.completed]?.includes(repairOrderData?.status)
     ) {
       updateOrderStatus(REPAIR_ORDER_STATUS.readyToInvoice);
+    }
+    if (invoiceStep && repairOrderData?.status === REPAIR_ORDER_STATUS.invoiced) {
+      setPrevStep(false)
+    }
+    else {
+      setPrevStep(true)
     }
   }, [invoiceStep]);
 
