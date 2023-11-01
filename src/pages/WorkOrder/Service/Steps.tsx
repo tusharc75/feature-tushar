@@ -1490,7 +1490,7 @@ const Steps = ({
     <Box m={2} height={500}>
       <CommonSkeleton lenArray={[...Array(10).keys()]} />
     </Box>
-  )};
+  )}
     {addNewStep.open && (
       <StepDialog
         handleClose={() => {

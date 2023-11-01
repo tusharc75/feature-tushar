@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { CustomDialogTransition } from './../../constants/helpers';
-import { isMobile, isTablet } from 'react-device-detect';
 import {
   makeStyles,
   Theme,
@@ -10,16 +9,13 @@ import {
   ListItem,
   ListItemText,
   ListItemIcon,
-  ListItemSecondaryAction,
-  ListSubheader,
-  Divider,
   Button,
   Paper,
   Box,
   CircularProgress,
   Typography
 } from '@material-ui/core';
-import { DragHandle } from '@material-ui/icons';
+import { DragHandle,ExpandMore } from '@material-ui/icons';
 import { XYCoord } from 'dnd-core';
 import { DndProvider, useDrag, useDrop, DropTargetMonitor } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -30,6 +26,7 @@ import update from 'immutability-helper';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { debounce, uniq } from 'lodash';
+import { Accordion, AccordionSummary, AccordionDetails } from 'src/components/CustomAccordion';
 
 const ItemTypes = {
   CARD: 'card',
@@ -175,9 +172,10 @@ const ArrangeView = (props) => {
     >
       <CustomDialogHeader title={`Change Resource Order`} onClose={close} showRequiredLabel={false} showManimizeMaximize={false} />
       <CustomDialogContent>
-        <Box my={1} color="#555">
-          <h3>Drag & Drop to arrange</h3>
+        <Box my={1}>
+          <span>Drag & Drop to arrange</span>
         </Box>
+        <br />
         <DndProvider backend={HTML5Backend}>
           {sections.map((section, sectionIndex) => (
             <SectionDrag
@@ -187,24 +185,31 @@ const ArrangeView = (props) => {
               key={section + ' - ' + sectionIndex}
               moveSection={moveSection}
             >
-              <List disablePadding className={classes.root}>
-                <Box paddingLeft={2} pt={1} color="#555">
-                  <h3>{section}</h3>
-                </Box>
-
-                {getSection(sectionIndex).map((sectionData, index) => (
-                  <RenderListItems
-                    key={sectionData.name}
-                    sectionData={sectionData}
-                    moveItem={moveItem}
-                    index={index}
-                    id={sectionData.id}
-                    section={section}
-                    data={resourceData}
-                    isDivider={getSection(sectionIndex).length !== index + 1}
-                  />
-                ))}
-              </List>
+              <Accordion>
+                <AccordionSummary
+                  expandIcon={<ExpandMore />}
+                  aria-controls={`section-${sectionIndex}-content`}
+                  id={`section-${sectionIndex}-header`}
+                >
+                  <Typography variant="subtitle1">{section}</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <List disablePadding className={classes.root}>
+                    {getSection(sectionIndex).map((sectionData, index) => (
+                      <RenderListItems
+                        key={sectionData.name}
+                        sectionData={sectionData}
+                        moveItem={moveItem}
+                        index={index}
+                        id={sectionData.id}
+                        section={section}
+                        data={resourceData}
+                        isDivider={getSection(sectionIndex).length !== index + 1}
+                      />
+                    ))}
+                  </List>
+                </AccordionDetails>
+              </Accordion>
             </SectionDrag>
           ))}
         </DndProvider>
@@ -245,6 +250,7 @@ interface DragItem {
   id: string;
   type: string;
 }
+
 const RenderListItems = (props: ItemProps) => {
   const { sectionData, moveItem, id, isDivider, section, data } = props;
   const classes = useStyles();
@@ -307,9 +313,8 @@ const RenderListItems = (props: ItemProps) => {
         <ListItemIcon className={classes.cursor}>
           <DragHandle />
         </ListItemIcon>
-        <ListItemText style={{ fontSize: '10px' }} primary={sectionData.resourceLabel} />
+        <ListItemText primary={sectionData.resourceLabel} />
       </ListItem>
-      {isDivider && <Divider />}
     </div>
   );
 };
@@ -318,7 +323,6 @@ const SectionDrag = (props) => {
   const style = {
     cursor: 'move'
   };
-
   const { index, id, moveSection, isDivider } = props;
   const ref = React.useRef<HTMLDivElement>(null);
   const [{ handlerId }, drop] = useDrop({
@@ -369,7 +373,6 @@ const SectionDrag = (props) => {
       isDragging: monitor.isDragging()
     })
   });
-
   const opacity = isDragging ? 0.6 : 1;
   drag(drop(ref));
 
@@ -378,11 +381,7 @@ const SectionDrag = (props) => {
       <Paper style={{ ...style, opacity }} elevation={1}>
         {props.children}
       </Paper>
-      {isDivider && (
-        <Box my={2}>
-          <Divider />
-        </Box>
-      )}
+      <br />
     </div>
   );
 };

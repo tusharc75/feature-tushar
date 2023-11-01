@@ -67,6 +67,8 @@ const RepairOrderDetails = () => {
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [repairOrderFields, setRepairOrderFields] = useState([]);
   const [nextStep, setNextStep] = useState(true);
+  const [prevStep, setPrevStep] = useState(false);
+
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
@@ -158,13 +160,14 @@ const RepairOrderDetails = () => {
         }
         setStepList(steps);
         setStepNames(steps.map((item) => item.name));
-        if (data?.status === REPAIR_ORDER_STATUS.completed) {
+        if ([REPAIR_ORDER_STATUS.invoiced, REPAIR_ORDER_STATUS.completed]?.includes(data?.status)) {
           setCurrentStep(steps?.length - 1);
         } else {
           setCurrentStep(
             steps?.map((item) => item.name)?.indexOf(data?.processStatus) !== -1 ? steps?.map((item) => item.name)?.indexOf(data?.processStatus) : 0
           );
         }
+
         setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
         setRepairOrderData({ ...data });
       })
@@ -375,6 +378,7 @@ const RepairOrderDetails = () => {
           <Steps
             isNextStep={false}
             nextStep={nextStep}
+            isPrevStep={prevStep}
             steps={stepList}
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
@@ -440,6 +444,7 @@ const RepairOrderDetails = () => {
               <Quotation
                 repairOrderData={repairOrderData}
                 setNextStep={setNextStep}
+                setPrevStep={setPrevStep}
                 renderedFrom={`${renderedFrom}_grid-4`}
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={allowedToEdit}
@@ -460,6 +465,7 @@ const RepairOrderDetails = () => {
               <Quotation
                 repairOrderData={repairOrderData}
                 setNextStep={setNextStep}
+                setPrevStep={setPrevStep}
                 renderedFrom={`${renderedFrom}_grid-4`}
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={false}

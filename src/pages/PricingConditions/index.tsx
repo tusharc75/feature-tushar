@@ -33,7 +33,7 @@ let timeout;
 const PricingConditions = () => {
   const renderedFrom = camelCase(routes?.pricingCondition.title);
   const {
-    state: { permissions }
+    state: { permissions, selectedEntity }
   }: any = useData();
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -58,7 +58,7 @@ const PricingConditions = () => {
 
   useEffect(() => {
     fetchPriceConditionList();
-  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
+  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, selectedEntity]);
 
   const fetchGridMetadata = () => {
     axiosInstance()
@@ -155,7 +155,7 @@ const PricingConditions = () => {
   );
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
+    let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '';
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
@@ -419,7 +419,7 @@ const PricingConditions = () => {
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={true}
-              onClone={(data) => {}}
+              onClone={(data) => { }}
               renderedFrom={renderedFrom}
             />
           ) : (
