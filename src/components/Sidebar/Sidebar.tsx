@@ -141,7 +141,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
           <div className="max-[959px]:min-h-[56px] min-[771px]:min-h-[unset] max-[770px]:min-h-[56px] ">
             <img
               className={`${styles.logo} ${toggleDrawer ? 'block' : 'hidden'} ml-[22px]`}
-              src={user.brandLogo || SVG('LogoNew')}
+              src={user?.brandLogo || SVG('LogoNew')}
               onClick={() => history.push('/')}
               alt="equip logo"
               title="eQuipt Logo"
