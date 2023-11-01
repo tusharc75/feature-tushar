@@ -399,9 +399,11 @@ const SerializedAsset = () => {
         </HtmlTooltip>
       ) : (
         <HtmlTooltip title="You do not have permission to clone">
-          <IconButton size="small" aria-label="Clone">
-            <FileCopyIcon />
-          </IconButton>
+          <span>
+            <IconButton size="small" disabled aria-label="Clone">
+              <FileCopyIcon />
+            </IconButton>
+          </span>
         </HtmlTooltip>
       )}
       {permissions?.serializedAsset?.isDelete && params.data.canDelete ? (
@@ -419,9 +421,11 @@ const SerializedAsset = () => {
         </HtmlTooltip>
       ) : (
         <HtmlTooltip title="You do not have permission to delete">
-          <IconButton size="small" aria-label="Clone">
-            <DeleteIcon />
-          </IconButton>
+          <span>
+            <IconButton size="small" disabled aria-label="Clone">
+              <DeleteIcon />
+            </IconButton>
+          </span>
         </HtmlTooltip>
       )}
     </>
