@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { CustomDialogTransition } from './../../constants/helpers';
-import { isMobile, isTablet } from 'react-device-detect';
 import {
   makeStyles,
   Theme,
@@ -10,8 +9,6 @@ import {
   ListItem,
   ListItemText,
   ListItemIcon,
-  ListItemSecondaryAction,
-  ListSubheader,
   Divider,
   Button,
   Paper,
