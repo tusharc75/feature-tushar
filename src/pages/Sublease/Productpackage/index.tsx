@@ -449,7 +449,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
 
   return (
     <Fragment>
-      <Box display="flex" justifyContent="space-between" mb={1}>
+      <Box display="flex" justifyContent="space-between" m={1}>
         <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
           <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : ''}>
             <div>
