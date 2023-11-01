@@ -148,16 +148,16 @@ export default function Attachment() {
       )
     },
     {
-      id: 'category',
-      accessor: 'category',
-      Header: 'Category',
+      id: 'attachmentType',
+      accessor: 'attachmentType',
+      Header: 'Attachment Type',
       width: 150,
       canDrag: false,
       disableFilters: true,
       Cell: ({ row }) => {
-        return row.original?.category ? (
+        return row.original?.attachmentType ? (
           <p>
-            {row.original.category}
+            {row.original.attachmentType}
           </p>
         ) : (
           <NoDataCell />
@@ -813,6 +813,7 @@ export default function Attachment() {
               renderedFrom={'attachment_render'}
               isClientSideGrid={false}
               fetchChildAttachment={fetchChildAttachment}
+              refreshGrid={fetchAttachments}
             />
           ) : (
             <Box p={2} height={500}>

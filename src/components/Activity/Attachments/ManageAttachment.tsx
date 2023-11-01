@@ -21,12 +21,12 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import AttachmentThumbnail from 'src/components/AttachmentThumbnail';
 import { isEqual } from 'lodash';
 import DocumentScanner from '../Helpers/DocumentScanner';
-import {ATTACHMENT_CATEGORY} from 'src/constants/helpers';
+import { ATTACHMENT_TYPE } from 'src/constants/helpers';
 import { Autocomplete } from '@material-ui/lab';
 
 const AttachmentSchema = object().shape({
   name: string().required('Attachment Name is required'),
-  category : string().nullable(),
+  attachmentType: string().nullable(),
   fileUrl: string().required('please upload attachment')
 });
 
@@ -115,7 +115,7 @@ export default function ManageAttachment({
         name: values.name,
         file: otherAttachments,
         relatedTo: relatedTo,
-        category : values.category ? values.category : ''
+        attachmentType: values?.attachmentType || ''
       };
     } else {
       request = {
@@ -252,24 +252,24 @@ export default function ManageAttachment({
                     {type === 'file' && (
                       <Grid item xs={6}>
                         <Autocomplete
-                          id="file-category"
+                          id="attachmentType"
                           size="small"
-                          options={Object.values(ATTACHMENT_CATEGORY)} // Use the values of the constant object
+                          options={Object.values(ATTACHMENT_TYPE)}
                           renderInput={(params) => (
                             <TextField
                               {...params}
                               size="small"
                               variant="outlined"
-                              label="Category"
+                              label="Attachment Type"
                               margin="dense"
                             />
                           )}
                           getOptionLabel={(option) => option}
                           getOptionSelected={(option: any, value: any) => option === value}
                           onChange={(e, val) => {
-                            setFieldValue('category', val);
+                            setFieldValue('attachmentType', val);
                           }}
-                          value={values['category']}
+                          value={values['attachmentType']}
                         />
                       </Grid>
                     )}
