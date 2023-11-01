@@ -2830,6 +2830,6 @@ export const fieldLabelToFieldName = (fieldLabel) => {
   return camelCase(fieldLabel?.replace(/[^a-zA-Z0-9]/g, ''))?.substring(0, 60);
 };
 
-export const attachmentFileCategory = [
-  {value: 'diagram', label : 'Diagram'},
-];
+export const ATTACHMENT_CATEGORY = {
+  diagram : 'Diagram'
+};

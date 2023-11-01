@@ -21,12 +21,12 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import AttachmentThumbnail from 'src/components/AttachmentThumbnail';
 import { isEqual } from 'lodash';
 import DocumentScanner from '../Helpers/DocumentScanner';
-import {attachmentFileCategory} from 'src/constants/helpers';
+import {ATTACHMENT_CATEGORY} from 'src/constants/helpers';
 import { Autocomplete } from '@material-ui/lab';
 
 const AttachmentSchema = object().shape({
   name: string().required('Attachment Name is required'),
-  category : object().nullable(),
+  category : string().nullable(),
   fileUrl: string().required('please upload attachment')
 });
 
@@ -115,7 +115,7 @@ export default function ManageAttachment({
         name: values.name,
         file: otherAttachments,
         relatedTo: relatedTo,
-        category : values.category ? values.category : {value : '', label : ''}
+        category : values.category ? values.category : ''
       };
     } else {
       request = {
@@ -254,7 +254,7 @@ export default function ManageAttachment({
                         <Autocomplete
                           id="file-category"
                           size="small"
-                          options={attachmentFileCategory}
+                          options={Object.values(ATTACHMENT_CATEGORY)} // Use the values of the constant object
                           renderInput={(params) => (
                             <TextField
                               {...params}
@@ -264,10 +264,10 @@ export default function ManageAttachment({
                               margin="dense"
                             />
                           )}
-                          getOptionLabel={(option) => option.label}
-                          getOptionSelected={(option: any, value: any) => option.label === value.label}
+                          getOptionLabel={(option) => option}
+                          getOptionSelected={(option: any, value: any) => option === value}
                           onChange={(e, val) => {
-                            setFieldValue('category', val)
+                            setFieldValue('category', val);
                           }}
                           value={values['category']}
                         />

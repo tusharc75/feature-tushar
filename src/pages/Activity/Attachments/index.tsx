@@ -155,9 +155,9 @@ export default function Attachment() {
       canDrag: false,
       disableFilters: true,
       Cell: ({ row }) => {
-        return row.original?.category?.label ? (
+        return row.original?.category ? (
           <p>
-            {row.original.category?.label}
+            {row.original.category}
           </p>
         ) : (
           <NoDataCell />
