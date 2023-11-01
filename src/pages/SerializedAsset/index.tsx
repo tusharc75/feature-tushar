@@ -866,7 +866,7 @@ const SerializedAsset = () => {
               ]}
               owerCollaboratorInitialsOrImages=""
               onCreate={false}
-              showClone={true}
+              showClone={false}
               // onClone={(data) => {
               //   setShowManageProductInventoryDialog({ open: true, isClone: true, idToClone: data._id });
               // }}
