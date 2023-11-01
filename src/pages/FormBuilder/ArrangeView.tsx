@@ -9,7 +9,6 @@ import {
   ListItem,
   ListItemText,
   ListItemIcon,
-  Divider,
   Button,
   Paper,
   Box,
@@ -173,9 +172,10 @@ const ArrangeView = (props) => {
     >
       <CustomDialogHeader title={`Change Resource Order`} onClose={close} showRequiredLabel={false} showManimizeMaximize={false} />
       <CustomDialogContent>
-        <Box my={1} color="#555">
-          <h3>Drag & Drop to arrange</h3>
+        <Box my={1}>
+          <span>Drag & Drop to arrange</span>
         </Box>
+        <br />
         <DndProvider backend={HTML5Backend}>
           {sections.map((section, sectionIndex) => (
             <SectionDrag
@@ -191,15 +191,10 @@ const ArrangeView = (props) => {
                   aria-controls={`section-${sectionIndex}-content`}
                   id={`section-${sectionIndex}-header`}
                 >
-                  <Typography variant="h6">{section}</Typography>
+                  <Typography variant="subtitle1">{section}</Typography>
                 </AccordionSummary>
-
                 <AccordionDetails>
                   <List disablePadding className={classes.root}>
-                    {/* <Box paddingLeft={2} pt={1} color="#555">
-                  <h3>{section}</h3>
-                </Box> */}
-
                     {getSection(sectionIndex).map((sectionData, index) => (
                       <RenderListItems
                         key={sectionData.name}
@@ -255,6 +250,7 @@ interface DragItem {
   id: string;
   type: string;
 }
+
 const RenderListItems = (props: ItemProps) => {
   const { sectionData, moveItem, id, isDivider, section, data } = props;
   const classes = useStyles();
@@ -317,9 +313,8 @@ const RenderListItems = (props: ItemProps) => {
         <ListItemIcon className={classes.cursor}>
           <DragHandle />
         </ListItemIcon>
-        <ListItemText style={{ fontSize: '10px' }} primary={sectionData.resourceLabel} />
+        <ListItemText primary={sectionData.resourceLabel} />
       </ListItem>
-      {isDivider && <Divider />}
     </div>
   );
 };
@@ -386,11 +381,7 @@ const SectionDrag = (props) => {
       <Paper style={{ ...style, opacity }} elevation={1}>
         {props.children}
       </Paper>
-      {isDivider && (
-        <Box my={2}>
-          <Divider />
-        </Box>
-      )}
+      <br />
     </div>
   );
 };

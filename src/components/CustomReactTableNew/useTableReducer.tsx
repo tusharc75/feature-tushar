@@ -78,6 +78,9 @@ function reducer(state: TInitialState, action: TActios) {
       };
     case 'currentEditingCellPosition':
       return { ...state, currentEditingCellPosition: action.cellPosition };
+    case 'showFilteredRecordsOnly':
+      return { ...state, showFilteredRecordsOnly: !state.showFilteredRecordsOnly };
+
     default:
       break;
   }
@@ -97,7 +100,8 @@ const intialState = {
   sorting: [],
   selectedRecords: [],
   currentEditingCellPosition: null,
-  error: false
+  error: false,
+  showFilteredRecordsOnly: false
 };
 
 export type TInitialState = {
@@ -113,6 +117,7 @@ export type TInitialState = {
   selectedRecords: any[];
   currentEditingCellPosition: { rowId: string; columnName: string } | null;
   error: boolean;
+  showFilteredRecordsOnly: boolean;
 };
 export type TActios =
   | { type: 'loading'; loading: boolean }
@@ -126,7 +131,8 @@ export type TActios =
   | { type: 'pageSizeChange'; limit: number }
   | { type: 'complete' }
   | { type: 'currentEditingCellPosition'; cellPosition: { rowId: string; columnName: string } | null }
-  | { type: 'error'; error: boolean };
+  | { type: 'error'; error: boolean }
+  | { type: 'showFilteredRecordsOnly'; showFilteredRecordsOnly: boolean };
 
 export const useTableReducer = () => {
   const [state, dispatch] = useReducer(reducer, intialState);

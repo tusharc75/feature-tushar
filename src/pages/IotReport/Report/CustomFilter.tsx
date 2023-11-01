@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import {
   CircularProgress,
   Box,
@@ -27,12 +27,14 @@ import DialogContent from '@material-ui/core/DialogContent';
 import { useHistory } from 'react-router-dom';
 import routes from './../../../components/Helpers/Routes';
 import { List } from '@material-ui/icons';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const CustomFilter = ({ field, setFilterQuery, showGrid, setShowGrid, loadingData }) => {
   const history = useHistory();
+  const { setToastConfig } = useContext(CustomToastContext);
   const [formValues, setFormValues] = useState({});
   const [selectedResources, setSelectedResources] = useState([]);
-  const [resourceOptions, setResourceOptions] = useState(null);
+  let [resourceOptions, setResourceOptions] = useState(null);
 
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -102,7 +104,7 @@ const CustomFilter = ({ field, setFilterQuery, showGrid, setShowGrid, loadingDat
 
         setLoading(false);
       } catch (error) {
-        console.error(error);
+        setToastConfig(error);
       }
     }, 1000),
     []
@@ -114,6 +116,25 @@ const CustomFilter = ({ field, setFilterQuery, showGrid, setShowGrid, loadingDat
 
   const handleSelectFilter = (type, name, value) => {
     let fieldProps: any = {};
+
+    if(!resourceOptions) {
+      const optionsData: any = {};
+      [...field]
+      .filter((d: any) => d.type === 'dropDown' || d.type === 'multiSelect' || d.type === 'date' || d.type === 'checkBox')
+      .map((d: any) => {
+        if (d.type === 'dropDown' || d.type === 'multiSelect') {
+          optionsData[d.fieldName] = {
+            type: d.type,
+            lookup: Boolean(d?.lookup)
+          };
+        }
+        if (d.type === 'date') {
+          d['timeFrame'] = 'custom';
+        }
+        return d;
+      });
+      resourceOptions = optionsData;
+    }
 
     if (type === 'dropDown' || type === 'multiSelect') {
       fieldProps.type = resourceOptions[name].type;
@@ -307,16 +328,16 @@ const CustomFilter = ({ field, setFilterQuery, showGrid, setShowGrid, loadingDat
   const validate = (formValues: any) => {
     const error: any = {};
     if (!formValues?.asset) {
-      error['asset'] = 'field is required';
+      error['asset'] = 'Asset is required';
     }
     if (!formValues?.from_date) {
-      error['from_date'] = 'field is required';
+      error['from_date'] = 'From Date is required';
     }
     if (!formValues?.to_date) {
-      error['to_date'] = 'field is required';
+      error['to_date'] = 'To Date is required';
     }
     if (!formValues?.interval) {
-      error['interval'] = 'field is required';
+      error['interval'] = 'Interval is required';
     }
     setError(error);
     return error;
@@ -497,8 +518,8 @@ const CustomFilter = ({ field, setFilterQuery, showGrid, setShowGrid, loadingDat
                                           : new Date()
                                       }
                                       required={field?.required}
-                                      error={error && error[`from_${field.fieldName}`] && Boolean(error[`from_${field.fieldName}`])}
-                                      helperText={error && Boolean(error[`from_${field.fieldName}`]) && error[`from_${field.fieldName}`]}
+                                      error={error && error[`to_${field.fieldName}`] && Boolean(error[`to_${field.fieldName}`])}
+                                      helperText={error && Boolean(error[`to_${field.fieldName}`]) && error[`to_${field.fieldName}`]}
                                     />
                                   </Grid>
                                 </>

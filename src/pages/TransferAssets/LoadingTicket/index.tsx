@@ -1,5 +1,5 @@
 import { useState, useReducer, Fragment, useContext, useEffect, FC } from 'react';
-import { Button, Box, MenuItem, Menu } from '@material-ui/core';
+import { Button, Box, MenuItem, Menu, IconButton } from '@material-ui/core';
 import { useHistory } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
@@ -30,6 +30,7 @@ import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import { Link } from 'react-router-dom';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import InfoIcon from '@material-ui/icons/Info';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
 interface LoadingGridProps {
   permissions: any;
@@ -121,74 +122,113 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       .get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
         let columns = [];
-        data?.filter(d => ['assetNumber', 'serialNumber', 'product', 'productDescription', 'status']?.includes(d?.fieldData?.fieldName))?.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path);
-          if (currentColumn !== null) {
-            if (o?.fieldData?.fieldName === 'assetNumber') {
-              const assetNumberColumn = {
-                accessor: o?.fieldData?.fieldName,
-                Header: o?.fieldData?.fieldLabel,
-                width: 300,
-                sticky: isMobile ? 'none' : 'left',
-                primaryField: true,
-                Cell: ({ row }) => (row?.original?.assetNumber ?
-                  <div className="d-flex gap-2 align-items-center">
-                    <p
-                      className="link cursor-pointer"
-                      title={row?.original?.assetNumber}
-                      onClick={() => window.open(`${routes.serializedAssetDetail.path}/${row?.original?._id}`)}>
-                      {row?.original?.assetNumber}
-                    </p>
-                    {row?.original?.isReplaced && (
-                      <Box >
-                        <HtmlTooltip title={`Replaced Asset ${row?.original?.replaceAsset} Reason-${row?.original?.replaceReason}`}>
-                          <InfoIcon fontSize="small" color={'primary'} />
-                        </HtmlTooltip>
-                      </Box>
-                    )}
-                  </div>
-                  :
-                  <NoDataCell />),
-                setCellClassNames: (row) => {
-                  if ([ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(row?.status)) {
-                    return 'error';
+        data
+          ?.filter((d) => ['assetNumber', 'serialNumber', 'product', 'productDescription', 'status']?.includes(d?.fieldData?.fieldName))
+          ?.forEach((o) => {
+            let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path);
+            if (currentColumn !== null) {
+              if (o?.fieldData?.fieldName === 'assetNumber') {
+                const assetNumberColumn = {
+                  accessor: o?.fieldData?.fieldName,
+                  Header: o?.fieldData?.fieldLabel,
+                  width: 300,
+                  sticky: isMobile ? 'none' : 'left',
+                  primaryField: true,
+                  Cell: ({ row }) =>
+                    row?.original?.assetNumber ? (
+                      <div className="d-flex gap-2 align-items-center">
+                        <p> {row.original[o?.fieldData?.fieldName]}</p>
+                        <Box ml={1}>
+                          <IconButton
+                            size="small"
+                            onClick={() => {
+                              window.open(`${routes.serializedAssetDetail.path}/${row.original?._id}`);
+                            }}
+                          >
+                            <OpenInNewIcon fontSize="small" color="primary" />
+                          </IconButton>
+                        </Box>
+                        {row?.original?.isReplaced && (
+                          <Box>
+                            <HtmlTooltip
+                              enterTouchDelay={0}
+                              title={`Replaced Asset ${row?.original?.replaceAsset} Reason-${row?.original?.replaceReason}`}
+                            >
+                              <InfoIcon fontSize="small" color={'primary'} />
+                            </HtmlTooltip>
+                          </Box>
+                        )}
+                      </div>
+                    ) : (
+                      <NoDataCell />
+                    ),
+                  setCellClassNames: (row) => {
+                    if ([ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(row?.status)) {
+                      return 'error';
+                    }
+                    if (row?.isReplaced) {
+                      return 'isPurchaseOrder';
+                    }
                   }
-                  if (row?.isReplaced) {
-                    return 'isPurchaseOrder'
-                  };
-                }
+                };
+                columns = [...columns, assetNumberColumn];
+              } else if (o?.fieldData?.fieldName === 'product') {
+                const productTypeColumn = {
+                  accessor: o?.fieldData?.fieldName,
+                  Header: o?.fieldData?.fieldLabel,
+                  width: 300,
+                  Cell: ({ row }) =>
+                    row?.original[o?.fieldData?.fieldName] ? (
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <p> {row.original[o?.fieldData?.fieldName]}</p>
+                        <Box ml={1}>
+                          <IconButton
+                            size="small"
+                            onClick={() => {
+                              window.open(`${routes.productDetail.path}/${row.original?.productId}`);
+                            }}
+                          >
+                            <OpenInNewIcon fontSize="small" color="primary" />
+                          </IconButton>
+                        </Box>
+                      </div>
+                    ) : (
+                      <NoDataCell />
+                    )
+                };
+                columns = [...columns, productTypeColumn];
+              } else {
+                columns = [...columns, currentColumn?.columnData];
               }
-              columns = [...columns, assetNumberColumn];
             }
-            else {
-              columns = [...columns, currentColumn?.columnData];
-            }
-          }
-        });
+          });
         const column = [
           {
             accessor: 'index',
             Header: 'Index',
             width: 70,
             sticky: isMobile ? 'none' : 'left',
-            Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+            Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
           },
           ...columns,
           {
             accessor: 'loadingTicket',
             Header: 'Loading Ticket',
             width: 200,
-            Cell: ({ row }) => row?.original?.loadingTicket ?
-              <Link
-                className="link text-truncate"
-                title={row?.original?.loadingTicket}
-                to={`${routes.deliveryTicketDetail.path}/${row?.original?.loadingTicketId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {row?.original?.loadingTicket}
-              </Link>
-              : <NoDataCell />
+            Cell: ({ row }) =>
+              row?.original?.loadingTicket ? (
+                <Link
+                  className="link text-truncate"
+                  title={row?.original?.loadingTicket}
+                  to={`${routes.deliveryTicketDetail.path}/${row?.original?.loadingTicketId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {row?.original?.loadingTicket}
+                </Link>
+              ) : (
+                <NoDataCell />
+              )
           },
           {
             accessor: 'loadingTicketStatus',
@@ -196,8 +236,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             primaryField: true,
             width: 200,
             Cell: ({ row }) => <p className="text-truncate">{row?.original?.loadingTicketStatus || <NoDataCell />}</p>
-          },
-        ]
+          }
+        ];
         setColumns(column);
       });
   };
@@ -240,8 +280,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
         };
       });
       setExistingAssets(assetData);
-      setDataRows(assetData)
-      setSelectedRecords(assetData?.filter((f) => f.isChecked === true))
+      setDataRows(assetData);
+      setSelectedRecords(assetData?.filter((f) => f.isChecked === true));
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -447,7 +487,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                       !canReceive ||
                       selectedRecords.length === 0 ||
                       selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !==
-                      selectedRecords.length
+                        selectedRecords.length
                     }
                     onClick={() => {
                       setShowConfirmBoxReceive(true);
@@ -461,7 +501,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                     disabled={
                       selectedRecords.length === 0 ||
                       selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !==
-                      selectedRecords.length
+                        selectedRecords.length
                     }
                     onClick={() => {
                       const products = [];
@@ -486,9 +526,9 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                   </MenuItem>
 
                   {permissions?.transferAsset?.isUpdate &&
-                    selectedRecords.length &&
-                    selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicket') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)
-                      ?.length === selectedRecords?.length ? (
+                  selectedRecords.length &&
+                  selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicket') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)
+                    ?.length === selectedRecords?.length ? (
                     <MenuItem
                       onClick={() => {
                         setShowConfirmBox(true);
@@ -525,8 +565,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
-        )
-        }
+        )}
       </Box>
       {showTicketDialog.open && (
         <ManageDeliveryTicket

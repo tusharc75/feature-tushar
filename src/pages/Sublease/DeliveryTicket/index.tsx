@@ -228,7 +228,11 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
                 setNextStepToolTip(null);
             } else {
                 setNextStep(false);
-                setNextStepToolTip(subleaseMessage.deliverLoadingTicketStep);
+                if (ticketType === DELIVERY_TICKET_TYPE.loading) {
+                    setNextStepToolTip(subleaseMessage.deliverLoadingTicketStep);
+                } else if (ticketType === DELIVERY_TICKET_TYPE.receiving) {
+                    setNextStepToolTip(subleaseMessage.deliverReceivingTicketStep);
+                }
             }
         } catch (error) {
             toastConfig.setToastConfig(error);
@@ -254,18 +258,18 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
             data['isDeliveryToDisable'] = true;
             if (ticketType === DELIVERY_TICKET_TYPE.loading) {
                 data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.plant;
-                data['pickupFrom'] = subleaseData?.warehouse?.optionValue;
-                data['pickupFromAddress'] = subleaseData?.warehouse?.optionValue;
-                data['deliveryToType'] = DELIVERY_FROM_TO_TYPE.plant;
-                data['deliveryTo'] = subleaseData?.fromWarehouse?.optionValue;
-                data['deliveryToAddress'] = subleaseData?.fromWarehouse?.optionValue;
-            } else {
-                data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.plant;
                 data['pickupFrom'] = subleaseData?.fromWarehouse?.optionValue;
                 data['pickupFromAddress'] = subleaseData?.fromWarehouse?.optionValue;
                 data['deliveryToType'] = DELIVERY_FROM_TO_TYPE.plant;
-                data['deliveryTo'] = subleaseData?.warehouse?.optionValue;
-                data['deliveryToAddress'] = subleaseData?.warehouse?.optionValue;
+                data['deliveryTo'] = subleaseData?.toWarehouse?.optionValue;
+                data['deliveryToAddress'] = subleaseData?.toWarehouse?.optionValue;
+            } else {
+                data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.plant;
+                data['pickupFrom'] = subleaseData?.toWarehouse?.optionValue;
+                data['pickupFromAddress'] = subleaseData?.toWarehouse?.optionValue;
+                data['deliveryToType'] = DELIVERY_FROM_TO_TYPE.plant;
+                data['deliveryTo'] = subleaseData?.fromWarehouse?.optionValue;
+                data['deliveryToAddress'] = subleaseData?.fromWarehouse?.optionValue;
             }
             if (subleaseData?.processor?.optionValue) {
                 data['processor'] = subleaseData?.processor?.optionValue;
@@ -282,7 +286,6 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
             data['_ids'] = loadingTicketIds?.map((e) => e);
             data['status'] = DELIVERY_TICKET_STATUS.delivered;
             data['signatures'] = [];
-            data['warehouse'] = subleaseData?.warehouse?.optionValue;
             axiosInstance()
                 .post(`${deliveryTicket.api}/updatebulk`, data)
                 .then(({ data: { data } }) => {
@@ -339,74 +342,69 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
 
     return (
         <>
-            <Box display="flex" justifyContent="flex-end">
+            <Box display="flex" justifyContent="flex-end" m={1}>
                 <Box display="flex" alignItems="center" >
-                    {allowedToEdit && (
-                        <div>
-                            <Button
-                                variant="outlined"
-                                color="default"
-                                size="small"
-                                onClick={openActions}
-                                aria-controls="action-menu"
-                                disabled={selectedRecords.length === 0}
-                                endIcon={<ExpandMore />}
-                                className="new-dropdown-v1"
-                            >
-                                Actions
-                            </Button>
-                            <Menu
-                                anchorEl={anchorActionEl}
-                                keepMounted
-                                getContentAnchorEl={null}
-                                anchorOrigin={{
-                                    vertical: 'bottom',
-                                    horizontal: 'left'
+                    <Button
+                        variant="outlined"
+                        color="default"
+                        size="small"
+                        onClick={openActions}
+                        aria-controls="action-menu"
+                        disabled={selectedRecords.length === 0}
+                        endIcon={<ExpandMore />}
+                        className="new-dropdown-v1"
+                    >
+                        Actions
+                    </Button>
+                    <Menu
+                        anchorEl={anchorActionEl}
+                        keepMounted
+                        getContentAnchorEl={null}
+                        anchorOrigin={{
+                            vertical: 'bottom',
+                            horizontal: 'left'
+                        }}
+                        id="action-menu"
+                        open={Boolean(anchorActionEl)}
+                        onClose={closeActions}
+                    >
+                        {ticketType === DELIVERY_TICKET_TYPE.loading && (
+                            <MenuItem
+                                onClick={() => {
+                                    if (!validateAction(subleaseActions.createLoadingTicket)) {
+                                        handleDeliveryTicketDialog();
+                                    }
+                                    closeActions();
                                 }}
-                                id="action-menu"
-                                open={Boolean(anchorActionEl)}
-                                onClose={closeActions}
                             >
-                                {ticketType === DELIVERY_TICKET_TYPE.loading && (
-                                    <MenuItem
-                                        onClick={() => {
-                                            if (!validateAction(subleaseActions.createLoadingTicket)) {
-                                                handleDeliveryTicketDialog();
-                                            }
-                                            closeActions();
-                                        }}
-                                    >
-                                        Create Loading Ticket
-                                    </MenuItem>
-                                )}
-                                {ticketType === DELIVERY_TICKET_TYPE.receiving && (
-                                    <MenuItem
-                                        onClick={() => {
-                                            if (!validateAction(subleaseActions.createReceivingTicket)) {
-                                                handleDeliveryTicketDialog();
-                                            }
-                                            closeActions();
-                                        }}
-                                    >
-                                        Create Receiving Ticket
-                                    </MenuItem>
-                                )}
-                                <MenuItem
-                                    onClick={() => {
-                                        if (ticketType === DELIVERY_TICKET_TYPE.loading && !validateAction(subleaseActions.deliveredToWarehouse)) {
-                                            handelProcessTickets();
-                                        }
-                                        else if (ticketType === DELIVERY_TICKET_TYPE.receiving && !validateAction(subleaseActions.receivedToWarehouse)) {
-                                            handelProcessTickets();
-                                        }
-                                        closeActions();
-                                    }}
-                                >{ticketType === DELIVERY_TICKET_TYPE.loading ? 'Delivered to Plant' : 'Received at Plant'}
-                                </MenuItem>
-                            </Menu>
-                            <Box mx={1} />
-                        </div>
-                    )}
+                                Create Loading Ticket
+                            </MenuItem>
+                        )}
+                        {ticketType === DELIVERY_TICKET_TYPE.receiving && (
+                            <MenuItem
+                                onClick={() => {
+                                    if (!validateAction(subleaseActions.createReceivingTicket)) {
+                                        handleDeliveryTicketDialog();
+                                    }
+                                    closeActions();
+                                }}
+                            >
+                                Create Receiving Ticket
+                            </MenuItem>
+                        )}
+                        <MenuItem
+                            onClick={() => {
+                                if (ticketType === DELIVERY_TICKET_TYPE.loading && !validateAction(subleaseActions.deliveredToWarehouse)) {
+                                    handelProcessTickets();
+                                }
+                                else if (ticketType === DELIVERY_TICKET_TYPE.receiving && !validateAction(subleaseActions.receivedToWarehouse)) {
+                                    handelProcessTickets();
+                                }
+                                closeActions();
+                            }}
+                        >{ticketType === DELIVERY_TICKET_TYPE.loading ? 'Delivered to Plant' : 'Received at Plant'}
+                        </MenuItem>
+                    </Menu>
                 </Box>
             </Box>
             <Grid item xs={12} md={12} sm={12} className="mt-3">

@@ -25,7 +25,6 @@ import { generateCustomTableColumns } from 'src/constants/columns';
 import { useData } from 'src/StateProvider/Provider';
 
 const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
-
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = `${camelCase(routes?.invoice.title)}_view`;
 
@@ -48,7 +47,8 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
   };
 
   useEffect(() => {
-    axiosInstance().get(`${invoice.api}/${invoiceId}`)
+    axiosInstance()
+      .get(`${invoice.api}/${invoiceId}`)
       .then(({ data: { data } }) => {
         setInvoiceData(data);
       })
@@ -70,7 +70,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
       data?.forEach((e) => {
         e.isColumnEditable = false;
       });
-      const newColumns = generateCustomTableColumns(data, invoiceData.currency ? invoiceData.currency : "USD", renderedFrom);
+      const newColumns = generateCustomTableColumns(data, invoiceData.currency ? invoiceData.currency : 'USD', renderedFrom);
       let qtyIndex = newColumns?.findIndex((d) => d.accessor === 'qty');
       if (qtyIndex > -1) {
         newColumns[qtyIndex].accessor = 'qtyDisplay';
@@ -266,10 +266,17 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
   };
 
   const handleCancelInvoice = async (data) => {
+    let api = `${routes?.generateInvoice.path}/invoice/cancle`;
+    if (resource === sidebarResource.fieldTicket) {
+      api = `${routes?.generateInvoice.path}/cancel`;
+    }
     axiosInstance()
-      .patch(`${routes?.fieldTicketInvoice.path}/invoice/cancle`, {
+      .patch(api, {
         invoice: invoiceData?._id,
-        comment: data
+        comment: data,
+        ...(resource === sidebarResource.fieldTicket && {
+          resource: sidebarResource.fieldTicket
+        })
       })
       .then(({ data }) => {
         onSuccess();
@@ -300,7 +307,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
               hideAction={true}
               renderedFrom={renderedFrom}
               isClientSideGrid={true}
-              hideExpander={true}
+              hideExpander={resource === sidebarResource.fieldTicket ? true : false}
             />
           </Box>
         ) : (
@@ -326,7 +333,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
                     resource={sidebarResource.invoice}
                     referenceId={invoiceData?._id}
                     columns={columns}
-                    hideDetailButton={true}
+                    hideDetailButton={resource === sidebarResource.fieldTicket ? true : false}
                     isSendEmail={true}
                     defaultColumns={[
                       'type',
@@ -344,7 +351,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
                       `finalPrice_${invoiceData?.currency?.toLowerCase()}`
                     ]}
                   />
-                  {resource === sidebarResource.fieldTicketInvoice && (
+                  {(resource === sidebarResource.fieldTicket) && (
                     <>
                       <Button
                         variant={isMobile && !isTablet ? 'text' : 'outlined'}
@@ -377,14 +384,16 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
                 </Box>
               )}
               <div className="ml-auto">
-                {rowsData && rowsData?.length > 0 && resource === sidebarResource.fieldTicketInvoice &&
+                {rowsData &&
+                  rowsData?.length > 0 &&
+                  (resource === sidebarResource.fieldTicket) &&
                   ![INVOICE_STATUS.closed, INVOICE_STATUS.cancelled]?.includes(invoiceData?.status) && (
                     <DeleteButton text="Cancel Invoice" onClick={() => setCommentDialog(true)} />
                   )}
               </div>
             </div>
             <Box pt={1}>
-              {resource === sidebarResource.fieldTicketInvoice && permissions?.creditMemo?.isRead ? (
+              {(resource === sidebarResource.fieldTicket) && permissions?.creditMemo?.isRead ? (
                 <>
                   <Tabs
                     className="new-tab-container-v1"

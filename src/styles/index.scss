@@ -4193,3 +4193,11 @@ body {
     max-width: 100%;
   }
 }
+.custom-react-table-v1 {
+  th,
+  td {
+    &[data-sticky-first-right-td='true'] {
+      right: -1px !important;
+    }
+  }
+}

@@ -5,7 +5,14 @@ import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import SearchBox from '../Helpers/SearchBox';
-import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, getLocalStorageArrayData, serializedAsset, SUBLEASE_TYPE } from 'src/constants/helpers';
+import {
+  gridLoadingTimeout,
+  isObjectEmpty,
+  prepareDataForGrid,
+  getLocalStorageArrayData,
+  serializedAsset,
+  SUBLEASE_TYPE
+} from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import routes from '../Helpers/Routes';
 import styles from 'src/pages/Leads/Header.module.scss';
@@ -132,7 +139,7 @@ const AssignSerializedAssetDialog = ({
     let deepFilter = `?page=${page}&limit=${limit}&ignoreIds=${JSON.stringify(ignoreIds)}`;
 
     if (reference === 'job') {
-      deepFilter += '&job=1'
+      deepFilter += '&job=1';
     }
     if (reference === 'repairOrder') {
       deepFilter = `${deepFilter}`;
@@ -158,7 +165,10 @@ const AssignSerializedAssetDialog = ({
       deepFilter = `${deepFilter}&subleaseAsset=0`;
     }
     if (reference === 'sublease') {
-      deepFilter = `${deepFilter}&masterSubleaseAsset=true`;
+      deepFilter = `${deepFilter}&masterSubleaseAsset=true&subleaseAsset=0`;
+      if (referenceData?.warehouse) {
+        deepFilter = `${deepFilter}&plant=${referenceData?.warehouse}`;
+      }
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
@@ -221,40 +231,40 @@ const AssignSerializedAssetDialog = ({
       <CustomDialogContent>
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
-            <Grid item xs={6} className="d-flex align-items-center gap-1">
+            <Grid item xs={6} md={6} className="d-flex align-items-center gap-1">
               <Box style={{ display: 'inline' }}>
                 {products.length > 0
                   ? products?.map((d) => (
-                    <Box
-                      m={0.5}
-                      p={1}
-                      border={1}
-                      className="cursor-pointer"
-                      borderColor="var(--common-border-color)"
-                      onClick={() => {
-                        if (selectedProduct === d.id) {
-                          setSelectedProduct(null);
-                        } else {
-                          setSelectedProduct(d.id);
-                        }
-                      }}
-                      style={{ display: 'inline-block' }}
-                      bgcolor={d.id === selectedProduct && 'primary.main'}
-                      color={d.id === selectedProduct && 'white'}
-                    >
-                      {d?.qty < 0 ? (
-                        <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
-                      ) : d?.qty === 0 ? (
-                        <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
-                      ) : (
-                        <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
-                      )}
-                    </Box>
-                  ))
+                      <Box
+                        m={0.5}
+                        p={1}
+                        border={1}
+                        className={`cursor-pointer rounded-sm ${
+                          selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'dark:text-gray-300'
+                        }`}
+                        borderColor="var(--common-border-color)"
+                        onClick={() => {
+                          if (selectedProduct === d.id) {
+                            setSelectedProduct(null);
+                          } else {
+                            setSelectedProduct(d.id);
+                          }
+                        }}
+                        style={{ display: 'inline-block' }}
+                      >
+                        {d?.qty < 0 ? (
+                          <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                        ) : d?.qty === 0 ? (
+                          <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
+                        ) : (
+                          <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
+                        )}
+                      </Box>
+                    ))
                   : null}
               </Box>
             </Grid>
-            <Grid item xs={6} className={styles.filter_side}>
+            <Grid item xs={12} md={6} className={styles.filter_side}>
               <Box className={styles.filter_side_header} component="div">
                 <SearchBox onChange={handleSearch} className={styles.search_box_input} width="242px" size="small" value={search} />
                 <Button
@@ -296,6 +306,11 @@ const AssignSerializedAssetDialog = ({
                 </Button>
               </Box>
             </Grid>
+            {products.length > 0 && products.some((s) => s.qty < 0) ? (
+              <div className="text-error font-weight-bold">You have selected more assets than required</div>
+            ) : (
+              ''
+            )}
           </Grid>
         </div>
         {frameWorkComponent && Object.keys(frameWorkComponent).length > 0 ? (
@@ -312,7 +327,7 @@ const AssignSerializedAssetDialog = ({
             allowAction={false}
             loading={loading}
             allowSelection={true}
-            onCellValueChanged={() => { }}
+            onCellValueChanged={() => {}}
             showOnlyShowFilteredRecordSwitch={true}
             refreshGrid={fetchData}
             renderedFrom={renderedFrom}

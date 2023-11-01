@@ -1,5 +1,5 @@
 import { Box, Chip, IconButton, Tooltip } from '@material-ui/core';
-import { Delete, Info, Warning } from '@material-ui/icons';
+import { Delete, Help, Info, Warning } from '@material-ui/icons';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { camelCase } from 'lodash';
 import moment from 'moment';
@@ -190,14 +190,16 @@ const Quotation = () => {
           {moment(params.data?.estimateEndDate).isBefore(moment(), 'day') && (
             <Box ml={1}>
               <HtmlTooltip title={`${routes.quotation.title} Expired`}>
-                <Warning style={{ fontSize: '14px' }} fontSize="small" color="error" />
+                <Warning style={{ fontSize: '14px' }} className=" cursor-pointer" fontSize="small" color="error" />
               </HtmlTooltip>
             </Box>
           )}
           {isDateWithinNext15Days(params.data?.estimateEndDate) && (
             <Box ml={1}>
               <HtmlTooltip title={`${routes.quotation.title} about to renew`}>
-                <HelpOutlineIcon style={{ fontSize: '14px', backgroundColor: 'yellow' }} fontSize="small" />
+                <span className=" text-yellow-600 dark:text-yellow-500 cursor-pointer block">
+                  <Help style={{ fontSize: '14px' }} fontSize="small" />
+                </span>
               </HtmlTooltip>
             </Box>
           )}

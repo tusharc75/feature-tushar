@@ -17,7 +17,7 @@ import CustomRenderCell from 'src/components/Helpers/CustomRenderCell';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { camelCase } from 'lodash';
 
-const Invoices = ({ resourceId, resourceName }) => {
+const Invoices = ({ resourceId, resource, invoiceFieldName }) => {
 
   const renderedFrom = `${camelCase(routes.generateInvoice?.title)}_invoice`
 
@@ -113,18 +113,16 @@ const Invoices = ({ resourceId, resourceName }) => {
 
   const ActionsRenderer = (params) => (
     <>
-      {
-        <HtmlTooltip title="View Invoice">
-          <IconButton
-            size="small"
-            onClick={() => {
-              setViewInvoiceDialog({ open: true, invoice: params.data._id });
-            }}
-          >
-            <VisibilityIcon fontSize="small" color="primary" />
-          </IconButton>
-        </HtmlTooltip>
-      }
+      <HtmlTooltip title="View Invoice">
+        <IconButton
+          size="small"
+          onClick={() => {
+            setViewInvoiceDialog({ open: true, invoice: params.data._id });
+          }}
+        >
+          <VisibilityIcon fontSize="small" color="primary" />
+        </IconButton>
+      </HtmlTooltip>
       {params?.data?.canDelete && (
         <HtmlTooltip title="Delete">
           <IconButton
@@ -147,9 +145,9 @@ const Invoices = ({ resourceId, resourceName }) => {
   }, [page, limit, filters, sorting]);
 
 
-  const getQueryString = (isExport = false) => {
+  const getQueryString = () => {
 
-    let deepFilter = `?page=${page}&limit=${limit}&${resourceName}=${resourceId}`;
+    let deepFilter = `?page=${page}&limit=${limit}&${invoiceFieldName}=${resourceId}`;
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
@@ -271,7 +269,7 @@ const Invoices = ({ resourceId, resourceName }) => {
           onSuccess={() => {
             setViewInvoiceDialog({ open: false, invoice: null });
           }}
-          resource={sidebarResource.subleaseInvoice}
+          resource={resource}
         />
       )}
       {isConfirmDialogVisible ? (

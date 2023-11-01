@@ -248,8 +248,6 @@ function CustomReactTable({
   };
 
   const [cellValue, setCellValue] = React.useState('');
-  const [isCellEditing, setIsCellEditing] = React.useState(false);
-  const [currentRowEditing, setCurrentRowEditing] = React.useState(null);
   const [baseColumns, setBaseColumns] = React.useState([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState(null);
@@ -367,7 +365,7 @@ function CustomReactTable({
                 <IndeterminateCheckbox
                   onClick={(e) => handleAllSelect(getToggleAllRowsSelectedProps()?.checked)}
                   {...getToggleAllRowsSelectedProps()}
-                  style={{ marginLeft: '6px' }}
+                  className="mx-auto text-center"
                 />
               ),
               Cell: ({ row }) => (
@@ -377,7 +375,7 @@ function CustomReactTable({
                       paddingLeft: isMobileView ? 0 : `${row.depth * 15}px`
                     }
                   }}
-                  className="ml-[6px]"
+                  className="mx-auto text-center"
                 >
                   <IndeterminateCheckbox onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps()} />
                 </div>
@@ -398,13 +396,24 @@ function CustomReactTable({
                 <IndeterminateCheckbox
                   onClick={(e) => handleAllSelect(getToggleAllRowsSelectedProps()?.checked)}
                   {...getToggleAllRowsSelectedProps()}
-                  style={{ marginLeft: '7px' }}
+                  className="mx-auto text-center"
                 />
               ),
-              Cell: ({ row }) => <IndeterminateCheckbox onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps()} />
+              Cell: ({ row }) => (
+                <div
+                  {...{
+                    style: {
+                      paddingLeft: isMobileView ? 0 : `${row.depth * 15}px`
+                    }
+                  }}
+                  className="mx-auto text-center"
+                >
+                  <IndeterminateCheckbox onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps()} />
+                </div>
+              )
             },
             ...baseColumns.map((m) => {
-              return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' };
+              return m.canFilter === false ? {  ...m,columnFilterable : false, filter: 'filterRowsWithSubrows' } : { ...m, columnFilterable : true };
             })
           ],
     [baseColumns]
@@ -738,7 +747,7 @@ function CustomReactTable({
               !hideSelection &&
               mobileSelectAllHeader && (
                 <>
-                  <label className="flex items-center gap-2 cursor-pointer -ml-2">
+                  <label className="flex items-center gap-2 cursor-pointer ml-[13px]">
                     {mobileSelectAllHeader.render('Header')} <span>Select All</span>
                   </label>
                 </>
@@ -1073,7 +1082,11 @@ const DraggableHeader: React.FC<DraggableHeaderProps> = ({ column, index, reorde
 
   return (
     <TableCell {...column.getHeaderProps()} className="th text-truncate table-header">
-      <div ref={ref} className="d-flex align-items-center justify-content-space-between pos-rel" style={{ width: '100%' }}>
+      <div
+        ref={ref}
+        className={`d-flex items-center ${column.id === 'selection' ? 'justify-center' : 'justify-between'} pos-rel`}
+        style={{ width: '100%' }}
+      >
         <div
           style={{ opacity: isDragging ? 0.2 : 1 }}
           className="d-flex gap-2 align-items-center"
@@ -1082,16 +1095,16 @@ const DraggableHeader: React.FC<DraggableHeaderProps> = ({ column, index, reorde
           <span>{column.render('Header')}</span>
           {column.isSorted ? column.isSortedDesc ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" /> : ''}
         </div>
-        <div>
-          {column.canFilter ? (
+        {column?.columnFilterable ? (
+          <div>
             <TempFilter
               filterValue={filters.find((filter) => filter.id === column.id)?.value || ''}
               id={column?.id}
               setFilters={setFilters}
               customFilters={customFilters}
             />
-          ) : null}
-        </div>
+          </div>
+        ) : null}
       </div>
       <div {...column.getResizerProps()} className="resizer" />
     </TableCell>

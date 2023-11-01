@@ -37,7 +37,8 @@ export default function CustomSwipableList({
   additionalDetails = [],
   owerCollaboratorInitialsOrImages = null,
   actionCol = null,
-  renderExtraChip = null
+  renderExtraChip = null,
+  backgroundColorClass = null
 }) {
   const [themeColor] = useAppTheme();
   const [isAllChecked, setIsAllChecked] = useState(false);
@@ -134,7 +135,9 @@ export default function CustomSwipableList({
             >
               {dataRows.map((d, index) => (
                 <div
-                  className="shadow-[0px_3px_26px_0px_rgba(0,0,0,0.06)] mx-2 rounded-md my-2 px-3 py-2 [--left-gutter:20px] dark:bg-[var(--dark-secondary)]"
+                  className={`shadow-[0px_3px_26px_0px_rgba(0,0,0,0.06)] mx-2 rounded-md my-2 px-3 py-2 [--left-gutter:20px] dark:bg-[var(--dark-secondary)] ${
+                    backgroundColorClass && backgroundColorClass(d) + ' td-color'
+                  }`}
                   key={`${d._id}${d.isChecked || ''}`}
                   style={{ border: '1px solid var(--common-border-color)' }}
                 >
@@ -214,7 +217,9 @@ export default function CustomSwipableList({
                         d[a.field] !== undefined && (
                           <div key={index} className="ml-2 my-1">
                             <div className="flex flex-wrap gap-1 items-center">
-                              <span className="flex items-center text-[#6B6B6B] dark:text-gray-300 max-w-[15px] max-h-[15px]">{a.icon}</span>
+                              {a.icon && (
+                                <span className="flex items-center text-[#6B6B6B] dark:text-gray-300 max-w-[15px] max-h-[15px]">{a.icon}</span>
+                              )}
                               <h5 className="text-truncate font-medium text-[13px] dark:text-gray-300" style={{ paddingTop: '2px', fontWeight: 500 }}>
                                 {a.label ?? `${a.label || ''}`}
                                 {d[a.field] ?? ''}

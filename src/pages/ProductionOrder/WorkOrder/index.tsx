@@ -248,7 +248,8 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     var data: any = [];
     const response = await axiosInstance().get(`${productionOrder.api}/${productionOrderData._id}/work-order/service`);
     data = response?.data?.data;
-    let rows = data.material.filter((e) => e.parentId === null);
+    // let rows = data.material.filter((e) => e.parentId === null);
+    let rows = data.material.filter((e) => e.type === 'product');
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = parent.type === MATERIAL_TYPE.service ?
