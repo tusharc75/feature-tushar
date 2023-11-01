@@ -306,7 +306,7 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
                           <div className="min-[769px]:hidden">
                             {values?.products?.map((value: any, index) => (
                               <div
-                                className="rounded-[8px] shadow-[0px_5.44444px_27.22222px_0px_rgba(0,_0,_0,_0.06)] px-[20px] py-[15px] grid grid-cols-[1fr_3fr] gap-2 item"
+                                className="rounded-[8px] mb-2 shadow-[0px_5.44444px_27.22222px_0px_rgba(0,_0,_0,_0.06)] px-[20px] py-[15px] grid grid-cols-[1fr_3fr] gap-2 item"
                                 style={{ border: '1px solid var(--common-border-color)' }}
                                 key={value._id}
                               >
