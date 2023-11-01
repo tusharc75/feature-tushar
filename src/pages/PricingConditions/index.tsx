@@ -155,7 +155,7 @@ const PricingConditions = () => {
   );
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
+    let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '';
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
@@ -419,7 +419,7 @@ const PricingConditions = () => {
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={true}
-              onClone={(data) => {}}
+              onClone={(data) => { }}
               renderedFrom={renderedFrom}
             />
           ) : (
