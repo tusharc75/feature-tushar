@@ -162,7 +162,7 @@ export default function NewCreateQuotePdfTemplate() {
 
   useEffect(() => {
     if (id && id !== '0') {
-      (async () => {
+        (async () => {
         let tempPdfTemplate = null;
         if (queryParams.quote && queryParams.version) {
           history.replace(`?quote=${queryParams.quote}&version=${queryParams.version}`);
