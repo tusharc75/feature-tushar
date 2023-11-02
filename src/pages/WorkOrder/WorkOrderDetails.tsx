@@ -36,6 +36,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import EditIcon from '@material-ui/icons/Edit';
 import CloseIcon from '@material-ui/icons/Close';
 import { RiFileShredFill } from 'react-icons/ri';
+import Diagram from './Diagram';
 
 const WorkOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -366,6 +367,9 @@ const WorkOrderDetails = () => {
           )}
         </TabPanel>
         <TabPanel value={tabValue} index={4}>
+          {workOrderData && <Diagram resource={'workOrder'} referenceId={id} />}
+        </TabPanel>
+        <TabPanel value={tabValue} index={5}>
           <Box>
             <View workOrderName={workOrderData?.workOrderNumber || ''} workOrderId={id} workOrderStatus={workOrderData?.status} />
           </Box>
