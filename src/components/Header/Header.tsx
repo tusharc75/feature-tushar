@@ -18,7 +18,7 @@ import {
 } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
 import Avatar from '@material-ui/core/Avatar';
-import { MoreVert as MoreIcon, Clear as ClearIcon, Notifications, ExpandMore, Brightness1, Close } from '@material-ui/icons';
+import { MoreVert as MoreIcon, Clear as ClearIcon, Notifications, ExpandMore, Brightness1, Close, Image } from '@material-ui/icons';
 import SyncIcon from '@material-ui/icons/Sync';
 import io, { Socket } from 'socket.io-client';
 import { useHistory, Link, useLocation } from 'react-router-dom';
@@ -596,7 +596,9 @@ const Header = () => {
                   <>
                     <Grid container>
                       <Grid item xs={2} md={2}>
-                        <Avatar style={{ height: 30, width: 30 }} src={d?.avatar}></Avatar>
+                        <Avatar style={{ height: 30, width: 30 }} src={d?.avatar}>
+                          <Image style={{ fontSize: 24 }} />
+                        </Avatar>
                       </Grid>
                       <Grid item xs={10} md={10}>
                         <h6>{displayCardDate(d?.date)}</h6>
@@ -716,7 +718,9 @@ const Header = () => {
                   <>
                     <Grid container>
                       <Grid item xs={2} md={2}>
-                        <Avatar style={{ height: 30, width: 30 }} src={d?.avatar}></Avatar>
+                        <Avatar style={{ height: 30, width: 30 }} src={d?.avatar}>
+                          <Image style={{ fontSize: 24 }} />
+                        </Avatar>
                       </Grid>
                       <Grid item xs={10} md={10}>
                         <h6>{displayCardDate(d?.date)}</h6>

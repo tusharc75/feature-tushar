@@ -5,7 +5,7 @@ import { TreeView, TreeItem } from '@material-ui/lab';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import moment from 'moment';
-import { Map } from '@material-ui/icons';
+import { Image, Map } from '@material-ui/icons';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -51,7 +51,9 @@ export default function ActivityList(props) {
           }}
         >
           <Box width={'80%'} className="d-flex align-items-center">
-            <Avatar variant="circle" sizes="small" style={{ height: 45, width: 45 }} alt="Remy Sharp" src={data?.photo} />
+            <Avatar variant="circle" sizes="small" style={{ height: 45, width: 45 }} alt="Remy Sharp" src={data?.photo}>
+              <Image style={{ fontSize: 28 }} />
+            </Avatar>
             <Box ml={2} flex style={{ flexDirection: 'column' }}>
               <Typography style={{ fontWeight: 'bolder', fontSize: '1rem' }}>{`${data?.firstName} ${data?.lastName}`}</Typography>
               <p style={{ fontSize: '0.8rem', color: 'grey' }}>{`${data?.competencyType?.optionLabel || ''}`}</p>

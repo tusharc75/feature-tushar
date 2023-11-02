@@ -207,7 +207,7 @@ const EditableCell = ({ value: initialValue, row: { index }, column: { id }, upd
 function CustomReactTable({
   columns,
   childrenProperty = 'subRows',
-  onSelect,
+  onSelect = null,
   setWholeRowsCellColor = null,
   height = '100%',
   hideSelection = false,
@@ -243,7 +243,7 @@ function CustomReactTable({
   const defaultColumn = {
     Cell: EditableCell,
     minWidth: 80,
-    width: 150,
+    width: 200,
     Filter: DefaultColumnFilter
   };
 
@@ -413,7 +413,7 @@ function CustomReactTable({
               )
             },
             ...baseColumns.map((m) => {
-              return m.canFilter === false ? {  ...m,columnFilterable : false, filter: 'filterRowsWithSubrows' } : { ...m, columnFilterable : true };
+              return m.canFilter === false ? { ...m, columnFilterable: false, filter: 'filterRowsWithSubrows' } : { ...m, columnFilterable: true };
             })
           ],
     [baseColumns]
@@ -591,7 +591,7 @@ function CustomReactTable({
         flatSelectedData.push({ ...rest });
       }
     });
-    onSelect([...flatSelectedData]);
+    if (onSelect) onSelect([...flatSelectedData]);
     dispatch({
       type: 'selection',
       selectedRecords: [...flatSelectedData]
@@ -1089,13 +1089,15 @@ const DraggableHeader: React.FC<DraggableHeaderProps> = ({ column, index, reorde
       >
         <div
           style={{ opacity: isDragging ? 0.2 : 1 }}
-          className="d-flex gap-2 align-items-center"
+          className="d-flex gap-2 align-items-center "
           {...column.getSortByToggleProps({ title: undefined })}
         >
-          <span>{column.render('Header')}</span>
+          <div className="line-clamp-1">
+            <span className=" overflow-hidden overflow-ellipsis whitespace-normal">{column.render('Header')}</span>
+          </div>
           {column.isSorted ? column.isSortedDesc ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" /> : ''}
         </div>
-        {column?.columnFilterable ? (
+        {column?.columnFilterable && column?.id !== 'action' ? (
           <div>
             <TempFilter
               filterValue={filters.find((filter) => filter.id === column.id)?.value || ''}

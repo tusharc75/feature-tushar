@@ -7,6 +7,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { CustomDialogTransition, dateTimeFormat } from '../../../constants/helpers';
+import { Image } from '@material-ui/icons';
 
 const CageHistory = ({ handleCloseDialog, fetchHistory, products, handleDrop }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -58,7 +59,9 @@ const CageHistory = ({ handleCloseDialog, fetchHistory, products, handleDrop }) 
                   ?.map((product) => (
                     <ListItem divider key={product._id}>
                       <ListItemAvatar>
-                        <Avatar src={product?.productDetail?.productImage} alt={product?.productDetail?.productName ?? ''} />
+                        <Avatar src={product?.productDetail?.productImage} alt={product?.productDetail?.productName ?? ''}>
+                          <Image style={{ fontSize: 24 }} />
+                        </Avatar>
                       </ListItemAvatar>
                       <ListItemText
                         primary={
@@ -107,7 +110,9 @@ const CageHistory = ({ handleCloseDialog, fetchHistory, products, handleDrop }) 
                   ?.map((product) => (
                     <ListItem divider key={product._id}>
                       <ListItemAvatar>
-                        <Avatar src={product?.productDetail?.productImage} alt={product?.productDetail?.productName ?? ''} />
+                        <Avatar src={product?.productDetail?.productImage} alt={product?.productDetail?.productName ?? ''}>
+                          <Image style={{ fontSize: 24 }} />
+                        </Avatar>
                       </ListItemAvatar>
                       <ListItemText
                         primary={

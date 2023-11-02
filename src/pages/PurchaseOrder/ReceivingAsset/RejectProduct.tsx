@@ -56,7 +56,7 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
   const fetchData = () => {
     setLoading(true);
     axiosInstance()
-      .get(`${productInventory.api}/serial-number/${product.productId}?warehouse=${warehouse}`)
+      .get(`${productInventory.api}/serial-number/${product.materialId}?warehouse=${warehouse}`)
       .then(({ data: { data } }) => {
         if (data?.length) {
           setSerialNumbers(data);
@@ -86,7 +86,8 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
         _id: product._id,
         comment: values?.comment === '' ? 'Rejected' : values?.comment,
         supplierPartNumber: values?.supplierPartNumber,
-        product: product.productId,
+        type: product.type,
+        materialId: product.materialId,
         qty: parseInt(values.qty),
         serialNumber: serialNumberIds?.map((item) => item?._id),
         storageLocation: user?.user?.brandPolicy?.storageLocation ? values['storageLocation'] : null,
@@ -94,7 +95,7 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
     ];
     setLoading(true);
     axiosInstance()
-      .post(`/purchase-order/reject-inventory/${POId}`, { products: data, rejectDate: moment(values?.rejectDate).format('MM/DD/YYYY') })
+      .post(`/purchase-order/reject-inventory/${POId}`, { material: data, rejectDate: moment(values?.rejectDate).format('MM/DD/YYYY') })
       .then(() => {
         setLoading(false);
         handleSuccess();
@@ -176,9 +177,9 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
               />
               <CustomDialogContent>
                 <List style={{ padding: 0 }}>
-                  <ListItem key={product.productId}>
+                  <ListItem key={product.materialId}>
                     <ListItemText
-                      primary={product?.productName}
+                      primary={product?.detail}
                       secondary={`Quantity : ${product?.qty - (product?.rejectQuantity || 0) - (product?.assetQty || 0)}`}
                     />
                     <TextField

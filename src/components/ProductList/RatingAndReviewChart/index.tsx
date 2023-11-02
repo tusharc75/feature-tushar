@@ -1,11 +1,5 @@
-import { useState, useEffect } from 'react'
-import {
-  Avatar,
-  Box,
-  CircularProgress,
-  CircularProgressProps,
-  Typography
-} from '@material-ui/core';
+import { useState, useEffect } from 'react';
+import { Avatar, Box, CircularProgress, CircularProgressProps, Typography } from '@material-ui/core';
 import { Rating } from '@material-ui/lab';
 import styles from './rating-and-review-chart.module.scss';
 import StarIcon from '@material-ui/icons/Star';
@@ -14,14 +8,14 @@ const green = '#1fb31f';
 const yellow = '#1fb31f';
 const red = '#1fb31f';
 
-const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const getDateFormated = (date) => {
   if (date) {
-    let current_datetime = new Date(date)
-    return current_datetime.getDate() + "  " + months[current_datetime.getMonth() + 1] + "  " + current_datetime.getFullYear()
+    let current_datetime = new Date(date);
+    return current_datetime.getDate() + '  ' + months[current_datetime.getMonth() + 1] + '  ' + current_datetime.getFullYear();
   }
-  return ""
-}
+  return '';
+};
 const getColorOfRating = (value) => {
   const color = value > 40 ? (value > 70 ? green : yellow) : red;
   return color;
@@ -58,18 +52,12 @@ function ReviewsComponent({ review }) {
       <div className="mb-4">
         <Box className="pr-2">
           <div style={{ display: 'flex' }}>
-            <Avatar className="mr-3"
-              style={{ height: 30, width: 30 }}
-            ></Avatar>
+            <Avatar className="mr-3" style={{ height: 30, width: 30 }}></Avatar>
             <Typography variant="body1">Doe John</Typography>
           </div>
 
-
           <div className="d-flex align-items-center">
-            <Rating name="size-small"
-              value={review?.rating} readOnly
-              size="small"
-              className="mr-3" />
+            <Rating name="size-small" value={review?.rating} readOnly size="small" className="mr-3" />
             {review?.commentTitle}
           </div>
           <div className="d-flex align-items-center">
@@ -78,9 +66,7 @@ function ReviewsComponent({ review }) {
             </Typography>
           </div>
         </Box>
-        <Typography variant="body1">
-          {review?.commentDescription}
-        </Typography>
+        <Typography variant="body1">{review?.commentDescription}</Typography>
       </div>
     </>
   );
@@ -93,32 +79,32 @@ const RatingAndReviewChart = ({ id, reviews, averageRating }) => {
     3: 0,
     4: 0,
     5: 0
-  })
+  });
 
   useEffect(() => {
-
-    let tempRating = { ...ratings }
-    reviews.forEach(o => {
+    let tempRating = { ...ratings };
+    reviews.forEach((o) => {
       if (o?.rating) {
-        tempRating[o?.rating] = tempRating[o?.rating] ? tempRating[o?.rating] + 1 : 1
+        tempRating[o?.rating] = tempRating[o?.rating] ? tempRating[o?.rating] + 1 : 1;
       }
-    })
-    setRatings({ ...tempRating })
-  }, [reviews])
+    });
+    setRatings({ ...tempRating });
+  }, [reviews]);
 
   return (
     <>
-      <h2 className="text-align-center" >Feedback</h2>
+      <h2 className="text-align-center">Feedback</h2>
       <div className={styles.rating_and_review_chart_outer}>
         <div className={styles.rating_chart}>
           <div className={styles.total_rating}>
             <Typography variant="h4" color="primary">
-              {averageRating}<StarIcon fontSize="large" />
+              {averageRating}
+              <StarIcon fontSize="large" />
             </Typography>
             {/* <Typography variant="body2" color="primary">
               {reviews ? reviews.length : 0} Ratings &amp;
             </Typography> */}
-            <Typography variant="body2" color="primary" >
+            <Typography variant="body2" color="primary">
               {reviews ? reviews.length : 0} Reviews
             </Typography>
           </div>
@@ -129,19 +115,17 @@ const RatingAndReviewChart = ({ id, reviews, averageRating }) => {
             <CustomLinearProgressBar value={ratings[2]} index={2} />
             <CustomLinearProgressBar value={ratings[1]} index={1} />
           </div>
-          <div className={styles.rating_category} >
-            <CircularProgressWithLabel variant="determinate" size={120} thickness={6} value={50} comment={"Easy to Use"} />
-            <CircularProgressWithLabel variant="determinate" size={120} thickness={6} value={75} comment={"Value for Money"} />
+          <div className={styles.rating_category}>
+            <CircularProgressWithLabel variant="determinate" size={120} thickness={6} value={50} comment={'Easy to Use'} />
+            <CircularProgressWithLabel variant="determinate" size={120} thickness={6} value={75} comment={'Value for Money'} />
           </div>
         </div>
         <div className={styles.reviews}>
-          {
-            reviews && reviews.length ?
-              reviews.map(currentReview => {
-                return <ReviewsComponent review={currentReview} />
+          {reviews && reviews.length
+            ? reviews.map((currentReview) => {
+                return <ReviewsComponent review={currentReview} />;
               })
-              : null
-          }
+            : null}
         </div>
       </div>
     </>

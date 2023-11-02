@@ -10,6 +10,7 @@ import { Formik, Form, FieldArray } from 'formik';
 import { isMobile, isTablet } from 'react-device-detect';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import {
+  MATERIAL_TYPE,
   convertDateInDateTime,
   convertDateTimToDate,
   dateFormatForInputControl,
@@ -21,8 +22,9 @@ import { useData } from 'src/StateProvider/Provider';
 import moment from 'moment';
 import DateUtils from '@date-io/date-fns';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import { startCase } from 'lodash';
 
-const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrderData }) => {
+const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderData }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
@@ -74,7 +76,8 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
       if (parseInt(element?.rejectQuantity)) {
         data.push({
           _id: element._id,
-          product: element.productId,
+          type: element.type,
+          materialId: element.materialId,
           serializedProduct: element.serializedProduct,
           qty: parseInt(element?.rejectQuantity),
           comment: element?.comment === '' ? 'Rejected' : element?.comment,
@@ -86,7 +89,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
     });
     if (data?.length) {
       axiosInstance()
-        .post(`${purchaseOrder.api}/reject-inventory/${purchaseOrderID}`, { products: data, rejectDate: moment(rejectDate).format('MM/DD/YYYY') })
+        .post(`${purchaseOrder.api}/reject-inventory/${purchaseOrderID}`, { material: data, rejectDate: moment(rejectDate).format('MM/DD/YYYY') })
         .then(({ data }) => {
           setIsSubmitting(false);
           toastConfig.setToastConfig({
@@ -109,7 +112,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
     let errors: any = {};
     if (values.length > 0) {
       values.map((d) => {
-        let tempProduct = productList.find((u) => u._id === d._id);
+        let tempProduct = material.find((u) => u._id === d._id);
         if (tempProduct && d.rejectQuantity > tempProduct.qty - (tempProduct.rejectQuantity || 0) - (tempProduct.assetQty || 0)) {
           errors.rejectQuantity = 'should be greater';
         }
@@ -166,11 +169,12 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
         <Formik
           initialValues={{
             rejectDate: new Date(),
-            products: productList.map((d) => ({
+            material: material.map((d) => ({
               _id: d._id,
+              type: d.type,
+              materialId: d.materialId,
+              detail: d.detail,
               storageLocation: purchaseOrderData?.storageLocation || null,
-              product: d.productName,
-              productId: d.productId,
               rejectQuantity: 0,
               comment: '',
               supplierPartNumber: '',
@@ -183,15 +187,15 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
           {({ values, setFieldValue, errors }) => (
             <>
               <CustomDialogContent>
-                {values.products && values.products.length ? (
+                {values.material && values.material.length ? (
                   <Box p={2}>
                     <Form>
                       <FieldArray
-                        name="products"
+                        name="material"
                         render={(arrayHelpers) => (
                           <div>
                             <div className="grid gap-[15px] sm:gap-[18px]">
-                              {values.products.map((data, index) => (
+                              {values.material.map((data, index) => (
                                 <div
                                   style={{ border: '1.5px solid var(--common-border-color)' }}
                                   className="rounded-[6px] pt-[17px] px-[23px] pb-[21px] grid sm:grid-cols-[24px,1fr] md:gap-[29px] gap-[15px] shadow-[0px_4px_26.8799991607666px_0px_rgba(0,0,0,0.06)]"
@@ -206,6 +210,10 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
                                       className="flex border-b  border-b-[var(--common-border-color)] gap-[20px] md:gap-[61px] pb-[9px]"
                                     >
                                       <span>
+                                        <span className="text-[var(--primary-text)] font-semibold">Type: </span>
+                                        {startCase(data?.type)}
+                                      </span>
+                                      <span>
                                         <span className="text-[var(--primary-text)] font-semibold">PO Quantity: </span>
                                         {data?.row?.qty}
                                       </span>
@@ -219,19 +227,13 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
                                       </span>
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[20px] md:gap-[25px] mt-[28px]">
-                                      <Autocomplete
-                                        size="small"
-                                        value={data.product}
-                                        options={productList}
+                                      <TextField
+                                        variant="outlined"
+                                        name={`${data?.type}_${data?._id}`}
+                                        label={startCase(data?.type)}
+                                        value={data?.detail}
+                                        size='small'
                                         disabled
-                                        getOptionLabel={(option: any) => (option ? option : '')}
-                                        onChange={(_, newValue) => {
-                                          arrayHelpers.replace(index, {
-                                            ...values.products[index],
-                                            ['product']: newValue
-                                          });
-                                        }}
-                                        renderInput={(params) => <TextField {...params} variant="outlined" name="product" label="Product" />}
                                       />
                                       {user?.user?.brandPolicy?.storageLocation &&
                                         <Autocomplete
@@ -241,7 +243,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
                                           getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
                                           onChange={(_, newValue) => {
                                             arrayHelpers.replace(index, {
-                                              ...values.products[index],
+                                              ...values.material[index],
                                               ['storageLocation']: newValue
                                             });
                                           }}
@@ -270,7 +272,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
                                         onChange={(e) => {
                                           const value = e.target.value.replace(/[^0-9]/g, '');
                                           arrayHelpers.replace(index, {
-                                            ...values.products[index],
+                                            ...values.material[index],
                                             ['rejectQuantity']: value
                                           });
                                         }}
@@ -278,22 +280,24 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
                                         error={validate([data])?.rejectQuantity}
                                         helperText={validate([data]).rejectQuantity ? 'Reject quantity is more than quantity' : ''}
                                       />
-                                      <TextField
-                                        fullWidth
-                                        label="Supplier Part Number"
-                                        variant="outlined"
-                                        type="text"
-                                        size="small"
-                                        name="supplierPartNumber"
-                                        placeholder="Supplier Part Number"
-                                        value={data.supplierPartNumber}
-                                        onChange={(e) => {
-                                          arrayHelpers.replace(index, {
-                                            ...values.products[index],
-                                            ['supplierPartNumber']: e.target.value
-                                          });
-                                        }}
-                                      />
+                                      {data.type === MATERIAL_TYPE.product &&
+                                        <TextField
+                                          fullWidth
+                                          label="Supplier Part Number"
+                                          variant="outlined"
+                                          type="text"
+                                          size="small"
+                                          name="supplierPartNumber"
+                                          placeholder="Supplier Part Number"
+                                          value={data.supplierPartNumber}
+                                          onChange={(e) => {
+                                            arrayHelpers.replace(index, {
+                                              ...values.material[index],
+                                              ['supplierPartNumber']: e.target.value
+                                            });
+                                          }}
+                                        />
+                                      }
                                       <TextField
                                         fullWidth
                                         label="Comment"
@@ -305,7 +309,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
                                         value={data.comment}
                                         onChange={(e) => {
                                           arrayHelpers.replace(index, {
-                                            ...values.products[index],
+                                            ...values.material[index],
                                             ['comment']: e.target.value
                                           });
                                         }}
@@ -361,11 +365,11 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
                 <Button
                   onClick={() => {
                     if (
-                      !validate(values.products).rejectQuantity &&
-                      !validate(values.products).storageLocation &&
+                      !validate(values.material).rejectQuantity &&
+                      !validate(values.material).storageLocation &&
                       !validateDate(values)?.rejectDate
                     ) {
-                      handleReject(values.products, values.rejectDate);
+                      handleReject(values.material, values.rejectDate);
                     }
                   }}
                   size="small"

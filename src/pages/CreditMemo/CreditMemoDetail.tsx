@@ -105,7 +105,7 @@ const creditMemoDetail = () => {
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Box>
         <Box className="controls-v1">
-          <Box className="control-buttons-v1">
+          {/* <Box className="control-buttons-v1">
             <>
               {permissions?.creditMemo?.isUpdate && (
                 <Button
@@ -118,7 +118,7 @@ const creditMemoDetail = () => {
               )}
               {permissions?.creditMemo?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             </>
-          </Box>
+          </Box> */}
         </Box>
       </Box>
       <Box className="detail-container-v1">
@@ -159,7 +159,8 @@ const creditMemoDetail = () => {
       )}
       {openUpdateDialog && (
         <ManageCreditMemo
-          id={id}
+          creditMemoId={id}
+          open={openUpdateDialog}
           isClone={false}
           onClose={closeUpdateDialog}
           onSuccess={() => {
