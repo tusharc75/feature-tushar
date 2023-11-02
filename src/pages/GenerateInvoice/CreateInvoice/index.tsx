@@ -165,7 +165,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
                   } else if (row.original.type === MATERIAL_TYPE.product) {
                     window.open(`${routes.productDetail.path}/${row.original.materialId}`);
                   } else if (row.original.type === MATERIAL_TYPE.serializedAsset) {
-                    window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
+                    window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
                   } else {
                     window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
                   }
@@ -190,10 +190,21 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
     setColumns(column);
   };
 
-  const manageMaterial = (material, invoicedProducts) => {
+  const fetchData = async () => {
+    const referenceIds = resourceData?.map((d) => d._id);
+    const { data: { data: data } } = await axiosInstance().get(`${routes?.generateInvoice.path}/material?resource=${resource}&referenceIds=${JSON.stringify(referenceIds)}`);
+
     let newMaterial: any = [];
+
+    data?.manualEntry?.forEach((ele, i) => {
+      ele.type = 'manualEntry';
+    });
+
     if (resource === sidebarResource.sublease) {
-      material?.filter((d) => d.actualStartDate)?.forEach((element) => {
+      const invoiceResponse = await axiosInstance().get(`/generate-invoice/${resourceData[0]?._id}/invoice/material-end-date-qty?resource=${resource}`);
+      const invoicedProducts = invoiceResponse?.data?.data?.material || [];
+
+      data?.material?.filter((d) => d.actualStartDate)?.forEach((element) => {
         let values: any = {};
         values['actualEndDate'] = element?.actualEndDate || element?.estimateEndDate;
         values['manualEndDate'] = element?.actualEndDate;
@@ -201,74 +212,35 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
         newMaterial.push({ ...element, ...calValues });
       });
 
-      material = newMaterial;
       if (invoicedProducts?.length) {
-        material = material?.map((e) => {
-          let materialData: any = { ...e };
-
-          let pMethod = materialData?.pricingMethod?.split(',') || [];
-          pMethod = pMethod.map((m) => m?.trim()).find((m) => !['Per Day', 'Per Week', 'Per Month'].includes(m));
-
-          const product = invoicedProducts?.find((p) => p._id === e._id);
+        newMaterial = newMaterial?.map((_material) => {
+          const product = invoicedProducts?.find((p) => p._id === _material._id);
           if (product) {
             const actualEndDate = new Date(product?.endDate)?.setDate(new Date(product?.endDate)?.getDate() + 1);
-            materialData.actualStartDate = actualEndDate;
-          } else {
-            materialData.actualStartDate = materialData.manualStartDate ? materialData.manualStartDate : new Date().setDate(new Date().getDate() + 1);
+            _material.actualStartDate = actualEndDate;
           }
-          return materialData;
+          return _material;
         }).filter((d) => d.qty > 0);
       }
+
+      data?.assets?.forEach((_asset) => {
+        const product = newMaterial?.find((p) => p._id === _asset._id);
+        const obj: any = {}
+        obj._id = _asset.inventory;
+        obj.parentId = _asset._id;
+        obj.type = MATERIAL_TYPE.serializedAsset;
+        obj.materialId = _asset.inventory;
+        obj.serializedAssetDetail = _asset?.assetDetail;
+        obj.actualStartDate = product?.actualStartDate;
+        obj.pricingMethod = product?.pricingMethod;
+        newMaterial.push(obj);
+      })
     }
-    else if (resource === sidebarResource.fieldTicket) {
-      material?.cost?.forEach((ele, i) => {
-        ele.type = 'manualEntry';
-      });
-      material = [...material?.material, ...material?.cost];
+    else {
+      newMaterial = data?.material;
     }
-    setMaterial(material);
-    initializeTable(material);
-  };
-
-  const fetchData = async () => {
-    let invoicedProducts: any = [];
-
-    let response: any = {};
-
-    if (resource === sidebarResource.sublease) {
-      response = await axiosInstance().get(`${sublease.api}/productpackage/${resourceData[0]?._id}`);
-
-      const invoiceResponse = await axiosInstance().get(
-        `/generate-invoice/${resourceData[0]?._id}/invoice/material-end-date-qty?resource=${resource}`
-      );
-      invoicedProducts = invoiceResponse?.data?.data?.material;
-
-      manageMaterial(response?.data?.data?.material, invoicedProducts);
-    } else if (resource === sidebarResource.repairOrder) {
-      const quotationResponse = axiosInstance().get(
-        `${repairOrder.api}/${resourceData[0]?._id}/check-create/quotation?approval=${resourceData[0]?.addQuotationStep ? 1 : 0}`
-      );
-      const quotationData: any = (await quotationResponse).data.data;
-
-      let keys = Object.keys(quotationData.versions);
-      let currentVersion = parseInt(keys[keys.length - 1]);
-
-      const productPackageResponse = axiosInstance().get(
-        `${quotation.api}/productpackage/${quotationData._id}/${quotationData.versions[currentVersion]?._id}`
-      );
-
-      const [quotationResult, productPackageResult] = await Promise.all([quotationResponse, productPackageResponse]);
-
-      response = productPackageResult.data;
-      manageMaterial(response?.data?.material, invoicedProducts);
-    } else if (resource === sidebarResource.fieldTicket) {
-      const referenceIds = resourceData?.map((d) => d._id);
-
-      const {
-        data: { data: data }
-      } = await axiosInstance().get(`${routes?.generateInvoice.path}/material?referenceIds=${JSON.stringify(referenceIds)}`);
-      manageMaterial(data, []);
-    }
+    setMaterial([...newMaterial, ...data?.manualEntry]);
+    initializeTable([...newMaterial, ...data?.manualEntry]);
   };
 
   const initializeTable = (material) => {
