@@ -49,6 +49,7 @@ import AssignUserDialog from './AssignUserDialog';
 import PeopleIcon from '@material-ui/icons/People';
 import { isDesktop, isMobile, isTablet } from 'react-device-detect';
 import AssignWorkStationDialog from './AssignWorkStationDialog';
+import WorkOutlineIcon from '@material-ui/icons/WorkOutline';
 
 interface StepInterface {
   _id: string;
@@ -261,12 +262,13 @@ const Steps = ({
 
   const [addNewStep, setAddNewStep] = useState({ open: false, clone: false, cloneStepData: null });
 
-
   const {
     state: {
-      user: { user }
+      user: { user },
+      permissions
     }
   } = useData();
+
   const [viewStep, setViewStep] = React.useState({ open: false, step: null });
   const [isAllStepDone, setIsAllStepDone] = React.useState(false);
   const [attchmentsDialog, setAttchmentsDialog] = useState({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
@@ -977,6 +979,13 @@ const Steps = ({
                           </HtmlTooltip>
                         </Box>
                       )}
+                      {step?.workStations?.length > 0 && (
+                        <Box ml={1}>
+                          <HtmlTooltip title={`Work Stations-${step?.workStations?.map((e) => e?.optionLabel)?.toString()}`}>
+                            <WorkOutlineIcon style={{ color: 'var(--primary)', maxWidth: '22px' }} />
+                          </HtmlTooltip>
+                        </Box>
+                      )}
                     </Box>
                     <Box style={{ display: 'flex', alignItems: 'center', flexBasis: mobScreen ? '100%' : 'unset', flexWrap: 'wrap' }}>
                       {step?.isAllowToPerform && (
@@ -1242,15 +1251,17 @@ const Steps = ({
                   Assign Technicians
                 </MenuItem>
               )}
-              <MenuItem
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setWorkStationAssignDialog(true);
-                  setAnchorEl(null);
-                }}
+              {referencType !== 'workOrderTechnician' && permissions?.workStations?.isRead && (
+                <MenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setWorkStationAssignDialog(true);
+                    setAnchorEl(null);
+                  }}
                 >
                   Assign Work Stations
-              </MenuItem>
+                </MenuItem>
+              )}
               <MenuItem
                 onClick={(e) => {
                   e.stopPropagation();
@@ -1470,7 +1481,7 @@ const Steps = ({
                 stepId: selectedStep?._id,
               }
             ]}
-            assignedWorkStations={selectedStep?.assignedWorkStations}
+            workStations={selectedStep?.workStations}
             handleClose={() => {
               setWorkStationAssignDialog(false);
             }}

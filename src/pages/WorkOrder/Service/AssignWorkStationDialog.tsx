@@ -12,11 +12,11 @@ import Autocomplete from '@material-ui/lab/Autocomplete/Autocomplete';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import routes from 'src/components/Helpers/Routes';
 
-const AssignWorkStationDialog = ({ warehouse, workOrderData, assignedWorkStations, handleClose, handleSucess }) => {
+const AssignWorkStationDialog = ({ warehouse, workOrderData, workStations, handleClose, handleSucess }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const [workStationList, setworkStationList] = useState([]);
-  const [selectedWorkStations, setSelectedWorkStations] = useState(assignedWorkStations);
+  const [selectedWorkStations, setSelectedWorkStations] = useState(workStations);
 
   useEffect(() => {
     fetchData();
@@ -55,9 +55,9 @@ const AssignWorkStationDialog = ({ warehouse, workOrderData, assignedWorkStation
 
     const api = `${routes?.workOrder?.path}/service/assign-work-station`;
     const payload = {
-        workStations : selectedWorkStations?.map((d) => d.optionValue),
-        workOrder : workOrderData
-    }    
+      workStations: selectedWorkStations?.map((d) => d.optionValue),
+      workOrder: workOrderData
+    }
     axiosInstance()
       .put(api, payload)
       .then(({ data }) => {
