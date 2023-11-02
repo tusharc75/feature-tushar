@@ -45,12 +45,12 @@ import { PreWorkIcon, PostWorkIcon } from 'src/assets/svg/svgIcons';
 import { isArray, reverse } from 'lodash';
 import AttachmentDialog from './AttachmentDialog';
 import ManagePurchaseOrder from 'src/pages/PurchaseOrder/ManagePurchaseOrder';
-import { AiFillCheckCircle, AiFillExclamationCircle } from 'react-icons/ai';
 import { PassIcon, FailIcon } from 'src/assets/svg/svgIcons';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { Add, ExpandMore } from '@material-ui/icons';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 import AssignWorkStationDialog from './AssignWorkStationDialog';
+import WorkOutlineIcon from '@material-ui/icons/WorkOutline';
 
 const getTotalTime = (stepTimes: any) => {
   let totalTimes = 0;
@@ -61,7 +61,7 @@ const getTotalTime = (stepTimes: any) => {
       totalTimes += new Date().getTime() - new Date(item?.pauseDate || item?.startDate).getTime();
     }
   });
-  stepTimes.forEach((item) => {});
+  stepTimes.forEach((item) => { });
   return { shouldTimerRun, totalTimes };
 };
 
@@ -231,7 +231,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
       setServiceSteps(services);
       if (
         services.filter((e) => e.type === 'service' && e.status === WORKORDER_SERVICE_STATUS.completed)?.length ===
-          services.filter((e) => e.type === 'service')?.length &&
+        services.filter((e) => e.type === 'service')?.length &&
         workOrderData?.status !== WORK_ORDER_STATUS.completed
       ) {
         fetchWorkOrderData();
@@ -688,6 +688,13 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                             </HtmlTooltip>
                                           </Box>
                                         )}
+                                        {data?.type === 'service' && data?.workStations?.length > 0 && (
+                                          <Box ml={1}>
+                                            <HtmlTooltip title={`Work Stations-${data?.workStations?.map((e) => e?.optionLabel)?.toString()}`}>
+                                              <WorkOutlineIcon style={{ color: 'var(--primary)', maxWidth: '22px' }} />
+                                            </HtmlTooltip>
+                                          </Box>
+                                        )}
                                       </Box>
 
                                       {/* Chips */}
@@ -964,20 +971,20 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                                       data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
                                                         ? '#E1FCE3'
                                                         : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                        ? '#fabebe'
-                                                        : '#FFF5DD',
+                                                          ? '#fabebe'
+                                                          : '#FFF5DD',
                                                     color:
                                                       data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
                                                         ? '#048E0A'
                                                         : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                        ? '#fa0202'
-                                                        : '#FF8C21',
+                                                          ? '#fa0202'
+                                                          : '#FF8C21',
                                                     background:
                                                       data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
                                                         ? '#E1FCE3'
                                                         : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                        ? '#fabebe'
-                                                        : '#FFF5DD',
+                                                          ? '#fabebe'
+                                                          : '#FFF5DD',
                                                     fontWeight: 700
                                                   }}
                                                 />
@@ -1067,7 +1074,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                   Assign Technicians
                 </MenuItem>
               )}
-              {allowedToEdit && (
+              {allowedToEdit && permissions?.workStations?.isRead && (
                 <MenuItem
                   disabled={!allowedToEdit}
                   onClick={() => {
@@ -1208,14 +1215,14 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
       )}
       {workStationAssignDialog && (
         <AssignWorkStationDialog
-          warehouse = {workOrderData?.warehouse}
+          warehouse={workOrderData?.warehouse}
           workOrderData={[
             {
               uniqueId: selectedService?.uniqueId,
               workOrderId: workOrderId
             }
           ]}
-          assignedWorkStations={selectedService?.assignedWorkStations}
+          workStations={selectedService?.workStations}
           handleClose={() => {
             setWorkStationAssignDialog(false);
           }}
@@ -1344,7 +1351,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           handleClose={() => {
             setAttchmentsDialog({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
           }}
-          handleSuccess={() => {}}
+          handleSuccess={() => { }}
         />
       )}
       {showManagePurchaseOrder && (
