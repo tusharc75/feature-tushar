@@ -4,6 +4,7 @@ import { Autocomplete } from '@material-ui/lab';
 
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { Image } from '@material-ui/icons';
 
 const NewChat = (props) => {
   const { setNewChat, setSelectedChat, users, userId } = props;
@@ -55,7 +56,9 @@ const NewChat = (props) => {
           getOptionLabel={(option) => option.name}
           renderOption={(option) => (
             <Fragment>
-              <Avatar src={option.avatar} />
+              <Avatar src={option.avatar}>
+                <Image style={{ fontSize: 24 }} />
+              </Avatar>
               <Box component="span" mr={2} />
               {option.name}
             </Fragment>
