@@ -75,7 +75,7 @@ export const purchaseRequisitionSteps = ['Add Products'];
 export const productionOrderSteps: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },
   { name: 'Work Order', title: 'Work Order', icon: 'workOrder' },
-  { name: 'Loading Ticket', title: 'Loading', icon: 'ticket' },
+  { name: 'Loading Ticket', title: 'Loading', icon: 'ticket' }
 ];
 
 export const jobProcessSteps: stepInterface[] = [
@@ -1033,21 +1033,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-          .required(`${input.fieldLabel} is required`)
+            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+            .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(
+            .matches(
+              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+              'Enter valid URL'
+            )
+            .required(`${input.fieldLabel} is required`)
+        : string().matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          )
-          .required(`${input.fieldLabel} is required`)
-        : string().matches(
-          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-          'Enter valid URL'
-        );
+          );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
@@ -1996,7 +1996,7 @@ export const DELIVERY_TICKET_REFERENCE_TYPE = {
   sublease: 'Sublease',
   transferInventory: 'Transfer Inventory',
   repairOrder: 'Repair Order',
-  productionOrder: 'Production Order',
+  productionOrder: 'Production Order'
 };
 
 export const DELIVERY_FROM_TO_TYPE = {
@@ -2012,7 +2012,7 @@ export const SUBLEASE_STATUS = {
   completed: 'Completed',
   readyToInvoice: 'Ready to Invoice',
   invoiced: 'Invoiced',
-  closed: 'Closed',
+  closed: 'Closed'
 };
 
 export const PURCHASE_ORDER_STATUS = {
@@ -2053,12 +2053,10 @@ export const REPAIR_PROCESS_STATUS = {
   failed: 'Failed'
 } as const;
 
-
 export const PLANNING_STATUS = {
   open: 'Open',
   converted: 'Converted'
 } as const;
-
 
 export const asyncForEach = async (array: any[], callback: (arrayIndex: any, i: number, array: any[]) => Promise<any>) => {
   for (let index = 0; index < array.length; index++) {
@@ -2263,7 +2261,7 @@ export const IOT_REPORT_LIST = [
         type: 'dropDown',
         multiple: true,
         _id: '1'
-      },
+      }
     ]
   }
 ];
@@ -2452,7 +2450,7 @@ export const COLOUR_MASTER = {
     borderColor: '#FFE4C0'
   },
   transferAsset: {
-    background: '#ecc19c',
+    background: 'var(--transferAsset-bg)',
     borderColor: '#d98298'
   },
   bulkAsset: {
@@ -2717,7 +2715,7 @@ export const SERVICE_TYPE = {
 export const SUBLEASE_TYPE = {
   vendor: 'Vendor',
   interCompany: 'Inter Company'
-}
+};
 
 export const QUOTE_PROCESS_STATUS = {
   new: 'New',
@@ -2824,7 +2822,6 @@ export const ROLE_TIER = {
   tier2: 'Tier 2',
   tier3: 'Tier 3'
 };
-
 
 export const fieldLabelToFieldName = (fieldLabel) => {
   return camelCase(fieldLabel?.replace(/[^a-zA-Z0-9]/g, ''))?.substring(0, 60);
