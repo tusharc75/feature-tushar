@@ -27,6 +27,7 @@ import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import { startCase } from 'lodash';
+import { isMobile, isTablet } from 'react-device-detect';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -210,7 +211,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
   }, [searchVal]);
 
   return (
-    <Dialog open onClose={onClose} maxWidth="sm" fullWidth fullScreen={!isMinimized}>
+    <Dialog open onClose={onClose} maxWidth="sm" fullWidth fullScreen={!isMinimized || (isMobile && !isTablet)}>
       <CustomDialogHeader
         title="Arrange View"
         onClose={onClose}
@@ -399,8 +400,7 @@ const RenderListItem = (props: ItemProps) => {
   drag(drop(ref));
 
   return column.sticky ? (
-    <div className="d-none">
-    </div>
+    <div className="d-none"></div>
   ) : (
     <div ref={ref} style={{ opacity }} data-handler-id={handlerId}>
       <ListItem divider disableGutters disabled={column.disabled}>

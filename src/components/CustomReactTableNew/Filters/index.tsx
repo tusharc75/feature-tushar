@@ -18,6 +18,7 @@ import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import SaveFilterDialog from 'src/components/GridFilter/SaveFilterDialog';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isEmpty } from 'lodash';
+import { isMobile, isTablet } from 'react-device-detect';
 
 function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, currentFomValue, setCurrentFomValue, customFilters, dispatch }) {
   const toastConfig = useContext(CustomToastContext);
@@ -82,7 +83,11 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
             }
           });
           modifiedColumn = modifiedColumn?.filter((e) => e.fieldName !== 'lastName');
-        } else if (resource === sidebarResource.customerContact || resource === sidebarResource.supplierContact || resource === sidebarResource.lead) {
+        } else if (
+          resource === sidebarResource.customerContact ||
+          resource === sidebarResource.supplierContact ||
+          resource === sidebarResource.lead
+        ) {
           modifiedColumn?.forEach((e) => {
             if (e.fieldName === 'firstName') {
               e.fieldName = 'concatedName';
@@ -182,17 +187,17 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
   const createFilterModel = () => {
     const filterModel = new Map();
     const colNames = Object.keys(formValues);
-  
+
     for (const col of coloums) {
       const fieldName = col?.fieldName;
-  
+
       if (
         !(colNames.includes(fieldName) || colNames.includes(`from_${fieldName}`) || colNames.includes(`to_${fieldName}`)) &&
         (col.type !== 'dateTime' || col.type !== 'date')
       ) {
         continue;
       }
-  
+
       switch (col.type) {
         case 'singleLine':
         case 'multiLine':
@@ -229,10 +234,10 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
         case 'date':
           const from = `from_${fieldName}`;
           const to = `to_${fieldName}`;
-  
+
           const fromDate = formValues[from] ? formValues[from] : null;
           const toDate = formValues[to] ? formValues[to] : null;
-  
+
           if (fromDate || toDate) {
             filterModel.set(fieldName, {
               filter: {
@@ -257,10 +262,9 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
           console.warn('Unknown column type:', col.type);
       }
     }
-  
+
     return Object.fromEntries(filterModel);
   };
-  
 
   const handleApplyFilter = () => {
     setCurrentFomValue(formValues || {});
@@ -292,6 +296,7 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
       <Dialog
         maxWidth={'md'}
         open={true}
+        fullScreen={isMobile && !isTablet}
         fullWidth
         onClose={(e, reason) => {
           if (reason !== 'backdropClick') {
@@ -316,9 +321,7 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
                   getOptionLabel={(option) => option.title}
                   renderOption={(option) => (
                     <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'} width={'100%'}>
-                      <span style={{ width: 'calc(100% - 71px)' }}>
-                        {option?.title}
-                      </span>
+                      <span style={{ width: 'calc(100% - 71px)' }}>{option?.title}</span>
                       <Box>
                         <IconButton size="small" style={{ marginRight: '20px' }}>
                           <AiFillEdit />
@@ -417,8 +420,8 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
                                 betweenDate && betweenDate[`from_${field.fieldName}`]
                                   ? betweenDate[`from_${field.fieldName}`]
                                   : formValues[`from_${field.fieldName}`]
-                                    ? formValues[`from_${field.fieldName}`]
-                                    : new Date()
+                                  ? formValues[`from_${field.fieldName}`]
+                                  : new Date()
                               }
                             />
                           </Grid>
@@ -466,7 +469,14 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
           >
             {selectedUserFilter ? 'Update Filter' : 'Save Filter'}
           </Button>
-          <Button disabled={isEmpty(formValues) ? true : false} onClick={handleApplyFilter} size="small" className="no-shadow" color="primary" variant="contained">
+          <Button
+            disabled={isEmpty(formValues) ? true : false}
+            onClick={handleApplyFilter}
+            size="small"
+            className="no-shadow"
+            color="primary"
+            variant="contained"
+          >
             Apply Now
           </Button>
         </CustomDialogFooter>

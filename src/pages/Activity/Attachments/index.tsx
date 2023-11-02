@@ -148,6 +148,23 @@ export default function Attachment() {
       )
     },
     {
+      id: 'attachmentType',
+      accessor: 'attachmentType',
+      Header: 'Attachment Type',
+      width: 150,
+      canDrag: false,
+      disableFilters: true,
+      Cell: ({ row }) => {
+        return row.original?.attachmentType ? (
+          <p>
+            {row.original.attachmentType}
+          </p>
+        ) : (
+          <NoDataCell />
+        );
+      }      
+    },
+    {
       id: 'createdBy',
       accessor: 'createdBy',
       Header: 'Created By',
@@ -652,7 +669,7 @@ export default function Attachment() {
           permissions={permissions?.attachment}
           module="Attachment"
           api={`/attachment`}
-          afterImportCompleted={() => {}}
+          afterImportCompleted={() => { }}
           total={rowCount}
           onlyExport={true}
           additionalParams={`&relatedTo=${JSON.stringify(filter)}${getQueryString(true)}`}
@@ -792,10 +809,11 @@ export default function Attachment() {
               state={state}
               childrenProperty="subRows"
               expander={true}
-              setWholeRowsCellColor={() => {}}
+              setWholeRowsCellColor={() => { }}
               renderedFrom={'attachment_render'}
               isClientSideGrid={false}
               fetchChildAttachment={fetchChildAttachment}
+              refreshGrid={fetchAttachments}
             />
           ) : (
             <Box p={2} height={500}>
@@ -877,8 +895,8 @@ export default function Attachment() {
                   referenceId: open.parentResource
                     ? open.parentResource?.referenceId
                     : resource && selectedResourceData
-                    ? selectedResourceData.optionValue
-                    : user?.user?._id,
+                      ? selectedResourceData.optionValue
+                      : user?.user?._id,
                   access: true
                 }
               ]}

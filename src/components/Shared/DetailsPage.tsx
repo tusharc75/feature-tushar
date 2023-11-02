@@ -13,7 +13,7 @@ import {
   GridSize
 } from '@material-ui/core';
 import { Link } from 'react-router-dom';
-import { GetApp, InfoOutlined, InsertDriveFile } from '@material-ui/icons';
+import { GetApp, Image, InfoOutlined, InsertDriveFile } from '@material-ui/icons';
 import { kebabCase } from 'lodash';
 import { FcApproval } from 'react-icons/fc';
 import { getObjKeysWithValues } from '../../constants/helpers';
@@ -412,7 +412,9 @@ const Details = (props: DetailProps) => {
                         <Grid item xs={dynamicSize(6, field.fieldData.type)} sm={dynamicSize(7, field.fieldData.type)}>
                           {field.fieldData.type === 'imageUpload' ? (
                             <Box marginTop={1} marginBottom={4}>
-                              <Avatar src={initialVals[field.fieldData.fieldName]} style={{ width: 56, height: 56 }} />
+                              <Avatar src={initialVals[field.fieldData.fieldName]} style={{ width: 56, height: 56 }}>
+                                <Image style={{ fontSize: 30 }} />
+                              </Avatar>
                             </Box>
                           ) : (
                             <Box display="flex" alignItems="center" className="formdata-text-v1">
