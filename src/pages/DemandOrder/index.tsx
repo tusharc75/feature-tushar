@@ -32,7 +32,6 @@ import DeleteIcon from '@material-ui/icons/Delete';
 let searchTimeout;
 
 const DemandOrder = () => {
-
   const renderedFrom = camelCase(routes?.demandOrder.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const toastConfig = useContext(CustomToastContext);
@@ -53,7 +52,9 @@ const DemandOrder = () => {
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { getColumnData } = useColumns();
 
-  const { state: { user, permissions, selectedEntity } }: any = useData();
+  const {
+    state: { user, permissions, selectedEntity }
+  }: any = useData();
 
   const [selectedType, setSelectedType] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -207,7 +208,7 @@ const DemandOrder = () => {
   };
 
   const handleDelete = () => {
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     let ids = [];
     if (deleteRecord) {
       ids.push(deleteRecord._id);
@@ -217,16 +218,16 @@ const DemandOrder = () => {
     axiosInstance()
       .put(`${demandOrder.api}/remove`, { ids: ids })
       .then(() => {
-        removeLocalStorage(localStorageSelectedRecords)
+        removeLocalStorage(localStorageSelectedRecords);
         fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
         setAnchorEl(null);
-        setIsSubmitting(false)
+        setIsSubmitting(false);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        setIsSubmitting(false)
+        setIsSubmitting(false);
       });
   };
 
@@ -253,7 +254,7 @@ const DemandOrder = () => {
           permissions={permissions?.demandOrder}
           module="demandOrder"
           api={demandOrder.api}
-          afterImportCompleted={() => { }}
+          afterImportCompleted={() => {}}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
@@ -348,7 +349,7 @@ const DemandOrder = () => {
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => { }}
+            onSelect={() => {}}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}

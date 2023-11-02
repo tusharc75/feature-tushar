@@ -45,6 +45,7 @@ export const getStaticFields = () => {
       Header: 'Created By',
       show: true,
       minWidth: 185,
+      canFilter: false,
       Cell: ({ row }) =>
         row?.original?.createdBy ? (
           <h5 className="createBy" title={`${row?.original?.createdBy} • ${moment(row?.original?.createdByDate.slice(0, 10)).format(dateFormat)}`}>
@@ -60,6 +61,7 @@ export const getStaticFields = () => {
       Header: 'Updated By',
       minWidth: 185,
       show: true,
+      canFilter: false,
       Cell: ({ row }) =>
         row?.original?.updatedBy ? (
           <h5 className="updateBy" title={`${row?.original?.updatedBye} • ${moment(row?.original?.updatedByDate.slice(0, 10)).format(dateFormat)}`}>
@@ -108,19 +110,19 @@ export const getSortedColumns = (columns = []) => {
 };
 export const staticColumns = ['createdBy', 'updatedBy'];
 
-const getColumnWidth = (text) => {
-  const textLength = text.length;
-  const characterWidth = 8;
-  const searchIconWidth = 30;
-  const searchIconMargin = 10;
-  const tempWidth = textLength * characterWidth + searchIconWidth + searchIconMargin;
-  const width = Math.max(tempWidth, 150);
-  const minWidth = 80;
-  return {
-    minWidth,
-    width
-  };
-};
+// const getColumnWidth = (text) => {
+//   const textLength = text.length;
+//   const characterWidth = 8;
+//   const searchIconWidth = 30;
+//   const searchIconMargin = 10;
+//   const tempWidth = textLength * characterWidth + searchIconWidth + searchIconMargin;
+//   const width = Math.max(tempWidth, 150);
+//   const minWidth = 80;
+//   return {
+//     minWidth,
+//     width
+//   };
+// };
 export default function useColumns() {
   const {
     state: { permissions }
@@ -145,7 +147,7 @@ export default function useColumns() {
       let commonFieldData = {
         accessor: field?.fieldName,
         Header: fieldHeaderName,
-        ...getColumnWidth(fieldHeaderName),
+        // ...getColumnWidth(fieldHeaderName),
         show: gridMetaData[title]?.hide && gridMetaData[title]?.hide.indexOf(field?.fieldName) >= 0 ? false : true,
         disabled: gridMetaData[title]?.disabled && gridMetaData[title]?.disabled.indexOf(field?.fieldName) >= 0 ? true : false,
         primaryField: field?.primaryField ?? false
