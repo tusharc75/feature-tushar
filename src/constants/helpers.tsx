@@ -2670,7 +2670,8 @@ export const MATERIAL_TYPE = {
   product: 'product',
   service: 'service',
   package: 'package',
-  serializedAsset: 'serializedAsset'
+  serializedAsset: 'serializedAsset',
+  manualEntry: 'manualEntry'
 };
 
 export const MATERIAL_SUB_TYPE = {
