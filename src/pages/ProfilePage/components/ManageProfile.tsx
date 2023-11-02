@@ -37,6 +37,7 @@ import AddProxyDialog from './AddProxyDialog';
 import DeleteIcon from '@material-ui/icons/Delete';
 import routes from '../../../components/Helpers/Routes';
 import { FaDiceOne, FaUserAltSlash, FaUserCheck } from 'react-icons/fa';
+import { Image } from '@material-ui/icons';
 
 const useStyles = makeStyles((theme) => ({
   profileEdit: {
@@ -230,7 +231,9 @@ export default function ManageProfile(props) {
               <>
                 <Box display="flex" flexDirection="row">
                   <Box position="relative">
-                    <Avatar src={userData?.avatar} style={{ width: 100, height: 100 }} alt={userData?.firstName ?? ''} />
+                    <Avatar src={userData?.avatar} style={{ width: 100, height: 100 }} alt={userData?.firstName ?? ''}>
+                      <Image style={{ fontSize: 60 }} />
+                    </Avatar>
                     <Box title={userData?.avatar ?? 'No picture selected'} display="flex" justifyContent="center" alignItems="center">
                       {isUploading && <CircularProgress size={22} />}
                     </Box>
