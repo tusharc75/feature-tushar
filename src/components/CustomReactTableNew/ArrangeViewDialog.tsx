@@ -21,6 +21,7 @@ import { DragHandle } from '@material-ui/icons';
 import { XYCoord } from 'dnd-core';
 import { DndProvider, useDrag, useDrop, DropTargetMonitor } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+
 import update from 'immutability-helper';
 
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
@@ -224,19 +225,21 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
         <List
           disablePadding
           subheader={
-            <Box display="flex" alignItems="center">
-              <ListSubheader style={{ width: '50%' }} disableGutters disableSticky>
+            <Box className="flex items-center flex-wrap sm:gap-2">
+              <ListSubheader disableGutters disableSticky>
                 Toggle and Drag & Drop to arrange
               </ListSubheader>
-              <TextField
-                type="search"
-                value={searchVal}
-                onChange={(e) => setSearchVal(e.target.value)}
-                size="small"
-                style={{ width: '50%', marginLeft: '1rem' }}
-                variant="outlined"
-                placeholder="Search"
-              />
+              <div className="sm:ml-auto sm:w-1/2 w-full">
+                <TextField
+                  type="search"
+                  fullWidth
+                  value={searchVal}
+                  onChange={(e) => setSearchVal(e.target.value)}
+                  size="small"
+                  variant="outlined"
+                  placeholder="Search"
+                />
+              </div>
             </Box>
           }
           className={classes.root}
