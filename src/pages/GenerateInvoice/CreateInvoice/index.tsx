@@ -84,7 +84,8 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
     data?.forEach((e) => {
       e.isColumnEditable = false;
     });
-    const newColumns = generateCustomTableColumns(data, resourceData[0]?.currency ? resourceData[0]?.currency : 'USD', renderedFrom);
+
+    var newColumns = generateCustomTableColumns(data, resourceData[0]?.currency ? resourceData[0]?.currency : 'USD', renderedFrom);
     setAllFields(JSON.parse(JSON.stringify(data)));
     let column: any = [
       {
@@ -186,6 +187,10 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
         }
       }
     ];
+
+    if (resource === sidebarResource.sublease) {
+      newColumns = newColumns?.filter((d) => !d?.accessor?.includes('estimate'))
+    }
     column = [...column, ...newColumns];
     setColumns(column);
   };
