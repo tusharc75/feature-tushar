@@ -45,11 +45,12 @@ import { PreWorkIcon, PostWorkIcon } from 'src/assets/svg/svgIcons';
 import { isArray, reverse } from 'lodash';
 import AttachmentDialog from './AttachmentDialog';
 import ManagePurchaseOrder from 'src/pages/PurchaseOrder/ManagePurchaseOrder';
-import { AiFillCheckCircle, AiFillExclamationCircle } from 'react-icons/ai';
 import { PassIcon, FailIcon } from 'src/assets/svg/svgIcons';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { Add, ExpandMore } from '@material-ui/icons';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
+import AssignWorkStationDialog from './AssignWorkStationDialog';
+import WorkOutlineIcon from '@material-ui/icons/WorkOutline';
 
 const getTotalTime = (stepTimes: any) => {
   let totalTimes = 0;
@@ -102,7 +103,6 @@ const RenderTotalTime = ({ stepTimes }: any) => {
 };
 
 const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWorkOrderData }) => {
-
   const toastConfig = useContext(CustomToastContext);
   const {
     state: {
@@ -115,6 +115,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
   const [stepSubmitedData, setStepSubmitedData] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [userAssignDialog, setUserAssignDialog] = useState(false);
+  const [workStationAssignDialog, setWorkStationAssignDialog] = useState(false);
   const [serviceDialog, setServiceDialog] = useState({ open: false, type: '', uniqueId: null, preWork: null });
   const [arrangeView, setArrangeView] = useState(false);
   const [consumablesDialog, setConsumablesDialog] = useState({ open: false, uniqueId: null, service: null, stepId: null, serviceName: null });
@@ -290,7 +291,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
   };
 
   const handleAddService = (ids, uniqueId) => {
-    setSubmitting(true)
+    setSubmitting(true);
     const data: any = {};
     data.serviceIds = ids;
     if (uniqueId) {
@@ -306,11 +307,11 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           fetchServiceData();
         }
         fetchWorkOrderData();
-        setSubmitting(false)
+        setSubmitting(false);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
-        setSubmitting(false)
+        setSubmitting(false);
       });
   };
 
@@ -684,6 +685,13 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                           <Box ml={1}>
                                             <HtmlTooltip title={data?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
                                               <PeopleIcon style={{ color: 'var(--primary)', maxWidth: '22px' }} />
+                                            </HtmlTooltip>
+                                          </Box>
+                                        )}
+                                        {data?.type === 'service' && data?.workStations?.length > 0 && (
+                                          <Box ml={1}>
+                                            <HtmlTooltip title={`Work Stations-${data?.workStations?.map((e) => e?.optionLabel)?.toString()}`}>
+                                              <WorkOutlineIcon style={{ color: 'var(--primary)', maxWidth: '22px' }} />
                                             </HtmlTooltip>
                                           </Box>
                                         )}
@@ -1066,6 +1074,17 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                   Assign Technicians
                 </MenuItem>
               )}
+              {allowedToEdit && permissions?.workStations?.isRead && (
+                <MenuItem
+                  disabled={!allowedToEdit}
+                  onClick={() => {
+                    setWorkStationAssignDialog(true);
+                    setAnchorEl(null);
+                  }}
+                >
+                  Assign Work Stations
+                </MenuItem>
+              )}
               <MenuItem
                 disabled={!allowedToEdit}
                 onClick={() => {
@@ -1194,12 +1213,33 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           }}
         />
       )}
+      {workStationAssignDialog && (
+        <AssignWorkStationDialog
+          warehouse={workOrderData?.warehouse}
+          workOrderData={[
+            {
+              uniqueId: selectedService?.uniqueId,
+              workOrderId: workOrderId
+            }
+          ]}
+          workStations={selectedService?.workStations}
+          handleClose={() => {
+            setWorkStationAssignDialog(false);
+          }}
+          handleSucess={() => {
+            setWorkStationAssignDialog(false);
+            fetchServiceData();
+          }}
+        />
+      )}
       {serviceDialog.open && serviceDialog.type === 'service' && (
         <AssignServiceDialog
           handleClose={() => setServiceDialog({ open: false, type: '', uniqueId: null, preWork: null })}
           onSuccess={(data) => {
             handleAddService(
-              data?.map((e) => { return { _id: e._id, qty: parseInt(e?.qty) || 1 } }),
+              data?.map((e) => {
+                return { _id: e._id, qty: parseInt(e?.qty) || 1 };
+              }),
               serviceDialog.uniqueId
             );
           }}
