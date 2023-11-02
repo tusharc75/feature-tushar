@@ -8,6 +8,7 @@ import { dateFormat, sidebarResourceObjectFromValues } from 'src/constants/helpe
 import { leadDetailPage } from 'src/routes/Lead';
 import routes from '../Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
+import { Image } from '@material-ui/icons';
 
 const permissionForLinks = sidebarResourceObjectFromValues();
 
@@ -190,7 +191,7 @@ export default function useColumns() {
                       className="link text-truncate"
                       title={row?.original?.[field?.fieldName]}
                       to={`${detailScreenRoute}/${row?.original?._id}`}
-                      target = {masterPage ? "_self" : "_blank"}
+                      target={masterPage ? '_self' : '_blank'}
                       rel="noopener noreferrer"
                     >
                       {row?.original?.[field?.fieldName]}
@@ -278,7 +279,11 @@ export default function useColumns() {
             ...commonFieldData,
             canFilter: false,
             sortable: false,
-            Cell: ({ row }) => <Avatar className="grid-avatar" src={row?.original?.[field?.fieldName]} />,
+            Cell: ({ row }) => (
+              <Avatar className="grid-avatar" src={row?.original?.[field?.fieldName]}>
+                <Image style={{ fontSize: 18 }} />
+              </Avatar>
+            ),
             width: 100
           }
         };
@@ -339,7 +344,7 @@ export default function useColumns() {
                   <NoDataCell />
                 )}
               </>
-            )            
+            )
           }
         };
       }
