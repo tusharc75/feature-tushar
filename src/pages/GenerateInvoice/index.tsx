@@ -227,18 +227,20 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
               <NoteAddIcon fontSize="small" color="primary" />
             </IconButton>
           </HtmlTooltip>
-          <Box ml={1}>
-            <HtmlTooltip title="View Invoices">
-              <IconButton
-                size="small"
-                onClick={() => {
-                  setViewInvoiceDialog({ open: true, data: params.data });
-                }}
-              >
-                <VisibilityIcon fontSize="small" color="primary" />
-              </IconButton>
-            </HtmlTooltip>
-          </Box>
+          {params.data?.invoice_count !== 0 && (
+            <Box ml={1}>
+              <HtmlTooltip title="View Invoices">
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    setViewInvoiceDialog({ open: true, data: params.data });
+                  }}
+                >
+                  <VisibilityIcon fontSize="small" color="primary" />
+                </IconButton>
+              </HtmlTooltip>
+            </Box>
+          )}
         </div>
       ) : params.data?.status === INVOICE_STATUS.readyToInvoice ? (
         <HtmlTooltip title="Create Invoice">
