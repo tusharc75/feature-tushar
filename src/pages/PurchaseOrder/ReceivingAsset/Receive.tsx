@@ -7,6 +7,7 @@ import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHea
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import {
+  MATERIAL_TYPE,
   convertDateInDateTime,
   convertDateTimToDate,
   dateFormatForInputControl,
@@ -22,9 +23,10 @@ import DateUtils from '@date-io/date-fns';
 import moment from 'moment';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import CustomAssetDialog from 'src/pages/ConvertInventory/InventoryToAsset/CustomAssetDialog';
-import { isEqual } from 'lodash';
+import { isEqual, startCase } from 'lodash';
 
-const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrderData }) => {
+const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderData }) => {
+
   const [fullScreen, setFullScreen] = useState(true);
 
   const {
@@ -39,7 +41,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
   const [lockDate, setLockDate] = useState(null);
   const toastConfig = useContext(CustomToastContext);
 
-  const [assetNumberDialog, setAssetNumberDialog] = useState({ open: false, products: [], receiveDate: null });
+  const [assetNumberDialog, setAssetNumberDialog] = useState({ open: false, material: [], receiveDate: null });
 
   useEffect(() => {
     axiosInstance()
@@ -66,11 +68,12 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
 
   const handleSubmit = (values) => {
     const data: any = [];
-    values?.seriaizedAsset?.forEach((element) => {
+    values?.material?.forEach((element) => {
       if (parseInt(element?.inventoryQuantity) || parseInt(element?.assetQuantity)) {
         data.push({
           _id: element._id,
-          product: element.productId,
+          type: element.type,
+          materialId: element.materialId,
           serializedProduct: element.serializedProduct,
           warehouse: element?.warehouse?.optionValue,
           storageLocation: user?.user?.brandPolicy?.storageLocation ? element?.storageLocation?.optionValue : null,
@@ -84,7 +87,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
     });
     if (data?.length) {
       if (data?.find((e) => e?.assetQuantity)) {
-        setAssetNumberDialog({ open: true, products: data, receiveDate: values?.receiveDate })
+        setAssetNumberDialog({ open: true, material: data, receiveDate: values?.receiveDate })
       }
       else {
         handleReceive(data, values?.receiveDate)
@@ -94,10 +97,10 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
     }
   };
 
-  const handleReceive = (products, receiveDate) => {
+  const handleReceive = (material, receiveDate) => {
     setIsSubmitting(true);
     axiosInstance()
-      .post(`${purchaseOrder.api}/receive-inventory/${purchaseOrderID}`, { products: products, receiveDate: receiveDate })
+      .post(`${purchaseOrder.api}/receive-inventory/${purchaseOrderID}`, { material: material, receiveDate: receiveDate })
       .then(({ data }) => {
         setIsSubmitting(false);
         toastConfig.setToastConfig({
@@ -105,7 +108,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
           type: 'success',
           message: data.message
         });
-        setAssetNumberDialog({ open: false, products: [], receiveDate: null })
+        setAssetNumberDialog({ open: false, material: [], receiveDate: null })
         onSuccess();
       })
       .catch((error) => {
@@ -135,7 +138,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
     let errors: any = {};
     if (values.length > 0) {
       values.map((d) => {
-        let tempProduct = productList.find((u) => u._id === d._id);
+        let tempProduct = material.find((u) => u._id === d._id);
         let qty = tempProduct.qty - (tempProduct.actualReceived || 0);
         if (tempProduct && d.inventoryQuantity > qty) {
           errors.inventoryQuantity = 'should be greater';
@@ -214,7 +217,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
         const serialNumber = tableContent.map((item: any[]) => item[1]);
         var strSerialNumber = serialNumber?.map(String);
         arrayHelpers.replace(index, {
-          ...values.seriaizedAsset[index],
+          ...values.material[index],
           serialNumber: strSerialNumber
         });
       }
@@ -249,10 +252,11 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
           <Formik
             initialValues={{
               receiveDate: new Date(),
-              seriaizedAsset: productList.map((d) => ({
+              material: material.map((d) => ({
                 _id: d._id,
-                product: d.productName,
-                productId: d.productId,
+                type: d.type,
+                materialId: d.materialId,
+                detail: d.detail,
                 warehouse: defaultWareHouse || '',
                 storageLocation: purchaseOrderData?.storageLocation || null,
                 inventoryQuantity: !d.serializedProduct ? d.qty - (d.actualReceived || 0) - (d.rejectQuantity || 0) : 0,
@@ -270,14 +274,14 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
             {({ values, setFieldValue, errors }) => (
               <>
                 <CustomDialogContent>
-                  {values.seriaizedAsset && values.seriaizedAsset.length && warehouseOptions ? (
+                  {values.material && values.material.length && warehouseOptions ? (
                     <Box p={2}>
                       <Form>
                         <FieldArray
-                          name="seriaizedAsset"
+                          name="material"
                           render={(arrayHelpers) => (
                             <div className="grid gap-[15px] sm:gap-[18px]">
-                              {values.seriaizedAsset.map((data, index) => (
+                              {values.material.map((data, index) => (
                                 <div
                                   style={{ border: '1.5px solid var(--common-border-color)' }}
                                   className="rounded-[6px] pt-[17px] px-[23px] pb-[21px] grid sm:grid-cols-[24px,1fr] md:gap-[29px] gap-[15px] shadow-[0px_4px_26.8799991607666px_0px_rgba(0,0,0,0.06)]"
@@ -292,6 +296,10 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                       className="flex border-b  border-b-[var(--common-border-color)] gap-[20px] md:gap-[61px] pb-[9px]"
                                     >
                                       <span>
+                                        <span className="text-[var(--primary-text)] font-semibold">Type: </span>
+                                        {startCase(data?.type)}
+                                      </span>
+                                      <span>
                                         <span className="text-[var(--primary-text)] font-semibold">PO Quantity: </span>
                                         {data?.row?.qty}
                                       </span>
@@ -304,22 +312,14 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                         {data?.row?.rejectQuantity || 0}
                                       </span>
                                     </div>
-
-                                    {/* FIELDS */}
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[20px] md:gap-[25px] mt-[28px]">
-                                      <Autocomplete
-                                        size="small"
-                                        value={data.product}
-                                        options={productList}
+                                      <TextField
+                                        variant="outlined"
+                                        name={`${data?.type}_${data?._id}`}
+                                        label={startCase(data?.type)}
+                                        value={data?.detail}
+                                        size='small'
                                         disabled
-                                        getOptionLabel={(option: any) => (option ? option : '')}
-                                        onChange={(_, newValue) => {
-                                          arrayHelpers.replace(index, {
-                                            ...values.seriaizedAsset[index],
-                                            ['product']: newValue
-                                          });
-                                        }}
-                                        renderInput={(params) => <TextField {...params} variant="outlined" name="product" label="Product" />}
                                       />
                                       <Autocomplete
                                         size="small"
@@ -329,7 +329,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                         disabled
                                         onChange={(_, newValue) => {
                                           arrayHelpers.replace(index, {
-                                            ...values.seriaizedAsset[index],
+                                            ...values.material[index],
                                             ['warehouse']: newValue
                                           });
                                         }}
@@ -353,7 +353,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                           getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
                                           onChange={(_, newValue) => {
                                             arrayHelpers.replace(index, {
-                                              ...values.seriaizedAsset[index],
+                                              ...values.material[index],
                                               ['storageLocation']: newValue
                                             });
                                           }}
@@ -385,7 +385,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                           onChange={(e) => {
                                             const value = e.target.value.replace(/[^0-9]/g, '');
                                             arrayHelpers.replace(index, {
-                                              ...values.seriaizedAsset[index],
+                                              ...values.material[index],
                                               ['inventoryQuantity']: value
                                             });
                                           }}
@@ -406,7 +406,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                           onChange={(e) => {
                                             const value = e.target.value.replace(/[^0-9]/g, '');
                                             arrayHelpers.replace(index, {
-                                              ...values.seriaizedAsset[index],
+                                              ...values.material[index],
                                               ['assetQuantity']: value
                                             });
                                           }}
@@ -414,22 +414,24 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                           helperText={validate([data]).assetQuantity ? 'Receiving quantity is more than actual quantity' : ''}
                                         />
                                       )}
-                                      <TextField
-                                        fullWidth
-                                        label="Supplier Part Number"
-                                        variant="outlined"
-                                        type="text"
-                                        size="small"
-                                        name="supplierPartNumber"
-                                        placeholder="Supplier Part Number"
-                                        value={data.supplierPartNumber}
-                                        onChange={(e) => {
-                                          arrayHelpers.replace(index, {
-                                            ...values.seriaizedAsset[index],
-                                            ['supplierPartNumber']: e.target.value
-                                          });
-                                        }}
-                                      />
+                                      {data?.type === MATERIAL_TYPE.product &&
+                                        <TextField
+                                          fullWidth
+                                          label="Supplier Part Number"
+                                          variant="outlined"
+                                          type="text"
+                                          size="small"
+                                          name="supplierPartNumber"
+                                          placeholder="Supplier Part Number"
+                                          value={data.supplierPartNumber}
+                                          onChange={(e) => {
+                                            arrayHelpers.replace(index, {
+                                              ...values.material[index],
+                                              ['supplierPartNumber']: e.target.value
+                                            });
+                                          }}
+                                        />
+                                      }
                                       <TextField
                                         fullWidth
                                         label="Comment"
@@ -441,7 +443,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                         value={data.comment}
                                         onChange={(e) => {
                                           arrayHelpers.replace(index, {
-                                            ...values.seriaizedAsset[index],
+                                            ...values.material[index],
                                             ['comment']: e.target.value
                                           });
                                         }}
@@ -458,7 +460,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                             value={data.serialNumber}
                                             onChange={(_, val) => {
                                               arrayHelpers.replace(index, {
-                                                ...values.seriaizedAsset[index],
+                                                ...values.material[index],
                                                 ['serialNumber']: val
                                               });
                                             }}
@@ -550,11 +552,11 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                   <Button
                     onClick={() => {
                       if (
-                        !validate(values.seriaizedAsset).inventoryQuantity &&
-                        !validate(values.seriaizedAsset).warehouse &&
-                        !validate(values.seriaizedAsset).storageLocation &&
-                        !validate(values.seriaizedAsset).assetQuantity &&
-                        !validate(values.seriaizedAsset).serialNumber &&
+                        !validate(values.material).inventoryQuantity &&
+                        !validate(values.material).warehouse &&
+                        !validate(values.material).storageLocation &&
+                        !validate(values.material).assetQuantity &&
+                        !validate(values.material).serialNumber &&
                         !validateDate(values)?.receiveDate
                       ) {
                         handleSubmit(values);
@@ -575,14 +577,15 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
       </Dialog>
       {assetNumberDialog.open && (
         <CustomAssetDialog
-          handleClose={() => setAssetNumberDialog({ open: false, products: [], receiveDate: null })}
-          products={assetNumberDialog.products?.filter((e) => e.serializedProduct)?.map((e) => { return { id: e._id, productName: productList.find((u) => u._id === e._id)?.productName, qty: e.assetQuantity } })}
+          handleClose={() => setAssetNumberDialog({ open: false, material: [], receiveDate: null })}
+          products={assetNumberDialog.material?.filter((e) => e.serializedProduct
+            && e.type === MATERIAL_TYPE.product)?.map((e) => { return { id: e._id, productName: material.find((u) => u._id === e._id)?.productName, qty: e.assetQuantity } })}
           handleSuccess={(rows) => {
-            const products = assetNumberDialog.products;
-            products?.forEach((e) => {
+            const material = assetNumberDialog.material;
+            material?.forEach((e) => {
               e.assetNumbers = rows?.find((ele) => isEqual(ele._id, e.id))?.assetNumbers || []
             })
-            handleReceive(products, assetNumberDialog.receiveDate)
+            handleReceive(material, assetNumberDialog.receiveDate)
           }}
           loading={isSubmitting}
         />
