@@ -308,8 +308,13 @@ const WorkOrderDetails = () => {
               <BiFoodMenu className="mr-1" fontSize="inherit" /> BOM
             </CustomTab>
           )}
-          {!(isMobile && !isTablet) && (
+          {workOrderData?.type === WORK_ORDER_TYPE.productionOrder && (
             <CustomTab index={4} value={4} className={'tabLayout'} {...a11yProps(4)}>
+              <BiFoodMenu className="mr-1" fontSize="inherit" /> Diagram
+            </CustomTab>
+          )}
+          {!(isMobile && !isTablet) && (
+            <CustomTab index={5} value={5} className={'tabLayout'} {...a11yProps(5)}>
               <RiFlowChart className="mr-1" fontSize="inherit" /> Views
             </CustomTab>
           )}
