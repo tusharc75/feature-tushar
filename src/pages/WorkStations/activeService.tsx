@@ -6,8 +6,6 @@ import { useData } from 'src/StateProvider/Provider';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
-import SearchBox from 'src/components/Helpers/SearchBox';
-import styles from '../Leads/Header.module.scss';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 import { camelCase } from 'lodash';
 import { Link } from 'react-router-dom';
@@ -18,10 +16,8 @@ const ActiveService = (workStationId) => {
     const toastConfig = useContext(CustomToastContext);
     const [loading, setLoading] = useState(false);
     const { state, dispatch } = useTableReducer();
-    const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
     const [columns, setColumns] = useState(null);
     const renderedFrom = camelCase(routes?.workStations.title);
-    const localStorageSelectedRecords = `${renderedFrom}_selected`;
     const {
         state: { user, permissions }
     }: any = useData();
@@ -33,39 +29,10 @@ const ActiveService = (workStationId) => {
         }
     }, []);
 
-    const getQueryString = (isExport = false) => {
-        let deepFilter = `?page=${page}&limit=${limit}`;
-        if (isExport) {
-            deepFilter = `?`;
-        }
-        const { filterByIds, deepFilters } = gridFilterParser(filters);
-        if (filterByIds?.length) {
-            deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
-        }
-        if (deepFilters?.length) {
-            deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
-        }
-        if (filterByIds?.length || deepFilters?.length) {
-            deepFilter = `${deepFilter}&filterType=and`;
-        }
-        if (sorting.length > 0) {
-            deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
-        }
-        if (search) {
-            deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
-        }
-        if (showFilteredRecordsOnly) {
-            const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-            deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
-        }
-        return deepFilter;
-    };
-
     const fetchActiveServicesData = async () => {
         dispatch({ type: 'loading', loading: true });
-        const queryString = getQueryString();
         axiosInstance()
-            .get(`${routes.workStationsActiveService.path}/${workStationId.workStationId}${queryString}`)
+            .get(`${routes.workStations.path}/active-service/${workStationId.workStationId}`)
             .then(({ data: { data } }) => {
                 let count = data?.count
                 let rows = data?.data?.map((u) => {
@@ -142,10 +109,6 @@ const ActiveService = (workStationId) => {
         setColumns(column);
     };
 
-    const handleSearch = (e) => {
-        dispatch({ type: 'search', search: e.target.value });
-    };
-
     return (
 
         <Box>
@@ -155,11 +118,6 @@ const ActiveService = (workStationId) => {
                 </Grid>
             ) : (
                 <CustomContainer>
-                    <div className="header-panel">
-                        <div className="flex flex-wrap gap-[8px] justify-end">
-                            <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
-                        </div>
-                    </div>
                     {columns ? (
                         <CustomReactTable
                             height={'calc(100vh - 200px)'}
