@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { Box, Button, Dialog, Grid, IconButton, Typography } from '@material-ui/core';
+import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Dialog, Grid, IconButton, Typography } from '@material-ui/core';
 import { Add } from '@material-ui/icons';
 import axiosInstance from 'src/axios/axiosInstance';
 import { ATTACHMENT_TYPE, CustomDialogTransition } from 'src/constants/helpers';
@@ -12,11 +12,14 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import ViewImage from './ViewImage';
 import { docIcon } from 'src/assets/file_icons';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 
 const Diagram = ({ resource, referenceId }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [rowData, setRowData] = useState(null);
+  const [expended, setExpended] = useState({});
   const [attachemntDialog, setAttachemntDialog] = useState({ open: false, id: null });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -28,39 +31,20 @@ const Diagram = ({ resource, referenceId }) => {
   }, [resource, referenceId]);
 
   const fetchData = async () => {
-    const { data: { data } } = await axiosInstance().get(`/attachment/resource-attachment-type?resource=${resource}&referenceId=${referenceId}&attachmentType=${ATTACHMENT_TYPE.diagram}`
-    );
-    const files: any = [];
-    data?.forEach((d) => {
-      if (d?.file?.length > 1) {
-        const child: any = [];
-        d?.file?.forEach((file, i) => {
-          child.push({
-            _id: `${d?._id + i}`,
-            attachment: file?.name,
-            date: file?.date,
-            url: file?.url,
-            parent: d?._id
-          });
+    axiosInstance()
+      .get(`/attachment/resource-attachment-type?resource=${resource}&referenceId=${referenceId}&attachmentType=${ATTACHMENT_TYPE.diagram}`)
+      .then(({ data: { data } }) => {
+        const expend: any = {};
+        data?.forEach((file) => {
+          expend[file?._id] = true;
         });
-        files.push({
-          _id: d?._id,
-          file: d?.name,
-          child: child
-        });
-      } else {
-        files.push({
-          _id: d?._id,
-          file: d?.name,
-          attachment: d?.file[0]?.name,
-          date: d?.file[0]?.date,
-          url: d?.file[0]?.url
-        });
-      }
-    });
-    setRowData(files);
-    setSelectedFile(files[0]);
-    setSelectedAttachment(files[0]?.child ? files[0].child[0] : null);
+        setExpended(expend);
+        setRowData(data);
+        setSelectedAttachment(data[0]?.file[0]);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
   };
 
   const handleDeleteFile = async (ids) => {
@@ -81,98 +65,13 @@ const Diagram = ({ resource, referenceId }) => {
     }
   };
 
-  const FileShow = ({ data, index, child = false }) => {
-    return (
-      <Box
-        p={2}
-        onClick={() => {
-          if (child) {
-            setSelectedAttachment(data);
-            setSelectedFile(rowData.find((r) => r?._id === data?.parent));
-          } else {
-            setSelectedAttachment(data?.child ? data?.child[0] : null);
-            setSelectedFile(data);
-          }
-        }}
-        style={{
-          border:
-            selectedFile?._id === data?._id || selectedAttachment?._id === data?._id
-              ? '1px solid var(--dark-active-border-color,#298B88)'
-              : '1px solid var(--dark-mode-border-color, rgb(224, 224, 224))',
-          // borderTopWidth: index === 1 ? 1 : 0,
-          cursor: 'pointer'
-        }}
-      >
-        <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Box display="flex" alignItems="center">
-            <Box
-              style={{
-                backgroundColor: 'var(--dark-primary, var(--primary))',
-                color: 'white',
-                width: '20px',
-                height: '20px',
-                borderRadius: '50%',
-                lineHeight: '20px',
-                textAlign: 'center',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '10px',
-                flexShrink: 0,
-                top: '4px',
-                left: 0
-              }}
-            >
-              <span>{index}</span>
-            </Box>
-            <Box ml={'10px'}>
-              <Typography style={{ fontWeight: 600 }}>{child ? data?.attachment : data?.file}</Typography>
-            </Box>
-          </Box>
-          {!child && (
-            <Box display="flex">
-              <div style={{ flexBasis: 'max-content' }}>
-                <HtmlTooltip title="Edit" placement="top" arrow>
-                  <IconButton
-                    size="small"
-                    color="inherit"
-                    aria-label="edit"
-                    onClick={() => {
-                      setAttachemntDialog({ open: true, id: data?._id });
-                    }}
-                  >
-                    <EditIcon style={{ fontSize: '18px' }} />
-                  </IconButton>
-                </HtmlTooltip>
-              </div>
-              <div style={{ flexBasis: 'max-content' }}>
-                <HtmlTooltip title="Delete" placement="top" arrow>
-                  <IconButton
-                    size="small"
-                    color="inherit"
-                    style={{ color: 'red' }}
-                    aria-label="delete"
-                    onClick={() => {
-                      setShowConfirmBox(true);
-                    }}
-                  >
-                    <DeleteOutlineIcon style={{ fontSize: '18px' }} />
-                  </IconButton>
-                </HtmlTooltip>
-              </div>
-            </Box>
-          )}
-        </Box>
-      </Box>
-    );
-  };
-
   const checkImageType = (memeType) => {
     if (['jpg', 'png'].includes(memeType)) {
       return true;
     }
     return false;
   };
+
   const checkpdfType = (memeType) => {
     if (['pdf'].includes(memeType)) {
       return true;
@@ -198,7 +97,7 @@ const Diagram = ({ resource, referenceId }) => {
     }, [data]);
     return (
       <Box height={'calc(100vh - 150px)'}>
-        <iframe title={data?.attachment} src={url} width="100%" height="100%" frameBorder="0" scrolling="auto"></iframe>
+        <iframe title={data?.name} src={url} width="100%" height="100%" frameBorder="0" scrolling="auto"></iframe>
       </Box>
     );
   };
@@ -253,19 +152,96 @@ const Diagram = ({ resource, referenceId }) => {
                 Add Attachment
               </Button>
             </Box>
-            <Box>
-              {rowData && rowData?.map((data, index) => {
-                return data?.child ? (
-                  <>
-                    <FileShow data={data} index={index + 1} />
-                    {data?.child?.map((c, i) => {
-                      return <FileShow data={c} index={`${index + 1}.${i + 1}`} child={true} />;
-                    })}
-                  </>
-                ) : (
-                  <FileShow data={data} index={index + 1} />
-                );
-              })}
+            <Box pt={2} pb={2}>
+              <Box
+                style={{
+                  overflow: 'auto',
+                  height: 'calc(100vh - 250px)'
+                }}
+              >
+                {rowData &&
+                  rowData?.map((file, index) => {
+                    return (
+                      <Accordion
+                        expanded={expended[file?._id]}
+                        className="omsAccordian"
+                        onChange={() => {
+                          setExpended((prev) => ({
+                            ...prev,
+                            [file?._id]: expended[file?._id] ? false : true
+                          }));
+                        }}
+                      >
+                        <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
+                          <Box width="100%" display="flex" justifyContent="space-between" alignItems="center">
+                            <Box display="flex" alignItems="center">
+                              <IconButton size="small">{expended[file?._id] ? <ExpandMoreIcon /> : <KeyboardArrowRight />}</IconButton>
+                              <Box ml={2}>
+                                <Typography style={{ fontWeight: 600 }}>{file?.name}</Typography>
+                              </Box>
+                            </Box>
+                            <Box display="flex">
+                              <div style={{ flexBasis: 'max-content' }}>
+                                <HtmlTooltip title="Edit" placement="top" arrow>
+                                  <IconButton
+                                    size="small"
+                                    color="inherit"
+                                    aria-label="edit"
+                                    onClick={() => {
+                                      setAttachemntDialog({ open: true, id: file?._id });
+                                    }}
+                                  >
+                                    <EditIcon style={{ fontSize: '18px' }} />
+                                  </IconButton>
+                                </HtmlTooltip>
+                              </div>
+                              <div style={{ flexBasis: 'max-content' }}>
+                                <HtmlTooltip title="Delete" placement="top" arrow>
+                                  <IconButton
+                                    size="small"
+                                    color="inherit"
+                                    style={{ color: 'red' }}
+                                    aria-label="delete"
+                                    onClick={() => {
+                                      setSelectedFile(file);
+                                      setShowConfirmBox(true);
+                                    }}
+                                  >
+                                    <DeleteOutlineIcon style={{ fontSize: '18px' }} />
+                                  </IconButton>
+                                </HtmlTooltip>
+                              </div>
+                            </Box>
+                          </Box>
+                        </AccordionSummary>
+                        <AccordionDetails style={{ display: 'flex', flexDirection: 'column' }}>
+                          {expended[file?._id] &&
+                            file?.file?.map((f) => {
+                              return (
+                                <Box
+                                  p={1}
+                                  onClick={() => {
+                                    setSelectedAttachment(f);
+                                  }}
+                                  style={{
+                                    cursor: 'pointer',
+                                    border:
+                                      selectedAttachment?.url === f?.url
+                                        ? '1px solid var(--dark-active-border-color,#298B88)'
+                                        : '1px solid var(--dark-mode-border-color, rgb(224, 224, 224))'
+                                  }}
+                                >
+                                  <Box>
+                                    <Typography style={{ fontWeight: 600 }}>{f?.name}</Typography>
+                                  </Box>
+                                </Box>
+                              );
+                            })}
+                        </AccordionDetails>
+                      </Accordion>
+                    );
+                  })}
+              </Box>
             </Box>
           </Box>
         </Grid>
@@ -279,28 +255,17 @@ const Diagram = ({ resource, referenceId }) => {
             }}
           >
             <Box>
-              {selectedFile &&
-                (selectedAttachment ? (
-                  <>
-                    {checkImageType(selectedAttachment?.url?.split('.')[1]) ? (
-                      <ViewImage data={selectedAttachment} />
-                    ) : checkpdfType(selectedAttachment?.url?.split('.')[1]) ? (
-                      <ShowPdf data={selectedAttachment} />
-                    ) : (
-                      <ShowExcel data={selectedAttachment} />
-                    )}
-                  </>
-                ) : (
-                  <>
-                    {checkImageType(selectedFile?.url?.split('.')[1]) ? (
-                      <ViewImage data={selectedFile} />
-                    ) : checkpdfType(selectedFile?.url?.split('.')[1]) ? (
-                      <ShowPdf data={selectedFile} />
-                    ) : (
-                      <ShowExcel data={selectedFile} />
-                    )}
-                  </>
-                ))}
+              {selectedAttachment && (
+                <>
+                  {checkImageType(selectedAttachment?.url?.split('.')[1]) ? (
+                    <ViewImage data={selectedAttachment} />
+                  ) : checkpdfType(selectedAttachment?.url?.split('.')[1]) ? (
+                    <ShowPdf data={selectedAttachment} />
+                  ) : (
+                    <ShowExcel data={selectedAttachment} />
+                  )}
+                </>
+              )}
             </Box>
           </Box>
         </Grid>
@@ -339,7 +304,7 @@ const Diagram = ({ resource, referenceId }) => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${selectedFile?.file}?`}
+          message={`Are you sure you want to delete ${selectedFile?.name}?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}
