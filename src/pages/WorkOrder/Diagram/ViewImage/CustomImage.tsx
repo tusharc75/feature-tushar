@@ -8,7 +8,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 interface ImageRenderProps extends Omit<ImageConfig, 'image'> {
   textProps?: TextInterface;
 }
-interface TextInterface extends TextConfig {}
+interface TextInterface extends TextConfig { }
 
 const ImageRender: React.FC<ImageRenderProps> = ({
   onTransformImage,
@@ -78,30 +78,30 @@ const ImageRender: React.FC<ImageRenderProps> = ({
   );
 };
 
-const CustomImage: React.FC<ImageRenderProps> = ({ onTransformImage, transformImage, imageState, setImageState, textProps, ...others }) => {
+const CustomImage: React.FC<ImageRenderProps> = ({ onTransformImage, transformImage, imageState, key, setImageState, textProps, ...others }) => {
   const imageRef = useRef(null);
   const trRef = useRef(null);
   const [url, setUrl] = useState();
 
   useEffect(() => {
-    if (!imageState) return;
-    axiosInstance()
-      .get('/user/download?fileName=' + imageState?.url, {
-        responseType: 'blob'
-      })
-      .then(({ data }) => {
-        const file = new Blob([data], { type: 'application/pdf' });
-        var reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onloadend = function () {
-          let base64data: any = reader.result;
-          setUrl(base64data);
-        };
-      })
-      .catch((err) => {
-        // setToastConfig(err);
-      });
-  }, [imageState.url, imageState]);
+    if (!url) {
+      axiosInstance()
+        .get('/user/download?fileName=' + imageState?.url, {
+          responseType: 'blob'
+        })
+        .then(({ data }) => {
+          const file = new Blob([data], { type: 'application/pdf' });
+          var reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onloadend = function () {
+            let base64data: any = reader.result;
+            setUrl(base64data);
+          };
+        })
+        .catch((err) => {
+        });
+    }
+  }, [key]);
 
   useEffect(() => {
     trRef.current?.nodes([imageRef.current]);

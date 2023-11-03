@@ -117,16 +117,6 @@ const ViewImage = ({ data }) => {
                 fill: textColor
               }}
             />
-            // <CustomImage
-            //   setImageState={setImageState}
-            //   imageState={imageState}
-            //   selectedId={selectedImage === imageState.id}
-            //   onSelect={() => selectImage(imageState.id)}
-            //   key={imageState.id}
-            //   textProps={{
-            //     fill: textColor
-            //   }}
-            // />
           )}
           {texts.length > 0 &&
             texts?.map((text) => (
