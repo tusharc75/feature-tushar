@@ -10,7 +10,6 @@ import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import MomentUtils from '@date-io/moment';
 
 const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) => {
-
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   if (!products?.length) {
@@ -22,8 +21,9 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
     const rows = values?.products?.filter((e) => e.returnQuantity > 0);
     if (rows?.length) {
       onSuccess(rows);
+    } else {
+      onClose();
     }
-    else { onClose() }
   };
 
   const validate = (values) => {
@@ -93,7 +93,7 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
             }))
           }}
           enableReinitialize={true}
-          onSubmit={() => { }}
+          onSubmit={() => {}}
         >
           {({ values }) => (
             <>
@@ -225,7 +225,7 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
                     </Form>
                   </Box>
                 ) : (
-                  <Box p={2} height={300} bgcolor="white">
+                  <Box p={2} height={300}>
                     <CommonSkeleton lenArray={[...Array(6).keys()]} />
                   </Box>
                 )}

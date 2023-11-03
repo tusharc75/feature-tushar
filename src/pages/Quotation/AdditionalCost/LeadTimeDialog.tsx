@@ -96,15 +96,7 @@ function LeadTimeDialog({ quotationId, data, versionId, onClose, handleSucess })
       <CustomDialogContent>
         <Grid container>
           <Grid item xs={12}>
-            <Box
-              style={{ maxHeight: '350px', overflow: 'auto' }}
-              bgcolor="white"
-              border={1}
-              mt={2}
-              mb={1}
-              borderColor="var(--common-border-color)"
-              width={'100%'}
-            >
+            <Box style={{ maxHeight: '350px', overflow: 'auto' }} border={1} mt={2} mb={1} borderColor="var(--common-border-color)" width={'100%'}>
               <Box p={1} bgcolor="grey.200">
                 <Grid container xs={12}>
                   <Grid item xs={6}>
@@ -129,7 +121,7 @@ function LeadTimeDialog({ quotationId, data, versionId, onClose, handleSucess })
                 </Grid>
               </Box>
               {leadTimeMasterSteps?.map((steps, index) => (
-                <Box key={index} bgcolor="white" p={1} borderTop={1} borderColor="var(--common-border-color)" width={'100%'}>
+                <Box key={index} p={1} borderTop={1} borderColor="var(--common-border-color)" width={'100%'}>
                   <Grid container spacing={1}>
                     <Grid item xs={6}>
                       <Autocomplete

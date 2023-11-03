@@ -18,38 +18,36 @@ const TECHNICIAN_RESOURCE = [
   {
     key: 'rentalManagement',
     resource: sidebarResource.rentalManagement,
-    title: routes.rentalManagementDetail.title,
+    title: routes.rentalManagementDetail.title
   },
   {
     key: 'fieldTicket',
     resource: sidebarResource.fieldTicket,
-    title: routes.fieldTicketDetail.title,
+    title: routes.fieldTicketDetail.title
   }
-]
+];
 
 function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, selectedRecords, setSelectedRecords }) {
-
   const {
     state: { permissions }
   }: any = useData();
 
   const toastConfig = useContext(CustomToastContext);
   const [rowsData, setRowsData] = useState(null);
-  const [columns, setColumns] = useState([])
+  const [columns, setColumns] = useState([]);
   const [serviceTypes, setServiceTypes] = useState([]);
   const [selectedType, setSelectedType] = useState(serviceTypes[0]?.key || '');
-
 
   useEffect(() => {
     const options: any = [];
     TECHNICIAN_RESOURCE?.forEach((item) => {
       if (permissions[item.key] && permissions[item.key]?.isRead === true) {
-        options.push({ ...item, title: routes[item.key] ? routes[item.key]?.title : item.title })
+        options.push({ ...item, title: routes[item.key] ? routes[item.key]?.title : item.title });
       }
-    })
+    });
     setServiceTypes(options);
     setSelectedType(options[0]?.key || '');
-  }, [])
+  }, []);
 
   useEffect(() => {
     fetchData();
@@ -99,73 +97,79 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, selec
         width: 50,
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
       },
-      ...(selectedType === 'fieldTicket' ? [{
-        accessor: 'fieldServiceOrderNumber',
-        Header: 'Field Service Order',
-        width: 200,
-        Cell: ({ row }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <p title={row.original.fieldServiceOrder}>{row.original.fieldServiceOrder}</p>
-            <Box ml={1}>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  window.open(`${routes.fieldServiceOrderDetail.path}/${row.original.fieldServiceOrderId}`);
-                }}
-              >
-                <OpenInNewIcon fontSize="small" color="primary" />
-              </IconButton>
-            </Box>
-          </div>
-        )
-      },
-      {
-        accessor: 'fieldTicketNumber',
-        Header: 'Field Ticket',
-        width: 200,
-        Cell: ({ row }) =>
-          row.original['fieldTicketNumber'] ? (
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <p title={row.original.fieldTicketNumber}>{row.original.fieldTicketNumber}</p>
-              <Box ml={1}>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    window.open(`${routes.fieldTicketDetail.path}/${row.original._id}`);
-                  }}
-                >
-                  <OpenInNewIcon fontSize="small" color="primary" />
-                </IconButton>
-              </Box>
-            </div>
-          ) : (
-            <NoDataCell />
-          )
-      }] : selectedType === 'rentalManagement' ? [
-        {
-          accessor: 'rentalJobName',
-          Header: 'Rental Job',
-          width: 200,
-          Cell: ({ row }) =>
-            row.original['rentalJobName'] ? (
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <p title={row.original.rentalJobName}>{row.original.rentalJobName}</p>
-                <Box ml={1}>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      window.open(`${routes.rentalManagementDetail.path}/${row.original._id}`);
-                    }}
-                  >
-                    <OpenInNewIcon fontSize="small" color="primary" />
-                  </IconButton>
-                </Box>
-              </div>
-            ) : (
-              <NoDataCell />
-            )
-        }
-      ] : []),
+      ...(selectedType === 'fieldTicket'
+        ? [
+            {
+              accessor: 'fieldServiceOrderNumber',
+              Header: 'Field Service Order',
+              width: 200,
+              Cell: ({ row }) => (
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <p title={row.original.fieldServiceOrder}>{row.original.fieldServiceOrder}</p>
+                  <Box ml={1}>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        window.open(`${routes.fieldServiceOrderDetail.path}/${row.original.fieldServiceOrderId}`);
+                      }}
+                    >
+                      <OpenInNewIcon fontSize="small" color="primary" />
+                    </IconButton>
+                  </Box>
+                </div>
+              )
+            },
+            {
+              accessor: 'fieldTicketNumber',
+              Header: 'Field Ticket',
+              width: 200,
+              Cell: ({ row }) =>
+                row.original['fieldTicketNumber'] ? (
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <p title={row.original.fieldTicketNumber}>{row.original.fieldTicketNumber}</p>
+                    <Box ml={1}>
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          window.open(`${routes.fieldTicketDetail.path}/${row.original._id}`);
+                        }}
+                      >
+                        <OpenInNewIcon fontSize="small" color="primary" />
+                      </IconButton>
+                    </Box>
+                  </div>
+                ) : (
+                  <NoDataCell />
+                )
+            }
+          ]
+        : selectedType === 'rentalManagement'
+        ? [
+            {
+              accessor: 'rentalJobName',
+              Header: 'Rental Job',
+              width: 200,
+              Cell: ({ row }) =>
+                row.original['rentalJobName'] ? (
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <p title={row.original.rentalJobName}>{row.original.rentalJobName}</p>
+                    <Box ml={1}>
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          window.open(`${routes.rentalManagementDetail.path}/${row.original._id}`);
+                        }}
+                      >
+                        <OpenInNewIcon fontSize="small" color="primary" />
+                      </IconButton>
+                    </Box>
+                  </div>
+                ) : (
+                  <NoDataCell />
+                )
+            }
+          ]
+        : []),
       {
         accessor: 'serviceName',
         Header: 'Service Name',
@@ -249,7 +253,7 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, selec
     ];
 
     setColumns(columns);
-  }
+  };
 
   const height = 400;
   return (
@@ -288,7 +292,7 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, selec
           />
         </Box>
       ) : (
-        <Box p={2} height={height} bgcolor="white">
+        <Box p={2} height={height}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

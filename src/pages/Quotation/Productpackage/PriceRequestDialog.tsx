@@ -263,7 +263,7 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
                               hideExpander={true}
                             />
                           ) : (
-                            <Box height={500} bgcolor="white">
+                            <Box height={500}>
                               <CommonSkeleton lenArray={[...Array(10).keys()]} />
                             </Box>
                           )}
@@ -277,7 +277,7 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
           );
         })
       ) : isLoading ? (
-        <Box height={500} bgcolor="white">
+        <Box height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       ) : (

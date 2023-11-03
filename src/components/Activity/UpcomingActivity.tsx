@@ -24,7 +24,7 @@ const UpcomingActivity = (props) => {
   };
 
   return (
-    <Box border={1} p={1} bgcolor="white" borderColor="var(--common-border-color)">
+    <Box border={1} p={1} borderColor="var(--common-border-color)">
       <Box ml={1} mb={1}>
         <Typography variant="h6">Upcoming Activity</Typography>
       </Box>
