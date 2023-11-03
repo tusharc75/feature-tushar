@@ -228,7 +228,7 @@ const AdditionalCost = ({ quotationData, setNextStep, renderedFrom, version, all
 
   return (
     <Fragment>
-      <Box display="flex" justifyContent="space-between" my={1}>
+      <Box display="flex" justifyContent="space-between" m={1}>
         <Box display="flex">
           <Button
             variant={isMobile ? 'outlined' : 'text'}
