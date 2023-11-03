@@ -404,6 +404,7 @@ const Invoice = () => {
             </InvoiceHeader>
           )}
         </div>
+        {console.log(columns)}
         {Object.keys(frameworkComponent).length > 0 && columns ? (
           isMobile && !isTablet ? (
             <CustomSwipableList
@@ -411,23 +412,17 @@ const Invoice = () => {
               allowSelection={true}
               allowSwipe={true}
               permissions={permissions?.invoice}
-              primaryField={columns?.find((d) => d.field === 'invoiceNo')}
+              primaryField={columns?.find((d) => d.field === 'invoiceNumber')}
               onClick={(data) => {
                 history.push(`${routes.invoiceDetail.path}/${data._id}`);
               }}
               dataRows={dataRows}
               selectedRecords={selectedRecords}
               dispatch={dispatch}
-              onEdit={(data) => {
-                history.push(`${routes.invoiceDetail.path}/${data._id}`);
-              }}
               extraParamsToCheckDelete={true}
-              onDelete={(data) => {
-                setSingleInvoiceDelete({
-                  show: true,
-                  id: data._id,
-                  invoiceNumber: `${data.invoiceNumber}`
-                });
+              actionCol={(data) => {
+                const params = { data };
+                return <ActionsRenderer {...params} />;
               }}
               rowCount={rowCount}
               page={page}
@@ -467,10 +462,8 @@ const Invoice = () => {
               ]}
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
-              showClone={true}
-              onClone={(data) => {
-                setShowManageInvoiceDialog({ open: true, isClone: true, idToClone: data._id });
-              }}
+              showClone={false}
+              onClone={(data) => {}}
               renderedFrom={renderedFrom}
             />
           ) : (
