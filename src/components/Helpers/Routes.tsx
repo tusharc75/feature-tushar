@@ -1070,6 +1070,13 @@ const routes = {
         : RESOURCE_LABEL.workStations,
     path: '/work-stations/detail'
   },
+  workStationsActiveService: {
+    title:
+      storedRoutes && storedRoutes.workStations && storedRoutes.workStations.title
+        ? storedRoutes.workStations?.title
+        : RESOURCE_LABEL.workStations,
+    path: '/work-stations/active-service'
+  },
   deviceTemplateAlert: {
     title:
       storedRoutes && storedRoutes.deviceTemplateAlert && storedRoutes.deviceTemplateAlert.title
