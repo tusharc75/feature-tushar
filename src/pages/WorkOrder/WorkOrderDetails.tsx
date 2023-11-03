@@ -36,6 +36,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import EditIcon from '@material-ui/icons/Edit';
 import CloseIcon from '@material-ui/icons/Close';
 import { RiFileShredFill } from 'react-icons/ri';
+import Diagram from './Diagram';
 
 const WorkOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -307,8 +308,13 @@ const WorkOrderDetails = () => {
               <BiFoodMenu className="mr-1" fontSize="inherit" /> BOM
             </CustomTab>
           )}
-          {!(isMobile && !isTablet) && (
+          {workOrderData?.type === WORK_ORDER_TYPE.productionOrder && (
             <CustomTab index={4} value={4} className={'tabLayout'} {...a11yProps(4)}>
+              <BiFoodMenu className="mr-1" fontSize="inherit" /> Diagram
+            </CustomTab>
+          )}
+          {!(isMobile && !isTablet) && (
+            <CustomTab index={5} value={5} className={'tabLayout'} {...a11yProps(5)}>
               <RiFlowChart className="mr-1" fontSize="inherit" /> Views
             </CustomTab>
           )}
@@ -366,6 +372,9 @@ const WorkOrderDetails = () => {
           )}
         </TabPanel>
         <TabPanel value={tabValue} index={4}>
+          {workOrderData && <Diagram resource={'workOrder'} referenceId={id} />}
+        </TabPanel>
+        <TabPanel value={tabValue} index={5}>
           <Box>
             <View workOrderName={workOrderData?.workOrderNumber || ''} workOrderId={id} workOrderStatus={workOrderData?.status} />
           </Box>
