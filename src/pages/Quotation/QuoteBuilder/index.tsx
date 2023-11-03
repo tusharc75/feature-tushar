@@ -106,13 +106,14 @@ const QuoteBuilder = ({
                   size="small"
                   onClick={() => {
                     window.open(
-                      `${row.original.type === 'serializedAsset'
-                        ? routes.serializedAssetDetail.path
-                        : row.original.type === 'product'
+                      `${
+                        row.original.type === 'serializedAsset'
+                          ? routes.serializedAssetDetail.path
+                          : row.original.type === 'product'
                           ? routes.productDetail.path
                           : row.original.type === 'package'
-                            ? routes.packagesDetail.path
-                            : routes.serviceMasterDetail.path
+                          ? routes.packagesDetail.path
+                          : routes.serviceMasterDetail.path
                       }/${row.original.materialId}`
                     );
                   }}
@@ -124,18 +125,21 @@ const QuoteBuilder = ({
           </div>
         )
       },
-      ...(permissions?.leadTimeMaster ?
-        [{
-          accessor: 'leadTime',
-          Header: 'Lead Time (Days)',
-          Cell: ({ row }) => (row.original?.leadTime && row.original?.leadTime?.length ? <p>{row.original['leadTime']}</p> : <p>0</p>),
-          Footer: (info) => {
-            const total = info.rows
-              .filter((f) => f.values.hasOwnProperty('leadTime') && !isNaN(f.values['leadTime']))
-              .reduce((sum, row) => parseInt(row.values['leadTime']) + sum, 0);
-            return <>{total}</>;
-          }
-        }] : []),
+      ...(permissions?.leadTimeMaster
+        ? [
+            {
+              accessor: 'leadTime',
+              Header: 'Lead Time (Days)',
+              Cell: ({ row }) => (row.original?.leadTime && row.original?.leadTime?.length ? <p>{row.original['leadTime']}</p> : <p>0</p>),
+              Footer: (info) => {
+                const total = info.rows
+                  .filter((f) => f.values.hasOwnProperty('leadTime') && !isNaN(f.values['leadTime']))
+                  .reduce((sum, row) => parseInt(row.values['leadTime']) + sum, 0);
+                return <>{total}</>;
+              }
+            }
+          ]
+        : []),
       {
         accessor: 'description',
         Header: 'Description',
@@ -162,22 +166,23 @@ const QuoteBuilder = ({
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === 'serializedAsset'
-        ? parent.serializedAssetDetail?.assetNumber
-        : parent.type === 'product'
+      parent.detail = `${
+        parent.type === 'serializedAsset'
+          ? parent.serializedAssetDetail?.assetNumber
+          : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-            ? parent.serviceDetail?.serviceName
-            : parent.packageDetail?.packageName
-        }`;
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
+      }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-            ? parent?.productDetail?.productDescription || ''
-            : parent.type === 'package'
-              ? parent?.packageDetail?.packageDescription || ''
-              : '';
+          ? parent?.productDetail?.productDescription || ''
+          : parent.type === 'package'
+          ? parent?.packageDetail?.packageDescription || ''
+          : '';
       parent.leadTime = Array.isArray(parent?.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
@@ -238,22 +243,23 @@ const QuoteBuilder = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = `${_subRow.type === 'serializedAsset'
-        ? _subRow.serializedAssetDetail?.assetNumber
-        : _subRow.type === 'product'
+      _subRow.detail = `${
+        _subRow.type === 'serializedAsset'
+          ? _subRow.serializedAssetDetail?.assetNumber
+          : _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'service'
-            ? _subRow.serviceDetail?.serviceName
-            : _subRow.packageDetail?.packageName
-        }`;
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.packageDetail?.packageName
+      }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === 'package'
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+          ? _subRow?.productDetail?.productDescription || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qtyDisplay = _subRow.qty;
@@ -301,8 +307,8 @@ const QuoteBuilder = ({
 
   return (
     <Fragment>
-      <Box m={1} display="flex" justifyContent="space-between">
-        <Box display="flex">
+      <Box m={1} className="flex justify-between flex-wrap gap-2">
+        <Box className="flex md:w-[unset] w-full">
           <SendEmail
             quotationData={quotationData}
             versionId={versionData?._id}
@@ -337,7 +343,7 @@ const QuoteBuilder = ({
             )}
         </Box>
         {currentStep === 'Quote Approval' && (
-          <Box display="flex">
+          <Box className="flex gap-2 ml-auto">
             <Button
               variant="contained"
               size="small"
@@ -349,7 +355,6 @@ const QuoteBuilder = ({
             >
               {`Process ${routes.quotation.title}`}
             </Button>
-            <Box p={1} />
             <Button
               variant="contained"
               size="small"
@@ -378,7 +383,7 @@ const QuoteBuilder = ({
             columns={columns}
             data={rowsData}
             setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-            onSelect={() => { }}
+            onSelect={() => {}}
             hideSelection={true}
             hideAction={true}
             childrenProperty="subRows"
