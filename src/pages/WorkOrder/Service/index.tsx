@@ -41,15 +41,16 @@ import { IoMdArrowDropup, IoMdArrowDropdown } from 'react-icons/io';
 import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
 import FormatQuoteIcon from '@material-ui/icons/FormatQuote';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
-import { PreWorkIcon, PostWorkIcon } from 'src/assets/svg/svgIcons';
+import { PreWorkIcon, PostWorkIcon, WorkStations } from 'src/assets/svg/svgIcons';
 import { isArray, reverse } from 'lodash';
 import AttachmentDialog from './AttachmentDialog';
 import ManagePurchaseOrder from 'src/pages/PurchaseOrder/ManagePurchaseOrder';
-import { AiFillCheckCircle, AiFillExclamationCircle } from 'react-icons/ai';
 import { PassIcon, FailIcon } from 'src/assets/svg/svgIcons';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { Add, ExpandMore } from '@material-ui/icons';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
+import AssignWorkStationDialog from './AssignWorkStationDialog';
+import WorkOutlineIcon from '@material-ui/icons/WorkOutline';
 
 const getTotalTime = (stepTimes: any) => {
   let totalTimes = 0;
@@ -60,7 +61,7 @@ const getTotalTime = (stepTimes: any) => {
       totalTimes += new Date().getTime() - new Date(item?.pauseDate || item?.startDate).getTime();
     }
   });
-  stepTimes.forEach((item) => { });
+  stepTimes.forEach((item) => {});
   return { shouldTimerRun, totalTimes };
 };
 
@@ -102,7 +103,6 @@ const RenderTotalTime = ({ stepTimes }: any) => {
 };
 
 const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWorkOrderData }) => {
-
   const toastConfig = useContext(CustomToastContext);
   const {
     state: {
@@ -115,6 +115,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
   const [stepSubmitedData, setStepSubmitedData] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [userAssignDialog, setUserAssignDialog] = useState(false);
+  const [workStationAssignDialog, setWorkStationAssignDialog] = useState(false);
   const [serviceDialog, setServiceDialog] = useState({ open: false, type: '', uniqueId: null, preWork: null });
   const [arrangeView, setArrangeView] = useState(false);
   const [consumablesDialog, setConsumablesDialog] = useState({ open: false, uniqueId: null, service: null, stepId: null, serviceName: null });
@@ -230,7 +231,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
       setServiceSteps(services);
       if (
         services.filter((e) => e.type === 'service' && e.status === WORKORDER_SERVICE_STATUS.completed)?.length ===
-        services.filter((e) => e.type === 'service')?.length &&
+          services.filter((e) => e.type === 'service')?.length &&
         workOrderData?.status !== WORK_ORDER_STATUS.completed
       ) {
         fetchWorkOrderData();
@@ -290,7 +291,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
   };
 
   const handleAddService = (ids, uniqueId) => {
-    setSubmitting(true)
+    setSubmitting(true);
     const data: any = {};
     data.serviceIds = ids;
     if (uniqueId) {
@@ -306,11 +307,11 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           fetchServiceData();
         }
         fetchWorkOrderData();
-        setSubmitting(false)
+        setSubmitting(false);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
-        setSubmitting(false)
+        setSubmitting(false);
       });
   };
 
@@ -657,7 +658,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                           display: 'flex',
                                           alignItems: 'center',
                                           flexWrap: 'wrap',
-                                          flexBasis: data?.type === 'quotation' ? 'calc(100% - 30px)' : '100%'
+                                          flexBasis: data?.type === 'quotation' ? 'calc(100% - 30px)' : '100%',
+                                          color: 'var(--primary-text)'
                                         }}
                                       >
                                         <Box ml={'10px'}>
@@ -666,13 +668,13 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                         {user?.brandPolicy?.servicePrePost && data?.type === 'service' && (
                                           <Box ml={1}>
                                             {data?.preWork ? (
-                                              <HtmlTooltip title="Pre Work Service">
+                                              <HtmlTooltip enterTouchDelay={0} title="Pre Work Service">
                                                 <span>
                                                   <PreWorkIcon style={{ verticalAlign: 'middle' }} />
                                                 </span>
                                               </HtmlTooltip>
                                             ) : (
-                                              <HtmlTooltip title="Post Work Service">
+                                              <HtmlTooltip enterTouchDelay={0} title="Post Work Service">
                                                 <span>
                                                   <PostWorkIcon style={{ verticalAlign: 'middle' }} />
                                                 </span>
@@ -682,8 +684,20 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                         )}
                                         {data?.type === 'service' && data?.assignedUsers?.length > 0 && (
                                           <Box ml={1}>
-                                            <HtmlTooltip title={data?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
-                                              <PeopleIcon style={{ color: 'var(--primary)', maxWidth: '22px' }} />
+                                            <HtmlTooltip enterTouchDelay={0} title={data?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
+                                              <PeopleIcon style={{ fontSize: 20 }} />
+                                            </HtmlTooltip>
+                                          </Box>
+                                        )}
+                                        {data?.type === 'service' && data?.workStations?.length > 0 && (
+                                          <Box ml={1}>
+                                            <HtmlTooltip
+                                              enterTouchDelay={0}
+                                              title={`Work Stations-${data?.workStations?.map((e) => e?.optionLabel)?.toString()}`}
+                                            >
+                                              <span>
+                                                <WorkStations className=" align-text-top" />
+                                              </span>
                                             </HtmlTooltip>
                                           </Box>
                                         )}
@@ -736,7 +750,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                             </IconButton>
                                           </div>
                                           <div style={{ flexBasis: 'max-content' }}>
-                                            <HtmlTooltip title="Delete" placement="top" arrow>
+                                            <HtmlTooltip enterTouchDelay={0} title="Delete" placement="top" arrow>
                                               <IconButton
                                                 size="small"
                                                 color="inherit"
@@ -916,18 +930,37 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                             {user?.brandPolicy?.servicePrePost && data?.type === 'service' && (
                                               <Box ml={1}>
                                                 {data?.preWork ? (
-                                                  <HtmlTooltip title="Pre Work Service">
+                                                  <HtmlTooltip enterTouchDelay={0} title="Pre Work Service">
                                                     <span>
                                                       <PreWorkIcon style={{ verticalAlign: 'middle' }} />
                                                     </span>
                                                   </HtmlTooltip>
                                                 ) : (
-                                                  <HtmlTooltip title="Post Work Service">
+                                                  <HtmlTooltip enterTouchDelay={0} title="Post Work Service">
                                                     <span>
                                                       <PostWorkIcon style={{ verticalAlign: 'middle' }} />
                                                     </span>
                                                   </HtmlTooltip>
                                                 )}
+                                              </Box>
+                                            )}
+                                            {data?.type === 'service' && data?.assignedUsers?.length > 0 && (
+                                              <Box ml={1}>
+                                                <HtmlTooltip enterTouchDelay={0} title={data?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
+                                                  <PeopleIcon />
+                                                </HtmlTooltip>
+                                              </Box>
+                                            )}
+                                            {data?.type === 'service' && data?.workStations?.length > 0 && (
+                                              <Box ml={1}>
+                                                <HtmlTooltip
+                                                  enterTouchDelay={0}
+                                                  title={`Work Stations-${data?.workStations?.map((e) => e?.optionLabel)?.toString()}`}
+                                                >
+                                                  <span>
+                                                    <WorkStations className=" align-text-top" />
+                                                  </span>
+                                                </HtmlTooltip>
                                               </Box>
                                             )}
                                             <>
@@ -942,13 +975,6 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                                 </Box>
                                               )}
                                             </>
-                                            {data?.type === 'service' && data?.assignedUsers?.length > 0 && (
-                                              <Box ml={1}>
-                                                <HtmlTooltip title={data?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
-                                                  <PeopleIcon style={{ color: 'var(--primary)', maxWidth: '22px' }} />
-                                                </HtmlTooltip>
-                                              </Box>
-                                            )}
                                           </Box>
 
                                           {/* Chips */}
@@ -963,20 +989,20 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                                       data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
                                                         ? '#E1FCE3'
                                                         : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                          ? '#fabebe'
-                                                          : '#FFF5DD',
+                                                        ? '#fabebe'
+                                                        : '#FFF5DD',
                                                     color:
                                                       data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
                                                         ? '#048E0A'
                                                         : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                          ? '#fa0202'
-                                                          : '#FF8C21',
+                                                        ? '#fa0202'
+                                                        : '#FF8C21',
                                                     background:
                                                       data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
                                                         ? '#E1FCE3'
                                                         : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                          ? '#fabebe'
-                                                          : '#FFF5DD',
+                                                        ? '#fabebe'
+                                                        : '#FFF5DD',
                                                     fontWeight: 700
                                                   }}
                                                 />
@@ -1064,6 +1090,17 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                   }}
                 >
                   Assign Technicians
+                </MenuItem>
+              )}
+              {allowedToEdit && permissions?.workStations?.isRead && (
+                <MenuItem
+                  disabled={!allowedToEdit}
+                  onClick={() => {
+                    setWorkStationAssignDialog(true);
+                    setAnchorEl(null);
+                  }}
+                >
+                  Assign Work Stations
                 </MenuItem>
               )}
               <MenuItem
@@ -1194,12 +1231,33 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           }}
         />
       )}
+      {workStationAssignDialog && (
+        <AssignWorkStationDialog
+          warehouse={workOrderData?.warehouse}
+          workOrderData={[
+            {
+              uniqueId: selectedService?.uniqueId,
+              workOrderId: workOrderId
+            }
+          ]}
+          workStations={selectedService?.workStations}
+          handleClose={() => {
+            setWorkStationAssignDialog(false);
+          }}
+          handleSucess={() => {
+            setWorkStationAssignDialog(false);
+            fetchServiceData();
+          }}
+        />
+      )}
       {serviceDialog.open && serviceDialog.type === 'service' && (
         <AssignServiceDialog
           handleClose={() => setServiceDialog({ open: false, type: '', uniqueId: null, preWork: null })}
           onSuccess={(data) => {
             handleAddService(
-              data?.map((e) => { return { _id: e._id, qty: parseInt(e?.qty) || 1 } }),
+              data?.map((e) => {
+                return { _id: e._id, qty: parseInt(e?.qty) || 1 };
+              }),
               serviceDialog.uniqueId
             );
           }}
@@ -1311,7 +1369,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           handleClose={() => {
             setAttchmentsDialog({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
           }}
-          handleSuccess={() => { }}
+          handleSuccess={() => {}}
         />
       )}
       {showManagePurchaseOrder && (
@@ -1356,14 +1414,14 @@ const RenderStatusIcon = ({ stepStatus, style = {}, ...others }: { stepStatus: s
   return (
     <>
       {stepStatus === WORKORDER_SERVICE_STEP_STATUS.passed && (
-        <HtmlTooltip title={stepStatus}>
+        <HtmlTooltip enterTouchDelay={0} title={stepStatus}>
           <Box style={{ ...style, color: '#059825' }} {...others}>
             <PassIcon style={{ display: 'block', width: '100%', height: '100%' }} />
           </Box>
         </HtmlTooltip>
       )}
       {stepStatus === WORKORDER_SERVICE_STEP_STATUS.failed && (
-        <HtmlTooltip title={stepStatus}>
+        <HtmlTooltip enterTouchDelay={0} title={stepStatus}>
           <Box style={{ ...style, color: '#EE0E06' }} {...others}>
             <FailIcon style={{ display: 'block', width: '100%', height: '100%' }} />
           </Box>

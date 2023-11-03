@@ -227,7 +227,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
               <NoteAddIcon fontSize="small" color="primary" />
             </IconButton>
           </HtmlTooltip>
-          {params.data?.invoice_count !== 0 && (
+          {params.data?.invoiceCount ? (
             <Box ml={1}>
               <HtmlTooltip title="View Invoices">
                 <IconButton
@@ -240,7 +240,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
                 </IconButton>
               </HtmlTooltip>
             </Box>
-          )}
+          ) : null}
         </div>
       ) : params.data?.status === INVOICE_STATUS.readyToInvoice ? (
         <HtmlTooltip title="Create Invoice">
