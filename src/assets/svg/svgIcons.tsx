@@ -39,7 +39,23 @@ export const DOAPending: React.FC<svgInterfaceWithSize> = ({ size = 14, width = 
   );
 };
 
-export const PreWorkIcon = ({ className = '', width = '', height = '', size = 15, color = '#298B88', style = {} }) => {
+export const WorkStations: React.FC<svgInterfaceWithSize> = ({ size = 16, width = 15, height = 15, ...others }) => {
+  return (
+    <svg {...others} xmlns="http://www.w3.org/2000/svg" width={size ?? width} height={size ?? height} fill="none" viewBox="0 0 512 512">
+      <g fill="currentcolor" clipPath="url(#clip0_5472_23693)">
+        <path d="M460.8 204.8V0H358.4v204.8h-51.2V76.732H204.8V204.8H0V512h51.2V307.063H256V512h256V204.8h-51.2zm-102.4 256h-51.2v-51.2h51.2v51.2zm0-102.4h-51.2v-51.2h51.2v51.2zm102.4 102.4h-51.2v-51.2h51.2v51.2zm0-102.4h-51.2v-51.2h51.2v51.2z"></path>
+        <path d="M102.4 358.4h102.4V512H102.4V358.4z"></path>
+      </g>
+      <defs>
+        <clipPath id="clip0_5472_23693">
+          <path fill="#fff" d="M0 0H512V512H0z"></path>
+        </clipPath>
+      </defs>
+    </svg>
+  );
+};
+
+export const PreWorkIcon = ({ className = '', width = '', height = '', size = 15, color = 'var(--primary-text)', style = {} }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -62,7 +78,16 @@ export const PreWorkIcon = ({ className = '', width = '', height = '', size = 15
   );
 };
 
-export const PostWorkIcon = ({ className = '', width = '', height = '', size = 15, color = '#298B88', color2 = '#FAAB48', style = {} }) => {
+export const PostWorkIcon = ({
+  className = '',
+  width = '',
+  height = '',
+  size = 15,
+  color = 'var(--primary-text)',
+  color2 = '#FAAB48',
+  style = {},
+  ...others
+}) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -72,6 +97,7 @@ export const PostWorkIcon = ({ className = '', width = '', height = '', size = 1
       height={height ? height : size + 'px'}
       fill={color}
       style={style}
+      {...others}
     >
       <g clip-path="url(#clip0_786_6090)">
         <path
