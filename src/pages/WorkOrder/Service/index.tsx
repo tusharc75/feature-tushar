@@ -696,7 +696,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                               title={`Work Stations-${data?.workStations?.map((e) => e?.optionLabel)?.toString()}`}
                                             >
                                               <span>
-                                                <WorkStations />
+                                                <WorkStations className=" align-text-top" />
                                               </span>
                                             </HtmlTooltip>
                                           </Box>
@@ -958,7 +958,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                                   title={`Work Stations-${data?.workStations?.map((e) => e?.optionLabel)?.toString()}`}
                                                 >
                                                   <span>
-                                                    <WorkStations />
+                                                    <WorkStations className=" align-text-top" />
                                                   </span>
                                                 </HtmlTooltip>
                                               </Box>
