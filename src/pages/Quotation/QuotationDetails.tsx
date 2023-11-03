@@ -615,13 +615,7 @@ const QuotationDetails = () => {
           {[QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(
             quotationData?.versions[currentVersion]?.status
           ) && (
-            <Box
-              style={{
-                marginLeft: 'auto',
-                maxWidth: 'max-content',
-                marginTop: '-30px'
-              }}
-            >
+            <Box className={`md:-mt-[30px] md:static max-w-max ml-auto absolute right-0 pt-[5px]`}>
               <ShowQuoteStatus status={quotationData?.versions[currentVersion]?.status} />
             </Box>
           )}
