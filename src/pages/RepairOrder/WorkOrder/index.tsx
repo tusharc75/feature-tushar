@@ -21,6 +21,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import { Delete, ExpandMore, CheckCircleOutline } from '@material-ui/icons';
 import AssignUserDialog from 'src/pages/WorkOrder/Service/AssignUserDialog';
+import AssignWorkStationDialog from 'src/pages/WorkOrder/Service/AssignWorkStationDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -50,7 +51,8 @@ const WorkOrder = ({
   const toastConfig = useContext(CustomToastContext);
   const {
     state: {
-      user: { user }
+      user: { user },
+      permissions
     }
   } = useData();
   const [selectedRecords, setSelectedRecords] = useState([]);
@@ -65,10 +67,12 @@ const WorkOrder = ({
   const [completeConfirmBox, setCompleteConfirmBox] = useState(false);
   const [addServicesDialog, setAddServicesDialog] = useState({ open: false, new: false });
   const [userAssignDialog, setUserAssignDialog] = useState(false);
+  const [workStationAssignDialog, setWorkStationAssignDialog] = useState(false);
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [arrangeView, setArrangeView] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
   const [allAssignedUsers, setAllAssignedUsers] = useState([]);
+  const [allAssignedWorkStations, setAllAssignedWorkStations] = useState([]);
   const [updateDialog, setUpdateDialog] = useState({ open: false, data: null });
   const [isBulkEdit, setIsBulkEdit] = useState(false);
 
@@ -85,8 +89,15 @@ const WorkOrder = ({
     const assignedUsersArrays = selectedRecords?.filter((product) => product?.assignedUsers).map((product) => product?.assignedUsers);
     const assignedUsers = assignedUsersArrays?.flat();
 
-    const uniqueArray = assignedUsers.filter((obj, index, self) => index === self.findIndex((t) => JSON.stringify(t) === JSON.stringify(obj)));
-    setAllAssignedUsers(uniqueArray);
+    const uniqueAssignedUsers = assignedUsers.filter((obj, index, self) => index === self.findIndex((t) => JSON.stringify(t) === JSON.stringify(obj)));
+    setAllAssignedUsers(uniqueAssignedUsers);
+
+    const assignedWorkStationsArrays = selectedRecords?.filter((product) => product?.assignedWorkStations).map((product) => product?.assignedWorkStations);
+    const assignedWorkStations = assignedWorkStationsArrays?.flat();
+
+    const uniqueAssignedWorkStations = assignedWorkStations.filter((obj, index, self) => index === self.findIndex((t) => JSON.stringify(t) === JSON.stringify(obj)));
+    setAllAssignedWorkStations(uniqueAssignedWorkStations);
+
   }, [selectedRecords]);
 
   const fetchFields = async () => {
@@ -261,6 +272,31 @@ const WorkOrder = ({
         Cell: ({ row }) => (row.original['qty'] ? <p> {row?.original?.qty}</p> : <NoDataCell />)
       }
     ];
+    const workStationColumn =  {
+      accessor: 'assignedWorkStations',
+      Header: 'Assigned Work Station',
+      disableFilters: true,
+      Cell: ({ row }) =>
+        row?.original['assignedWorkStations'] && row?.original['assignedWorkStations']?.length ? (
+          row?.original['assignedWorkStations']?.map((e, i) => {
+            return i === row?.original['assignedWorkStations'].length - 1 ? (
+              <a className="link text-truncate" target="_blank" href={`${routes.workStationsDetail.path}/${e.optionValue}`} rel="noreferrer">
+                {e?.optionLabel}
+              </a>
+            ) : (
+              <a className="link text-truncate" target="_blank" href={`${routes.workStationsDetail.path}/${e.optionValue}`} rel="noreferrer">
+                {e?.optionLabel},{' '}
+              </a>
+            );
+          })
+        ) : (
+          <NoDataCell />
+        )
+    }
+    if (permissions?.workStations?.isRead) {
+      const assignedTechnicianIndex = coloum.findIndex(col => col.accessor === 'assignedUsers');
+      coloum.splice(assignedTechnicianIndex + 1, 0, workStationColumn);
+    }
     coloum = [...coloum, ...newColumns];
     coloum.push({
       accessor: 'action',
@@ -806,6 +842,17 @@ const WorkOrder = ({
               >
                 Assign Technician
               </MenuItem>
+              {allowedToEdit && permissions?.workStations?.isRead && (
+                <MenuItem
+                  disabled={selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length > 0 ? false : true}
+                  onClick={() => {
+                    closeActions();
+                    setWorkStationAssignDialog(true);
+                  }}
+                >
+                  Assign Work Station
+                </MenuItem>
+                )}
               <MenuItem
                 disabled={
                   selectedRecords?.filter((d) => [MATERIAL_TYPE.serializedAsset, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0 &&
@@ -951,6 +998,27 @@ const WorkOrder = ({
               handleSucess={() => {
                 fetchData();
                 setUserAssignDialog(false);
+              }}
+            />
+          )}
+          {workStationAssignDialog && (
+            <AssignWorkStationDialog
+              warehouse={repairOrderData?.warehouse}
+              workOrderData={selectedRecords
+                .filter((e) => e.type === 'service')
+                .map((d) => {
+                  return {
+                    uniqueId: d?.uniqueId,
+                    workOrderId: d?.workOrder?._id
+                  };
+                })}
+              workStations={allAssignedWorkStations}
+              handleClose={() => {
+                setWorkStationAssignDialog(false);
+              }}
+              handleSucess={() => {
+                fetchData();
+                setWorkStationAssignDialog(false);
               }}
             />
           )}
