@@ -404,7 +404,6 @@ const Invoice = () => {
             </InvoiceHeader>
           )}
         </div>
-        {console.log(columns)}
         {Object.keys(frameworkComponent).length > 0 && columns ? (
           isMobile && !isTablet ? (
             <CustomSwipableList
