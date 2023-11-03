@@ -11,7 +11,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import ViewImage from './ViewImage';
-import { docIcon, excelSheetIcon, pptIcon } from 'src/assets/file_icons';
+import { docIcon } from 'src/assets/file_icons';
 
 const Diagram = ({ resource, referenceId }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -28,10 +28,7 @@ const Diagram = ({ resource, referenceId }) => {
   }, [resource, referenceId]);
 
   const fetchData = async () => {
-    const {
-      data: { data }
-    } = await axiosInstance().get(
-      `/attachment/resource-attachment-type?resource=${resource}&referenceId=${referenceId}&attachmentType=${ATTACHMENT_TYPE.diagram}`
+    const { data: { data } } = await axiosInstance().get(`/attachment/resource-attachment-type?resource=${resource}&referenceId=${referenceId}&attachmentType=${ATTACHMENT_TYPE.diagram}`
     );
     const files: any = [];
     data?.forEach((d) => {
@@ -232,7 +229,7 @@ const Diagram = ({ resource, referenceId }) => {
         }}
         style={{ cursor: 'pointer' }}
       >
-        <img width={200} src={excelSheetIcon} alt="attchment" />;
+        <img width={200} src={docIcon} alt="attchment" />;
       </div>
     );
   };
@@ -257,19 +254,18 @@ const Diagram = ({ resource, referenceId }) => {
               </Button>
             </Box>
             <Box>
-              {rowData &&
-                rowData?.map((data, index) => {
-                  return data?.child ? (
-                    <>
-                      <FileShow data={data} index={index + 1} />
-                      {data?.child?.map((c, i) => {
-                        return <FileShow data={c} index={`${index + 1}.${i + 1}`} child={true} />;
-                      })}
-                    </>
-                  ) : (
+              {rowData && rowData?.map((data, index) => {
+                return data?.child ? (
+                  <>
                     <FileShow data={data} index={index + 1} />
-                  );
-                })}
+                    {data?.child?.map((c, i) => {
+                      return <FileShow data={c} index={`${index + 1}.${i + 1}`} child={true} />;
+                    })}
+                  </>
+                ) : (
+                  <FileShow data={data} index={index + 1} />
+                );
+              })}
             </Box>
           </Box>
         </Grid>
