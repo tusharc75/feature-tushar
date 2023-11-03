@@ -248,13 +248,12 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     var data: any = [];
     const response = await axiosInstance().get(`${productionOrder.api}/${productionOrderData._id}/work-order/service`);
     data = response?.data?.data;
-    // let rows = data.material.filter((e) => e.parentId === null);
-    let rows = data.material.filter((e) => e.type === 'product');
+    let rows = data.material.filter((e) => e.type === MATERIAL_TYPE.product);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = parent.type === MATERIAL_TYPE.service ?
-        parent?.serviceDetail?.serviceName : parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName;
-      parent.description = parent.type === 'product' ? parent?.productDetail?.productDescription : parent?.packageDetail?.packageDescription;
+        parent?.serviceDetail?.serviceName : parent.type === MATERIAL_TYPE.product ? parent.productDetail?.productName : parent.packageDetail?.packageName;
+      parent.description = parent.type === MATERIAL_TYPE.product ? parent?.productDetail?.productDescription : parent?.packageDetail?.packageDescription;
       parent.qty = parent.qty;
       parent.qtyDisplay = parent.qty;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
@@ -264,14 +263,11 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         parent.serviceStatus = parent?.workOrder?.status;
       }
       parent.subRows = generateNestedData(data.material, parent);
-      if (parent?.workOrder?.status === WORK_ORDER_STATUS.new && parent?.subRows?.some((obj) => obj.type === 'service')) {
+      if (parent?.workOrder?.status === WORK_ORDER_STATUS.new && parent?.subRows?.some((obj) => obj.type === MATERIAL_TYPE.service)) {
         parent.canAutoCompleteWorkOrder = true;
       }
     });
-
-    if (rows.filter((_rows) => _rows.isValid === false).length > 0) {
-      setNextStep(false);
-    } else {
+    if (rows.filter((e) => e?.serviceStatus === WORK_ORDER_STATUS.completed)?.length === rows?.length) {
       setNextStep(true);
     }
     setRowsData(rows);
@@ -282,11 +278,11 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
       _subRow.detail = _subRow.type === MATERIAL_TYPE.service ?
-        _subRow?.serviceDetail?.serviceName : _subRow.type === 'product' ?
+        _subRow?.serviceDetail?.serviceName : _subRow.type === MATERIAL_TYPE.product ?
           _subRow.productDetail?.productName :
           _subRow.packageDetail?.packageName;
-      _subRow.description = _subRow.type === MATERIAL_TYPE.service
-        ? _subRow?.serviceDetail?.serviceDescription || '' : _subRow.type === 'product' ? _subRow?.productDetail?.productDescription : _subRow?.packageDetail?.packageDescription;
+      _subRow.description = _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceDescription
+        : _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productDescription : _subRow?.packageDetail?.packageDescription;
       _subRow.qty = _subRow.qty;
       _subRow.workOrder = parent?.workOrder;
       _subRow.workOrderNumber = parent?.workOrder?.workOrderNumber;
@@ -556,7 +552,6 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
               columns={columns}
               data={rowsData}
-              setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
               onSelect={(data) => {
                 setSelectedProducts(data)
                 setSelectedServices(data?.filter((d) => d.type === MATERIAL_TYPE.service && !d.hideSelection) || []);

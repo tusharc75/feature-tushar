@@ -10,7 +10,7 @@ import CustomReactTable from '../../../components/CustomReactTable/CustomReactTa
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import { CHILD_RESOURCE, productionOrder, sidebarResource } from '../../../constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, productionOrder, sidebarResource } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile } from 'react-device-detect';
 import { ExpandMore } from '@material-ui/icons';
@@ -22,7 +22,6 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
-import PreviewDownload from 'src/components/PreviewDownload';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import CreateProduct from 'src/components/Product/CreateProduct';
 
@@ -105,16 +104,16 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
             ) : (
               <p className="text-truncate">{row.original?.detail}</p>
             )}
-            {allowedToEdit && (
+            {allowedToEdit && row.original.type === MATERIAL_TYPE.package && (
               <>
                 <Box ml={1}>
                   <span>({row.original?.subRows?.length})</span>
                 </Box>
                 <Box ml={1}>
-                  <HtmlTooltip title="Add Product">
+                  <HtmlTooltip title="Add Existing Products">
                     <IconButton
                       onClick={() => {
-                        setAddDialog({ open: true, type: 'product', parentId: row.original?._id });
+                        setAddDialog({ open: true, type: MATERIAL_TYPE.product, parentId: row.original?._id });
                       }}
                       size="small"
                     >
@@ -128,7 +127,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
               <IconButton
                 size="small"
                 onClick={() => {
-                  if (row.original.type === 'product') {
+                  if (row.original.type === MATERIAL_TYPE.product) {
                     window.open(`${routes.productDetail.path}/${row.original.materialId}`);
                   } else {
                     window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
@@ -203,8 +202,8 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
     let rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName;
-      parent.description = parent.type === 'product' ? parent?.productDetail?.productDescription : parent?.packageDetail?.packageDescription;
+      parent.detail = parent.type === MATERIAL_TYPE.product ? parent.productDetail?.productName : parent.packageDetail?.packageName;
+      parent.description = parent.type === MATERIAL_TYPE.product ? parent?.productDetail?.productDescription : parent?.packageDetail?.packageDescription;
       parent.qty = parent.qty;
       parent.qtyDisplay = parent.qty;
       parent.canDelete = parent?.workOrder ? false : true;
@@ -236,8 +235,8 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = _subRow.type === 'product' ? _subRow.productDetail?.productName : _subRow.packageDetail?.packageName;
-      _subRow.description = _subRow.type === 'product' ? _subRow?.productDetail?.productDescription : _subRow?.packageDetail?.packageDescription;
+      _subRow.detail = _subRow.type === MATERIAL_TYPE.product ? _subRow.productDetail?.productName : _subRow.packageDetail?.packageName;
+      _subRow.description = _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productDescription : _subRow?.packageDetail?.packageDescription;
       _subRow.qty = _subRow.qty;
       _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
       _subRow.canDelete = _subRow?.workOrder ? false : true;
@@ -377,7 +376,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
               <MenuItem
                 onClick={() => {
                   closeAddActions();
-                  setAddDialog({ open: true, type: 'product', parentId: null });
+                  setAddDialog({ open: true, type: MATERIAL_TYPE.product, parentId: null });
                 }}
               >
                 Add Existing Products
@@ -393,7 +392,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
               <MenuItem
                 onClick={() => {
                   closeAddActions();
-                  setAddDialog({ open: true, type: 'package', parentId: null });
+                  setAddDialog({ open: true, type: MATERIAL_TYPE.package, parentId: null });
                 }}
               >
                 Add Existing Packages
@@ -401,12 +400,6 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
             </Menu>
           </Box>
           <Box display="flex">
-            <PreviewDownload
-              fileName={`${routes.productionOrder.title}-${productionOrderData?.productionOrderNumber}`}
-              resource={sidebarResource.productionOrder}
-              referenceId={productionOrderData?._id}
-              columns={columns} />
-            <Box ml={1} />
             <Button
               disabled={selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true}
               variant={isMobile ? 'text' : 'outlined'}
@@ -494,7 +487,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
           okBtnLoading={isDeleting}
         />
       )}
-      {addDialog.open && addDialog.type === 'product' && (
+      {addDialog.open && addDialog.type === MATERIAL_TYPE.product && (
         <AssignProductDialog
           handleCloseDialog={() => setAddDialog({ open: false, type: '', parentId: null })}
           onSuccess={(d) => {
@@ -513,14 +506,14 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
               handleAdd([{
                 ...d,
                 unitMain: d?.unit,
-                type: 'product'
+                type: MATERIAL_TYPE.product
               }]);
             }}
             isRedirectToDetailPage={false}
             openFrom="productMaster" />
         )
       }
-      {addDialog.open && addDialog.type === 'package' && (
+      {addDialog.open && addDialog.type === MATERIAL_TYPE.package && (
         <AssignPackageDialog
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
           onSuccess={(rows) => {
