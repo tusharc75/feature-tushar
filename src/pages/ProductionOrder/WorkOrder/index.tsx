@@ -7,9 +7,9 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { CHILD_RESOURCE, MATERIAL_TYPE, WORKORDER_SERVICE_STATUS, WORK_ORDER_STATUS, productionOrder, workOrder } from '../../../constants/helpers';
-import { startCase } from 'lodash';
+import { map, startCase, uniq } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { generateCustomTableColumns } from 'src/constants/columns';
+import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { isMobile } from 'react-device-detect';
 import { Delete, ExpandMore } from '@material-ui/icons';
@@ -22,6 +22,8 @@ import ArrangeView from 'src/components/Helpers/ArrangeView';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { AutoCompleteIcon } from 'src/assets/svg/svgIcons';
 import AssignWorkStationDialog from 'src/pages/WorkOrder/Service/AssignWorkStationDialog';
+import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
+const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
 
 const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, setCurrentStep }) => {
@@ -46,6 +48,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
+  const [consumablesDialog, setConsumablesDialog] = useState({ open: false, ids: [], data: null });
 
   useEffect(() => {
     fetchFields();
@@ -273,7 +276,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     var data: any = [];
     const response = await axiosInstance().get(`${productionOrder.api}/${productionOrderData._id}/work-order/service`);
     data = response?.data?.data;
-    let rows = data.material.filter((e) => e.type === MATERIAL_TYPE.product);
+    let rows = data.material.filter((e) => e.type === MATERIAL_TYPE.product && e?.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = parent.type === MATERIAL_TYPE.service ?
@@ -299,9 +302,11 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   };
 
   const generateNestedData = (material, parent) => {
-    const subRows: any = material.filter((e) => e?.workOrder === parent?.workOrder?._id);
+    const subRows: any = material.filter((e) => e?.parentId === parent?._id);
+    let productIndex = 0;
+    let serviceIndex = 0;
     subRows.forEach((_subRow, index) => {
-      _subRow.index = parent.index + '.' + `${index + 1}`;
+      _subRow.index = parent.index + '.' + `${_subRow.type === MATERIAL_TYPE.service ? alphabet[serviceIndex] : productIndex + 1}`;
       _subRow.detail = _subRow.type === MATERIAL_TYPE.service ?
         _subRow?.serviceDetail?.serviceName : _subRow.type === MATERIAL_TYPE.product ?
           _subRow.productDetail?.productName :
@@ -313,6 +318,8 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       _subRow.workOrderNumber = parent?.workOrder?.workOrderNumber;
       _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
       _subRow.hideSelection = false;
+      _subRow.subRows = generateNestedData(material, _subRow);
+      _subRow.type === MATERIAL_TYPE.service ? serviceIndex++ : productIndex++;
       if (_subRow?.status === WORKORDER_SERVICE_STATUS.completed) {
         _subRow.hideSelection = true;
       }
@@ -465,9 +472,65 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     }
   };
 
+  const handleAddConsumables = (rows, records = []) => {
+    setSubmitting(true);
+    const data: any = [];
+    let workOrderId = '';
+    const product = records?.find((s) => s.type === MATERIAL_TYPE.product);
+    if (product) {
+      workOrderId = product?.workOrder?._id;
+      rows?.forEach((e) => {
+        data.push({
+          product: e._id,
+          qty: parseInt(e.qty) || 1,
+          service: null,
+          uniqueId: null,
+          stepId: null
+        });
+      });
+    } else {
+      const services = records?.filter((s) => s.type === MATERIAL_TYPE.service);
+      workOrderId = services[0]?.workOrder?._id;
+      services?.forEach((s) => {
+        rows?.forEach((e) => {
+          data.push({
+            product: e._id,
+            qty: parseInt(e.qty) || 1,
+            service: s?.serviceDetail?._id,
+            uniqueId: s?.uniqueId,
+            stepId: null,
+            parentId: s?._id
+          });
+        });
+      });
+    }
+    axiosInstance()
+      .post(`${workOrder.api}/${workOrderId}/consumable`, data)
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        fetchData();
+        setSubmitting(false);
+        setConsumablesDialog({ open: false, ids: [], data: null });
+      })
+      .catch((error) => {
+        setSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
 
-
-
+  const checkUniqWorkOrder = () => {
+    if (selectedProducts.length === 0) {
+      return false;
+    } else if (uniq(map(selectedProducts, 'workOrder._id')).length === 1) {
+      return true;
+    } else {
+      return false;
+    }
+  };
 
   return (
     <Fragment>
@@ -541,6 +604,32 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                 </MenuItem>
               )}
               <MenuItem
+                disabled={
+                  selectedProducts?.filter((d) => [MATERIAL_TYPE.product, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0 &&
+                    checkUniqWorkOrder()
+                    ? false
+                    : true
+                }
+                onClick={() => {
+                  var ids = [];
+                  if (selectedProducts?.find((e) => e.type === MATERIAL_TYPE.product)) {
+                    const product = selectedProducts?.find((e) => e.type === MATERIAL_TYPE.product);
+                    ids = flattenArray(rowsData)
+                      ?.filter((e) => e?.workOrder?._id === product?.workOrder?._id)
+                      ?.map((e) => e.materialId);
+                  } else {
+                    const serviceIds = selectedProducts?.filter((d) => d?.type === MATERIAL_TYPE.service)?.map((e) => e._id);
+                    ids = flattenArray(rowsData)
+                      ?.filter((e) => serviceIds?.includes(e?.parentId))
+                      ?.map((e) => e.materialId);
+                  }
+                  closeActions();
+                  setConsumablesDialog({ open: true, ids: ids, data: null });
+                }}
+              >
+                Add Products/Consumables
+              </MenuItem>
+              <MenuItem
                 onClick={() => {
                   closeActions();
                   setArrangeView(true);
@@ -595,6 +684,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                 setSelectedProducts(data)
                 setSelectedServices(data?.filter((d) => d.type === MATERIAL_TYPE.service && !d.hideSelection) || []);
               }}
+              setWholeRowsCellColor={(rowData) => (rowData.type === 'service' ? 'isService' : '')}
               childrenProperty="subRows"
               uniqueKey="_id"
               renderedFrom={renderedFrom}
@@ -706,6 +796,17 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
             setCompleteConfirmBox(false);
           }}
           onOk={handleAutoComplete}
+        />
+      )}
+      {consumablesDialog.open && (
+        <AssignProductDialog
+          handleCloseDialog={() => setConsumablesDialog({ open: false, ids: [], data: null })}
+          ids={consumablesDialog.ids}
+          onSuccess={(rows) => {
+            handleAddConsumables(rows, consumablesDialog?.data ? consumablesDialog?.data : selectedProducts);
+          }}
+          serialized={false}
+          isSubmitting={isSubmitting}
         />
       )}
     </Fragment>
