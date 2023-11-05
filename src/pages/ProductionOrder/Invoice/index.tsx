@@ -239,8 +239,6 @@ const Invoice = ({ productionOrderData, setNextStep, renderedFrom, stepFullScree
     return subRows;
   };
 
-  console.log("here in invoice");
-
   return (
     <Fragment>
       <Box display="flex" justifyContent="space-between" m={1}>
