@@ -26,6 +26,7 @@ import ManageProductionOrder from './ManageProductionOrder';
 import Material from './Material';
 import WorkOrder from './WorkOrder';
 import LoadingTicket from './LoadingTicket';
+import Invoice from './Invoice';
 
 function a11yProps(index: any) {
   return {
@@ -356,6 +357,14 @@ const ProductionOrderDetails = () => {
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={allowedToEdit && permissions?.productionOrder?.isUpdate ? true : false}
                 setCurrentStep={setCurrentStep}
+              />
+            )}
+            {productionOrderProcessStepsNames[currentStep] === 'Final Slip' && productionOrderData && (
+              <Invoice
+                productionOrderData={productionOrderData}
+                setNextStep={setNextStep}
+                renderedFrom={`${renderedFrom}_grid-2`}
+                stepFullScreen={stepFullScreen}
               />
             )}
 

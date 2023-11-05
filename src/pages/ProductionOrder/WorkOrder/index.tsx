@@ -141,9 +141,9 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
           )
       },
       {
-        accessor: 'serviceStatus',
+        accessor: 'workOrderStatus',
         Header: 'Result',
-        Cell: ({ row }) => (row?.original['serviceStatus'] ? <p> {row?.original?.serviceStatus}</p> : <NoDataCell />)
+        Cell: ({ row }) => (row?.original['workOrderStatus'] ? <p> {row?.original?.workOrderStatus}</p> : <NoDataCell />)
       },
       {
         accessor: 'assignedUsers',
@@ -235,7 +235,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
               <>
                 <IconButton
                   disabled={row.original?.subRows?.length === 0
-                    && row.original?.serviceStatus !== WORK_ORDER_STATUS.completed ? false : true}
+                    && row.original?.workOrderStatus !== WORK_ORDER_STATUS.completed ? false : true}
                   size="small"
                   aria-label="Details"
                   onClick={() => {
@@ -244,7 +244,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                   }}
                 >
                   <Delete fontSize="small" color={row.original?.subRows?.length === 0
-                    && row.original?.serviceStatus !== WORK_ORDER_STATUS.completed ? 'error' : 'disabled'} />
+                    && row.original?.workOrderStatus !== WORK_ORDER_STATUS.completed ? 'error' : 'disabled'} />
                 </IconButton>
               </>
             ) : null}
@@ -288,14 +288,14 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       parent.hideSelection = false;
       if (parent?.workOrder?.status === WORK_ORDER_STATUS.completed) {
         parent.hideSelection = true;
-        parent.serviceStatus = parent?.workOrder?.status;
+        parent.workOrderStatus = parent?.workOrder?.status;
       }
       parent.subRows = generateNestedData(data.material, parent);
       if (parent?.workOrder?.status === WORK_ORDER_STATUS.new && parent?.subRows?.some((obj) => obj.type === MATERIAL_TYPE.service)) {
         parent.canAutoCompleteWorkOrder = true;
       }
     });
-    if (rows.filter((e) => e?.serviceStatus === WORK_ORDER_STATUS.completed)?.length === rows?.length) {
+    if (rows.filter((e) => e?.workOrderStatus === WORK_ORDER_STATUS.completed)?.length === rows?.length) {
       setNextStep(true);
     }
     setRowsData(rows);
