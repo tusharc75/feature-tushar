@@ -362,7 +362,6 @@ const ProductionOrderDetails = () => {
             {productionOrderProcessStepsNames[currentStep] === 'Final Slip' && productionOrderData && (
               <Invoice
                 productionOrderData={productionOrderData}
-                setNextStep={setNextStep}
                 renderedFrom={`${renderedFrom}_grid-2`}
                 stepFullScreen={stepFullScreen}
               />

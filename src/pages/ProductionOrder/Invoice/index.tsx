@@ -22,7 +22,7 @@ import { isMobile } from 'react-device-detect';
 import PreviewDownload from 'src/components/PreviewDownload';
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
-const Invoice = ({ productionOrderData, setNextStep, renderedFrom, stepFullScreen }) => {
+const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
   const {
     state: { user, permissions }
   }: any = useData();
@@ -173,7 +173,6 @@ const Invoice = ({ productionOrderData, setNextStep, renderedFrom, stepFullScree
   };
 
   const fetchData = async () => {
-    setNextStep(false);
     var data: any = [];
     const response = await axiosInstance().get(`${productionOrder.api}/${productionOrderData._id}/work-order/service`);
     data = response?.data?.data;
@@ -201,9 +200,6 @@ const Invoice = ({ productionOrderData, setNextStep, renderedFrom, stepFullScree
         parent.canAutoCompleteWorkOrder = true;
       }
     });
-    if (rows.filter((e) => e?.workOrderStatus === WORK_ORDER_STATUS.completed)?.length === rows?.length) {
-      setNextStep(true);
-    }
     setRowsData(rows);
   };
 
