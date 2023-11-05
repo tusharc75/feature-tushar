@@ -64,8 +64,8 @@ const ProductionOrderDetails = () => {
   const [stepFullScreen, setStepFullScreen] = useState(false);
 
   const productionOrderProcessStepsNames = React.useMemo(() => {
-    return productionOrderSteps.map((item) => item.name);
-  }, [productionOrderSteps]);
+    return productionOrderProcessSteps.map((item) => item.name);
+  }, [productionOrderProcessSteps]);
 
   useEffect(() => {
     return history.listen((location) => {

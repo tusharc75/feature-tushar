@@ -35,7 +35,6 @@ const Invoice = ({ productionOrderData, setNextStep, renderedFrom, stepFullScree
   }, [productionOrderData]);
 
   const fetchFields = async () => {
-    await axiosInstance().post(`${productionOrder.api}/${productionOrderData._id}/work-order`);
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.productionOrderDetail}`);
     var data = response?.data?.data;
     data = CURReplaceByCurrencySingle(data, productionOrderData?.currency || 'USD');
