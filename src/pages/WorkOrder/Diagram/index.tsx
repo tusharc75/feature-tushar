@@ -245,7 +245,7 @@ const Diagram = ({ resource, referenceId }) => {
                                       <div className="w-[20px]">
                                         <Icon size={20} />
                                       </div>
-                                      <p className=" line-clamp-1 font-semibold">{f?.name}</p>
+                                      <p className=" line-clamp-1 text-[14px] font-normal">{f?.name}</p>
                                     </div>
                                   </Box>
                                 );
