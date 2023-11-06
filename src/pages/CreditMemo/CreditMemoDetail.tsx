@@ -160,7 +160,6 @@ const creditMemoDetail = () => {
       {openUpdateDialog && (
         <ManageCreditMemo
           creditMemoId={id}
-          open={openUpdateDialog}
           isClone={false}
           onClose={closeUpdateDialog}
           onSuccess={() => {

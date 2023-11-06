@@ -356,7 +356,6 @@ const ProductionOrderDetails = () => {
                 renderedFrom={`${renderedFrom}_grid-2`}
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={allowedToEdit && permissions?.productionOrder?.isUpdate ? true : false}
-                setCurrentStep={setCurrentStep}
               />
             )}
             {productionOrderProcessStepsNames[currentStep] === 'Final Slip' && productionOrderData && (
