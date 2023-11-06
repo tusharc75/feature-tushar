@@ -2,7 +2,7 @@ import { Fragment, useEffect, useState } from 'react';
 import { Box, Button, Dialog, Grid } from '@material-ui/core';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Form, Formik } from 'formik';
-import { CustomDialogTransition, getObjKeysWithValues, yupSchema } from 'src/constants/helpers';
+import { CHILD_RESOURCE, CustomDialogTransition, getObjKeysWithValues, yupSchema } from 'src/constants/helpers';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -11,21 +11,30 @@ import FormTypes from 'src/components/Helpers/FormTypes';
 import { uniq, map, orderBy } from 'lodash';
 import { FaDiceOne } from 'react-icons/fa';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import axiosInstance from 'src/axios/axiosInstance';
+import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 
-const UpdateWorkOrderDialog = ({ onClose, materialData, handleUpdate, loadingEdit, childFields }) => {
+const UpdateWorkOrderDialog = ({ onClose, materialData, handleUpdate, loadingEdit, workOrderData }) => {
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [fields, setFields] = useState([]);
 
   useEffect(() => {
-    setInitialData({ fields: [], values: {} });
-    setInitialData({
-      fields: childFields,
-      values: getObjKeysWithValues(materialData, childFields)
-    });
-    EvaluteFields(childFields);
+    fetchFields();
   }, [materialData]);
+
+  const fetchFields = async () => {
+    setInitialData({ fields: [], values: {} });
+    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.workOrderProduct}`);
+    var data = response?.data?.data;
+    data = CURReplaceByCurrencySingle(data, workOrderData?.currency || 'USD');
+    setInitialData({
+      fields: data,
+      values: getObjKeysWithValues(materialData, data)
+    });
+    EvaluteFields(data);
+  };
 
   const EvaluteFields = (fields) => {
     const sections = uniq(map(fields, 'sectionName'));

@@ -20,21 +20,24 @@ import { useData } from 'src/StateProvider/Provider';
 import History from '../../ProductInventory/LedgerHistory';
 import FormatListBulletedIcon from '@material-ui/icons/FormatListBulleted';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import DeleteButton from 'src/components/Helpers/DeleteButton';
 import { BiChevronDown } from 'react-icons/bi';
 import UpdateWorkOrderDialog from './UpdateWorkOrderDialog';
+import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
+import { generateCustomTableColumns } from 'src/constants/columns';
 
 const Consumables = ({
-  workOrderId,
-  warehouse,
   isCreate,
   allowedToEdit,
   service,
   uniqueId,
   stepId,
   serviceName,
-  materialSubType = MATERIAL_SUB_TYPE.consumable
+  materialSubType = MATERIAL_SUB_TYPE.consumable,
+  workOrderData
 }) => {
+
+  const workOrderId = workOrderData?._id;
+  const warehouse = workOrderData?.warehouse;
   const toastConfig = useContext(CustomToastContext);
   const [dataRows, setDataRows] = useState(null);
   const [columns, setColumns] = useState(null);
@@ -47,7 +50,6 @@ const Consumables = ({
   const [consumeRequest, setConsumeRequest] = useState(false);
   const [historyDialog, setHistoryDialog] = useState({ open: false, _id: '', product: '', productName: '' });
   const [updateDialog, setUpdateDialog] = useState({ open: false, data: null });
-  const [childFields, setChildFields] = useState([]);
   const [isUpdating, setUpdating] = useState(false);
 
   const [anchorEl, setAnchorEl] = useState(null);
@@ -70,18 +72,9 @@ const Consumables = ({
       }
     }
     setConsumeRequest(allowRequest);
-    fetchChildFields();
     fetchColumns();
     fetchData();
   }, [allowedToEdit, workOrderId, consumeRequest]);
-
-  const fetchChildFields = () => {
-    axiosInstance()
-      .get(`/field/child?resource=${CHILD_RESOURCE.workOrderProduct}`)
-      .then(({ data }) => {
-        setChildFields(data?.data);
-      });
-  };
 
   const handleUpdate = async (row: any) => {
     setUpdating(true);
@@ -100,6 +93,9 @@ const Consumables = ({
   };
   
   const fetchColumns = async () => {
+    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.workOrderProduct}`);
+    let childFields = response?.data?.data || [];
+    const hasChildFields = Array.isArray(childFields) && childFields.length > 0 ? true : false;
     const column = [];
     const {
       data: { data }
@@ -120,13 +116,12 @@ const Consumables = ({
           width: 250,
           primaryField: true,
           Cell: ({ row }) => {
-            const hasChild = Array.isArray(childFields) && childFields.length > 0 ? true : false;
             return row.original[e?.fieldName] ? (
               <div className="d-flex gap-2 align-items-center">
                 <p
-                  className={hasChild ? 'link text-truncate' : 'text-truncate'}
+                  className={hasChildFields ? 'link text-truncate' : 'text-truncate'}
                   onClick={() => {
-                    if(hasChild) return;
+                    if(!hasChildFields) return;
                     setUpdateDialog({
                       open: true,
                       data: row.original
@@ -160,6 +155,9 @@ const Consumables = ({
         });
       }
     });
+
+    let childFieldCols = CURReplaceByCurrencySingle(childFields, workOrderData?.currency || 'USD');
+    const newColumns = generateCustomTableColumns(childFieldCols, workOrderData?.currency || 'USD');
 
     const extracolumns: any = [
       {
@@ -214,6 +212,7 @@ const Consumables = ({
         width: 150,
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
       },
+      ...(hasChildFields ? newColumns : []),
       {
         accessor: 'action',
         Header: 'Actions',
@@ -546,7 +545,7 @@ const Consumables = ({
             materialData={updateDialog.data}
             handleUpdate={handleUpdate}
             loadingEdit={isUpdating}
-            childFields={childFields}
+            workOrderData={workOrderData}
           />
         )}
       </Grid>

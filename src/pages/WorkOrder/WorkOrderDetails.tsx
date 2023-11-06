@@ -349,13 +349,12 @@ const WorkOrderDetails = () => {
             <Consumables
               allowedToEdit={allowedToEdit && !completed}
               isCreate={true}
-              workOrderId={id}
-              warehouse={workOrderData?.warehouse}
               service={null}
               uniqueId={null}
               stepId={null}
               serviceName={null}
               materialSubType={MATERIAL_SUB_TYPE.consumable}
+              workOrderData={workOrderData}
             />
           )}
         </TabPanel>
@@ -364,13 +363,12 @@ const WorkOrderDetails = () => {
             <Consumables
               allowedToEdit={allowedToEdit && !completed}
               isCreate={true}
-              workOrderId={id}
-              warehouse={workOrderData?.warehouse}
               service={null}
               uniqueId={null}
               stepId={null}
               serviceName={null}
               materialSubType={MATERIAL_SUB_TYPE.bom}
+              workOrderData={workOrderData}
             />
           )}
         </TabPanel>
