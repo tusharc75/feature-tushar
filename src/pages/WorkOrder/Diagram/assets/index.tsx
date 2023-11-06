@@ -92,12 +92,12 @@ export const getFileIcon = (fileName: string) => {
   }
 };
 
-export const getFileNameWithExtention = (file: { url: string; name: string }) => {
-  const fileNameExtention = file.name.lastIndexOf('.');
-  if (fileNameExtention > -1) {
+export const getFileNameWithExtension = (file: { url: string; name: string }) => {
+  const fileNameExtension = file.name.lastIndexOf('.');
+  if (fileNameExtension > -1) {
     return file.name;
   } else {
-    const extention = file.url.substring(file.url.lastIndexOf('.')).toLowerCase();
-    return `${file.name}${extention}`;
+    const extension = file.url.substring(file.url.lastIndexOf('.')).toLowerCase();
+    return `${file.name}${extension}`;
   }
 };

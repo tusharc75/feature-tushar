@@ -13,7 +13,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { ATTACHMENT_TYPE, CustomDialogTransition } from 'src/constants/helpers';
 import ViewImage from './ViewImage';
-import { getFileIcon, getFileNameWithExtention } from './assets';
+import { getFileIcon, getFileNameWithExtension } from './assets';
 
 const Diagram = ({ resource, referenceId }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -126,7 +126,7 @@ const Diagram = ({ resource, referenceId }) => {
       <div className="flex justify-center items-center h-full absolute inset-0">
         <div className="flex flex-col gap-2 items-center">
           <FileIcon size={150} className="text-center" />
-          <p className=" line-clamp-1 text-[14px] font-normal">{getFileNameWithExtention(data)}</p>
+          <p className=" line-clamp-1 text-[14px] font-normal">{getFileNameWithExtension(data)}</p>
           <Button
             onClick={() => {
               downloadExcel(data);
@@ -245,7 +245,7 @@ const Diagram = ({ resource, referenceId }) => {
                                         <div className="w-[20px]">
                                           <Icon size={20} />
                                         </div>
-                                        <p className=" line-clamp-1 text-[14px] font-normal">{getFileNameWithExtention(f)}</p>
+                                        <p className=" line-clamp-1 text-[14px] font-normal">{getFileNameWithExtension(f)}</p>
                                       </div>
                                     </Tooltip>
                                   </Box>
