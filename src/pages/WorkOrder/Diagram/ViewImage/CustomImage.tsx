@@ -3,12 +3,11 @@ import useImage from 'use-image';
 import { Image, Text, Transformer } from 'react-konva';
 import type { ImageConfig } from 'konva/lib/shapes/Image';
 import type { TextConfig } from 'konva/lib/shapes/Text';
-import axiosInstance from 'src/axios/axiosInstance';
 
 interface ImageRenderProps extends Omit<ImageConfig, 'image'> {
   textProps?: TextInterface;
 }
-interface TextInterface extends TextConfig { }
+interface TextInterface extends TextConfig {}
 
 const ImageRender: React.FC<ImageRenderProps> = ({
   onTransformImage,
@@ -27,6 +26,28 @@ const ImageRender: React.FC<ImageRenderProps> = ({
     setImageState({ ...imageState, isDragging: isDragging, x: e.target.x(), y: e.target.y() });
   };
 
+  const handleWheel = (e) => {
+    e.evt.preventDefault();
+    const scaleBy = 1.02;
+    const stage = e.target.getStage();
+    const oldScale = stage.scaleX();
+    const point = stage.getPointerPosition();
+    
+    const newScale = e.evt.deltaY > 0 ? oldScale * scaleBy : oldScale / scaleBy;
+
+    const mousePointTo = {
+      x: point.x / oldScale - stage.x() / oldScale,
+      y: point.y / oldScale - stage.y() / oldScale
+    };
+
+
+    setImageState({
+      scale: newScale,
+      x: (point.x / newScale - mousePointTo.x) * newScale,
+      y: (point.y / newScale - mousePointTo.y) * newScale,      
+    });
+  };
+
   return (
     <>
       <Image
@@ -39,6 +60,7 @@ const ImageRender: React.FC<ImageRenderProps> = ({
         image={image}
         onTap={onTransformImage}
         onClick={onTransformImage}
+        onWheel={handleWheel}
         x={imageState.x}
         y={imageState.y}
         onDragStart={() => {
@@ -78,30 +100,9 @@ const ImageRender: React.FC<ImageRenderProps> = ({
   );
 };
 
-const CustomImage: React.FC<ImageRenderProps> = ({ onTransformImage, transformImage, imageState, key, setImageState, textProps, ...others }) => {
+const CustomImage: React.FC<ImageRenderProps> = ({ url, onTransformImage, transformImage, imageState, setImageState, textProps, ...others }) => {
   const imageRef = useRef(null);
   const trRef = useRef(null);
-  const [url, setUrl] = useState();
-
-  useEffect(() => {
-    if (!url) {
-      axiosInstance()
-        .get('/user/download?fileName=' + imageState?.url, {
-          responseType: 'blob'
-        })
-        .then(({ data }) => {
-          const file = new Blob([data], { type: 'application/pdf' });
-          var reader = new FileReader();
-          reader.readAsDataURL(file);
-          reader.onloadend = function () {
-            let base64data: any = reader.result;
-            setUrl(base64data);
-          };
-        })
-        .catch((err) => {
-        });
-    }
-  }, [key]);
 
   useEffect(() => {
     trRef.current?.nodes([imageRef.current]);

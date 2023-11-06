@@ -14,6 +14,7 @@ import ViewImage from './ViewImage';
 import { docIcon } from 'src/assets/file_icons';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
+import ShowPdf from './ShowPdf';
 
 const Diagram = ({ resource, referenceId }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -25,10 +26,15 @@ const Diagram = ({ resource, referenceId }) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [selectedAttachment, setSelectedAttachment] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchData();
   }, [resource, referenceId]);
+
+  useEffect(() => {
+    setLoading(true);
+  }, [selectedAttachment]);
 
   const fetchData = async () => {
     axiosInstance()
@@ -77,29 +83,6 @@ const Diagram = ({ resource, referenceId }) => {
       return true;
     }
     return false;
-  };
-
-  const ShowPdf = ({ data }) => {
-    const [url, seturl] = useState();
-    useEffect(() => {
-      axiosInstance()
-        .get(`user/download?fileName=${data?.url}`, {
-          responseType: 'blob'
-        })
-        .then(({ data }) => {
-          const file = new Blob([data], { type: 'application/pdf' });
-          const fileURL: any = URL.createObjectURL(file);
-          seturl(fileURL);
-        })
-        .catch((err) => {
-          toastConfig.setToastConfig(err);
-        });
-    }, [data]);
-    return (
-      <Box height={'calc(100vh - 150px)'}>
-        <iframe title={data?.name} src={url} width="100%" height="100%" frameBorder="0" scrolling="auto"></iframe>
-      </Box>
-    );
   };
 
   const downloadExcel = (file) => {
@@ -258,9 +241,9 @@ const Diagram = ({ resource, referenceId }) => {
               {selectedAttachment && (
                 <>
                   {checkImageType(selectedAttachment?.url?.split('.')[1]) ? (
-                    <ViewImage data={selectedAttachment} />
+                    <ViewImage data={selectedAttachment} loading={loading} setLoading={setLoading} />
                   ) : checkpdfType(selectedAttachment?.url?.split('.')[1]) ? (
-                    <ShowPdf data={selectedAttachment} />
+                    <ShowPdf data={selectedAttachment} loading={loading} setLoading={setLoading} />
                   ) : (
                     <ShowExcel data={selectedAttachment} />
                   )}
