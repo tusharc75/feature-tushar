@@ -107,8 +107,8 @@ const Planning = () => {
   const ActionsRenderer = {
     accessor: 'action',
     Header: 'Actions',
-    minWidth: 150,
-    width: 150,
+    minWidth: 130,
+    width: 130,
     sticky: 'right',
     disableFilters: true,
     canDrag: false,
@@ -138,6 +138,7 @@ const Planning = () => {
             <span>
               <IconButton
                 aria-label="Convert"
+                size="small"
                 onClick={() => {
                   let newPath = '';
                   if (row?.original?.type === 'Rental Job') {
@@ -164,6 +165,7 @@ const Planning = () => {
               <IconButton
                 disabled={permissions?.planning?.isUpdate ? false : true}
                 aria-label="Convert"
+                size="small"
                 onClick={() => {
                   setShowConverConfirmBox({ open: true, id: row?.original?._id, planningNumber: row?.original?.planningNumber });
                 }}

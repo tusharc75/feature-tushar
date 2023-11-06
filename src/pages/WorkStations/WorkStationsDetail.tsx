@@ -14,7 +14,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageWorkStations from './ManageWorkStations';
 import { sidebarResource } from 'src/constants/helpers';
-import ActiveService from './activeService';
+import CurrentStatus from './CurrentStatus';
 
 const WorkStationsDetail = () => {
   const { id } = useParams();
@@ -122,7 +122,7 @@ const WorkStationsDetail = () => {
         </Box>
       </Box>
       <Box className="detail-container-v1">
-      <Tabs
+        <Tabs
           className="new-tab-container-v1"
           value={tabValue}
           onChange={handleMainTabChange}
@@ -133,23 +133,25 @@ const WorkStationsDetail = () => {
             }
           }}
         >
-           <Tab label={<div className="tab-font">Details</div>} value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className={'tabLayout'} />
-           <Tab label={<div className="tab-font">Active Services</div>} value={1} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className={'tabLayout'} />
-          </Tabs>
-          {tabValue === 0 && (
-              <Box>
-                {loading || !fields?.length ? (
-                  <Grid container spacing={2} style={{ padding: '8px' }}>
-                    <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                  </Grid>
-                ) : (
-                  <DetailsPage data={workStationsData} fields={fields} />
-                )}
-              </Box>
-          )}
-          {tabValue === 1 && (
-              < ActiveService workStationId={id} />
-          )}
+          <Tab label={<div className="tab-font">Details</div>} value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className={'tabLayout'} />
+          <Tab label={<div className="tab-font">Active Services</div>} value={1} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className={'tabLayout'} />
+        </Tabs>
+        {tabValue === 0 && (
+          <Box>
+            {loading || !fields?.length ? (
+              <Grid container spacing={2} style={{ padding: '8px' }}>
+                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+              </Grid>
+            ) : (
+              <DetailsPage data={workStationsData} fields={fields} />
+            )}
+          </Box>
+        )}
+        {tabValue === 1 && (
+          <CurrentStatus
+            id={id}
+          />
+        )}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog
