@@ -409,7 +409,7 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
                   </Form>
                 </Box>
               ) : (
-                <Box p={2} height={300} bgcolor="white">
+                <Box p={2} height={300}>
                   <CommonSkeleton lenArray={[...Array(6).keys()]} />
                 </Box>
               )}

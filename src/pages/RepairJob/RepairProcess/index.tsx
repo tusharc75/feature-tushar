@@ -104,7 +104,7 @@ const RepairProcess = ({ onClose, onSuccess, assetId, assetNumber, repaired, rep
                 <Box key={i} p={1}>
                   <Typography variant="body1">{process.repairType}</Typography>
                 </Box>
-                <Box bgcolor="white" p={1} borderTop={1} borderColor="var(--common-border-color)" width={'100%'}>
+                <Box p={1} borderTop={1} borderColor="var(--common-border-color)" width={'100%'}>
                   <Grid container>
                     <Grid item xs={1} sm={1} md={1} lg={1}>
                       <Typography variant="body2">Sr.</Typography>
@@ -121,7 +121,7 @@ const RepairProcess = ({ onClose, onSuccess, assetId, assetNumber, repaired, rep
                   </Grid>
                 </Box>
                 {process?.steps?.map((step, index) => (
-                  <Box key={index} bgcolor="white" p={2} borderTop={1} borderColor="var(--common-border-color)" width={'100%'}>
+                  <Box key={index} p={2} borderTop={1} borderColor="var(--common-border-color)" width={'100%'}>
                     <Grid container>
                       <Grid item xs={1} sm={1} md={1} lg={1}>
                         <Typography variant="body2">{step.order}</Typography>

@@ -182,7 +182,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
             }))
           }}
           enableReinitialize={true}
-          onSubmit={() => { }}
+          onSubmit={() => {}}
         >
           {({ values, setFieldValue, errors }) => (
             <>
@@ -232,10 +232,10 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
                                         name={`${data?.type}_${data?._id}`}
                                         label={startCase(data?.type)}
                                         value={data?.detail}
-                                        size='small'
+                                        size="small"
                                         disabled
                                       />
-                                      {user?.user?.brandPolicy?.storageLocation &&
+                                      {user?.user?.brandPolicy?.storageLocation && (
                                         <Autocomplete
                                           size="small"
                                           value={data?.storageLocation}
@@ -259,7 +259,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
                                             />
                                           )}
                                         />
-                                      }
+                                      )}
                                       <TextField
                                         fullWidth
                                         label="Reject Quantity"
@@ -280,7 +280,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
                                         error={validate([data])?.rejectQuantity}
                                         helperText={validate([data]).rejectQuantity ? 'Reject quantity is more than quantity' : ''}
                                       />
-                                      {data.type === MATERIAL_TYPE.product &&
+                                      {data.type === MATERIAL_TYPE.product && (
                                         <TextField
                                           fullWidth
                                           label="Supplier Part Number"
@@ -297,7 +297,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
                                             });
                                           }}
                                         />
-                                      }
+                                      )}
                                       <TextField
                                         fullWidth
                                         label="Comment"
@@ -353,7 +353,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
                     </Form>
                   </Box>
                 ) : (
-                  <Box p={2} height={300} bgcolor="white">
+                  <Box p={2} height={300}>
                     <CommonSkeleton lenArray={[...Array(6).keys()]} />
                   </Box>
                 )}

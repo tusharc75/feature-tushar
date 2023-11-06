@@ -159,7 +159,7 @@ export const Vlookup = ({ fields, values, setFieldValue, _id, touched, errors })
   const Row = React.useMemo(() => {
     return React.forwardRef((props2: any, ref2: any) => (
       <div style={props2.style} ref={ref2}>
-        <Box bgcolor="white" border={1} p={1} borderColor="var(--common-border-color)" width={'100%'}>
+        <Box border={1} p={1} borderColor="var(--common-border-color)" width={'100%'}>
           <Box display="flex" flexDirection="row">
             <Box minWidth={100}>
               <IconButton aria-label="setting" onClick={() => AddRemoveValue('add', props2.index)}>
@@ -317,7 +317,7 @@ export const Vlookup = ({ fields, values, setFieldValue, _id, touched, errors })
           </Grid>
         </Box>
         <Box border={1} mt={1} p={1} borderColor="var(--common-border-color)">
-          <Box bgcolor="white" border={1} mb={1} p={1} borderColor="var(--common-border-color)" width={'100%'}>
+          <Box border={1} mb={1} p={1} borderColor="var(--common-border-color)" width={'100%'}>
             <Box display="flex" flexDirection="row">
               <Box minWidth={100} pl={2}>
                 <Typography variant="body2">Action</Typography>

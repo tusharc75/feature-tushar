@@ -71,14 +71,14 @@ const PublicRoutePage = () => {
 
   const fetchLinkData = async () => {
     setLoading(true);
-    axios.get(backendApi + `/public/check-link/${id}`)
+    axios
+      .get(backendApi + `/public/check-link/${id}`)
       .then(async ({ data }) => {
         setReferenceType(data?.data?.referenceType);
         if (data?.data?.referenceType === 'QuotationCustomer' || data?.data?.referenceType === 'RentalJob') {
-          document.title = 'Equipt Customer Portal'
-        }
-        else {
-          document.title = 'Equipt Supplier Portal'
+          document.title = 'Equipt Customer Portal';
+        } else {
+          document.title = 'Equipt Supplier Portal';
         }
         if (data?.data?.valid) {
           if (data?.data?.protected) {
@@ -100,7 +100,8 @@ const PublicRoutePage = () => {
       id: id
     };
     if (password) tempData['password'] = password;
-    axios.post(backendApi + `/public/get-data`, tempData)
+    axios
+      .post(backendApi + `/public/get-data`, tempData)
       .then(async ({ data }) => {
         setResourceData(data.data);
         setReferenceType(data?.data?.referenceIdType);
@@ -183,12 +184,12 @@ const PublicRoutePage = () => {
         ) : resourceData?.referenceIdType === sidebarResource.irtTicket ? (
           <IrtTicket openAuthId={id} openAuthData={resourceData?.data} />
         ) : (
-          <Box p={2} bgcolor="white">
+          <Box p={2}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )
       ) : (
-        <Box p={2} bgcolor="white">
+        <Box p={2}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

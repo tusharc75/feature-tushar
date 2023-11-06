@@ -93,7 +93,7 @@ const EditDashboards = (props) => {
           <Formik initialValues={initialValues} validationSchema={ProductBuilderSchema} onSubmit={handleSave}>
             {({ submitForm }) => (
               <Form>
-                <Box p={1} bgcolor="white">
+                <Box p={1}>
                   <Grid container spacing={1}>
                     <Grid item xs={12} sm={3}>
                       {initialValues.name}
