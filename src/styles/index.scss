@@ -4201,3 +4201,24 @@ body {
     }
   }
 }
+
+// calendar overlay{
+.rbc-overlay {
+  border-color: var(--common-border-color);
+  border-radius: 5px;
+  .rbc-overlay-header {
+    position: sticky;
+    top: -10px;
+    background-color: white;
+    border-color: var(--common-border-color);
+  }
+  max-height: 200px;
+  overflow-y: auto;
+  [data-mode='dark'] & {
+    background-color: var(--dark-secondary);
+    color: white;
+    .rbc-overlay-header {
+      background-color: var(--dark-secondary);
+    }
+  }
+}
