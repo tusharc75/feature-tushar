@@ -49,7 +49,7 @@ const ViewImage = ({ data }) => {
     setImageState({
       url: data?.url,
       id: data?._id,
-      name: data?.attachment,
+      name: data?.name,
       x: 150,
       isDragging: false,
       y: 0,
