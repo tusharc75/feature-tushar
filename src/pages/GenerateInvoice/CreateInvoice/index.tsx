@@ -235,7 +235,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
         obj.parentId = _asset._id;
         obj.type = MATERIAL_TYPE.serializedAsset;
         obj.materialId = _asset.inventory;
-        obj.serializedAssetDetail = _asset?.assetDetail;
+        obj.serializedAssetDetail = _asset?.serializedAssetDetail;
         obj.actualStartDate = product?.actualStartDate;
         obj.pricingMethod = product?.pricingMethod;
         newMaterial.push(obj);
