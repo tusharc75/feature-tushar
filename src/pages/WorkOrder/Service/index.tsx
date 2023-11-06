@@ -110,6 +110,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
       permissions
     }
   } = useData();
+  const workOrderConsumableHide = user?.brandPolicy?.workOrderConsumableHide === true ? true : false;
   const [serviceSteps, setServiceSteps] = useState(null);
   const [selectedService, setSelectedService] = useState(null);
   const [stepSubmitedData, setStepSubmitedData] = useState([]);
@@ -1140,20 +1141,22 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
               >
                 Upload Documents
               </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  setConsumablesDialog({
-                    open: true,
-                    uniqueId: selectedService.uniqueId,
-                    service: selectedService._id,
-                    stepId: null,
-                    serviceName: selectedService.serviceName
-                  });
-                  setAnchorEl(null);
-                }}
-              >
-                Add/Consume Products
-              </MenuItem>
+              {!workOrderConsumableHide && (
+                <MenuItem
+                  onClick={() => {
+                    setConsumablesDialog({
+                      open: true,
+                      uniqueId: selectedService.uniqueId,
+                      service: selectedService._id,
+                      stepId: null,
+                      serviceName: selectedService.serviceName
+                    });
+                    setAnchorEl(null);
+                  }}
+                >
+                  Add/Consume Products
+                </MenuItem>
+                )}
               <MenuItem
                 disabled={
                   disableCompleteFail ||

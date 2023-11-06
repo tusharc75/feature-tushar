@@ -55,6 +55,7 @@ const WorkOrder = ({
       permissions
     }
   } = useData();
+  const workOrderConsumableHide = user?.brandPolicy?.workOrderConsumableHide === true ? true : false;
   const [selectedRecords, setSelectedRecords] = useState([]);
 
   const [columns, setColumns] = useState(null);
@@ -338,7 +339,7 @@ const WorkOrder = ({
                 </IconButton>
               </HtmlTooltip>
             )}
-            {[MATERIAL_TYPE.service, MATERIAL_TYPE.serializedAsset]?.includes(row?.original?.type) && (
+            {[MATERIAL_TYPE.service, MATERIAL_TYPE.serializedAsset]?.includes(row?.original?.type) && !workOrderConsumableHide && (
               <HtmlTooltip title="Add Products/Consumables">
                 <IconButton
                   size="small"
@@ -853,32 +854,34 @@ const WorkOrder = ({
                   Assign Work Station
                 </MenuItem>
                 )}
-              <MenuItem
-                disabled={
-                  selectedRecords?.filter((d) => [MATERIAL_TYPE.serializedAsset, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0 &&
-                    checkUniqWorkOrder()
-                    ? false
-                    : true
-                }
-                onClick={() => {
-                  var ids = [];
-                  if (selectedRecords?.find((e) => e.type === MATERIAL_TYPE.serializedAsset)) {
-                    const asset = selectedRecords?.find((e) => e.type === MATERIAL_TYPE.serializedAsset);
-                    ids = flattenArray(rowsData)
-                      ?.filter((e) => e?.workOrder?._id === asset?.workOrder?._id)
-                      ?.map((e) => e.materialId);
-                  } else {
-                    const serviceIds = selectedRecords?.filter((d) => d?.type === MATERIAL_TYPE.service)?.map((e) => e._id);
-                    ids = flattenArray(rowsData)
-                      ?.filter((e) => serviceIds?.includes(e?.parentId))
-                      ?.map((e) => e.materialId);
+              {!workOrderConsumableHide && (
+                <MenuItem
+                  disabled={
+                    selectedRecords?.filter((d) => [MATERIAL_TYPE.serializedAsset, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0 &&
+                      checkUniqWorkOrder()
+                      ? false
+                      : true
                   }
-                  closeActions();
-                  setConsumablesDialog({ open: true, ids: ids, data: null });
-                }}
-              >
-                Add Products/Consumables
-              </MenuItem>
+                  onClick={() => {
+                    var ids = [];
+                    if (selectedRecords?.find((e) => e.type === MATERIAL_TYPE.serializedAsset)) {
+                      const asset = selectedRecords?.find((e) => e.type === MATERIAL_TYPE.serializedAsset);
+                      ids = flattenArray(rowsData)
+                        ?.filter((e) => e?.workOrder?._id === asset?.workOrder?._id)
+                        ?.map((e) => e.materialId);
+                    } else {
+                      const serviceIds = selectedRecords?.filter((d) => d?.type === MATERIAL_TYPE.service)?.map((e) => e._id);
+                      ids = flattenArray(rowsData)
+                        ?.filter((e) => serviceIds?.includes(e?.parentId))
+                        ?.map((e) => e.materialId);
+                    }
+                    closeActions();
+                    setConsumablesDialog({ open: true, ids: ids, data: null });
+                  }}
+                >
+                  Add Products/Consumables
+                </MenuItem>
+              )}
               <MenuItem
                 onClick={() => {
                   closeActions();
