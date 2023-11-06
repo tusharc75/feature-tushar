@@ -30,7 +30,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   const {
     state: { user, permissions }
   }: any = useData();
-
+  const workOrderConsumableHide = user?.brandPolicy?.workOrderConsumableHide === true ? true : false;
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
@@ -603,32 +603,34 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                   Assign Work Station
                 </MenuItem>
               )}
-              <MenuItem
-                disabled={
-                  selectedProducts?.filter((d) => [MATERIAL_TYPE.product, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0 &&
-                    checkUniqWorkOrder()
-                    ? false
-                    : true
-                }
-                onClick={() => {
-                  var ids = [];
-                  if (selectedProducts?.find((e) => e.type === MATERIAL_TYPE.product)) {
-                    const product = selectedProducts?.find((e) => e.type === MATERIAL_TYPE.product);
-                    ids = flattenArray(rowsData)
-                      ?.filter((e) => e?.workOrder?._id === product?.workOrder?._id)
-                      ?.map((e) => e.materialId);
-                  } else {
-                    const serviceIds = selectedProducts?.filter((d) => d?.type === MATERIAL_TYPE.service)?.map((e) => e._id);
-                    ids = flattenArray(rowsData)
-                      ?.filter((e) => serviceIds?.includes(e?.parentId))
-                      ?.map((e) => e.materialId);
+              {!workOrderConsumableHide && (
+                <MenuItem
+                  disabled={
+                    selectedProducts?.filter((d) => [MATERIAL_TYPE.product, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0 &&
+                      checkUniqWorkOrder()
+                      ? false
+                      : true
                   }
-                  closeActions();
-                  setConsumablesDialog({ open: true, ids: ids, data: null });
-                }}
-              >
-                Add Products/Consumables
-              </MenuItem>
+                  onClick={() => {
+                    var ids = [];
+                    if (selectedProducts?.find((e) => e.type === MATERIAL_TYPE.product)) {
+                      const product = selectedProducts?.find((e) => e.type === MATERIAL_TYPE.product);
+                      ids = flattenArray(rowsData)
+                        ?.filter((e) => e?.workOrder?._id === product?.workOrder?._id)
+                        ?.map((e) => e.materialId);
+                    } else {
+                      const serviceIds = selectedProducts?.filter((d) => d?.type === MATERIAL_TYPE.service)?.map((e) => e._id);
+                      ids = flattenArray(rowsData)
+                        ?.filter((e) => serviceIds?.includes(e?.parentId))
+                        ?.map((e) => e.materialId);
+                    }
+                    closeActions();
+                    setConsumablesDialog({ open: true, ids: ids, data: null });
+                  }}
+                >
+                  Add Products/Consumables
+                </MenuItem>
+              )}
               <MenuItem
                 onClick={() => {
                   closeActions();
