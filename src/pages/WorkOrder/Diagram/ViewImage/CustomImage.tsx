@@ -28,24 +28,27 @@ const ImageRender: React.FC<ImageRenderProps> = ({
 
   const handleWheel = (e) => {
     e.evt.preventDefault();
+
     const scaleBy = 1.02;
+
     const stage = e.target.getStage();
     const oldScale = stage.scaleX();
-    const point = stage.getPointerPosition();
-    
+
+    const pointer = stage.getPointerPosition();
+
     const newScale = e.evt.deltaY > 0 ? oldScale * scaleBy : oldScale / scaleBy;
 
-    const mousePointTo = {
-      x: point.x / oldScale - stage.x() / oldScale,
-      y: point.y / oldScale - stage.y() / oldScale
+    stage.scale({ x: newScale, y: newScale });
+
+    const newPos = {
+      x: -(pointer.x / oldScale - pointer.x / newScale),
+      y: -(pointer.y / oldScale - pointer.y / newScale)
     };
-
-
-    setImageState({
-      scale: newScale,
-      x: (point.x / newScale - mousePointTo.x) * newScale,
-      y: (point.y / newScale - mousePointTo.y) * newScale,      
+    stage.position({
+      x: newPos.x,
+      y: newPos.y
     });
+    stage.batchDraw();
   };
 
   return (
