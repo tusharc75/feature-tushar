@@ -4,7 +4,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { MATERIAL_SUB_TYPE, sidebarResource, workOrder } from 'src/constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_SUB_TYPE, repairOrder, sidebarResource, workOrder } from 'src/constants/helpers';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
@@ -22,6 +22,7 @@ import FormatListBulletedIcon from '@material-ui/icons/FormatListBulleted';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import { BiChevronDown } from 'react-icons/bi';
+import UpdateWorkOrderDialog from './UpdateWorkOrderDialog';
 
 const Consumables = ({
   workOrderId,
@@ -45,6 +46,9 @@ const Consumables = ({
   const [openLogDialog, setOpenLogDialog] = useState({ open: false, product: '', uniqueId: null, data: null });
   const [consumeRequest, setConsumeRequest] = useState(false);
   const [historyDialog, setHistoryDialog] = useState({ open: false, _id: '', product: '', productName: '' });
+  const [updateDialog, setUpdateDialog] = useState({ open: false, data: null });
+  const [childFields, setChildFields] = useState([]);
+  const [isUpdating, setUpdating] = useState(false);
 
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -66,10 +70,35 @@ const Consumables = ({
       }
     }
     setConsumeRequest(allowRequest);
+    fetchChildFields();
     fetchColumns();
     fetchData();
   }, [allowedToEdit, workOrderId, consumeRequest]);
 
+  const fetchChildFields = () => {
+    axiosInstance()
+      .get(`/field/child?resource=${CHILD_RESOURCE.workOrderProduct}`)
+      .then(({ data }) => {
+        setChildFields(data?.data);
+      });
+  };
+
+  const handleUpdate = async (row: any) => {
+    setUpdating(true);
+    try {
+      const data: any = row;
+      delete data.workOrder;
+      await axiosInstance().put(`${repairOrder.api}/${workOrderId}/work-order/${workOrderId}`, { material: [data] });
+    } catch (error) {
+      setUpdating(false);
+      toastConfig.setToastConfig(error);
+    } finally {
+      setUpdating(false);
+      fetchData();
+      setUpdateDialog({ open: false, data: null });
+    }
+  };
+  
   const fetchColumns = async () => {
     const column = [];
     const {
@@ -93,7 +122,17 @@ const Consumables = ({
           Cell: ({ row }) => {
             return row.original[e?.fieldName] ? (
               <div className="d-flex gap-2 align-items-center">
-                <p className="text-truncate">{row.original[e?.fieldName]}</p>
+                <p
+                  className={Array.isArray(childFields) && childFields.length > 0 ? 'link text-truncate' : 'text-truncate'}
+                  onClick={() => {
+                    setUpdateDialog({
+                      open: true,
+                      data: row.original
+                    });
+                  }}
+                >
+                  {row.original[e?.fieldName]}
+                </p>
                 <IconButton
                   size="small"
                   onClick={() => {
@@ -495,6 +534,17 @@ const Consumables = ({
             referenceId={workOrderId}
             uniqueId={historyDialog._id}
             product={historyDialog.product}
+          />
+        )}
+        {updateDialog.open && (
+          <UpdateWorkOrderDialog
+            onClose={() => {
+              setUpdateDialog({ open: false, data: null });
+            }}
+            materialData={updateDialog.data}
+            handleUpdate={handleUpdate}
+            loadingEdit={isUpdating}
+            childFields={childFields}
           />
         )}
       </Grid>
