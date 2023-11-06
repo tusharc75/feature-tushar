@@ -26,6 +26,7 @@ import ManageProductionOrder from './ManageProductionOrder';
 import Material from './Material';
 import WorkOrder from './WorkOrder';
 import LoadingTicket from './LoadingTicket';
+import Invoice from './Invoice';
 
 function a11yProps(index: any) {
   return {
@@ -63,8 +64,8 @@ const ProductionOrderDetails = () => {
   const [stepFullScreen, setStepFullScreen] = useState(false);
 
   const productionOrderProcessStepsNames = React.useMemo(() => {
-    return productionOrderSteps.map((item) => item.name);
-  }, [productionOrderSteps]);
+    return productionOrderProcessSteps.map((item) => item.name);
+  }, [productionOrderProcessSteps]);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -356,6 +357,13 @@ const ProductionOrderDetails = () => {
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={allowedToEdit && permissions?.productionOrder?.isUpdate ? true : false}
                 setCurrentStep={setCurrentStep}
+              />
+            )}
+            {productionOrderProcessStepsNames[currentStep] === 'Final Slip' && productionOrderData && (
+              <Invoice
+                productionOrderData={productionOrderData}
+                renderedFrom={`${renderedFrom}_grid-2`}
+                stepFullScreen={stepFullScreen}
               />
             )}
 
