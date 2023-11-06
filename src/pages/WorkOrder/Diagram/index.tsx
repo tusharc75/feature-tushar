@@ -13,7 +13,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { ATTACHMENT_TYPE, CustomDialogTransition } from 'src/constants/helpers';
 import ViewImage from './ViewImage';
-import { getFileIcon, getFileNameWithExtension } from './assets';
+import { getFileIcon, getFileNameWithExtension } from './utils';
 
 const Diagram = ({ resource, referenceId }) => {
   const toastConfig = useContext(CustomToastContext);
