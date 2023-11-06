@@ -795,18 +795,7 @@ function CustomReactTable({
               className="border"
             >
               {(loading || error) && (
-                <Box
-                  bgcolor={'rgba(255,255,255,0.2)'}
-                  width="100%"
-                  height="100%"
-                  zIndex={100}
-                  position="absolute"
-                  top={0}
-                  left={0}
-                  display="flex"
-                  justifyContent="center"
-                  alignItems="center"
-                >
+                <Box className="bg-[rgba(255,255,255,0.2)] dark:bg-[rgba(0,0,0,0.1)] w-full h-full z-[100] absolute inset-0 flex justify-center items-center">
                   <div className="bg-[white] dark:bg-[var(--dark-secondary)] px-10 py-5 rounded-lg text-center shadow-md">
                     {error ? (
                       <>
