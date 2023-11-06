@@ -81,13 +81,3 @@ export const fileIcons = [
     icon: VideoFile
   }
 ];
-
-export const getFileIcon = (fileName: string) => {
-  let extension = fileName.substring(fileName.lastIndexOf('.')).toLowerCase();
-  let data = fileIcons.find((o) => o.extensions.indexOf(extension) >= 0);
-  if (data && data?.icon) {
-    return data.icon;
-  } else {
-    return FileIcon; // default icon if no icon is found for the file extension.
-  }
-};
