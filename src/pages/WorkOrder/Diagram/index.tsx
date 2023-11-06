@@ -1,6 +1,6 @@
-import { useContext, useEffect, useState } from 'react';
-import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Dialog, Grid, IconButton, Typography } from '@material-ui/core';
-import { Add } from '@material-ui/icons';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Collapse, Dialog, Grid, IconButton, Typography } from '@material-ui/core';
+import { Add, Delete } from '@material-ui/icons';
 import axiosInstance from 'src/axios/axiosInstance';
 import { ATTACHMENT_TYPE, CustomDialogTransition } from 'src/constants/helpers';
 import ManageAttachment from 'src/components/Activity/Attachments/ManageAttachment';
@@ -14,6 +14,8 @@ import ViewImage from './ViewImage';
 import { docIcon } from 'src/assets/file_icons';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
+import { getFileIcon } from './assets';
+import { BiDownload } from 'react-icons/bi';
 
 const Diagram = ({ resource, referenceId }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -66,7 +68,7 @@ const Diagram = ({ resource, referenceId }) => {
   };
 
   const checkImageType = (memeType) => {
-    if (['jpg', 'png'].includes(memeType)) {
+    if (['jpg', 'png', 'jpeg'].includes(memeType)) {
       return true;
     }
     return false;
@@ -120,15 +122,24 @@ const Diagram = ({ resource, referenceId }) => {
       });
   };
 
-  const ShowExcel = ({ data }) => {
+  const ShowOtherFiles = ({ data }) => {
+    const FileIcon = getFileIcon(data.url);
     return (
-      <div
-        onClick={() => {
-          downloadExcel(data);
-        }}
-        style={{ cursor: 'pointer' }}
-      >
-        <img width={200} src={docIcon} alt="attchment" />;
+      <div className="flex justify-center items-center h-full absolute inset-0">
+        <div className="flex flex-col gap-2 items-center">
+          <FileIcon size={150} className="text-center" />
+          <Button
+            onClick={() => {
+              downloadExcel(data);
+            }}
+            variant="contained"
+            className="no-shadow"
+            color="inherit"
+            endIcon={<BiDownload />}
+          >
+            Download
+          </Button>
+        </div>
       </div>
     );
   };
@@ -153,120 +164,122 @@ const Diagram = ({ resource, referenceId }) => {
               </Button>
             </Box>
             <Box pt={2} pb={2}>
-              <Box
-                style={{
-                  overflow: 'auto',
-                  height: 'calc(100vh - 250px)'
-                }}
-              >
-                {rowData &&
-                  rowData?.map((file, index) => {
-                    return (
-                      <Accordion
-                        expanded={expended[file?._id]}
-                        className="omsAccordian"
-                        onChange={() => {
-                          setExpended((prev) => ({
-                            ...prev,
-                            [file?._id]: expended[file?._id] ? false : true
-                          }));
-                        }}
-                      >
-                        <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
-                          <Box width="100%" display="flex" justifyContent="space-between" alignItems="center">
-                            <Box display="flex" alignItems="center">
-                              <IconButton size="small">{expended[file?._id] ? <ExpandMoreIcon /> : <KeyboardArrowRight />}</IconButton>
+              <Box className=" overflow-auto h-[calc(100vh-250px)]">
+                <div className=" grid gap-3">
+                  {rowData &&
+                    rowData?.map((file, index) => {
+                      return (
+                        <div key={file._id} className="shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
+                          <div
+                            className={`head flex items-center justify-between cursor-pointer w-full p-[8px_15px] ${
+                              expended[file?._id]
+                                ? 'bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)] rounded-[4px_4px_0_0]'
+                                : 'bg-[var(--accordion-summary-bg,#fff)] rounded-[4px]'
+                            }`}
+                            onClick={() => {
+                              setExpended((prev) => ({
+                                ...prev,
+                                [file?._id]: expended[file?._id] ? false : true
+                              }));
+                            }}
+                          >
+                            <div className="flex items-center">
+                              <span className="p-1">{expended[file?._id] ? <ExpandMoreIcon /> : <KeyboardArrowRight />}</span>
                               <Box ml={2}>
                                 <Typography style={{ fontWeight: 600 }}>{file?.name}</Typography>
                               </Box>
-                            </Box>
-                            <Box display="flex">
-                              <div style={{ flexBasis: 'max-content' }}>
-                                <HtmlTooltip title="Edit" placement="top" arrow>
-                                  <IconButton
-                                    size="small"
-                                    color="inherit"
-                                    aria-label="edit"
-                                    onClick={() => {
-                                      setAttachemntDialog({ open: true, id: file?._id });
-                                    }}
-                                  >
-                                    <EditIcon style={{ fontSize: '18px' }} />
-                                  </IconButton>
-                                </HtmlTooltip>
-                              </div>
-                              <div style={{ flexBasis: 'max-content' }}>
-                                <HtmlTooltip title="Delete" placement="top" arrow>
-                                  <IconButton
-                                    size="small"
-                                    color="inherit"
-                                    style={{ color: 'red' }}
-                                    aria-label="delete"
-                                    onClick={() => {
-                                      setSelectedFile(file);
-                                      setShowConfirmBox(true);
-                                    }}
-                                  >
-                                    <DeleteOutlineIcon style={{ fontSize: '18px' }} />
-                                  </IconButton>
-                                </HtmlTooltip>
-                              </div>
-                            </Box>
-                          </Box>
-                        </AccordionSummary>
-                        <AccordionDetails style={{ display: 'flex', flexDirection: 'column' }}>
-                          {expended[file?._id] &&
-                            file?.file?.map((f) => {
-                              return (
-                                <Box
-                                  p={1}
-                                  onClick={() => {
-                                    setSelectedAttachment(f);
-                                  }}
-                                  style={{
-                                    cursor: 'pointer',
-                                    border:
-                                      selectedAttachment?.url === f?.url
-                                        ? '1px solid var(--dark-active-border-color,#298B88)'
-                                        : '1px solid var(--dark-mode-border-color, rgb(224, 224, 224))'
+                            </div>
+                            <div className="flex gap-2">
+                              <HtmlTooltip title="Edit" placement="top" arrow>
+                                <IconButton
+                                  size="small"
+                                  color="inherit"
+                                  aria-label="edit"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setAttachemntDialog({ open: true, id: file?._id });
                                   }}
                                 >
-                                  <Box>
-                                    <Typography style={{ fontWeight: 600 }}>{f?.name}</Typography>
+                                  <EditIcon style={{ fontSize: '18px' }} />
+                                </IconButton>
+                              </HtmlTooltip>
+                              <HtmlTooltip title="Delete" placement="top" arrow>
+                                <IconButton
+                                  size="small"
+                                  color="inherit"
+                                  style={{ color: 'red' }}
+                                  aria-label="delete"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedFile(file);
+                                    setShowConfirmBox(true);
+                                  }}
+                                >
+                                  <Delete style={{ fontSize: '18px' }} />
+                                </IconButton>
+                              </HtmlTooltip>
+                            </div>
+                          </div>
+
+                          <Collapse in={expended[file?._id]}>
+                            <div className="border border-[var(--common-border-color)]">
+                              {file?.file?.map((f) => {
+                                const Icon = getFileIcon(f.url);
+                                return (
+                                  <Box
+                                    key={f.url}
+                                    onClick={() => {
+                                      setSelectedAttachment(f);
+                                    }}
+                                    className="px-[18px] py-[8px] cursor-pointer"
+                                    style={{
+                                      border:
+                                        selectedAttachment?.url === f?.url
+                                          ? '1px solid var(--dark-active-border-color,#0F9FA9 )'
+                                          : '1px solid transparent',
+                                      borderBottomColor:
+                                        selectedAttachment?.url === f?.url ? 'var(--dark-active-border-color,#0F9FA9 )' : 'var(--common-border-color)'
+                                    }}
+                                  >
+                                    <div className="flex gap-2 items-center" title={f.name}>
+                                      <div className="w-[20px]">
+                                        <Icon size={20} />
+                                      </div>
+                                      <p className=" line-clamp-1 font-semibold">{f?.name}</p>
+                                    </div>
                                   </Box>
-                                </Box>
-                              );
-                            })}
-                        </AccordionDetails>
-                      </Accordion>
-                    );
-                  })}
+                                );
+                              })}
+                            </div>
+                          </Collapse>
+                        </div>
+                      );
+                    })}
+                </div>
               </Box>
             </Box>
           </Box>
         </Grid>
         <Grid item xs={12} sm={7} md={7} lg={8} xl={9}>
           <Box
-            className="container-with-border"
+            className="container-with-border relative"
             p={'20px'}
             style={{
               overflow: 'hidden',
               minHeight: '100%'
             }}
           >
-            <Box>
-              {selectedAttachment && (
-                <>
-                  {checkImageType(selectedAttachment?.url?.split('.')[1]) ? (
-                    <ViewImage data={selectedAttachment} />
-                  ) : checkpdfType(selectedAttachment?.url?.split('.')[1]) ? (
-                    <ShowPdf data={selectedAttachment} />
-                  ) : (
-                    <ShowExcel data={selectedAttachment} />
-                  )}
-                </>
-              )}
-            </Box>
+            {selectedAttachment && (
+              <>
+                {checkImageType(selectedAttachment?.url?.split('.')[1]) ? (
+                  <ViewImage data={selectedAttachment} key={selectedAttachment.url} />
+                ) : checkpdfType(selectedAttachment?.url?.split('.')[1]) ? (
+                  <ShowPdf data={selectedAttachment} key={selectedAttachment.url} />
+                ) : (
+                  <ShowOtherFiles data={selectedAttachment} key={selectedAttachment.url} />
+                )}
+              </>
+            )}
           </Box>
         </Grid>
       </Grid>
