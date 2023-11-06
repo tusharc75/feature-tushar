@@ -1,4 +1,4 @@
-import { Box, Button, Collapse, Dialog, Grid, IconButton, Typography } from '@material-ui/core';
+import { Box, Button, Collapse, Dialog, Grid, IconButton, Tooltip, Typography } from '@material-ui/core';
 import { Add, Delete } from '@material-ui/icons';
 import EditIcon from '@material-ui/icons/Edit';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
@@ -240,12 +240,14 @@ const Diagram = ({ resource, referenceId }) => {
                                         selectedAttachment?.url === f?.url ? 'var(--dark-active-border-color,#0F9FA9 )' : 'var(--common-border-color)'
                                     }}
                                   >
-                                    <div className="flex gap-2 items-center" title={f.name}>
-                                      <div className="w-[20px]">
-                                        <Icon size={20} />
+                                    <Tooltip enterTouchDelay={0} title={f.name} placement={'top'} arrow>
+                                      <div className="flex gap-2 items-center">
+                                        <div className="w-[20px]">
+                                          <Icon size={20} />
+                                        </div>
+                                        <p className=" line-clamp-1 text-[14px] font-normal">{getFileNameWithExtention(f)}</p>
                                       </div>
-                                      <p className=" line-clamp-1 text-[14px] font-normal">{getFileNameWithExtention(f)}</p>
-                                    </div>
+                                    </Tooltip>
                                   </Box>
                                 );
                               })}
