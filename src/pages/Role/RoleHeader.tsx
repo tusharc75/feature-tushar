@@ -9,8 +9,9 @@ import { useData } from '../../StateProvider/Provider';
 import routes from '../../components/Helpers/Routes';
 import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
 import MobileSortDialog from '../../components/MobileSortDialog';
-import { localStorageKeys } from '../../constants/helpers';
+import { ROLE_TIER, localStorageKeys } from '../../constants/helpers';
 import styles from '../Leads/Header.module.scss';
+import { PERMISSION } from 'src/constants/Roles';
 
 const RoleHeader = (props) => {
   const {
@@ -27,7 +28,8 @@ const RoleHeader = (props) => {
     columns,
     dispatch,
     filters,
-    resource
+    resource,
+    updateResourceOpen
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
   const [filter, setFilter] = useState(
@@ -193,6 +195,26 @@ const RoleHeader = (props) => {
                   }}
                 >
                   Assign users
+                </MenuItem>
+                <MenuItem
+                  disabled={selectedRecords?.some((e) => e?.permission === PERMISSION.brandAdmin
+                    || [ROLE_TIER.tier2, ROLE_TIER.tier3]?.includes(e?.tier)) ? true : false}
+                  onClick={() => {
+                    closeActions();
+                    updateResourceOpen({ action: "Assign" });
+                  }}
+                >
+                  Assign Resource
+                </MenuItem>
+                <MenuItem
+                  disabled={selectedRecords?.some((e) => e?.permission === PERMISSION.brandAdmin
+                    || [ROLE_TIER.tier2, ROLE_TIER.tier3]?.includes(e?.tier)) ? true : false}
+                  onClick={() => {
+                    closeActions();
+                    updateResourceOpen({ action: "Remove" });
+                  }}
+                >
+                  Remove Resource
                 </MenuItem>
               </Menu>
             </>

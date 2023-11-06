@@ -514,6 +514,7 @@ export default function CustomReactTable({
 
   const submitInput = () => {
     const rowData = Object.keys(rowState[currentRowEditing.id].cellState).filter((k) => rowState[currentRowEditing.id].cellState[k].isEditing);
+
     const updatedData = flattenArray(data)?.find((row) => row?._id == currentRowEditing?.original?._id);
     updatedData[rowData[0]] = cellValue;
     const inputField = { [`${rowData[0]}`]: cellValue };
@@ -660,6 +661,7 @@ export default function CustomReactTable({
                               background: 'transparent',
                               outline: 'none'
                             }}
+                            className="border-0 appearance-none "
                             value={cellValue}
                             onChange={(e) => {
                               let value: any = e.target.value;
@@ -670,7 +672,7 @@ export default function CustomReactTable({
                           />
                         ) : isCellEditing && currentRowEditing && currentRowEditing.id === row.id && cell?.column.id === 'action' ? (
                           <HtmlTooltip title="Save">
-                            <IconButton size="small" aria-label="Save" onClick={submitInput}>
+                            <IconButton size="small" aria-label="Save" onClick={(e) => submitInput()}>
                               <Check color="primary" />
                             </IconButton>
                           </HtmlTooltip>

@@ -89,12 +89,12 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                  ? row.original?.packageDetail?.packageType === 'Product'
-                    ? '(Product)'
-                    : '(Service)'
-                  : row.original.type === 'service'
-                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                    : ''}
+                ? row.original?.packageDetail?.packageType === 'Product'
+                  ? '(Product)'
+                  : '(Service)'
+                : row.original.type === 'service'
+                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                : ''}
             </Box>
           </div>
         )
@@ -233,14 +233,14 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
         parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'package'
-            ? parent.packageDetail?.packageName
-            : parent.serviceDetail?.serviceName;
+          ? parent.packageDetail?.packageName
+          : parent.serviceDetail?.serviceName;
       parent.description =
         parent.type === 'product'
           ? parent?.productDetail?.productDescription
           : parent.type === 'package'
-            ? parent?.packageDetail?.packageDescription
-            : parent?.serviceDetail?.serviceDescription;
+          ? parent?.packageDetail?.packageDescription
+          : parent?.serviceDetail?.serviceDescription;
       parent.qty = parent.qty;
       parent.qtyDisplay = parent.qty;
       parent.assetQty = data.material?.filter((i) => i.parentId === parent._id && i.type === 'serializedAsset')?.length;
@@ -268,18 +268,18 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
         _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'package'
-            ? _subRow.packageDetail?.packageName
-            : _subRow.type === 'serializedAsset'
-              ? _subRow.assetDetail.assetNumber
-              : _subRow.serviceDetail?.serviceName;
+          ? _subRow.packageDetail?.packageName
+          : _subRow.type === 'serializedAsset'
+          ? _subRow.assetDetail.assetNumber
+          : _subRow.serviceDetail?.serviceName;
       _subRow.description =
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productDescription
           : _subRow.type === 'package'
-            ? _subRow?.packageDetail?.packageDescription
-            : _subRow.type === 'serializedAsset'
-              ? parent.description
-              : _subRow?.serviceDetail?.serviceDescription;
+          ? _subRow?.packageDetail?.packageDescription
+          : _subRow.type === 'serializedAsset'
+          ? parent.description
+          : _subRow?.serviceDetail?.serviceDescription;
       _subRow.qty = _subRow.qty;
       _subRow.assetQty = material?.filter((i) => i.parentId === _subRow._id && i.type === 'serializedAsset')?.length;
       _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
@@ -412,7 +412,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
     <Fragment>
       <Box display="flex" justifyContent="space-between" m={1}>
         <Box display="flex" alignItems="center">
-          {allowedToEdit &&
+          {allowedToEdit && (
             <>
               <Button variant={'outlined'} color="primary" size="small" startIcon={<AddIcon />} onClick={openAddActions} aria-controls="add-menu">
                 {'Add'}
@@ -456,7 +456,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
                 </MenuItem>
               </Menu>
             </>
-          }
+          )}
         </Box>
         <Box display="flex">
           <PreviewDownload
@@ -464,9 +464,10 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
             resource={sidebarResource.planning}
             referenceId={planningData._id}
             columns={columns}
-            isSendEmail={true} />
+            isSendEmail={true}
+          />
           <Box mr={1} />
-          {allowedToEdit &&
+          {allowedToEdit && (
             <>
               <Button
                 disabled={selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true}
@@ -531,7 +532,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
                 </MenuItem>
               </Menu>
             </>
-          }
+          )}
         </Box>
       </Box>
       {columns && rowsData ? (
@@ -580,37 +581,29 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
       )}
       {addDialog.open && addDialog.type === 'product' && (
         <AssignProductDialog
-          reference="planning"
-          serialized={null}
-          productsDialogOpen={addDialog.open}
-          productId={null}
           handleCloseDialog={() => setAddDialog({ open: false, type: '', parentId: null })}
-          assignedProducts={[]}
           onSuccess={(d) => {
             handleAdd(d);
           }}
+          isSubmitting={isAdding}
         />
       )}
       {addDialog.open && addDialog.type === 'service' && (
         <AssignServiceDialog
-          reference={'planning'}
-          referenceId={planningData?._id}
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
-          ids={[]}
           onSuccess={(rows) => {
             handleAdd(rows);
           }}
+          isSubmitting={isAdding}
         />
       )}
       {addDialog.open && addDialog.type === 'package' && (
         <AssignPackageDialog
-          referenceType="planning"
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
-          ids={[]}
           onSuccess={(rows) => {
             handleAdd(rows);
           }}
-          packageType={null}
+          isSubmitting={isAdding}
         />
       )}
       {addDialog.open && addDialog.type === 'serializedAsset' && (

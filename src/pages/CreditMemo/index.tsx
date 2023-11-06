@@ -1,136 +1,136 @@
-import { Button, IconButton, Menu, MenuItem, Tooltip } from '@material-ui/core';
-import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import CustomContainer from 'src/components/CustomContainer';
-import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
-import routes from 'src/components/Helpers/Routes';
-import styles from '../Leads/Header.module.scss';
-import SearchBox from 'src/components/Helpers/SearchBox';
-import { camelCase } from 'lodash';
-import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
-import { useData } from 'src/StateProvider/Provider';
-import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
-import axiosInstance from 'src/axios/axiosInstance';
-import {
-  getLocalStorageArrayData,
-  gridLoadingTimeout,
-  isObjectEmpty,
-  prepareDataForGrid,
-  removeLocalStorage,
-  sidebarResource
-} from 'src/constants/helpers';
-import DeleteIcon from '@material-ui/icons/Delete';
+import { Button, IconButton } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { useContext, useEffect, useState } from 'react';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
+import { getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, removeLocalStorage, sidebarResource } from '../../constants/helpers';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import routes from './../../components/Helpers/Routes';
+import { camelCase } from 'lodash';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import styles from '../Leads/Header.module.scss';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import { Menu, MenuItem } from '@material-ui/core';
+import { ToggleButtonGroup, ToggleButton } from '@material-ui/lab';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import DeleteIcon from '@material-ui/icons/Delete';
 import ManageCreditMemo from './ManageCreditMemo';
+
+let searchTimeout;
 
 const CreditMemo = () => {
   const renderedFrom = camelCase(routes?.creditMemo.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
-
   const toastConfig = useContext(CustomToastContext);
-  const {
-    state: { permissions, selectedEntity, user }
-  }: any = useData();
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
-    state;
-  const [creditMemoId, setCreditMemoId] = useState(null);
-  const [open, setOpen] = useState({ open: false, isClone: false });
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [deleteRecord, setDeleteRecord] = useState(null);
-  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
-  const [columns, setColumns] = useState([]);
-  const [gridApi, setGridApi] = useState(null);
+
+  const { state, dispatch } = useTableReducer();
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { getColumnData } = useColumns();
 
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource?.creditMemo}`)
-      .then(({ data: { data } }) => {
-        let columns = [];
-        let rendererNames = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.creditMemoDetail.path, true);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName);
-            }
-          }
-        });
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent,
-          actionsRenderer: ActionsRenderer
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
-        columns = [...columns, ...getStaticFields()];
-        setColumns([...columns]);
-      });
+  const {
+    state: { user, permissions, selectedEntity }
+  }: any = useData();
+
+  const [selectedType, setSelectedType] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
+  const [deleteRecord, setDeleteRecord] = useState(null);
+
+  const [columns, setColumns] = useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  useEffect(() => {
+    fetchGridColumns();
+  }, []);
+
+  useEffect(() => {
+    let millisec = Object.keys(search).length > 0 ? 600 : 5;
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+    searchTimeout = setTimeout(() => {
+      fetchData();
+    }, millisec);
+  }, [search]);
+  useEffect(() => {
+    fetchData();
+  }, [page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
+
+  const fetchGridColumns = async () => {
+    let data;
+    const response = await axiosInstance().get(`/field?resource=${sidebarResource?.creditMemo}`);
+    data = response?.data?.data;
+    let columns = [];
+    data.forEach((o) => {
+      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.creditMemoDetail.path, true);
+      if (currentColumn !== null) {
+        columns = [...columns, currentColumn?.columnData];
+      }
+      return o?.fieldData;
+    });
+    columns = [...columns, ...getStaticFields(), ActionsRenderer];
+    setColumns(columns);
   };
 
-  const fetchCreditMemoData = () => {
-    dispatch({ type: 'loading', loading: true });
-    const queryString = getQueryString();
-
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
-    axiosInstance()
-      .get(`${routes?.creditMemo.path}${queryString}`)
-      .then(({ data: { data } }) => {
-        let count = data?.count;
-        let rows = data?.data?.map((u: any) => {
-          let finalObject: any = prepareDataForGrid(u);
-          finalObject['canDelete'] = permissions?.creditMemo?.isDelete;
-          finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions?.creditMemo?.isUpdate;
-
-          return {
-            ...finalObject
-          };
-        });
-        if (appendRows) {
-          dispatch({
-            type: 'initialize',
-            data: [...dataRows, ...rows],
-            count: count,
-            selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
-          });
-        } else {
-          dispatch({
-            type: 'initialize',
-            data: rows,
-            count: count,
-            selectedRecords: rows.filter((f) => f.isChecked === true)
-          });
-        }
-        dispatch({ type: 'initialize', data: rows, count: count });
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
-      });
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 100,
+    sticky: 'right',
+    disableFilters: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        {permissions?.creditMemo?.isCreate ? (
+          <HtmlTooltip title="Clone">
+            <IconButton
+              size="small"
+              aria-label="Clone"
+              onClick={() => {
+                setShowManageDialog({ open: true, isClone: true, idToClone: row.original._id });
+              }}
+            >
+              <FileCopyIcon fontSize="small" color="primary" />
+            </IconButton>
+          </HtmlTooltip>
+        ) : (
+          <HtmlTooltip className="cursor-stop" title="You do not have permission to clone/create">
+            <IconButton aria-label="Clone" size="small">
+              <FileCopyIcon fontSize="small" />
+            </IconButton>
+          </HtmlTooltip>
+        )}
+        {permissions?.creditMemo?.isDelete && (
+          <HtmlTooltip title="Delete">
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              onClick={() => {
+                setDeleteRecord(row.original);
+                setShowDeleteConfirmBox(true);
+              }}
+            >
+              <DeleteIcon color="error" />
+            </IconButton>
+          </HtmlTooltip>
+        )}
+      </>
+    )
   };
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-
     if (isExport) {
       deepFilter = `?`;
     }
-
-    if (selectedEntity) {
-      deepFilter = `${deepFilter}&entity=${selectedEntity}`;
-    }
-
     const { filterByIds, deepFilters } = gridFilterParser(filters);
-
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
@@ -140,21 +140,72 @@ const CreditMemo = () => {
     if (filterByIds?.length || deepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
     }
-
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
-
     if (search) {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
-
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
-
     return deepFilter;
+  };
+
+  const fetchData = async () => {
+    dispatch({ type: 'loading', loading: true });
+    const queryString = getQueryString();
+
+    axiosInstance()
+      .get(`${routes.creditMemo.path}${queryString}`)
+      .then(({ data: { data} }) => {
+        let count = data?.count
+        let rows = data?.data?.map((u) => {
+          let finalObject = prepareDataForGrid(u, user);
+          finalObject['isChecked'] = false;
+          finalObject['allowedToEdit'] = permissions?.creditMemo?.isUpdate;
+          finalObject['canDelete'] = permissions?.creditMemo?.isDelete;
+          return finalObject;
+        });
+        dispatch({ type: 'initialize', data: rows, count: count });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      })
+      .finally(() => {
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
+      });
+  };
+
+  const handleSearch = (e) => {
+    dispatch({ type: 'search', search: e.target.value });
+  };
+
+  const handleDelete = () => {
+    setIsSubmitting(true);
+    let ids = [];
+    if (deleteRecord) {
+      ids.push(deleteRecord._id);
+    } else {
+      ids = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((d) => d._id);
+    }
+    axiosInstance()
+      .put(`${routes.creditMemo.path}/remove`, { ids: ids })
+      .then(() => {
+        removeLocalStorage(localStorageSelectedRecords);
+        fetchData();
+        setShowDeleteConfirmBox(false);
+        setDeleteRecord(null);
+        setAnchorEl(null);
+        setIsSubmitting(false);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setIsSubmitting(false);
+      });
   };
 
   const openActions = (event) => {
@@ -165,98 +216,15 @@ const CreditMemo = () => {
     setAnchorEl(null);
   };
 
-  const handleSearch = (e) => {
-    dispatch({ type: 'search', search: e.target.value });
-  };
-
-  const ActionsRenderer = (params) => (
-    <Fragment>
-      {permissions?.creditMemo?.isCreate ? (
-        <Tooltip title="Clone">
-          <IconButton
-            aria-label="Clone"
-            onClick={() => {
-              setCreditMemoId(params.data.id);
-              setOpen({ open: true, isClone: true });
-            }}
-          >
-            <FileCopyIcon fontSize="small" color="primary" />
-          </IconButton>
-        </Tooltip>
-      ) : (
-        <Tooltip className="cursor-stop" title="You do not have permission to clone/create">
-          <IconButton aria-label="Clone" size="small">
-            <FileCopyIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      )}
-
-      {params?.data?.canDelete ? (
-        <Tooltip title="Delete">
-          <IconButton
-            aria-label="Delete"
-            onClick={() => {
-              setDeleteRecord(params.data);
-              setShowDeleteConfirmBox(true);
-            }}
-          >
-            <DeleteIcon fontSize="small" color="error" />
-          </IconButton>
-        </Tooltip>
-      ) : (
-        <Tooltip className="cursor-stop" title="You do not have permission to delete">
-          <IconButton aria-label="Delete" size="small">
-            <DeleteIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      )}
-    </Fragment>
-  );
-
-  const handleDelete = () => {
-    let ids = [];
-    if (deleteRecord) {
-      ids.push(deleteRecord._id);
-    } else {
-      ids = selectedRecords.map((m) => m._id);
-    }
-    axiosInstance()
-      .put(`${routes?.creditMemo?.path}/remove`, { ids: ids })
-      .then(({ data }) => {
-        removeLocalStorage(localStorageSelectedRecords);
-        fetchCreditMemoData();
-        setShowDeleteConfirmBox(false);
-        setDeleteRecord(null);
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data?.message
-        });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  };
-
-  useEffect(() => {
-    fetchGridColumns();
-  }, []);
-
-  useEffect(() => {
-    fetchCreditMemoData();
-  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
-
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: routes.creditMemo.title }]} />
+        <CustomBreadCrumbs routes={[routes.creditMemo]} />
         <ImportExportLinks
           permissions={permissions?.creditMemo}
           module="creditMemo"
-          api={'credit-memo'}
-          afterImportCompleted={() => {
-            fetchCreditMemoData();
-          }}
+          api={routes.creditMemo.path}
+          afterImportCompleted={() => {}}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
@@ -266,34 +234,30 @@ const CreditMemo = () => {
               : []
           }
           onExportToExcelSuccess={() => {
-            if (gridApi) gridApi.deselectAll();
-            else fetchCreditMemoData();
+            fetchData();
           }}
           additionalParams={getQueryString(true)}
+          onlyExport={true}
         />
       </div>
       <CustomContainer>
         <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className={'d-flex align-items-center gap-1'}></div>
-            <div className="flex flex-wrap gap-[8px]  justify-end">
-              <SearchBox onChange={handleSearch} className={styles.search_box_input} size="small" value={search} />
-              <div className="flex gap-[8px] flex-wrap items-center">
-                {permissions?.creditMemo?.isCreate && (
-                  <Button
-                    className={'no-shadow'}
-                    onClick={() => {
-                      setCreditMemoId(null);
-                      setOpen({ open: true, isClone: false });
-                    }}
-                    variant={'contained'}
-                    size="small"
-                    color="primary"
-                    startIcon={<AddOutlined />}
-                  >
-                    Add
-                  </Button>
-                )}
+          {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-4"> */}
+          <div className="flex flex-wrap gap-[8px] justify-end">
+            <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
+            {/* <div className="flex gap-[8px] flex-wrap items-center"> */}
+            {/* <Button
+                  variant={'contained'}
+                  color="primary"
+                  size="small"
+                  className={`no-shadow`}
+                  onClick={() => {
+                    setShowManageDialog({ open: true, isClone: false, idToClone: null });
+                  }}
+                  startIcon={<AddOutlined />}
+                >
+                  Add
+                </Button>
                 {permissions?.creditMemo?.isDelete && (
                   <>
                     <Button
@@ -301,10 +265,10 @@ const CreditMemo = () => {
                       color="default"
                       size="small"
                       onClick={openActions}
-                      disabled={selectedRecords.length ? false : true}
-                      aria-controls="action-menu"
                       className={`new-dropdown-v1`}
+                      aria-controls="action-menu"
                       endIcon={<ExpandMore />}
+                      disabled={selectedRecords?.length ? false : true}
                     >
                       Actions
                     </Button>
@@ -321,17 +285,8 @@ const CreditMemo = () => {
                       onClose={closeActions}
                     >
                       <MenuItem
-                        disabled={
-                          !(
-                            (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length
-                          )
-                        }
                         onClick={() => {
                           closeActions();
-                          // eslint-disable-next-line no-lone-blocks
-                          {
-                            selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
-                          }
                           setShowDeleteConfirmBox(true);
                         }}
                       >
@@ -339,92 +294,51 @@ const CreditMemo = () => {
                       </MenuItem>
                     </Menu>
                   </>
-                )}
-              </div>
-            </div>
+                )} */}
+            {/* </div> */}
           </div>
+          {/* </div> */}
         </div>
-        {Object.keys(frameWorkComponent).length > 0 ? (
-          isMobile && !isTablet ? (
-            <CustomSwipableList
-              allowSelection={true}
-              allowSwipe={true}
-              permissions={permissions.creditMemo}
-              primaryField={columns?.find((d) => d.primaryField)}
-              onClick={(data) => {
-                setCreditMemoId(data.id);
-                setOpen({ open: true, isClone: false });
-              }}
-              dataRows={dataRows}
-              selectedRecords={selectedRecords}
-              dispatch={dispatch}
-              onEdit={(data) => {
-                setCreditMemoId(data.id);
-                setOpen({ open: true, isClone: false });
-              }}
-              extraParamsToCheckDelete={true}
-              onDelete={(data) => {
-                setDeleteRecord(data);
-                setShowDeleteConfirmBox(true);
-              }}
-              rowCount={rowCount}
-              page={page}
-              loading={loading}
-              additionalDetails={[]}
-              owerCollaboratorInitialsOrImages=""
-              onCreate={false}
-              showClone={true}
-              onClone={(data) => {
-                setCreditMemoId(data.id);
-                setOpen({ open: true, isClone: true });
-              }}
-              chips={[]}
-              renderedFrom={renderedFrom}
-            />
-          ) : (
-            <CustomAgGrid
-              columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameWorkComponent}
-              setGridApi={setGridApi}
-              dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              allowAction={true}
-              loading={loading}
-              renderedFrom={renderedFrom}
-              refreshGrid={fetchCreditMemoData}
-              showOnlyShowFilteredRecordSwitch={true}
-              showFilters={true}
-              resource={sidebarResource.creditMemo}
-            />
-          )
+        {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
+            columns={columns}
+            onSelect={() => {}}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            isClientSideGrid={false}
+            refreshGrid={fetchData}
+            showOnlyShowFilteredRecordSwitch={true}
+            showFilters={true}
+            resource={sidebarResource.creditMemo}
+            hideAction={true}
+          />
         ) : null}
-        {showDeleteConfirmBox && (
-          <ConfirmationDialog
-            open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${routes?.creditMemo?.title?.toLowerCase()}  ${deleteRecord?.creditMemoNumber || ''} ?`}
-            onClose={() => {
-              setDeleteRecord(null);
-              setShowDeleteConfirmBox(false);
-            }}
-            onOk={handleDelete}
-          />
-        )}
-        {open?.open && (
-          <ManageCreditMemo
-            id={creditMemoId}
-            isClone={open?.isClone}
-            onClose={() => setOpen({ open: false, isClone: false })}
-            onSuccess={() => {
-              setOpen({ open: false, isClone: false });
-              fetchCreditMemoData();
-            }}
-          />
-        )}
       </CustomContainer>
+      {showDeleteConfirmBox && (
+        <ConfirmationDialog
+          open={showDeleteConfirmBox}
+          message={`Are you sure you want to delete ${routes?.creditMemo?.title} ${deleteRecord?.creditMemoNumber || ''} ?`}
+          onClose={() => {
+            setDeleteRecord(null);
+            setShowDeleteConfirmBox(false);
+          }}
+          okBtnLoading={isSubmitting}
+          onOk={handleDelete}
+        />
+      )}
+      {showManageDialog.open && (
+        <ManageCreditMemo
+          isClone={showManageDialog.isClone}
+          creditMemoId={showManageDialog.idToClone}
+          onClose={() => setShowManageDialog({ open: false, isClone: false, idToClone: null })}
+          onSuccess={() => {
+            fetchData();
+            setShowManageDialog({ open: false, isClone: false, idToClone: null });
+          }}
+        />
+      )}
     </section>
   );
 };

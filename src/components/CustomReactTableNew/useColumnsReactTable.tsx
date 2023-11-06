@@ -8,6 +8,7 @@ import { dateFormat, sidebarResourceObjectFromValues } from 'src/constants/helpe
 import { leadDetailPage } from 'src/routes/Lead';
 import routes from '../Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
+import { Image } from '@material-ui/icons';
 
 const permissionForLinks = sidebarResourceObjectFromValues();
 
@@ -44,6 +45,7 @@ export const getStaticFields = () => {
       Header: 'Created By',
       show: true,
       minWidth: 185,
+      canFilter: false,
       Cell: ({ row }) =>
         row?.original?.createdBy ? (
           <h5 className="createBy" title={`${row?.original?.createdBy} • ${moment(row?.original?.createdByDate.slice(0, 10)).format(dateFormat)}`}>
@@ -59,6 +61,7 @@ export const getStaticFields = () => {
       Header: 'Updated By',
       minWidth: 185,
       show: true,
+      canFilter: false,
       Cell: ({ row }) =>
         row?.original?.updatedBy ? (
           <h5 className="updateBy" title={`${row?.original?.updatedBye} • ${moment(row?.original?.updatedByDate.slice(0, 10)).format(dateFormat)}`}>
@@ -106,12 +109,26 @@ export const getSortedColumns = (columns = []) => {
   });
 };
 export const staticColumns = ['createdBy', 'updatedBy'];
+
+// const getColumnWidth = (text) => {
+//   const textLength = text.length;
+//   const characterWidth = 8;
+//   const searchIconWidth = 30;
+//   const searchIconMargin = 10;
+//   const tempWidth = textLength * characterWidth + searchIconWidth + searchIconMargin;
+//   const width = Math.max(tempWidth, 150);
+//   const minWidth = 80;
+//   return {
+//     minWidth,
+//     width
+//   };
+// };
 export default function useColumns() {
   const {
-    state: { permissions, user, selectedEntity }
+    state: { permissions }
   }: any = useData();
 
-  const getColumnData = (title, field, detailScreenRoute = null, hasPopup = false) => {
+  const getColumnData = (title, field, detailScreenRoute = null, masterPage = false) => {
     let data = localStorage.getItem('gridMetaData');
 
     let gridMetaData = data == 'undefined' ? {} : JSON.parse(data);
@@ -130,6 +147,7 @@ export default function useColumns() {
       let commonFieldData = {
         accessor: field?.fieldName,
         Header: fieldHeaderName,
+        // ...getColumnWidth(fieldHeaderName),
         show: gridMetaData[title]?.hide && gridMetaData[title]?.hide.indexOf(field?.fieldName) >= 0 ? false : true,
         disabled: gridMetaData[title]?.disabled && gridMetaData[title]?.disabled.indexOf(field?.fieldName) >= 0 ? true : false,
         primaryField: field?.primaryField ?? false
@@ -143,15 +161,19 @@ export default function useColumns() {
             accessor: 'concatedName',
             Cell: ({ row }) => (
               <Fragment>
-                <Link
-                  className="link text-truncate"
-                  title={row?.original?.detail}
-                  to={`${pathName}/${row?.original?._id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {row?.original?.concatedName}
-                </Link>
+                {row?.original?.concatedName ? (
+                  <Link
+                    className="link text-truncate"
+                    title={row?.original?.detail}
+                    to={`${pathName}/${row?.original?._id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {row?.original?.concatedName}
+                  </Link>
+                ) : (
+                  <NoDataCell />
+                )}
               </Fragment>
             )
           }
@@ -163,20 +185,22 @@ export default function useColumns() {
             ...commonFieldData,
             disabled: true,
             accessor: field?.fieldName === 'firstName' ? 'concatedName' : field.fieldName,
-            cellRenderer: permissions[permissionForLinks[field?.resource]]?.isRead ? 'linkRenderer' : 'commonRenderer',
-            cellRendererParams: { pathName: detailScreenRoute, property: '_id' },
             Cell: ({ row }) =>
               permissions[permissionForLinks[field?.resource]]?.isRead ? (
                 <Fragment>
-                  <Link
-                    className="link text-truncate"
-                    title={row?.original?.[field?.fieldName]}
-                    to={`${detailScreenRoute}/${row?.original?._id}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {row?.original?.[field?.fieldName]}
-                  </Link>
+                  {row?.original?.[field?.fieldName] ? (
+                    <Link
+                      className="link text-truncate"
+                      title={row?.original?.[field?.fieldName]}
+                      to={`${detailScreenRoute}/${row?.original?._id}`}
+                      target={masterPage ? '_self' : '_blank'}
+                      rel="noopener noreferrer"
+                    >
+                      {row?.original?.[field?.fieldName]}
+                    </Link>
+                  ) : (
+                    <NoDataCell />
+                  )}
                 </Fragment>
               ) : (
                 <p className="text-truncate">{row?.original?.[field?.fieldName] ? <p>{row?.original?.[field?.fieldName]}</p> : <NoDataCell />}</p>
@@ -203,27 +227,33 @@ export default function useColumns() {
         return {
           columnData: {
             ...commonFieldData,
-            cellRenderer: permissions[permissionForLinks[field?.lookupResource]]?.isRead ? 'linkRenderer' : 'commonRenderer',
-            cellRendererParams: {
-              pathName: pathName,
-              property: joinedFieldName + 'Id',
-              more: `rest${joinedFieldName}`
-            },
             Cell: ({ row }) =>
               permissions[permissionForLinks[field?.lookupResource]]?.isRead ? (
                 <Fragment>
-                  <Link
-                    className="link text-truncate"
-                    title={row?.original?.[field?.fieldName]}
-                    to={`${pathName}/${row?.original?.[`${field?.fieldName}Id`]}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {row?.original?.[field?.fieldName]}
-                  </Link>
+                  {row?.original?.[field?.fieldName] ? (
+                    <Link
+                      className="link text-truncate"
+                      title={row?.original?.[field?.fieldName]}
+                      to={`${pathName}/${row?.original?.[`${field?.fieldName}Id`]}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {row?.original?.[field?.fieldName]}
+                    </Link>
+                  ) : (
+                    <NoDataCell />
+                  )}
                 </Fragment>
               ) : (
-                <p className="text-truncate">{row?.original?.[field?.fieldName] ? <p>{row?.original?.[field?.fieldName]}</p> : <NoDataCell />}</p>
+                <>
+                  {row?.original?.[field?.fieldName] ? (
+                    <h5 className="text-truncate" title={row?.original?.[field?.fieldName]}>
+                      {row?.original?.[field?.fieldName]}
+                    </h5>
+                  ) : (
+                    <NoDataCell />
+                  )}
+                </>
               )
           }
         };
@@ -231,7 +261,6 @@ export default function useColumns() {
         return {
           columnData: {
             ...commonFieldData,
-            cellRenderer: 'commonRendererWithCopy',
             Cell: ({ row }) =>
               row?.original?.[field?.fieldName] ? (
                 <h5
@@ -250,10 +279,13 @@ export default function useColumns() {
         return {
           columnData: {
             ...commonFieldData,
-            filter: false,
+            canFilter: false,
             sortable: false,
-            cellRenderer: 'imageRenderer',
-            Cell: ({ row }) => <Avatar className="grid-avatar" src={row?.original?.[field?.fieldName]} />,
+            Cell: ({ row }) => (
+              <Avatar className="grid-avatar" src={row?.original?.[field?.fieldName]}>
+                <Image style={{ fontSize: 18 }} />
+              </Avatar>
+            ),
             width: 100
           }
         };
@@ -261,31 +293,42 @@ export default function useColumns() {
         return {
           columnData: {
             ...commonFieldData,
-            cellRenderer: 'dateRenderer',
             Cell: ({ row }) => (
-              <p className="text-truncate">
-                {row?.original?.[field?.fieldName] ? <p>{moment(row?.original?.[field?.fieldName]).format(dateFormat)}</p> : <NoDataCell />}
-              </p>
+              <>
+                {row?.original?.[field?.fieldName] ? (
+                  <h5 className="createBy" title={`${moment(row?.original?.[field?.fieldName]).format(dateFormat)}`}>
+                    {moment(row?.original?.[field?.fieldName])?.format(dateFormat)}
+                  </h5>
+                ) : (
+                  <NoDataCell />
+                )}
+              </>
             ),
-            filter: false
+            canFilter: false
           }
         };
       } else if (field?.type === 'checkBox') {
         return {
           columnData: {
             ...commonFieldData,
-            Cell: ({ row }) => <span>{Boolean(row?.original?.[field?.fieldName]) ? 'Yes' : 'No'}</span>,
-            cellRenderer: 'checkboxRenderer'
+            Cell: ({ row }) => <span>{Boolean(row?.original?.[field?.fieldName]) ? 'Yes' : 'No'}</span>
           }
         };
       } else if (field?.type === 'colorPicker') {
         return {
           columnData: {
             ...commonFieldData,
-            cellRenderer: 'commonRenderer',
-            filter: false,
+            canFilter: false,
             Cell: ({ row }) => (
-              <p className="text-truncate">{row?.original?.[field?.fieldName] ? <p>{row?.original?.[field?.fieldName]}</p> : <NoDataCell />}</p>
+              <>
+                {row?.original?.[field?.fieldName] ? (
+                  <h5 className="text-truncate" title={row?.original?.[field?.fieldName]}>
+                    {row?.original?.[field?.fieldName]}
+                  </h5>
+                ) : (
+                  <NoDataCell />
+                )}
+              </>
             )
           }
         };
@@ -293,9 +336,16 @@ export default function useColumns() {
         return {
           columnData: {
             ...commonFieldData,
-            cellRenderer: 'commonRenderer',
             Cell: ({ row }) => (
-              <p className="text-truncate">{row?.original?.[field?.fieldName] ? <p>{row?.original?.[field?.fieldName]}</p> : <NoDataCell />}</p>
+              <>
+                {row?.original?.[field?.fieldName] ? (
+                  <h5 className="text-truncate" title={row?.original?.[field?.fieldName]}>
+                    {row?.original?.[field?.fieldName]}
+                  </h5>
+                ) : (
+                  <NoDataCell />
+                )}
+              </>
             )
           }
         };

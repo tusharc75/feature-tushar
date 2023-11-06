@@ -8,7 +8,7 @@ import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridCo
 import { CommonRenderer, DateTimeRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { camelCase } from 'lodash';
-import { employeeMaster } from 'src/constants/helpers';
+import { employeeMaster, sidebarResource } from 'src/constants/helpers';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
 
@@ -22,7 +22,7 @@ const History = ({ id }) => {
 
     const NameRenderer = (params: { value: any; data: { type: string; referenceId: any } }) => (
         <>
-            {params.value ? params.data?.type === 'Field Ticket' ? (
+            {params.data?.type === sidebarResource.fieldTicket ? (
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                     <p>
                         {params?.value}
@@ -38,13 +38,26 @@ const History = ({ id }) => {
                         </IconButton>
                     </Box>
                 </div>
-            ) :
-                (
-                    params.value
-                )
-                : (
-                    <NoDataCell />
-                )}
+            ) : params.value ? params.data?.type === sidebarResource.rentalManagement ? (
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <p>
+                        {params?.value}
+                    </p>
+                    <Box ml={1}>
+                        <IconButton
+                            size="small"
+                            onClick={() => {
+                                window.open(`${routes.rentalManagementDetail.path}/${params.data.referenceId}`);
+                            }}
+                        >
+                            <OpenInNewIcon fontSize="small" color="primary" />
+                        </IconButton>
+                    </Box>
+                </div>
+            ) : params?.value ? (
+                params.value
+            ) : (<NoDataCell />) : (<NoDataCell />)
+            }
         </>
     );
 

@@ -54,6 +54,8 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
   const [openLogDialog, setOpenLogDialog] = useState({ open: false, product: '', uniqueId: null, data: null });
   const [historyDialog, setHistoryDialog] = useState({ open: false, _id: '', product: '', productName: '' });
 
+  const [isSubmitting, setSubmitting] = useState(false);
+
   useEffect(() => {
     setServiceOption([{ optionLabel: 'All', optionValue: 'All' },
     ...services?.map((s) => {
@@ -321,6 +323,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
   };
 
   const handleSubmit = async (rows) => {
+    setSubmitting(true)
     const material: any = [];
     rows.forEach((d) => {
       const element: any = {};
@@ -375,9 +378,11 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
         });
         setConsumablesDialog(false);
         fetchData();
+        setSubmitting(false)
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
+        setSubmitting(false)
       });
   };
 
@@ -562,31 +567,31 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
                     horizontal: 'right'
                   }}
                 >
-                    <MenuItem
-                      onClick={() => {
-                        setIsConsumableEdit({ open: true, data: null, showSaveAndNext: false });
-                        setIsBulkEdit(true);
-                        handleClose();
-                      }}
-                    >
-                      Bulk Edit
-                    </MenuItem>
-                  
-                    <MenuItem
-                      disabled={isDeleting || selectedRecords?.some((e) => e?.requestedQty || e?.consumedQty)}
-                      onClick={() => {
-                        setDeleteData(
-                          selectedRecords?.map((d) => {
-                            return {
-                              id: d?._id
-                            };
-                          })
-                        );
-                        handleClose();
-                      }}
-                    >
-                      Delete
-                    </MenuItem>
+                  <MenuItem
+                    onClick={() => {
+                      setIsConsumableEdit({ open: true, data: null, showSaveAndNext: false });
+                      setIsBulkEdit(true);
+                      handleClose();
+                    }}
+                  >
+                    Bulk Edit
+                  </MenuItem>
+
+                  <MenuItem
+                    disabled={isDeleting || selectedRecords?.some((e) => e?.requestedQty || e?.consumedQty)}
+                    onClick={() => {
+                      setDeleteData(
+                        selectedRecords?.map((d) => {
+                          return {
+                            id: d?._id
+                          };
+                        })
+                      );
+                      handleClose();
+                    }}
+                  >
+                    Delete
+                  </MenuItem>
                 </Menu>
               </Box>
             </Box>
@@ -625,15 +630,13 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
       </TabPanel>
       {consumablesDialog && (
         <AssignProductDialog
-          productsDialogOpen={consumablesDialog}
-          productId={fieldTicketData?._id}
-          reference={'fieldTicket'}
           handleCloseDialog={() => setConsumablesDialog(false)}
-          assignedProducts={dataRows?.map((d) => d?.materialId)}
+          ids={dataRows?.map((d) => d?.materialId)}
           onSuccess={(rows) => {
             handleSubmit(rows);
           }}
           serialized={false}
+          isSubmitting={isSubmitting}
         />
       )}
 

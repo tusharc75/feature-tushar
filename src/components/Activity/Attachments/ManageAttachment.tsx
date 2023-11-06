@@ -21,9 +21,12 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import AttachmentThumbnail from 'src/components/AttachmentThumbnail';
 import { isEqual } from 'lodash';
 import DocumentScanner from '../Helpers/DocumentScanner';
+import { ATTACHMENT_TYPE } from 'src/constants/helpers';
+import { Autocomplete } from '@material-ui/lab';
 
 const AttachmentSchema = object().shape({
   name: string().required('Attachment Name is required'),
+  attachmentType: string().nullable(),
   fileUrl: string().required('please upload attachment')
 });
 
@@ -111,7 +114,8 @@ export default function ManageAttachment({
       request = {
         name: values.name,
         file: otherAttachments,
-        relatedTo: relatedTo
+        relatedTo: relatedTo,
+        attachmentType: values?.attachmentType || ''
       };
     } else {
       request = {
@@ -226,8 +230,8 @@ export default function ManageAttachment({
             <CustomDialogContent>
               <Form autoComplete="off" autoCorrect="off" noValidate>
                 <Box padding={1}>
-                  <Grid container spacing={3}>
-                    <Grid item xs={12}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={type == "file" ? 6 : 12}>
                       <TextField
                         variant="outlined"
                         type="text"
@@ -245,6 +249,30 @@ export default function ManageAttachment({
                         }}
                       />
                     </Grid>
+                    {type === 'file' && (
+                      <Grid item xs={6}>
+                        <Autocomplete
+                          id="attachmentType"
+                          size="small"
+                          options={Object.values(ATTACHMENT_TYPE)}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              size="small"
+                              variant="outlined"
+                              label="Attachment Type"
+                              margin="dense"
+                            />
+                          )}
+                          getOptionLabel={(option) => option}
+                          getOptionSelected={(option: any, value: any) => option === value}
+                          onChange={(e, val) => {
+                            setFieldValue('attachmentType', val);
+                          }}
+                          value={values['attachmentType']}
+                        />
+                      </Grid>
+                    )}
                     {type === 'file' && (
                       <Grid container item xs={12}>
                         <Grid item xs={12}>

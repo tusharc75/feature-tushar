@@ -196,31 +196,130 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
           <>
             <CustomDialogContent>
               {values?.products && values?.products?.length ? (
-                <Box p={2}>
+                <Box className="min-[769px]:p-[16px] max-[768px]:py-[11px]">
                   <Form>
                     <FieldArray
                       name="products"
                       render={(arrayHelpers) => (
-                        <TableContainer className={classes.tableContainer} component={Paper}>
-                          <Table aria-label="customized table">
-                            <TableHead>
-                              <TableRow>
-                                <TableCell>Index</TableCell>
-                                <TableCell align="left">Product</TableCell>
-                                {user?.user?.brandPolicy?.storageLocation && <TableCell align="left">Storage Location</TableCell>}
-                                <TableCell align="left">{'Qty'}</TableCell>
-                                <TableCell align="left">{consumeRequest ? 'Request Qty' : 'Consume Qty'}</TableCell>
-                              </TableRow>
-                            </TableHead>
-                            <TableBody>
-                              {values?.products?.map((value: any, index) => (
-                                <TableRow key={value._id}>
-                                  <TableCell component="th" scope="row">
-                                    {index + 1}
-                                  </TableCell>
-                                  <TableCell align="left">{value['product']}</TableCell>
-                                  {user?.user?.brandPolicy?.storageLocation && (
-                                    <TableCell align="left">
+                        <>
+                          <div className="max-[768px]:hidden">
+                            <TableContainer className={classes.tableContainer} component={Paper}>
+                              <Table aria-label="customized table">
+                                <TableHead>
+                                  <TableRow>
+                                    <TableCell>Index</TableCell>
+                                    <TableCell align="left">Product</TableCell>
+                                    {user?.user?.brandPolicy?.storageLocation && <TableCell align="left">Storage Location</TableCell>}
+                                    <TableCell align="left">{'Qty'}</TableCell>
+                                    <TableCell align="left">{consumeRequest ? 'Request Qty' : 'Consume Qty'}</TableCell>
+                                  </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                  {values?.products?.map((value: any, index) => (
+                                    <TableRow key={value._id}>
+                                      <TableCell component="th" scope="row">
+                                        {index + 1}
+                                      </TableCell>
+                                      <TableCell align="left">{value['product']}</TableCell>
+                                      {user?.user?.brandPolicy?.storageLocation && (
+                                        <TableCell align="left">
+                                          <Autocomplete
+                                            options={storageLocationOptions}
+                                            getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                                            getOptionSelected={(option: any, val) => option.optionValue === val}
+                                            value={
+                                              storageLocationOptions.filter((data) => data.optionValue === value['storageLocation']).length
+                                                ? storageLocationOptions.filter((data) => data.optionValue === value['storageLocation'])[0]
+                                                : ''
+                                            }
+                                            onChange={(e, val) => {
+                                              arrayHelpers.replace(index, {
+                                                ...values.products[index],
+                                                storageLocation: val?.optionValue
+                                              });
+                                            }}
+                                            renderInput={(params) => (
+                                              <TextField
+                                                {...params}
+                                                style={{ minWidth: '200px' }}
+                                                margin="dense"
+                                                name="storageLocation"
+                                                label="Storage Location"
+                                                placeholder="Storage Location"
+                                                variant="outlined"
+                                                fullWidth
+                                                required
+                                                error={validate([value])?.storageLocation}
+                                                helperText={validate([value])?.storageLocation ? 'Storage Location is required' : ''}
+                                              />
+                                            )}
+                                          />
+                                        </TableCell>
+                                      )}
+                                      <TableCell align="left">
+                                        <TextField
+                                          fullWidth
+                                          size="small"
+                                          variant="outlined"
+                                          autoComplete="off"
+                                          name={'qty'}
+                                          disabled={true}
+                                          type="number"
+                                          value={value['qty']}
+                                          label="Qty"
+                                          placeholder="Qty"
+                                        />
+                                      </TableCell>
+                                      <TableCell align="left">
+                                        <TextField
+                                          fullWidth
+                                          size="small"
+                                          variant="outlined"
+                                          autoComplete="off"
+                                          name={'consumedQty'}
+                                          type="number"
+                                          required
+                                          value={value['consumedQty']}
+                                          error={validate([value])?.consumedQty}
+                                          onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
+                                          onChange={(e) => {
+                                            const value = e.target.value.replace(/[^0-9]/g, '');
+                                            arrayHelpers.replace(index, {
+                                              ...values.products[index],
+                                              consumedQty: value
+                                            });
+                                          }}
+                                          label={consumeRequest ? 'Request Qty' : 'Consume Qty'}
+                                          placeholder={consumeRequest ? 'Request Qty' : 'Consume Qty'}
+                                          helperText={
+                                            // validate([value])?.consumedQty ? `${consumeRequest ? 'Request' : 'Consume'} Qty is limited to Qty.` : ''
+                                            validate([value])?.consumedQty ?? ''
+                                          }
+                                        />
+                                      </TableCell>
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            </TableContainer>
+                          </div>
+                          <div className="min-[769px]:hidden">
+                            {values?.products?.map((value: any, index) => (
+                              <div
+                                className="rounded-[8px] mb-2 shadow-[0px_5.44444px_27.22222px_0px_rgba(0,_0,_0,_0.06)] px-[20px] py-[15px] grid grid-cols-[1fr_3fr] gap-2 item"
+                                style={{ border: '1px solid var(--common-border-color)' }}
+                                key={value._id}
+                              >
+                                <h5 className="text-[#aaa]">Index:</h5>
+                                <p>{index + 1}</p>
+
+                                <h5 className="text-[#aaa]">Product:</h5>
+                                <p className="pb-1">{value['product']}</p>
+
+                                {user?.user?.brandPolicy?.storageLocation && (
+                                  <>
+                                    <h5 className="mt-2 text-[#aaa]">Storage Location:</h5>
+                                    <div>
                                       <Autocomplete
                                         options={storageLocationOptions}
                                         getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
@@ -240,7 +339,8 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
                                           <TextField
                                             {...params}
                                             style={{ minWidth: '200px' }}
-                                            margin="dense"
+                                            margin="none"
+                                            size={'small'}
                                             name="storageLocation"
                                             label="Storage Location"
                                             placeholder="Storage Location"
@@ -252,60 +352,64 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
                                           />
                                         )}
                                       />
-                                    </TableCell>
-                                  )}
-                                  <TableCell align="left">
-                                    <TextField
-                                      fullWidth
-                                      size="small"
-                                      variant="outlined"
-                                      autoComplete="off"
-                                      name={'qty'}
-                                      disabled={true}
-                                      type="number"
-                                      value={value['qty']}
-                                      label="Qty"
-                                      placeholder="Qty"
-                                    />
-                                  </TableCell>
-                                  <TableCell align="left">
-                                    <TextField
-                                      fullWidth
-                                      size="small"
-                                      variant="outlined"
-                                      autoComplete="off"
-                                      name={'consumedQty'}
-                                      type="number"
-                                      required
-                                      value={value['consumedQty']}
-                                      error={validate([value])?.consumedQty}
-                                      onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
-                                      onChange={(e) => {
-                                        const value = e.target.value.replace(/[^0-9]/g, '');
-                                        arrayHelpers.replace(index, {
-                                          ...values.products[index],
-                                          consumedQty: value
-                                        });
-                                      }}
-                                      label={consumeRequest ? 'Request Qty' : 'Consume Qty'}
-                                      placeholder={consumeRequest ? 'Request Qty' : 'Consume Qty'}
-                                      helperText={
-                                        // validate([value])?.consumedQty ? `${consumeRequest ? 'Request' : 'Consume'} Qty is limited to Qty.` : ''
-                                        validate([value])?.consumedQty ?? ''
-                                      }
-                                    />
-                                  </TableCell>
-                                </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
-                        </TableContainer>
+                                    </div>
+                                  </>
+                                )}
+
+                                <h5 className="mt-2 text-[#aaa]">Qty:</h5>
+                                <div>
+                                  <TextField
+                                    fullWidth
+                                    size="small"
+                                    variant="outlined"
+                                    autoComplete="off"
+                                    name={'qty'}
+                                    disabled={true}
+                                    type="number"
+                                    value={value['qty']}
+                                    label="Qty"
+                                    placeholder="Qty"
+                                  />
+                                </div>
+
+                                <h5 className="mt-2 text-[#aaa]">Consumed Qty:</h5>
+                                <div>
+                                  <TextField
+                                    fullWidth
+                                    size="small"
+                                    variant="outlined"
+                                    autoComplete="off"
+                                    name={'consumedQty'}
+                                    type="number"
+                                    required
+                                    value={value['consumedQty']}
+                                    error={validate([value])?.consumedQty}
+                                    onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
+                                    onChange={(e) => {
+                                      const value = e.target.value.replace(/[^0-9]/g, '');
+                                      arrayHelpers.replace(index, {
+                                        ...values.products[index],
+                                        consumedQty: value
+                                      });
+                                    }}
+                                    label={consumeRequest ? 'Request Qty' : 'Consume Qty'}
+                                    placeholder={consumeRequest ? 'Request Qty' : 'Consume Qty'}
+                                    helperText={
+                                      // validate([value])?.consumedQty ? `${consumeRequest ? 'Request' : 'Consume'} Qty is limited to Qty.` : ''
+                                      validate([value])?.consumedQty ?? ''
+                                    }
+                                  />
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </>
                       )}
                     />
                   </Form>
                 </Box>
               ) : (
-                <Box p={2} height={300} bgcolor="white">
+                <Box p={2} height={300}>
                   <CommonSkeleton lenArray={[...Array(6).keys()]} />
                 </Box>
               )}

@@ -18,7 +18,7 @@ import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/hel
 import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from 'src/components/Helpers/FormTypes';
 
-const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null, isRedirectToDetailPage = true }) => {
+const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, creditMemoId = null,  referenceData = null, isRedirectToDetailPage = true }) => {
   
   const history = useHistory();
   const {
@@ -50,9 +50,9 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, id = null, refe
       let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
       const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
-      if (id) {
+      if (creditMemoId) {
         axiosInstance()
-          .get(`${routes?.creditMemo?.path}/${id}`)
+          .get(`${routes?.creditMemo?.path}/${creditMemoId}`)
           .then(({ data: { data } }: any) => {
             let fields = fieldsDataForUpdate;
             let tempData = data;
@@ -98,8 +98,8 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, id = null, refe
 
   const handleSubmit = (values) => {
     setSubmitting(true);
-    if (id && !isClone) {
-      values._id = id;
+    if (creditMemoId && !isClone) {
+      values._id = creditMemoId;
       axiosInstance()
         .put(`${routes.creditMemo?.path}`, values)
         .then(({ data }: any) => {
@@ -162,7 +162,7 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, id = null, refe
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={`${id
+                title={`${creditMemoId
                   ? isClone
                     ? `Clone - ${cloneHeading}`
                     : `Update - ${initialData.values?.creditMemoNumber ? `${initialData.values?.creditMemoNumber}` : ''}`
@@ -189,17 +189,17 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, id = null, refe
                               {form.sectionFields.map((field) => (
                                 <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
                                   <FormTypes
-                                    creditMemoId={id}
+                                    creditMemoId={creditMemoId}
                                     {...field}
                                     fieldData={field}
                                     disabled={
                                       field.fieldName === 'currency'
-                                        ? id
+                                        ? creditMemoId
                                           ? field?.disableOnEdit && !isClone
                                           : field?.isUneditable && field?.disableOnEdit
                                             ? true
                                             : false
-                                        : id && field.disableOnEdit && !isClone
+                                        : creditMemoId && field.disableOnEdit && !isClone
                                     }
                                     values={values}
                                     errors={errors}

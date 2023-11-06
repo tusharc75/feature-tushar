@@ -103,7 +103,7 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician }) {
 
   if (loadingRoadmap) {
     return (
-      <Box p={2} height={height} bgcolor="white">
+      <Box p={2} height={height}>
         <CommonSkeleton lenArray={[...Array(10).keys()]} />
       </Box>
     );

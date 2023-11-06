@@ -4,7 +4,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { Typography, Box, Avatar, IconButton, Collapse, Tooltip } from '@material-ui/core';
 import { TreeView, TreeItem } from '@material-ui/lab';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import { Close, Map, ExpandMore, ExpandLess, DateRange } from '@material-ui/icons';
+import { Close, Map, ExpandMore, ExpandLess, DateRange, Image } from '@material-ui/icons';
 import MapView from '../Map';
 import { getColorFromPriority, getPriority } from './helperFunctions';
 import styles from './roadmap.module.scss';
@@ -65,7 +65,9 @@ const MobileRoadmap: React.FC<TProps> = ({ activity, expanded, selected, handleT
             }}
           >
             <div className="flex items-center">
-              <Avatar variant="circle" sizes="small" style={{ height: 45, width: 45 }} alt="Remy Sharp" src={data?.photo} />
+              <Avatar variant="circle" sizes="small" style={{ height: 45, width: 45 }} alt="Remy Sharp" src={data?.photo}>
+                <Image style={{ fontSize: 28 }} />
+              </Avatar>
               <Box ml={2} flex style={{ flexDirection: 'column' }}>
                 <Typography style={{ fontWeight: 'bolder', fontSize: '1rem' }}>{`${data?.firstName} ${data?.lastName}`}</Typography>
                 <p style={{ fontSize: '0.8rem', color: 'grey' }}>{`${data?.competencyType?.optionLabel || ''}`}</p>

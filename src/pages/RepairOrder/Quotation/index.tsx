@@ -30,6 +30,7 @@ import EditIcon from '@material-ui/icons/Edit';
 const Quotation = ({
   repairOrderData,
   setNextStep,
+  setPrevStep,
   renderedFrom,
   stepFullScreen,
   allowedToEdit,
@@ -73,11 +74,16 @@ const Quotation = ({
   }, [repairOrderData]);
 
   useEffect(() => {
-    if (
-      invoiceStep &&
-      ![REPAIR_ORDER_STATUS.invoiced, REPAIR_ORDER_STATUS.readyToInvoice, REPAIR_ORDER_STATUS.completed]?.includes(repairOrderData?.status)
+    if (invoiceStep && ![REPAIR_ORDER_STATUS.invoiced, REPAIR_ORDER_STATUS.readyToInvoice,
+    REPAIR_ORDER_STATUS.completed]?.includes(repairOrderData?.status)
     ) {
       updateOrderStatus(REPAIR_ORDER_STATUS.readyToInvoice);
+    }
+    if (invoiceStep && repairOrderData?.status === REPAIR_ORDER_STATUS.invoiced) {
+      setPrevStep(false)
+    }
+    else {
+      setPrevStep(true)
     }
   }, [invoiceStep]);
 
@@ -325,11 +331,7 @@ const Quotation = ({
   };
 
   const generateNestedData = (material, parent) => {
-    var subRows: any = orderBy(
-      material?.filter((e) => e.parentId === parent._id),
-      ['preWork'],
-      ['desc']
-    );
+    var subRows: any = material?.filter((e) => e.parentId === parent._id);
 
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
@@ -358,6 +360,7 @@ const Quotation = ({
       _subRow.hideSelection = false;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
+
     if (subRows.length === 0 && parent.type === 'package') {
       parent.isValid = false;
     }

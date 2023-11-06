@@ -1,5 +1,16 @@
 :root {
+  --error-bg: #ffd2d2;
+  --success-bg: #e3fae3;
+
+  // master colors COLOUR_MASTER in helpers.tsx
+  --transferAsset-bg: #ecc19c;
 }
 
 [data-mode='dark']:root {
+  --error-bg: #5e1c23;
+  --error-border: #8b5959;
+  --success-bg: #234623;
+
+  // master colors for dark theme
+  --transferAsset-bg: #67360c;
 }

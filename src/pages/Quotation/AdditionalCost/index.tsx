@@ -16,7 +16,7 @@ import { CHILD_RESOURCE } from '../../../constants/helpers';
 import { generateCustomTableColumns, flattenArray } from '../../../constants/columns';
 import { GrBusinessService } from 'react-icons/all';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
-import { ExpandMore } from '@material-ui/icons';
+import { Add, ExpandMore } from '@material-ui/icons';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import LeadTimeDialog from './LeadTimeDialog';
 import DateRangeIcon from '@material-ui/icons/DateRange';
@@ -43,7 +43,7 @@ const AdditionalCost = ({ quotationData, setNextStep, renderedFrom, version, all
   useEffect(() => {
     fetchFields();
     fetchData();
-  }, [quotationData, allowedToEdit]);
+  }, []);
 
   const handleOpen = (row, rows) => {
     setShowCostDialog({
@@ -96,7 +96,7 @@ const AdditionalCost = ({ quotationData, setNextStep, renderedFrom, version, all
                 <EditIcon color="primary" />
               </IconButton>
             </HtmlTooltip>
-            {permissions?.leadTimeMaster &&
+            {permissions?.leadTimeMaster && (
               <HtmlTooltip title="Edit Lead Time">
                 <IconButton
                   size="small"
@@ -108,7 +108,7 @@ const AdditionalCost = ({ quotationData, setNextStep, renderedFrom, version, all
                   <DateRangeIcon fontSize="small" color="primary" />
                 </IconButton>
               </HtmlTooltip>
-            }
+            )}
             <GridDeleteIcon
               hasDeletePermission={permissions?.quotation?.isUpdate}
               ownerId={user?.user?._id}
@@ -231,15 +231,16 @@ const AdditionalCost = ({ quotationData, setNextStep, renderedFrom, version, all
       <Box display="flex" justifyContent="space-between" m={1}>
         <Box display="flex">
           <Button
-            variant={isMobile ? 'outlined' : 'contained'}
+            variant={isMobile ? 'outlined' : 'text'}
             color="primary"
+            className="btn-outline-v1"
             size="small"
             onClick={() => {
               setShowCostDialog({ open: true, showSaveAndNext: false });
               setSelectedCostData(null);
             }}
           >
-            {isMobile ? <GrBusinessService size={20} /> : 'Add'}
+            {isMobile ? <Add /> : 'Add'}
           </Button>
         </Box>
         <div className="d-flex gap-2">

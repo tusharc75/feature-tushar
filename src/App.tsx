@@ -222,7 +222,6 @@ import DriverMaster from './pages/DriverMaster';
 import DriverMasterDetail from './pages/DriverMaster/DriverMasterDetail';
 import TrailerMaster from './pages/TrailerMaster';
 import TrailerMasterDetail from './pages/TrailerMaster/TrailerMasterDetail';
-import FieldTicketInvoice from './pages/FieldTicketInvoice';
 import AzureSSOError from './pages/Auth/AzureSSOError';
 import AzureSSOLogin from './pages/Auth/AzureSSOLogin';
 import IotDataPoints from './pages/IotDataPoints';
@@ -243,10 +242,9 @@ import ChartOfAccount from './pages/ChartOfAccount';
 import ChartOfAccountDetail from './pages/ChartOfAccount/ChartOfAccountDetail';
 import Flash from './pages/Flash';
 import FlashDetailsPage from './pages/Flash/FlashDetailsPage';
-import SubleaseInvoice from './pages/SubleaseInvoice';
-import RentalManagementInvoice from './pages/RentalMangementInvoice';
 import CreditMemo from './pages/CreditMemo';
 import CreditMemoDetail from './pages/CreditMemo/CreditMemoDetail';
+import GenerateInvoice from './pages/GenerateInvoice';
 
 var notificationInterval: any = null;
 
@@ -301,7 +299,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) {}
+    } catch (e) { }
   }, [isOffline]);
 
   const getNotification = async () => {
@@ -561,17 +559,11 @@ function App() {
             <PrivateRoute exact path={routes.rentalManagementDetail.path + '/:id'}>
               <RentalManagementDetailsPage />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.rentalManagementInvoice.path}>
-              <RentalManagementInvoice />
-            </PrivateRoute>
             <PrivateRoute exact path={routes.sublease.path}>
               <Sublease />
             </PrivateRoute>
             <PrivateRoute exact path={routes.subleaseDetail.path + '/:id'}>
               <SubleaseDetailsPage />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.subleaseInvoice.path}>
-              <SubleaseInvoice />
             </PrivateRoute>
             <PrivateRoute exact path={routes.productCategory.path}>
               <ProductCategory />
@@ -951,9 +943,6 @@ function App() {
             <PrivateRoute exact path={`${routes.fieldTicketDetail.path}/:id`}>
               <FieldTicketDetail />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.fieldTicketInvoice.path}`}>
-              <FieldTicketInvoice />
-            </PrivateRoute>
             <PrivateRoute exact path={`${routes.fieldServiceTechnician.path}`}>
               <FieldServiceTechnician />
             </PrivateRoute>
@@ -1082,6 +1071,21 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.creditMemoDetail.path}/:id`}>
               <CreditMemoDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.generateInvoice.path}`}>
+              <GenerateInvoice />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.subleaseInvoice.path}>
+              <GenerateInvoice resourceRendered="sublease" />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.repairOrderInvoice.path}>
+              <GenerateInvoice resourceRendered="repairOrder" />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.rentalManagementInvoice.path}>
+              <GenerateInvoice resourceRendered="rentalManagement" />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.fieldTicketInvoice.path}>
+              <GenerateInvoice resourceRendered="fieldTicket" />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />

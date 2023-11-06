@@ -166,7 +166,7 @@ export default function BigCalendar({ type, activity }) {
             <tr>
               {dayname.map((day, key) => (
                 <td key={key} className={classes.tdWidth}>
-                  <Box border={0.7} borderColor="grey.200" className={classes.minusMargin} bgcolor="white" p={1}>
+                  <Box border={0.7} borderColor="var(--common-border-color)" className={classes.minusMargin} p={1}>
                     <Typography className={classes.calHeader}>{day}</Typography>
                   </Box>
                 </td>
@@ -178,7 +178,7 @@ export default function BigCalendar({ type, activity }) {
               <tr key={key}>
                 {_days.map((_day, key) => (
                   <td key={key} className={classes.tdWidth}>
-                    <Box className={classes.calContent} border={0.7} borderColor="grey.200" minHeight={100} maxHeight={100}>
+                    <Box className={classes.calContent} border={0.7} borderColor="var(--common-border-color)" minHeight={100} maxHeight={100}>
                       <Box pl={1} pt={1}>
                         <Typography className={_day.month == month ? classes.fontBold : ''}>{_day.day}</Typography>
                       </Box>

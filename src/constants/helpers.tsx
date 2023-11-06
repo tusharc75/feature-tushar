@@ -76,6 +76,7 @@ export const productionOrderSteps: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },
   { name: 'Work Order', title: 'Work Order', icon: 'workOrder' },
   { name: 'Loading Ticket', title: 'Loading', icon: 'ticket' },
+  { name: 'Final Slip', title: 'Slip', icon: 'invoice' }
 ];
 
 export const jobProcessSteps: stepInterface[] = [
@@ -95,10 +96,17 @@ export const bulkAssetCreationSteps: stepInterface[] = [
   { name: 'Serialized Asset', title: 'Asset', icon: 'serializedAssets' }
 ];
 
-export const subleaseSteps: stepInterface[] = [
+export const sublease_Vendor_Steps: stepInterface[] = [
   { name: 'Add Products', title: 'Add', icon: 'add' },
   { name: 'Start Sublease', title: 'Sublease', icon: 'startSublease' },
   { name: 'End Sublease', title: 'End', icon: 'end' }
+];
+export const sublease_InterCompany_Steps: stepInterface[] = [
+  { name: 'Add Products', title: 'Add', icon: 'add' },
+  { name: 'Serialized Asset', title: 'Asset', icon: 'serializedAssets' },
+  { name: 'Loading Ticket', title: 'Loading', icon: 'ticket' },
+  { name: 'Receiving Ticket', title: 'Receiving', icon: 'receivingTicket' },
+  { name: 'Final Slip', title: 'Slip', icon: 'invoice' }
 ];
 
 export const quotationProcessSteps: stepInterface[] = [
@@ -346,7 +354,7 @@ export const sidebarResource = {
   deviceTemplateAlert: 'Device Template Alert',
   chartOfAccount: 'Chart Of Account',
   flash: 'Flash',
-  rentalManagementInvoice : 'Rental Management Invoice',
+  rentalManagementInvoice: 'Rental Management Invoice',
   creditMemo: 'Credit Memo'
 };
 
@@ -402,7 +410,7 @@ export const RESOURCE_LABEL = {
   marketSegment: 'Market Segments',
   quotePdfTemplate: 'PDF Templates',
   rentalManagement: 'Rental Job',
-  rentalManagementInvoice : 'Rental Management Invoice',
+  rentalManagementInvoice: 'Rental Management Invoice',
   deliveryTicket: 'Delivery Tickets',
   pricingCondition: 'Pricing Setup',
   repairJob: 'Repair Jobs',
@@ -414,7 +422,7 @@ export const RESOURCE_LABEL = {
   transferAsset: 'Transfer Assets',
   address: 'Addresses',
   sublease: 'Sublease',
-  subleaseInvoice: 'SubleaseInvoice',
+  subleaseInvoice: 'Sublease Invoice',
   transferInventory: 'Transfer Inventory',
   zone: 'Zone',
   wellMaster: 'Well Master',
@@ -480,7 +488,9 @@ export const RESOURCE_LABEL = {
   chartOfAccount: 'Chart Of Account',
   flash: 'Flash',
   accountsReceivable: 'Accounts Receivable',
-  creditMemo: 'Credit Memo'
+  creditMemo: 'Credit Memo',
+  generateInvoice: 'Generate Invoice',
+  repairOrderInvoice: 'Repair Order Invoice'
 };
 
 export const CHILD_RESOURCE = {
@@ -1024,21 +1034,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-          .required(`${input.fieldLabel} is required`)
+            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+            .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(
+            .matches(
+              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+              'Enter valid URL'
+            )
+            .required(`${input.fieldLabel} is required`)
+        : string().matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          )
-          .required(`${input.fieldLabel} is required`)
-        : string().matches(
-          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-          'Enter valid URL'
-        );
+          );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
@@ -1987,7 +1997,7 @@ export const DELIVERY_TICKET_REFERENCE_TYPE = {
   sublease: 'Sublease',
   transferInventory: 'Transfer Inventory',
   repairOrder: 'Repair Order',
-  productionOrder: 'Production Order',
+  productionOrder: 'Production Order'
 };
 
 export const DELIVERY_FROM_TO_TYPE = {
@@ -2000,7 +2010,10 @@ export const SUBLEASE_STATUS = {
   new: 'New',
   inProgress: 'In-Progress',
   issued: 'Issued',
-  completed: 'Completed'
+  completed: 'Completed',
+  readyToInvoice: 'Ready to Invoice',
+  invoiced: 'Invoiced',
+  closed: 'Closed'
 };
 
 export const PURCHASE_ORDER_STATUS = {
@@ -2041,12 +2054,10 @@ export const REPAIR_PROCESS_STATUS = {
   failed: 'Failed'
 } as const;
 
-
 export const PLANNING_STATUS = {
   open: 'Open',
   converted: 'Converted'
 } as const;
-
 
 export const asyncForEach = async (array: any[], callback: (arrayIndex: any, i: number, array: any[]) => Promise<any>) => {
   for (let index = 0; index < array.length; index++) {
@@ -2251,7 +2262,7 @@ export const IOT_REPORT_LIST = [
         type: 'dropDown',
         multiple: true,
         _id: '1'
-      },
+      }
     ]
   }
 ];
@@ -2440,7 +2451,7 @@ export const COLOUR_MASTER = {
     borderColor: '#FFE4C0'
   },
   transferAsset: {
-    background: '#ecc19c',
+    background: 'var(--transferAsset-bg)',
     borderColor: '#d98298'
   },
   bulkAsset: {
@@ -2658,7 +2669,8 @@ export const MATERIAL_TYPE = {
   product: 'product',
   service: 'service',
   package: 'package',
-  serializedAsset: 'serializedAsset'
+  serializedAsset: 'serializedAsset',
+  manualEntry: 'manualEntry'
 };
 
 export const MATERIAL_SUB_TYPE = {
@@ -2700,6 +2712,11 @@ export const PRICING_TYPE = [
 export const SERVICE_TYPE = {
   shopService: 'Shop Service',
   fieldService: 'Field Service'
+};
+
+export const SUBLEASE_TYPE = {
+  vendor: 'Vendor',
+  interCompany: 'Inter Company'
 };
 
 export const QUOTE_PROCESS_STATUS = {
@@ -2808,7 +2825,12 @@ export const ROLE_TIER = {
   tier3: 'Tier 3'
 };
 
-
 export const fieldLabelToFieldName = (fieldLabel) => {
   return camelCase(fieldLabel?.replace(/[^a-zA-Z0-9]/g, ''))?.substring(0, 60);
+};
+
+export const ATTACHMENT_TYPE = {
+  diagram: 'Diagram',
+  certificate: 'Certificate',
+  mtr: 'MTR'
 };

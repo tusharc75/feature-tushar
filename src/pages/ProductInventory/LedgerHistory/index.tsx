@@ -12,13 +12,17 @@ import { CustomDialogTransition } from '../../../constants/helpers';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { capitalize } from 'lodash';
+import { camelCase, capitalize } from 'lodash';
 import { useData } from 'src/StateProvider/Provider';
 import { Link } from 'react-router-dom';
 import routes from 'src/components/Helpers/Routes';
 import { useAppTheme } from 'src/constants/AppConfig';
 
 const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueId }) => {
+
+  const renderedFrom = `${camelCase(routes?.productInventory.title)}_history`;
+
+
   const [themeColor] = useAppTheme();
   const isDarkTheme = themeColor === 'dark';
   const [gridApi, setGridApi] = useState(null);
@@ -58,8 +62,8 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
   };
 
   const columns = [
-    { field: 'date', headerName: 'Date', show: true, cellRenderer: 'dateTimeRenderer', filter: false, sortable: false },
-    { field: 'type', headerName: 'Type', show: true, cellRenderer: 'commonRenderer', filter: true, sortable: true },
+    { field: 'date', headerName: 'Date', show: true, disabled: true, cellRenderer: 'dateTimeRenderer', filter: false, sortable: false },
+    { field: 'type', headerName: 'Type', show: true, disabled: true, cellRenderer: 'commonRenderer', filter: true, sortable: true },
     {
       field: 'qty',
       headerName: 'Qty',
@@ -67,6 +71,7 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
       cellRenderer: 'creditDebitRenderer',
       filter: false,
       sortable: false,
+      disabled: true,
       cellStyle: (params) => {
         if (params?.data?.type === 'Credit') {
           return { backgroundColor: isDarkTheme ? 'hsl(120 73% 40% / 1)' : '#90ee90' };
@@ -160,6 +165,18 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
     dateTimeRenderer: DateTimeRenderer
   };
 
+
+  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
+  if (columnState) {
+    columns.forEach((item) => {
+      columnState.forEach((d) => {
+        if (d.colId === item.field) {
+          item.show = !d.hide;
+        }
+      });
+    });
+  }
+
   return (
     <>
       <Dialog fullScreen TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true} fullWidth>
@@ -181,7 +198,7 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
                 loading={loading}
                 isClientSideGrid={true}
                 allowSelection={false}
-                renderedFrom={'purchaseOrder_history'}
+                renderedFrom={renderedFrom}
                 refreshGrid={fetchRecords}
               />
             ) : (

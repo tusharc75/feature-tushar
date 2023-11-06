@@ -278,6 +278,7 @@ export default function AccountHierarchy({
       {rowData && customColumns && (
         <Box p="6px" zIndex={5} width={'100%'}>
           <CustomReactTable
+            height="max(calc(100vh - 350px), 500px)"
             columns={customColumns}
             data={rowData}
             setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}

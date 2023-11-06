@@ -411,12 +411,12 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
                     isClientSideGrid={true}
                   />
                 ) : (
-                  <Box p={2} bgcolor="white">
+                  <Box p={2}>
                     <CommonSkeleton lenArray={[...Array(10).keys()]} />
                   </Box>
                 )
               ) : (
-                <Box p={2} bgcolor="white">
+                <Box p={2}>
                   <CommonSkeleton lenArray={[...Array(10).keys()]} />
                 </Box>
               )}

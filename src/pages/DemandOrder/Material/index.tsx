@@ -1,35 +1,38 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, IconButton, MenuItem, Menu } from '@material-ui/core';
-import axiosInstance from '../../../axios/axiosInstance';
-import routes from '../../../components/Helpers/Routes';
-import { useData } from '../../../StateProvider/Provider';
-import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import { Box, Button, Grid, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../../StateProvider/Provider';
+import axiosInstance from '../../../axios/axiosInstance';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import routes from '../../../components/Helpers/Routes';
+
+import { ExpandMore } from '@material-ui/icons';
 import Add from '@material-ui/icons/Add';
-import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import { isMobile } from 'react-device-detect';
-import { ExpandMore } from '@material-ui/icons';
-import { startCase } from 'lodash';
-import { calculateRowsFieldNew } from 'src/components/RentalManagment/helper';
-import MaterialDialog from './MaterialDialog';
-import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
-import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
-import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import PreviewDownload from 'src/components/PreviewDownload';
-import { CHILD_RESOURCE, sidebarResource } from 'src/constants/helpers';
-import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
+import { startCase } from 'lodash';
+import { isMobile } from 'react-device-detect';
+import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
+import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
+import PreviewDownload from 'src/components/PreviewDownload';
+import { calculateRowsFieldNew } from 'src/components/RentalManagment/helper';
+import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
+import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
+import { CHILD_RESOURCE, gridLoadingTimeout, sidebarResource } from 'src/constants/helpers';
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
+import MaterialDialog from './MaterialDialog';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
 
 const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
   }: any = useData();
+
+  const { state, dispatch } = useTableReducer();
 
   const [isUpdating, setUpdating] = useState(false);
   const [materialEdit, setMaterialEdit] = useState({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
@@ -42,6 +45,8 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
   const [allFields, setAllFields] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
+
+  const [isSubmitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     fetchFields();
@@ -85,7 +90,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
         width: 300,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row, rows }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'nowrap' }}>
             {allowedToEdit ? (
               <p
                 onClick={() => {
@@ -189,20 +194,32 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
   };
 
   const fetchData = async () => {
-    var data: any = [];
-    const response = await axiosInstance().get(`${routes.demandOrder.path}/material/${demandOrderData._id}`);
-    data = response?.data?.data;
-    let rows = data.material.filter((e) => e.parentId === null);
-    rows.forEach((parent, i) => {
-      parent.index = i + 1;
-      parent.detail = parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName;
-      parent.description = parent.type === 'product' ? parent?.productDetail?.productDescription : parent?.packageDetail?.packageDescription;
-      parent.qty = parent.qty;
-      parent.qtyDisplay = parent.qty;
-      parent.subRows = generateNestedData(data.material, parent);
-    });
-    setRowsData(rows);
-    setSelectedRecords([]);
+    dispatch({ type: 'loading', loading: true });
+    try {
+      var data: any = [];
+      const response = await axiosInstance().get(`${routes.demandOrder.path}/material/${demandOrderData._id}`);
+      data = response?.data?.data;
+      let rows = data.material.filter((e) => e.parentId === null);
+      rows.forEach((parent, i) => {
+        parent.index = i + 1;
+        parent.detail = parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName;
+        parent.description = parent.type === 'product' ? parent?.productDetail?.productDescription : parent?.packageDetail?.packageDescription;
+        parent.qty = parent.qty;
+        parent.qtyDisplay = parent.qty;
+        parent.subRows = generateNestedData(data.material, parent);
+      });
+
+      dispatch({ type: 'initialize', data: rows, count: data.length });
+      setRowsData(rows);
+      setSelectedRecords([]);
+    } catch (error) {
+      dispatch({ type: 'error', error: true });
+      console.error(error);
+    } finally {
+      setTimeout(() => {
+        dispatch({ type: 'loading', loading: false });
+      }, gridLoadingTimeout);
+    }
   };
 
   const generateNestedData = (material, parent) => {
@@ -213,14 +230,14 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
         _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'package'
-            ? _subRow.packageDetail?.packageName
-            : _subRow.serviceDetail?.serviceName;
+          ? _subRow.packageDetail?.packageName
+          : _subRow.serviceDetail?.serviceName;
       _subRow.description =
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productDescription
           : _subRow.type === 'package'
-            ? _subRow?.packageDetail?.packageDescription
-            : _subRow?.serviceDetail?.serviceDescription;
+          ? _subRow?.packageDetail?.packageDescription
+          : _subRow?.serviceDetail?.serviceDescription;
       _subRow.qty = _subRow.qty;
       _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
       _subRow.subRows = generateNestedData(material, _subRow);
@@ -229,6 +246,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
   };
 
   const handleAdd = async (rows) => {
+    setSubmitting(true);
     const material: any = [];
     rows.forEach((d) => {
       const element: any = {};
@@ -249,10 +267,11 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
           message: data.message
         });
         fetchData();
+        setSubmitting(false);
       })
       .catch((error) => {
-        setAddDialog({ open: false, type: '', parentId: null });
         toastConfig.setToastConfig(error);
+        setSubmitting(false);
       });
   };
 
@@ -343,7 +362,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
   return (
     <Fragment>
       {allowedToEdit && (
-        <Box display="flex" justifyContent="space-between" m={1}>
+        <Box display="flex" justifyContent="space-between" my={1}>
           <Box display="flex" alignItems="center">
             <Button variant={'outlined'} color="primary" size="small" startIcon={<Add />} onClick={openAddActions} aria-controls="add-menu">
               {'Add'}
@@ -384,7 +403,8 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
               fileName={`${routes.demandOrder.title}-${demandOrderData?.demandOrderNumber}`}
               resource={sidebarResource.demandOrder}
               referenceId={demandOrderData?._id}
-              columns={columns} />
+              columns={columns}
+            />
             <Box ml={1} />
             <Button
               disabled={selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true}
@@ -439,22 +459,24 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
           </Box>
         </Box>
       )}
-      {columns && rowsData ? (
+      {columns ? (
         <>
-          <Box p="6px" zIndex={5} width={'100%'}>
+          <Box py="6px" zIndex={5} width={'100%'}>
             <CustomReactTable
               height={'calc(100vh - 345px)'}
               columns={columns}
-              data={rowsData}
               setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
               onSelect={setSelectedRecords}
               childrenProperty="subRows"
-              uniqueKey="_id"
               renderedFrom={renderedFrom}
               isClientSideGrid={true}
               onSaveEdit={onSaveInlineEdit}
               hideSelection={!allowedToEdit}
               hideAction={!allowedToEdit}
+              expander={true}
+              state={state}
+              dispatch={dispatch}
+              allowPagination={false}
             />
           </Box>
         </>
@@ -487,26 +509,20 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
       )}
       {addDialog.open && addDialog.type === 'product' && (
         <AssignProductDialog
-          reference="demandOrder"
-          serialized={null}
-          productsDialogOpen={addDialog.open}
-          productId={null}
           handleCloseDialog={() => setAddDialog({ open: false, type: '', parentId: null })}
-          assignedProducts={[]}
-          onSuccess={(d) => {
-            handleAdd(d);
+          onSuccess={(rows) => {
+            handleAdd(rows);
           }}
+          isSubmitting={isSubmitting}
         />
       )}
       {addDialog.open && addDialog.type === 'package' && (
         <AssignPackageDialog
-          referenceType="demandOrder"
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
-          ids={[]}
           onSuccess={(rows) => {
             handleAdd(rows);
           }}
-          packageType={null}
+          isSubmitting={isSubmitting}
         />
       )}
     </Fragment>

@@ -1,6 +1,9 @@
-import { Collapse, IconButton } from '@material-ui/core';
-import { KeyboardArrowDown, KeyboardArrowUp } from '@material-ui/icons';
+import { CircularProgress, Collapse, IconButton } from '@material-ui/core';
+import { Check, Edit, Error } from '@material-ui/icons';
 import React, { FC, useState } from 'react';
+import { BsChevronContract, BsChevronExpand } from 'react-icons/bs';
+import { TInitialState } from '../CustomReactTableNew/useTableReducer';
+import HtmlTooltip from '../CustomTooltipTitle';
 import type { TSwipableListInputProps } from './types';
 
 const DEFAULT_DATA_COUNT = 4;
@@ -15,12 +18,19 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
   page,
   loading,
   expander,
-  backgroundColor = null,
+  backgroundColorClass = null,
   prepareRow,
   handleCellSelection,
   IndeterminateCheckbox,
-  toggleAllRowsSelected
+  toggleAllRowsSelected,
+  submitInput,
+  cellValue,
+  setCellValue,
+  state,
+  handleCellClick,
+  handleKeyDown
 }) => {
+  const { error } = state;
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [expanded, setExpanded] = React.useState<string | false>(false);
 
@@ -56,11 +66,22 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
     <>
       <div className="relative rounded-lg">
         {/* Loader */}
-        {loading ? (
+        {loading || error ? (
           <div className=" absolute inset-0 flex items-center justify-center bg-[rgba(255,255,255,0.54)] dark:bg-[rgba(5,9,19,0.54)] backdrop-blur-[10px]">
-            <div className="bg-[white] dark:bg-[var(--dark-secondary)] px-10 py-5 rounded-lg">
-              <div className="spinner"></div>
-              <p className="-ml-[3px] mt-2">Loading</p>
+            <div className="bg-[white] dark:bg-[var(--dark-secondary)] px-10 py-5 rounded-lg text-center shadow-md">
+              {error ? (
+                <>
+                  <Error className="mx-auto mb-2" />
+                  <p>Something Went Wrong</p>
+                </>
+              ) : loading ? (
+                <>
+                  <CircularProgress />
+                  <p>Loading...</p>
+                </>
+              ) : (
+                ''
+              )}
             </div>
           </div>
         ) : null}
@@ -78,9 +99,9 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                   if (row.depth !== 0) return null;
                   return (
                     <div
-                      className={`shadow-[0px_3px_26px_0px_rgba(0,0,0,0.06)] rounded-md my-2 px-3 py-2 [--left-gutter:20px] dark:bg-[var(--dark-secondary)] ${backgroundColor(
-                        row.original
-                      )}`}
+                      className={`shadow-[0px_3px_26px_0px_rgba(0,0,0,0.06)] rounded-md my-2 px-3 py-2 [--left-gutter:20px] dark:bg-[var(--dark-secondary)] ${
+                        backgroundColorClass && backgroundColorClass(row.original) + ' td-color'
+                      }`}
                       key={row.original._id}
                       style={{
                         border: '1px solid var(--common-border-color)',
@@ -111,7 +132,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                                     handleCollapse(row.original._id);
                                   }}
                                 >
-                                  {compareCollapse(row.original._id) ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+                                  {compareCollapse(row.original._id) ? <BsChevronContract /> : <BsChevronExpand />}
                                 </IconButton>
                               )}
                             </div>
@@ -121,13 +142,39 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                       <div className="px-2 mt-2 pt-2 grid gap-2" style={{ borderTop: '1px dashed var(--common-border-color)' }}>
                         <div className="grid gap-2 w-full">
                           {defaultDisplay.map((field) => {
-                            return <RenderCellWithHeader key={field.id} field={field} row={row} />;
+                            return (
+                              <RenderCellWithHeader
+                                key={field.id}
+                                field={field}
+                                row={row}
+                                submitInput={submitInput}
+                                cellValue={cellValue}
+                                setCellValue={setCellValue}
+                                state={state}
+                                handleCellClick={handleCellClick}
+                                handleKeyDown={handleKeyDown}
+                                dispatch={dispatch}
+                              />
+                            );
                           })}
                         </div>
                         <Collapse in={compareCollapse(row.original._id)}>
                           <div className="grid gap-2 w-full">
                             {collapsibleFields.map((field) => {
-                              return <RenderCellWithHeader key={field.id} field={field} row={row} />;
+                              return (
+                                <RenderCellWithHeader
+                                  key={field.id}
+                                  field={field}
+                                  row={row}
+                                  submitInput={submitInput}
+                                  cellValue={cellValue}
+                                  setCellValue={setCellValue}
+                                  state={state}
+                                  handleCellClick={handleCellClick}
+                                  handleKeyDown={handleKeyDown}
+                                  dispatch={dispatch}
+                                />
+                              );
                             })}
                           </div>
                         </Collapse>
@@ -146,7 +193,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                                     dataRows: row.subRows || [],
                                     renderedFrom,
                                     expander,
-                                    backgroundColor,
+                                    backgroundColorClass,
                                     otherFieldsLength,
                                     handleCollapse,
                                     expanderCol,
@@ -159,7 +206,13 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                                     collapsibleFields,
                                     IndeterminateCheckbox,
                                     handleCellSelection,
-                                    row
+                                    row,
+                                    submitInput,
+                                    cellValue,
+                                    setCellValue,
+                                    state,
+                                    handleCellClick,
+                                    handleKeyDown
                                   }}
                                 />
                               );
@@ -170,7 +223,8 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                     </div>
                   );
                 })
-              : !loading && (
+              : !loading &&
+                !error && (
                   <div className=" absolute inset-0 flex items-center justify-center bg-[rgba(255,255,255,0.54)] dark:bg-[rgba(5,9,19,0.54)] backdrop-blur-[10px] rounded-lg">
                     <div className="bg-[white] dark:bg-[var(--dark-secondary)] px-10 py-5 rounded-lg">
                       <p>No Data Found.</p>
@@ -187,10 +241,9 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
 const RenderSubCard = ({
   dispatch,
   allowSelection,
-  dataRows,
   renderedFrom,
   expander,
-  backgroundColor,
+  backgroundColorClass,
   otherFieldsLength,
   handleCollapse,
   expanderCol,
@@ -204,14 +257,20 @@ const RenderSubCard = ({
   IndeterminateCheckbox,
   handleCellSelection,
   row,
-  depth = 1
+  depth = 1,
+  submitInput,
+  cellValue,
+  setCellValue,
+  state,
+  handleCellClick,
+  handleKeyDown
 }: any) => {
   if (row.depth !== depth) return null;
   return (
     <div
-      className={`shadow-[0px_3px_26px_0px_rgba(0,0,0,0.06)] rounded-md my-2 px-3 py-2 [--left-gutter:20px] dark:bg-[var(--dark-secondary)] ${backgroundColor(
-        row.original
-      )}`}
+      className={`shadow-[0px_3px_26px_0px_rgba(0,0,0,0.06)] rounded-md my-2 px-3 py-2 [--left-gutter:20px] dark:bg-[var(--dark-secondary)] ${
+        backgroundColorClass && backgroundColorClass(row.original) + ' td-color'
+      }`}
       key={row.original._id}
       style={{
         border: '1px solid var(--common-border-color)',
@@ -242,7 +301,7 @@ const RenderSubCard = ({
                     handleCollapse(row.original._id);
                   }}
                 >
-                  {compareCollapse(row.original._id) ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+                  {compareCollapse(row.original._id) ? <BsChevronContract /> : <BsChevronExpand />}
                 </IconButton>
               )}
             </div>
@@ -252,13 +311,39 @@ const RenderSubCard = ({
       <div className="px-2 mt-2 pt-2 grid gap-2" style={{ borderTop: '1px dashed var(--common-border-color)' }}>
         <div className="grid gap-2 w-full">
           {defaultDisplay.map((field) => {
-            return <RenderCellWithHeader key={field.id} field={field} row={row} />;
+            return (
+              <RenderCellWithHeader
+                key={field.id}
+                field={field}
+                row={row}
+                submitInput={submitInput}
+                cellValue={cellValue}
+                setCellValue={setCellValue}
+                state={state}
+                handleCellClick={handleCellClick}
+                handleKeyDown={handleKeyDown}
+                dispatch={dispatch}
+              />
+            );
           })}
         </div>
         <Collapse in={compareCollapse(row.original._id)}>
           <div className="grid gap-2 w-full">
             {collapsibleFields.map((field) => {
-              return <RenderCellWithHeader key={field.id} field={field} row={row} />;
+              return (
+                <RenderCellWithHeader
+                  key={field.id}
+                  field={field}
+                  row={row}
+                  submitInput={submitInput}
+                  cellValue={cellValue}
+                  setCellValue={setCellValue}
+                  state={state}
+                  handleCellClick={handleCellClick}
+                  handleKeyDown={handleKeyDown}
+                  dispatch={dispatch}
+                />
+              );
             })}
           </div>
         </Collapse>
@@ -277,7 +362,7 @@ const RenderSubCard = ({
                     dataRows: row.subRows || [],
                     renderedFrom,
                     expander,
-                    backgroundColor,
+                    backgroundColorClass,
                     otherFieldsLength,
                     handleCollapse,
                     expanderCol,
@@ -290,7 +375,11 @@ const RenderSubCard = ({
                     collapsibleFields,
                     IndeterminateCheckbox,
                     handleCellSelection,
-                    row
+                    row,
+                    submitInput,
+                    cellValue,
+                    setCellValue,
+                    state
                   }}
                 />
               );
@@ -302,12 +391,60 @@ const RenderSubCard = ({
   );
 };
 
-const RenderCellWithHeader = ({ field, row }: any) => {
+const RenderCellWithHeader = ({ field, row, submitInput, handleCellClick, handleKeyDown, cellValue, setCellValue, state, dispatch }: any) => {
+  const { currentEditingCellPosition }: TInitialState = state;
+  const cell = row.cells.find((cell: any) => cell?.column?.id === field?.id);
+  if (!cell) return null;
+
+  const resetField = () => {
+    dispatch({
+      type: 'currentEditingCellPosition',
+      cellPosition: null
+    });
+  };
+
   return (
     <h6 className=" text-[12px] grid grid-cols-2 justify-between gap-2 max-w-full">
       <span className="">{field.Header}: </span>
-      <span className="text-[12px_!important] text-right [&>*]:text-right [&>*]:justify-end line-clamp-1 break-all [&>*]:[flex-wrap:wrap] [&>*]:[font-weight:500_!important] [&>*]:[font-size:12px_!important] [&>*]:line-clamp-1 [&>*]:[white-space:unset_!important] ">
-        {field.Cell({ row })}
+      <span
+        onKeyDown={(e) => {
+          handleKeyDown(e);
+        }}
+        onClick={() => {
+          handleCellClick(cell, row);
+        }}
+        className="text-[12px_!important] text-right [&>*]:text-right [&>*]:justify-end line-clamp-1 break-all [&>*]:[flex-wrap:wrap] [&>*]:[font-weight:500_!important] [&>*]:[font-size:12px_!important] [&>*]:line-clamp-1 [&>*]:[white-space:unset_!important] "
+      >
+        {!['selection'].includes(cell?.column.id) &&
+        currentEditingCellPosition?.rowId === row.original._id &&
+        currentEditingCellPosition?.columnName === cell?.column.id ? (
+          <input
+            title={`Edit-${cell.id}`}
+            autoFocus
+            onBlur={() => (cell.value !== cellValue ? submitInput() : resetField())}
+            value={cellValue}
+            className={` dark:text-[white] appearance-none w-full focus-within:outline-[var(--new-theme-color)] bg-[transparent] outline-[transparent] shadow-0 border-[0] px-[2px] py-[4px] [border-bottom:1px_solid_var(--common-border-color)_!important]`}
+            onChange={(e) => setCellValue(e.target.value)}
+          />
+        ) : currentEditingCellPosition?.rowId === row.original._id && cell?.column.id === 'action' ? (
+          <HtmlTooltip title="Save">
+            <IconButton size="small" aria-label="Save" onClick={submitInput}>
+              <Check color="primary" />
+            </IconButton>
+          </HtmlTooltip>
+        ) : cell.column?.editable && cell?.value ? (
+          <div
+            className="[display:flex_!important] gap-[20px] justify-end ml-auto cursor-pointer max-w-[max-content]"
+            style={{ borderBottom: '1px dashed #8a8a8a' }}
+          >
+            <p>{cell?.value}</p>
+            <span>
+              <Edit className="text-[rgba(0,0,0,0.3)] dark:text-[rgba(255,255,255,0.9)]" fontSize="small" />
+            </span>
+          </div>
+        ) : (
+          field.Cell({ row })
+        )}
       </span>
     </h6>
   );

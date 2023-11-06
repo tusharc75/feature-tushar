@@ -15,7 +15,9 @@ import {
   sublease,
   setFieldsInAscendingOrder,
   SUBLEASE_STATUS,
-  GenerateResourceLineNumber
+  GenerateResourceLineNumber,
+  sidebarResource,
+  SUBLEASE_TYPE
 } from '../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
@@ -53,7 +55,7 @@ const ManageSublease = ({
 
   useEffect(() => {
     axiosInstance()
-      .get('/field?resource=Sublease')
+      .get(`/field?resource=${sidebarResource.sublease}`)
       .then(({ data: { data } }) => {
         data = data.filter((d) => !['rentalJob'].includes(d.fieldData.fieldName));
         let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
@@ -145,7 +147,11 @@ const ManageSublease = ({
   }, [subleaseId]);
 
   useEffect(() => {
-    setFormsData(setFieldsInAscendingOrder(initialData.fields));
+    if (initialData.values['type']) {
+      handleTypeChange(initialData.values['type']);
+    } else {
+      setFormsData(setFieldsInAscendingOrder(initialData.fields));
+    }
   }, [initialData.fields]);
 
   const handleSubmit = (values) => {
@@ -228,8 +234,40 @@ const ManageSublease = ({
         errors['actualEndDate'] = 'Please enter valid actual end date';
       }
     }
+
+    if (values?.type === SUBLEASE_TYPE.interCompany) {
+      const fromWarehouseField = initialData?.fields?.find((e) => e.fieldName === 'fromWarehouse')
+      if (!values?.fromWarehouse && fromWarehouseField) {
+        errors['fromWarehouse'] = `${fromWarehouseField?.fieldLabel} is required`;
+      }
+      const toWarehouseField = initialData?.fields?.find((e) => e.fieldName === 'toWarehouse')
+      if (!values?.toWarehouse && toWarehouseField) {
+        errors['toWarehouse'] = `${toWarehouseField?.fieldLabel} is required`;
+      }
+
+      if (values?.fromWarehouse && values?.toWarehouse) {
+        if (values?.fromWarehouse === values?.toWarehouse) {
+          errors['toWarehouse'] = `${fromWarehouseField?.fieldLabel} and ${toWarehouseField?.fieldLabel} should not be same`;
+        }
+      }
+    }
+    else {
+      const warehouseField = initialData?.fields?.find((e) => e.fieldName === 'warehouse')
+      if (!values?.warehouse) {
+        errors['warehouse'] = `${warehouseField?.fieldLabel} is required`;
+      }
+    }
     return errors;
   }
+
+  const handleTypeChange = (type) => {
+    if (type === SUBLEASE_TYPE.interCompany) {
+      setFormsData(setFieldsInAscendingOrder(initialData.fields.filter((e) => e.fieldName !== 'warehouse')));
+    }
+    else {
+      setFormsData(setFieldsInAscendingOrder(initialData.fields.filter((d) => !['fromWarehouse', 'toWarehouse']?.includes(d.fieldName))))
+    }
+  };
 
   return (
     <Dialog
@@ -358,8 +396,17 @@ const ManageSublease = ({
                                     options={field.option}
                                     setFieldValue={(name, value) => {
                                       setFieldValue(name, value);
+                                      if (field.fieldName === 'type') {
+                                        handleTypeChange(value);
+                                        ['warehouse', 'fromWarehouse', 'toWarehouse']?.forEach((fieldName) => {
+                                          if (initialData.fields?.find((ele) => ele.fieldName === fieldName)) {
+                                            setFieldValue(fieldName, '');
+                                          }
+                                        })
+                                      }
                                     }}
-                                    required={field.required}
+                                    required={['fromWarehouse', 'toWarehouse']?.includes(field.fieldName) && values.type === SUBLEASE_TYPE.interCompany ?
+                                      true : values.type === SUBLEASE_TYPE.vendor && field.fieldName === 'warehouse' ? true : field.required}
                                     fullWidth
                                     isTooltip={field?.isTooltip || false}
                                     tooltipMessage={field?.tooltipMessage}
