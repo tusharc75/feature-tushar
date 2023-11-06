@@ -246,7 +246,8 @@ const Steps = ({
   stepSubmitedData,
   handelClose = null
 }) => {
-  const {workOrderId, warehouse} = workOrderData;
+  const workOrderId = workOrderData?._id;
+  const warehouse = workOrderData?.warehouse;
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
 
