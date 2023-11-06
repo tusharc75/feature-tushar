@@ -132,7 +132,7 @@ export type TActios =
   | { type: 'complete' }
   | { type: 'currentEditingCellPosition'; cellPosition: { rowId: string; columnName: string } | null }
   | { type: 'error'; error: boolean }
-  | { type: 'showFilteredRecordsOnly'; showFilteredRecordsOnly: boolean };
+  | { type: 'showFilteredRecordsOnly' };
 
 export const useTableReducer = () => {
   const [state, dispatch] = useReducer(reducer, intialState);

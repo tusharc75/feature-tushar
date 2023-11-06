@@ -1,90 +1,17 @@
-import React, { useState, useContext, Fragment } from 'react';
-import Grid from '@material-ui/core/Grid';
-import axiosInstance from 'src/axios/axiosInstance';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { IconButton, Typography, Paper, Tooltip, Dialog } from '@material-ui/core';
+import { IconButton, Tooltip } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import GetAppIcon from '@material-ui/icons/GetApp';
-import { csvIcon, docIcon, excelSheetIcon, pdfFileIcon, pptIcon, textFileIcon, imageIcon, zipIcon } from 'src/assets/file_icons';
-import emailStyles from 'src/pages/Activity/Email/email.module.scss';
-import { useData } from 'src/StateProvider/Provider';
 import PreviewIcon from '@material-ui/icons/Visibility';
-import _ from 'lodash';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import moment from 'moment';
-import { dateTimeFormat } from 'src/constants/helpers';
 import axios from 'axios';
+import _ from 'lodash';
 import mimeDb from 'mime-db';
-
-const fileIcons = [
-  {
-    extensions: ['.txt', '.rtf'],
-    source: textFileIcon
-  },
-  {
-    extensions: ['.doc', '.docx', '.docs'],
-    source: docIcon
-  },
-  {
-    extensions: ['.pdf'],
-    source: pdfFileIcon
-  },
-  {
-    extensions: ['.xlsx', '.xml', '.xls', '.xlsm', '.xlt', '.xltm', '.xltx', '.xlw'],
-    source: excelSheetIcon
-  },
-  {
-    extensions: ['.csv'],
-    source: csvIcon
-  },
-  {
-    extensions: ['.pot', '.potm', '.potx', '.ppa', '.ppam', '.pptx', '.pptm', '.ppt', '.ppsx'],
-    source: pptIcon
-  },
-  {
-    extensions: ['.tif', 'tiff', '.bmp', '.jpg', '.jpeg', '.gif', '.png', '.eps', '.raw', '.cr2', '.nef', '.orf', '.sr2'],
-    source: imageIcon
-  },
-  {
-    extensions: [
-      '.arc',
-      '.arj',
-      '.as',
-      '.b64',
-      '.btoa',
-      '.bz',
-      '.bz2',
-      '.cab',
-      '.cpt',
-      '.gz',
-      '.hqx',
-      '.iso',
-      '.lha',
-      '.lzh',
-      '.mim',
-      '.mme',
-      '.pak',
-      '.pf',
-      '.rar',
-      '.rpm',
-      '.sea',
-      '.sit',
-      '.sitx',
-      '.tar',
-      '.gz',
-      '.tbz',
-      '.tbz2',
-      '.tgz',
-      '.uu',
-      '.uue',
-      '.z',
-      '.zip',
-      '.zipx',
-      '.zoo'
-    ],
-    source: zipIcon
-  }
-];
+import { Fragment, useContext, useState } from 'react';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import { fileIcons } from 'src/assets/fileIcons';
+import { FileIcon } from 'src/assets/fileIcons/icons';
+import axiosInstance from 'src/axios/axiosInstance';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
 const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) => {
   const {
@@ -102,18 +29,18 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
     if (mimeDb[file]) {
       let extension = `.${mimeDb[file].extensions[0]}`;
       let data = fileIcons.find((o) => o.extensions.indexOf(extension) >= 0);
-      if (data && data?.source) return data.source;
+      if (data && data?.icon) return data.icon;
     }
     if (file?.contentType) {
       let extension = `.${mimeDb[file.contentType].extensions[0]}`;
       let data = fileIcons.find((o) => o.extensions.indexOf(extension) >= 0);
-      if (data && data?.source) return data.source;
+      if (data && data?.icon) return data.icon;
     } else if (file) {
       let extension = file.substring(file.lastIndexOf('.')).toLowerCase();
       let data = fileIcons.find((o) => o.extensions.indexOf(extension) >= 0);
-      if (data && data?.source) return data.source;
+      if (data && data?.icon) return data.icon;
     }
-    return '';
+    return FileIcon;
   };
 
   // VIEW ATTACHMENT
@@ -246,16 +173,18 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
         {attachments && attachments.length > 0 ? (
           <>
             {attachments.map((attachment, i) => {
+              const Icon = getFileIconSrc(attachment?.contentType ? attachment?.contentType : attachment.url ? attachment.url : attachment);
               return (
                 <Fragment key={i}>
                   <div className="w-[138px] max-w-[138px] basis-[138px] flex-grow group border border-[var(--common-border-color)] min-h-[153px] relative rounded-[4px] p-[var(--gutter)] [--gutter:18px]">
                     <div className="front  group-hover:hidden">
-                      <div className="mx-auto h-[79px] mb-[11px]">
-                        <img
-                          src={getFileIconSrc(attachment?.contentType ? attachment?.contentType : attachment.url ? attachment.url : attachment)}
+                      <div className="mx-auto h-[79px] mb-[11px] text-center">
+                        {/* <img
+                          src={}
                           className={`object-contain mx-auto block h-full w-full max-w-full`}
                           alt="attchment"
-                        />
+                        /> */}
+                        <Icon size={79} className="mx-auto" />
                       </div>
                       <p className=" line-clamp-1 text-[14px] text-[var(--text-primary)]">
                         {attachment
