@@ -197,13 +197,13 @@ const Consumables = ({
       },
       ...(user?.user?.brandPolicy?.workOrderConsumableRequest
         ? [
-            {
-              accessor: 'requestedQty',
-              Header: 'Requested Qty',
-              width: 150,
-              Cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
-            }
-          ]
+          {
+            accessor: 'requestedQty',
+            Header: 'Requested Qty',
+            width: 150,
+            Cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
+          }
+        ]
         : []),
       {
         accessor: 'consumedQty',
@@ -314,7 +314,7 @@ const Consumables = ({
     const data: any = [];
     rows?.forEach((e) => {
       if (parseInt(e.qty)) {
-        data.push({ product: e._id, qty: parseInt(e.qty), service, uniqueId, stepId });
+        data.push({ product: e._id, qty: parseInt(e.qty), service, uniqueId, stepId, subType: materialSubType });
       }
     });
     axiosInstance()
@@ -405,10 +405,10 @@ const Consumables = ({
   return (
     <>
       {allowedToEdit && (
-        <Box className="flex flex-wrap mb-2 justify-between gap-2">
+        <Box className="flex flex-wrap mb-3 justify-between gap-2">
           {isCreate && permissions?.product?.isRead && (
             <Button variant={'contained'} color="primary" size="small" onClick={() => setConsumablesDialog(true)}>
-              Add Products/Consumables
+              {materialSubType === MATERIAL_SUB_TYPE.bom ? `Add BOM` : `Add Products/Consumables`}
             </Button>
           )}
           <Box display="flex" ml={'auto'}>

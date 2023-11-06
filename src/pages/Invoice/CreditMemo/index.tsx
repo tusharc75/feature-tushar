@@ -15,7 +15,6 @@ import EditIcon from '@material-ui/icons/Edit';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import ManageCreditMemo from 'src/pages/CreditMemo/ManageCreditMemo';
 import { useData } from 'src/StateProvider/Provider';
 
@@ -253,7 +252,7 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
             setCreditMemoDialog({ open: false, id: null });
             fetchData();
           }}
-          id={creditMemoDialog.id}
+          creditMemoId={creditMemoDialog.id}
           referenceData={{
             invoice: invoiceData?._id,
             currency: invoiceData?.currency
@@ -264,8 +263,7 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
       {showDeleteConfirmBox.open && (
         <ConfirmationDialog
           open={showDeleteConfirmBox.open}
-          message={`Are you sure you want to delete the credit memo ${showDeleteConfirmBox.ids.length > 1 ? '(s)' : ''}
-                     ?`}
+          message={`Are you sure you want to delete the credit memo ${showDeleteConfirmBox.ids.length > 1 ? '(s)' : ''}?`}
           onClose={() => {
             setShowDeleteConfirmBox({ open: false, ids: [] });
           }}

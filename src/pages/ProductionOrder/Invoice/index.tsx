@@ -38,12 +38,10 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.productionOrderDetail}`);
     var data = response?.data?.data;
     data = CURReplaceByCurrencySingle(data, productionOrderData?.currency || 'USD');
+    data?.forEach((e) => {
+      e.isColumnEditable = false;
+    });
     const newColumns = generateCustomTableColumns(data, productionOrderData?.currency || 'USD', renderedFrom);
-    let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
-    if (qtyIndex > -1) {
-      newColumns[qtyIndex].accessor = 'qtyDisplay';
-      newColumns[qtyIndex].editable = false;
-    }
     let coloum: any = [
       {
         accessor: 'index',
@@ -183,22 +181,16 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceName
           : parent.type === MATERIAL_TYPE.product
-          ? parent.productDetail?.productName
-          : parent.packageDetail?.packageName;
+            ? parent.productDetail?.productName
+            : parent.packageDetail?.packageName;
       parent.description =
         parent.type === MATERIAL_TYPE.product ? parent?.productDetail?.productDescription : parent?.packageDetail?.packageDescription;
       parent.qty = parent.qty;
-      parent.qtyDisplay = parent.qty;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
-      parent.hideSelection = false;
       if (parent?.workOrder?.status === WORK_ORDER_STATUS.completed) {
-        parent.hideSelection = true;
         parent.workOrderStatus = parent?.workOrder?.status;
       }
       parent.subRows = generateNestedData(data.material, parent);
-      if (parent?.workOrder?.status === WORK_ORDER_STATUS.new && parent?.subRows?.some((obj) => obj.type === MATERIAL_TYPE.service)) {
-        parent.canAutoCompleteWorkOrder = true;
-      }
     });
     setRowsData(rows);
   };
@@ -213,24 +205,19 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceName
           : _subRow.type === MATERIAL_TYPE.product
-          ? _subRow.productDetail?.productName
-          : _subRow.packageDetail?.packageName;
+            ? _subRow.productDetail?.productName
+            : _subRow.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription
           : _subRow.type === MATERIAL_TYPE.product
-          ? _subRow?.productDetail?.productDescription
-          : _subRow?.packageDetail?.packageDescription;
+            ? _subRow?.productDetail?.productDescription
+            : _subRow?.packageDetail?.packageDescription;
       _subRow.qty = _subRow.qty;
       _subRow.workOrder = parent?.workOrder;
       _subRow.workOrderNumber = parent?.workOrder?.workOrderNumber;
-      _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
-      _subRow.hideSelection = false;
       _subRow.subRows = generateNestedData(material, _subRow);
       _subRow.type === MATERIAL_TYPE.service ? serviceIndex++ : productIndex++;
-      if (_subRow?.status === WORKORDER_SERVICE_STATUS.completed) {
-        _subRow.hideSelection = true;
-      }
     });
     return subRows;
   };
@@ -257,7 +244,7 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
                   height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
                   columns={columns}
                   data={rowsData}
-                  onSelect={() => {}}
+                  onSelect={() => { }}
                   setWholeRowsCellColor={(rowData) => (rowData.type === 'service' ? 'isService' : '')}
                   childrenProperty="subRows"
                   uniqueKey="_id"

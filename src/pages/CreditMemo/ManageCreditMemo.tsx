@@ -18,7 +18,7 @@ import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/hel
 import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from 'src/components/Helpers/FormTypes';
 
-const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, creditMemoId = null, open, referenceData = null, isRedirectToDetailPage = true }) => {
+const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, creditMemoId = null,  referenceData = null, isRedirectToDetailPage = true }) => {
   
   const history = useHistory();
   const {
@@ -145,7 +145,7 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, creditMemoId = 
       fullScreen={fullScreen || isMobile || isTablet}
       TransitionComponent={CustomDialogTransition}
       aria-labelledby="customized-dialog-title"
-      open={open}
+      open={true}
       fullWidth
       onClose={(e, reason) => {
         if (reason !== 'backdropClick') {
