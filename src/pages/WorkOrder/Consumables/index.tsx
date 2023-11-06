@@ -120,11 +120,13 @@ const Consumables = ({
           width: 250,
           primaryField: true,
           Cell: ({ row }) => {
+            const hasChild = Array.isArray(childFields) && childFields.length > 0 ? true : false;
             return row.original[e?.fieldName] ? (
               <div className="d-flex gap-2 align-items-center">
                 <p
-                  className={Array.isArray(childFields) && childFields.length > 0 ? 'link text-truncate' : 'text-truncate'}
+                  className={hasChild ? 'link text-truncate' : 'text-truncate'}
                   onClick={() => {
+                    if(hasChild) return;
                     setUpdateDialog({
                       open: true,
                       data: row.original
