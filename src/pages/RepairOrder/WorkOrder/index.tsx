@@ -15,7 +15,8 @@ import {
   WORK_ORDER_STATUS,
   CHILD_RESOURCE,
   MATERIAL_TYPE,
-  asyncForEach
+  asyncForEach,
+  MATERIAL_SUB_TYPE
 } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
@@ -740,6 +741,7 @@ const WorkOrder = ({
         data.push({
           product: e._id,
           qty: parseInt(e.qty) || 1,
+          subType: MATERIAL_SUB_TYPE.consumable,
           service: null,
           uniqueId: null,
           stepId: null
@@ -754,6 +756,7 @@ const WorkOrder = ({
             product: e._id,
             qty: parseInt(e.qty) || 1,
             service: s?.serviceDetail?._id,
+            subType: MATERIAL_SUB_TYPE.consumable,
             uniqueId: s?.uniqueId,
             stepId: null,
             parentId: s?._id
