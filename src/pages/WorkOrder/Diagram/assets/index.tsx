@@ -91,3 +91,13 @@ export const getFileIcon = (fileName: string) => {
     return FileIcon; // default icon if no icon is found for the file extension.
   }
 };
+
+export const getFileNameWithExtension = (file: { url: string; name: string }) => {
+  const fileNameExtension = file.name.lastIndexOf('.');
+  if (fileNameExtension > -1) {
+    return file.name;
+  } else {
+    const extension = file.url.substring(file.url.lastIndexOf('.')).toLowerCase();
+    return `${file.name}${extension}`;
+  }
+};

@@ -1,21 +1,19 @@
-import { Fragment, useContext, useEffect, useState } from 'react';
-import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Collapse, Dialog, Grid, IconButton, Typography } from '@material-ui/core';
+import { Box, Button, Collapse, Dialog, Grid, IconButton, Tooltip, Typography } from '@material-ui/core';
 import { Add, Delete } from '@material-ui/icons';
-import axiosInstance from 'src/axios/axiosInstance';
-import { ATTACHMENT_TYPE, CustomDialogTransition } from 'src/constants/helpers';
-import ManageAttachment from 'src/components/Activity/Attachments/ManageAttachment';
-import { isMobile, isTablet } from 'react-device-detect';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
 import EditIcon from '@material-ui/icons/Edit';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import ViewImage from './ViewImage';
-import { docIcon } from 'src/assets/file_icons';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
-import { getFileIcon } from './assets';
+import { useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
 import { BiDownload } from 'react-icons/bi';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from 'src/axios/axiosInstance';
+import ManageAttachment from 'src/components/Activity/Attachments/ManageAttachment';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import { ATTACHMENT_TYPE, CustomDialogTransition } from 'src/constants/helpers';
+import ViewImage from './ViewImage';
+import { getFileIcon, getFileNameWithExtension } from './assets';
 
 const Diagram = ({ resource, referenceId }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -128,6 +126,7 @@ const Diagram = ({ resource, referenceId }) => {
       <div className="flex justify-center items-center h-full absolute inset-0">
         <div className="flex flex-col gap-2 items-center">
           <FileIcon size={150} className="text-center" />
+          <p className=" line-clamp-1 text-[14px] font-normal">{getFileNameWithExtension(data)}</p>
           <Button
             onClick={() => {
               downloadExcel(data);
@@ -241,12 +240,14 @@ const Diagram = ({ resource, referenceId }) => {
                                         selectedAttachment?.url === f?.url ? 'var(--dark-active-border-color,#0F9FA9 )' : 'var(--common-border-color)'
                                     }}
                                   >
-                                    <div className="flex gap-2 items-center" title={f.name}>
-                                      <div className="w-[20px]">
-                                        <Icon size={20} />
+                                    <Tooltip enterTouchDelay={0} title={f.name} placement={'top'} arrow>
+                                      <div className="flex gap-2 items-center">
+                                        <div className="w-[20px]">
+                                          <Icon size={20} />
+                                        </div>
+                                        <p className=" line-clamp-1 text-[14px] font-normal">{getFileNameWithExtension(f)}</p>
                                       </div>
-                                      <p className=" line-clamp-1 font-semibold">{f?.name}</p>
-                                    </div>
+                                    </Tooltip>
                                   </Box>
                                 );
                               })}
