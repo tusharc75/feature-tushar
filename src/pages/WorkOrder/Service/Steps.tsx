@@ -237,8 +237,7 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 const Steps = ({
-  workOrderId,
-  warehouse,
+  workOrderData,
   selectedService,
   allowedToEdit,
   setDisableCompleteFail,
@@ -247,6 +246,7 @@ const Steps = ({
   stepSubmitedData,
   handelClose = null
 }) => {
+  const {workOrderId, warehouse} = workOrderData;
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
 
@@ -1483,12 +1483,11 @@ const Steps = ({
                 handleClose={() => {
                   setConsumablesDialog({ open: false, uniqueId: null, service: null, stepId: null, serviceName: null });
                 }}
-                workOrderId={workOrderId}
                 service={consumablesDialog.service}
                 uniqueId={consumablesDialog.uniqueId}
                 stepId={consumablesDialog.stepId}
                 serviceName={consumablesDialog.serviceName}
-                warehouse={warehouse}
+                workOrderData={workOrderData}
               />
             )}
             {userAssignDialog && (
