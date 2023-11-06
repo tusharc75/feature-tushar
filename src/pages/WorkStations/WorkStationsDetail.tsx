@@ -14,6 +14,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageWorkStations from './ManageWorkStations';
 import { sidebarResource } from 'src/constants/helpers';
+import ActiveService from './activeService';
 
 const WorkStationsDetail = () => {
   const { id } = useParams();
@@ -97,7 +98,6 @@ const WorkStationsDetail = () => {
     setTabValue(newValue);
   };
 
-
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -134,6 +134,7 @@ const WorkStationsDetail = () => {
           }}
         >
            <Tab label={<div className="tab-font">Details</div>} value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className={'tabLayout'} />
+           <Tab label={<div className="tab-font">Active Services</div>} value={1} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className={'tabLayout'} />
           </Tabs>
           {tabValue === 0 && (
               <Box>
@@ -145,6 +146,9 @@ const WorkStationsDetail = () => {
                   <DetailsPage data={workStationsData} fields={fields} />
                 )}
               </Box>
+          )}
+          {tabValue === 1 && (
+              < ActiveService workStationId={id} />
           )}
       </Box>
       {showConfirmBox && (

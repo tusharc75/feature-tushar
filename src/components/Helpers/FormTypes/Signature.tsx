@@ -13,25 +13,17 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 //camera library being used
 import Webcam from 'react-webcam';
 
-
 //handling camera side
 const UseCamera = ({ setUsePad, usePad, setPicture, picture }) => {
-
-  const webcamRef = React.useRef(null)
+  const webcamRef = React.useRef(null);
   const capture = () => {
-    const pictureSrc = webcamRef.current.getScreenshot()
-    setPicture(pictureSrc)
-  }
+    const pictureSrc = webcamRef.current.getScreenshot();
+    setPicture(pictureSrc);
+  };
 
   return (
     <div>
-      <Button
-        size="small"
-        variant="contained"
-        color="primary"
-        onClick={() => setUsePad(!usePad)}
-        style={{ float: "right", margin: '10px' }}
-      >
+      <Button size="small" variant="contained" color="primary" onClick={() => setUsePad(!usePad)} style={{ float: 'right', margin: '10px' }}>
         Close Camera
       </Button>
       <div>
@@ -43,21 +35,23 @@ const UseCamera = ({ setUsePad, usePad, setPicture, picture }) => {
             width={500}
             minScreenshotWidth={500}
             screenshotFormat="image/jpeg"
-          // videoConstraints={videoConstraints}
+            // videoConstraints={videoConstraints}
           />
         ) : (
           <img src={picture} />
         )}
       </div>
-      <div style={{
-        alignItems: "center",
-        marginTop: '3px'
-      }}>
+      <div
+        style={{
+          alignItems: 'center',
+          marginTop: '3px'
+        }}
+      >
         {picture != '' ? (
           <Button
             onClick={(e) => {
-              e.preventDefault()
-              setPicture('')
+              e.preventDefault();
+              setPicture('');
             }}
             size="small"
             variant="contained"
@@ -68,8 +62,8 @@ const UseCamera = ({ setUsePad, usePad, setPicture, picture }) => {
         ) : (
           <Button
             onClick={(e) => {
-              e.preventDefault()
-              capture()
+              e.preventDefault();
+              capture();
             }}
             size="small"
             variant="contained"
@@ -80,27 +74,25 @@ const UseCamera = ({ setUsePad, usePad, setPicture, picture }) => {
         )}
       </div>
     </div>
-  )
-
-}
+  );
+};
 
 const SignatureDialog = ({ onSave, open, close }) => {
-
   const signCanvas: any = React.useRef(null);
   const { setToastConfig } = React.useContext(CustomToastContext);
 
-  const [picture, setPicture] = useState('')
-
+  const [picture, setPicture] = useState('');
 
   const [usePad, setUsePad] = useState(true);
-
 
   return (
     <Dialog open={open} onClose={close}>
       <CustomDialogHeader title="Signature Pad" onClose={close} />
       <CustomDialogContent>
         {usePad ? (
-          <SignaturePad ref={signCanvas} canvasProps={{ minWidth: 500, width: 500, height: 400 }} />
+          <div className="bg-[white]">
+            <SignaturePad ref={signCanvas} canvasProps={{ minWidth: 500, width: 500, height: 400 }} />
+          </div>
         ) : (
           <UseCamera setUsePad={setUsePad} usePad={usePad} setPicture={setPicture} picture={picture} />
         )}
@@ -117,25 +109,21 @@ const SignatureDialog = ({ onSave, open, close }) => {
           size="small"
           color="primary"
           onClick={() => {
-
             //check if user is in camera mode or pad mode
             if (usePad) {
-
               if (!signCanvas.current?.isEmpty()) {
                 const dataURL = signCanvas.current?.getTrimmedCanvas().toDataURL('image/png');
                 onSave(dataURL);
               } else {
                 setToastConfig({ open: true, type: 'warning', message: 'Signature cannot be empty!' });
               }
-
             } else {
               if (picture != '') {
-                onSave(picture)
+                onSave(picture);
               } else {
                 setToastConfig({ open: true, type: 'warning', message: 'Signature cannot be empty (no picture clicked)!' });
               }
             }
-
           }}
         >
           Save
@@ -172,7 +160,12 @@ const Signature = ({ label, values, name, touched, errors, isTooltip, tooltipMes
           }}
         >
           {values[name] ? (
-            <img src={values[name]} style={{ maxWidth: 70, maxHeight: 70, width: '100%', height: 'auto' }} alt="Signature" />
+            <img
+              src={values[name]}
+              className="dark:[filter:invert(1)]"
+              style={{ maxWidth: 70, maxHeight: 70, width: '100%', height: 'auto' }}
+              alt="Signature"
+            />
           ) : (
             <FaSignature style={{ width: 70, height: 70, color: '#5b5b5b' }} />
           )}

@@ -41,7 +41,7 @@ import { IoMdArrowDropup, IoMdArrowDropdown } from 'react-icons/io';
 import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
 import FormatQuoteIcon from '@material-ui/icons/FormatQuote';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
-import { PreWorkIcon, PostWorkIcon } from 'src/assets/svg/svgIcons';
+import { PreWorkIcon, PostWorkIcon, WorkStations } from 'src/assets/svg/svgIcons';
 import { isArray, reverse } from 'lodash';
 import AttachmentDialog from './AttachmentDialog';
 import ManagePurchaseOrder from 'src/pages/PurchaseOrder/ManagePurchaseOrder';
@@ -61,7 +61,7 @@ const getTotalTime = (stepTimes: any) => {
       totalTimes += new Date().getTime() - new Date(item?.pauseDate || item?.startDate).getTime();
     }
   });
-  stepTimes.forEach((item) => { });
+  stepTimes.forEach((item) => {});
   return { shouldTimerRun, totalTimes };
 };
 
@@ -110,6 +110,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
       permissions
     }
   } = useData();
+  const workOrderConsumableHide = user?.brandPolicy?.workOrderConsumableHide === true ? true : false;
   const [serviceSteps, setServiceSteps] = useState(null);
   const [selectedService, setSelectedService] = useState(null);
   const [stepSubmitedData, setStepSubmitedData] = useState([]);
@@ -231,7 +232,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
       setServiceSteps(services);
       if (
         services.filter((e) => e.type === 'service' && e.status === WORKORDER_SERVICE_STATUS.completed)?.length ===
-        services.filter((e) => e.type === 'service')?.length &&
+          services.filter((e) => e.type === 'service')?.length &&
         workOrderData?.status !== WORK_ORDER_STATUS.completed
       ) {
         fetchWorkOrderData();
@@ -658,7 +659,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                           display: 'flex',
                                           alignItems: 'center',
                                           flexWrap: 'wrap',
-                                          flexBasis: data?.type === 'quotation' ? 'calc(100% - 30px)' : '100%'
+                                          flexBasis: data?.type === 'quotation' ? 'calc(100% - 30px)' : '100%',
+                                          color: 'var(--primary-text)'
                                         }}
                                       >
                                         <Box ml={'10px'}>
@@ -667,13 +669,13 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                         {user?.brandPolicy?.servicePrePost && data?.type === 'service' && (
                                           <Box ml={1}>
                                             {data?.preWork ? (
-                                              <HtmlTooltip title="Pre Work Service">
+                                              <HtmlTooltip enterTouchDelay={0} title="Pre Work Service">
                                                 <span>
                                                   <PreWorkIcon style={{ verticalAlign: 'middle' }} />
                                                 </span>
                                               </HtmlTooltip>
                                             ) : (
-                                              <HtmlTooltip title="Post Work Service">
+                                              <HtmlTooltip enterTouchDelay={0} title="Post Work Service">
                                                 <span>
                                                   <PostWorkIcon style={{ verticalAlign: 'middle' }} />
                                                 </span>
@@ -683,15 +685,20 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                         )}
                                         {data?.type === 'service' && data?.assignedUsers?.length > 0 && (
                                           <Box ml={1}>
-                                            <HtmlTooltip title={data?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
-                                              <PeopleIcon style={{ color: 'var(--primary)', maxWidth: '22px' }} />
+                                            <HtmlTooltip enterTouchDelay={0} title={data?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
+                                              <PeopleIcon style={{ fontSize: 20 }} />
                                             </HtmlTooltip>
                                           </Box>
                                         )}
                                         {data?.type === 'service' && data?.workStations?.length > 0 && (
                                           <Box ml={1}>
-                                            <HtmlTooltip title={`Work Stations-${data?.workStations?.map((e) => e?.optionLabel)?.toString()}`}>
-                                              <WorkOutlineIcon style={{ color: 'var(--primary)', maxWidth: '22px' }} />
+                                            <HtmlTooltip
+                                              enterTouchDelay={0}
+                                              title={`Work Stations-${data?.workStations?.map((e) => e?.optionLabel)?.toString()}`}
+                                            >
+                                              <span>
+                                                <WorkStations className=" align-text-top" />
+                                              </span>
                                             </HtmlTooltip>
                                           </Box>
                                         )}
@@ -744,7 +751,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                             </IconButton>
                                           </div>
                                           <div style={{ flexBasis: 'max-content' }}>
-                                            <HtmlTooltip title="Delete" placement="top" arrow>
+                                            <HtmlTooltip enterTouchDelay={0} title="Delete" placement="top" arrow>
                                               <IconButton
                                                 size="small"
                                                 color="inherit"
@@ -924,18 +931,37 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                             {user?.brandPolicy?.servicePrePost && data?.type === 'service' && (
                                               <Box ml={1}>
                                                 {data?.preWork ? (
-                                                  <HtmlTooltip title="Pre Work Service">
+                                                  <HtmlTooltip enterTouchDelay={0} title="Pre Work Service">
                                                     <span>
                                                       <PreWorkIcon style={{ verticalAlign: 'middle' }} />
                                                     </span>
                                                   </HtmlTooltip>
                                                 ) : (
-                                                  <HtmlTooltip title="Post Work Service">
+                                                  <HtmlTooltip enterTouchDelay={0} title="Post Work Service">
                                                     <span>
                                                       <PostWorkIcon style={{ verticalAlign: 'middle' }} />
                                                     </span>
                                                   </HtmlTooltip>
                                                 )}
+                                              </Box>
+                                            )}
+                                            {data?.type === 'service' && data?.assignedUsers?.length > 0 && (
+                                              <Box ml={1}>
+                                                <HtmlTooltip enterTouchDelay={0} title={data?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
+                                                  <PeopleIcon />
+                                                </HtmlTooltip>
+                                              </Box>
+                                            )}
+                                            {data?.type === 'service' && data?.workStations?.length > 0 && (
+                                              <Box ml={1}>
+                                                <HtmlTooltip
+                                                  enterTouchDelay={0}
+                                                  title={`Work Stations-${data?.workStations?.map((e) => e?.optionLabel)?.toString()}`}
+                                                >
+                                                  <span>
+                                                    <WorkStations className=" align-text-top" />
+                                                  </span>
+                                                </HtmlTooltip>
                                               </Box>
                                             )}
                                             <>
@@ -950,13 +976,6 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                                 </Box>
                                               )}
                                             </>
-                                            {data?.type === 'service' && data?.assignedUsers?.length > 0 && (
-                                              <Box ml={1}>
-                                                <HtmlTooltip title={data?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
-                                                  <PeopleIcon style={{ color: 'var(--primary)', maxWidth: '22px' }} />
-                                                </HtmlTooltip>
-                                              </Box>
-                                            )}
                                           </Box>
 
                                           {/* Chips */}
@@ -971,20 +990,20 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                                       data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
                                                         ? '#E1FCE3'
                                                         : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                          ? '#fabebe'
-                                                          : '#FFF5DD',
+                                                        ? '#fabebe'
+                                                        : '#FFF5DD',
                                                     color:
                                                       data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
                                                         ? '#048E0A'
                                                         : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                          ? '#fa0202'
-                                                          : '#FF8C21',
+                                                        ? '#fa0202'
+                                                        : '#FF8C21',
                                                     background:
                                                       data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
                                                         ? '#E1FCE3'
                                                         : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                          ? '#fabebe'
-                                                          : '#FFF5DD',
+                                                        ? '#fabebe'
+                                                        : '#FFF5DD',
                                                     fontWeight: 700
                                                   }}
                                                 />
@@ -1122,20 +1141,22 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
               >
                 Upload Documents
               </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  setConsumablesDialog({
-                    open: true,
-                    uniqueId: selectedService.uniqueId,
-                    service: selectedService._id,
-                    stepId: null,
-                    serviceName: selectedService.serviceName
-                  });
-                  setAnchorEl(null);
-                }}
-              >
-                Add/Consume Products
-              </MenuItem>
+              {!workOrderConsumableHide && (
+                <MenuItem
+                  onClick={() => {
+                    setConsumablesDialog({
+                      open: true,
+                      uniqueId: selectedService.uniqueId,
+                      service: selectedService._id,
+                      stepId: null,
+                      serviceName: selectedService.serviceName
+                    });
+                    setAnchorEl(null);
+                  }}
+                >
+                  Add/Consume Products
+                </MenuItem>
+                )}
               <MenuItem
                 disabled={
                   disableCompleteFail ||
@@ -1351,7 +1372,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           handleClose={() => {
             setAttchmentsDialog({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
           }}
-          handleSuccess={() => { }}
+          handleSuccess={() => {}}
         />
       )}
       {showManagePurchaseOrder && (
@@ -1396,14 +1417,14 @@ const RenderStatusIcon = ({ stepStatus, style = {}, ...others }: { stepStatus: s
   return (
     <>
       {stepStatus === WORKORDER_SERVICE_STEP_STATUS.passed && (
-        <HtmlTooltip title={stepStatus}>
+        <HtmlTooltip enterTouchDelay={0} title={stepStatus}>
           <Box style={{ ...style, color: '#059825' }} {...others}>
             <PassIcon style={{ display: 'block', width: '100%', height: '100%' }} />
           </Box>
         </HtmlTooltip>
       )}
       {stepStatus === WORKORDER_SERVICE_STEP_STATUS.failed && (
-        <HtmlTooltip title={stepStatus}>
+        <HtmlTooltip enterTouchDelay={0} title={stepStatus}>
           <Box style={{ ...style, color: '#EE0E06' }} {...others}>
             <FailIcon style={{ display: 'block', width: '100%', height: '100%' }} />
           </Box>

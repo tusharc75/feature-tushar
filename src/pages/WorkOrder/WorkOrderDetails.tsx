@@ -36,6 +36,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import EditIcon from '@material-ui/icons/Edit';
 import CloseIcon from '@material-ui/icons/Close';
 import { RiFileShredFill } from 'react-icons/ri';
+import Diagram from './Diagram';
 
 const WorkOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -48,6 +49,7 @@ const WorkOrderDetails = () => {
     state: { user, permissions }
   }: any = useData();
 
+  const workOrderConsumableHide = user?.brandPolicy?.workOrderConsumableHide === true ? true : false;
   const [workOrderData, setWorkOrderData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -299,16 +301,23 @@ const WorkOrderDetails = () => {
           <CustomTab index={1} value={1} {...a11yProps(1)}>
             <BiFoodMenu className="mr-1" fontSize="inherit" /> Services
           </CustomTab>
-          <CustomTab index={2} value={2} className={'tabLayout'} {...a11yProps(2)}>
-            <BiFoodMenu className="mr-1" fontSize="inherit" /> Products/Consumables
-          </CustomTab>
+          {!workOrderConsumableHide && (
+            <CustomTab index={2} value={2} className={'tabLayout'} {...a11yProps(2)}>
+              <BiFoodMenu className="mr-1" fontSize="inherit" /> Products/Consumables
+            </CustomTab>
+          )}
           {workOrderData?.type === WORK_ORDER_TYPE.productionOrder && (
             <CustomTab index={3} value={3} className={'tabLayout'} {...a11yProps(3)}>
               <BiFoodMenu className="mr-1" fontSize="inherit" /> BOM
             </CustomTab>
           )}
-          {!(isMobile && !isTablet) && (
+          {workOrderData?.type === WORK_ORDER_TYPE.productionOrder && (
             <CustomTab index={4} value={4} className={'tabLayout'} {...a11yProps(4)}>
+              <BiFoodMenu className="mr-1" fontSize="inherit" /> Diagram
+            </CustomTab>
+          )}
+          {!(isMobile && !isTablet) && (
+            <CustomTab index={5} value={5} className={'tabLayout'} {...a11yProps(5)}>
               <RiFlowChart className="mr-1" fontSize="inherit" /> Views
             </CustomTab>
           )}
@@ -354,7 +363,7 @@ const WorkOrderDetails = () => {
           {workOrderData && (
             <Consumables
               allowedToEdit={allowedToEdit && !completed}
-              isCreate={false}
+              isCreate={true}
               workOrderId={id}
               warehouse={workOrderData?.warehouse}
               service={null}
@@ -366,6 +375,9 @@ const WorkOrderDetails = () => {
           )}
         </TabPanel>
         <TabPanel value={tabValue} index={4}>
+          {workOrderData && <Diagram resource={'workOrder'} referenceId={id} />}
+        </TabPanel>
+        <TabPanel value={tabValue} index={5}>
           <Box>
             <View workOrderName={workOrderData?.workOrderNumber || ''} workOrderId={id} workOrderStatus={workOrderData?.status} />
           </Box>

@@ -331,7 +331,6 @@ const CreditMemo = () => {
       {showManageDialog.open && (
         <ManageCreditMemo
           isClone={showManageDialog.isClone}
-          open={showManageDialog.open}
           creditMemoId={showManageDialog.idToClone}
           onClose={() => setShowManageDialog({ open: false, isClone: false, idToClone: null })}
           onSuccess={() => {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, useMemo } from 'react';
-import { Grid, Box, Button, Tabs, Tab, Menu, MenuItem, Typography } from '@material-ui/core';
+import { Grid, Box, Button, Tabs, Tab, Menu, MenuItem, Typography, ListItemIcon } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from '../../axios/axiosInstance';
@@ -19,15 +19,7 @@ import { BiFoodMenu, BiLayerPlus } from 'react-icons/bi';
 import Productpackage from './Productpackage';
 import { isMobile, isTablet } from 'react-device-detect';
 import ExpandMore from '@material-ui/icons/ExpandMore';
-import {
-  GiReceiveMoney,
-  IoArrowDownCircleSharp,
-  MdDelete,
-  RiFlowChart,
-  VscVersions,
-  MdAutorenew,
-  SiSemanticrelease
-} from 'react-icons/all';
+import { GiReceiveMoney, IoArrowDownCircleSharp, MdDelete, RiFlowChart, VscVersions, MdAutorenew, SiSemanticrelease } from 'react-icons/all';
 import { HiPencil } from 'react-icons/hi';
 import { camelCase, set } from 'lodash';
 import QuoteBuilder from './QuoteBuilder';
@@ -82,7 +74,7 @@ const QuotationDetails = () => {
 
   const [convertConfirmBox, setConvertConfirmBox] = useState(false);
   const [renewal, setRenewal] = useState(false);
-  const [releaseConfirm, setReleaseConfirm] = useState(false)
+  const [releaseConfirm, setReleaseConfirm] = useState(false);
 
   const [stepList, setStepList] = useState(quotationProcessSteps);
   const [stepNames, setStepNames] = useState(quotationProcessSteps.map((item) => item.name));
@@ -135,17 +127,26 @@ const QuotationDetails = () => {
     if (quotationData && quotationFields.length !== 0) {
       if (quotationData['type'] === QUOTATION_TYPE.rentalJob) {
         tempQuotationFields = tempQuotationFields.filter(
-          (d) => !['expectedCustomerDeliveryDate', 'supplierSuggestedDeliveryDate', 'repairOrder', 'salesOrder', 'fieldJob']?.includes(d?.fieldData?.fieldName)
+          (d) =>
+            !['expectedCustomerDeliveryDate', 'supplierSuggestedDeliveryDate', 'repairOrder', 'salesOrder', 'fieldJob']?.includes(
+              d?.fieldData?.fieldName
+            )
         );
       }
       if (quotationData['type'] === QUOTATION_TYPE.fieldJob) {
         tempQuotationFields = tempQuotationFields.filter(
-          (d) => !['expectedCustomerDeliveryDate', 'supplierSuggestedDeliveryDate', 'repairOrder', 'salesOrder', 'rentalJob']?.includes(d?.fieldData?.fieldName)
+          (d) =>
+            !['expectedCustomerDeliveryDate', 'supplierSuggestedDeliveryDate', 'repairOrder', 'salesOrder', 'rentalJob']?.includes(
+              d?.fieldData?.fieldName
+            )
         );
       }
       if (quotationData['type'] === QUOTATION_TYPE.repairOrder) {
         tempQuotationFields = tempQuotationFields.filter(
-          (d) => !['expectedCustomerDeliveryDate', 'supplierSuggestedDeliveryDate', 'salesOrder', 'fieldJob', 'rentalJob']?.includes(d?.fieldData?.fieldName)
+          (d) =>
+            !['expectedCustomerDeliveryDate', 'supplierSuggestedDeliveryDate', 'salesOrder', 'fieldJob', 'rentalJob']?.includes(
+              d?.fieldData?.fieldName
+            )
         );
       }
       if (quotationData['type'] === QUOTATION_TYPE.salesOrder) {
@@ -178,50 +179,45 @@ const QuotationDetails = () => {
       if (quotationData?.type) {
         if (quotationData?.type === QUOTATION_TYPE.rentalJob) {
           var canAllowMultipleTimeConvert = false;
-          const rentalJobField = quotationFields?.find((e) => e?.fieldData?.fieldName === 'rentalJob')?.fieldData
+          const rentalJobField = quotationFields?.find((e) => e?.fieldData?.fieldName === 'rentalJob')?.fieldData;
           if (rentalJobField) {
-            if (rentalJobField?.type === "multiSelect") {
-              canAllowMultipleTimeConvert = true
+            if (rentalJobField?.type === 'multiSelect') {
+              canAllowMultipleTimeConvert = true;
             }
           }
-          if (canAllowMultipleTimeConvert && [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.converted]?.includes(quotationData?.status)
-            && quotationData.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer) {
+          if (
+            canAllowMultipleTimeConvert &&
+            [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.converted]?.includes(quotationData?.status) &&
+            quotationData.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer
+          ) {
             var isAllowedToEdit = [...(quotationData.collaborator ?? []), quotationData.owner].some((d) => d?.optionValue === user?.user?._id);
             if (user?.role?.selectedEntity?.superAdminAccess) {
               isAllowedToEdit = true;
             }
-            setAllowedToEdit(isAllowedToEdit)
-            setCanConvert(true)
+            setAllowedToEdit(isAllowedToEdit);
+            setCanConvert(true);
+          } else if (!quotationData?.rentalJob && [QUOTATION_STATUS.acceptByCustomer]?.includes(quotationData?.status)) {
+            setCanConvert(true);
+          } else {
+            setCanConvert(false);
           }
-          else if (!quotationData?.rentalJob && [QUOTATION_STATUS.acceptByCustomer]?.includes(quotationData?.status)) {
-            setCanConvert(true)
-          }
-          else {
-            setCanConvert(false)
-          }
-        }
-        else if (quotationData?.type === QUOTATION_TYPE.salesOrder) {
+        } else if (quotationData?.type === QUOTATION_TYPE.salesOrder) {
           if (!quotationData?.salesOrder && [QUOTATION_STATUS.acceptByCustomer]?.includes(quotationData?.status)) {
-            setCanConvert(true)
+            setCanConvert(true);
+          } else {
+            setCanConvert(false);
           }
-          else {
-            setCanConvert(false)
-          }
-        }
-        else if (quotationData?.type === QUOTATION_TYPE.repairOrder) {
+        } else if (quotationData?.type === QUOTATION_TYPE.repairOrder) {
           if (!quotationData?.repairOrder && [QUOTATION_STATUS.acceptByCustomer]?.includes(quotationData?.status)) {
-            setCanConvert(true)
+            setCanConvert(true);
+          } else {
+            setCanConvert(false);
           }
-          else {
-            setCanConvert(false)
-          }
-        }
-        else if (quotationData?.type === QUOTATION_TYPE.fieldJob) {
+        } else if (quotationData?.type === QUOTATION_TYPE.fieldJob) {
           if (!quotationData?.fieldJob && [QUOTATION_STATUS.acceptByCustomer]?.includes(quotationData?.status)) {
-            setCanConvert(true)
-          }
-          else {
-            setCanConvert(false)
+            setCanConvert(true);
+          } else {
+            setCanConvert(false);
           }
         }
       }
@@ -265,9 +261,8 @@ const QuotationDetails = () => {
       setSentToCustomer(data.versions[versionIndex]?.status === QUOTATION_STATUS.sentToCustomer);
 
       if (data.versions[versionIndex]?.status === QUOTATION_STATUS.acceptByCustomer) {
-        setCurrentStep(tempStepList?.length - 1)
-      }
-      else {
+        setCurrentStep(tempStepList?.length - 1);
+      } else {
         setCurrentStep(getIndex(data.versions[versionIndex]?.processStatus, tempStepList));
       }
 
@@ -351,16 +346,16 @@ const QuotationDetails = () => {
           message: `Converted Successfully`
         });
         if (quotationData?.type === QUOTATION_TYPE.rentalJob) {
-          window.open(`${routes.rentalManagementDetail.path}/${data?._id}`)
+          window.open(`${routes.rentalManagementDetail.path}/${data?._id}`);
         }
         if (quotationData?.type === QUOTATION_TYPE.salesOrder) {
-          window.open(`${routes.salesOrderDetail.path}/${data?._id}`)
+          window.open(`${routes.salesOrderDetail.path}/${data?._id}`);
         }
         if (quotationData?.type === QUOTATION_TYPE.repairOrder) {
-          window.open(`${routes.repairOrderDetail.path}/${data?._id}`)
+          window.open(`${routes.repairOrderDetail.path}/${data?._id}`);
         }
         if (quotationData?.type === QUOTATION_TYPE.fieldJob) {
-          window.open(`${routes.fieldServiceOrderDetail.path}/${data?._id}`)
+          window.open(`${routes.fieldServiceOrderDetail.path}/${data?._id}`);
         }
       })
       .catch((error) => {
@@ -369,14 +364,17 @@ const QuotationDetails = () => {
   };
 
   const handleRelease = () => {
-    axiosInstance().put(`${quotation.api}/quotation-release/${id}`).then((data) => {
-      fetchQuotationData();
-      setReleaseConfirm(false);
-    }).catch((err) => {
-      toastConfig.setToastConfig(err);
-      setReleaseConfirm(false);
-    })
-  }
+    axiosInstance()
+      .put(`${quotation.api}/quotation-release/${id}`)
+      .then((data) => {
+        fetchQuotationData();
+        setReleaseConfirm(false);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        setReleaseConfirm(false);
+      });
+  };
 
   return (
     <Box className="main-container-v1">
@@ -388,34 +386,38 @@ const QuotationDetails = () => {
           <Box className="control-buttons-v1">
             {quotationData ? (
               <>
-                {quotationData.rentalJob && quotationData.rentalJob.status === RENTAL_STATUS.jobStarted && <><HtmlTooltip title="Renewal">
-                  <Button
-                    onClick={() => {
-                      setRenewal(true)
-                    }}
-                    variant="outlined"
-                    size="small"
-                    className="mx-1 btn-outline-v1"
-                    startIcon={<MdAutorenew />}
-                    color="primary"
-                  >
-                    Renewal
-                  </Button>
-                </HtmlTooltip>
-                  <HtmlTooltip title="Release">
-                    <Button
-                      onClick={() => {
-                        setReleaseConfirm(true)
-                      }}
-                      variant="outlined"
-                      size="small"
-                      className="mx-1 btn-outline-v1"
-                      startIcon={<SiSemanticrelease />}
-                      color="primary"
-                    >
-                      Release
-                    </Button>
-                  </HtmlTooltip></>}
+                {quotationData.rentalJob && quotationData.rentalJob.status === RENTAL_STATUS.jobStarted && (
+                  <>
+                    <HtmlTooltip title="Renewal">
+                      <Button
+                        onClick={() => {
+                          setRenewal(true);
+                        }}
+                        variant="outlined"
+                        size="small"
+                        className="mx-1 btn-outline-v1"
+                        startIcon={<MdAutorenew />}
+                        color="primary"
+                      >
+                        Renewal
+                      </Button>
+                    </HtmlTooltip>
+                    <HtmlTooltip title="Release">
+                      <Button
+                        onClick={() => {
+                          setReleaseConfirm(true);
+                        }}
+                        variant="outlined"
+                        size="small"
+                        className="mx-1 btn-outline-v1"
+                        startIcon={<SiSemanticrelease />}
+                        color="primary"
+                      >
+                        Release
+                      </Button>
+                    </HtmlTooltip>
+                  </>
+                )}
                 <HtmlTooltip title={`${routes.quotation.title} Summary`}>
                   <Button
                     onClick={() => {
@@ -435,7 +437,7 @@ const QuotationDetails = () => {
                     variant={isMobile && !isTablet ? 'text' : 'outlined'}
                     color="primary"
                     size="small"
-                    className={`${isMobile && !isTablet ? contactClass.mobile_button_layout : 'mx-1'} btn-outline-v1`}
+                    className={` btn-outline-v1`}
                     onClick={() => {
                       setShowAllVersionStatus(true);
                     }}
@@ -454,9 +456,9 @@ const QuotationDetails = () => {
                     size="small"
                     onClick={openActionsAction}
                     aria-controls="action"
-                    endIcon={isMobile && !isTablet ? null : <ExpandMore />}
+                    endIcon={<ExpandMore />}
                   >
-                    {isMobile && !isTablet ? <IoArrowDownCircleSharp size={20} /> : 'Action'}
+                    Action
                   </Button>
                 )}
                 <Menu
@@ -472,97 +474,74 @@ const QuotationDetails = () => {
                   onClose={closeActionsAction}
                 >
                   {allowedToEdit && (
-                    <MenuItem>
-                      <Button
-                        variant="text"
-                        color="primary"
-                        size="small"
-                        startIcon={<HiPencil className={isMobile ? 'mr-1' : ''} />}
-                        onClick={() => {
-                          handleOpenUpdateDialog();
-                          closeActionsAction();
-                        }}
-                      >
-                        Edit
-                      </Button>
-                    </MenuItem>
-                  )}
-                  <MenuItem>
-                    <Button
-                      disabled={!allowedToEdit || isCloning || loading
-                        || quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer
-                        || [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.converted]?.includes(quotationData?.status)}
-                      variant="text"
-                      type="button"
-                      size="small"
-                      startIcon={isCloning ? <CircularProgress color="inherit" size={16} /> : <BiLayerPlus className={isMobile ? 'mr-1' : ''} />}
+                    <MenuItem
                       onClick={() => {
-                        cloneVersion();
+                        handleOpenUpdateDialog();
                         closeActionsAction();
                       }}
                     >
-                      {isCloning ? <>Cloning Version-{currentVersion}</> : `Clone Version-${currentVersion}`}
-                    </Button>
-                  </MenuItem>
-                  {(allowedToEdit && canConvert) && (
-                    <MenuItem>
-                      <Button
-                        onClick={() => {
-                          setConvertConfirmBox(true);
-                          closeActionsAction();
-                        }}
-                        variant="text"
-                        type="button"
-                        size="small"
-                        startIcon={<CachedIcon />}
-                      >
-                        Convert to {quotationData?.type || ""}
-                      </Button>
+                      <HiPencil className={'mr-2'} />
+                      Edit
                     </MenuItem>
                   )}
-                  {currentVersion !== 1 && permissions?.quotation?.isDelete
-                    && quotationData?.versions[currentVersion]?.status !== QUOTATION_STATUS.acceptByCustomer && (
-                      <MenuItem>
-                        <Button
-                          variant="text"
-                          size="small"
-                          disabled={!allowedToEdit || loading}
-                          startIcon={<MdDelete className={isMobile ? 'mr-1' : ''} />}
-                          onClick={() => {
-                            deleteVersion();
-                            closeActionsAction();
-                          }}
-                        >
-                          Delete Version-{currentVersion}
-                        </Button>
+                  <MenuItem
+                    disabled={
+                      !allowedToEdit ||
+                      isCloning ||
+                      loading ||
+                      quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ||
+                      [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.converted]?.includes(quotationData?.status)
+                    }
+                    onClick={() => {
+                      cloneVersion();
+                      closeActionsAction();
+                    }}
+                  >
+                    {isCloning ? <CircularProgress color="inherit" size={16} className="mr-2" /> : <BiLayerPlus className={'mr-2'} />}
+                    {isCloning ? <>Cloning Version-{currentVersion}</> : `Clone Version-${currentVersion}`}
+                  </MenuItem>
+                  {allowedToEdit && canConvert && (
+                    <MenuItem
+                      onClick={() => {
+                        setConvertConfirmBox(true);
+                        closeActionsAction();
+                      }}
+                    >
+                      <CachedIcon className="mr-2" />
+                      Convert to {quotationData?.type || ''}
+                    </MenuItem>
+                  )}
+                  {currentVersion !== 1 &&
+                    permissions?.quotation?.isDelete &&
+                    quotationData?.versions[currentVersion]?.status !== QUOTATION_STATUS.acceptByCustomer && (
+                      <MenuItem
+                        disabled={!allowedToEdit || loading}
+                        onClick={() => {
+                          deleteVersion();
+                          closeActionsAction();
+                        }}
+                      >
+                        <MdDelete className={'mr-2'} />
+                        Delete Version-{currentVersion}
                       </MenuItem>
                     )}
                   {permissions?.quotation?.isDelete && (
-                    <MenuItem>
-                      <Button
-                        variant="text"
-                        size="small"
-                        startIcon={<MdDelete className={isMobile ? 'mr-1' : ''} />}
-                        onClick={() => {
-                          setShowConfirmBox(true);
-                          closeActionsAction();
-                        }}
-                      >
-                        Delete
-                      </Button>
+                    <MenuItem
+                      onClick={() => {
+                        setShowConfirmBox(true);
+                        closeActionsAction();
+                      }}
+                    >
+                      <MdDelete className={'mr-2'} />
+                      Delete
                     </MenuItem>
                   )}
-
                 </Menu>
               </>
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
             )}
-            <ActivityButton
-              referenceId={quotationData?._id}
-              resource={ACTIVITY_RESOURCE.quotation}
-              resourceLabel={quotationData?.quotationNumber}
-            />
+            <ActivityButton referenceId={quotationData?._id} resource={ACTIVITY_RESOURCE.quotation} resourceLabel={quotationData?.quotationNumber} />
           </Box>
         </Box>
       </Box>
@@ -636,16 +615,10 @@ const QuotationDetails = () => {
           {[QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(
             quotationData?.versions[currentVersion]?.status
           ) && (
-              <Box
-                style={{
-                  marginLeft: 'auto',
-                  maxWidth: 'max-content',
-                  marginTop: '-30px'
-                }}
-              >
-                <ShowQuoteStatus status={quotationData?.versions[currentVersion]?.status} />
-              </Box>
-            )}
+            <Box className={`md:-mt-[30px] md:static max-w-max ml-auto absolute right-0 pt-[5px]`}>
+              <ShowQuoteStatus status={quotationData?.versions[currentVersion]?.status} />
+            </Box>
+          )}
           <div>
             <Steps
               isNextStep={false}
@@ -662,8 +635,8 @@ const QuotationDetails = () => {
               handleNext={
                 stepNames[currentStep] === 'Quote Approval'
                   ? () => {
-                    setCustomerAcceptable(true);
-                  }
+                      setCustomerAcceptable(true);
+                    }
                   : null
               }
             />
@@ -780,9 +753,11 @@ const QuotationDetails = () => {
           }}
           onSuccess={(data) => {
             const prevVersion = quotationData?.versions[currentVersion];
-            axiosInstance().put(`${quotation.api}/version-to-clone/${prevVersion._id}/${data._id}`).then((data: any) => {
-              history.push(`${routes.quotationDetail.path}/${data._id}`);
-            })
+            axiosInstance()
+              .put(`${quotation.api}/version-to-clone/${prevVersion._id}/${data._id}`)
+              .then((data: any) => {
+                history.push(`${routes.quotationDetail.path}/${data._id}`);
+              });
             // fetchQuotationData();
             setRenewal(false);
           }}

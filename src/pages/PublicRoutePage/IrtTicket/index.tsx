@@ -10,14 +10,14 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { IRT_APPROVER_STATUS } from 'src/constants/helpers';
 
 const resaonList = [
-  "Inventory physically not here to release.  Action:  Complete paperwork and cycle count to correct inventory accuracy. ",
-  "Future demands not reflected in system and need to keep inventory for future known demands.  Action:  Update planning data (ie. forecast, sales orders, safety stock, min/max, MOQ, etc).    ",
-  "Part expired and not available.  Action:  Will scrap physically and electronically.",
-  "Part is not the same part.  The description is not the same. Action:  Do we need to add to master supersession list? ",
-  "Freight is too much (> 25%).  What is considered acceptable landed costs for your business? ",
-  "Want to keep for potential future demand.  (I don’t like this option BUT we may want to consider it as realistic and deep dive later.)",
-  "Other"
-]
+  'Inventory physically not here to release.  Action:  Complete paperwork and cycle count to correct inventory accuracy. ',
+  'Future demands not reflected in system and need to keep inventory for future known demands.  Action:  Update planning data (ie. forecast, sales orders, safety stock, min/max, MOQ, etc).    ',
+  'Part expired and not available.  Action:  Will scrap physically and electronically.',
+  'Part is not the same part.  The description is not the same. Action:  Do we need to add to master supersession list? ',
+  'Freight is too much (> 25%).  What is considered acceptable landed costs for your business? ',
+  'Want to keep for potential future demand.  (I don’t like this option BUT we may want to consider it as realistic and deep dive later.)',
+  'Other'
+];
 
 const IrtTicket = ({ openAuthId, openAuthData }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -30,7 +30,6 @@ const IrtTicket = ({ openAuthId, openAuthData }) => {
   const [comment, setComment] = useState('');
   const [status, setStatus] = useState('Approved');
   const [reason, setReason] = useState('');
-
 
   useEffect(() => {
     fetchData();
@@ -54,7 +53,7 @@ const IrtTicket = ({ openAuthId, openAuthData }) => {
     const data: any = {
       openAuthId: openAuthId,
       status: status,
-      comment: comment,
+      comment: comment
     };
     if (status === IRT_APPROVER_STATUS.declined) {
       data.reason = reason;
@@ -68,7 +67,7 @@ const IrtTicket = ({ openAuthId, openAuthData }) => {
           message: `Thank you for your submission`
         });
         setIsSubmited(true);
-        setComment('')
+        setComment('');
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -80,11 +79,11 @@ const IrtTicket = ({ openAuthId, openAuthData }) => {
     const data = {
       openAuthId: openAuthId,
       users: users
-    }
+    };
     axiosInstance()
       .post(`${routes.irtTicket.path}/approver/public/forwardApprover/${irtTicketData?._id}`, data)
       .then(({ data }) => {
-        setSelectedUsers([])
+        setSelectedUsers([]);
         setIsSubmited(true);
         toastConfig.setToastConfig({
           open: true,
@@ -95,131 +94,145 @@ const IrtTicket = ({ openAuthId, openAuthData }) => {
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
-  }
+  };
 
   return (
-    <> {fields && fields?.length && irtTicketData ? (
-      <Container>
-        {!isSubmited ?
-          <Box pt={3} >
-            <DetailsPage data={irtTicketData} fields={fields} />
-            <Box pt={2}>
-              <Grid container spacing={2}>
-                <Grid item xs={6}>
-                  <Paper>
-                    <Box p={3}>
-                      <Typography variant="h6" color="primary">Approve/Decline IRT</Typography>
-                      <Box mt={2}>
-                        <RadioGroup
-                          aria-label="quiz"
-                          value={status}
-                          name="status"
-                          row
-                          onChange={(event) => {
-                            setStatus(event.target.value);
-                          }}>
-                          <FormControlLabel value={IRT_APPROVER_STATUS.approved} control={<Radio />} label="Approve" />
-                          <FormControlLabel value={IRT_APPROVER_STATUS.declined} control={<Radio />} label="Decline" />
-                        </RadioGroup>
-                      </Box>
-                      {status === IRT_APPROVER_STATUS.declined &&
+    <>
+      {' '}
+      {fields && fields?.length && irtTicketData ? (
+        <Container>
+          {!isSubmited ? (
+            <Box pt={3}>
+              <DetailsPage data={irtTicketData} fields={fields} />
+              <Box pt={2}>
+                <Grid container spacing={2}>
+                  <Grid item xs={6}>
+                    <Paper>
+                      <Box p={3}>
+                        <Typography variant="h6" color="primary">
+                          Approve/Decline IRT
+                        </Typography>
                         <Box mt={2}>
-                          <FormControl variant="outlined" fullWidth margin="dense">
-                            <Autocomplete
-                              id="tags-filled"
-                              options={resaonList}
-                              getOptionLabel={(option) => option}
-                              value={reason}
-                              onChange={(e, value) => {
-                                setReason(value);
-                              }}
-                              renderInput={(params) => (
-                                <TextField
-                                  {...params}
-                                  margin="dense"
-                                  variant="outlined"
-                                  label="Decline Reason"
-                                  placeholder="Decline Reason"
-                                  name="reason"
-                                />
-                              )}
-                            />
-                          </FormControl>
+                          <RadioGroup
+                            aria-label="quiz"
+                            value={status}
+                            name="status"
+                            row
+                            onChange={(event) => {
+                              setStatus(event.target.value);
+                            }}
+                          >
+                            <FormControlLabel value={IRT_APPROVER_STATUS.approved} control={<Radio />} label="Approve" />
+                            <FormControlLabel value={IRT_APPROVER_STATUS.declined} control={<Radio />} label="Decline" />
+                          </RadioGroup>
                         </Box>
-                      }
-                      <Box my={1}>
-                        <TextField
-                          variant="outlined"
-                          type="text"
-                          label="Comment"
-                          multiline
-                          fullWidth
-                          rows={2}
-                          margin="dense"
-                          value={comment}
-                          onChange={(e: any) => setComment(e.target.value)}
-                        />
+                        {status === IRT_APPROVER_STATUS.declined && (
+                          <Box mt={2}>
+                            <FormControl variant="outlined" fullWidth margin="dense">
+                              <Autocomplete
+                                id="tags-filled"
+                                options={resaonList}
+                                getOptionLabel={(option) => option}
+                                value={reason}
+                                onChange={(e, value) => {
+                                  setReason(value);
+                                }}
+                                renderInput={(params) => (
+                                  <TextField
+                                    {...params}
+                                    margin="dense"
+                                    variant="outlined"
+                                    label="Decline Reason"
+                                    placeholder="Decline Reason"
+                                    name="reason"
+                                  />
+                                )}
+                              />
+                            </FormControl>
+                          </Box>
+                        )}
+                        <Box my={1}>
+                          <TextField
+                            variant="outlined"
+                            type="text"
+                            label="Comment"
+                            multiline
+                            fullWidth
+                            rows={2}
+                            margin="dense"
+                            value={comment}
+                            onChange={(e: any) => setComment(e.target.value)}
+                          />
+                        </Box>
+                        <Box pt={2}>
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            disabled={isSubmited}
+                            onClick={() => {
+                              submitResponce();
+                            }}
+                          >
+                            Submit
+                          </Button>
+                        </Box>
                       </Box>
-                      <Box pt={2}>
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          disabled={isSubmited}
-                          onClick={() => {
-                            submitResponce();
-                          }}
-                        >
-                          Submit
-                        </Button>
+                    </Paper>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Paper>
+                      <Box p={3}>
+                        <Typography variant="h6" color="primary">
+                          {' '}
+                          Forward Approval{' '}
+                        </Typography>
+                        <Box pt={2}>
+                          <Autocomplete
+                            size="small"
+                            options={userList}
+                            multiple
+                            value={selectedUsers}
+                            onChange={(_, val) => {
+                              setSelectedUsers(val);
+                            }}
+                            getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                            getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                            renderInput={(props) => (
+                              <TextField {...props} placeholder={''} variant="outlined" name="userList" label={'Select Users'} />
+                            )}
+                          />
+                        </Box>
+                        <Box my={3}>
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            disabled={!isSubmited && selectedUsers?.length === 0}
+                            onClick={() => {
+                              handleForwardApproval();
+                            }}
+                          >
+                            Forward Approval
+                          </Button>
+                        </Box>
                       </Box>
-                    </Box>
-                  </Paper>
+                    </Paper>
+                  </Grid>
                 </Grid>
-                <Grid item xs={6}>
-                  <Paper>
-                    <Box p={3}>
-                      <Typography variant="h6" color="primary"> Forward Approval  </Typography>
-                      <Box pt={2}>
-                        <Autocomplete
-                          size="small"
-                          options={userList}
-                          multiple
-                          value={selectedUsers}
-                          onChange={(_, val) => {
-                            setSelectedUsers(val);
-                          }}
-                          getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                          getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
-                          renderInput={(props) => <TextField {...props} placeholder={''} variant="outlined" name="userList" label={'Select Users'} />}
-                        />
-                      </Box>
-                      <Box my={3}>
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          disabled={!isSubmited && selectedUsers?.length === 0}
-                          onClick={() => {
-                            handleForwardApproval()
-                          }}
-                        >
-                          Forward Approval
-                        </Button>
-                      </Box>
-                    </Box>
-                  </Paper>
-                </Grid>
-              </Grid>
+              </Box>
             </Box>
-          </Box> :
-          <Box pt={3} >
-            <h1 style={{ padding: '10px', display: 'flex', justifyContent: 'center', color: '#047d1c' }} title={' Thanks for your submission'}>
-              Thanks for your submission
-            </h1>
-          </Box>}
-      </Container>
-    ) : <Box p={2} bgcolor="white">
-      <CommonSkeleton lenArray={[...Array(10).keys()]} />
-    </Box>}
+          ) : (
+            <Box pt={3}>
+              <h1 style={{ padding: '10px', display: 'flex', justifyContent: 'center', color: '#047d1c' }} title={' Thanks for your submission'}>
+                Thanks for your submission
+              </h1>
+            </Box>
+          )}
+        </Container>
+      ) : (
+        <Box p={2}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
+      )}
     </>
   );
 };

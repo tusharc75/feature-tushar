@@ -75,7 +75,8 @@ export const purchaseRequisitionSteps = ['Add Products'];
 export const productionOrderSteps: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },
   { name: 'Work Order', title: 'Work Order', icon: 'workOrder' },
-  { name: 'Loading Ticket', title: 'Loading', icon: 'ticket' }
+  { name: 'Loading Ticket', title: 'Loading', icon: 'ticket' },
+  { name: 'Final Slip', title: 'Slip', icon: 'invoice' }
 ];
 
 export const jobProcessSteps: stepInterface[] = [
