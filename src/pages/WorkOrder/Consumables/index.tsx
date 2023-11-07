@@ -82,7 +82,7 @@ const Consumables = ({
     try {
       const data: any = row;
       delete data.workOrder;
-      await axiosInstance().put(`${repairOrder.api}/${workOrderId}/work-order/${workOrderId}`, { material: [data] });
+      await axiosInstance().put(`${workOrder.api}/${workOrderId}/material`, { material: [data] });
     } catch (error) {
       setUpdating(false);
       toastConfig.setToastConfig(error);
