@@ -848,18 +848,17 @@ const SerializedAsset = () => {
                     const plant = columns.find((c) => c.field === 'warehouse');
                     if (!plant) return null;
                     return (
-                      <Link
-                        className="link line-clamp-1"
-                        title={d[plant.field]}
-                        to={`${plant.cellRendererParams.pathName}/${d[plant.cellRendererParams.property]}`}
-                        target="_blank"
-                      >
-                        {
-                          <span>
-                            {plant.headerName}: {d[plant.field]}
-                          </span>
-                        }
-                      </Link>
+                      <span className="line-clamp-1 flex">
+                        {plant.headerName}:&nbsp;
+                        <Link
+                          className="link"
+                          title={d[plant.field] || ''}
+                          to={`${plant.cellRendererParams?.pathName}/${d[plant.cellRendererParams?.property]}`}
+                          target="_blank"
+                        >
+                          {d[plant.field] || ''}
+                        </Link>
+                      </span>
                     );
                   }
                 },
@@ -868,18 +867,17 @@ const SerializedAsset = () => {
                     const product = columns.find((c) => c.field === 'product');
                     if (!product) return null;
                     return (
-                      <Link
-                        className="link line-clamp-1"
-                        title={d[product.field]}
-                        to={`${product.cellRendererParams.pathName}/${d[product.cellRendererParams.property]}`}
-                        target="_blank"
-                      >
-                        {
-                          <span>
-                            {product.headerName}: {d[product.field]}
-                          </span>
-                        }
-                      </Link>
+                      <span className="line-clamp-1 flex">
+                        {product.headerName}:&nbsp;
+                        <Link
+                          className="link"
+                          title={d[product.field] || ''}
+                          to={`${product.cellRendererParams?.pathName}/${d[product.cellRendererParams?.property]}`}
+                          target="_blank"
+                        >
+                          {d[product.field] || ''}
+                        </Link>
+                      </span>
                     );
                   }
                 }
