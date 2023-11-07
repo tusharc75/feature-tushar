@@ -439,7 +439,6 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
             }}
           />
         )}
-
         {viewSingleInvoiceDialog.open && (
           <ViewInvoice
             invoiceId={viewSingleInvoiceDialog.invoice}

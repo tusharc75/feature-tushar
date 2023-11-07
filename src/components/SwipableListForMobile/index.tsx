@@ -6,7 +6,7 @@ import { TInitialState } from '../CustomReactTableNew/useTableReducer';
 import HtmlTooltip from '../CustomTooltipTitle';
 import type { TSwipableListInputProps } from './types';
 
-const DEFAULT_DATA_COUNT = 4;
+const DEFAULT_DATA_ROWS_VISIBLE = 3; // This number will change how many rows will be visible by default
 
 const SwipableListForMobile: FC<TSwipableListInputProps> = ({
   dispatch,
@@ -55,11 +55,11 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
   const otherFieldsLength = React.useMemo(() => otherFields.length, [otherFields]);
 
   const defaultDisplay: any[] = React.useMemo(() => {
-    return otherFields.slice(0, DEFAULT_DATA_COUNT) || [];
+    return otherFields.slice(0, DEFAULT_DATA_ROWS_VISIBLE) || [];
   }, [otherFields]);
 
   const collapsibleFields: any[] = React.useMemo(() => {
-    return otherFields.slice(DEFAULT_DATA_COUNT, otherFieldsLength) || [];
+    return otherFields.slice(DEFAULT_DATA_ROWS_VISIBLE, otherFieldsLength) || [];
   }, [otherFields, otherFieldsLength]);
 
   return (
@@ -105,7 +105,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                       key={row.original._id}
                       style={{
                         border: '1px solid var(--common-border-color)',
-                        cursor: otherFieldsLength > DEFAULT_DATA_COUNT ? 'pointer' : 'auto'
+                        cursor: otherFieldsLength > DEFAULT_DATA_ROWS_VISIBLE ? 'pointer' : 'auto'
                       }}
                     >
                       <div className={`flex gap-2 items-center`}>
@@ -124,7 +124,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                             )}
                             <div className="icon-layout  d-flex align-items-center gap-2">
                               {actionField && actionField?.Cell({ row })}
-                              {otherFieldsLength > DEFAULT_DATA_COUNT && (
+                              {otherFieldsLength > DEFAULT_DATA_ROWS_VISIBLE && (
                                 <IconButton
                                   size="small"
                                   onClick={(e) => {
@@ -274,7 +274,7 @@ const RenderSubCard = ({
       key={row.original._id}
       style={{
         border: '1px solid var(--common-border-color)',
-        cursor: otherFieldsLength > DEFAULT_DATA_COUNT ? 'pointer' : 'auto'
+        cursor: otherFieldsLength > DEFAULT_DATA_ROWS_VISIBLE ? 'pointer' : 'auto'
       }}
     >
       <div className={`flex gap-2 items-center`}>
@@ -293,7 +293,7 @@ const RenderSubCard = ({
             )}
             <div className="icon-layout  d-flex align-items-center gap-2">
               {actionField && actionField?.Cell({ row })}
-              {otherFieldsLength > DEFAULT_DATA_COUNT && (
+              {otherFieldsLength > DEFAULT_DATA_ROWS_VISIBLE && (
                 <IconButton
                   size="small"
                   onClick={(e) => {

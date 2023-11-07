@@ -789,7 +789,7 @@ function CustomReactTable({
             <div
               style={{
                 display: 'block',
-                overflow: 'auto',
+                overflow: !loading && !error && rows.length === 0 ? 'hidden' : 'auto',
                 height: height ?? '100%'
               }}
               className="border"
