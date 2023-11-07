@@ -11,7 +11,7 @@ import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageD
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { gridLoadingTimeout, rentalManagement } from '../../../constants/helpers';
+import { MATERIAL_TYPE, gridLoadingTimeout, rentalManagement } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
@@ -32,9 +32,9 @@ import Technicians from './Technicians';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { Autocomplete } from '@material-ui/lab';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
-import { ownerAndColaborator } from 'src/constants/messageHelpers';
+import { ownerAndColaborator, rentalManagementMessage } from 'src/constants/messageHelpers';
 
-const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }: any) => {
+const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, renderedFrom, stepFullScreen, allowedToEdit }: any) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -257,10 +257,13 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
 
   const fetchProductInventory = async () => {
     setNextStep(false);
+    setNextStepToolTip(null)
     try {
       var data: any = [];
       var inventory: any = [];
       var nonSerializeAsset: any = [];
+
+      var nextStepMessage = null;
 
       if (isOffline) {
         data = await findOne(objectStore.rentalManagement, rentalManagementData._id);
@@ -294,17 +297,25 @@ const Services = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScr
         parent.serializedProduct = parent.type === 'product' ? parent?.productDetail?.serializedProduct : false;
         parent.qtyDisplay = parent.qty;
         parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
+        if (!parent.isValid) {
+          nextStepMessage = rentalManagementMessage.validPrice
+        }
         parent.assetQty = parent.serializedProduct
           ? inventory?.filter((e) => e._id === parent._id).length
           : nonSerializeAsset?.filter((e) => e._id === parent._id).length;
         parent.hideSelection = parent.assetQty > 0 ? true : parent?.status ? true : false;
         parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent);
+        if (parent.type === MATERIAL_TYPE.package && parent.subRows?.length === 0 && !nextStepMessage) {
+          nextStepMessage = rentalManagementMessage.addServiceInPackage
+        }
       });
 
       if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
         setNextStep(false);
+        setNextStepToolTip(nextStepMessage)
       } else {
         setNextStep(true);
+        setNextStepToolTip(null)
       }
       if (rows?.length === 0) {
         setNextStep(true);
