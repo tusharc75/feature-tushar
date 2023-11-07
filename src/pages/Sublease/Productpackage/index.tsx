@@ -64,7 +64,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
   }, [columns]);
 
   const fetchFields = async () => {
-    var data = await fetch_sublease_product_fields(subleaseData.currency);
+    var data = await fetch_sublease_product_fields(subleaseData?.currency);
     setAllFields(JSON.parse(JSON.stringify(data)));
     const newColumns = generateCustomTableColumns(data, subleaseData?.currency, renderedFrom);
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');

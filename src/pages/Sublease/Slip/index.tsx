@@ -38,7 +38,7 @@ function Slip({ subleaseData, stepFullScreen, renderedFrom, statusNames, updateS
     }, []);
 
     const fetchFields = async () => {
-        var data = await fetch_sublease_product_fields(subleaseData.currency);
+        var data = await fetch_sublease_product_fields(subleaseData?.currency);
         data?.forEach((e) => {
             e.isColumnEditable = false;
         });
@@ -110,42 +110,11 @@ function Slip({ subleaseData, stepFullScreen, renderedFrom, statusNames, updateS
         fetchRowData();
     };
 
-    const getAssetAssignedValues = (row) => {
-        if (row?.original?.type === 'asset' || row?.original?.assetQty === 0) {
-            return ' N/A ';
-        }
-        return (
-            <p>
-                {row?.original?.assetAssignedQty} / {row?.original?.assetQty}
-            </p>
-        );
-    };
-
-    const checkProductInside = (item, material) => {
-        if (item?.type === 'product') {
-            return true;
-        }
-        const child = material?.filter(e => e.parentId === item?._id);
-        if (child?.some(e => e?.type === 'product')) {
-            return true;
-        }
-        if (child?.length) {
-            for (var ele in child) {
-                return checkProductInside(child[ele], material)
-            }
-        }
-        else {
-            return false
-        }
-    }
-
     const fetchRowData = async () => {
         try {
             var data: any = [];
-
             const response = await axiosInstance().get(`${sublease.api}/productpackage/${subleaseData._id}`);
             data = response?.data?.data;
-
             let rows = data.material.filter((e) => !e.parentId)
             rows.forEach((parent, i) => {
                 parent.index = i + 1;
