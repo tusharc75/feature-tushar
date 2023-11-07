@@ -29,6 +29,7 @@ import Invoices from '../GenerateInvoice/InvoiceDialog/Invoices';
 import SerializedAsset from './SerializedAsset';
 import LoadingTicket from './DeliveryTicket';
 import Slip from './Slip';
+import ButtonWithPulse from 'src/components/ButtonWithPulse';
 
 const SubleaseDetailsPage = () => {
   const renderedFrom = camelCase(routes?.sublease.title);
@@ -133,7 +134,11 @@ const SubleaseDetailsPage = () => {
       const subleaseSteps = data?.type === SUBLEASE_TYPE.vendor ? sublease_Vendor_Steps : sublease_InterCompany_Steps;
       setSubleaseSteps(subleaseSteps);
       setSubleaseStepsNames(subleaseSteps.map((item) => item.name));
-      setCurrentStep(getIndex(data?.processStatus, subleaseSteps));
+      if (data?.status === SUBLEASE_STATUS.closed) {
+        setCurrentStep(subleaseSteps?.length - 1);
+      } else {
+        setCurrentStep(getIndex(data?.processStatus, subleaseSteps));
+      }
       var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
       if (user?.role?.selectedEntity?.superAdminAccess) {
         isAllowedToEdit = true;
@@ -141,6 +146,9 @@ const SubleaseDetailsPage = () => {
       const isProcessorToEdit = [data.processor].some((d) => d?.optionValue === user?.user?._id);
       if (data.status === SUBLEASE_STATUS.issued) {
         setIsIssued(true);
+      }
+      if (data.status === SUBLEASE_STATUS.closed) {
+        isAllowedToEdit = false;
       }
       setAllowedToEdit(isAllowedToEdit);
       setIsProcessor(isProcessorToEdit);
@@ -171,13 +179,25 @@ const SubleaseDetailsPage = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            {permissions?.sublease?.isUpdate && subleaseData?.status !== SUBLEASE_STATUS.completed && allowedToEdit && (
-              <>
-                <Button variant={isMobile && !isTablet ? 'text' : 'contained'} onClick={() => setOpenUpdateDialog(true)} className={'btn-outline-v1'}>
-                  {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
-                </Button>
-              </>
-            )}
+            {permissions?.sublease?.isUpdate && allowedToEdit &&
+              [SUBLEASE_STATUS.readyToInvoice, SUBLEASE_STATUS.invoiced, SUBLEASE_STATUS.completed].includes(subleaseData?.status) &&
+              (<ButtonWithPulse
+                variant={'outlined'}
+                color="default"
+                size="small"
+                onClick={() => updateStatus(SUBLEASE_STATUS.closed)}
+                className={'btn-outline-v1'}
+              >
+                Close
+              </ButtonWithPulse>)}
+            {permissions?.sublease?.isUpdate &&
+              ![SUBLEASE_STATUS.closed, SUBLEASE_STATUS.completed].includes(subleaseData?.status) && allowedToEdit && (
+                <>
+                  <Button variant={isMobile && !isTablet ? 'text' : 'contained'} onClick={() => setOpenUpdateDialog(true)} className={'btn-outline-v1'}>
+                    {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
+                  </Button>
+                </>
+              )}
             <ActivityButton referenceId={subleaseData?._id} resource={ACTIVITY_RESOURCE.sublease} resourceLabel={subleaseData?.subleaseName} />
           </Box>
         </Box>
@@ -258,7 +278,7 @@ const SubleaseDetailsPage = () => {
                   nextStepToolTip={nextStepToolTip}
                   currentStep={currentStep}
                   setCurrentStep={setCurrentStep}
-                  isStepEnded={[SUBLEASE_STATUS.completed].includes(subleaseData?.status)}
+                  isStepEnded={[SUBLEASE_STATUS.completed, SUBLEASE_STATUS.closed].includes(subleaseData?.status)}
                   setStepFullScreen={() => setStepFullScreen(true)}
                 />
                 <ContentFullScreen title={subleaseStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
