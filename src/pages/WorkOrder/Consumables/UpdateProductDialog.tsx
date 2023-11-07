@@ -14,7 +14,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 
-const UpdateWorkOrderDialog = ({ onClose, materialData, handleUpdate, loadingEdit, workOrderData }) => {
+const UpdateProductDialog = ({ onClose, materialData, handleUpdate, loadingEdit, workOrderData }) => {
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
@@ -62,14 +62,14 @@ const UpdateWorkOrderDialog = ({ onClose, materialData, handleUpdate, loadingEdi
           initialValues={initialData.values}
           validationSchema={yupSchema(initialData.fields)}
           validateOnMount
-          onSubmit={async(values) => {
+          onSubmit={async (values) => {
             await handleUpdate({ _id: materialData._id, ...values });
           }}
         >
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
-                title={`Edit - (${materialData?.product || ''})`}
+                title={`Edit - ${materialData?.product || ''}`}
                 onClose={() => {
                   onClose();
                 }}
@@ -186,4 +186,4 @@ const UpdateWorkOrderDialog = ({ onClose, materialData, handleUpdate, loadingEdi
   );
 };
 
-export default UpdateWorkOrderDialog;
+export default UpdateProductDialog;
