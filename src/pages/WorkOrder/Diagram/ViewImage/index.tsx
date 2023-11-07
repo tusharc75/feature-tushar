@@ -1,9 +1,12 @@
 import { Box, Button } from '@material-ui/core';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Stage, Layer, Rect } from 'react-konva';
 import CustomImage from './CustomImage';
 import { useAppTheme } from 'src/constants/AppConfig';
 import CustomText from './CustomText';
+import axiosInstance from 'src/axios/axiosInstance';
+import Loader from 'src/components/Loader';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 type TextType = {
   fontSize: number;
@@ -17,7 +20,8 @@ type TextType = {
   height: number;
 };
 
-const ViewImage = ({ data }) => {
+const ViewImage = ({ data, loading, setLoading }) => {
+  const toastConfig = useContext(CustomToastContext);
   const [themeColor] = useAppTheme();
   const stageRef = useRef(null);
   const layerRef = useRef(null);
@@ -28,6 +32,7 @@ const ViewImage = ({ data }) => {
   const [selectedText, selectText] = useState(null);
   const [editingText, setEditingText] = useState<TextType>(null);
   const [transformImage, setTransformImage] = useState(false);
+  const [url, setUrl] = useState();
   const [widthHeight, setWidthHeight] = useState({
     width: window.innerWidth - 700,
     height: window.innerHeight - 250
@@ -53,8 +58,6 @@ const ViewImage = ({ data }) => {
 
   useEffect(() => {
     setImageState({
-      url: data?.url,
-      id: data?._id,
       name: data?.name,
       x: 150,
       isDragging: false,
@@ -62,6 +65,24 @@ const ViewImage = ({ data }) => {
       width: 400,
       height: 400
     });
+
+    axiosInstance()
+      .get('/user/download?fileName=' + data?.url, {
+        responseType: 'blob'
+      })
+      .then(({ data }) => {
+        const file = new Blob([data], { type: 'application/pdf' });
+        var reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onloadend = function () {
+          let base64data: any = reader.result;
+          setUrl(base64data);
+          setLoading(false);
+        };
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
   }, [data]);
 
   useEffect(() => {
@@ -99,62 +120,65 @@ const ViewImage = ({ data }) => {
         </Button>
         <Box component="span" mx={1} />
       </Box>
-
-      <Stage
-        ref={(node) => {
-          stageRef.current = node;
-        }}
-        style={{ backgroundColor: 'var(--dark-primary, #D3D3D3)' }}
-        width={widthHeight.width}
-        height={widthHeight.height}
-        onClick={(e) => {
-          if (!e.target.attrs.hasOwnProperty('id') || e.target.attrs.id !== 'image') {
-            setTransformImage(false);
-          }
-          if ((!e.target.attrs.hasOwnProperty('id') || e.target.attrs.id !== 'canvasText') && !editingText) {
-            selectText(null);
-            setEditingText(null);
-            if (editingTextRef.current) {
-              editingTextRef.current.textRef.show();
-              editingTextRef.current.transformRef.show();
-              editingTextRef.current.transformRef.forceUpdate();
-              editingTextRef.current = null;
+      {!loading ? (
+        <Stage
+          ref={(node) => {
+            stageRef.current = node;
+          }}
+          style={{ backgroundColor: 'white' }}
+          width={widthHeight.width}
+          height={widthHeight.height}
+          onClick={(e) => {
+            if (!e.target.attrs.hasOwnProperty('id') || e.target.attrs.id !== 'image') {
+              setTransformImage(false);
             }
-          }
-        }}
-      >
-        <Layer ref={layerRef}>
-          <Rect x={0} y={0} width={stageRef.current?.width()} height={stageRef.current?.height()} fill={stageColor} />
-          {imageState && (
-            <CustomImage
-              setImageState={setImageState}
-              imageState={imageState}
-              key={imageState?._id}
-              transformImage={transformImage}
-              onTransformImage={() => {
-                setTransformImage(true);
-              }}
-              textProps={{
-                fill: textColor
-              }}
-            />
-          )}
-          {texts.length > 0 &&
-            texts?.map((text) => (
-              <CustomText
-                fill={textColor}
-                key={text.id}
-                onSelect={() => selectText(text.id)}
-                onEdit={() => setEditingText(text)}
-                textState={text}
-                setTextState={setTexts}
-                selectedId={selectedText === text.id}
-                editingText={editingText}
-                editingTextRef={editingTextRef}
+            if ((!e.target.attrs.hasOwnProperty('id') || e.target.attrs.id !== 'canvasText') && !editingText) {
+              selectText(null);
+              setEditingText(null);
+              if (editingTextRef.current) {
+                editingTextRef.current.textRef.show();
+                editingTextRef.current.transformRef.show();
+                editingTextRef.current.transformRef.forceUpdate();
+                editingTextRef.current = null;
+              }
+            }
+          }}
+        >
+          <Layer ref={layerRef}>
+            <Rect x={0} y={0} width={stageRef.current?.width()} height={stageRef.current?.height()} fill={stageColor} />
+            {imageState && (
+              <CustomImage
+                url={url}
+                setImageState={setImageState}
+                imageState={imageState}
+                transformImage={transformImage}
+                onTransformImage={() => {
+                  setTransformImage(true);
+                }}
+                textProps={{
+                  fill: textColor
+                }}
               />
-            ))}
-        </Layer>
-      </Stage>
+            )}
+            {texts.length > 0 &&
+              texts?.map((text) => (
+                <CustomText
+                  fill={textColor}
+                  key={text.id}
+                  onSelect={() => selectText(text.id)}
+                  onEdit={() => setEditingText(text)}
+                  textState={text}
+                  setTextState={setTexts}
+                  selectedId={selectedText === text.id}
+                  editingText={editingText}
+                  editingTextRef={editingTextRef}
+                />
+              ))}
+          </Layer>
+        </Stage>
+      ) : (
+        <Loader style={{ minHeight: 500 }} text="Loading..." />
+      )}
       {editingText && (
         <textarea
           autoFocus

@@ -100,7 +100,7 @@ export default function ManageAttachment({
         });
     } else {
       if (type === 'file') {
-        setInitialValues({ name: '', fileUrl: '' });
+        setInitialValues({ name: '', fileUrl: '', attachmentType: ATTACHMENT_TYPE.diagram });
       } else {
         setInitialValues({ name: '' });
       }

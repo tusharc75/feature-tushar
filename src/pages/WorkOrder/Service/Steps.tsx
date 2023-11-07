@@ -2,7 +2,7 @@ import React, { Fragment, useContext, useEffect, useRef, useState } from 'react'
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import { AiOutlinePlus } from 'react-icons/ai';
 import Button from '@material-ui/core/Button';
-import { ExpandMore } from '@material-ui/icons';
+import { ExpandMore, AccessTime, Info, DragIndicator, MoreHoriz, DeleteOutline, People, AddCircleOutline } from '@material-ui/icons';
 import {
   convertMsToTime,
   getChipColor,
@@ -32,24 +32,17 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isEmpty, isEqual, set } from 'lodash';
 import StepFieldsDialog from './StepFieldsDialog';
-import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import CompleteDialog from './CompleteDialog';
 import { useData } from 'src/StateProvider/Provider';
 import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import AttachmentDialog from './AttachmentDialog';
-import InfoIcon from '@material-ui/icons/Info';
-import DragIndicatorIcon from '@material-ui/icons/DragIndicator';
-import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import ConsumablesDialog from '../Consumables/ConsumablesDialog';
 import Comments from './Comments';
-import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import AssignUserDialog from './AssignUserDialog';
-import PeopleIcon from '@material-ui/icons/People';
 import { isDesktop, isMobile, isTablet } from 'react-device-detect';
 import AssignWorkStationDialog from './AssignWorkStationDialog';
-import WorkOutlineIcon from '@material-ui/icons/WorkOutline';
 import { WorkStations } from 'src/assets/svg/svgIcons';
 
 interface StepInterface {
@@ -125,7 +118,7 @@ const TimerComponent = ({ stepData, updateTime = true }) => {
         color: '#8B8B8B'
       }}
     >
-      <AccessTimeIcon style={{ marginRight: '3px', color: 'gray', fontSize: '1rem' }} />({time})
+      <AccessTime style={{ marginRight: '3px', color: 'gray', fontSize: '1rem' }} />({time})
     </Box>
   );
 };
@@ -237,8 +230,7 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 const Steps = ({
-  workOrderId,
-  warehouse,
+  workOrderData,
   selectedService,
   allowedToEdit,
   setDisableCompleteFail,
@@ -247,6 +239,8 @@ const Steps = ({
   stepSubmitedData,
   handelClose = null
 }) => {
+  const workOrderId = workOrderData?._id;
+  const warehouse = workOrderData?.warehouse;
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
 
@@ -262,6 +256,7 @@ const Steps = ({
   const mobScreen = useMediaQuery('(max-width:768px)');
 
   const [addNewStep, setAddNewStep] = useState({ open: false, clone: false, cloneStepData: null });
+  const [cloning, setCloning] = useState(false);
 
   const {
     state: {
@@ -770,6 +765,29 @@ const Steps = ({
       });
   };
 
+  const cloneStep = (step) => {
+    const payload = {
+      workOrderId: workOrderId,
+      uniqueId: selectedService?.uniqueId,
+      stepId: step?._id
+    };
+    axiosInstance()
+      .put(`${workOrder.api}/step/clone-step`, payload)
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        setCloning(false);
+        fetchServiceData();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setCloning(false);
+      });
+  };
+
   return (
     <>
       {serviceDetails ? (
@@ -838,7 +856,7 @@ const Steps = ({
                     }
                     onClick={() => setArrangeView(true)}
                   >
-                    <DragIndicatorIcon className="mr-1" fontSize="small" />
+                    <DragIndicator className="mr-1" fontSize="small" />
                     Arrange
                   </Button>
                 )}
@@ -963,7 +981,7 @@ const Steps = ({
                                       setIsFieldDialogEditable(false);
                                     }}
                                   >
-                                    <InfoIcon fontSize="inherit" />
+                                    <Info fontSize="inherit" />
                                   </IconButton>
                                 )}
 
@@ -977,7 +995,7 @@ const Steps = ({
                                     setSelectedStep(step);
                                   }}
                                 >
-                                  <MoreHorizIcon />
+                                  <MoreHoriz />
                                 </IconButton>
                                 <HtmlTooltip title="Delete" enterTouchDelay={0} placement="top" arrow>
                                   <IconButton
@@ -995,7 +1013,7 @@ const Steps = ({
                                     }
                                     onClick={() => setShowDeleteConfirmBox((prev) => ({ ...prev, open: true, steps: [step] }))}
                                   >
-                                    <DeleteOutlineIcon style={{ fontSize: '20px' }} />
+                                    <DeleteOutline style={{ fontSize: '20px' }} />
                                   </IconButton>
                                 </HtmlTooltip>
                               </div>
@@ -1004,7 +1022,7 @@ const Steps = ({
                           {step?.assignedUsers?.length > 0 && (
                             <Box ml={1}>
                               <HtmlTooltip enterTouchDelay={0} title={step?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
-                                <PeopleIcon style={{ color: 'var(--primary-text)', maxWidth: '22px' }} />
+                                <People style={{ color: 'var(--primary-text)', maxWidth: '22px' }} />
                               </HtmlTooltip>
                             </Box>
                           )}
@@ -1182,7 +1200,7 @@ const Steps = ({
                         </Box>
                       </Box>
                       {(isTablet || isDesktop) && (
-                        <div className="flex flex-wrap md:gap-2 items-center">
+                        <div className="flex flex-wrap md:gap-1 items-center">
                           {stepData?.status && (
                             <IconButton
                               aria-label="info"
@@ -1197,7 +1215,7 @@ const Steps = ({
                                 setIsFieldDialogEditable(false);
                               }}
                             >
-                              <InfoIcon fontSize="inherit" />
+                              <Info fontSize="inherit" />
                             </IconButton>
                           )}
 
@@ -1211,8 +1229,30 @@ const Steps = ({
                               setSelectedStep(step);
                             }}
                           >
-                            <MoreHorizIcon />
+                            <MoreHoriz />
                           </IconButton>
+                          <HtmlTooltip enterTouchDelay={0} title="Clone" placement="top" arrow>
+                            <IconButton
+                              size="small"
+                              color="inherit"
+                              aria-label="delete"
+                              disabled={
+                                cloning ||
+                                (allowedToEdit &&
+                                ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                                  selectedService?.status
+                                )
+                                  ? false
+                                  : true)
+                              }
+                              onClick={() => {
+                                setCloning(true);
+                                cloneStep(step);
+                              }}
+                            >
+                              <AddCircleOutline style={{ fontSize: '20px' }} />
+                            </IconButton>
+                          </HtmlTooltip>
                           <HtmlTooltip enterTouchDelay={0} title="Delete" placement="top" arrow>
                             <IconButton
                               size="small"
@@ -1229,7 +1269,7 @@ const Steps = ({
                               }
                               onClick={() => setShowDeleteConfirmBox((prev) => ({ ...prev, open: true, steps: [step] }))}
                             >
-                              <DeleteOutlineIcon style={{ fontSize: '20px' }} />
+                              <DeleteOutline style={{ fontSize: '20px' }} />
                             </IconButton>
                           </HtmlTooltip>
                         </div>
@@ -1255,23 +1295,24 @@ const Steps = ({
                   >
                     Upload Documents
                   </MenuItem>
-                  {(referencType === 'workOrder' || (referencType === 'workOrderTechnician' && user?.brandPolicy?.workOrderTechnicianConsumable)) && !workOrderConsumableHide &&  (
-                    <MenuItem
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setConsumablesDialog({
-                          open: true,
-                          uniqueId: selectedService.uniqueId,
-                          service: selectedService._id,
-                          stepId: selectedStep?._id,
-                          serviceName: `${selectedService.serviceName} - ${selectedStep.stepName}`
-                        });
-                        setAnchorEl(null);
-                      }}
-                    >
-                      Add/Consume Products
-                    </MenuItem>
-                  )}
+                  {(referencType === 'workOrder' || (referencType === 'workOrderTechnician' && user?.brandPolicy?.workOrderTechnicianConsumable)) &&
+                    !workOrderConsumableHide && (
+                      <MenuItem
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setConsumablesDialog({
+                            open: true,
+                            uniqueId: selectedService.uniqueId,
+                            service: selectedService._id,
+                            stepId: selectedStep?._id,
+                            serviceName: `${selectedService.serviceName} - ${selectedStep.stepName}`
+                          });
+                          setAnchorEl(null);
+                        }}
+                      >
+                        Add/Consume Products
+                      </MenuItem>
+                    )}
                   {referencType !== 'workOrderTechnician' && (
                     <MenuItem
                       disabled={Boolean(getFields(selectedStep)?.stepData?.startDate)}
@@ -1483,12 +1524,11 @@ const Steps = ({
                 handleClose={() => {
                   setConsumablesDialog({ open: false, uniqueId: null, service: null, stepId: null, serviceName: null });
                 }}
-                workOrderId={workOrderId}
                 service={consumablesDialog.service}
                 uniqueId={consumablesDialog.uniqueId}
                 stepId={consumablesDialog.stepId}
                 serviceName={consumablesDialog.serviceName}
-                warehouse={warehouse}
+                workOrderData={workOrderData}
               />
             )}
             {userAssignDialog && (
