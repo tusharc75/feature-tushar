@@ -212,21 +212,29 @@ export default function CustomSwipableList({
                   <div className="swipe-card-additional-details pl-[var(--left-gutter)]">
                     {additionalDetails.map(
                       (a, index) =>
-                        d[a.field] !== null &&
-                        d[a.field] !== '' &&
-                        d[a.field] !== undefined && (
+                        (a.renderer || (d[a.field] !== null && d[a.field] !== '' && d[a.field] !== undefined)) &&
+                        (a.renderer ? (
+                          <div className="pl-2 my-1 col-span-2" key={index}>
+                            {a.renderer(d)}
+                          </div>
+                        ) : (
                           <div key={index} className="ml-2 my-1">
-                            <div className="flex flex-wrap gap-1 items-center">
-                              {a.icon && (
-                                <span className="flex items-center text-[#6B6B6B] dark:text-gray-300 max-w-[15px] max-h-[15px]">{a.icon}</span>
-                              )}
-                              <h5 className="text-truncate font-medium text-[13px] dark:text-gray-300" style={{ paddingTop: '2px', fontWeight: 500 }}>
-                                {a.label ?? `${a.label || ''}`}
-                                {d[a.field] ?? ''}
-                              </h5>
+                            <div className="flex gap-1 items-center flex-wrap">
+                              <>
+                                {a.icon && (
+                                  <span className="flex items-center text-[#6B6B6B] dark:text-gray-300 max-w-[15px] max-h-[15px]">{a.icon}</span>
+                                )}
+                                <h5
+                                  className="text-truncate font-medium text-[13px] dark:text-gray-300"
+                                  style={{ paddingTop: '2px', fontWeight: 500 }}
+                                >
+                                  {a.label ?? `${a.label || ''}`}
+                                  {d[a.field] ?? ''}
+                                </h5>
+                              </>
                             </div>
                           </div>
-                        )
+                        ))
                     )}
                   </div>
 
