@@ -59,9 +59,9 @@ const ViewImage = ({ data, loading, setLoading }) => {
   useEffect(() => {
     setImageState({
       name: data?.name,
-      x: 150,
+      x: widthHeight.width * 0.5 - 200,
+      y: widthHeight.height * 0.5 - 200,
       isDragging: false,
-      y: 0,
       width: 400,
       height: 400
     });
