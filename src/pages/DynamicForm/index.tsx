@@ -71,7 +71,6 @@ const DynamicForm = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${resource}`);
     data = response?.data?.data;
-    console.log(data);
     let columns = [];
     data.forEach((o) => {
       let currentColumn = getColumnData(renderedFrom, o?.fieldData, detailPagePath, true);
