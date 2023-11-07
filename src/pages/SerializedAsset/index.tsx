@@ -825,7 +825,6 @@ const SerializedAsset = () => {
             </div>
           </div>
         </div>
-        {console.log(columns)}
         {columns ? (
           isMobile && !isTablet ? (
             <CustomSwipableList
