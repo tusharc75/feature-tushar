@@ -56,7 +56,6 @@ const WorkOrder = ({
       permissions
     }
   } = useData();
-  const workOrderConsumableHide = user?.brandPolicy?.workOrderConsumableHide === true ? true : false;
   const [selectedRecords, setSelectedRecords] = useState([]);
 
   const [columns, setColumns] = useState(null);
@@ -340,7 +339,7 @@ const WorkOrder = ({
                 </IconButton>
               </HtmlTooltip>
             )}
-            {[MATERIAL_TYPE.service, MATERIAL_TYPE.serializedAsset]?.includes(row?.original?.type) && !workOrderConsumableHide && (
+            {[MATERIAL_TYPE.service, MATERIAL_TYPE.serializedAsset]?.includes(row?.original?.type) && !user?.brandPolicy?.workOrderConsumableHide && (
               <HtmlTooltip title="Add Products/Consumables">
                 <IconButton
                   size="small"
@@ -857,7 +856,7 @@ const WorkOrder = ({
                   Assign Work Station
                 </MenuItem>
                 )}
-              {!workOrderConsumableHide && (
+              {!user?.brandPolicy?.workOrderConsumableHide && (
                 <MenuItem
                   disabled={
                     selectedRecords?.filter((d) => [MATERIAL_TYPE.serializedAsset, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0 &&

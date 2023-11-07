@@ -49,7 +49,6 @@ const WorkOrderDetails = () => {
     state: { user, permissions }
   }: any = useData();
 
-  const workOrderConsumableHide = user?.brandPolicy?.workOrderConsumableHide === true ? true : false;
   const [workOrderData, setWorkOrderData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -301,7 +300,7 @@ const WorkOrderDetails = () => {
           <CustomTab index={1} value={1} {...a11yProps(1)}>
             <BiFoodMenu className="mr-1" fontSize="inherit" /> Services
           </CustomTab>
-          {!workOrderConsumableHide && (
+          {!user?.user?.brandPolicy?.workOrderConsumableHide && (
             <CustomTab index={2} value={2} className={'tabLayout'} {...a11yProps(2)}>
               <BiFoodMenu className="mr-1" fontSize="inherit" /> Products/Consumables
             </CustomTab>
