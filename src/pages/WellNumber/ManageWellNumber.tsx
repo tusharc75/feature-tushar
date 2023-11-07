@@ -212,7 +212,6 @@ const ManageWellNumber = ({ isClone = false, id = null, onClose, onSuccess, refe
                             {form.sectionFields.map((field, index2) => (
                               <Grid key={index2} item xs={12} sm={6} md={6}>
                                 <FormTypes
-                                  isNew={Boolean(id)}
                                   {...field}
                                   fieldData={field}
                                   fields={initialData.fields}

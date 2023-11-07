@@ -220,7 +220,6 @@ const ManageTransferInventory: FC<Props> = (props) => {
                             {form.sectionFields.map((field, index2) => (
                               <Grid key={index2} item xs={12} sm={6}>
                                 <FormTypes
-                                  isNew={Boolean(transferInventoryId)}
                                   {...field}
                                   fields={allFields}
                                   fieldData={field}

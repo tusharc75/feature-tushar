@@ -294,7 +294,6 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                     {field.fieldName === 'transfertoPlant' && (
                                       <Grid item xs={12} sm={6} md={6}>
                                         <FormTypes
-                                          isNew={Boolean(transferAssetId)}
                                           {...field}
                                           disabled={Boolean(transferAssetId) && (isMainInfoEditable || field.disableOnEdit)}
                                           values={values}
@@ -322,7 +321,6 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                     {field.fieldName === 'plantShipTo' && (
                                       <Grid key={index2} item xs={12} sm={6} md={6}>
                                         <FormTypes
-                                          isNew={Boolean(transferAssetId)}
                                           {...field}
                                           disabled={Boolean(transferAssetId) && (isMainInfoEditable || field.disableOnEdit)}
                                           values={values}
@@ -357,7 +355,6 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                 values?.transferType.includes('Supplier') && (
                                   <Grid item xs={12} sm={6} md={6}>
                                     <FormTypes
-                                      isNew={Boolean(transferAssetId)}
                                       {...field}
                                       disabled={Boolean(transferAssetId) && (isMainInfoEditable || field.disableOnEdit)}
                                       values={values}
@@ -384,7 +381,6 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                 values?.transferType.includes('Customer') && (
                                   <Grid item xs={12} sm={6} md={6}>
                                     <FormTypes
-                                      isNew={Boolean(transferAssetId)}
                                       {...field}
                                       disabled={Boolean(transferAssetId) && (isMainInfoEditable || field.disableOnEdit)}
                                       values={values}
@@ -410,7 +406,6 @@ const ManageTransferAsset: FC<Props> = (props) => {
                               ) : field.fieldName === 'transferType' ? (
                                 <Grid key={index2} item xs={12} sm={6} md={6}>
                                   <FormTypes
-                                    isNew={Boolean(transferAssetId)}
                                     {...field}
                                     disabled={Boolean(transferAssetId) && (isMainInfoEditable || field.disableOnEdit)}
                                     values={values}
@@ -453,7 +448,6 @@ const ManageTransferAsset: FC<Props> = (props) => {
                               ) : field.fieldName === 'transferFromPlant' ? (
                                 <Grid key={index2} item xs={12} sm={6} md={6}>
                                   <FormTypes
-                                    isNew={Boolean(transferAssetId)}
                                     {...field}
                                     disabled={Boolean(transferAssetId) && (isEditable || field.disableOnEdit)}
                                     values={values}
@@ -483,7 +477,6 @@ const ManageTransferAsset: FC<Props> = (props) => {
                               ) : (
                                 <Grid key={index2} item xs={12} sm={6} md={6}>
                                   <FormTypes
-                                    isNew={Boolean(transferAssetId)}
                                     {...field}
                                     disabled={
                                       (Boolean(transferAssetId) && field.disableOnEdit) ||
