@@ -125,7 +125,7 @@ const ViewImage = ({ data, loading, setLoading }) => {
           ref={(node) => {
             stageRef.current = node;
           }}
-          style={{ backgroundColor: 'white' }}
+          style={{ backgroundColor: 'transparent' }}
           width={widthHeight.width}
           height={widthHeight.height}
           onClick={(e) => {
