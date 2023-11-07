@@ -492,7 +492,7 @@ const SerializedAsset = () => {
     {
       renderer: (d) => {
         const plant = columns.find((c) => c.field === 'warehouse');
-        if (!plant) return null;
+        if (!plant || !plant.show) return null;
         return (
           <span className="line-clamp-1 flex">
             {plant.headerName}:&nbsp;
@@ -511,7 +511,7 @@ const SerializedAsset = () => {
     {
       renderer: (d) => {
         const product = columns.find((c) => c.field === 'product');
-        if (!product) return null;
+        if (!product || !product.show) return null;
         return (
           <span className="line-clamp-1 flex">
             {product.headerName}:&nbsp;
