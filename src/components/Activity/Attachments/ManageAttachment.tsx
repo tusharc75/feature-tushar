@@ -44,7 +44,8 @@ export default function ManageAttachment({
   onMinimizeMaximize,
   showManimizeMaximize,
   parentFolder = null,
-  type = 'file'
+  type = 'file',
+  defaultAttachmentType = ''
 }) {
   const [initialValues, setInitialValues] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -100,7 +101,7 @@ export default function ManageAttachment({
         });
     } else {
       if (type === 'file') {
-        setInitialValues({ name: '', fileUrl: '', attachmentType: ATTACHMENT_TYPE.diagram });
+        setInitialValues({ name: '', fileUrl: '', attachmentType: defaultAttachmentType });
       } else {
         setInitialValues({ name: '' });
       }
@@ -264,6 +265,7 @@ export default function ManageAttachment({
                               margin="dense"
                             />
                           )}
+                          disabled={defaultAttachmentType === '' ? false : true}
                           getOptionLabel={(option) => option}
                           getOptionSelected={(option: any, value: any) => option === value}
                           onChange={(e, val) => {
