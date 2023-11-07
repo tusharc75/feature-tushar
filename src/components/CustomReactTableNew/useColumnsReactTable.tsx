@@ -186,7 +186,7 @@ export default function useColumns() {
             disabled: true,
             accessor: field?.fieldName === 'firstName' ? 'concatedName' : field.fieldName,
             Cell: ({ row }) =>
-              permissions[permissionForLinks[field?.resource]]?.isRead ? (
+              (permissions[permissionForLinks[field?.resource]]?.isRead||permissions[updatedTitle]?.isRead) ? (
                 <Fragment>
                   {row?.original?.[field?.fieldName] ? (
                     <Link
