@@ -158,24 +158,25 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
     const rows = data.material.filter((e) => !e.parentId);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === 'product'
-        ? parent.productDetail?.productName
-        : parent.type === 'package'
+      parent.detail = `${
+        parent.type === 'product'
+          ? parent.productDetail?.productName
+          : parent.type === 'package'
           ? parent.packageDetail?.packageName
           : parent.type === 'serializedAsset'
-            ? parent.serializedAssetDetail?.assetNumber
-            : parent.serviceDetail?.serviceName
-        }`;
+          ? parent.serializedAssetDetail?.assetNumber
+          : parent.serviceDetail?.serviceName
+      }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-            ? parent?.productDetail?.productDescription || ''
-            : parent.type === 'package'
-              ? parent?.packageDetail?.packageDescription || ''
-              : parent.type === 'serializedAsset'
-                ? parent.serializedAssetDetail?.product?.productDescription || ''
-                : '';
+          ? parent?.productDetail?.productDescription || ''
+          : parent.type === 'package'
+          ? parent?.packageDetail?.packageDescription || ''
+          : parent.type === 'serializedAsset'
+          ? parent.serializedAssetDetail?.product?.productDescription || ''
+          : '';
       parent.qtyDisplay = parent.qty;
       parent.subRows = generateNestedData(data.material, parent);
     });
@@ -197,24 +198,25 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${_subRow?.type === 'product'
-        ? _subRow?.productDetail?.productName
-        : _subRow?.type === 'package'
+      _subRow.detail = `${
+        _subRow?.type === 'product'
+          ? _subRow?.productDetail?.productName
+          : _subRow?.type === 'package'
           ? _subRow?.packageDetail?.packageName
           : _subRow?.type === 'serializedAsset'
-            ? _subRow?.serializedAssetDetail?.assetNumber
-            : _subRow?.serviceDetail?.serviceName
-        }`;
+          ? _subRow?.serializedAssetDetail?.assetNumber
+          : _subRow?.serviceDetail?.serviceName
+      }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === 'package'
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : _subRow.type === 'serializedAsset'
-                ? _subRow.serializedAssetDetail?.product?.productDescription || ''
-                : '';
+          ? _subRow?.productDetail?.productDescription || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : _subRow.type === 'serializedAsset'
+          ? _subRow.serializedAssetDetail?.product?.productDescription || ''
+          : '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
@@ -300,7 +302,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
               height={'calc(100vh - 200px)'}
               columns={columns}
               data={rowsData}
-              onSelect={() => { }}
+              onSelect={() => {}}
               childrenProperty="subRows"
               uniqueKey="_id"
               hideSelection={true}
@@ -351,7 +353,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
                       `finalPrice_${invoiceData?.currency?.toLowerCase()}`
                     ]}
                   />
-                  {(resource === sidebarResource.fieldTicket) && (
+                  {resource === sidebarResource.fieldTicket && (
                     <>
                       <Button
                         variant={isMobile && !isTablet ? 'text' : 'outlined'}
@@ -386,14 +388,14 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
               <div className="ml-auto">
                 {rowsData &&
                   rowsData?.length > 0 &&
-                  (resource === sidebarResource.fieldTicket) &&
+                  resource === sidebarResource.fieldTicket &&
                   ![INVOICE_STATUS.closed, INVOICE_STATUS.cancelled]?.includes(invoiceData?.status) && (
-                    <DeleteButton text="Cancel Invoice" onClick={() => setCommentDialog(true)} />
+                    <DeleteButton mode="light" text="Cancel Invoice" onClick={() => setCommentDialog(true)} />
                   )}
               </div>
             </div>
             <Box pt={1}>
-              {(resource === sidebarResource.fieldTicket) && permissions?.creditMemo?.isRead ? (
+              {resource === sidebarResource.fieldTicket && permissions?.creditMemo?.isRead ? (
                 <>
                   <Tabs
                     className="new-tab-container-v1"

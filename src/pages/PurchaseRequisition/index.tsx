@@ -121,12 +121,8 @@ const PurchaseRequisition = () => {
               aria-label="Convert"
               onClick={() => {
                 setConvertedPurchaseRequisitionId(row?.original?.id);
-                console.log(row?.original);
                 const products = row?.original?.material?.filter((item: any) => item?.type == 'product');
                 const services = row?.original?.material?.filter((item: any) => item?.type == 'service');
-
-                console.log(products);
-                console.log(services);
                 setOrderDialog({
                   open: true,
                   currency: row?.original?.currency,
@@ -404,7 +400,6 @@ const PurchaseRequisition = () => {
           purchaseOrderId={null}
           onClose={() => setOrderDialog((prevState) => ({ ...prevState, open: false }))}
           onSuccess={(data: any) => {
-            console.log('hello');
             handleConvertSuccess(data);
           }}
           products={showOrderDialog?.products?.map((e) => {

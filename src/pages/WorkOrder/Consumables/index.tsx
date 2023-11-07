@@ -4,7 +4,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { MATERIAL_SUB_TYPE, sidebarResource, workOrder } from 'src/constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_SUB_TYPE, repairOrder, sidebarResource, workOrder } from 'src/constants/helpers';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
@@ -20,20 +20,25 @@ import { useData } from 'src/StateProvider/Provider';
 import History from '../../ProductInventory/LedgerHistory';
 import FormatListBulletedIcon from '@material-ui/icons/FormatListBulleted';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import DeleteButton from 'src/components/Helpers/DeleteButton';
 import { BiChevronDown } from 'react-icons/bi';
+import UpdateProductDialog from './UpdateProductDialog';
+import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
+import { generateCustomTableColumns } from 'src/constants/columns';
+import EditIcon from '@material-ui/icons/Edit';
 
 const Consumables = ({
-  workOrderId,
-  warehouse,
   isCreate,
   allowedToEdit,
   service,
   uniqueId,
   stepId,
   serviceName,
-  materialSubType = MATERIAL_SUB_TYPE.consumable
+  materialSubType = MATERIAL_SUB_TYPE.consumable,
+  workOrderData
 }) => {
+
+  const workOrderId = workOrderData?._id;
+  const warehouse = workOrderData?.warehouse;
   const toastConfig = useContext(CustomToastContext);
   const [dataRows, setDataRows] = useState(null);
   const [columns, setColumns] = useState(null);
@@ -45,6 +50,8 @@ const Consumables = ({
   const [openLogDialog, setOpenLogDialog] = useState({ open: false, product: '', uniqueId: null, data: null });
   const [consumeRequest, setConsumeRequest] = useState(false);
   const [historyDialog, setHistoryDialog] = useState({ open: false, _id: '', product: '', productName: '' });
+  const [updateDialog, setUpdateDialog] = useState({ open: false, data: null });
+  const [isUpdating, setUpdating] = useState(false);
 
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -70,7 +77,30 @@ const Consumables = ({
     fetchData();
   }, [allowedToEdit, workOrderId, consumeRequest]);
 
+  const handleUpdate = async (row: any) => {
+    setUpdating(true);
+    try {
+      const data: any = row;
+      delete data.workOrder;
+      await axiosInstance().put(`${repairOrder.api}/${workOrderId}/work-order/${workOrderId}`, { material: [data] });
+    } catch (error) {
+      setUpdating(false);
+      toastConfig.setToastConfig(error);
+    } finally {
+      setUpdating(false);
+      fetchData();
+      setUpdateDialog({ open: false, data: null });
+    }
+  };
+
   const fetchColumns = async () => {
+    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.workOrderProduct}`);
+    let childFields = response?.data?.data || [];
+    childFields = CURReplaceByCurrencySingle(childFields, workOrderData?.currency || 'USD');
+    const newColumns = generateCustomTableColumns(childFields, workOrderData?.currency || 'USD');
+
+    const hasChildFields = Array.isArray(childFields) && childFields?.length > 0 ? true : false;
+
     const column = [];
     const {
       data: { data }
@@ -93,7 +123,19 @@ const Consumables = ({
           Cell: ({ row }) => {
             return row.original[e?.fieldName] ? (
               <div className="d-flex gap-2 align-items-center">
-                <p className="text-truncate">{row.original[e?.fieldName]}</p>
+                {hasChildFields && allowedToEdit ?
+                  <p className={'link text-truncate'} onClick={() => {
+                    setUpdateDialog({
+                      open: true,
+                      data: row.original
+                    });
+                  }} >
+                    {row.original[e?.fieldName]}
+                  </p> :
+                  <p className={'text-truncate'}>
+                    {row.original[e?.fieldName]}
+                  </p>
+                }
                 <IconButton
                   size="small"
                   onClick={() => {
@@ -119,7 +161,6 @@ const Consumables = ({
         });
       }
     });
-
     const extracolumns: any = [
       {
         accessor: 'service',
@@ -172,66 +213,81 @@ const Consumables = ({
         primaryField: true,
         width: 150,
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
-      },
-      {
-        accessor: 'action',
-        Header: 'Actions',
-        width: 150,
-        minWidth: 150,
-        sticky: 'right',
-        disableFilters: true,
-        canDrag: false,
-        Cell: ({ row }: any) => (
-          <div style={{ display: 'flex', justifyContent: 'right' }}>
-            {row.original?.isqtyRequestLog && (
-              <HtmlTooltip title="View Requests">
-                <IconButton
-                  size="small"
-                  aria-label="Requests"
-                  onClick={() => {
-                    setOpenLogDialog({ open: true, product: row?.original?.productId, uniqueId: row.original._id, data: row.original });
-                  }}
-                >
-                  <FormatListBulletedIcon fontSize="small" color={'primary'} />
-                </IconButton>
-              </HtmlTooltip>
-            )}
-            <HtmlTooltip title="History">
+      }
+    ];
+    extracolumns.push({
+      accessor: 'action',
+      Header: 'Actions',
+      width: 150,
+      minWidth: 150,
+      sticky: 'right',
+      disableFilters: true,
+      canDrag: false,
+      Cell: ({ row }: any) => (
+        <div style={{ display: 'flex', justifyContent: 'right' }}>
+          {row.original?.isqtyRequestLog && (
+            <HtmlTooltip title="View Requests">
               <IconButton
                 size="small"
-                aria-label="History"
+                aria-label="Requests"
                 onClick={() => {
-                  setHistoryDialog({
+                  setOpenLogDialog({ open: true, product: row?.original?.productId, uniqueId: row.original._id, data: row.original });
+                }}
+              >
+                <FormatListBulletedIcon fontSize="small" color={'primary'} />
+              </IconButton>
+            </HtmlTooltip>
+          )}
+          <HtmlTooltip title="History">
+            <IconButton
+              size="small"
+              aria-label="History"
+              onClick={() => {
+                setHistoryDialog({
+                  open: true,
+                  _id: row?.original?._id,
+                  product: row?.original?.productId,
+                  productName: row?.original?.productName
+                });
+              }}
+            >
+              <HistoryIcon fontSize="small" color={'primary'}  />
+            </IconButton>
+          </HtmlTooltip>
+          {(allowedToEdit && hasChildFields) && (
+            <HtmlTooltip title="Edit">
+              <IconButton
+                size="small"
+                aria-label="Edit"
+                onClick={() => {
+                  setUpdateDialog({
                     open: true,
-                    _id: row?.original?._id,
-                    product: row?.original?.productId,
-                    productName: row?.original?.productName
+                    data: row.original
                   });
                 }}
               >
-                <HistoryIcon fontSize="small" color={'primary'} />
+                <EditIcon color={'primary'} fontSize="small" />
               </IconButton>
             </HtmlTooltip>
-            {allowedToEdit && (
-              <HtmlTooltip title="Delete">
-                <IconButton
-                  size="small"
-                  aria-label="Delete"
-                  disabled={row?.original?.consumedQty || row?.original?.requestedQty ? true : false}
-                  onClick={() => {
-                    handleDelete([row.original]);
-                  }}
-                >
-                  <DeleteIcon color={row?.original?.consumedQty || row?.original?.requestedQty ? 'disabled' : 'error'} />
-                </IconButton>
-              </HtmlTooltip>
-            )}
-          </div>
-        )
-      }
-    ];
-
-    setColumns([...column, ...extracolumns]);
+          )}
+          {allowedToEdit && (
+            <HtmlTooltip title="Delete">
+              <IconButton
+                size="small"
+                aria-label="Delete"
+                disabled={row?.original?.consumedQty || row?.original?.requestedQty ? true : false}
+                onClick={() => {
+                  handleDelete([row.original]);
+                }}
+              >
+                <DeleteIcon color={row?.original?.consumedQty || row?.original?.requestedQty ? 'disabled' : 'error'} fontSize="small" />
+              </IconButton>
+            </HtmlTooltip>
+          )}
+        </div>
+      )
+    })
+    setColumns([...column, ...newColumns, ...extracolumns]);
   };
 
   const fetchData = async () => {
@@ -495,6 +551,17 @@ const Consumables = ({
             referenceId={workOrderId}
             uniqueId={historyDialog._id}
             product={historyDialog.product}
+          />
+        )}
+        {updateDialog.open && (
+          <UpdateProductDialog
+            onClose={() => {
+              setUpdateDialog({ open: false, data: null });
+            }}
+            materialData={updateDialog.data}
+            handleUpdate={handleUpdate}
+            loadingEdit={isUpdating}
+            workOrderData={workOrderData}
           />
         )}
       </Grid>

@@ -22,6 +22,9 @@ export const rentalManagementActions = {
 
 export const rentalManagementMessage = {
     addProductPackage: 'Add Products or Packages to proceed',
+    validPrice: 'Enter Price to proceed',
+    addProductInPackage: 'Add Product in package to proceed',
+    addServiceInPackage: 'Add Service in package to proceed',
     assignAssets: 'Assign Assets to proceed',
     loadingCreatedAndDelivered: 'Create and Deliver at least one Loading Ticket to proceed',
     receivingCreatedAndDelivered: 'Create and Receive at least one Receiving or Return Ticket to proceed',

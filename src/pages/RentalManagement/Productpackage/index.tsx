@@ -12,7 +12,7 @@ import CustomReactTable from '../../../components/CustomReactTable/CustomReactTa
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { rentalManagement } from '../../../constants/helpers';
+import { MATERIAL_TYPE, rentalManagement } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import RentalJobQtyDialog from './RentalJobQtyDialog';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
@@ -68,7 +68,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
   }, [allowedToEdit]);
 
   useEffect(() => {
-    fetchProductInventory();
+    fetchData();
   }, [columns]);
 
   const fetchFields = async () => {
@@ -252,12 +252,14 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
     setColumns(column);
   };
 
-  const fetchProductInventory = async () => {
+  const fetchData = async () => {
     setNextStep(false);
     setNextStepToolTip(null)
     var data: any = [];
     var inventory: any = [];
     var nonSerializeAsset: any = [];
+
+    var nextStepMessage = null;
 
     if (isOffline) {
       data = await findOne(objectStore.rentalManagement, rentalManagementData._id);
@@ -296,16 +298,22 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
+      if (!parent.isValid) {
+        nextStepMessage = rentalManagementMessage.validPrice
+      }
       parent.assetQty = parent.serializedProduct
         ? inventory?.filter((e) => e._id === parent._id).length
         : nonSerializeAsset?.filter((e) => e._id === parent._id).length;
       parent.hideSelection = parent.assetQty > 0 ? true : parent?.status ? true : false;
       parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent);
+      if (parent.type === MATERIAL_TYPE.package && parent.subRows?.length === 0 && !nextStepMessage) {
+        nextStepMessage = rentalManagementMessage.addProductInPackage
+      }
     });
 
     if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
       setNextStep(false);
-      setNextStepToolTip(rentalManagementMessage.addProductPackage)
+      setNextStepToolTip(nextStepMessage || rentalManagementMessage.addProductPackage)
     } else {
       setNextStep(true);
       setNextStepToolTip(null)
@@ -410,7 +418,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
       .post(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`, { material: tempMaterial })
       .then(() => {
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
-        fetchProductInventory();
+        fetchData();
         setAddingProducts(false);
         setPriceDataDialog({ open: false, material: null });
       })
@@ -441,7 +449,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
     axiosInstance()
       .put(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`, { material: rows })
       .then(() => {
-        fetchProductInventory();
+        fetchData();
         if (saveAndNext) {
           const rowIndex = rowsData?.findIndex((d) => d._id === rows[0]?._id);
           setIsProductEdit({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false });
@@ -463,7 +471,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
       .put(`${rentalManagement.api}/productpackage/${rentalManagementData?._id}/delete`, { ids: rows })
       .then(() => {
         setDeleting(false);
-        fetchProductInventory();
+        fetchData();
         setDeleteData(null);
       })
       .catch((error) => {

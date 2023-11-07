@@ -3,6 +3,7 @@ import { Add, Delete } from '@material-ui/icons';
 import EditIcon from '@material-ui/icons/Edit';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
+import ShowPdf from './ShowPdf';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BiDownload } from 'react-icons/bi';
@@ -13,7 +14,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { ATTACHMENT_TYPE, CustomDialogTransition } from 'src/constants/helpers';
 import ViewImage from './ViewImage';
-import { getFileIcon, getFileNameWithExtension } from './assets';
+import { getFileIcon, getFileNameWithExtension } from './utils';
 
 const Diagram = ({ resource, referenceId }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -25,10 +26,15 @@ const Diagram = ({ resource, referenceId }) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [selectedAttachment, setSelectedAttachment] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchData();
   }, [resource, referenceId]);
+
+  useEffect(() => {
+    setLoading(true);
+  }, [selectedAttachment]);
 
   const fetchData = async () => {
     axiosInstance()
@@ -77,29 +83,6 @@ const Diagram = ({ resource, referenceId }) => {
       return true;
     }
     return false;
-  };
-
-  const ShowPdf = ({ data }) => {
-    const [url, seturl] = useState();
-    useEffect(() => {
-      axiosInstance()
-        .get(`user/download?fileName=${data?.url}`, {
-          responseType: 'blob'
-        })
-        .then(({ data }) => {
-          const file = new Blob([data], { type: 'application/pdf' });
-          const fileURL: any = URL.createObjectURL(file);
-          seturl(fileURL);
-        })
-        .catch((err) => {
-          toastConfig.setToastConfig(err);
-        });
-    }, [data]);
-    return (
-      <Box height={'calc(100vh - 150px)'}>
-        <iframe title={data?.name} src={url} width="100%" height="100%" frameBorder="0" scrolling="auto"></iframe>
-      </Box>
-    );
   };
 
   const downloadExcel = (file) => {
@@ -159,7 +142,7 @@ const Diagram = ({ resource, referenceId }) => {
                 }}
                 aria-controls="add-menu"
               >
-                Add Attachment
+                Add
               </Button>
             </Box>
             <Box pt={2} pb={2}>
@@ -170,11 +153,10 @@ const Diagram = ({ resource, referenceId }) => {
                       return (
                         <div key={file._id} className="shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
                           <div
-                            className={`head flex items-center justify-between cursor-pointer w-full p-[8px_15px] ${
-                              expended[file?._id]
-                                ? 'bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)] rounded-[4px_4px_0_0]'
-                                : 'bg-[var(--accordion-summary-bg,#fff)] rounded-[4px]'
-                            }`}
+                            className={`head flex items-center justify-between cursor-pointer w-full p-[8px_15px] ${expended[file?._id]
+                              ? 'bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)] rounded-[4px_4px_0_0]'
+                              : 'bg-[var(--accordion-summary-bg,#fff)] rounded-[4px]'
+                              }`}
                             onClick={() => {
                               setExpended((prev) => ({
                                 ...prev,
@@ -273,9 +255,9 @@ const Diagram = ({ resource, referenceId }) => {
             {selectedAttachment && (
               <>
                 {checkImageType(selectedAttachment?.url?.split('.')[1]) ? (
-                  <ViewImage data={selectedAttachment} key={selectedAttachment.url} />
+                  <ViewImage data={selectedAttachment} key={selectedAttachment.url} loading={loading} setLoading={setLoading} />
                 ) : checkpdfType(selectedAttachment?.url?.split('.')[1]) ? (
-                  <ShowPdf data={selectedAttachment} key={selectedAttachment.url} />
+                  <ShowPdf data={selectedAttachment} key={selectedAttachment.url} loading={loading} setLoading={setLoading} />
                 ) : (
                   <ShowOtherFiles data={selectedAttachment} key={selectedAttachment.url} />
                 )}
@@ -312,6 +294,7 @@ const Diagram = ({ resource, referenceId }) => {
             }}
             showManimizeMaximize={true}
             fetchData={fetchData}
+            defaultAttachmentType={ATTACHMENT_TYPE.diagram}
           />
         </Dialog>
       )}

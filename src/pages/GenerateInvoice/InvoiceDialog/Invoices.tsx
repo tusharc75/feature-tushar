@@ -18,8 +18,7 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { camelCase } from 'lodash';
 
 const Invoices = ({ resourceId, resource, invoiceFieldName }) => {
-
-  const renderedFrom = `${camelCase(routes.generateInvoice?.title)}_invoice`
+  const renderedFrom = `${camelCase(routes.generateInvoice?.title)}_invoice`;
 
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const toastConfig = useContext(CustomToastContext);
@@ -36,7 +35,7 @@ const Invoices = ({ resourceId, resource, invoiceFieldName }) => {
   const [columns, setColumns] = useState(null);
   const [deleteRecord, setDeleteRecord] = useState<any>({});
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
-  const [viewInvoiceDialog, setViewInvoiceDialog] = useState({ open: false, invoice: null })
+  const [viewInvoiceDialog, setViewInvoiceDialog] = useState({ open: false, invoice: null });
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
@@ -144,9 +143,7 @@ const Invoices = ({ resourceId, resource, invoiceFieldName }) => {
     fetchBilling();
   }, [page, limit, filters, sorting]);
 
-
   const getQueryString = () => {
-
     let deepFilter = `?page=${page}&limit=${limit}&${invoiceFieldName}=${resourceId}`;
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
