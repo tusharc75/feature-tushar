@@ -4,7 +4,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { MATERIAL_SUB_TYPE, sidebarResource, workOrder } from 'src/constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_SUB_TYPE, repairOrder, sidebarResource, workOrder } from 'src/constants/helpers';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
@@ -20,20 +20,24 @@ import { useData } from 'src/StateProvider/Provider';
 import History from '../../ProductInventory/LedgerHistory';
 import FormatListBulletedIcon from '@material-ui/icons/FormatListBulleted';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import DeleteButton from 'src/components/Helpers/DeleteButton';
 import { BiChevronDown } from 'react-icons/bi';
+import UpdateWorkOrderDialog from './UpdateWorkOrderDialog';
+import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
+import { generateCustomTableColumns } from 'src/constants/columns';
 
 const Consumables = ({
-  workOrderId,
-  warehouse,
   isCreate,
   allowedToEdit,
   service,
   uniqueId,
   stepId,
   serviceName,
-  materialSubType = MATERIAL_SUB_TYPE.consumable
+  materialSubType = MATERIAL_SUB_TYPE.consumable,
+  workOrderData
 }) => {
+
+  const workOrderId = workOrderData?._id;
+  const warehouse = workOrderData?.warehouse;
   const toastConfig = useContext(CustomToastContext);
   const [dataRows, setDataRows] = useState(null);
   const [columns, setColumns] = useState(null);
@@ -45,6 +49,8 @@ const Consumables = ({
   const [openLogDialog, setOpenLogDialog] = useState({ open: false, product: '', uniqueId: null, data: null });
   const [consumeRequest, setConsumeRequest] = useState(false);
   const [historyDialog, setHistoryDialog] = useState({ open: false, _id: '', product: '', productName: '' });
+  const [updateDialog, setUpdateDialog] = useState({ open: false, data: null });
+  const [isUpdating, setUpdating] = useState(false);
 
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -70,7 +76,26 @@ const Consumables = ({
     fetchData();
   }, [allowedToEdit, workOrderId, consumeRequest]);
 
+  const handleUpdate = async (row: any) => {
+    setUpdating(true);
+    try {
+      const data: any = row;
+      delete data.workOrder;
+      await axiosInstance().put(`${repairOrder.api}/${workOrderId}/work-order/${workOrderId}`, { material: [data] });
+    } catch (error) {
+      setUpdating(false);
+      toastConfig.setToastConfig(error);
+    } finally {
+      setUpdating(false);
+      fetchData();
+      setUpdateDialog({ open: false, data: null });
+    }
+  };
+  
   const fetchColumns = async () => {
+    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.workOrderProduct}`);
+    let childFields = response?.data?.data || [];
+    const hasChildFields = Array.isArray(childFields) && childFields.length > 0 ? true : false;
     const column = [];
     const {
       data: { data }
@@ -93,7 +118,18 @@ const Consumables = ({
           Cell: ({ row }) => {
             return row.original[e?.fieldName] ? (
               <div className="d-flex gap-2 align-items-center">
-                <p className="text-truncate">{row.original[e?.fieldName]}</p>
+                <p
+                  className={hasChildFields ? 'link text-truncate' : 'text-truncate'}
+                  onClick={() => {
+                    if(!hasChildFields) return;
+                    setUpdateDialog({
+                      open: true,
+                      data: row.original
+                    });
+                  }}
+                >
+                  {row.original[e?.fieldName]}
+                </p>
                 <IconButton
                   size="small"
                   onClick={() => {
@@ -119,6 +155,9 @@ const Consumables = ({
         });
       }
     });
+
+    let childFieldCols = CURReplaceByCurrencySingle(childFields, workOrderData?.currency || 'USD');
+    const newColumns = generateCustomTableColumns(childFieldCols, workOrderData?.currency || 'USD');
 
     const extracolumns: any = [
       {
@@ -173,6 +212,7 @@ const Consumables = ({
         width: 150,
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
       },
+      ...(hasChildFields ? newColumns : []),
       {
         accessor: 'action',
         Header: 'Actions',
@@ -495,6 +535,17 @@ const Consumables = ({
             referenceId={workOrderId}
             uniqueId={historyDialog._id}
             product={historyDialog.product}
+          />
+        )}
+        {updateDialog.open && (
+          <UpdateWorkOrderDialog
+            onClose={() => {
+              setUpdateDialog({ open: false, data: null });
+            }}
+            materialData={updateDialog.data}
+            handleUpdate={handleUpdate}
+            loadingEdit={isUpdating}
+            workOrderData={workOrderData}
           />
         )}
       </Grid>
