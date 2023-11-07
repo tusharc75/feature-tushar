@@ -821,8 +821,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                 <>
                   {selectedService?.type === 'service' ? (
                     <Steps
-                      workOrderId={workOrderId}
-                      warehouse={workOrderData?.warehouse}
+                      workOrderData={workOrderData}
                       selectedService={selectedService}
                       allowedToEdit={isAllowedToServiceEdit && selectedService?.clickable}
                       setDisableCompleteFail={setDisableCompleteFail}
@@ -1303,12 +1302,11 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           handleClose={() => {
             setConsumablesDialog({ open: false, uniqueId: null, service: null, stepId: null, serviceName: null });
           }}
-          workOrderId={workOrderId}
+          workOrderData={workOrderData}
           service={consumablesDialog.service}
           uniqueId={consumablesDialog.uniqueId}
           stepId={consumablesDialog.stepId}
           serviceName={consumablesDialog.serviceName}
-          warehouse={workOrderData?.warehouse}
         />
       )}
       {logsDialog && (

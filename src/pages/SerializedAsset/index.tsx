@@ -36,7 +36,7 @@ import HtmlTooltip from '../../components/CustomTooltipTitle';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
 import { prepareDataForGrid } from '../../constants/helpers';
-import { AiFillCrown, MdAdd } from 'react-icons/all';
+import { AiFillCrown, BsBox, HiOutlineDocumentText, MdAdd } from 'react-icons/all';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Autocomplete } from '@material-ui/lab';
@@ -841,7 +841,16 @@ const SerializedAsset = () => {
               // onEdit={(d) => {
               //   history.push(`${routes.serializedAssetDetail.path}/${d._id}`);
               // }}
-              additionalDetails={[]}
+              additionalDetails={[
+                {
+                  icon: <BsBox />,
+                  field: 'product'
+                },
+                {
+                  icon: <HiOutlineDocumentText />,
+                  field: 'productDescription'
+                }
+              ]}
               extraParamsToCheckDelete={false}
               // onDelete={(d) => {
               //   setDeleteRecord(d);

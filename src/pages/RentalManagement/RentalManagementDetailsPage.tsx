@@ -670,6 +670,7 @@ const RentalManagementDetailsPage = () => {
                 <Services
                   rentalManagementData={rentalManagementData}
                   setNextStep={setNextStep}
+                  setNextStepToolTip={setNextStepToolTip}
                   renderedFrom={`${renderedFrom}_grid-1`}
                   stepFullScreen={stepFullScreen}
                   allowedToEdit={

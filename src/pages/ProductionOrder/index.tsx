@@ -105,7 +105,7 @@ const ProductionOrder = () => {
     accessor: 'action',
     Header: 'Actions',
     minWidth: 100,
-    width: 100,
+    width: 110,
     sticky: 'right',
     disableFilters: true,
     canDrag: false,
@@ -239,11 +239,11 @@ const ProductionOrder = () => {
   };
 
   const showConfirmBox = () => {
-      if (getLocalStorageArrayData(localStorageSelectedRecords)?.find((d) => d.canDelete === false)) {
-        setShowDeleteWarningConfirmBox(true);
-      } else {
-        setShowDeleteConfirmBox(true);
-      } 
+    if (getLocalStorageArrayData(localStorageSelectedRecords)?.find((d) => d.canDelete === false)) {
+      setShowDeleteWarningConfirmBox(true);
+    } else {
+      setShowDeleteConfirmBox(true);
+    }
   };
 
   const openActions = (event) => {

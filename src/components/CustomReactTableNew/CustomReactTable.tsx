@@ -789,7 +789,7 @@ function CustomReactTable({
             <div
               style={{
                 display: 'block',
-                overflow: 'auto',
+                overflow: !loading && !error && rows.length === 0 ? 'hidden' : 'auto',
                 height: height ?? '100%'
               }}
               className="border"
@@ -807,113 +807,130 @@ function CustomReactTable({
                         <CircularProgress />
                         <p>Loading...</p>
                       </>
-                    ) : (
-                      ''
-                    )}
+                    ) : null}
                   </div>
                 </Box>
               )}
-
-              <MaUTable {...getTableProps()} size="small" className="tableWrap table sticky">
-                <TableHead style={{ overflowY: 'auto', overflowX: 'hidden' }} className="header">
-                  {headerGroups.map((headerGroup, index) => (
-                    <React.Fragment key={index}>
-                      <TableRow {...headerGroup.getHeaderGroupProps()} className="tr">
-                        {headerGroup.headers.map((column, index) => (
-                          <React.Fragment key={column.id}>
-                            <DraggableHeader
-                              key={column.id}
-                              column={column}
-                              reorder={reorder}
-                              index={index}
-                              customFilters={customFilters}
-                              dispatch={dispatch}
-                              isClientSideGrid={isClientSideGrid}
-                            />
-                          </React.Fragment>
-                        ))}
-                      </TableRow>
-                    </React.Fragment>
-                  ))}
-                </TableHead>
-
-                <TableBody
-                  style={{
-                    overflowY: 'scroll',
-                    overflowX: 'hidden'
-                    // height: "250px"
-                  }}
-                  className="body"
-                >
-                  {rows.map((row, index1) => {
-                    prepareRow(row);
-                    return (
-                      <TableRow key={index1} {...row.getRowProps()} className="tr">
-                        {row.cells.map((cell, index2) => {
-                          return (
-                            <TableCell
-                              key={index2}
-                              {...cell.getCellProps()}
-                              className={`td   ${cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''}    ${
-                                setWholeRowsCellColor ? setWholeRowsCellColor(row.original) : ''
-                              }`}
-                              onClick={() => {
-                                handleCellClick(cell, row);
-                              }}
-                              onKeyDown={(e) => {
-                                handleKeyDown(e);
-                              }}
-                            >
-                              {!['selection'].includes(cell?.column.id) &&
-                              currentEditingCellPosition?.rowId === row.original._id &&
-                              currentEditingCellPosition?.columnName === cell?.column.id ? (
-                                <input
-                                  title={`Edit-${cell.id}`}
-                                  autoFocus
-                                  onBlur={() => (cell.value !== cellValue ? submitInput() : resetField())}
-                                  value={cellValue}
-                                  className="dark:text-[white]  appearance-none w-full focus-within:outline-[var(--new-theme-color)] bg-[transparent] outline-[transparent] shadow-0 border-[0] px-[2px] py-[4px] [border-bottom:1px_solid_var(--common-border-color)_!important]"
-                                  onChange={(e) => setCellValue(e.target.value)}
-                                />
-                              ) : currentEditingCellPosition?.rowId === row.original._id && cell?.column.id === 'action' ? (
-                                <HtmlTooltip title="Save">
-                                  <IconButton size="small" aria-label="Save" onClick={submitInput}>
-                                    <Check color="primary" />
-                                  </IconButton>
-                                </HtmlTooltip>
-                              ) : cell.column?.editable && cell?.value ? (
-                                <div
-                                  style={{ borderBottom: '1px dashed #8a8a8a', cursor: 'pointer', display: 'flex', justifyContent: 'space-between' }}
-                                >
-                                  <p>{cell?.value}</p>
-                                  <span>
-                                    <Edit className="text-[rgba(0,0,0,0.3)] dark:text-[rgba(255,255,255,0.9)]" fontSize="small" />
-                                  </span>
-                                </div>
-                              ) : (
-                                cell.render('Cell')
-                              )}
-                            </TableCell>
-                          );
-                        })}
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-                {rows?.length > 0 && footerGroups?.length > 0 && !allowPagination && (
-                  <TableFooter style={{ overflowY: 'auto', overflowX: 'hidden' }} className="footer ">
-                    {footerGroups.map((group) => (
-                      <TableRow {...group.getFooterGroupProps()} className="tr">
-                        {group.headers.map((column) => (
-                          <TableCell {...column.getHeaderProps()} className="th text-truncate font-weight-bold text-black">
-                            {column.render('Footer')}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    ))}
-                  </TableFooter>
+              <div className="relative">
+                {!loading && !error && rows.length === 0 && (
+                  <>
+                    <Box
+                      style={{ height: `calc(${height ?? '100%'} - 60px)` }}
+                      className="bg-[rgba(255,255,255,0.2)] dark:bg-[rgba(0,0,0,0.1)] w-full h-full z-[100] absolute inset-0 flex justify-center items-center"
+                    >
+                      <div className="bg-[white] dark:bg-[var(--dark-secondary)] px-10 py-5 rounded-lg text-center shadow-md">
+                        <Error className="mx-auto mb-2" />
+                        <p>No data found</p>
+                      </div>
+                    </Box>
+                  </>
                 )}
-              </MaUTable>
+                <MaUTable {...getTableProps()} size="small" className="tableWrap table sticky">
+                  <TableHead style={{ overflowY: 'auto', overflowX: 'hidden' }} className="header">
+                    {headerGroups.map((headerGroup, index) => (
+                      <React.Fragment key={index}>
+                        <TableRow {...headerGroup.getHeaderGroupProps()} className="tr">
+                          {headerGroup.headers.map((column, index) => (
+                            <React.Fragment key={column.id}>
+                              <DraggableHeader
+                                key={column.id}
+                                column={column}
+                                reorder={reorder}
+                                index={index}
+                                customFilters={customFilters}
+                                dispatch={dispatch}
+                                isClientSideGrid={isClientSideGrid}
+                              />
+                            </React.Fragment>
+                          ))}
+                        </TableRow>
+                      </React.Fragment>
+                    ))}
+                  </TableHead>
+
+                  <TableBody
+                    style={{
+                      overflowY: 'scroll',
+                      overflowX: 'hidden'
+                      // height: "250px"
+                    }}
+                    className="body relative"
+                  >
+                    {rows.map((row, index1) => {
+                      prepareRow(row);
+                      return (
+                        <TableRow key={index1} {...row.getRowProps()} className="tr">
+                          {row.cells.map((cell, index2) => {
+                            return (
+                              <TableCell
+                                key={index2}
+                                {...cell.getCellProps()}
+                                className={`td   ${cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''}    ${
+                                  setWholeRowsCellColor ? setWholeRowsCellColor(row.original) : ''
+                                }`}
+                                onClick={() => {
+                                  handleCellClick(cell, row);
+                                }}
+                                onKeyDown={(e) => {
+                                  handleKeyDown(e);
+                                }}
+                              >
+                                {!['selection'].includes(cell?.column.id) &&
+                                currentEditingCellPosition?.rowId === row.original._id &&
+                                currentEditingCellPosition?.columnName === cell?.column.id ? (
+                                  <input
+                                    title={`Edit-${cell.id}`}
+                                    autoFocus
+                                    onBlur={() => (cell.value !== cellValue ? submitInput() : resetField())}
+                                    value={cellValue}
+                                    className="dark:text-[white]  appearance-none w-full focus-within:outline-[var(--new-theme-color)] bg-[transparent] outline-[transparent] shadow-0 border-[0] px-[2px] py-[4px] [border-bottom:1px_solid_var(--common-border-color)_!important]"
+                                    onChange={(e) => setCellValue(e.target.value)}
+                                  />
+                                ) : currentEditingCellPosition?.rowId === row.original._id && cell?.column.id === 'action' ? (
+                                  <HtmlTooltip title="Save">
+                                    <IconButton size="small" aria-label="Save" onClick={submitInput}>
+                                      <Check color="primary" />
+                                    </IconButton>
+                                  </HtmlTooltip>
+                                ) : cell.column?.editable && cell?.value ? (
+                                  <div
+                                    style={{
+                                      borderBottom: '1px dashed #8a8a8a',
+                                      cursor: 'pointer',
+                                      display: 'flex',
+                                      justifyContent: 'space-between'
+                                    }}
+                                  >
+                                    <p>{cell?.value}</p>
+                                    <span>
+                                      <Edit className="text-[rgba(0,0,0,0.3)] dark:text-[rgba(255,255,255,0.9)]" fontSize="small" />
+                                    </span>
+                                  </div>
+                                ) : (
+                                  cell.render('Cell')
+                                )}
+                              </TableCell>
+                            );
+                          })}
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                  {rows?.length > 0 && footerGroups?.length > 0 && !allowPagination && (
+                    <TableFooter style={{ overflowY: 'auto', overflowX: 'hidden' }} className="footer ">
+                      {footerGroups.map((group) => (
+                        <TableRow {...group.getFooterGroupProps()} className="tr">
+                          {group.headers.map((column) => (
+                            <TableCell {...column.getHeaderProps()} className="th text-truncate font-weight-bold text-black">
+                              {column.render('Footer')}
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      ))}
+                    </TableFooter>
+                  )}
+                </MaUTable>
+              </div>
             </div>
           )}
         </div>
