@@ -1,52 +1,47 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import AddIcon from '@material-ui/icons/Add';
-import IconButton from '@material-ui/core/IconButton';
-import DeleteIcon from '@material-ui/icons/Delete';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import axiosInstance from '../../axios/axiosInstance';
-import { GiStockpiles } from 'react-icons/gi';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import { Box, Chip, Menu, MenuItem, TextField } from '@material-ui/core';
-import SearchBox from '../../components/Helpers/SearchBox';
-import styles from '../Leads/Header.module.scss';
+import Button from '@material-ui/core/Button';
+import Checkbox from '@material-ui/core/Checkbox';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import IconButton from '@material-ui/core/IconButton';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import DeleteIcon from '@material-ui/icons/Delete';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
+import WarningIcon from '@material-ui/icons/Warning';
+import { Autocomplete } from '@material-ui/lab';
+import { camelCase } from 'lodash';
+import moment from 'moment';
+import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { GiStockpiles } from 'react-icons/gi';
+import { Link, useHistory } from 'react-router-dom';
+import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import HtmlTooltip from '../../components/CustomTooltipTitle';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import routes from '../../components/Helpers/Routes';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
+import SearchBox from '../../components/Helpers/SearchBox';
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import {
-  serializedAsset,
-  gridLoadingTimeout,
-  product,
-  warehouse as warehouseHelper,
   ASSET_STATUS,
   COLOUR_MASTER,
+  INVENTORY_HISTORY_TYPE,
   getLocalStorageArrayData,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  product,
   removeLocalStorage,
-  sidebarResource,
-  INVENTORY_HISTORY_TYPE
+  serializedAsset,
+  sidebarResource
 } from '../../constants/helpers';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { useData } from '../../StateProvider/Provider';
+import useColumns, { getFrameworkComponents, getStaticFields, gridFilterParser } from '../../constants/useColumns';
+import styles from '../Leads/Header.module.scss';
 import ManageSerializedAsset from './ManageSerializedAsset';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { useHistory } from 'react-router-dom';
-import HtmlTooltip from '../../components/CustomTooltipTitle';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
-import { prepareDataForGrid } from '../../constants/helpers';
-import { AiFillCrown, BsBox, MdAdd } from 'react-icons/all';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { isMobile, isTablet } from 'react-device-detect';
-import { Autocomplete } from '@material-ui/lab';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
-import { camelCase } from 'lodash';
-import { Link } from 'react-router-dom';
-import WarningIcon from '@material-ui/icons/Warning';
-import moment from 'moment';
-import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
 import ReasonDialog from './ReasonDialog';
 
 const SerializedAsset = () => {
