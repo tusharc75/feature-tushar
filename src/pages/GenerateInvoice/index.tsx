@@ -93,9 +93,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
   const [viewInvoiceDialog, setViewInvoiceDialog] = useState({ open: false, data: null });
   const [viewSingleInvoiceDialog, setViewSingleInvoiceDialog] = useState({ open: false, invoice: null });
 
-  const [selectedResource, setSelectedResource] = useState(
-    resourceRendered ? GENERATE_RESOURCE.find((r) => r.key === resourceRendered) : GENERATE_RESOURCE[0]
-  );
+  const [selectedResource, setSelectedResource] = useState(null);
   const [resourceList, setResourceList] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -107,6 +105,14 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
       }
     });
     setResourceList(options);
+    if (resourceRendered) {
+      setSelectedResource(GENERATE_RESOURCE.find((r) => r.key === resourceRendered))
+    }
+    else {
+      if (options?.length) {
+        setSelectedResource(options[0])
+      }
+    }
   }, []);
 
   useEffect(() => {
@@ -298,162 +304,163 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs
-            routes={[
-              {
-                title: resourceRendered
-                  ? routes[`${resourceRendered}Invoice`]
-                    ? routes[`${resourceRendered}Invoice`]?.title
-                    : 'Invoice'
-                  : routes.generateInvoice.title
-              }
-            ]}
-          />
-        </Grid>
-        <Grid item md={8} sm={1} xs={2} />
-      </Grid>
-      <CustomContainer>
-        <div className="header-panel" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          {!resourceRendered && (
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <Autocomplete
-                id="generate-invoice"
-                style={{ width: '300px' }}
-                options={resourceList?.map((item) => item)}
-                renderInput={(params) => <TextField {...params} variant="outlined" label="Resource" margin="dense" required={true} />}
-                getOptionLabel={(option) => option?.title}
-                onChange={(e, val) => {
-                  setSelectedResource(val);
-                }}
-                disableClearable={true}
-                value={selectedResource}
-              />
-            </div>
-          )}
-          <Grid container className={styles.filter_side_container}>
-            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}></Grid>
-            <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
-              <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                <SearchBox onChange={handleSearch} className={isMobile ? styles.search_box_input : ''} size="small" value={search} />
-                {selectedResource.resource === sidebarResource.fieldTicket && (
-                  <>
-                    <Button
-                      variant={'outlined'}
-                      color="default"
-                      size="small"
-                      onClick={openActions}
-                      disabled={selectedRecords.length ? false : true}
-                      aria-controls="action-menu"
-                      className={`new-dropdown-v1`}
-                      endIcon={<ExpandMore />}
-                    >
-                      Actions
-                    </Button>
-                    <Menu
-                      anchorEl={anchorEl}
-                      keepMounted
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
-                      }}
-                      id="action-menu"
-                      open={Boolean(anchorEl)}
-                      onClose={closeActions}
-                    >
-                      <MenuItem
-                        disabled={checkUniqCreateInvoice()}
-                        onClick={() => {
-                          setCreateInvoiceDialog({ open: true, data: selectedRecords });
-                          closeActions();
-                        }}
-                      >
-                        Create Invoice
-                      </MenuItem>
-                    </Menu>
-                  </>
-                )}
-              </Box>
-            </Grid>
+    selectedResource ?
+      <Fragment>
+        <Grid container className="headerbox">
+          <Grid item md={4} sm={11} xs={10}>
+            <CustomBreadCrumbs
+              routes={[
+                {
+                  title: resourceRendered
+                    ? routes[`${resourceRendered}Invoice`]
+                      ? routes[`${resourceRendered}Invoice`]?.title
+                      : 'Invoice'
+                    : routes.generateInvoice.title
+                }
+              ]}
+            />
           </Grid>
-        </div>
-        {columns && Object.keys(frameWorkComponent).length > 0 ? (
-          <CustomAgGrid
-            columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameWorkComponent}
-            setGridApi={setGridApi}
-            dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            allowAction={true}
-            loading={loading}
-            renderedFrom={renderedFrom}
-            refreshGrid={fetchData}
-            showFilters={true}
-            actionWidth={120}
-            resource={selectedResource.resource}
-            allowSelection={selectedResource.resource === sidebarResource.fieldTicket ? true : false}
-          />
-        ) : (
-          <Box p={2} height={500}>
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Box>
-        )}
-        {createInvoiceDialog.open &&
-          (selectedResource.resource === sidebarResource.rentalManagement ? (
-            <CreateBillingDialog
-              rentalManagementData={createInvoiceDialog.data[0]}
-              onClose={() => {
-                setCreateInvoiceDialog({ open: false, data: null });
-              }}
-              onSuccess={() => {
-                setCreateInvoiceDialog({ open: false, data: null });
-                fetchData();
-              }}
+          <Grid item md={8} sm={1} xs={2} />
+        </Grid>
+        <CustomContainer>
+          <div className="header-panel" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            {!resourceRendered && (
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <Autocomplete
+                  id="generate-invoice"
+                  style={{ width: '300px' }}
+                  options={resourceList?.map((item) => item)}
+                  renderInput={(params) => <TextField {...params} variant="outlined" label="Resource" margin="dense" required={true} />}
+                  getOptionLabel={(option) => option?.title}
+                  onChange={(e, val) => {
+                    setSelectedResource(val);
+                  }}
+                  disableClearable={true}
+                  value={selectedResource}
+                />
+              </div>
+            )}
+            <Grid container className={styles.filter_side_container}>
+              <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}></Grid>
+              <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
+                <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
+                  <SearchBox onChange={handleSearch} className={isMobile ? styles.search_box_input : ''} size="small" value={search} />
+                  {selectedResource.resource === sidebarResource.fieldTicket && (
+                    <>
+                      <Button
+                        variant={'outlined'}
+                        color="default"
+                        size="small"
+                        onClick={openActions}
+                        disabled={selectedRecords.length ? false : true}
+                        aria-controls="action-menu"
+                        className={`new-dropdown-v1`}
+                        endIcon={<ExpandMore />}
+                      >
+                        Actions
+                      </Button>
+                      <Menu
+                        anchorEl={anchorEl}
+                        keepMounted
+                        getContentAnchorEl={null}
+                        anchorOrigin={{
+                          vertical: 'bottom',
+                          horizontal: 'left'
+                        }}
+                        id="action-menu"
+                        open={Boolean(anchorEl)}
+                        onClose={closeActions}
+                      >
+                        <MenuItem
+                          disabled={checkUniqCreateInvoice()}
+                          onClick={() => {
+                            setCreateInvoiceDialog({ open: true, data: selectedRecords });
+                            closeActions();
+                          }}
+                        >
+                          Create Invoice
+                        </MenuItem>
+                      </Menu>
+                    </>
+                  )}
+                </Box>
+              </Grid>
+            </Grid>
+          </div>
+          {columns && Object.keys(frameWorkComponent).length > 0 ? (
+            <CustomAgGrid
+              columns={columns}
+              dataRows={dataRows}
+              frameworkComponents={frameWorkComponent}
+              setGridApi={setGridApi}
+              dispatch={dispatch}
+              rowCount={rowCount}
+              limit={limit}
+              pageSizes={pageSizes}
+              page={page}
+              allowAction={true}
+              loading={loading}
+              renderedFrom={renderedFrom}
+              refreshGrid={fetchData}
+              showFilters={true}
+              actionWidth={120}
+              resource={selectedResource.resource}
+              allowSelection={selectedResource.resource === sidebarResource.fieldTicket ? true : false}
             />
           ) : (
-            <CreateInvoiceDialog
-              resourceData={createInvoiceDialog?.data}
-              onClose={() => setCreateInvoiceDialog({ open: false, data: null })}
-              resource={selectedResource.resource}
-              progressiveBilling={selectedResource.progressiveBilling}
-              onSuccess={() => {
-                setCreateInvoiceDialog({ open: false, data: null });
-                removeLocalStorage(localStorageSelectedRecords);
-                fetchData();
+            <Box p={2} height={500}>
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Box>
+          )}
+          {createInvoiceDialog.open &&
+            (selectedResource.resource === sidebarResource.rentalManagement ? (
+              <CreateBillingDialog
+                rentalManagementData={createInvoiceDialog.data[0]}
+                onClose={() => {
+                  setCreateInvoiceDialog({ open: false, data: null });
+                }}
+                onSuccess={() => {
+                  setCreateInvoiceDialog({ open: false, data: null });
+                  fetchData();
+                }}
+              />
+            ) : (
+              <CreateInvoiceDialog
+                resourceData={createInvoiceDialog?.data}
+                onClose={() => setCreateInvoiceDialog({ open: false, data: null })}
+                resource={selectedResource.resource}
+                progressiveBilling={selectedResource.progressiveBilling}
+                onSuccess={() => {
+                  setCreateInvoiceDialog({ open: false, data: null });
+                  removeLocalStorage(localStorageSelectedRecords);
+                  fetchData();
+                }}
+              />
+            ))}
+          {viewInvoiceDialog.open && (
+            <InvoiceDialog
+              resourceData={viewInvoiceDialog?.data}
+              selectedResource={selectedResource}
+              handleClose={() => {
+                setViewInvoiceDialog({ open: false, data: null });
               }}
             />
-          ))}
-        {viewInvoiceDialog.open && (
-          <InvoiceDialog
-            resourceData={viewInvoiceDialog?.data}
-            selectedResource={selectedResource}
-            handleClose={() => {
-              setViewInvoiceDialog({ open: false, data: null });
-            }}
-          />
-        )}
-        {viewSingleInvoiceDialog.open && (
-          <ViewInvoice
-            invoiceId={viewSingleInvoiceDialog.invoice}
-            onClose={() => {
-              setViewSingleInvoiceDialog({ open: false, invoice: null });
-            }}
-            onSuccess={() => {
-              setViewSingleInvoiceDialog({ open: false, invoice: null });
-              fetchData();
-            }}
-            resource={selectedResource.resource}
-          />
-        )}
-      </CustomContainer>
-    </Fragment>
+          )}
+          {viewSingleInvoiceDialog.open && (
+            <ViewInvoice
+              invoiceId={viewSingleInvoiceDialog.invoice}
+              onClose={() => {
+                setViewSingleInvoiceDialog({ open: false, invoice: null });
+              }}
+              onSuccess={() => {
+                setViewSingleInvoiceDialog({ open: false, invoice: null });
+                fetchData();
+              }}
+              resource={selectedResource.resource}
+            />
+          )}
+        </CustomContainer>
+      </Fragment> : null
   );
 };
 
