@@ -21,9 +21,10 @@ import History from '../../ProductInventory/LedgerHistory';
 import FormatListBulletedIcon from '@material-ui/icons/FormatListBulleted';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { BiChevronDown } from 'react-icons/bi';
-import UpdateWorkOrderDialog from './UpdateWorkOrderDialog';
+import UpdateProductDialog from './UpdateProductDialog';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { generateCustomTableColumns } from 'src/constants/columns';
+import EditIcon from '@material-ui/icons/Edit';
 
 const Consumables = ({
   isCreate,
@@ -91,11 +92,15 @@ const Consumables = ({
       setUpdateDialog({ open: false, data: null });
     }
   };
-  
+
   const fetchColumns = async () => {
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.workOrderProduct}`);
     let childFields = response?.data?.data || [];
-    const hasChildFields = Array.isArray(childFields) && childFields.length > 0 ? true : false;
+    childFields = CURReplaceByCurrencySingle(childFields, workOrderData?.currency || 'USD');
+    const newColumns = generateCustomTableColumns(childFields, workOrderData?.currency || 'USD');
+
+    const hasChildFields = Array.isArray(childFields) && childFields?.length > 0 ? true : false;
+
     const column = [];
     const {
       data: { data }
@@ -118,18 +123,19 @@ const Consumables = ({
           Cell: ({ row }) => {
             return row.original[e?.fieldName] ? (
               <div className="d-flex gap-2 align-items-center">
-                <p
-                  className={hasChildFields ? 'link text-truncate' : 'text-truncate'}
-                  onClick={() => {
-                    if(!hasChildFields) return;
+                {hasChildFields && allowedToEdit ?
+                  <p className={'link text-truncate'} onClick={() => {
                     setUpdateDialog({
                       open: true,
                       data: row.original
                     });
-                  }}
-                >
-                  {row.original[e?.fieldName]}
-                </p>
+                  }} >
+                    {row.original[e?.fieldName]}
+                  </p> :
+                  <p className={'text-truncate'}>
+                    {row.original[e?.fieldName]}
+                  </p>
+                }
                 <IconButton
                   size="small"
                   onClick={() => {
@@ -155,10 +161,6 @@ const Consumables = ({
         });
       }
     });
-
-    let childFieldCols = CURReplaceByCurrencySingle(childFields, workOrderData?.currency || 'USD');
-    const newColumns = generateCustomTableColumns(childFieldCols, workOrderData?.currency || 'USD');
-
     const extracolumns: any = [
       {
         accessor: 'service',
@@ -211,67 +213,81 @@ const Consumables = ({
         primaryField: true,
         width: 150,
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
-      },
-      ...(hasChildFields ? newColumns : []),
-      {
-        accessor: 'action',
-        Header: 'Actions',
-        width: 150,
-        minWidth: 150,
-        sticky: 'right',
-        disableFilters: true,
-        canDrag: false,
-        Cell: ({ row }: any) => (
-          <div style={{ display: 'flex', justifyContent: 'right' }}>
-            {row.original?.isqtyRequestLog && (
-              <HtmlTooltip title="View Requests">
-                <IconButton
-                  size="small"
-                  aria-label="Requests"
-                  onClick={() => {
-                    setOpenLogDialog({ open: true, product: row?.original?.productId, uniqueId: row.original._id, data: row.original });
-                  }}
-                >
-                  <FormatListBulletedIcon fontSize="small" color={'primary'} />
-                </IconButton>
-              </HtmlTooltip>
-            )}
-            <HtmlTooltip title="History">
+      }
+    ];
+    extracolumns.push({
+      accessor: 'action',
+      Header: 'Actions',
+      width: 150,
+      minWidth: 150,
+      sticky: 'right',
+      disableFilters: true,
+      canDrag: false,
+      Cell: ({ row }: any) => (
+        <div style={{ display: 'flex', justifyContent: 'right' }}>
+          {row.original?.isqtyRequestLog && (
+            <HtmlTooltip title="View Requests">
               <IconButton
                 size="small"
-                aria-label="History"
+                aria-label="Requests"
                 onClick={() => {
-                  setHistoryDialog({
+                  setOpenLogDialog({ open: true, product: row?.original?.productId, uniqueId: row.original._id, data: row.original });
+                }}
+              >
+                <FormatListBulletedIcon fontSize="small" color={'primary'} />
+              </IconButton>
+            </HtmlTooltip>
+          )}
+          <HtmlTooltip title="History">
+            <IconButton
+              size="small"
+              aria-label="History"
+              onClick={() => {
+                setHistoryDialog({
+                  open: true,
+                  _id: row?.original?._id,
+                  product: row?.original?.productId,
+                  productName: row?.original?.productName
+                });
+              }}
+            >
+              <HistoryIcon fontSize="small" color={'primary'}  />
+            </IconButton>
+          </HtmlTooltip>
+          {(allowedToEdit && hasChildFields) && (
+            <HtmlTooltip title="Edit">
+              <IconButton
+                size="small"
+                aria-label="Edit"
+                onClick={() => {
+                  setUpdateDialog({
                     open: true,
-                    _id: row?.original?._id,
-                    product: row?.original?.productId,
-                    productName: row?.original?.productName
+                    data: row.original
                   });
                 }}
               >
-                <HistoryIcon fontSize="small" color={'primary'} />
+                <EditIcon color={'primary'} fontSize="small" />
               </IconButton>
             </HtmlTooltip>
-            {allowedToEdit && (
-              <HtmlTooltip title="Delete">
-                <IconButton
-                  size="small"
-                  aria-label="Delete"
-                  disabled={row?.original?.consumedQty || row?.original?.requestedQty ? true : false}
-                  onClick={() => {
-                    handleDelete([row.original]);
-                  }}
-                >
-                  <DeleteIcon color={row?.original?.consumedQty || row?.original?.requestedQty ? 'disabled' : 'error'} />
-                </IconButton>
-              </HtmlTooltip>
-            )}
-          </div>
-        )
-      }
-    ];
-
-    setColumns([...column, ...extracolumns]);
+          )}
+          {allowedToEdit && (
+            <HtmlTooltip title="Delete">
+              <IconButton
+                size="small"
+                aria-label="Delete"
+                disabled={row?.original?.consumedQty || row?.original?.requestedQty ? true : false}
+                onClick={() => {
+                  handleDelete([row.original]);
+                }}
+              >
+                <DeleteIcon color={row?.original?.consumedQty || row?.original?.requestedQty ? 'disabled' : 'error'} fontSize="small" />
+              </IconButton>
+            </HtmlTooltip>
+          )}
+        </div>
+      )
+    })
+    setColumns([...column, ...newColumns, ...extracolumns]);
   };
 
   const fetchData = async () => {
@@ -538,7 +554,7 @@ const Consumables = ({
           />
         )}
         {updateDialog.open && (
-          <UpdateWorkOrderDialog
+          <UpdateProductDialog
             onClose={() => {
               setUpdateDialog({ open: false, data: null });
             }}
