@@ -36,7 +36,7 @@ import HtmlTooltip from '../../components/CustomTooltipTitle';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
 import { prepareDataForGrid } from '../../constants/helpers';
-import { AiFillCrown, BsBox, HiOutlineDocumentText, MdAdd } from 'react-icons/all';
+import { AiFillCrown, BsBox,  MdAdd } from 'react-icons/all';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Autocomplete } from '@material-ui/lab';
@@ -847,7 +847,6 @@ const SerializedAsset = () => {
                   field: 'product'
                 },
                 {
-                  icon: <HiOutlineDocumentText />,
                   field: 'productDescription'
                 }
               ]}
