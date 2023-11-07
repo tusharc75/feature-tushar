@@ -41,8 +41,6 @@ const DynamicForm = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
-  // const [sortOpen, setSortOpen] = useState(false);
-  // const [isOpenDialog, setisOpenDialog] = useState(false);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
 
