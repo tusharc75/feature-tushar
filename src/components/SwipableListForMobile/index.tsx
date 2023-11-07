@@ -6,7 +6,7 @@ import { TInitialState } from '../CustomReactTableNew/useTableReducer';
 import HtmlTooltip from '../CustomTooltipTitle';
 import type { TSwipableListInputProps } from './types';
 
-const DEFAULT_DATA_COUNT = 4;
+const DEFAULT_DATA_COUNT = 3;
 
 const SwipableListForMobile: FC<TSwipableListInputProps> = ({
   dispatch,
