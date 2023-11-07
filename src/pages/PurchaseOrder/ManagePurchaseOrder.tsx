@@ -281,7 +281,6 @@ const ManagePurchaseOrder = ({
                                   />
                                 ) : (
                                   <FormTypes
-                                    isNew={Boolean(purchaseOrderId)}
                                     {...field}
                                     disabled={(Boolean(purchaseOrderId) && field.disableOnEdit && !isClone)}
                                     values={values}
