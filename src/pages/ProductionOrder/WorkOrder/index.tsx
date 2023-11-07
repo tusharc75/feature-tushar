@@ -30,7 +30,6 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   const {
     state: { user, permissions }
   }: any = useData();
-  const workOrderConsumableHide = user?.brandPolicy?.workOrderConsumableHide === true ? true : false;
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
@@ -602,7 +601,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                   Assign Work Station
                 </MenuItem>
               )}
-              {!workOrderConsumableHide && (
+              {!user?.user?.brandPolicy?.workOrderConsumableHide && (
                 <MenuItem
                   disabled={
                     selectedProducts?.filter((d) => [MATERIAL_TYPE.product, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0 &&
