@@ -77,7 +77,7 @@ const CostDetails = ({ product, productData, minHeight = null }) => {
                         <Typography className="table-data-v1  bt-0">{data?.price}</Typography>
                       </Box>
                       <Box mb={1} display="flex" justifyContent="space-between">
-                        <Typography className="table-head-v1 bt-0 br-0">Margin</Typography>
+                        <Typography className="table-head-v1 bt-0 br-0">Margin(%)</Typography>
                         <Typography className="table-data-v1  bt-0">
                           {listPrice === 0 ? 0 : ((listPrice + data?.price) / listPrice).toFixed(2)}
                         </Typography>
