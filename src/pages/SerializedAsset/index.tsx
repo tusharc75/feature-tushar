@@ -36,7 +36,7 @@ import HtmlTooltip from '../../components/CustomTooltipTitle';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
 import { prepareDataForGrid } from '../../constants/helpers';
-import { AiFillCrown, BsBox, HiOutlineDocumentText, MdAdd } from 'react-icons/all';
+import { AiFillCrown, BsBox, MdAdd } from 'react-icons/all';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Autocomplete } from '@material-ui/lab';
@@ -825,6 +825,7 @@ const SerializedAsset = () => {
             </div>
           </div>
         </div>
+        {console.log(columns)}
         {columns ? (
           isMobile && !isTablet ? (
             <CustomSwipableList
@@ -843,12 +844,44 @@ const SerializedAsset = () => {
               // }}
               additionalDetails={[
                 {
-                  icon: <BsBox />,
-                  field: 'product'
+                  renderer: (d) => {
+                    const plant = columns.find((c) => c.field === 'warehouse');
+                    if (!plant) return null;
+                    return (
+                      <Link
+                        className="link line-clamp-1"
+                        title={d[plant.field]}
+                        to={`${plant.cellRendererParams.pathName}/${d[plant.cellRendererParams.property]}`}
+                        target="_blank"
+                      >
+                        {
+                          <span>
+                            {plant.headerName}: {d[plant.field]}
+                          </span>
+                        }
+                      </Link>
+                    );
+                  }
                 },
                 {
-                  icon: <HiOutlineDocumentText />,
-                  field: 'productDescription'
+                  renderer: (d) => {
+                    const product = columns.find((c) => c.field === 'product');
+                    if (!product) return null;
+                    return (
+                      <Link
+                        className="link line-clamp-1"
+                        title={d[product.field]}
+                        to={`${product.cellRendererParams.pathName}/${d[product.cellRendererParams.property]}`}
+                        target="_blank"
+                      >
+                        {
+                          <span>
+                            {product.headerName}: {d[product.field]}
+                          </span>
+                        }
+                      </Link>
+                    );
+                  }
                 }
               ]}
               extraParamsToCheckDelete={false}
