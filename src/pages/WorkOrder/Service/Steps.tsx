@@ -925,7 +925,7 @@ const Steps = ({
                     }}
                     className={`${classes.accordionHeading}  ${classes.white}`}
                   >
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap' }} gridGap={'8px'}>
+                    <Box sx={{ display: 'flex' }} gridGap={'8px'}>
                       {allowedToEdit && serviceDetails?.steps?.some((e) => e?.isAllowToCheck) && (
                         <Checkbox
                           name={`checkbox_${step._id}`}
@@ -1197,7 +1197,7 @@ const Steps = ({
                         </Box>
                       </Box>
                       {(isTablet || isDesktop) && (
-                        <div className="flex flex-wrap md:gap-1 items-center">
+                        <div className="flex  md:gap-1 items-center">
                           {stepData?.status && (
                             <IconButton
                               aria-label="info"
