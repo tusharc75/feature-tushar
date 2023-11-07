@@ -18,7 +18,6 @@ import HistoryIcon from '@material-ui/icons/History';
 import QtyWithdrawalDialog from './QtyWithdrawalDialog';
 
 function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productName, product }) {
-
   const [fullScreen, setFullScreen] = useState(true);
   const [columns, setColumns] = useState(null);
   const toastConfig = useContext(CustomToastContext);
@@ -37,7 +36,7 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
   }, [referenceId, uniqueId]);
 
   const fetchColumn = async () => {
-    setColumns(null)
+    setColumns(null);
     const column: any = [
       {
         accessor: 'requestDate',
@@ -57,10 +56,13 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
         Header: 'Requested By',
         width: 200,
         Cell: ({ row }) => {
-          return row?.original['requestBy'] ?
+          return row?.original['requestBy'] ? (
             <a className="link text-truncate" href={`${routes.userDetail.path}/${row?.original['requestById']}`} target="_blank">
               {row?.original['requestBy']}
-            </a> : <NoDataCell />;
+            </a>
+          ) : (
+            <NoDataCell />
+          );
         }
       },
       {
@@ -92,28 +94,38 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
       },
       ...(user?.user?.brandPolicy?.storageLocation
         ? [
-          {
-            accessor: 'storageLocation',
-            Header: 'Storage Location',
-            width: 200,
-            Cell: ({ row }) => {
-              return row?.original['storageLocation'] ?
-                <a className="link text-truncate" href={`${routes.storageLocationDetail.path}/${row?.original['storageLocationId']}`} target="_blank">
-                  {row?.original['storageLocation']}
-                </a> : <NoDataCell />;
+            {
+              accessor: 'storageLocation',
+              Header: 'Storage Location',
+              width: 200,
+              Cell: ({ row }) => {
+                return row?.original['storageLocation'] ? (
+                  <a
+                    className="link text-truncate"
+                    href={`${routes.storageLocationDetail.path}/${row?.original['storageLocationId']}`}
+                    target="_blank"
+                  >
+                    {row?.original['storageLocation']}
+                  </a>
+                ) : (
+                  <NoDataCell />
+                );
+              }
             }
-          }
-        ]
+          ]
         : []),
       {
         accessor: 'processBy',
         Header: 'Processed By',
         width: 200,
         Cell: ({ row }) => {
-          return row?.original['processBy'] ?
+          return row?.original['processBy'] ? (
             <a className="link text-truncate" href={`${routes.userDetail.path}/${row?.original['processById']}`} target="_blank">
               {row?.original['processBy']}
-            </a> : <NoDataCell />;
+            </a>
+          ) : (
+            <NoDataCell />
+          );
         }
       },
       {
@@ -152,20 +164,20 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
                 color="primary"
                 size="small"
                 onClick={() => {
-                  setWithdrawalQtyDialog({ open: true, data: row.original })
+                  setWithdrawalQtyDialog({ open: true, data: row.original });
                 }}
               >
                 Close
               </Button>
             )}
-            {row.original["processesLogs"] && row.original["processesLogs"]?.length > 0 && (
+            {row.original['processesLogs'] && row.original['processesLogs']?.length > 0 && (
               <Box ml={1}>
                 <HtmlTooltip title="View Logs">
                   <IconButton
                     size="small"
                     aria-label="Delete"
                     onClick={() => {
-                      setOpenProcessLogs({ open: true, logs: row.original["processesLogs"] });
+                      setOpenProcessLogs({ open: true, logs: row.original['processesLogs'] });
                     }}
                   >
                     <HistoryIcon />
@@ -231,7 +243,7 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
                   height={'calc(100vh - 200px)'}
                   columns={columns}
                   data={rowsData}
-                  onSelect={() => { }}
+                  onSelect={() => {}}
                   childrenProperty="subRows"
                   uniqueKey="_id"
                   hideSelection={true}
@@ -243,36 +255,37 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
               </Box>
             </Box>
           ) : (
-            <Box p={2} height={500} bgcolor="white">
+            <Box p={2} height={500}>
               <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Box>
           )}
         </CustomDialogContent>
-        {openProcessLogs.open &&
+        {openProcessLogs.open && (
           <ProcessLogs
             onClose={() => {
-              setOpenProcessLogs({ open: false, logs: [] })
+              setOpenProcessLogs({ open: false, logs: [] });
             }}
             logsData={openProcessLogs.logs}
             productName={productName}
             product={product}
           />
-        }
+        )}
       </Dialog>
-      {withdrawalQtyDialog.open &&
+      {withdrawalQtyDialog.open && (
         <QtyWithdrawalDialog
           onSuccess={() => {
-            setWithdrawalQtyDialog({ open: false, data: null })
-            fetchColumn()
-            fetchData()
+            setWithdrawalQtyDialog({ open: false, data: null });
+            fetchColumn();
+            fetchData();
           }}
           onClose={() => {
-            setWithdrawalQtyDialog({ open: false, data: null })
+            setWithdrawalQtyDialog({ open: false, data: null });
           }}
           data={withdrawalQtyDialog.data}
           referenceId={referenceId}
           referenceType={referenceType}
-        />}
+        />
+      )}
     </>
   );
 }

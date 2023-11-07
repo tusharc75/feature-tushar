@@ -18,7 +18,6 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import AddIcon from '@material-ui/icons/Add';
 import MaterialDialog from './materialDialog';
-import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { CHILD_RESOURCE, sidebarResource } from 'src/constants/helpers';
@@ -46,6 +45,8 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
   const [isDeleting, setDeleting] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
+
+  const [isSubmitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     fetchFields();
@@ -207,7 +208,9 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
       showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
     });
   };
+
   const handleAdd = async (rows) => {
+    setSubmitting(true)
     const material: any = [];
     rows.forEach((d) => {
       const element: any = {};
@@ -228,9 +231,10 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
           message: data.message
         });
         fetchData();
+        setSubmitting(false)
       })
       .catch((error) => {
-        setAddDialog({ open: false, type: '', parentId: null });
+        setSubmitting(false)
         toastConfig.setToastConfig(error);
       });
   };
@@ -455,26 +459,20 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
       )}
       {addDialog.open && addDialog.type === 'product' && (
         <AssignProductDialog
-          reference="purchaseRequisition"
-          serialized={null}
-          productsDialogOpen={addDialog.open}
-          productId={null}
           handleCloseDialog={() => setAddDialog({ open: false, type: '', parentId: null })}
-          assignedProducts={[]}
           onSuccess={(d) => {
             handleAdd(d);
           }}
+          isSubmitting={isSubmitting}
         />
       )}
       {addDialog.open && addDialog.type === 'service' && (
         <AssignServiceDialog
-          reference={'purchaseRequisition'}
-          referenceId={purchaseRequisitionData?._id}
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
-          ids={[]}
           onSuccess={(rows) => {
             handleAdd(rows);
           }}
+          isSubmitting={isSubmitting}
         />
       )}
     </Fragment>

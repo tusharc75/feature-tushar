@@ -289,15 +289,17 @@ const SalesOrderDetails = () => {
             }
             {...a11yProps(1)}
           />
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <RiFlowChart className="mr-1" fontSize="inherit" /> Views
-              </div>
-            }
-            {...a11yProps(2)}
-          />
+          {!(isMobile && !isTablet) && (
+            <Tab
+              className={'tabLayout'}
+              label={
+                <div className="d-flex align-items-center tab-font">
+                  <RiFlowChart className="mr-1" fontSize="inherit" /> Views
+                </div>
+              }
+              {...a11yProps(2)}
+            />
+          )}
         </Tabs>
         <TabPanel value={tabValue} index={0}>
           <Box>

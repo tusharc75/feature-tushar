@@ -211,7 +211,8 @@ export default function StepDialog({
           .catch((err) => {
             setLoading(false);
             toastConfig.setToastConfig(err);
-          }).finally(() => setIsSubmitting(false));
+          })
+          .finally(() => setIsSubmitting(false));
       } else {
         axiosInstance()
           .post(`${serviceMaster.api}/steps/${serviceId}`, values)
@@ -227,7 +228,8 @@ export default function StepDialog({
           .catch((err) => {
             setLoading(false);
             toastConfig.setToastConfig(err);
-          }).finally(() => setIsSubmitting(false));
+          })
+          .finally(() => setIsSubmitting(false));
       }
     }
   };
@@ -256,7 +258,7 @@ export default function StepDialog({
     <>
       <Dialog
         maxWidth="md"
-        fullScreen={fullScreen || isMobile || isTablet}
+        fullScreen={fullScreen || isMobile || !isTablet}
         TransitionComponent={CustomDialogTransition}
         open={true}
         onClose={(e, reason) => {
@@ -267,11 +269,7 @@ export default function StepDialog({
         fullWidth
       >
         {stepDetails ? (
-          <Formik
-            initialValues={stepDetails}
-            onSubmit={handleSubmit}
-            validateOnMount
-            validate={validate}>
+          <Formik initialValues={stepDetails} onSubmit={handleSubmit} validateOnMount validate={validate}>
             {({ submitForm, touched, errors, setFieldValue, values }) => (
               <Fragment>
                 <CustomDialogHeader
@@ -362,8 +360,9 @@ export default function StepDialog({
                         <TextField
                           InputProps={{
                             startAdornment: (
-                              <InputAdornment position="start">{`${values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
-                                }`}</InputAdornment>
+                              <InputAdornment position="start">{`${
+                                values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
+                              }`}</InputAdornment>
                             )
                           }}
                           margin="dense"
@@ -386,8 +385,9 @@ export default function StepDialog({
                         <TextField
                           InputProps={{
                             startAdornment: (
-                              <InputAdornment position="start">{`${values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
-                                }`}</InputAdornment>
+                              <InputAdornment position="start">{`${
+                                values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
+                              }`}</InputAdornment>
                             )
                           }}
                           margin="dense"
@@ -428,7 +428,7 @@ export default function StepDialog({
                       <Box>
                         <Box pt={2}>
                           <Grid container>
-                            <Grid item xs={6}>
+                            <Grid item xs={12} md={6}>
                               <FormControlLabel
                                 disabled={notEditable}
                                 control={
@@ -446,7 +446,7 @@ export default function StepDialog({
                                 label="Add Services on Pass"
                               />
                             </Grid>
-                            <Grid item xs={6}>
+                            <Grid item xs={12} md={6}>
                               {values['isPassAddon'] && (
                                 <Autocomplete
                                   options={[
@@ -477,7 +477,7 @@ export default function StepDialog({
                         </Box>
                         <Box pt={2}>
                           <Grid container>
-                            <Grid item xs={6}>
+                            <Grid item xs={12} md={6}>
                               <FormControlLabel
                                 disabled={notEditable}
                                 control={
@@ -495,7 +495,7 @@ export default function StepDialog({
                                 label="Add Services on Fail"
                               />
                             </Grid>
-                            <Grid item xs={6}>
+                            <Grid item xs={12} md={6}>
                               {values['isFailAddon'] && (
                                 <Autocomplete
                                   options={[
@@ -527,7 +527,7 @@ export default function StepDialog({
                         </Box>
                         <Box pt={2}>
                           <Grid container>
-                            <Grid item xs={6}>
+                            <Grid item xs={12} md={6}>
                               <FormControlLabel
                                 disabled={notEditable}
                                 control={
@@ -545,7 +545,7 @@ export default function StepDialog({
                                 label="Skip Services on Pass"
                               />
                             </Grid>
-                            <Grid item xs={6}>
+                            <Grid item xs={12} md={6}>
                               {values['isSkipServiceOnPass'] && (
                                 <Autocomplete
                                   options={[
@@ -556,7 +556,11 @@ export default function StepDialog({
                                   multiple
                                   disabled={notEditable}
                                   size="small"
-                                  value={values?.skipServiceOnPass ? services?.filter((data: any) => values?.skipServiceOnPass?.includes(data.optionValue)) : []}
+                                  value={
+                                    values?.skipServiceOnPass
+                                      ? services?.filter((data: any) => values?.skipServiceOnPass?.includes(data.optionValue))
+                                      : []
+                                  }
                                   getOptionLabel={(option) => option.optionLabel}
                                   getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
                                   onChange={(_, newVal: any) => {
@@ -567,7 +571,13 @@ export default function StepDialog({
                                     setFieldValue('skipServiceOnPass', values);
                                   }}
                                   renderInput={(params) => (
-                                    <TextField {...params} label="Skip Services on Pass" name="skipServiceOnPass" disabled={notEditable} variant="outlined" />
+                                    <TextField
+                                      {...params}
+                                      label="Skip Services on Pass"
+                                      name="skipServiceOnPass"
+                                      disabled={notEditable}
+                                      variant="outlined"
+                                    />
                                   )}
                                 />
                               )}
@@ -576,7 +586,7 @@ export default function StepDialog({
                         </Box>
                         <Box pt={2}>
                           <Grid container>
-                            <Grid item xs={6}>
+                            <Grid item xs={12} md={6}>
                               <FormControlLabel
                                 disabled={notEditable}
                                 control={
@@ -594,7 +604,7 @@ export default function StepDialog({
                                 label="Skip Services on Fail"
                               />
                             </Grid>
-                            <Grid item xs={6}>
+                            <Grid item xs={12} md={6}>
                               {values['isSkipServiceOnFail'] && (
                                 <Autocomplete
                                   options={[
@@ -605,7 +615,11 @@ export default function StepDialog({
                                   multiple
                                   disabled={notEditable}
                                   size="small"
-                                  value={values?.skipServiceOnFail ? services?.filter((data: any) => values?.skipServiceOnFail?.includes(data.optionValue)) : []}
+                                  value={
+                                    values?.skipServiceOnFail
+                                      ? services?.filter((data: any) => values?.skipServiceOnFail?.includes(data.optionValue))
+                                      : []
+                                  }
                                   getOptionLabel={(option) => option.optionLabel}
                                   getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
                                   onChange={(_, newVal: any) => {
@@ -616,7 +630,13 @@ export default function StepDialog({
                                     setFieldValue('skipServiceOnFail', values);
                                   }}
                                   renderInput={(params) => (
-                                    <TextField {...params} label="Skip Services on Fail" name="skipServiceOnFail" disabled={notEditable} variant="outlined" />
+                                    <TextField
+                                      {...params}
+                                      label="Skip Services on Fail"
+                                      name="skipServiceOnFail"
+                                      disabled={notEditable}
+                                      variant="outlined"
+                                    />
                                   )}
                                 />
                               )}
@@ -625,7 +645,7 @@ export default function StepDialog({
                         </Box>
                         <Box pt={2}>
                           <Grid container>
-                            <Grid item xs={6}>
+                            <Grid item xs={12} md={6}>
                               <FormControlLabel
                                 control={
                                   <Checkbox
@@ -645,7 +665,7 @@ export default function StepDialog({
                         </Box>
                         <Box pt={2}>
                           <Grid container>
-                            <Grid item xs={6}>
+                            <Grid item xs={12} md={6}>
                               <FormControlLabel
                                 control={
                                   <Checkbox
@@ -665,7 +685,7 @@ export default function StepDialog({
                         </Box>
                         <Box pt={2}>
                           <Grid container>
-                            <Grid item xs={6}>
+                            <Grid item xs={12} md={6}>
                               <FormControlLabel
                                 disabled={notEditable}
                                 control={
@@ -683,7 +703,7 @@ export default function StepDialog({
                                 label="Skip Steps on Pass"
                               />
                             </Grid>
-                            <Grid item xs={6}>
+                            <Grid item xs={12} md={6}>
                               {values['isJumpStepPass'] && (
                                 <Autocomplete
                                   options={[{ optionValue: 'all', optionLabel: 'Select All Consequent Steps' }, ...allFollowingStepToJump]}
@@ -720,7 +740,7 @@ export default function StepDialog({
                         </Box>
                         <Box pt={2}>
                           <Grid container>
-                            <Grid item xs={6}>
+                            <Grid item xs={12} md={6}>
                               <FormControlLabel
                                 disabled={notEditable}
                                 control={
@@ -738,7 +758,7 @@ export default function StepDialog({
                                 label="Skip Steps on Fail"
                               />
                             </Grid>
-                            <Grid item xs={6}>
+                            <Grid item xs={12} md={6}>
                               {values['isJumpStepFail'] && (
                                 <Autocomplete
                                   options={[{ optionValue: 'all', optionLabel: 'Select All Consequent Steps' }, ...allFollowingStepToJump]}
@@ -774,7 +794,7 @@ export default function StepDialog({
                         {user?.brandPolicy?.repairOrderQuotation && (
                           <Box pt={2}>
                             <Grid container>
-                              <Grid item xs={6}>
+                              <Grid item xs={12} md={6}>
                                 <FormControlLabel
                                   control={
                                     <Checkbox
@@ -795,7 +815,7 @@ export default function StepDialog({
                         )}
                         <Box pt={2}>
                           <Grid container>
-                            <Grid item xs={6}>
+                            <Grid item xs={12} md={6}>
                               <FormControlLabel
                                 disabled={notEditable}
                                 control={
@@ -813,7 +833,7 @@ export default function StepDialog({
                                 label="Return To Step On Fail"
                               />
                             </Grid>
-                            <Grid item xs={6}>
+                            <Grid item xs={12} md={6}>
                               {values['isReturnToStepOnFail'] && (
                                 <Autocomplete
                                   options={stepOption}
@@ -844,7 +864,7 @@ export default function StepDialog({
                         </Box>
                         <Box pt={2}>
                           <Grid container>
-                            <Grid item xs={6}>
+                            <Grid item xs={12} md={6}>
                               <FormControlLabel
                                 disabled={notEditable}
                                 control={
@@ -862,7 +882,7 @@ export default function StepDialog({
                                 label="Return To Service On Fail"
                               />
                             </Grid>
-                            <Grid item xs={6}>
+                            <Grid item xs={12} md={6}>
                               {values['isReturnToServiceOnFail'] && (
                                 <Autocomplete
                                   options={services}
@@ -919,7 +939,8 @@ export default function StepDialog({
                         submitForm();
                       }}
                       variant="contained"
-                      color="primary">
+                      color="primary"
+                    >
                       Save
                     </CustomButton>
                   )}

@@ -13,9 +13,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { Autorenew } from '@material-ui/icons';
 import RevertQtyDialog from 'src/pages/ProductInventory/History/RevertQtyDialog';
 
-
 function ProcessLogs({ onClose, logsData, productName, product }) {
-
   const [fullScreen, setFullScreen] = useState(true);
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState([]);
@@ -86,25 +84,27 @@ function ProcessLogs({ onClose, logsData, productName, product }) {
       sticky: 'right',
       disableFilters: true,
       canDrag: false,
-      Cell: ({ row }) => ((row.original?.qty - (row.original?.revertedQty || 0)) > 0) &&
-        <Box>
-          <HtmlTooltip title="Revert">
-            <IconButton
-              size="small"
-              aria-label="revert"
-              onClick={() => {
-                setRevertQtyDialog({
-                  open: true,
-                  qty: row.original?.qty,
-                  revertedQty: row.original?.revertedQty || 0,
-                  ledgerId: row.original?._id
-                })
-              }}
-            >
-              <Autorenew fontSize="small" color="primary" />
-            </IconButton>
-          </HtmlTooltip>
-        </Box>
+      Cell: ({ row }) =>
+        row.original?.qty - (row.original?.revertedQty || 0) > 0 && (
+          <Box>
+            <HtmlTooltip title="Revert">
+              <IconButton
+                size="small"
+                aria-label="revert"
+                onClick={() => {
+                  setRevertQtyDialog({
+                    open: true,
+                    qty: row.original?.qty,
+                    revertedQty: row.original?.revertedQty || 0,
+                    ledgerId: row.original?._id
+                  });
+                }}
+              >
+                <Autorenew fontSize="small" color="primary" />
+              </IconButton>
+            </HtmlTooltip>
+          </Box>
+        )
     });
     setColumns([...column]);
   };
@@ -148,7 +148,7 @@ function ProcessLogs({ onClose, logsData, productName, product }) {
                 height={'calc(100vh - 200px)'}
                 columns={columns}
                 data={rowsData}
-                onSelect={() => { }}
+                onSelect={() => {}}
                 childrenProperty="subRows"
                 uniqueKey="_id"
                 hideSelection={true}
@@ -159,7 +159,7 @@ function ProcessLogs({ onClose, logsData, productName, product }) {
             </Box>
           </Box>
         ) : (
-          <Box p={2} height={500} bgcolor="white">
+          <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
@@ -173,11 +173,11 @@ function ProcessLogs({ onClose, logsData, productName, product }) {
           revertedQty={revertQtyDialog.revertedQty}
           ledgerId={revertQtyDialog.ledgerId}
           onClose={() => {
-            setRevertQtyDialog({ open: false, qty: 0, revertedQty: 0, ledgerId: '' })
+            setRevertQtyDialog({ open: false, qty: 0, revertedQty: 0, ledgerId: '' });
           }}
           onSuccess={() => {
-            setRevertQtyDialog({ open: false, qty: 0, revertedQty: 0, ledgerId: '' })
-            onClose()
+            setRevertQtyDialog({ open: false, qty: 0, revertedQty: 0, ledgerId: '' });
+            onClose();
           }}
         />
       )}

@@ -12,7 +12,7 @@ import CustomReactTable from '../../../components/CustomReactTable/CustomReactTa
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { rentalManagement } from '../../../constants/helpers';
+import { MATERIAL_TYPE, rentalManagement } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import RentalJobQtyDialog from './RentalJobQtyDialog';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
@@ -30,7 +30,7 @@ import { AssetAvailabilityIcon } from 'src/assets/svg/svgIcons';
 import { ExpandMore } from '@material-ui/icons';
 import ManagePackageDialog from 'src/pages/Packages/ManagePackageDialog';
 import EditIcon from '@material-ui/icons/Edit';
-import { rentalManagementMessage } from 'src/constants/messageHelpers';
+import { ownerAndColaborator, rentalManagementMessage } from 'src/constants/messageHelpers';
 
 const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip, renderedFrom, stepFullScreen, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -68,7 +68,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
   }, [allowedToEdit]);
 
   useEffect(() => {
-    fetchProductInventory();
+    fetchData();
   }, [columns]);
 
   const fetchFields = async () => {
@@ -252,12 +252,14 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
     setColumns(column);
   };
 
-  const fetchProductInventory = async () => {
+  const fetchData = async () => {
     setNextStep(false);
     setNextStepToolTip(null)
     var data: any = [];
     var inventory: any = [];
     var nonSerializeAsset: any = [];
+
+    var nextStepMessage = null;
 
     if (isOffline) {
       data = await findOne(objectStore.rentalManagement, rentalManagementData._id);
@@ -296,16 +298,22 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
+      if (!parent.isValid) {
+        nextStepMessage = rentalManagementMessage.validPrice
+      }
       parent.assetQty = parent.serializedProduct
         ? inventory?.filter((e) => e._id === parent._id).length
         : nonSerializeAsset?.filter((e) => e._id === parent._id).length;
       parent.hideSelection = parent.assetQty > 0 ? true : parent?.status ? true : false;
       parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent);
+      if (parent.type === MATERIAL_TYPE.package && parent.subRows?.length === 0 && !nextStepMessage) {
+        nextStepMessage = rentalManagementMessage.addProductInPackage
+      }
     });
 
     if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
       setNextStep(false);
-      setNextStepToolTip(rentalManagementMessage.addProductPackage)
+      setNextStepToolTip(nextStepMessage || rentalManagementMessage.addProductPackage)
     } else {
       setNextStep(true);
       setNextStepToolTip(null)
@@ -410,7 +418,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
       .post(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`, { material: tempMaterial })
       .then(() => {
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
-        fetchProductInventory();
+        fetchData();
         setAddingProducts(false);
         setPriceDataDialog({ open: false, material: null });
       })
@@ -441,7 +449,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
     axiosInstance()
       .put(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`, { material: rows })
       .then(() => {
-        fetchProductInventory();
+        fetchData();
         if (saveAndNext) {
           const rowIndex = rowsData?.findIndex((d) => d._id === rows[0]?._id);
           setIsProductEdit({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false });
@@ -463,7 +471,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
       .put(`${rentalManagement.api}/productpackage/${rentalManagementData?._id}/delete`, { ids: rows })
       .then(() => {
         setDeleting(false);
-        fetchProductInventory();
+        fetchData();
         setDeleteData(null);
       })
       .catch((error) => {
@@ -575,132 +583,142 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
 
   return (
     <Fragment>
-      {allowedToEdit && (
-        <Box display="flex" justifyContent="space-between" m={1}>
-          <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
-            <Button variant={'outlined'} color="primary" size="small" startIcon={<Add />} onClick={openAddActions} aria-controls="add-menu">
-              {'Add'}
-              <ExpandMore fontSize="small" />
-            </Button>
-            <Menu
-              anchorEl={addAnchorEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
-              }}
-              id="add-menu"
-              open={Boolean(addAnchorEl)}
-              onClose={closeAddActions}
-            >
-              <MenuItem
-                onClick={() => {
-                  closeAddActions();
-                  setAddExistingProductDialog({ open: true, type: 'product', parentId: null });
-                }}
-              >
-                Add Existing Products
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  closeAddActions();
-                  setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
-                }}
-              >
-                Add Existing Packages
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  closeAddActions();
-                  setAddExistingProductDialog({ open: true, type: 'newPackage', parentId: null });
-                }}
-              >
-                Add New Product Package
-              </MenuItem>
-            </Menu>
-          </Box>
-          <Box display="flex" ml={1}>
-            {flattenArray(rowsData)?.filter((e) => e?.serializedProduct)?.length > 0 && (
-              <Box mr={1}>
-                <HtmlTooltip title="Check Assets Availability" arrow placement="top">
-                  <IconButton
-                    size="small"
-                    aria-label="Details"
-                    onClick={() => {
-                      setOpenAssetAvailibility(true);
-                    }}
-                  >
-                    <AssetAvailabilityIcon color={'var(--dark-primary-text, #163340)'} size={24} />
-                  </IconButton>
-                </HtmlTooltip>
-              </Box>
-            )}
-            <Button
-              variant="outlined"
-              color="primary"
-              size="small"
-              id="demo-positioned-button"
-              onClick={handleClick}
-              disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
-              endIcon={<BiChevronDown />}
-              className="new-dropdown-v1"
-            >
-              Actions
-            </Button>
-            <Menu
-              anchorEl={anchorEl}
-              keepMounted
-              open={open}
-              onClose={handleClose}
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'right'
-              }}
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right'
+      <Box display="flex" justifyContent="space-between" m={1}>
+        <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
+          <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : ``}>
+            <span>
+              <Button
+                variant={'outlined'}
+                color="primary"
+                size="small"
+                startIcon={<Add />}
+                onClick={openAddActions}
+                disabled={!allowedToEdit}
+                aria-controls="add-menu">
+                {'Add'}
+                <ExpandMore fontSize="small" />
+              </Button>
+            </span>
+          </HtmlTooltip>
+          <Menu
+            anchorEl={addAnchorEl}
+            keepMounted
+            getContentAnchorEl={null}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left'
+            }}
+            id="add-menu"
+            open={Boolean(addAnchorEl)}
+            onClose={closeAddActions}
+          >
+            <MenuItem
+              onClick={() => {
+                closeAddActions();
+                setAddExistingProductDialog({ open: true, type: 'product', parentId: null });
               }}
             >
-              <HtmlTooltip
-                title={
-                  Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)
-                    ? 'Bulk edit selected records'
-                    : 'Select records to edit'
-                }
-              >
-                <MenuItem
-                  onClick={() => {
-                    setIsProductEdit({ open: true, data: null, showSaveAndNext: false });
-                    setIsBulkEdit(true);
-                    handleClose();
-                  }}
-                >
-                  Bulk Edit
-                </MenuItem>
-              </HtmlTooltip>
-              <HtmlTooltip
-                title={
-                  Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)
-                    ? 'Delete selected records'
-                    : 'Select records to delete'
-                }
-              >
-                <MenuItem
-                  disabled={isDeleting}
-                  onClick={() => {
-                    handleDeleteMultiple();
-                    handleClose();
-                  }}
-                >
-                  Delete
-                </MenuItem>
-              </HtmlTooltip>
-            </Menu>
-          </Box>
+              Add Existing Products
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                closeAddActions();
+                setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
+              }}
+            >
+              Add Existing Packages
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                closeAddActions();
+                setAddExistingProductDialog({ open: true, type: 'newPackage', parentId: null });
+              }}
+            >
+              Add New Product Package
+            </MenuItem>
+          </Menu>
         </Box>
-      )}
+        <Box display="flex" ml={1}>
+          {flattenArray(rowsData)?.filter((e) => e?.serializedProduct)?.length > 0 && (
+            <Box mr={1}>
+              <HtmlTooltip title="Check Assets Availability" arrow placement="top">
+                <IconButton
+                  size="small"
+                  aria-label="Details"
+                  onClick={() => {
+                    setOpenAssetAvailibility(true);
+                  }}
+                >
+                  <AssetAvailabilityIcon color={'var(--dark-primary-text, #163340)'} size={24} />
+                </IconButton>
+              </HtmlTooltip>
+            </Box>
+          )}
+          <Button
+            variant="outlined"
+            color="primary"
+            size="small"
+            id="demo-positioned-button"
+            onClick={handleClick}
+            disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
+            endIcon={<BiChevronDown />}
+            className="new-dropdown-v1"
+          >
+            Actions
+          </Button>
+          <Menu
+            anchorEl={anchorEl}
+            keepMounted
+            open={open}
+            onClose={handleClose}
+            getContentAnchorEl={null}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'right'
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right'
+            }}
+          >
+            <HtmlTooltip
+              title={
+                Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)
+                  ? 'Bulk edit selected records'
+                  : 'Select records to edit'
+              }
+            >
+              <MenuItem
+                onClick={() => {
+                  setIsProductEdit({ open: true, data: null, showSaveAndNext: false });
+                  setIsBulkEdit(true);
+                  handleClose();
+                }}
+              >
+                Bulk Edit
+              </MenuItem>
+            </HtmlTooltip>
+            <HtmlTooltip
+              title={
+                Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)
+                  ? 'Delete selected records'
+                  : 'Select records to delete'
+              }
+            >
+              <MenuItem
+                disabled={isDeleting}
+                onClick={() => {
+                  handleDeleteMultiple();
+                  handleClose();
+                }}
+              >
+                Delete
+              </MenuItem>
+            </HtmlTooltip>
+          </Menu>
+        </Box>
+      </Box>
+
       {columns && rowsData ? (
         <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}>
           <CustomReactTable

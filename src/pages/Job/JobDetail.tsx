@@ -24,6 +24,7 @@ import Dispatch from './Dispatch';
 import Invoice from './Invoice';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import Steps, { getIndex } from 'src/components/Steps';
+import { Edit } from '@material-ui/icons';
 
 const JobDetail = () => {
   const renderedFrom = camelCase(routes?.job.title);
@@ -145,20 +146,12 @@ const JobDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             {permissions?.job?.isUpdate && allowedToEdit && (
-              <Button
-                variant={isMobile && !isTablet ? 'text' : 'contained'}
-                className="btn-outline-v1"
-                onClick={handleOpenUpdateDialog}
-              >
-                {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+              <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
+                {isMobile && !isTablet ? <Edit /> : 'Edit'}
               </Button>
             )}
             {permissions?.job?.isDelete && allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-            <ActivityButton 
-              referenceId={jobData?._id} 
-              resource={ACTIVITY_RESOURCE.job} 
-              resourceLabel={jobData?.jobNumber}
-              />
+            <ActivityButton referenceId={jobData?._id} resource={ACTIVITY_RESOURCE.job} resourceLabel={jobData?.jobNumber} />
           </Box>
         </Box>
       </Box>

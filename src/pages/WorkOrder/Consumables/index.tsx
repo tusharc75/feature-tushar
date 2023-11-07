@@ -4,7 +4,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { MATERIAL_SUB_TYPE, sidebarResource, workOrder } from 'src/constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_SUB_TYPE, repairOrder, sidebarResource, workOrder } from 'src/constants/helpers';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
@@ -20,12 +20,25 @@ import { useData } from 'src/StateProvider/Provider';
 import History from '../../ProductInventory/LedgerHistory';
 import FormatListBulletedIcon from '@material-ui/icons/FormatListBulleted';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import DeleteButton from 'src/components/Helpers/DeleteButton';
 import { BiChevronDown } from 'react-icons/bi';
+import UpdateProductDialog from './UpdateProductDialog';
+import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
+import { generateCustomTableColumns } from 'src/constants/columns';
+import EditIcon from '@material-ui/icons/Edit';
 
-const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service, uniqueId, stepId, serviceName, materialSubType = MATERIAL_SUB_TYPE.consumable }) => {
+const Consumables = ({
+  isCreate,
+  allowedToEdit,
+  service,
+  uniqueId,
+  stepId,
+  serviceName,
+  materialSubType = MATERIAL_SUB_TYPE.consumable,
+  workOrderData
+}) => {
 
-
+  const workOrderId = workOrderData?._id;
+  const warehouse = workOrderData?.warehouse;
   const toastConfig = useContext(CustomToastContext);
   const [dataRows, setDataRows] = useState(null);
   const [columns, setColumns] = useState(null);
@@ -37,6 +50,8 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
   const [openLogDialog, setOpenLogDialog] = useState({ open: false, product: '', uniqueId: null, data: null });
   const [consumeRequest, setConsumeRequest] = useState(false);
   const [historyDialog, setHistoryDialog] = useState({ open: false, _id: '', product: '', productName: '' });
+  const [updateDialog, setUpdateDialog] = useState({ open: false, data: null });
+  const [isUpdating, setUpdating] = useState(false);
 
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -48,20 +63,44 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
   useEffect(() => {
     var allowRequest = false;
     if (user?.user?.brandPolicy?.workOrderConsumableRequest) {
-      if ((warehouse?.manager && warehouse?.manager?.includes(user?.user?._id))
-        || (warehouse?.materialHandlers && warehouse?.materialHandlers?.includes(user?.user?._id))) {
+      if (
+        (warehouse?.manager && warehouse?.manager?.includes(user?.user?._id)) ||
+        (warehouse?.materialHandlers && warehouse?.materialHandlers?.includes(user?.user?._id))
+      ) {
         allowRequest = false;
-      }
-      else {
+      } else {
         allowRequest = true;
       }
     }
-    setConsumeRequest(allowRequest)
+    setConsumeRequest(allowRequest);
     fetchColumns();
     fetchData();
   }, [allowedToEdit, workOrderId, consumeRequest]);
 
+  const handleUpdate = async (row: any) => {
+    setUpdating(true);
+    try {
+      const data: any = row;
+      delete data.workOrder;
+      await axiosInstance().put(`${repairOrder.api}/${workOrderId}/work-order/${workOrderId}`, { material: [data] });
+    } catch (error) {
+      setUpdating(false);
+      toastConfig.setToastConfig(error);
+    } finally {
+      setUpdating(false);
+      fetchData();
+      setUpdateDialog({ open: false, data: null });
+    }
+  };
+
   const fetchColumns = async () => {
+    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.workOrderProduct}`);
+    let childFields = response?.data?.data || [];
+    childFields = CURReplaceByCurrencySingle(childFields, workOrderData?.currency || 'USD');
+    const newColumns = generateCustomTableColumns(childFields, workOrderData?.currency || 'USD');
+
+    const hasChildFields = Array.isArray(childFields) && childFields?.length > 0 ? true : false;
+
     const column = [];
     const {
       data: { data }
@@ -84,13 +123,23 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
           Cell: ({ row }) => {
             return row.original[e?.fieldName] ? (
               <div className="d-flex gap-2 align-items-center">
-                <p className="text-truncate">
-                  {row.original[e?.fieldName]}
-                </p>
+                {hasChildFields && allowedToEdit ?
+                  <p className={'link text-truncate'} onClick={() => {
+                    setUpdateDialog({
+                      open: true,
+                      data: row.original
+                    });
+                  }} >
+                    {row.original[e?.fieldName]}
+                  </p> :
+                  <p className={'text-truncate'}>
+                    {row.original[e?.fieldName]}
+                  </p>
+                }
                 <IconButton
                   size="small"
                   onClick={() => {
-                    window.open(`${routes.productDetail.path}/${row.original?.productId}`)
+                    window.open(`${routes.productDetail.path}/${row.original?.productId}`);
                   }}
                 >
                   <OpenInNewIcon fontSize="small" color={'primary'} />
@@ -112,7 +161,6 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
         });
       }
     });
-
     const extracolumns: any = [
       {
         accessor: 'service',
@@ -121,13 +169,11 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
         Cell: ({ row }) =>
           row?.original?.service ? (
             <div className="d-flex gap-2 align-items-center">
-              <p className="text-truncate">
-                {row.original.service}
-              </p>
+              <p className="text-truncate">{row.original.service}</p>
               <IconButton
                 size="small"
                 onClick={() => {
-                  window.open(`${routes.serviceMasterDetail.path}/${row.original.serviceId}`)
+                  window.open(`${routes.serviceMasterDetail.path}/${row.original.serviceId}`);
                 }}
               >
                 <OpenInNewIcon fontSize="small" color={'primary'} />
@@ -167,66 +213,81 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
         primaryField: true,
         width: 150,
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
-      },
-      {
-        accessor: 'action',
-        Header: 'Actions',
-        width: 150,
-        minWidth: 150,
-        sticky: 'right',
-        disableFilters: true,
-        canDrag: false,
-        Cell: ({ row }: any) => (
-          <div style={{ display: 'flex', justifyContent: 'right' }}>
-            {row.original?.isqtyRequestLog && (
-              <HtmlTooltip title="View Requests">
-                <IconButton
-                  size="small"
-                  aria-label="Requests"
-                  onClick={() => {
-                    setOpenLogDialog({ open: true, product: row?.original?.productId, uniqueId: row.original._id, data: row.original });
-                  }}
-                >
-                  <FormatListBulletedIcon fontSize="small" color={'primary'} />
-                </IconButton>
-              </HtmlTooltip>
-            )}
-            <HtmlTooltip title="History">
+      }
+    ];
+    extracolumns.push({
+      accessor: 'action',
+      Header: 'Actions',
+      width: 150,
+      minWidth: 150,
+      sticky: 'right',
+      disableFilters: true,
+      canDrag: false,
+      Cell: ({ row }: any) => (
+        <div style={{ display: 'flex', justifyContent: 'right' }}>
+          {row.original?.isqtyRequestLog && (
+            <HtmlTooltip title="View Requests">
               <IconButton
                 size="small"
-                aria-label="History"
+                aria-label="Requests"
                 onClick={() => {
-                  setHistoryDialog({
+                  setOpenLogDialog({ open: true, product: row?.original?.productId, uniqueId: row.original._id, data: row.original });
+                }}
+              >
+                <FormatListBulletedIcon fontSize="small" color={'primary'} />
+              </IconButton>
+            </HtmlTooltip>
+          )}
+          <HtmlTooltip title="History">
+            <IconButton
+              size="small"
+              aria-label="History"
+              onClick={() => {
+                setHistoryDialog({
+                  open: true,
+                  _id: row?.original?._id,
+                  product: row?.original?.productId,
+                  productName: row?.original?.productName
+                });
+              }}
+            >
+              <HistoryIcon fontSize="small" color={'primary'}  />
+            </IconButton>
+          </HtmlTooltip>
+          {(allowedToEdit && hasChildFields) && (
+            <HtmlTooltip title="Edit">
+              <IconButton
+                size="small"
+                aria-label="Edit"
+                onClick={() => {
+                  setUpdateDialog({
                     open: true,
-                    _id: row?.original?._id,
-                    product: row?.original?.productId,
-                    productName: row?.original?.productName
+                    data: row.original
                   });
                 }}
               >
-                <HistoryIcon fontSize="small" color={'primary'} />
+                <EditIcon color={'primary'} fontSize="small" />
               </IconButton>
             </HtmlTooltip>
-            {allowedToEdit && (
-              <HtmlTooltip title="Delete">
-                <IconButton
-                  size="small"
-                  aria-label="Delete"
-                  disabled={row?.original?.consumedQty || row?.original?.requestedQty ? true : false}
-                  onClick={() => {
-                    handleDelete([row.original]);
-                  }}
-                >
-                  <DeleteIcon color={row?.original?.consumedQty || row?.original?.requestedQty ? 'disabled' : 'error'} />
-                </IconButton>
-              </HtmlTooltip>
-            )}
-          </div>
-        )
-      }
-    ];
-
-    setColumns([...column, ...extracolumns]);
+          )}
+          {allowedToEdit && (
+            <HtmlTooltip title="Delete">
+              <IconButton
+                size="small"
+                aria-label="Delete"
+                disabled={row?.original?.consumedQty || row?.original?.requestedQty ? true : false}
+                onClick={() => {
+                  handleDelete([row.original]);
+                }}
+              >
+                <DeleteIcon color={row?.original?.consumedQty || row?.original?.requestedQty ? 'disabled' : 'error'} fontSize="small" />
+              </IconButton>
+            </HtmlTooltip>
+          )}
+        </div>
+      )
+    })
+    setColumns([...column, ...newColumns, ...extracolumns]);
   };
 
   const fetchData = async () => {
@@ -242,10 +303,9 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
       .get(`${workOrder.api}/${workOrderId}/consumable${query}`)
       .then(({ data: { data } }) => {
         if (materialSubType === MATERIAL_SUB_TYPE.bom) {
-          data = data?.filter((e) => e?.subType === materialSubType)
-        }
-        else {
-          data = data?.filter((e) => e?.subType !== MATERIAL_SUB_TYPE.bom)
+          data = data?.filter((e) => e?.subType === materialSubType);
+        } else {
+          data = data?.filter((e) => e?.subType !== MATERIAL_SUB_TYPE.bom);
         }
         let rows = data?.map((u) => {
           let res: any = {
@@ -267,18 +327,18 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
   };
 
   const handleSubmit = async (rows) => {
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     const data: any = [];
     rows?.forEach((e) => {
       if (parseInt(e.qty)) {
-        data.push({ product: e._id, qty: parseInt(e.qty), service, uniqueId, stepId });
+        data.push({ product: e._id, qty: parseInt(e.qty), service, uniqueId, stepId, subType: materialSubType });
       }
     });
     axiosInstance()
       .post(`${workOrder.api}/${workOrderId}/consumable`, data)
       .then(({ data }) => {
         fetchData();
-        setIsSubmitting(false)
+        setIsSubmitting(false);
         setConsumablesDialog(false);
         toastConfig.setToastConfig({
           open: true,
@@ -287,7 +347,7 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
         });
       })
       .catch((error) => {
-        setIsSubmitting(false)
+        setIsSubmitting(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -312,12 +372,13 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
   };
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
-    if (parseInt(inputField.qty) < ((updatedData?.consumedQty || 0) + (updatedData?.requestedQty || 0))) {
+    if (parseInt(inputField.qty) < (updatedData?.consumedQty || 0) + (updatedData?.requestedQty || 0)) {
       toastConfig.setToastConfig({
         open: true,
         type: 'error',
-        message: user?.user?.brandPolicy?.workOrderConsumableRequest ? 'Qty can not be less than consumed qty plus requested qty' :
-          'Qty can not be less than consumed qty'
+        message: user?.user?.brandPolicy?.workOrderConsumableRequest
+          ? 'Qty can not be less than consumed qty plus requested qty'
+          : 'Qty can not be less than consumed qty'
       });
       return;
     } else if (parseInt(inputField.qty) === 0) {
@@ -361,15 +422,13 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
   return (
     <>
       {allowedToEdit && (
-        <Box display="flex" justifyContent="space-between" mb={2}>
-          <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
-            {(isCreate && permissions?.product?.isRead) && (
-              <Button variant={'contained'} color="primary" size="small" onClick={() => setConsumablesDialog(true)}>
-                Add Products/Consumables
-              </Button>
-            )}
-          </Box>
-          <Box display="flex" ml={1}>
+        <Box className="flex flex-wrap mb-3 justify-between gap-2">
+          {isCreate && permissions?.product?.isRead && (
+            <Button variant={'contained'} color="primary" size="small" onClick={() => setConsumablesDialog(true)}>
+              {materialSubType === MATERIAL_SUB_TYPE.bom ? `Add BOM` : `Add Products/Consumables`}
+            </Button>
+          )}
+          <Box display="flex" ml={'auto'}>
             <Box ml={1}></Box>
             <Button
               disabled={selectedRecords?.filter((e) => !e?.hideSelection).length === 0}
@@ -406,9 +465,9 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
               onClose={handleCloseAction}
             >
               <MenuItem
-                disabled={selectedRecords?.find(s => s?.consumedQty || s?.requestedQty) ? true : false}
+                disabled={selectedRecords?.find((s) => s?.consumedQty || s?.requestedQty) ? true : false}
                 onClick={() => {
-                  handleDelete(selectedRecords?.filter(s => !s?.consumedQty && !s?.requestedQty))
+                  handleDelete(selectedRecords?.filter((s) => !s?.consumedQty && !s?.requestedQty));
                   handleCloseAction();
                 }}
               >
@@ -443,11 +502,8 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
         </Grid>
         {consumablesDialog && (
           <AssignProductDialog
-            productsDialogOpen={consumablesDialog}
-            productId={workOrderId}
-            reference={'workOrder'}
             handleCloseDialog={() => setConsumablesDialog(false)}
-            assignedProducts={dataRows?.map((d) => d?.materialId) || []}
+            ids={dataRows?.map((d) => d?.materialId) || []}
             onSuccess={(rows) => {
               handleSubmit(rows);
             }}
@@ -495,6 +551,17 @@ const Consumables = ({ workOrderId, warehouse, isCreate, allowedToEdit, service,
             referenceId={workOrderId}
             uniqueId={historyDialog._id}
             product={historyDialog.product}
+          />
+        )}
+        {updateDialog.open && (
+          <UpdateProductDialog
+            onClose={() => {
+              setUpdateDialog({ open: false, data: null });
+            }}
+            materialData={updateDialog.data}
+            handleUpdate={handleUpdate}
+            loadingEdit={isUpdating}
+            workOrderData={workOrderData}
           />
         )}
       </Grid>

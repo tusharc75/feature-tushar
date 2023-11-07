@@ -12,7 +12,6 @@ import { Box, Chip, Menu, MenuItem, TextField } from '@material-ui/core';
 import SearchBox from '../../components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import routes from '../../components/Helpers/Routes';
-import { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import {
   serializedAsset,
   isObjectEmpty,
@@ -29,7 +28,7 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { useHistory } from 'react-router-dom';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import useColumns, { getStaticFields } from '../../components/CustomReactTableNew/useColumnsReactTable';
+import CustomReactTable, { useColumns, getStaticFields, useTableReducer, gridFilterParser } from 'src/components/CustomReactTableNew';
 import { prepareDataForGrid } from '../../constants/helpers';
 import { isMobile } from 'react-device-detect';
 import { Autocomplete } from '@material-ui/lab';
@@ -39,7 +38,7 @@ import { camelCase } from 'lodash';
 import { Link } from 'react-router-dom';
 import WarningIcon from '@material-ui/icons/Warning';
 import moment from 'moment';
-import CustomReactTable from 'src/components/CustomReactTableNew/CustomReactTable';
+import { sidebarResource } from '../../constants/helpers';
 
 const SerializedAssetTest = () => {
   const renderedFrom = camelCase(routes?.serializedAsset.title);
@@ -49,8 +48,8 @@ const SerializedAssetTest = () => {
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const [columns, setColumns] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } =
     state;
   const [productCategoryList, setProductCategoryList] = useState([]);
   const [productFilterList, setProductFilterList] = useState([]);
@@ -242,53 +241,53 @@ const SerializedAssetTest = () => {
           count: data.count,
           selectedRecords: rows.filter((f) => f.isChecked === true)
         });
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        dispatch({ type: 'loading', loading: false });
+        dispatch({ type: 'error', error: true });
+      })
+      .finally(() => {
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
       });
   };
 
   const getQueryString = (isExport = false) => {
     let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
-    let filterById = [];
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
+
     if (warehouse?.optionValue) {
-      filterById.push({ field: 'warehouse', term: warehouse?.optionValue });
+      filterByIds.push({ field: 'warehouse', term: warehouse?.optionValue });
     }
     if (selectedPlant && selectedPlant !== '') {
-      filterById.push({ field: 'warehouse', term: selectedPlant });
+      filterByIds.push({ field: 'warehouse', term: selectedPlant });
     }
     if (redirectProduct?.id) {
-      filterById.push({ field: 'product', term: redirectProduct?.id });
+      filterByIds.push({ field: 'product', term: redirectProduct?.id });
     }
     if (fromPurchaseOrder?.pOId) {
-      filterById.push({ field: 'purchaseOrder', term: fromPurchaseOrder.pOId });
+      filterByIds.push({ field: 'purchaseOrder', term: fromPurchaseOrder.pOId });
     }
     if (fromPurchaseOrder?.productId) {
-      filterById.push({ field: 'product', term: fromPurchaseOrder.productId });
+      filterByIds.push({ field: 'product', term: fromPurchaseOrder.productId });
     }
     if (productCategory && productCategory !== '') {
-      filterById.push({ field: 'productCategory', term: productCategory });
+      filterByIds.push({ field: 'productCategory', term: productCategory });
     }
     if (productFilter && productFilter !== '') {
-      filterById.push({ field: 'product', term: productFilter });
+      filterByIds.push({ field: 'product', term: productFilter });
     }
-    if (filterById.length > 0) {
-      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`;
+    if (filterByIds.length > 0) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
-    if (!isObjectEmpty(filters)) {
-      const updatedFilters = [];
-      Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
-          field: field,
-          term: filters[field].filter
-        });
-      });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}`;
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
     }
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
+    }
+
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
@@ -645,22 +644,18 @@ const SerializedAssetTest = () => {
             <CustomReactTable
               height={'calc(100vh - 200px)'}
               columns={columns}
-              data={dataRows}
-              currentPage={page}
               onSelect={(newSelectedRecords) => {
                 // dispatch({ type: "selection", selectedRecords: newSelectedRecords })
               }}
+              state={state}
               dispatch={dispatch}
               setWholeRowsCellColor={() => {}}
               renderedFrom={renderedFrom}
               isClientSideGrid={false}
-              rowCount={rowCount}
-              limit={limit}
-              customFilters={filters}
-              sorting={sorting}
               refreshGrid={fetchProductInventory}
-              loading={loading}
               showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={sidebarResource.serializedAsset}
             />
           </>
         ) : (

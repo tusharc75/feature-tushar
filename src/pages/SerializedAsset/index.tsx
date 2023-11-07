@@ -1,52 +1,47 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import AddIcon from '@material-ui/icons/Add';
-import IconButton from '@material-ui/core/IconButton';
-import DeleteIcon from '@material-ui/icons/Delete';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import axiosInstance from '../../axios/axiosInstance';
-import { GiStockpiles } from 'react-icons/gi';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import { Box, Chip, Menu, MenuItem, TextField } from '@material-ui/core';
-import SearchBox from '../../components/Helpers/SearchBox';
-import styles from '../Leads/Header.module.scss';
+import Button from '@material-ui/core/Button';
+import Checkbox from '@material-ui/core/Checkbox';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import IconButton from '@material-ui/core/IconButton';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import DeleteIcon from '@material-ui/icons/Delete';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
+import WarningIcon from '@material-ui/icons/Warning';
+import { Autocomplete } from '@material-ui/lab';
+import { camelCase } from 'lodash';
+import moment from 'moment';
+import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { GiStockpiles } from 'react-icons/gi';
+import { Link, useHistory } from 'react-router-dom';
+import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import HtmlTooltip from '../../components/CustomTooltipTitle';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import routes from '../../components/Helpers/Routes';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
+import SearchBox from '../../components/Helpers/SearchBox';
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import {
-  serializedAsset,
-  gridLoadingTimeout,
-  product,
-  warehouse as warehouseHelper,
   ASSET_STATUS,
   COLOUR_MASTER,
+  INVENTORY_HISTORY_TYPE,
   getLocalStorageArrayData,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  product,
   removeLocalStorage,
-  sidebarResource,
-  INVENTORY_HISTORY_TYPE
+  serializedAsset,
+  sidebarResource
 } from '../../constants/helpers';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { useData } from '../../StateProvider/Provider';
+import useColumns, { getFrameworkComponents, getStaticFields, gridFilterParser } from '../../constants/useColumns';
+import styles from '../Leads/Header.module.scss';
 import ManageSerializedAsset from './ManageSerializedAsset';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { useHistory } from 'react-router-dom';
-import HtmlTooltip from '../../components/CustomTooltipTitle';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
-import { prepareDataForGrid } from '../../constants/helpers';
-import { AiFillCrown, MdAdd } from 'react-icons/all';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { isMobile, isTablet } from 'react-device-detect';
-import { Autocomplete } from '@material-ui/lab';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
-import { camelCase } from 'lodash';
-import { Link } from 'react-router-dom';
-import WarningIcon from '@material-ui/icons/Warning';
-import moment from 'moment';
-import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
 import ReasonDialog from './ReasonDialog';
 
 const SerializedAsset = () => {
@@ -210,9 +205,18 @@ const SerializedAsset = () => {
           let finalObject = prepareDataForGrid(u);
           finalObject['isChecked'] = [...getLocalStorageArrayData(localStorageSelectedRecords)].some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions?.serializedAsset.isUpdate;
-          finalObject['canDelete'] = permissions?.serializedAsset?.isDelete &&
-            ![ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.lost, ASSET_STATUS.customerPossession, ASSET_STATUS.onPO,
-            ASSET_STATUS.scrap]?.includes(u?.status) ? false : true;
+          finalObject['canDelete'] =
+            permissions?.serializedAsset?.isDelete &&
+            ![
+              ASSET_STATUS.new,
+              ASSET_STATUS.available,
+              ASSET_STATUS.lost,
+              ASSET_STATUS.customerPossession,
+              ASSET_STATUS.onPO,
+              ASSET_STATUS.scrap
+            ]?.includes(u?.status)
+              ? false
+              : true;
           return {
             ...finalObject
           };
@@ -390,9 +394,11 @@ const SerializedAsset = () => {
         </HtmlTooltip>
       ) : (
         <HtmlTooltip title="You do not have permission to clone">
-          <IconButton size="small" aria-label="Clone">
-            <FileCopyIcon />
-          </IconButton>
+          <span>
+            <IconButton size="small" disabled aria-label="Clone">
+              <FileCopyIcon />
+            </IconButton>
+          </span>
         </HtmlTooltip>
       )}
       {permissions?.serializedAsset?.isDelete && params.data.canDelete ? (
@@ -410,9 +416,11 @@ const SerializedAsset = () => {
         </HtmlTooltip>
       ) : (
         <HtmlTooltip title="You do not have permission to delete">
-          <IconButton size="small" aria-label="Clone">
-            <DeleteIcon />
-          </IconButton>
+          <span>
+            <IconButton size="small" disabled aria-label="Clone">
+              <DeleteIcon />
+            </IconButton>
+          </span>
         </HtmlTooltip>
       )}
     </>
@@ -451,6 +459,75 @@ const SerializedAsset = () => {
       toastConfig.setToastConfig(error);
     }
   };
+
+  const backgroundColorClass = (data) => {
+    let className = '';
+    if (data?.recertDate || data?.certificateExpiryDate) {
+      var a = moment(data?.recertDate || data?.certificateExpiryDate);
+      var b = moment();
+      const days = a.diff(b, 'days');
+
+      switch (true) {
+        case days < 15:
+          className = 'light-red-data-row';
+          break;
+        case days < 30 && days >= 15:
+          className = 'light-yellow-data-row';
+          break;
+        case days <= 60 && days >= 30:
+          className = 'light-green-data-row';
+          break;
+        default:
+          break;
+      }
+    }
+    if (data.status === 'Scrap') {
+      className = 'light-yellow-data-row';
+    }
+
+    return className;
+  };
+
+  const additionalDetails = [
+    {
+      renderer: (d) => {
+        const plant = columns.find((c) => c.field === 'warehouse');
+        if (!plant) return null;
+        return (
+          <span className="line-clamp-1 flex">
+            {plant.headerName}:&nbsp;
+            <Link
+              className="link"
+              title={d[plant.field] || ''}
+              to={`${plant.cellRendererParams?.pathName}/${d[plant.cellRendererParams?.property]}`}
+              target="_blank"
+            >
+              {d[plant.field] || ''}
+            </Link>
+          </span>
+        );
+      }
+    },
+    {
+      renderer: (d) => {
+        const product = columns.find((c) => c.field === 'product');
+        if (!product) return null;
+        return (
+          <span className="line-clamp-1 flex">
+            {product.headerName}:&nbsp;
+            <Link
+              className="link"
+              title={d[product.field] || ''}
+              to={`${product.cellRendererParams?.pathName}/${d[product.cellRendererParams?.property]}`}
+              target="_blank"
+            >
+              {d[product.field] || ''}
+            </Link>
+          </span>
+        );
+      }
+    }
+  ];
 
   return (
     <section className="main-container-v1">
@@ -797,30 +874,43 @@ const SerializedAsset = () => {
               dataRows={dataRows}
               selectedRecords={selectedRecords}
               dispatch={dispatch}
-              onEdit={(d) => {
-                history.push(`${routes.serializedAssetDetail.path}/${d._id}`);
-              }}
+              // onEdit={(d) => {
+              //   history.push(`${routes.serializedAssetDetail.path}/${d._id}`);
+              // }}
+              additionalDetails={additionalDetails}
               extraParamsToCheckDelete={false}
-              onDelete={(d) => {
-                setDeleteRecord(d);
-                setShowDeleteConfirmBox(true);
+              // onDelete={(d) => {
+              //   setDeleteRecord(d);
+              //   setShowDeleteConfirmBox(true);
+              // }}
+              actionCol={(data) => {
+                const params = { data };
+                return <ActionsRenderer {...params} />;
               }}
               rowCount={rowCount}
               page={page}
               loading={loading}
-              additionalDetails={[]}
               chips={[
                 {
                   label: 'Serial Number : ',
                   field: 'serialNumber'
+                },
+                {
+                  label: 'Status : ',
+                  field: 'status'
+                },
+                {
+                  label: 'Cost : ',
+                  field: 'cost'
                 }
               ]}
               owerCollaboratorInitialsOrImages=""
               onCreate={false}
-              showClone={true}
-              onClone={(data) => {
-                setShowManageProductInventoryDialog({ open: true, isClone: true, idToClone: data._id });
-              }}
+              showClone={false}
+              // onClone={(data) => {
+              //   setShowManageProductInventoryDialog({ open: true, isClone: true, idToClone: data._id });
+              // }}
+              backgroundColorClass={(data) => backgroundColorClass(data)}
               renderedFrom={renderedFrom}
             />
           ) : Object.keys(frameWorkComponent).length > 0 && columns ? (
@@ -900,8 +990,9 @@ const SerializedAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ''
-            } ? `}
+          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${
+            deleteRecord?._id ? deleteRecord?.assetNumber : ''
+          } ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
@@ -923,7 +1014,7 @@ const SerializedAsset = () => {
           path={routes?.supplierAccount?.path}
         />
       )}
-       {showReasonDialog && (
+      {showReasonDialog && (
         <ReasonDialog
           onClose={() => setShowReasonDialog(false)}
           status={status}

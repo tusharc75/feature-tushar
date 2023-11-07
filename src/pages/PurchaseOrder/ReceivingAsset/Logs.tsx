@@ -10,10 +10,9 @@ import { capitalize } from 'lodash';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { useAppTheme } from 'src/constants/AppConfig';
 
-const Logs = ({ handleClose, productName, inventoryHistory }) => {
+const Logs = ({ handleClose, detail, inventoryHistory }) => {
   const [themeColor] = useAppTheme();
   const isDarkTheme = themeColor === 'dark';
-  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
@@ -66,21 +65,15 @@ const Logs = ({ handleClose, productName, inventoryHistory }) => {
   return (
     <Dialog
       fullWidth
-      maxWidth="md"
-      fullScreen={fullScreen || isMobile || isTablet}
+      fullScreen
       TransitionComponent={CustomDialogTransition}
       aria-labelledby="customized-dialog-title"
       open={true}
     >
       <CustomDialogHeader
-        title={`Logs - ${productName}`}
+        title={`Logs - ${detail}`}
         showRequiredLabel={false}
         onClose={handleClose}
-        isMinimized={!fullScreen}
-        onMinimizeMaximize={() => {
-          setFullScreen((prevState) => !prevState);
-        }}
-        showManimizeMaximize={true}
       />
       <CustomDialogContent>
         <CustomAgGrid
@@ -98,7 +91,7 @@ const Logs = ({ handleClose, productName, inventoryHistory }) => {
           isClientSideGrid={true}
           allowSelection={false}
           renderedFrom={'purchaseOrder_logs'}
-          refreshGrid={() => {}}
+          refreshGrid={() => { }}
         />
       </CustomDialogContent>
     </Dialog>

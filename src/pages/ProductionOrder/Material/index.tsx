@@ -10,7 +10,7 @@ import CustomReactTable from '../../../components/CustomReactTable/CustomReactTa
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import { CHILD_RESOURCE, productionOrder, sidebarResource } from '../../../constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, productionOrder, sidebarResource } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile } from 'react-device-detect';
 import { ExpandMore } from '@material-ui/icons';
@@ -22,7 +22,6 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
-import PreviewDownload from 'src/components/PreviewDownload';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import CreateProduct from 'src/components/Product/CreateProduct';
 
@@ -43,6 +42,8 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [allFields, setAllFields] = useState([]);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
+
+  const [isSubmitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     fetchFields();
@@ -103,16 +104,16 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
             ) : (
               <p className="text-truncate">{row.original?.detail}</p>
             )}
-            {allowedToEdit && (
+            {allowedToEdit && row.original.type === MATERIAL_TYPE.package && (
               <>
                 <Box ml={1}>
                   <span>({row.original?.subRows?.length})</span>
                 </Box>
                 <Box ml={1}>
-                  <HtmlTooltip title="Add Product">
+                  <HtmlTooltip title="Add Existing Products">
                     <IconButton
                       onClick={() => {
-                        setAddDialog({ open: true, type: 'product', parentId: row.original?._id });
+                        setAddDialog({ open: true, type: MATERIAL_TYPE.product, parentId: row.original?._id });
                       }}
                       size="small"
                     >
@@ -126,7 +127,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
               <IconButton
                 size="small"
                 onClick={() => {
-                  if (row.original.type === 'product') {
+                  if (row.original.type === MATERIAL_TYPE.product) {
                     window.open(`${routes.productDetail.path}/${row.original.materialId}`);
                   } else {
                     window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
@@ -172,7 +173,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
             </IconButton>
           </HtmlTooltip>
 
-          <HtmlTooltip title={allowedToDelete && row.original?.allowedToDelete ? 'Asset is already assigned' : 'Delete'}>
+          <HtmlTooltip title={allowedToDelete && row.original?.canDelete ? 'Delete' : 'Work Order is already assigned'}>
             <IconButton
               size="small"
               aria-label="Details"
@@ -180,9 +181,9 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
                 const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
                 setDeleteData(obj);
               }}
-              disabled={allowedToDelete && row.original?.allowedToDelete}
+              disabled={!(allowedToDelete && row.original?.canDelete)}
             >
-              <DeleteIcon fontSize="small" color={allowedToDelete && row.original?.allowedToDelete ? 'disabled' : 'error'} />
+              <DeleteIcon fontSize="small" color={allowedToDelete && row.original?.canDelete ? 'error' : 'disabled'} />
             </IconButton>
           </HtmlTooltip>
         </>
@@ -201,10 +202,11 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
     let rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName;
-      parent.description = parent.type === 'product' ? parent?.productDetail?.productDescription : parent?.packageDetail?.packageDescription;
+      parent.detail = parent.type === MATERIAL_TYPE.product ? parent.productDetail?.productName : parent.packageDetail?.packageName;
+      parent.description = parent.type === MATERIAL_TYPE.product ? parent?.productDetail?.productDescription : parent?.packageDetail?.packageDescription;
       parent.qty = parent.qty;
       parent.qtyDisplay = parent.qty;
+      parent.canDelete = parent?.workOrder ? false : true;
       parent.subRows = generateNestedData(data.material, parent);
     });
 
@@ -233,16 +235,18 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = _subRow.type === 'product' ? _subRow.productDetail?.productName : _subRow.packageDetail?.packageName;
-      _subRow.description = _subRow.type === 'product' ? _subRow?.productDetail?.productDescription : _subRow?.packageDetail?.packageDescription;
+      _subRow.detail = _subRow.type === MATERIAL_TYPE.product ? _subRow.productDetail?.productName : _subRow.packageDetail?.packageName;
+      _subRow.description = _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productDescription : _subRow?.packageDetail?.packageDescription;
       _subRow.qty = _subRow.qty;
       _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
+      _subRow.canDelete = _subRow?.workOrder ? false : true;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
     return subRows;
   };
 
   const handleAdd = async (rows) => {
+    setSubmitting(true)
     const material: any = [];
     rows.forEach((d) => {
       const element: any = {};
@@ -263,9 +267,10 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
           message: data.message
         });
         fetchData();
+        setSubmitting(false)
       })
       .catch((error) => {
-        setAddDialog({ open: false, type: '', parentId: null });
+        setSubmitting(false)
         toastConfig.setToastConfig(error);
       });
   };
@@ -371,7 +376,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
               <MenuItem
                 onClick={() => {
                   closeAddActions();
-                  setAddDialog({ open: true, type: 'product', parentId: null });
+                  setAddDialog({ open: true, type: MATERIAL_TYPE.product, parentId: null });
                 }}
               >
                 Add Existing Products
@@ -387,7 +392,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
               <MenuItem
                 onClick={() => {
                   closeAddActions();
-                  setAddDialog({ open: true, type: 'package', parentId: null });
+                  setAddDialog({ open: true, type: MATERIAL_TYPE.package, parentId: null });
                 }}
               >
                 Add Existing Packages
@@ -395,12 +400,6 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
             </Menu>
           </Box>
           <Box display="flex">
-            <PreviewDownload
-              fileName={`${routes.productionOrder.title}-${productionOrderData?.productionOrderNumber}`}
-              resource={sidebarResource.productionOrder}
-              referenceId={productionOrderData?._id}
-              columns={columns} />
-            <Box ml={1} />
             <Button
               disabled={selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true}
               variant={isMobile ? 'text' : 'outlined'}
@@ -434,9 +433,10 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
                 Bulk Edit
               </MenuItem>
               <MenuItem
+                disabled={allowedToDelete ? (selectedRecords?.filter((e) => e.canDelete)?.length > 0 ? false : true) : true}
                 onClick={() => {
                   const dataToDelete = selectedRecords
-                    ?.filter((e) => !e.hideSelection)
+                    ?.filter((e) => !e.hideSelection && e.canDelete)
                     .map((rec: any) => {
                       const obj: any = {};
                       obj.id = rec._id;
@@ -487,17 +487,13 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
           okBtnLoading={isDeleting}
         />
       )}
-      {addDialog.open && addDialog.type === 'product' && (
+      {addDialog.open && addDialog.type === MATERIAL_TYPE.product && (
         <AssignProductDialog
-          reference="productionOrder"
-          serialized={null}
-          productsDialogOpen={addDialog.open}
-          productId={null}
           handleCloseDialog={() => setAddDialog({ open: false, type: '', parentId: null })}
-          assignedProducts={[]}
           onSuccess={(d) => {
             handleAdd(d);
           }}
+          isSubmitting={isSubmitting}
         />
       )}
       {
@@ -510,22 +506,20 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
               handleAdd([{
                 ...d,
                 unitMain: d?.unit,
-                type: 'product'
+                type: MATERIAL_TYPE.product
               }]);
             }}
             isRedirectToDetailPage={false}
             openFrom="productMaster" />
         )
       }
-      {addDialog.open && addDialog.type === 'package' && (
+      {addDialog.open && addDialog.type === MATERIAL_TYPE.package && (
         <AssignPackageDialog
-          referenceType="productionOrder"
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
-          ids={[]}
           onSuccess={(rows) => {
             handleAdd(rows);
           }}
-          packageType={null}
+          isSubmitting={isSubmitting}
         />
       )}
       {materialEdit.open && (

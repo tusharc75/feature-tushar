@@ -98,7 +98,8 @@ export const CreateEmail = ({
   isMinimized,
   onMinimizeMaximize,
   showManimizeMaximize,
-  referenceType = ''
+  referenceType = '',
+  isAttachmentLoading = false
 }) => {
   const {
     state: { user }
@@ -370,19 +371,11 @@ export const CreateEmail = ({
     </>
   );
 
-  const renderQuotesFileThumbnails = (
-    <>
-      {stateQuoteBuilderAttachments && stateQuoteBuilderAttachments.length > 0 ? (
-        <>
-          <AttachmentThumbnail
-            attachments={stateQuoteBuilderAttachments}
-            handleDeleteAttachment={handleDeleteQuoteBuilderAttachment}
-            canEdit={true}
-          />
-        </>
-      ) : null}
-    </>
-  );
+  const renderQuotesFileThumbnails = isAttachmentLoading ? (
+    <Typography>Loading...</Typography>
+  ) : stateQuoteBuilderAttachments && stateQuoteBuilderAttachments.length > 0 ? (
+    <AttachmentThumbnail attachments={stateQuoteBuilderAttachments} handleDeleteAttachment={handleDeleteQuoteBuilderAttachment} canEdit={true} />
+  ) : null;
 
   const renderFileThumbnails = <AttachmentThumbnail attachments={otherAttachments} handleDeleteAttachment={handleDeleteAttachment} canEdit={true} />;
 

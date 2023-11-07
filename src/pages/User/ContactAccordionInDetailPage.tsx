@@ -27,7 +27,7 @@ import { AiOutlineMail } from 'react-icons/ai';
 import { FiStar } from 'react-icons/fi';
 import { BiPhone } from 'react-icons/bi';
 import CopyToClipboard from '../../components/Helpers/CopyToClipboard';
-import { MoreVert } from '@material-ui/icons';
+import { Image, MoreVert } from '@material-ui/icons';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 
 export default function ContactAccordionInDetailPage({ contacts, type, expanded = true, recordsPerLine = 2, userId, onSuccess, isAllowedToEdit }) {
@@ -142,7 +142,9 @@ export default function ContactAccordionInDetailPage({ contacts, type, expanded 
                                   <ListItem>
                                     <ListItemAvatar>
                                       {obj?.contactLogo ? (
-                                        <Avatar className="d-flex align-items-center gap-1" src={obj?.contactLogo}></Avatar>
+                                        <Avatar className="d-flex align-items-center gap-1" src={obj?.contactLogo}>
+                                          <Image style={{ fontSize: 24 }} />
+                                        </Avatar>
                                       ) : (
                                         <div
                                           data-initials={[obj?.firstName?.charAt(0)?.toUpperCase(), obj?.lastName?.charAt(0)?.toUpperCase()]

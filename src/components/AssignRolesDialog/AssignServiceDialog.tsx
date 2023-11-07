@@ -20,11 +20,12 @@ import styles from 'src/pages/Leads/Header.module.scss';
 import CustomAgGridEditable, { reducer, intialState } from '../AgGridComponents/CustomAgGridEditable';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
+import { camelCase } from 'lodash';
 
 let searchTimeout;
 
-const AssignServiceDialog = ({ reference, referenceId = null, onSuccess, handleClose, ids, extraStaticFilter = [] }) => {
-  const renderedFrom = `${routes.serviceMaster.title}_${reference}_selected`;
+const AssignServiceDialog = ({ onSuccess, handleClose, ids = [], extraStaticFilter = [], isSubmitting = false }) => {
+  const renderedFrom = `${camelCase(routes.serviceMaster?.title)}_assign`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const {
@@ -32,7 +33,6 @@ const AssignServiceDialog = ({ reference, referenceId = null, onSuccess, handleC
   }: any = useData();
 
   const toastConfig = useContext(CustomToastContext);
-  const [isAssigning, setAssigning] = useState(false);
   const [disableSaveButton, setDisableSaveButton] = useState(false);
 
   const [gridApi, setGridApi] = useState(null);
@@ -156,8 +156,7 @@ const AssignServiceDialog = ({ reference, referenceId = null, onSuccess, handleC
           if (user?.user?.brandPolicy?.servicePrePost) {
             updatedFilters.push(e);
           }
-        }
-        else {
+        } else {
           updatedFilters.push(e);
         }
       });
@@ -180,27 +179,6 @@ const AssignServiceDialog = ({ reference, referenceId = null, onSuccess, handleC
       deepFilter = `${deepFilter}&search=${search}`;
     }
     return deepFilter;
-  };
-
-  const handleSubmit = async () => {
-    setAssigning(true);
-    if (reference === 'package') {
-      axiosInstance()
-        .post(`${packages.api}/material`, {
-          ids: Array.isArray(referenceId) && referenceId.length ? referenceId : [referenceId],
-          services: [...getLocalStorageArrayData(localStorageSelectedRecords)].map((d: any) => ({ service: d.id, qty: Number(d.qty) }))
-        })
-        .then(() => {
-          onSuccess();
-          setAssigning(false);
-        })
-        .catch((err) => {
-          setAssigning(false);
-          toastConfig.setToastConfig(err);
-        });
-    } else {
-      onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]);
-    }
   };
 
   const handleSearch = (e) => {
@@ -233,17 +211,18 @@ const AssignServiceDialog = ({ reference, referenceId = null, onSuccess, handleC
       <CustomDialogContent>
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
-            <Grid item xs={6} className="d-flex align-items-center gap-1"></Grid>
-            <Grid item xs={6} className={styles.filter_side}>
+            <Grid item xs={12} className={styles.filter_side}>
               <Box className={styles.filter_side_header} component="div">
                 <SearchBox onChange={handleSearch} className={styles.search_box_input} width="242px" size="small" value={search} />
                 <Button
-                  disabled={isAssigning || disableSaveButton || [...getLocalStorageArrayData(localStorageSelectedRecords)].length === 0}
-                  onClick={handleSubmit}
+                  disabled={isSubmitting || disableSaveButton || [...getLocalStorageArrayData(localStorageSelectedRecords)].length === 0}
+                  onClick={() => {
+                    onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]);
+                  }}
                   color="primary"
                   size="small"
                   variant="contained"
-                  endIcon={isAssigning && <CircularProgress color="inherit" size={18} />}
+                  endIcon={isSubmitting && <CircularProgress color="inherit" size={18} />}
                 >
                   Add{' '}
                   {[...getLocalStorageArrayData(localStorageSelectedRecords)].length > 0

@@ -362,14 +362,21 @@ export default function NewCreateQuotePdfTemplate() {
           landscape: values?.landscape,
           productColumns: parseInt(values?.productColumns)
         })
-        .then(({ data: { data } }) => {
+        .then(({ data: { data, message } }) => {
           if (isPreview === true) {
             previewPdfTemplate(data._id);
             setIsUpdatingAndPreview(false);
             history.push(`${routes.quotePdfTemplateDetail.path}/${data._id}`);
           } else {
-            history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.quotePdfTemplate.path });
+            if (isBreakCrumbPath) {
+              history.push({ pathname: isBreakCrumbPath });
+            }       
             setIsUpdating(false);
+            toastConfig.setToastConfig({
+              open: true,
+              type: 'success',
+              message: message
+            })
           }
         })
         .catch((error) => {
@@ -400,7 +407,7 @@ export default function NewCreateQuotePdfTemplate() {
           landscape: values?.landscape,
           productColumns: parseInt(values?.productColumns)
         })
-        .then(({ data: { data } }) => {
+        .then(({ data: { data, message } }) => {
           if (isPreview === true) {
             previewPdfTemplate(data._id);
             setIsUpdatingAndPreview(false);
@@ -419,8 +426,15 @@ export default function NewCreateQuotePdfTemplate() {
                 tabValue: 1
               });
             } else {
-              history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.quotePdfTemplate.path });
+              if (isBreakCrumbPath) {
+                history.push({ pathname: isBreakCrumbPath });
+              }           
             }
+            toastConfig.setToastConfig({
+              open: true,
+              type: 'success',
+              message: message
+            })
             setIsUpdating(false);
           }
         })

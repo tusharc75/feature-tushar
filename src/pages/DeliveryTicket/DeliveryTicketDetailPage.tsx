@@ -3,14 +3,7 @@ import { useHistory, useParams } from 'react-router-dom';
 import { Box, Grid, Button, IconButton, Tooltip, Tabs, Tab } from '@material-ui/core';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import queryString from 'query-string';
-import {
-  deliveryTicket,
-  getObjKeysWithValues,
-  dateTimeFormat,
-  ACTIVITY_RESOURCE,
-  ASSET_STATUS,
-  rentalManagement
-} from '../../constants/helpers';
+import { deliveryTicket, getObjKeysWithValues, dateTimeFormat, ACTIVITY_RESOURCE, ASSET_STATUS, rentalManagement } from '../../constants/helpers';
 import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import routes from '../../components/Helpers/Routes';
@@ -487,8 +480,8 @@ export default function DeliveryTicketDetail(props) {
       deliveryTicketData?.status === DELIVERY_TICKET_STATUS.new
         ? 'Sign-off - Dispatch'
         : deliveryTicketData?.status === 'In-Transit'
-          ? 'Sign-off - Delivery'
-          : '';
+        ? 'Sign-off - Delivery'
+        : '';
 
     const { type, sign: newSign, name } = signedData;
     const indexOfExistingSignature = signatures.findIndex((sign) => sign.type === type && sign.status === status);
@@ -799,7 +792,7 @@ export default function DeliveryTicketDetail(props) {
               <Grid item xs={12}>
                 {isMobile && !isTablet ? (
                   <CustomSwipableList
-                    allowSelection={true}
+                    allowSelection={false}
                     allowSwipe={true}
                     permissions={permissions}
                     primaryField={columns?.find((d) => d.field === 'assetNumber')}
@@ -809,9 +802,9 @@ export default function DeliveryTicketDetail(props) {
                     dataRows={dataRows}
                     selectedRecords={selectedRecords}
                     dispatch={dispatch}
-                    onEdit={() => { }}
+                    onEdit={() => {}}
                     extraParamsToCheckDelete={true}
-                    onDelete={() => { }}
+                    onDelete={() => {}}
                     rowCount={rowCount}
                     page={page}
                     loading={loading}
@@ -826,7 +819,7 @@ export default function DeliveryTicketDetail(props) {
                     showClone={false}
                     fullHeight={true}
                     renderedFrom={renderedFrom}
-                    onClone={() => { }}
+                    onClone={() => {}}
                   />
                 ) : Object.keys(frameWorkComponent).length > 0 ? (
                   <CustomAgGrid

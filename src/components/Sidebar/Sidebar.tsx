@@ -1,32 +1,33 @@
-import React, { useEffect, useState, useContext, useRef } from 'react';
+import { Collapse, CssBaseline, Drawer, IconButton, List, ListItem, ListItemIcon, ListItemText, Toolbar, Tooltip } from '@material-ui/core';
+import { Close, ExpandLess, ExpandMore } from '@material-ui/icons';
 import clsx from 'clsx';
-import { CssBaseline, Drawer, List, ListItem, ListItemText, Toolbar, Collapse, ListItemIcon, Tooltip } from '@material-ui/core';
-import { Link, withRouter, useHistory } from 'react-router-dom';
-import Header from '../Header/Header';
-import { useData } from '../../StateProvider/Provider';
-import { GlobalChatContext } from '../../StateProvider/GlobalChatContext';
-import { ChevronRight, ExpandMore, ExpandLess } from '@material-ui/icons';
-import { kebabCase, lowerCase, sortBy } from 'lodash';
-import { setDataBySectionName } from 'src/pages/Home/helpers';
-
-import { FaRegUserCircle } from 'react-icons/fa';
-import { MdOutlineDashboard } from 'react-icons/md';
-
-import { BsChatLeftTextFill } from 'react-icons/bs';
-import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
-import { staticHiddenResource } from '../../constants/helpers';
-
-import { AiOutlineFileText } from 'react-icons/ai';
-
-import useStyles from './style';
-import routes from '../Helpers/Routes';
+import { kebabCase, lowerCase } from 'lodash';
+import React, { useContext, useEffect, useState } from 'react';
+import { Link, useHistory, withRouter } from 'react-router-dom';
 import { SVG } from 'src/assets';
-
+import { setDataBySectionName } from 'src/pages/Home/helpers';
+import { GlobalChatContext } from '../../StateProvider/GlobalChatContext';
+import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
+import { useData } from '../../StateProvider/Provider';
+import Header from '../Header/Header';
+import routes from '../Helpers/Routes';
 import styles from './sidebar.module.scss';
+import useStyles from './style';
+import { TResource, TSidebarItem, TSidebarSection } from './type';
+import { isSectionActive, isSectionVisible, staticSidebarData } from './utils';
+import { useStore, SIDEBAR_OPEN, SIDEBAR_OPENED_BY_BUTTON } from 'src/StateProvider/fastContext';
 
-function SideBar({ toggleDrawer, setToggleDrawer, location }) {
+function SideBar({ location }) {
   const [itemToAddActiveClass, setItemToAddActiveClass] = useState(NaN);
   const [subItemToAddActiveClass, setSubItemToAddActiveClass] = useState(NaN);
+
+  const [isSidebarOpen, setIsSidebarOpen] = useStore((store) => store[SIDEBAR_OPEN]);
+  const [sidebarOpenedByButton, setSidebarOpenedByButton] = useStore((store) => store[SIDEBAR_OPENED_BY_BUTTON]);
+
+  const handleSidebarClose = () => {
+    setIsSidebarOpen({ [SIDEBAR_OPEN]: false });
+    setSidebarOpenedByButton({ [SIDEBAR_OPENED_BY_BUTTON]: false });
+  };
 
   const {
     state: { permissions, user, selectedEntity, tour }
@@ -45,15 +46,6 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
     return sideBarIcon;
   };
 
-  let toggleTimeout;
-
-  const handleToggleDrawer = () => {
-    setToggleDrawer(!toggleDrawer);
-    if (toggleDrawer) {
-      setOpen({});
-    }
-  };
-
   const handleRoutes = (item) => {
     switch (item.name) {
       case 'Pos':
@@ -64,54 +56,42 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
   };
 
   useEffect(() => {
-    if (!toggleDrawer) {
+    if (!isSidebarOpen) {
       setOpen({});
     }
-  }, [toggleDrawer]);
+  }, [isSidebarOpen]);
 
-  const listItems = () => {
+  const getListItem = () => {
     if (user) {
-      var sections = [];
+      const sections: TSidebarSection[] = [...staticSidebarData(user, permissions, isOffline)];
 
-      let entityData;
+      let entitySidebarData: TResource[];
+      const userSidebarData: TResource[] = user.role.sideBar || [];
       if (user?.entity && user.entity.length) {
-        entityData = user.entity.find((curEntity) => curEntity._id === selectedEntity);
+        entitySidebarData = user.entity.find((curEntity) => curEntity._id === selectedEntity)?.resource || [];
       }
 
-      user.role.sideBar.forEach((item) => {
-        if (!sections.includes(item.sectionName) && item.isRead && !item.isHidden) {
-          sections.push(item.sectionName);
+      for (const item of [...entitySidebarData, ...userSidebarData]) {
+        if (!isSectionVisible(item)) continue;
+        const isSectionExist = sections.map((s) => s.sectionName).includes(item.sectionName);
+        const itemWithLink: TSidebarItem = { ...item, link: handleRoutes(item) };
+        if (!isSectionExist) {
+          const newSection: TSidebarSection = {
+            name: item.sectionName === 'Activities' || item.sectionName === 'Collaboration Tools' ? 'Collaboration Tools' : item.sectionName,
+            sectionName: item.sectionName,
+            icon: renderIcon(item.sectionName),
+            link: null,
+            items: [itemWithLink]
+          };
+          sections.push(newSection);
+        } else {
+          const sectionIndex = sections.findIndex((s) => s.sectionName === item.sectionName);
+          sections[sectionIndex].items.push(itemWithLink);
         }
-      });
-
-      if (entityData?.resource && entityData.resource.length) {
-        entityData.resource.forEach((item) => {
-          if (!sections.includes(item.sectionName) && item.isRead && !item.isHidden && item.sectionName !== '') {
-            sections.push(item.sectionName);
-          }
-        });
       }
-
-      return sections.map((section) => {
-        const lists = user.role.sideBar.filter((list) => list.sectionName === section);
-
-        let enitityList = [];
-
-        if (entityData?.resource && entityData.resource.length) {
-          enitityList = entityData.resource.filter((list) => list.sectionName === section);
-        }
-        const items = [...lists, ...enitityList].filter((item) => {
-          if (item?.name === 'Product Builder' && import.meta.env.VITE_APP_ENV === 'staging') {
-            return false;
-          }
-          if (item?.isHidden || staticHiddenResource?.includes(item?.name)) {
-            return false;
-          }
-          return item.isRead === true;
-        });
-        return { section, items };
-      });
+      return sections;
     }
+    return [];
   };
 
   const handleCollapse = (section) => {
@@ -120,203 +100,130 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
     setOpen(tempdata);
   };
 
+  let toggleTimeout;
+
   return (
     <div>
       <CssBaseline />
-      <Header toggleDrawer={handleToggleDrawer} isDrawerOpen={toggleDrawer} />
+      <Header />
       <Drawer
-        // onClick={() => {
-        //   toggleTimeout = setTimeout(() => setToggleDrawer((prev) => !prev), 300);
-        // }}
-        onClick={() => {
-          toggleTimeout = setTimeout(() => setToggleDrawer(true), 300);
-        }}
-        onMouseEnter={() => {
-          toggleTimeout = setTimeout(() => setToggleDrawer(true), 300);
-        }}
-        onMouseLeave={() => {
-          if (toggleTimeout) {
-            clearTimeout(toggleTimeout);
-          }
-          if (toggleDrawer)
-            setTimeout(() => {
-              setToggleDrawer(false);
-            }, 500);
-        }}
         variant="permanent"
         className={clsx(styles.drawer, 'sidebar-drawer', {
-          [classes.drawerOpen]: toggleDrawer,
-          [classes.drawerClose]: !toggleDrawer,
-          'sidebar-overflow-hide': !toggleDrawer && tour.stepIndex !== 1,
-          'sidebar-overflow-auto': toggleDrawer && tour.stepIndex !== 1
+          [classes.drawerOpen]: isSidebarOpen,
+          [classes.drawerClose]: !isSidebarOpen,
+          'sidebar-overflow-hide': !isSidebarOpen && tour.stepIndex !== 1,
+          'sidebar-overflow-auto': isSidebarOpen && tour.stepIndex !== 1
         })}
         classes={{
           paper: clsx(styles.drawer, {
-            [classes.drawerOpen]: toggleDrawer,
-            [classes.drawerClose]: !toggleDrawer,
-            'sidebar-overflow-hide': !toggleDrawer && tour.stepIndex !== 1,
-            'sidebar-overflow-auto': toggleDrawer && tour.stepIndex !== 1,
+            [classes.drawerOpen]: isSidebarOpen,
+            [classes.drawerClose]: !isSidebarOpen,
+            'sidebar-overflow-hide': !isSidebarOpen && tour.stepIndex !== 1,
+            'sidebar-overflow-auto': isSidebarOpen && tour.stepIndex !== 1,
             'sidebar-drawer': true
           })
         }}
+        onClick={() => {
+          if (sidebarOpenedByButton) return;
+          toggleTimeout = setTimeout(() => setIsSidebarOpen({ [SIDEBAR_OPEN]: true }), 300);
+        }}
+        onMouseEnter={() => {
+          if (sidebarOpenedByButton) return;
+          toggleTimeout = setTimeout(() => setIsSidebarOpen({ [SIDEBAR_OPEN]: true }), 300);
+        }}
+        onMouseLeave={() => {
+          if (sidebarOpenedByButton) return;
+          if (toggleTimeout) {
+            clearTimeout(toggleTimeout);
+          }
+          if (isSidebarOpen)
+            setTimeout(() => {
+              setIsSidebarOpen({ [SIDEBAR_OPEN]: false });
+            }, 500);
+        }}
+        keepMounted
       >
         <Toolbar />
         <div id="sidebarOrDrawer" style={{ borderTop: '1px solid #485B64' }}>
-          <div className="max-[959px]:min-h-[56px] min-[771px]:min-h-[unset] max-[770px]:min-h-[56px] ">
-            {toggleDrawer ? (
-              user?.brandLogo ? (
-                <img src={user.brandLogo} alt="brand" className={styles.logo} />
-              ) : (
-                <img className={styles.logo} src={SVG('LogoNew')} onClick={() => history.push('/')} alt="equip logo" title="eQuipt Logo" />
-              )
-            ) : (
-              <img className={styles.logo} src={SVG('LogoNewShort')} onClick={() => history.push('/')} alt="equip logo" title="eQuipt Logo" />
-            )}
-          </div>
-          <List className={`${styles.listContainer} sidebar-list`}>
-            <ListItem
-              button
-              selected={location.pathname === '/'}
-              className={`${styles.listItem} ${location.pathname === '/' ? styles.activeList : ''}`}
-              onClick={() => {
-                setItemToAddActiveClass(NaN);
-                setSubItemToAddActiveClass(NaN);
-                history.push('/');
-              }}
-            >
-              {location.pathname === '/' && (
-                <>
-                  <i />
-                  <i />
-                </>
-              )}
-              <ListItemIcon className={`${styles.listIcon} hi`}>
-                {toggleDrawer ? (
-                  <FaRegUserCircle
-                    className={styles.sidebarIcon}
-                    size={20}
-                    onClick={() => {
-                      history.push('/');
-                    }}
-                  />
-                ) : (
-                  <ChevronRight />
-                )}
-              </ListItemIcon>
-              <ListItemText
-                onClick={() => {}}
-                primary={[user?.user?.firstName, user?.user?.lastName].filter((f) => f).join(' ')}
-                // className={`wordWrap`}
+          <div className="max-[959px]:min-h-[56px] min-[769px]:min-h-[unset] max-[768px]:min-h-[56px] ">
+            <div className={`max-[768px]:pr-[50px] ${styles.logo}`}>
+              <img
+                className={` ${isSidebarOpen ? 'block' : 'hidden'} ml-[22px] max-h-[33px]`}
+                src={user?.brandLogo || SVG('LogoNew')}
+                onClick={() => history.push('/')}
+                alt="equip logo"
+                title="eQuipt Logo"
               />
-            </ListItem>
-            {permissions?.dashboard?.isRead && !isOffline && (
-              <Link
-                to="/dashboards"
-                onClick={() => {
-                  setItemToAddActiveClass(NaN);
-                  setSubItemToAddActiveClass(NaN);
-                }}
-              >
-                <Tooltip title={!toggleDrawer ? 'Dashboards' : ''}>
-                  <ListItem
-                    button
-                    selected={location.pathname === '/dashboards'}
-                    className={`${styles.listItem} ${pathName === 'dashboards' && styles.activeList}`}
-                  >
-                    {pathName === 'dashboards' && (
-                      <>
-                        <i />
-                        <i />
-                      </>
-                    )}
-                    <ListItemIcon className={styles.listIcon}>
-                      <MdOutlineDashboard size={20} className={styles.sidebarIcon} />
-                    </ListItemIcon>
-                    <ListItemText primary="Dashboards" className={`wordWrap`} />
-                  </ListItem>
-                </Tooltip>
-              </Link>
-            )}
-            {permissions?.report?.isRead && !isOffline && (
-              <Link
-                to="/reports"
-                onClick={() => {
-                  setItemToAddActiveClass(NaN);
-                  setSubItemToAddActiveClass(NaN);
-                }}
-              >
-                <Tooltip title={!toggleDrawer ? 'Reports' : ''}>
-                  <ListItem
-                    button
-                    selected={location.pathname === '/reports'}
-                    className={`${styles.listItem} ${pathName === 'reports' && styles.activeList}`}
-                  >
-                    {pathName === 'reports' && (
-                      <>
-                        <i />
-                        <i />
-                      </>
-                    )}
-                    <ListItemIcon className={styles.listIcon}>
-                      <AiOutlineFileText size={20} className={styles.sidebarIcon} />
-                    </ListItemIcon>
-                    <ListItemText primary="Reports" className={`wordWrap`} />
-                  </ListItem>
-                </Tooltip>
-              </Link>
-            )}
+              <img
+                className={`${isSidebarOpen ? 'hidden' : 'block'} mx-auto max-h-[33px]`}
+                src={SVG('LogoNewShort')}
+                onClick={() => history.push('/')}
+                alt="equip logo"
+                title="eQuipt Logo"
+              />
+            </div>
+            <div className={`${sidebarOpenedByButton && 'max-[768px]:block'} hidden absolute right-0 top-[5px]`}>
+              <IconButton onClick={handleSidebarClose}>
+                <Close />
+              </IconButton>
+            </div>
+          </div>
+          <List
+            className={`${styles.listContainer} sidebar-list max-h-[calc(100vh-80px)] ${
+              isSidebarOpen ? 'overflow-y-auto' : 'overflow-y-hidden'
+            } overflow-x-hidden`}
+          >
+            {getListItem()?.map((listItem, i) => {
+              const hasChild = Boolean(listItem.items);
 
-            {user &&
-              listItems().map((listItem, i) => {
-                const items = listItem.items.map((item) => item.name.toLowerCase().split(' ').join('-'));
-
-                return (
-                  <React.Fragment key={i}>
-                    <Tooltip title={!toggleDrawer ? listItem.section : ''}>
-                      <ListItem
-                        className={`${styles.listItem} dropdown-items ${items.some((item) => pathName === item) && styles.activeList}`}
-                        button
-                        key={listItem.section + '' + i}
-                        onClick={() => {
-                          handleCollapse(listItem.section);
-                          if (!toggleDrawer) {
-                            handleToggleDrawer();
-                          }
-                        }}
-                      >
-                        {items.some((item) => pathName === item) && (
-                          <>
-                            <i />
-                            <i />
-                          </>
-                        )}
-                        <ListItemIcon className={styles.listIcon}>{renderIcon(listItem.section)}</ListItemIcon>
-                        <ListItemText
-                          primary={
-                            listItem.section === 'Activities' || listItem.section === 'Collaboration Tools' ? 'Collaboration Tools' : listItem.section
-                          }
-                          className={`wordWrap `}
-                        />
-                        {open[listItem.section] ? <ExpandLess className={styles.listArrowIcon} /> : <ExpandMore className={styles.listArrowIcon} />}
-                      </ListItem>
-                    </Tooltip>
-                    <Collapse in={open[listItem.section]} timeout="auto" unmountOnExit>
+              return (
+                <React.Fragment key={listItem.name}>
+                  <Tooltip title={!isSidebarOpen ? listItem.name : ''}>
+                    <ListItem
+                      className={`${styles.listItem} dropdown-items ${isSectionActive(pathName, location.pathname, listItem) && styles.activeList}`}
+                      button
+                      key={listItem.name + '' + i}
+                      onClick={() => {
+                        if (isSidebarOpen) {
+                          handleCollapse(listItem.name);
+                        }
+                        if (!listItem.items?.length) {
+                          history.push(listItem.link);
+                        }
+                      }}
+                    >
+                      {isSectionActive(pathName, location.pathname, listItem) && (
+                        <>
+                          <i />
+                          <i />
+                        </>
+                      )}
+                      <ListItemIcon className={styles.listIcon}>{listItem.icon}</ListItemIcon>
+                      <ListItemText primary={listItem.name} className={`wordWrap  `} />
+                      {hasChild && (
+                        <>{open[listItem.name] ? <ExpandLess className={styles.listArrowIcon} /> : <ExpandMore className={styles.listArrowIcon} />}</>
+                      )}
+                    </ListItem>
+                  </Tooltip>
+                  {hasChild && (
+                    <Collapse in={open[listItem.name]} timeout="auto" unmountOnExit>
                       <List
                         component="div"
                         disablePadding
-                        className={`${styles.subList} ${items.some((item) => pathName === item) && styles.activeSubList}`}
+                        className={`${styles.subList} ${isSectionActive(pathName, location.pathname, listItem) && styles.activeSubList}`}
                       >
                         {listItem.items.map((item, j) => (
                           <Link
                             className={`sub-list ${pathName === item.name.toLowerCase().split(' ').join('-') && styles.active_sub} ${
-                              itemToAddActiveClass == i && subItemToAddActiveClass == j ? 'active_sub' : ''
+                              itemToAddActiveClass === i && subItemToAddActiveClass === j ? 'active_sub' : ''
                             }`}
                             key={j}
                             onClick={() => {
                               setItemToAddActiveClass(i);
                               setSubItemToAddActiveClass(j);
+                              // setOpen({});
                             }}
-                            to={handleRoutes(item)}
+                            to={item.link}
                           >
                             <ListItem
                               button
@@ -331,18 +238,19 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                                   stroke="currentcolor"
                                 ></path>
                               </svg>
-                              <ListItemText primary={item.resourceLabel || item.name} />
+                              <ListItemText primary={item.resourceLabel || item.name} className={`line-clamp-1`} />
                             </ListItem>
                           </Link>
                         ))}
                       </List>
                     </Collapse>
-                  </React.Fragment>
-                );
-              })}
+                  )}
+                </React.Fragment>
+              );
+            })}
           </List>
         </div>
-        {!isOffline && (
+        {/* {!isOffline && (
           <List style={{ bottom: '0px', marginTop: 'auto' }}>
             <ListItem style={{ paddingLeft: '31px', paddingBlock: '12px' }} button onClick={() => setChatOpen((prevState) => !prevState)}>
               <ListItemIcon className={styles.listIcon}>
@@ -351,7 +259,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
               <ListItemText primary="Chat" />
             </ListItem>
           </List>
-        )}
+        )} */}
       </Drawer>
     </div>
   );

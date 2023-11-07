@@ -37,7 +37,6 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
 
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [isProductEdit, setIsProductEdit] = useState({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
-  const [isAddingProducts, setAddingProducts] = useState(false);
   const [material, setMaterial] = useState([]);
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
@@ -47,6 +46,9 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
   const [rowsData, setRowsData] = useState(null);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
   const [allFields, setAllFields] = useState([]);
+
+  const [isSubmitting, setSubmitting] = useState(false);
+
 
   useEffect(() => {
     fetchFields();
@@ -205,16 +207,16 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
         parent.type === 'product'
           ? parent?.productDetail?.productName
           : parent.type === 'service'
-          ? parent?.serviceDetail?.serviceName
-          : parent?.packageDetail?.packageName;
+            ? parent?.serviceDetail?.serviceName
+            : parent?.packageDetail?.packageName;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDescription || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : '';
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : '';
       parent.qtyDisplay = parent.qty;
       parent.canDelete = technician.some((d) => d._id === parent._id) ? false : true;
       parent.estimateStartDate = parent.estimateStartDate ? parent.estimateStartDate : serviceOrderData?.estimateStartDate;
@@ -238,16 +240,16 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow?.serviceDetail?.serviceName
-          : _subRow?.packageDetail?.packageName;
+            ? _subRow?.serviceDetail?.serviceName
+            : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty} `;
       _subRow.canDelete = technician.some((d) => d.service.optionValue === _subRow._id) ? false : true;
       _subRow.estimateStartDate = _subRow.estimateStartDate ? _subRow.estimateStartDate : serviceOrderData?.estimateStartDate;
@@ -258,7 +260,7 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
   };
 
   const handleAdd = (rows) => {
-    setAddingProducts(true);
+    setSubmitting(true);
     const material: any = [];
     rows.forEach((d) => {
       const element: any = {};
@@ -276,12 +278,12 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
     axiosInstance()
       .post(`${fieldServiceOrder.api}/${serviceOrderData._id}/material`, { material })
       .then(({ data }) => {
-        setUpdating(false);
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
         fetchProductInventory();
+        setSubmitting(false);
       })
       .catch((error) => {
-        setUpdating(false);
+        setSubmitting(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -498,7 +500,6 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'package' && (
         <AssignPackageDialog
-          referenceType={'fieldServiceOrder'}
           onSuccess={(rows) => {
             handleAdd(rows);
           }}
@@ -506,7 +507,7 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
             setAddExistingProductDialog({ open: false, type: '', parentId: null });
           }}
           packageType="service"
-          ids={[]}
+          isSubmitting={isSubmitting}
         />
       )}
       {isProductEdit.open && (
@@ -524,27 +525,22 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'service' && (
         <AssignServiceDialog
-          reference={'fieldServiceOrder'}
           onSuccess={(services) => {
             handleAdd(services);
           }}
           handleClose={() => {
             setAddExistingProductDialog({ open: false, type: '', parentId: null });
           }}
-          ids={[]}
+          isSubmitting={isSubmitting}
         />
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'product' && (
         <AssignProductDialog
-          reference={'fieldServiceOrder'}
-          serialized={null}
-          productsDialogOpen={addExistingProductDialog.open}
-          productId={null}
           handleCloseDialog={() => setAddExistingProductDialog({ open: false, type: '', parentId: null })}
-          assignedProducts={[]}
           onSuccess={(product) => {
             handleAdd(product);
           }}
+          isSubmitting={isSubmitting}
         />
       )}
     </Fragment>

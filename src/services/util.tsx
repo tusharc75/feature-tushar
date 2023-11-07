@@ -1,5 +1,5 @@
-import moment from "moment";
-import { dateFormat } from "../constants/helpers"
+import moment from 'moment';
+import { dateFormat } from '../constants/helpers';
 export const validateEmail = (value) => {
   var reg = /^([A-Za-z0-9_\-.])+([A-Za-z0-9_\-.])+([A-Za-z]{2,4})$/;
 
@@ -11,11 +11,11 @@ export const validateEmail = (value) => {
 };
 export const getSearchQuery = (url, params) => {
   if (params && Object.keys(params).length > 0) {
-    url = url.indexOf("?") >= 0 ? url + "&" : url + "?";
+    url = url.indexOf('?') >= 0 ? url + '&' : url + '?';
     Object.keys(params).forEach((k, i) => {
       url = url + `${k}=${params[k]}`;
       if (i < Object.keys(params).length - 1) {
-        url = url + "&";
+        url = url + '&';
       }
     });
   }
@@ -29,19 +29,26 @@ export const getErrorMessage = (err) => {
       return err.response.data.error;
     }
   }
-  return "";
+  return '';
 };
 
 export const displayDate = (date) => {
-  return date ? moment(date).format(dateFormat) : "";
+  return date ? moment(date).format(dateFormat) : '';
 };
 
 export const getBordActionUrl = (type) => {
   switch (type.toLowerCase()) {
-    case "task":
-      return { update: "task/", delete: "task/" }
+    case 'task':
+      return { update: 'task/', delete: 'task/' };
     default:
-      return { update: "activity/field/", delete: "" }
+      return { update: 'activity/field/', delete: '' };
   }
+};
 
-}
+export const setCssVariable = ({ name = null, value = null }: { name: string; value: string }) => {
+  if (!name || value) return false;
+  const root = document.querySelector(':root') as HTMLElement;
+  if (!root) return false;
+  root.style.setProperty(name, value);
+  return true;
+};

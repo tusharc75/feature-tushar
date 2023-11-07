@@ -18,7 +18,7 @@ import {
 } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
 import Avatar from '@material-ui/core/Avatar';
-import { MoreVert as MoreIcon, Clear as ClearIcon, Notifications, ExpandMore, Brightness1 } from '@material-ui/icons';
+import { MoreVert as MoreIcon, Clear as ClearIcon, Notifications, ExpandMore, Brightness1, Close, Image } from '@material-ui/icons';
 import SyncIcon from '@material-ui/icons/Sync';
 import io, { Socket } from 'socket.io-client';
 import { useHistory, Link, useLocation } from 'react-router-dom';
@@ -55,6 +55,7 @@ import { MoonIcon, SunIcon } from 'src/assets/svg/svgIcons';
 import NotificationsNoneIcon from '@material-ui/icons/NotificationsNone';
 import ChatBubbleOutlineOutlinedIcon from '@material-ui/icons/ChatBubbleOutlineOutlined';
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
+import { useStore, SIDEBAR_OPEN, SIDEBAR_OPENED_BY_BUTTON } from 'src/StateProvider/fastContext';
 
 const useStyles = makeStyles((theme) => ({
   grow: {
@@ -98,8 +99,23 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const Header = ({ toggleDrawer, isDrawerOpen }) => {
+const Header = () => {
   const [themeColor, toggleThemeColor] = useAppTheme();
+  const [isSidebarOpen, setIsSidebarOpen] = useStore((store) => store[SIDEBAR_OPEN]);
+  const [sidebarOpenedByButton, setSidebarOpenedByButton] = useStore((store) => store[SIDEBAR_OPENED_BY_BUTTON]);
+
+  const isMobile = useMediaQuery('(max-width:960px)');
+  const is768 = useMediaQuery('(max-width: 768px)');
+
+  const toggleSidebarByButton = () => {
+    if (isSidebarOpen) {
+      setIsSidebarOpen({ [SIDEBAR_OPEN]: false });
+      setSidebarOpenedByButton({ [SIDEBAR_OPENED_BY_BUTTON]: false });
+    } else {
+      setIsSidebarOpen({ [SIDEBAR_OPEN]: true });
+      if (!isMobile) setSidebarOpenedByButton({ [SIDEBAR_OPENED_BY_BUTTON]: true });
+    }
+  };
 
   const { instance, accounts } = useMsal();
   const account = useAccount(accounts[0] || {});
@@ -112,8 +128,6 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
   const classes = useStyles();
   const history = useHistory();
   const { pathname } = useLocation();
-  const isMobile = useMediaQuery('(max-width:959.95px)');
-  const is768 = useMediaQuery('(max-width: 768px)');
 
   const [isSearch, setIsSearch] = useState(false);
   const [socket, setSocket] = useState<Socket>(null);
@@ -582,7 +596,9 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
                   <>
                     <Grid container>
                       <Grid item xs={2} md={2}>
-                        <Avatar style={{ height: 30, width: 30 }} src={d?.avatar}></Avatar>
+                        <Avatar style={{ height: 30, width: 30 }} src={d?.avatar}>
+                          <Image style={{ fontSize: 24 }} />
+                        </Avatar>
                       </Grid>
                       <Grid item xs={10} md={10}>
                         <h6>{displayCardDate(d?.date)}</h6>
@@ -702,7 +718,9 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
                   <>
                     <Grid container>
                       <Grid item xs={2} md={2}>
-                        <Avatar style={{ height: 30, width: 30 }} src={d?.avatar}></Avatar>
+                        <Avatar style={{ height: 30, width: 30 }} src={d?.avatar}>
+                          <Image style={{ fontSize: 24 }} />
+                        </Avatar>
                       </Grid>
                       <Grid item xs={10} md={10}>
                         <h6>{displayCardDate(d?.date)}</h6>
@@ -962,12 +980,20 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
         <Toolbar className={` ${styles.mainConainer}`} style={{ color: themeColor === 'light' ? '#3d3d3d' : '#fff' }}>
           <Box
             component="div"
-            className={`${isDrawerOpen ? styles.drawerOpen : styles.drawerClosed} ${styles.leftContent} ${styles.flexAlignCenter}`}
+            className={`${isSidebarOpen && sidebarOpenedByButton ? styles.drawerOpen : styles.drawerClosed} ${styles.leftContent} ${
+              styles.flexAlignCenter
+            }`}
             flexGrow
           >
             <div className={` ${styles.toggleButton}`}>
-              <IconButton aria-label="help" color="inherit" title="Menu" onClick={toggleDrawer}>
-                <HiOutlineMenuAlt1 />
+              <IconButton
+                aria-label="help"
+                color="inherit"
+                style={{ background: sidebarOpenedByButton && isSidebarOpen ? 'var(--dark-secondary, #f3f3f3)' : '' }}
+                title="Menu"
+                onClick={toggleSidebarByButton}
+              >
+                {sidebarOpenedByButton && isSidebarOpen ? <Close /> : <HiOutlineMenuAlt1 />}
               </IconButton>
             </div>
             {/* Searchbar */}

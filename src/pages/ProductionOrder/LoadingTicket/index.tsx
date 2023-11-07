@@ -1,9 +1,6 @@
 import Box from '@material-ui/core/Box/Box';
 import { useState, useEffect, useReducer, useContext, Fragment } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridComponents/CustomAgGrid';
-import { CommonRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
-import { Link } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
@@ -12,37 +9,28 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import {
     deliveryTicket,
-    gridLoadingTimeout,
     DELIVERY_TICKET_STATUS,
     DELIVERY_TICKET_TYPE,
     DELIVERY_TICKET_REFERENCE_TYPE,
     DELIVERY_FROM_TO_TYPE,
-    repairOrder,
-    ASSET_STATUS,
-    WORK_ORDER_STATUS,
     productionOrder,
-    CHILD_RESOURCE
+    CHILD_RESOURCE,
+    MATERIAL_TYPE
 } from '../../../constants/helpers';
-import { useHistory } from 'react-router-dom';
-import { isMobile, isTablet } from 'react-device-detect';
-import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
+import { isMobile } from 'react-device-detect';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import { uniq, map, startCase } from 'lodash';
 import { ExpandMore } from '@material-ui/icons';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { useAppTheme } from 'src/constants/AppConfig';
 import { useData } from 'src/StateProvider/Provider';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { generateCustomTableColumns } from 'src/constants/columns';
 
 
-const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, renderedFrom, allowedToEdit, setCurrentStep }) => {
+const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, renderedFrom, allowedToEdit }) => {
+
     const toastConfig = useContext(CustomToastContext);
-    const [theme] = useAppTheme();
-    const history = useHistory();
-    const [state, dispatch] = useReducer(reducer, intialState);
-    const [gridApi, setGridApi] = useState(null);
     const [columns, setColumns] = useState(null);
     const [anchorActionEl, setAnchorActionEl] = useState(null);
     const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
@@ -64,21 +52,17 @@ const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, rende
 
             const response = await axiosInstance().get(`${productionOrder.api}/material/${productionOrderData._id}`);
             data = response?.data?.data;
-            let rows = data.material.filter((e) => e.parentId === null);
+            let rows = data.material.filter((e) => e.type === MATERIAL_TYPE.product);
 
-            const {
-                data: { data: deliveryTicketList }
-            } = await axiosInstance().get(
+            const { data: { data: deliveryTicketList } } = await axiosInstance().get(
                 `${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.productionOrder}&referenceId=${productionOrderData._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`
             );
             rows.forEach((parent, i) => {
                 parent.index = i + 1;
-                parent.detail = parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName;
-                parent.description = parent.type === 'product' ? parent?.productDetail?.productDescription : parent?.packageDetail?.packageDescription;
+                parent.detail = parent.productDetail?.productName;
+                parent.description = parent?.productDetail?.productDescription;
                 parent.qty = parent.qty;
-                parent.qtyDisplay = parent.qty;
             });
-
             deliveryTicketList?.map((obj) => {
                 if (obj.ticketType === DELIVERY_TICKET_TYPE.loading) {
                     rows.map((d, index) => {
@@ -93,21 +77,23 @@ const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, rende
                     });
                 }
             });
+            if (rows?.filter((e) => e.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered)?.length === rows?.length) {
+                setNextStep(true);
+            }
             setRowsData(rows);
         } catch (error) {
             toastConfig.setToastConfig(error);
         }
     };
+
     const fetchFields = async () => {
         const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.productionOrderDetail}`);
         var data = response?.data?.data;
         data = CURReplaceByCurrencySingle(data, productionOrderData?.currency || 'USD');
+        data?.forEach((e) => {
+            e.isColumnEditable = false;
+        });
         const newColumns = generateCustomTableColumns(data, productionOrderData?.currency || 'USD', renderedFrom);
-        let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
-        if (qtyIndex > -1) {
-            newColumns[qtyIndex].accessor = 'qtyDisplay';
-            newColumns[qtyIndex].editable = false;
-        }
         let coloum: any = [
             {
                 accessor: 'index',
@@ -124,14 +110,14 @@ const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, rende
                 Header: 'Type',
                 disableFilters: true,
                 sticky: isMobile ? 'none' : 'left',
-                width: 200,
+                width: 100,
                 Cell: ({ row }) => (row.original['type'] ? <p>{`${startCase(row.original?.type)} `}</p> : <NoDataCell />)
             },
             {
                 accessor: 'detail',
                 Header: ' Details',
-                minWidth: 300,
-                width: 300,
+                minWidth: 200,
+                width: 200,
                 sticky: isMobile ? 'none' : 'left',
                 Cell: ({ row, rows }) => (
                     <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -140,11 +126,7 @@ const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, rende
                             <IconButton
                                 size="small"
                                 onClick={() => {
-                                    if (row.original.type === 'product') {
-                                        window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                                    } else {
-                                        window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                                    }
+                                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
                                 }}
                             >
                                 <OpenInNewIcon fontSize="small" color="primary" />
@@ -191,6 +173,7 @@ const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, rende
         setColumns(coloum);
         fetchRecords();
     };
+
     const openActions = (event) => {
         setAnchorActionEl(event.currentTarget);
     };
@@ -319,6 +302,7 @@ const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, rende
                                 isClientSideGrid={true}
                                 hideSelection={!allowedToEdit}
                                 hideAction={!allowedToEdit}
+                                hideExpander={true}
                             />
                         </Box>
                     </>

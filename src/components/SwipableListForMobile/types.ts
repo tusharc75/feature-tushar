@@ -1,4 +1,5 @@
 import { Dispatch, ReactNode } from 'react';
+import type { TInitialState } from 'src/components/CustomReactTableNew/useTableReducer';
 
 export type TSwipableListInputProps = {
   toggleAllRowsSelected: (value?: boolean) => void;
@@ -14,5 +15,11 @@ export type TSwipableListInputProps = {
   prepareRow: any;
   handleCellSelection: any;
   IndeterminateCheckbox: any;
-  backgroundColor?: (data: any) => string | null;
+  backgroundColorClass?: (data: any) => string | null;
+  submitInput: any;
+  cellValue: any;
+  setCellValue: any;
+  handleCellClick: any;
+  handleKeyDown: any;
+  state: TInitialState;
 };

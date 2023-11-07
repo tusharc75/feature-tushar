@@ -7,6 +7,7 @@ import { dateFormat, dateTimeFormat } from '../../constants/helpers';
 import Avatar from '@material-ui/core/Avatar';
 import Tooltip from '@material-ui/core/Tooltip';
 import { Link } from 'react-router-dom';
+import { Image } from '@material-ui/icons';
 
 export const CommonRenderer = (params) => <CustomRenderCell value={params.value} />;
 
@@ -106,7 +107,14 @@ export const NameRenderer = (params) =>
     <NoDataCell />
   );
 
-export const ImageRenderer = (params) => (params?.node?.rowPinned ? <NoDataCell /> : <Avatar className="grid-avatar" src={params?.value} />);
+export const ImageRenderer = (params) =>
+  params?.node?.rowPinned ? (
+    <NoDataCell />
+  ) : (
+    <Avatar className="grid-avatar" src={params?.value}>
+      <Image style={{ fontSize: 18 }} />
+    </Avatar>
+  );
 
 export const CustomLoadingOverlay = (params) => (
   <div className="ag-custom-loading-cell" style={{ paddingLeft: '10px', lineHeight: '25px' }}>

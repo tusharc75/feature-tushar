@@ -1703,7 +1703,7 @@ body::-webkit-scrollbar-thumb {
 }
 
 .red-data-row {
-  background-color: var(--error-dark, #ffcccb) !important;
+  background-color: var(--error-bg) !important;
 }
 
 .scrap-data-row {
@@ -1711,7 +1711,7 @@ body::-webkit-scrollbar-thumb {
 }
 
 .light-red-data-row {
-  background-color: var(--error-dark, #feb1b1) !important;
+  background-color: var(--error-bg) !important;
 }
 
 .light-yellow-data-row {
@@ -1723,7 +1723,7 @@ body::-webkit-scrollbar-thumb {
 }
 
 .light-green-data-row {
-  background-color: var(--dark-green, #acf1c8) !important;
+  background-color: var(--success-bg) !important;
 }
 
 .a_divider_inner {
@@ -3310,6 +3310,9 @@ body {
       border: none !important;
       width: 34px;
     }
+    &.with-border {
+      border: 1px solid var(--common-border-color) !important;
+    }
 
     & > span {
       line-height: 16px;
@@ -4189,5 +4192,34 @@ body {
 .ag-react-container {
   & > * {
     max-width: 100%;
+  }
+}
+.custom-react-table-v1 {
+  th,
+  td {
+    &[data-sticky-first-right-td='true'] {
+      right: -1px !important;
+    }
+  }
+}
+
+// calendar overlay{
+.rbc-overlay {
+  border-color: var(--common-border-color);
+  border-radius: 5px;
+  .rbc-overlay-header {
+    position: sticky;
+    top: -10px;
+    background-color: white;
+    border-color: var(--common-border-color);
+  }
+  max-height: 200px;
+  overflow-y: auto;
+  [data-mode='dark'] & {
+    background-color: var(--dark-secondary);
+    color: white;
+    .rbc-overlay-header {
+      background-color: var(--dark-secondary);
+    }
   }
 }

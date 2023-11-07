@@ -71,7 +71,7 @@ const ManageRepairOrder = ({
       const response: any = await axiosInstance().get('/field?resource=Repair Order');
       fieldData = response?.data?.data;
 
-      fieldData = fieldData?.filter((e) => !['rentalJob', 'quotation']?.includes(e.fieldData.fieldName));
+      fieldData = fieldData?.filter((e) => !['rentalJob', 'quotation', 'invoice']?.includes(e.fieldData.fieldName));
 
       const fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
       const fieldsDataForUpdate = fieldData?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);

@@ -37,6 +37,8 @@ function Parts({ id }) {
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [rowsData, setRowsData] = useState(null);
 
+  const [isSubmitting, setSubmitting] = useState(false);
+
   useEffect(() => {
     fetchGridColumns();
   }, []);
@@ -183,7 +185,7 @@ function Parts({ id }) {
 
   const handleSaveData = async (row: any) => {
     axiosInstance()
-      .put(`${product.api}/${id}/bom/${row._id}`,{ qty: row.qty })
+      .put(`${product.api}/${id}/bom/${row._id}`, { qty: row.qty })
       .then(({ data }) => {
         setToastConfig({
           open: true,
@@ -193,16 +195,40 @@ function Parts({ id }) {
         fetchBOMData();
       })
       .catch((error) => {
-       setToastConfig(error);
+        setToastConfig(error);
       });
   };
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
-      const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
-      if ( rowData && parseInt(inputField['qty']) > 0 ) {
-        handleSaveData({ _id: rowData._id, qty: parseInt(inputField['qty']) });
-      }
+    const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
+    if (rowData && parseInt(inputField['qty']) > 0) {
+      handleSaveData({ _id: rowData._id, qty: parseInt(inputField['qty']) });
     }
+  }
+
+  const handleAdd = async (rows) => {
+    setSubmitting(true)
+    const dataObj = rows
+      .filter((d) => d.qty > 0)
+      .map((d) => {
+        return { childProduct: d.id, qty: Number(d.qty) };
+      });
+    await axiosInstance().post(`/product/${id}/bom`, dataObj)
+      .then(({ data }) => {
+        if (permissions?.serializedAsset) fetchBOMData();
+        setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        setOpenAssignProductDialog(false);
+        setSubmitting(false)
+      })
+      .catch((error) => {
+        setToastConfig(error);
+        setSubmitting(false)
+      });
+  };
 
   return (
     <div>
@@ -292,16 +318,12 @@ function Parts({ id }) {
       )}
       {openAssignProductDialog && (
         <AssignProductDialog
-          productsDialogOpen={openAssignProductDialog}
-          productId={id}
           handleCloseDialog={() => setOpenAssignProductDialog(false)}
-          assignedProducts={[...parts?.map((p) => p.childProduct), id]}
-          onSuccess={() => {
-            if (permissions?.serializedAsset) {
-              fetchBOMData();
-            }
-            setOpenAssignProductDialog(false);
+          ids={[...parts?.map((p) => p.childProduct), id]}
+          onSuccess={(rows) => {
+            handleAdd(rows);
           }}
+          isSubmitting={isSubmitting}
         />
       )}
     </div>

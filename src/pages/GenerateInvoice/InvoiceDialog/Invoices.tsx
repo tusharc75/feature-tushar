@@ -1,26 +1,30 @@
-import { Box, Button, Grid, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { Box, Grid, IconButton } from '@material-ui/core';
 import { useContext, useEffect, useReducer, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
-import CustomRenderCell from 'src/components/Helpers/CustomRenderCell';
 import routes from 'src/components/Helpers/Routes';
-import { gridLoadingTimeout, invoice, isObjectEmpty, prepareDataForGrid, fieldServiceOrder, sidebarResource } from 'src/constants/helpers';
+import { gridLoadingTimeout, invoice, isObjectEmpty, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import useColumns, { checkStaticField, getFrameworkComponents, getStaticFields } from 'src/constants/useColumns';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { Delete, ExpandMore } from '@material-ui/icons';
+import ViewInvoice from '../../Invoice/ViewInvoice';
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import DeleteIcon from '@material-ui/icons/Delete';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import CustomRenderCell from 'src/components/Helpers/CustomRenderCell';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import ViewInvoice from 'src/pages/Invoice/ViewInvoice';
+import { camelCase } from 'lodash';
 
+const Invoices = ({ resourceId, resource, invoiceFieldName }) => {
+  const renderedFrom = `${camelCase(routes.generateInvoice?.title)}_invoice`;
 
-const FieldTicketInvoice = ({ fieldServiceOrderData, renderedFrom }) => {
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const toastConfig = useContext(CustomToastContext);
+
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions }
   }: any = useData();
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -31,13 +35,8 @@ const FieldTicketInvoice = ({ fieldServiceOrderData, renderedFrom }) => {
   const [columns, setColumns] = useState(null);
   const [deleteRecord, setDeleteRecord] = useState<any>({});
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
+  const [viewInvoiceDialog, setViewInvoiceDialog] = useState({ open: false, invoice: null });
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [viewBillDialog, setViewBillDialog] = useState({ open: false, invoice: null });
-  const [anchorActionEl, setAnchorActionEl] = useState(null);
-  const [selectedInvoices, setSelectedInvoices] = useState(null);
-  const [showConfirmBox, setShowConfirmBox] = useState(false);
-  const [isConsolidating, setConsolidating] = useState(false);
-
 
   useEffect(() => {
     fetchGridColumns();
@@ -72,14 +71,13 @@ const FieldTicketInvoice = ({ fieldServiceOrderData, renderedFrom }) => {
           }
         }
       }
-
       return o?.fieldData;
     });
     let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
     tempFrameworkComponent = {
       ...tempFrameworkComponent,
-      invoiceMaterialRenderer: InvoiceMaterialRenderer,
-      actionsRenderer: ActionsRenderer
+      actionsRenderer: ActionsRenderer,
+      invoiceMaterialRenderer: InvoiceMaterialRenderer
     };
     setFrameworkComponent({ ...tempFrameworkComponent });
     let staticFields = getStaticFields();
@@ -92,9 +90,9 @@ const FieldTicketInvoice = ({ fieldServiceOrderData, renderedFrom }) => {
   const InvoiceMaterialRenderer = (params) => (
     <>
       <span
-        className="link line-clamp-1"
+        className="link"
         onClick={() => {
-          setViewBillDialog({ open: true, invoice: params.data._id });
+          setViewInvoiceDialog({ open: true, invoice: params.data._id });
         }}
       >
         <CustomRenderCell value={params?.value} />
@@ -114,6 +112,16 @@ const FieldTicketInvoice = ({ fieldServiceOrderData, renderedFrom }) => {
 
   const ActionsRenderer = (params) => (
     <>
+      <HtmlTooltip title="View Invoice">
+        <IconButton
+          size="small"
+          onClick={() => {
+            setViewInvoiceDialog({ open: true, invoice: params.data._id });
+          }}
+        >
+          <VisibilityIcon fontSize="small" color="primary" />
+        </IconButton>
+      </HtmlTooltip>
       {params?.data?.canDelete && (
         <HtmlTooltip title="Delete">
           <IconButton
@@ -124,26 +132,19 @@ const FieldTicketInvoice = ({ fieldServiceOrderData, renderedFrom }) => {
               setIsConformDialogVisible(true);
             }}
           >
-            <Delete color="error" />
+            <DeleteIcon color="error" />
           </IconButton>
         </HtmlTooltip>
       )}
     </>
   );
 
-  const openActions = (event) => {
-    setAnchorActionEl(event.currentTarget);
-  };
-  const closeActions = () => {
-    setAnchorActionEl(null);
-  };
-
   useEffect(() => {
     fetchBilling();
   }, [page, limit, filters, sorting]);
 
-  const getQueryString = (isExport = false) => {
-    let deepFilter = `?page=${page}&limit=${limit}&fieldServiceOrder=${fieldServiceOrderData?._id}`;
+  const getQueryString = () => {
+    let deepFilter = `?page=${page}&limit=${limit}&${invoiceFieldName}=${resourceId}`;
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
@@ -164,6 +165,7 @@ const FieldTicketInvoice = ({ fieldServiceOrderData, renderedFrom }) => {
     if (search) {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
+
     return deepFilter;
   };
 
@@ -183,6 +185,7 @@ const FieldTicketInvoice = ({ fieldServiceOrderData, renderedFrom }) => {
           finalObject['canDelete'] = permissions?.invoice?.isDelete && u?.canDelete;
           return finalObject;
         });
+
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -226,77 +229,9 @@ const FieldTicketInvoice = ({ fieldServiceOrderData, renderedFrom }) => {
     }
   };
 
-  const handleConsolidate = async () => {
-    setConsolidating(true);
-    let ids = [];
-    selectedInvoices.forEach((e) => {
-      ids.push(e._id);
-    });
-    if (ids.length > 0) {
-      axiosInstance()
-        .put(`${fieldServiceOrder.api}/${fieldServiceOrderData?._id}/invoice/consolidate`, {
-          invoices: ids
-        })
-        .then(({ data }) => {
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-          setShowConfirmBox(false);
-          setConsolidating(false);
-          fetchBilling();
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-          setShowConfirmBox(false);
-          setConsolidating(false);
-        });
-    } else {
-      setShowConfirmBox(false);
-      setConsolidating(false);
-      fetchBilling();
-    }
-  };
-
   return (
     <>
       <Grid item xs={12} md={12} sm={12} className="mt-3">
-        {/* <Box display="flex" alignItems="center" justifyContent={'flex-end'} mr={1}>
-          <Button
-            variant="outlined"
-            color="default"
-            size="small"
-            disabled={selectedRecords.length >= 2 ? false : true}
-            onClick={openActions}
-            aria-controls="action-menu"
-            endIcon={<ExpandMore />}
-            className="new-dropdown-v1"
-          >
-            Actions
-          </Button>
-          <Menu
-            anchorEl={anchorActionEl}
-            keepMounted
-            getContentAnchorEl={null}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'left'
-            }}
-            id="action-menu"
-            open={Boolean(anchorActionEl)}
-            onClose={closeActions}
-          >
-            <MenuItem
-              onClick={() => {
-                setShowConfirmBox(true);
-                closeActions();
-              }}
-            >
-              Consolidate
-            </MenuItem>
-          </Menu>
-        </Box> */}
         {columns?.length ? (
           <CustomAgGrid
             columns={columns}
@@ -312,11 +247,9 @@ const FieldTicketInvoice = ({ fieldServiceOrderData, renderedFrom }) => {
             loading={loading}
             renderedFrom={renderedFrom}
             allowSelection={false}
-            onSelection={(data) => {
-              setSelectedInvoices(data);
-            }}
             allowAction={true}
             isClientSideGrid={true}
+            refreshGrid={fetchBilling}
           />
         ) : (
           <Box p={2} height={500}>
@@ -324,17 +257,16 @@ const FieldTicketInvoice = ({ fieldServiceOrderData, renderedFrom }) => {
           </Box>
         )}
       </Grid>
-      {viewBillDialog.open && (
+      {viewInvoiceDialog.open && (
         <ViewInvoice
-          invoiceId={viewBillDialog?.invoice}
+          invoiceId={viewInvoiceDialog.invoice}
           onClose={() => {
-            setViewBillDialog({ open: false, invoice: null });
+            setViewInvoiceDialog({ open: false, invoice: null });
           }}
           onSuccess={() => {
-            setViewBillDialog({ open: false, invoice: null });
-            fetchBilling();
+            setViewInvoiceDialog({ open: false, invoice: null });
           }}
-          resource={sidebarResource.fieldTicketInvoice}
+          resource={resource}
         />
       )}
       {isConfirmDialogVisible ? (
@@ -349,19 +281,7 @@ const FieldTicketInvoice = ({ fieldServiceOrderData, renderedFrom }) => {
           onOk={handleDeleteInvoice}
         />
       ) : null}
-      {showConfirmBox && (
-        <ConfirmationDialog
-          okBtnLoading={isConsolidating}
-          open={showConfirmBox}
-          message={`Are you sure you want to consolidate selected invoices?`}
-          onClose={() => {
-            setShowConfirmBox(false);
-          }}
-          onOk={handleConsolidate}
-        />
-      )}
     </>
   );
 };
-
-export default FieldTicketInvoice;
+export default Invoices;

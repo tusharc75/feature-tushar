@@ -37,10 +37,10 @@ const PackagesTable = ({ packageId, packageData }) => {
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const { getColumnData } = useColumns();
   const [state, dispatch] = useReducer(reducer, intialState);
-  const [arrangeView, setArrangeView] = useState(false);
-  const [isAssigning, setIsAssigning] = useState(false);
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
+
+  const [isSubmitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     fetchGridColumns();
@@ -141,6 +141,7 @@ const PackagesTable = ({ packageId, packageData }) => {
   const ActionsRenderer = (params) => <span>{params?.data?.qty}</span>;
 
   const handleAssignPackage = (rows) => {
+    setSubmitting(true)
     axiosInstance()
       .post(`${packages.api}/${packageId}/package`, {
         ids: [packageId],
@@ -150,10 +151,10 @@ const PackagesTable = ({ packageId, packageData }) => {
         setShowProductAssignDialog(false);
         setShowServiceAssignDialog(false);
         fetchData();
+        setSubmitting(false)
       })
       .catch((err) => {
-        setShowProductAssignDialog(false);
-        setShowServiceAssignDialog(false);
+        setSubmitting(false)
         setToastConfig(err);
       });
   };
@@ -299,24 +300,24 @@ const PackagesTable = ({ packageId, packageData }) => {
       )}
       {showProductAssignDialog && (
         <AssignPackageDialog
-          referenceType="packages"
           handleClose={() => setShowProductAssignDialog(false)}
           ids={[...dataRows?.map((e) => e._id), packageId]}
           onSuccess={(rows) => {
             handleAssignPackage(rows);
           }}
           packageType={'Product'}
+          isSubmitting={isSubmitting}
         />
       )}
       {showServiceAssignDialog && (
         <AssignPackageDialog
-          referenceType="packages"
           handleClose={() => setShowServiceAssignDialog(false)}
           ids={[...dataRows?.map((e) => e._id), packageId]}
           onSuccess={(rows) => {
             handleAssignPackage(rows);
           }}
           packageType={'Service'}
+          isSubmitting={isSubmitting}
         />
       )}
       {showProductConfirmBox && (

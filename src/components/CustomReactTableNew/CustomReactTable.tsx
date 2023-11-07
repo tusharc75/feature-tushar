@@ -1,22 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import MaUTable from '@material-ui/core/Table';
-import {
-  TableBody,
-  IconButton,
-  TableCell,
-  TableHead,
-  TableFooter,
-  TableRow,
-  TextField,
-  TablePagination,
-  Box,
-  CircularProgress
-} from '@material-ui/core';
-import { Check } from '@material-ui/icons';
+import { TableBody, IconButton, TableCell, TableHead, TableRow, Box, CircularProgress, Button, TableFooter } from '@material-ui/core';
+import { Check, Edit, Error } from '@material-ui/icons';
 import { FaAngleRight, FaAngleDown } from 'react-icons/fa';
 import { columnFilter } from './ReactTableHelpers';
 import { gridPageSizes } from '../../constants/helpers';
 import { isString, uniqBy, debounce } from 'lodash';
+import { flattenArray } from 'src/constants/columns';
 import {
   useTable,
   useExpanded,
@@ -46,6 +36,9 @@ import { CgSearch } from 'react-icons/cg';
 import GridHeader from './GridHeader';
 import SwipableListForMobile from 'src/components/SwipableListForMobile';
 import Pagination from './Pagination';
+import { BiFilterAlt } from 'react-icons/bi';
+import GridFilter from './Filters';
+import type { TInitialState } from './useTableReducer';
 
 interface CustomCheckBoxProps extends CheckboxProps {
   indeterminate: any;
@@ -213,38 +206,60 @@ const EditableCell = ({ value: initialValue, row: { index }, column: { id }, upd
 
 function CustomReactTable({
   columns,
-  data,
-  onSelect,
+  childrenProperty = 'subRows',
+  onSelect = null,
   setWholeRowsCellColor = null,
   height = '100%',
   hideSelection = false,
   renderedFrom,
   isClientSideGrid = true,
-  currentPage = 1,
-  rowCount,
   expander = false,
   allowPagination = true,
-  limit = gridPageSizes[0],
-  customFilters = [],
   refreshGrid = null,
   dispatch,
-  sorting,
-  loading,
+  state,
   fetchChildAttachment = null,
-  showOnlyShowFilteredRecordSwitch = false
+  showOnlyShowFilteredRecordSwitch = false,
+  showFilters = false,
+  resource = null,
+  onSaveEdit = null,
+  hideAction = false
 }) {
+  const {
+    currentEditingCellPosition,
+    dataRows: data,
+    rowCount,
+    selectedRecords,
+    loading,
+    page,
+    limit,
+    pageSizes,
+    search,
+    filters: customFilters,
+    sorting,
+    error
+  }: TInitialState = state;
   const isMobileView = isMobile && !isTablet;
   const defaultColumn = {
     Cell: EditableCell,
     minWidth: 80,
-    width: 150,
+    width: 200,
     Filter: DefaultColumnFilter
   };
 
   const [cellValue, setCellValue] = React.useState('');
-  const [isCellEditing, setIsCellEditing] = React.useState(false);
-  const [currentRowEditing, setCurrentRowEditing] = React.useState(null);
   const [baseColumns, setBaseColumns] = React.useState([]);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [selectedFilter, setSelectedFilter] = useState(null);
+  const [currentFomValue, setCurrentFomValue] = useState({});
+
+  const handleFilterOpen = () => {
+    setIsFilterOpen(true);
+  };
+
+  const handleFilterClose = () => {
+    setIsFilterOpen(false);
+  };
 
   useEffect(() => {
     setBaseColumns(columns);
@@ -312,42 +327,59 @@ function CustomReactTable({
               width: isMobile && !isTablet ? 40 : 70,
               minWidth: isMobile && !isTablet ? 40 : 70,
               canDrag: false,
-              Cell: ({ row }) =>
-                row.original.type === 'folder' ? (
-                  <IconButton
-                    {...row.getToggleRowExpandedProps?.({
-                      style: {
-                        marginLeft: isMobileView ? 0 : `${row.depth * 2}rem`
-                      }
-                    })}
-                    size="small"
-                  >
-                    {row.isExpanded ? (
-                      <FaAngleDown />
-                    ) : (
-                      <FaAngleRight
-                        onClick={async () => {
-                          const subRows = await fetchChildAttachment(row.original.id);
-                          row.original.subRows = subRows;
-                        }}
-                      />
-                    )}
-                  </IconButton>
-                ) : null
+              Cell: ({ row }) => (
+                <div
+                  {...row.getToggleRowExpandedProps?.({
+                    style: {
+                      marginLeft: isMobileView ? 0 : `${row.depth * 10}px`
+                    }
+                  })}
+                >
+                  {row.original.type === 'folder' || row.canExpand ? (
+                    <IconButton size="small" style={{ fontSize: 13 }}>
+                      {row.isExpanded ? (
+                        <FaAngleDown />
+                      ) : (
+                        <FaAngleRight
+                          onClick={async () => {
+                            if (!fetchChildAttachment || row.original[childrenProperty]?.length > 0) return;
+                            const subRows = await fetchChildAttachment(row.original.id);
+                            row.original.subRows = subRows;
+                            row.canExpand = true;
+                            row.isExpanded = true;
+                          }}
+                        />
+                      )}
+                    </IconButton>
+                  ) : null}
+                </div>
+              )
             },
             {
               id: 'selection',
               minWidth: 50,
               width: 50,
+              sticky: isMobileView ? 'none' : 'left',
               maxWidth: 50,
               Header: ({ getToggleAllRowsSelectedProps }) => (
                 <IndeterminateCheckbox
                   onClick={(e) => handleAllSelect(getToggleAllRowsSelectedProps()?.checked)}
                   {...getToggleAllRowsSelectedProps()}
-                  style={{ marginLeft: '7px' }}
+                  className="mx-auto text-center"
                 />
               ),
-              Cell: ({ row }) => <IndeterminateCheckbox onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps()} />
+              Cell: ({ row }) => (
+                <div
+                  {...{
+                    style: {
+                      paddingLeft: isMobileView ? 0 : `${row.depth * 15}px`
+                    }
+                  }}
+                  className="mx-auto text-center"
+                >
+                  <IndeterminateCheckbox onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps()} />
+                </div>
+              )
             },
             ...baseColumns.map((m) => {
               return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' };
@@ -356,6 +388,7 @@ function CustomReactTable({
         : [
             {
               id: 'selection',
+              sticky: isMobileView ? 'none' : 'left',
               minWidth: 50,
               width: 50,
               maxWidth: 50,
@@ -363,17 +396,55 @@ function CustomReactTable({
                 <IndeterminateCheckbox
                   onClick={(e) => handleAllSelect(getToggleAllRowsSelectedProps()?.checked)}
                   {...getToggleAllRowsSelectedProps()}
-                  style={{ marginLeft: '7px' }}
+                  className="mx-auto text-center"
                 />
               ),
-              Cell: ({ row }) => <IndeterminateCheckbox onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps()} />
+              Cell: ({ row }) => (
+                <div
+                  {...{
+                    style: {
+                      paddingLeft: isMobileView ? 0 : `${row.depth * 15}px`
+                    }
+                  }}
+                  className="mx-auto text-center"
+                >
+                  <IndeterminateCheckbox onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps()} />
+                </div>
+              )
             },
             ...baseColumns.map((m) => {
-              return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' };
+              return m.canFilter === false ? { ...m, columnFilterable: false, filter: 'filterRowsWithSubrows' } : { ...m, columnFilterable: true };
             })
           ],
     [baseColumns]
   );
+
+  const getDataFromLocalStorage = () => {
+    try {
+      const data = localStorage.getItem('gridMetaData');
+      return data && data !== 'undefined' ? JSON.parse(data) : {};
+    } catch (ex) {
+      console.error(`Error while getting data from local storage: ${ex.message}`);
+      return {};
+    }
+  };
+  const returnSavedColOrder = () => {
+    const gridMetaData = getDataFromLocalStorage();
+    const colOrder = gridMetaData[renderedFrom]?.order || [];
+    const orderIndices = {};
+
+    for (let i = 0; i < colOrder.length; i++) {
+      orderIndices[colOrder[i]] = i;
+    }
+
+    const orderedCols = newColumns.slice().sort((a, b) => {
+      const aIndex = orderIndices[a?.id || a?.accessor];
+      const bIndex = orderIndices[b?.id || b?.accessor];
+      return aIndex - bIndex;
+    });
+
+    return orderedCols.length ? orderedCols : newColumns.map((m) => m?.id || m?.accessor);
+  };
 
   const filterTypes = React.useMemo(
     () => ({
@@ -405,6 +476,7 @@ function CustomReactTable({
     toggleRowExpanded,
     toggleAllRowsExpanded,
     setColumnOrder,
+    footerGroups,
     setCellState,
     toggleAllRowsSelected,
     state: { rowState, pageIndex, sortBy, selectedRowIds, columnOrder }
@@ -416,13 +488,16 @@ function CustomReactTable({
       defaultColumn,
       filterTypes,
       initialState: {
-        columnOrder: newColumns.map((col) => col?.id || col?.accessor),
+        columnOrder: returnSavedColOrder(),
         sortBy: sorting.map((d) => {
           return { id: d.colId, desc: d.sort === 'asc' ? false : true };
         }),
-        pageIndex: currentPage,
+        pageIndex: page,
+        expanded: false,
         autoResetExpanded: false,
-        hiddenColumns: hideSelection ? ['selection', 'action'] : returnHiddenCols(),
+        // hiddenColumns: hideSelection ? ['selection', 'action'] : returnHiddenCols(),
+        hiddenColumns:
+          hideSelection && hideAction ? ['selection', 'action'] : hideSelection ? ['selection'] : hideAction ? ['action'] : returnHiddenCols(),
         selectedRowIds: localStorage.getItem(`${renderedFrom}_selected`)
           ? Object.assign(
               {},
@@ -430,7 +505,7 @@ function CustomReactTable({
             )
           : {}
       },
-      getSubRows: (row: any) => row.subRows,
+      getSubRows: (row: any) => row[childrenProperty],
       sortTypes: {
         alphanumeric: (row1, row2, columnName, desc: boolean) => {
           if (isClientSideGrid) {
@@ -459,7 +534,7 @@ function CustomReactTable({
 
   useEffect(() => {
     rows.forEach((d) => {
-      if (d.subRows && d.subRows.length < 20) {
+      if (d[childrenProperty] && d[childrenProperty].length < 20) {
         toggleAllRowsExpanded(true);
         toggleRowExpanded(d.id, true);
       }
@@ -516,7 +591,7 @@ function CustomReactTable({
         flatSelectedData.push({ ...rest });
       }
     });
-    onSelect([...flatSelectedData]);
+    if (onSelect) onSelect([...flatSelectedData]);
     dispatch({
       type: 'selection',
       selectedRecords: [...flatSelectedData]
@@ -587,29 +662,49 @@ function CustomReactTable({
   }, [allColumns]);
 
   const submitInput = () => {
-    const rowData = Object.keys(rowState[currentRowEditing.id].cellState).filter((k) => rowState[currentRowEditing.id].cellState[k].isEditing);
-    const updatedData = data.map((row: any) => {
-      if (row._id == currentRowEditing?.original._id) {
-        row[rowData[0]] = cellValue;
-      }
-      return row;
-    });
+    if (!currentEditingCellPosition) return;
+    const updatedData = flattenArray(data)?.find((row) => row?._id === currentEditingCellPosition.rowId);
+    updatedData[currentEditingCellPosition.columnName] = cellValue;
+    const inputField = { [`${currentEditingCellPosition.columnName}`]: cellValue };
+    if (onSaveEdit && ![undefined, null].includes(cellValue)) {
+      onSaveEdit(inputField, updatedData);
+    }
     dispatch({
-      type: 'initialize',
-      data: updatedData,
-      count: rowCount
+      type: 'currentEditingCellPosition',
+      cellPosition: null
     });
-    Object.keys(rowState).forEach((rowId) => {
-      Object.keys(rowState[rowId].cellState).forEach((colId) => {
-        setCellState(rowId, colId, { isEditing: false });
-      });
-    });
-    setIsCellEditing(false);
-    setCurrentRowEditing(null);
-    setCellValue('');
   };
 
   const mobileSelectAllHeader: any | null = React.useMemo(() => allColumns?.find((item) => item.id === 'selection') || null, [allColumns]);
+
+  const handleKeyDown = (e) => {
+    if (!currentEditingCellPosition) return;
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      submitInput();
+    }
+  };
+
+  const handleCellClick = (cell, row) => {
+    // prepareRow(row);
+    if (!cell.column.id || !row.original._id || !cell?.column?.editable) return;
+
+    dispatch({
+      type: 'currentEditingCellPosition',
+      cellPosition: {
+        rowId: row.original._id,
+        columnName: cell.column.id
+      }
+    });
+    setCellValue(cell?.value || null);
+  };
+
+  const resetField = () => {
+    dispatch({
+      type: 'currentEditingCellPosition',
+      cellPosition: null
+    });
+  };
 
   return (
     <DndProvider backend={HTML5Backend}>
@@ -620,6 +715,20 @@ function CustomReactTable({
             loading={loading}
             buttons={
               <>
+                {showFilters && (
+                  <HtmlTooltip title="Apply Filters" placement="top" arrow>
+                    <Button
+                      style={{ marginRight: '8px', color: '#424242' }}
+                      startIcon={<BiFilterAlt />}
+                      size={'small'}
+                      variant="outlined"
+                      className="btn-outline-v1 light "
+                      onClick={handleFilterOpen}
+                    >
+                      Filter
+                    </Button>
+                  </HtmlTooltip>
+                )}
                 <ArrangeViewButton
                   defaultColumns={allColumns}
                   loading={loading}
@@ -633,20 +742,45 @@ function CustomReactTable({
                 />
               </>
             }
+            startButtons={
+              isMobileView &&
+              !hideSelection &&
+              mobileSelectAllHeader && (
+                <>
+                  <label className="flex items-center gap-2 cursor-pointer ml-[13px]">
+                    {mobileSelectAllHeader.render('Header')} <span>Select All</span>
+                  </label>
+                </>
+              )
+            }
           >
             <CustomReactTableHeaderOptions
+              columns={baseColumns}
+              customFilters={customFilters}
               renderedFrom={renderedFrom}
               dispatchTable={dispatch}
               showOnlyShowFilteredRecordSwitch={showOnlyShowFilteredRecordSwitch}
               selectedRecords={selectedFlatRows?.length}
+              showFilters={showFilters}
+              handleFilterOpen={handleFilterOpen}
+              selectedFilter={selectedFilter}
+              setSelectedFilter={setSelectedFilter}
+              currentFomValue={currentFomValue}
+              setCurrentFomValue={setCurrentFomValue}
             />
             {/* Select All For Mobile */}
-            {isMobileView && !hideSelection && mobileSelectAllHeader && (
-              <>
-                <label className="flex items-center gap-2 cursor-pointer -ml-2">
-                  {mobileSelectAllHeader.render('Header')} <span>Select All</span>
-                </label>
-              </>
+
+            {isFilterOpen && (
+              <GridFilter
+                resource={resource}
+                customFilters={customFilters}
+                handleClose={handleFilterClose}
+                setSelectedFilter={setSelectedFilter}
+                selectedFilter={selectedFilter}
+                currentFomValue={currentFomValue}
+                setCurrentFomValue={setCurrentFomValue}
+                dispatch={dispatch}
+              />
             )}
           </GridHeader>
 
@@ -655,115 +789,153 @@ function CustomReactTable({
             <div
               style={{
                 display: 'block',
-                overflow: 'auto',
+                overflow: !loading && !error && rows.length === 0 ? 'hidden' : 'auto',
                 height: height ?? '100%'
               }}
-              className="border "
+              className="border"
             >
-              {loading && (
-                <Box
-                  bgcolor={'rgba(255,255,255,0.2)'}
-                  width="100%"
-                  height="100%"
-                  zIndex={100}
-                  position="absolute"
-                  top={0}
-                  left={0}
-                  display="flex"
-                  justifyContent="center"
-                  alignItems="center"
-                >
-                  <Box textAlign="center">
-                    <CircularProgress color="inherit" />
-                    <p>Loading...</p>
-                  </Box>
+              {(loading || error) && (
+                <Box className="bg-[rgba(255,255,255,0.2)] dark:bg-[rgba(0,0,0,0.1)] w-full h-full z-[100] absolute inset-0 flex justify-center items-center">
+                  <div className="bg-[white] dark:bg-[var(--dark-secondary)] px-10 py-5 rounded-lg text-center shadow-md">
+                    {error ? (
+                      <>
+                        <Error className="mx-auto mb-2" />
+                        <p>Something Went Wrong</p>
+                      </>
+                    ) : loading ? (
+                      <>
+                        <CircularProgress />
+                        <p>Loading...</p>
+                      </>
+                    ) : null}
+                  </div>
                 </Box>
               )}
+              <div className="relative">
+                {!loading && !error && rows.length === 0 && (
+                  <>
+                    <Box
+                      style={{ height: `calc(${height ?? '100%'} - 60px)` }}
+                      className="bg-[rgba(255,255,255,0.2)] dark:bg-[rgba(0,0,0,0.1)] w-full h-full z-[100] absolute inset-0 flex justify-center items-center"
+                    >
+                      <div className="bg-[white] dark:bg-[var(--dark-secondary)] px-10 py-5 rounded-lg text-center shadow-md">
+                        <Error className="mx-auto mb-2" />
+                        <p>No data found</p>
+                      </div>
+                    </Box>
+                  </>
+                )}
+                <MaUTable {...getTableProps()} size="small" className="tableWrap table sticky">
+                  <TableHead style={{ overflowY: 'auto', overflowX: 'hidden' }} className="header">
+                    {headerGroups.map((headerGroup, index) => (
+                      <React.Fragment key={index}>
+                        <TableRow {...headerGroup.getHeaderGroupProps()} className="tr">
+                          {headerGroup.headers.map((column, index) => (
+                            <React.Fragment key={column.id}>
+                              <DraggableHeader
+                                key={column.id}
+                                column={column}
+                                reorder={reorder}
+                                index={index}
+                                customFilters={customFilters}
+                                dispatch={dispatch}
+                                isClientSideGrid={isClientSideGrid}
+                              />
+                            </React.Fragment>
+                          ))}
+                        </TableRow>
+                      </React.Fragment>
+                    ))}
+                  </TableHead>
 
-              <MaUTable {...getTableProps()} size="small" className="tableWrap table sticky">
-                <TableHead style={{ overflowY: 'auto', overflowX: 'hidden' }} className="header">
-                  {headerGroups.map((headerGroup, index) => (
-                    <React.Fragment key={index}>
-                      <TableRow {...headerGroup.getHeaderGroupProps()} className="tr">
-                        {headerGroup.headers.map((column, index) => (
-                          <React.Fragment key={column.id}>
-                            <DraggableHeader
-                              key={column.id}
-                              column={column}
-                              reorder={reorder}
-                              index={index}
-                              customFilters={customFilters}
-                              dispatch={dispatch}
-                              isClientSideGrid={isClientSideGrid}
-                            />
-                          </React.Fragment>
-                        ))}
-                      </TableRow>
-                    </React.Fragment>
-                  ))}
-                </TableHead>
-
-                <TableBody
-                  style={{
-                    overflowY: 'scroll',
-                    overflowX: 'hidden'
-                    // height: "250px"
-                  }}
-                  className="body"
-                >
-                  {rows.map((row, index1) => {
-                    prepareRow(row);
-                    return (
-                      <TableRow key={index1} {...row.getRowProps()} className="tr">
-                        {row.cells.map((cell, index2) => {
-                          return (
-                            <TableCell
-                              key={index2}
-                              {...cell.getCellProps()}
-                              className={`td   ${cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''}    ${
-                                setWholeRowsCellColor ? setWholeRowsCellColor(row.original) : ''
-                              }`}
-                            >
-                              {!['selection'].includes(cell?.column.id) &&
-                              rowState &&
-                              rowState.hasOwnProperty(row.id) &&
-                              rowState[row.id].cellState[cell?.column.id]?.isEditing ? (
-                                <input
-                                  autoFocus
-                                  onBlur={submitInput}
-                                  style={{
-                                    borderLeft: '0',
-                                    borderTop: '0',
-                                    padding: '2px 4px',
-                                    width: cell?.column.width - 20,
-                                    background: 'transparent',
-                                    outline: 'none'
-                                  }}
-                                  value={cellValue}
-                                  onChange={(e) => setCellValue(e.target.value)}
-                                />
-                              ) : isCellEditing && currentRowEditing && currentRowEditing.id === row.id && cell?.column.id === 'action' ? (
-                                <HtmlTooltip title="Save">
-                                  <IconButton size="small" aria-label="Save" onClick={submitInput}>
-                                    <Check color="primary" />
-                                  </IconButton>
-                                </HtmlTooltip>
-                              ) : (
-                                cell.render('Cell')
-                              )}
+                  <TableBody
+                    style={{
+                      overflowY: 'scroll',
+                      overflowX: 'hidden'
+                      // height: "250px"
+                    }}
+                    className="body relative"
+                  >
+                    {rows.map((row, index1) => {
+                      prepareRow(row);
+                      return (
+                        <TableRow key={index1} {...row.getRowProps()} className="tr">
+                          {row.cells.map((cell, index2) => {
+                            return (
+                              <TableCell
+                                key={index2}
+                                {...cell.getCellProps()}
+                                className={`td   ${cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''}    ${
+                                  setWholeRowsCellColor ? setWholeRowsCellColor(row.original) : ''
+                                }`}
+                                onClick={() => {
+                                  handleCellClick(cell, row);
+                                }}
+                                onKeyDown={(e) => {
+                                  handleKeyDown(e);
+                                }}
+                              >
+                                {!['selection'].includes(cell?.column.id) &&
+                                currentEditingCellPosition?.rowId === row.original._id &&
+                                currentEditingCellPosition?.columnName === cell?.column.id ? (
+                                  <input
+                                    title={`Edit-${cell.id}`}
+                                    autoFocus
+                                    onBlur={() => (cell.value !== cellValue ? submitInput() : resetField())}
+                                    value={cellValue}
+                                    className="dark:text-[white]  appearance-none w-full focus-within:outline-[var(--new-theme-color)] bg-[transparent] outline-[transparent] shadow-0 border-[0] px-[2px] py-[4px] [border-bottom:1px_solid_var(--common-border-color)_!important]"
+                                    onChange={(e) => setCellValue(e.target.value)}
+                                  />
+                                ) : currentEditingCellPosition?.rowId === row.original._id && cell?.column.id === 'action' ? (
+                                  <HtmlTooltip title="Save">
+                                    <IconButton size="small" aria-label="Save" onClick={submitInput}>
+                                      <Check color="primary" />
+                                    </IconButton>
+                                  </HtmlTooltip>
+                                ) : cell.column?.editable && cell?.value ? (
+                                  <div
+                                    style={{
+                                      borderBottom: '1px dashed #8a8a8a',
+                                      cursor: 'pointer',
+                                      display: 'flex',
+                                      justifyContent: 'space-between'
+                                    }}
+                                  >
+                                    <p>{cell?.value}</p>
+                                    <span>
+                                      <Edit className="text-[rgba(0,0,0,0.3)] dark:text-[rgba(255,255,255,0.9)]" fontSize="small" />
+                                    </span>
+                                  </div>
+                                ) : (
+                                  cell.render('Cell')
+                                )}
+                              </TableCell>
+                            );
+                          })}
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                  {rows?.length > 0 && footerGroups?.length > 0 && !allowPagination && (
+                    <TableFooter style={{ overflowY: 'auto', overflowX: 'hidden' }} className="footer ">
+                      {footerGroups.map((group) => (
+                        <TableRow {...group.getFooterGroupProps()} className="tr">
+                          {group.headers.map((column) => (
+                            <TableCell {...column.getHeaderProps()} className="th text-truncate font-weight-bold text-black">
+                              {column.render('Footer')}
                             </TableCell>
-                          );
-                        })}
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </MaUTable>
+                          ))}
+                        </TableRow>
+                      ))}
+                    </TableFooter>
+                  )}
+                </MaUTable>
+              </div>
             </div>
           )}
         </div>
 
-        {isMobileView ? (
+        {isMobileView && rows ? (
           <SwipableListForMobile
             key={pageIndex}
             prepareRow={prepareRow}
@@ -772,14 +944,20 @@ function CustomReactTable({
             dataRows={rows}
             dispatch={dispatch}
             loading={loading}
-            page={currentPage}
+            page={page}
             rowCount={rowCount}
             expander={expander}
-            backgroundColor={setWholeRowsCellColor}
+            backgroundColorClass={setWholeRowsCellColor}
             renderedFrom={renderedFrom}
             handleCellSelection={handleCellSelection}
             IndeterminateCheckbox={IndeterminateCheckbox}
             toggleAllRowsSelected={toggleAllRowsSelected}
+            state={state}
+            submitInput={submitInput}
+            cellValue={cellValue}
+            setCellValue={setCellValue}
+            handleCellClick={handleCellClick}
+            handleKeyDown={handleKeyDown}
           />
         ) : null}
         {/* {allowPagination && (
@@ -837,19 +1015,23 @@ interface DraggableHeaderProps {
 const DraggableHeader: React.FC<DraggableHeaderProps> = ({ column, index, reorder, customFilters, dispatch, isClientSideGrid }) => {
   const ref = React.useRef();
   const { id, Header } = column;
-  const [filters, setFilters] = useState(() => {
-    if (Object.keys(customFilters).length === 0) {
-      return [];
-    } else {
-      return Object.keys(customFilters).map((key, i) => {
-        return { id: key, value: customFilters[key].filter };
-      });
-    }
-  });
+  const [filters, setFilters] = useState([]);
+
+  // Use a useEffect to update filters when customFilters changes
+  useEffect(() => {
+    setFilters(
+      Object.keys(customFilters).map((key, i) => ({
+        id: key,
+        value: customFilters[key].filter
+      }))
+    );
+  }, [customFilters]); // Add customFilters as a dependency
+
+  const MINIMUM_SEARCH_DELAY = 600; // Adjust this delay as needed
 
   const debouncedFilterDispatch = debounce((updatedCustomFilters) => {
     dispatch({ type: 'filter', filters: updatedCustomFilters });
-  }, 600);
+  }, MINIMUM_SEARCH_DELAY);
 
   const [, drop] = useDrop({
     accept: ItemTypes.COLUMN,
@@ -873,21 +1055,32 @@ const DraggableHeader: React.FC<DraggableHeaderProps> = ({ column, index, reorde
     }),
     canDrag: !column?.lockPosition || column?.id !== 'selection' || column?.id !== 'action' || column?.id !== 'expand'
   });
-
   useEffect(() => {
     if (!isClientSideGrid) {
-      let tempArray = Object.keys(customFilters).map((key, i) => {
-        return { id: key, value: customFilters[key].filter };
-      });
-      if (JSON.stringify(filters) !== JSON.stringify(tempArray)) {
-        var tempResult = {};
-        filters?.forEach((v) => {
-          if (v.value && v.value !== '') {
-            tempResult[v.id] = { filter: v.value };
-          }
+      // Add a timer to delay the dispatch
+      const searchTimer = setTimeout(() => {
+        let tempArray = Object.keys(customFilters).map((key, i) => {
+          return { id: key, value: customFilters[key].filter };
         });
-        debouncedFilterDispatch(tempResult);
-      }
+
+        if (JSON.stringify(filters) !== JSON.stringify(tempArray)) {
+          var tempResult = {};
+          filters?.forEach((v) => {
+            if (v.value && v.value !== '') {
+              tempResult[v.id] = { filter: v.value };
+            } else {
+              //this is for handling condition where the customFilters has a multiselect type field and we type something in some other filter
+              if (customFilters[v.id] && customFilters[v.id].operator && customFilters[v.id].condition1) {
+                tempResult[v.id] = customFilters[v.id];
+              }
+            }
+          });
+          debouncedFilterDispatch(tempResult);
+        }
+      }, MINIMUM_SEARCH_DELAY);
+
+      // Clear the timer when the component unmounts or when filters change
+      return () => clearTimeout(searchTimer);
     }
   }, [filters]);
 
@@ -895,25 +1088,31 @@ const DraggableHeader: React.FC<DraggableHeaderProps> = ({ column, index, reorde
 
   return (
     <TableCell {...column.getHeaderProps()} className="th text-truncate table-header">
-      <div ref={ref} className="d-flex align-items-center justify-content-space-between pos-rel" style={{ width: '100%' }}>
+      <div
+        ref={ref}
+        className={`d-flex items-center ${column.id === 'selection' ? 'justify-center' : 'justify-between'} pos-rel`}
+        style={{ width: '100%' }}
+      >
         <div
           style={{ opacity: isDragging ? 0.2 : 1 }}
-          className="d-flex gap-2 align-items-center"
+          className="d-flex gap-2 align-items-center "
           {...column.getSortByToggleProps({ title: undefined })}
         >
-          <span>{column.render('Header')}</span>
+          <div className="line-clamp-1">
+            <span className=" overflow-hidden overflow-ellipsis whitespace-normal">{column.render('Header')}</span>
+          </div>
           {column.isSorted ? column.isSortedDesc ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" /> : ''}
         </div>
-        <div>
-          {column.canFilter ? (
+        {column?.columnFilterable && column?.id !== 'action' ? (
+          <div>
             <TempFilter
               filterValue={filters.find((filter) => filter.id === column.id)?.value || ''}
               id={column?.id}
               setFilters={setFilters}
               customFilters={customFilters}
             />
-          ) : null}
-        </div>
+          </div>
+        ) : null}
       </div>
       <div {...column.getResizerProps()} className="resizer" />
     </TableCell>

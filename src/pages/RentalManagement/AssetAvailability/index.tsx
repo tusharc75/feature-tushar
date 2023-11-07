@@ -168,11 +168,6 @@ export default function AssetAvailability({ rentalId, handleClose }) {
       dialogProps={{
         maxWidth: 'md',
         fullScreen: isMobile
-        // onClose: (e, reason) => {
-        // if (reason !== 'backdropClick') {
-        //   return;
-        // }
-        // }
       }}
       open={true}
       modalHead={{ ...modalContent, fullScreenOption: true }}
