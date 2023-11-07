@@ -1,5 +1,5 @@
 import { Box, Button } from '@material-ui/core';
-import { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Stage, Layer, Rect } from 'react-konva';
 import CustomImage from './CustomImage';
 import { useAppTheme } from 'src/constants/AppConfig';
@@ -33,6 +33,12 @@ const ViewImage = ({ data, loading, setLoading }) => {
   const [editingText, setEditingText] = useState<TextType>(null);
   const [transformImage, setTransformImage] = useState(false);
   const [url, setUrl] = useState();
+  const [widthHeight, setWidthHeight] = useState({
+    width: window.innerWidth - 700,
+    height: window.innerHeight - 250
+  });
+
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const stageColor = useMemo(() => {
     if (themeColor === 'light') {
@@ -53,9 +59,9 @@ const ViewImage = ({ data, loading, setLoading }) => {
   useEffect(() => {
     setImageState({
       name: data?.name,
-      x: 150,
+      x: widthHeight.width * 0.5 - 200,
+      y: widthHeight.height * 0.5 - 200,
       isDragging: false,
-      y: 0,
       width: 400,
       height: 400
     });
@@ -91,8 +97,23 @@ const ViewImage = ({ data, loading, setLoading }) => {
     });
   };
 
+  const watchContainerSize = React.useCallback(() => {
+    if (containerRef.current) {
+      setWidthHeight({
+        width: containerRef.current.clientWidth,
+        height: containerRef.current.clientHeight - 38
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    watchContainerSize();
+    window.addEventListener('resize', watchContainerSize);
+    return () => window.removeEventListener('resize', watchContainerSize);
+  }, [watchContainerSize]);
+
   return (
-    <Box>
+    <div className="absolute inset-2" ref={containerRef}>
       <Box mb={1} display="flex">
         <Button size="small" variant="outlined" color="primary" onClick={handleAddText}>
           Add Text
@@ -104,9 +125,9 @@ const ViewImage = ({ data, loading, setLoading }) => {
           ref={(node) => {
             stageRef.current = node;
           }}
-          style={{ backgroundColor: 'white' }}
-          width={window.innerWidth - 700}
-          height={window.innerHeight - 250}
+          style={{ backgroundColor: 'transparent' }}
+          width={widthHeight.width}
+          height={widthHeight.height}
           onClick={(e) => {
             if (!e.target.attrs.hasOwnProperty('id') || e.target.attrs.id !== 'image') {
               setTransformImage(false);
@@ -199,7 +220,7 @@ const ViewImage = ({ data, loading, setLoading }) => {
           }}
         />
       )}
-    </Box>
+    </div>
   );
 };
 

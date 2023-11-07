@@ -218,13 +218,13 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
                           : 'attachment'}
                       </p>
                       <div className="flex justify-between">
-                        <Tooltip title="Download" placement="top">
+                        <Tooltip title="Download" placement="top" enterTouchDelay={0}>
                           <IconButton size={'small'} onClick={(event) => downloadFile(event, attachment)} style={{ paddingBottom: '1px' }}>
                             {<GetAppIcon />}
                           </IconButton>
                         </Tooltip>
                         {_.endsWith(attachment?.url, '.pdf') && (
-                          <Tooltip title="Preview" placement="top">
+                          <Tooltip title="Preview" placement="top" enterTouchDelay={0}>
                             <IconButton
                               size={'small'}
                               onClick={(e) => {
@@ -236,7 +236,7 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
                           </Tooltip>
                         )}
                         {canEdit && permissions?.attachment?.isDelete ? (
-                          <Tooltip title="Delete" placement="top">
+                          <Tooltip title="Delete" placement="top" enterTouchDelay={0}>
                             <IconButton
                               size={'small'}
                               onClick={() => {
@@ -248,7 +248,7 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
                             </IconButton>
                           </Tooltip>
                         ) : (
-                          <Tooltip className="cursor-stop" title={"You don't have permissions to delete attachment"}>
+                          <Tooltip className="cursor-stop" title={"You don't have permissions to delete attachment"} enterTouchDelay={0}>
                             <IconButton size={'small'}>
                               <DeleteIcon color="disabled" />
                             </IconButton>
