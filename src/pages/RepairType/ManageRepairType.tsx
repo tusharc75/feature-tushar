@@ -221,7 +221,6 @@ const ManageRepairType = ({ isClone = false, repairTypeId = null, onClose, onSuc
                             {form.sectionFields.map((field, index2) => (
                               <Grid key={index2} item xs={12} sm={6} md={6}>
                                 <FormTypes
-                                  isNew={Boolean(repairTypeId)}
                                   {...field}
                                   fieldData={field}
                                   disabled={Boolean(repairTypeId) && field.disableOnEdit && !isClone}

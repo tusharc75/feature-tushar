@@ -382,7 +382,6 @@ const ManageSublease = ({
                                   />
                                 ) : (
                                   <FormTypes
-                                    isNew={Boolean(subleaseId)}
                                     {...field}
                                     fieldData={field}
                                     disabled={Boolean(subleaseId) && field.disableOnEdit && !isClone}
