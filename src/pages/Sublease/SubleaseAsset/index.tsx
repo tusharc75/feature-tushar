@@ -21,7 +21,6 @@ import {
   SUBLEASE_STATUS,
   INVENTORY_OWNER_TYPE
 } from '../../../constants/helpers';
-// import route from '../../../constants/helpers';
 import { useData } from '../../../StateProvider/Provider';
 import { Button, Tooltip } from '@material-ui/core';
 import { AiFillFilePdf } from 'react-icons/ai';
@@ -32,6 +31,8 @@ import PreviewDownload from 'src/components/PreviewDownload';
 import { Link } from 'react-router-dom';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { subleaseMessage } from 'src/constants/messageHelpers';
+import { fetch_sublease_product_fields } from 'src/components/Sublease/helper';
+import { generateCustomTableColumns } from 'src/constants/columns';
 
 const SerializedAsset = ({ subleaseData, fetchData, setNextStep, setNextStepToolTip, currentStep, renderedFrom, allowedToEdit, isProcessor }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -56,6 +57,36 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, setNextStepTool
   useEffect(() => {
     fetchGridColumns();
   }, [currentStep]);
+
+  const [pdfColumns, setPdfColumns] = useState([]);
+
+  useEffect(() => {
+    fetchFields()
+  }, []);
+
+  const fetchFields = async () => {
+    var data = await fetch_sublease_product_fields(subleaseData?.currency);
+    const newColumns = generateCustomTableColumns(data, subleaseData?.currency);
+    let coloum: any = [
+      {
+        accessor: 'index',
+        Header: 'Index',
+      },
+      {
+        accessor: 'type',
+        Header: 'Type',
+      },
+      {
+        accessor: 'detail',
+        Header: 'Details',
+      },
+      {
+        accessor: 'description',
+        Header: 'Description',
+      }
+    ];
+    setPdfColumns([...coloum, ...newColumns])
+  }
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -218,13 +249,21 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, setNextStepTool
             />
           </Box>
         )}
-        <PreviewDownload
-          fileName={`${routes.sublease.title}-${subleaseData?.subleaseName}`}
-          resource={sidebarResource.sublease}
-          referenceId={subleaseData?._id}
-          hideDetailButton={true}
-          columns={columns?.filter((e) => ['assetNumber', 'product', 'serialNumber', 'supplierSerialNumber']?.includes(e.field))}
-        />
+        {columns && pdfColumns &&
+          <PreviewDownload
+            fileName={`${routes.sublease.title}-${subleaseData?.subleaseName}`}
+            resource={sidebarResource.sublease}
+            referenceId={subleaseData?._id}
+            columns={[...pdfColumns, ...columns?.filter((e) => ['serialNumber', 'supplierSerialNumber']?.includes(e.field))]}
+            defaultColumns={[
+              'index',
+              'type',
+              'detail',
+              'description',
+              'qty',
+            ]}
+          />
+        }
         {SUBLEASE_STATUS.completed != subleaseData?.status && (allowedToEdit || isProcessor) && (
           <Fragment>
             {/* {currentStep === 1 && (
