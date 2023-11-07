@@ -110,7 +110,6 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
       permissions
     }
   } = useData();
-  const workOrderConsumableHide = user?.brandPolicy?.workOrderConsumableHide === true ? true : false;
   const [serviceSteps, setServiceSteps] = useState(null);
   const [selectedService, setSelectedService] = useState(null);
   const [stepSubmitedData, setStepSubmitedData] = useState([]);
@@ -1140,7 +1139,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
               >
                 Upload Documents
               </MenuItem>
-              {!workOrderConsumableHide && (
+              {!user?.brandPolicy?.workOrderConsumableHide && (
                 <MenuItem
                   onClick={() => {
                     setConsumablesDialog({

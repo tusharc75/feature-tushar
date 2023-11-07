@@ -40,7 +40,7 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
 
     const fetchFields = async () => {
         setNextStep(false);
-        var data = await fetch_sublease_product_fields(subleaseData.currency);
+        var data = await fetch_sublease_product_fields(subleaseData?.currency);
         data?.forEach((e) => {
             e.isColumnEditable = false;
         });

@@ -297,7 +297,7 @@ const ProductDetailsPage = () => {
         >
           <Tab className={'tabLayout'} value={0} label={<div className="d-flex align-items-center tab-font">Details</div>} {...a11yProps(0)} />
 
-          {permissions?.serializedAsset && (
+          {(permissions?.serializedAsset || permissions?.productionOrder) && (
             <Tab
               className={'tabLayout'}
               value={1}
@@ -346,7 +346,7 @@ const ProductDetailsPage = () => {
             />
           )}
 
-          {permissions?.serializedAsset && (
+          {(permissions?.serializedAsset || permissions?.productionOrder) && (
             <Tab
               className={'tabLayout'}
               value={7}
