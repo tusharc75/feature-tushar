@@ -251,7 +251,7 @@ const Consumables = ({
                 });
               }}
             >
-              <HistoryIcon fontSize="small" color={'primary'}  />
+              <HistoryIcon fontSize="small" color={'primary'} />
             </IconButton>
           </HtmlTooltip>
           {(allowedToEdit && hasChildFields) && (
@@ -503,7 +503,7 @@ const Consumables = ({
         {consumablesDialog && (
           <AssignProductDialog
             handleCloseDialog={() => setConsumablesDialog(false)}
-            ids={dataRows?.map((d) => d?.materialId) || []}
+            ids={materialSubType === MATERIAL_SUB_TYPE.consumable ? dataRows?.map((d) => d?.materialId) || [] : []}
             onSuccess={(rows) => {
               handleSubmit(rows);
             }}

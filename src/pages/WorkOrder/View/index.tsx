@@ -111,8 +111,6 @@ const WorkOrderViews = (props) => {
       const servicesWithNoSteps = []
       allServices?.map((s, sIdx) => {
         allSteps.push(...(s?.steps || []));
-        // all assigned users should output as a single string
-        const allAssignUsers = s?.assignedUsers?.map((u) => u?.optionLabel).join(', ') || '';
         const serviceId = `${s?._id}_${s?.uniqueId}`;
         if (!s?.steps?.length) servicesWithNoSteps.push(serviceId)
         flow.push({
@@ -130,7 +128,7 @@ const WorkOrderViews = (props) => {
                 title={capitalize(s.type)}
               >
                 <div >
-                  <Typography variant="body2">{s?.serviceDetail?.serviceName || ''}</Typography>
+                  <Typography variant="body2">{s?.serviceName || ''}</Typography>
                   <Typography variant="subtitle2">{s?.status || ''}</Typography>
                 </div>
               </HtmlTooltip>
@@ -155,7 +153,6 @@ const WorkOrderViews = (props) => {
             type: 'default',
             data: {
               ref_type: 'step',
-              // ref_id: item.inventory,
               label: (
                 <HtmlTooltip
                   arrow
@@ -190,7 +187,6 @@ const WorkOrderViews = (props) => {
       });
       if (workOrderStatus === WORK_ORDER_STATUS.completed) {
         xPosition += 600;
-
         flow.push({
           id: `${workOrderId}-closed`,
           type: 'output',
@@ -224,7 +220,6 @@ const WorkOrderViews = (props) => {
         })
 
       }
-
       setFlowData([...flow, ...flowEdge]);
       setLoading(false);
     } catch (err) {
