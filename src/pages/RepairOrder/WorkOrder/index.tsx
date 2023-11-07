@@ -716,7 +716,7 @@ const WorkOrder = ({
         data?.forEach((e) => {
           delete e.workOrder;
         });
-        await axiosInstance().put(`${repairOrder.api}/${repairOrderData._id}/work-order/${id}`, { material: data });
+        await axiosInstance().put(`${workOrder.api}/${id}/material`, { material: data });
       });
     } catch (error) {
       setUpdating(false);
