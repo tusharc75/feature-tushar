@@ -493,6 +493,47 @@ const SerializedAsset = () => {
     return className;
   };
 
+  const additionalDetails = [
+    {
+      renderer: (d) => {
+        const plant = columns.find((c) => c.field === 'warehouse');
+        if (!plant) return null;
+        return (
+          <span className="line-clamp-1 flex">
+            {plant.headerName}:&nbsp;
+            <Link
+              className="link"
+              title={d[plant.field] || ''}
+              to={`${plant.cellRendererParams?.pathName}/${d[plant.cellRendererParams?.property]}`}
+              target="_blank"
+            >
+              {d[plant.field] || ''}
+            </Link>
+          </span>
+        );
+      }
+    },
+    {
+      renderer: (d) => {
+        const product = columns.find((c) => c.field === 'product');
+        if (!product) return null;
+        return (
+          <span className="line-clamp-1 flex">
+            {product.headerName}:&nbsp;
+            <Link
+              className="link"
+              title={d[product.field] || ''}
+              to={`${product.cellRendererParams?.pathName}/${d[product.cellRendererParams?.property]}`}
+              target="_blank"
+            >
+              {d[product.field] || ''}
+            </Link>
+          </span>
+        );
+      }
+    }
+  ];
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -825,7 +866,6 @@ const SerializedAsset = () => {
             </div>
           </div>
         </div>
-        {console.log(columns)}
         {columns ? (
           isMobile && !isTablet ? (
             <CustomSwipableList
@@ -842,46 +882,7 @@ const SerializedAsset = () => {
               // onEdit={(d) => {
               //   history.push(`${routes.serializedAssetDetail.path}/${d._id}`);
               // }}
-              additionalDetails={[
-                {
-                  renderer: (d) => {
-                    const plant = columns.find((c) => c.field === 'warehouse');
-                    if (!plant) return null;
-                    return (
-                      <span className="line-clamp-1 flex">
-                        {plant.headerName}:&nbsp;
-                        <Link
-                          className="link"
-                          title={d[plant.field] || ''}
-                          to={`${plant.cellRendererParams?.pathName}/${d[plant.cellRendererParams?.property]}`}
-                          target="_blank"
-                        >
-                          {d[plant.field] || ''}
-                        </Link>
-                      </span>
-                    );
-                  }
-                },
-                {
-                  renderer: (d) => {
-                    const product = columns.find((c) => c.field === 'product');
-                    if (!product) return null;
-                    return (
-                      <span className="line-clamp-1 flex">
-                        {product.headerName}:&nbsp;
-                        <Link
-                          className="link"
-                          title={d[product.field] || ''}
-                          to={`${product.cellRendererParams?.pathName}/${d[product.cellRendererParams?.property]}`}
-                          target="_blank"
-                        >
-                          {d[product.field] || ''}
-                        </Link>
-                      </span>
-                    );
-                  }
-                }
-              ]}
+              additionalDetails={additionalDetails}
               extraParamsToCheckDelete={false}
               // onDelete={(d) => {
               //   setDeleteRecord(d);
