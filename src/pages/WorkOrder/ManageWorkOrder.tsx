@@ -165,8 +165,6 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
     setFormsData(setFieldsInAscendingOrder(initialData.fields));
   }, [initialData.fields]);
 
-
-  console.log(initialData)
   return (
     <Dialog
       maxWidth="md"
