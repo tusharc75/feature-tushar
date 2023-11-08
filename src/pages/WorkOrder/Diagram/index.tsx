@@ -253,7 +253,7 @@ const Diagram = ({ resource, referenceId }) => {
                 {checkImageType(selectedAttachment?.url?.split('.')[1]) ? (
                   <ViewImage data={selectedAttachment} fetchData={fetchData} />
                 ) : checkpdfType(selectedAttachment?.url?.split('.')[1]) ? (
-                  <ShowPdf data={selectedAttachment} key={selectedAttachment.url} />
+                  <ShowPdf data={selectedAttachment} />
                 ) : (
                   <ShowOtherFiles data={selectedAttachment} key={selectedAttachment.url} />
                 )}
