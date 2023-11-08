@@ -89,14 +89,11 @@ const Report = () => {
             setLoadingColumns(true);
             let columns = [];
             let rendererNames = [];
-            let resourceFieldData = [];
-            let curr = user?.user?.brandCurrency || "";
 
             let {
                 data: { data: { columnFields, filterFields } }
             } = await await axiosInstance().get(`/report/${type}/column`);
-
-            const customRendererTypes = ['refer', 'creditDebit'];
+            const customRendererTypes = ['refer', 'creditDebit', 'date', 'creditDebitType'];
             columnFields.forEach((o) => {
                 const currentColumn: any = getColumnData('Inventory History', o?.fieldData, '');
                 if (customRendererTypes?.includes(o?.fieldData?.type)) {
@@ -120,9 +117,6 @@ const Report = () => {
                             break;
                         case 'creditDebitType':
                             currentColumn.columnData.rendererName = 'creditDebitTypeRenderer';
-                            break;
-                        case 'arrayData':
-                            currentColumn.columnData.rendererName = 'serialNumberRenderer';
                             break;
                     }
                 }
@@ -187,10 +181,6 @@ const Report = () => {
         });
     }, [selectedData, selectedResources]);
 
-    const SerialNumberRenderer = (params: any) => (
-        <span>{params?.value?.length ? params?.value?.map((e) => e?.serialNumber)?.toString() : <NoDataCell />}</span>
-    );
-
     const CreditDebitRenderer = (params: any) => (
         <span>{params?.value ? params?.data?.type === 'debit' ? `-${params?.value}` : params?.value : <NoDataCell />}</span>
     );
@@ -244,78 +234,11 @@ const Report = () => {
 
     const CreditDebitTypeRenderer = (params: any) => <span>{capitalize(params?.value)}</span>;
 
-    const PurchaseOrderRenderer = (params: any) => (
-        <Link className="link" title={params.value} to={`${routes.purchaseOrderDetail.path}/${params.data.purchaseOrderId}`} target="_blank">
-            {params.value}
-        </Link>
-    );
-
-    const ProductRenderer = (params: any) => (
-        <Link className="link" title={params.value} to={`${routes.productDetail.path}/${params.data.productId}`} target="_blank">
-            {params.value}
-        </Link>
-    );
-
-    const AssetRenderer = (params: any) => (
-        <Link className="link" title={params.value} to={`${routes.serializedAssetDetail.path}/${params.data._id}`} target="_blank">
-            {params.value}
-        </Link>
-    );
-
-    const ProductCategoryRenderer = (params: any) => (
-        <Link className="link" title={params.value} to={`${routes.productCategoryDetail.path}/${params.data.productCategoryId}`} target="_blank">
-            {params.value}
-        </Link>
-    );
-
-    const PlantRenderer = (params: any) => (
-        <Link className="link" title={params.value} to={`${routes.warehouseDetail.path}/${params.data.warehouseId}`} target="_blank">
-            {params.value}
-        </Link>
-    );
-
-    const SupplierRenderer = (params: any) => (
-        <Link className="link" title={params.value} to={`${routes.supplierAccountDetail.path}/${params.data.supplierAccountId}`} target="_blank">
-            {params.value}
-        </Link>
-    );
-
-    const UserRenderer = (params: any) => (
-        <Link className="link" title={params.value} to={`${routes.userDetail.path}/${params.data.userId}`} target="_blank">
-            {params.value}
-        </Link>
-    );
-
-    const ActionsRenderer = (params) => (
-        <>
-            <Tooltip title="View History">
-                <IconButton
-                    size="small"
-                    aria-label="Clone"
-                    onClick={() => {
-                        setShowPriceHistory({ open: true, product: params?.data?._id, productName: params?.data?.productName });
-                    }}
-                >
-                    <HistoryIcon fontSize="small" color="primary" />
-                </IconButton>
-            </Tooltip>
-        </>
-    );
-
     const customFrameworkComponents = {
-        purchaseOrderRenderer: PurchaseOrderRenderer,
-        productRenderer: ProductRenderer,
-        plantRenderer: PlantRenderer,
-        supplierRenderer: SupplierRenderer,
-        actionsRenderer: ActionsRenderer,
-        numberRenderer: NumberRenderer,
         dateRenderer: DateRenderer,
-        dateTimeRenderer: DateTimeRenderer,
         referenceRenderer: ReferenceRenderer,
-        creditDebitTypeRenderer: CreditDebitTypeRenderer,
         creditDebitRenderer: CreditDebitRenderer,
-        commonRenderer: CommonRenderer,
-        serialNumberRenderer: SerialNumberRenderer,
+        creditDebitTypeRenderer: CreditDebitTypeRenderer,
     };
 
     const fetchResourceData = () => {
