@@ -95,7 +95,7 @@ const Report = () => {
             } = await await axiosInstance().get(`/report/${type}/column`);
             const customRendererTypes = ['refer', 'creditDebit', 'date', 'creditDebitType'];
             columnFields.forEach((o) => {
-                const currentColumn: any = getColumnData('Inventory History', o?.fieldData, '');
+                const currentColumn: any = getColumnData(type, o?.fieldData, '');
                 if (customRendererTypes?.includes(o?.fieldData?.type)) {
                     switch (o?.fieldData?.type) {
                         case 'date':
