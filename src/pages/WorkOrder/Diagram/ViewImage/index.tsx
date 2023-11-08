@@ -8,6 +8,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import Loader from 'src/components/Loader';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { b64toBlob } from 'src/constants/helpers';
+import CustomButton from 'src/components/Helpers/CustomButton';
 import axios from 'axios';
 
 type TextType = {
@@ -22,7 +23,7 @@ type TextType = {
   height: number;
 };
 
-const ViewImage = ({ data, fetchData }) => {
+const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
   const toastConfig = useContext(CustomToastContext);
   const [themeColor] = useAppTheme();
   const stageRef = useRef(null);
@@ -40,6 +41,7 @@ const ViewImage = ({ data, fetchData }) => {
     height: window.innerHeight - 250
   });
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setSubmitting] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -59,14 +61,19 @@ const ViewImage = ({ data, fetchData }) => {
     }
   }, [themeColor]);
 
-  const getImageScale = (url: string, canvasSize: { width: number; height: number }, maxSize: number = 400) => {
+  const getImageScale = (url: string, canvasSize: { width: number; height: number }, maxSize: number | false = 400) => {
     const image = new Image();
     image.src = url;
     image.onload = function () {
       scaleToFit(this);
     };
     function scaleToFit(img) {
-      const scale = Math.min(canvasSize.width / img.width, canvasSize.height / img.height, maxSize / img.height, maxSize / img.width);
+      let scale = 0;
+      if (maxSize) {
+        scale = Math.min(canvasSize.width / img.width, canvasSize.height / img.height, maxSize / img.height, maxSize / img.width);
+      } else {
+        scale = Math.min(canvasSize.width / img.width, canvasSize.height / img.height);
+      }
 
       // get the top left position of the image
       const x = canvasSize.width / 2 - (img.width / 2) * scale;
@@ -101,12 +108,14 @@ const ViewImage = ({ data, fetchData }) => {
         reader.onloadend = function () {
           let base64data: any = reader.result;
           setUrl(base64data);
-          getImageScale(base64data, widthHeight, 500);
+          getImageScale(base64data, widthHeight, false);
+          setLoading(false);
         };
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
+
     return () => {
       source.cancel();
     };
@@ -140,32 +149,28 @@ const ViewImage = ({ data, fetchData }) => {
   }, [watchContainerSize]);
 
   const handleSave = async () => {
+    setSubmitting(true);
     const canvasElement: any = document.getElementById('canvas_layer');
     const imgURL = canvasElement?.toDataURL();
-
     const blob: any = b64toBlob(imgURL);
     const type = `image/${data?.url?.split('.')[1]}`;
-
     const file: any = new File([blob], data?.name, { type });
-
     let formData = new FormData();
     formData.append('file', file);
-
     const res = await axiosInstance().post('/user/upload', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
-
     axiosInstance()
-      .put(`/attachment/resource-attachment-type/${data?.attachmentId}`, {
-        oldUrl: data?.url,
-        url: res?.data?.fileName,
-        date: new Date()
-      })
+      .put(`/attachment/replace/${data?.attachmentId}`, { oldUrl: data?.url, url: res?.data?.fileName })
       .then(({ data }) => {
+        setTexts([]);
+        setSelectedAttachment(null);
         fetchData();
+        setSubmitting(false);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
+        setSubmitting(false);
       });
   };
 
@@ -197,9 +202,20 @@ const ViewImage = ({ data, fetchData }) => {
             </Button>
           )}
         </Box>
-        <Button disabled={texts?.length > 0 ? false : true} size="small" variant="contained" color="primary" onClick={handleSave}>
-          Save
-        </Button>
+        {texts?.length > 0 && (
+          <CustomButton
+            disabled={isSubmitting}
+            loading={isSubmitting}
+            variant="contained"
+            color="primary"
+            type="submit"
+            onClick={(e) => {
+              handleSave();
+            }}
+          >
+            Save
+          </CustomButton>
+        )}
       </Box>
       {!loading ? (
         <Stage
