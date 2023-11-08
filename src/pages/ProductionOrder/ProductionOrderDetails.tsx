@@ -165,7 +165,9 @@ const ProductionOrderDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${productionOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
+      .then(({ data }) => {
+        fetchProductionOrderData();
+      })
       .catch((error) => { });
   };
 
@@ -209,7 +211,21 @@ const ProductionOrderDetails = () => {
           <Box className="control-buttons-v1">
             {productionOrderData ? (
               <>
-                {permissions?.productionOrder?.isUpdate && allowedToEdit && (
+                {(
+                  <Button
+                    variant="outlined"
+                    color="default"
+                    size="small"
+                    disabled={!permissions?.productionOrder?.isUpdate || !allowedToEdit || productionOrderData?.processStatus !== productionOrderProcessStepsNames[productionOrderProcessStepsNames?.length - 1]}
+                    onClick={() => { updateOrderStatus(PRODUCTION_ORDER_STATUS.completed) }}
+                    aria-controls="action-menu"
+                    className="btn-outline-v1"
+                  >
+                    Close
+                  </Button>
+                )
+                }
+                {/* {permissions?.productionOrder?.isUpdate && allowedToEdit && (
                   <Fragment>
                     <Button
                       variant="outlined"
@@ -250,7 +266,7 @@ const ProductionOrderDetails = () => {
                       })}
                     </Menu>
                   </Fragment>
-                )}
+                )} */}
                 {permissions?.productionOrder?.isUpdate && allowedToEdit && (
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -337,6 +353,7 @@ const ProductionOrderDetails = () => {
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={allowedToEdit && permissions?.productionOrder?.isUpdate ? true : false}
                 allowedToDelete={allowedToDelete}
+                updateJobStatus={updateOrderStatus}
               />
             )}
             {productionOrderProcessStepsNames[currentStep] === 'Work Order' && productionOrderData && (

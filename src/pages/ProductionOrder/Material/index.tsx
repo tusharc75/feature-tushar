@@ -10,7 +10,7 @@ import CustomReactTable from '../../../components/CustomReactTable/CustomReactTa
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import { CHILD_RESOURCE, MATERIAL_TYPE, productionOrder, sidebarResource } from '../../../constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, PRODUCTION_ORDER_STATUS, productionOrder, sidebarResource } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile } from 'react-device-detect';
 import { ExpandMore } from '@material-ui/icons';
@@ -25,7 +25,7 @@ import { flattenArray, generateCustomTableColumns } from 'src/constants/columns'
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import CreateProduct from 'src/components/Product/CreateProduct';
 
-const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, allowedToDelete }) => {
+const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, allowedToDelete, updateJobStatus }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -218,6 +218,9 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
       }
     } else {
       setNextStep(false);
+    }
+    if (productionOrderData?.status === PRODUCTION_ORDER_STATUS.new && rowsData?.length > 0) {
+      updateJobStatus(PRODUCTION_ORDER_STATUS.inProgress);
     }
     setRowsData(rows);
     setSelectedRecords([]);
