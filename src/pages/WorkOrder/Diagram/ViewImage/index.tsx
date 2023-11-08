@@ -8,6 +8,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import Loader from 'src/components/Loader';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { b64toBlob } from 'src/constants/helpers';
+import CustomButton from 'src/components/Helpers/CustomButton';
 
 type TextType = {
   fontSize: number;
@@ -21,7 +22,7 @@ type TextType = {
   height: number;
 };
 
-const ViewImage = ({ data, fetchData }) => {
+const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
   const toastConfig = useContext(CustomToastContext);
   const [themeColor] = useAppTheme();
   const stageRef = useRef(null);
@@ -39,6 +40,8 @@ const ViewImage = ({ data, fetchData }) => {
     height: window.innerHeight - 250
   });
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setSubmitting] = useState(false);
+
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -115,34 +118,30 @@ const ViewImage = ({ data, fetchData }) => {
   }, [watchContainerSize]);
 
   const handleSave = async () => {
+    setSubmitting(true)
     const canvasElement: any = document.getElementById('canvas_layer');
     const imgURL = canvasElement?.toDataURL();
-
     const blob: any = b64toBlob(imgURL);
     const type = `image/${data?.url?.split('.')[1]}`;
-
     const file: any = new File([blob], data?.name, { type });
-
     let formData = new FormData();
     formData.append('file', file);
-
     const res = await axiosInstance().post('/user/upload', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
-
-    axiosInstance()
-      .put(`/attachment/resource-attachment-type/${data?.attachmentId}`, {
-        oldUrl: data?.url,
-        url: res?.data?.fileName,
-        date: new Date()
-      })
+    axiosInstance().put(`/attachment/replace/${data?.attachmentId}`, { oldUrl: data?.url, url: res?.data?.fileName })
       .then(({ data }) => {
+        setTexts([])
+        setSelectedAttachment(null)
         fetchData();
+        setSubmitting(false)
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
+        setSubmitting(false)
       });
   };
+
 
   return (
     <div className="absolute inset-2" ref={containerRef}>
@@ -172,9 +171,20 @@ const ViewImage = ({ data, fetchData }) => {
             </Button>
           )}
         </Box>
-        <Button disabled={texts?.length > 0 ? false : true} size="small" variant="contained" color="primary" onClick={handleSave}>
-          Save
-        </Button>
+        {texts?.length > 0 &&
+          <CustomButton
+            disabled={isSubmitting}
+            loading={isSubmitting}
+            variant="contained"
+            color="primary"
+            type="submit"
+            onClick={(e) => {
+              handleSave();
+            }}
+          >
+            Save
+          </CustomButton>
+        }
       </Box>
       {!loading ? (
         <Stage
