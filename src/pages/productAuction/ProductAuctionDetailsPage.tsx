@@ -85,7 +85,7 @@ const ProductAuctionDetailsPage = () => {
       .get(`${productAuction.api}/${id}`)
       .then(({ data: { data } }) => {
         setProductAuctionData(data);
-        setBids(data.bids);
+        {data?.bids && setBids(data?.bids)}
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
