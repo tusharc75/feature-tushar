@@ -46,7 +46,7 @@ const Diagram = ({ resource, referenceId }) => {
         });
         setExpended(expend);
         setRowData(data);
-        setSelectedAttachment(data[0]?.file[0]);
+        setSelectedAttachment({...data[0]?.file[0], attachmentId: data[0]?._id});
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -153,10 +153,11 @@ const Diagram = ({ resource, referenceId }) => {
                       return (
                         <div key={file._id} className="shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
                           <div
-                            className={`head flex items-center justify-between cursor-pointer w-full p-[8px_15px] ${expended[file?._id]
-                              ? 'bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)] rounded-[4px_4px_0_0]'
-                              : 'bg-[var(--accordion-summary-bg,#fff)] rounded-[4px]'
-                              }`}
+                            className={`head flex items-center justify-between cursor-pointer w-full p-[8px_15px] ${
+                              expended[file?._id]
+                                ? 'bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)] rounded-[4px_4px_0_0]'
+                                : 'bg-[var(--accordion-summary-bg,#fff)] rounded-[4px]'
+                            }`}
                             onClick={() => {
                               setExpended((prev) => ({
                                 ...prev,
@@ -210,7 +211,7 @@ const Diagram = ({ resource, referenceId }) => {
                                   <Box
                                     key={f.url}
                                     onClick={() => {
-                                      setSelectedAttachment(f);
+                                      setSelectedAttachment({ ...f, attachmentId: file?._id });
                                     }}
                                     className="px-[18px] py-[8px] cursor-pointer"
                                     style={{
@@ -255,7 +256,7 @@ const Diagram = ({ resource, referenceId }) => {
             {selectedAttachment && (
               <>
                 {checkImageType(selectedAttachment?.url?.split('.')[1]) ? (
-                  <ViewImage data={selectedAttachment} key={selectedAttachment.url} loading={loading} setLoading={setLoading} />
+                  <ViewImage data={selectedAttachment} key={selectedAttachment.url} fetchData={fetchData} loading={loading} setLoading={setLoading} />
                 ) : checkpdfType(selectedAttachment?.url?.split('.')[1]) ? (
                   <ShowPdf data={selectedAttachment} key={selectedAttachment.url} loading={loading} setLoading={setLoading} />
                 ) : (
