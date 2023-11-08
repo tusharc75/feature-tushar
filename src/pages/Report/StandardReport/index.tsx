@@ -330,32 +330,7 @@ const Report = () => {
             gridApi.setRowData([]);
         }
 
-        var api = '';
-        if (resourceCamelCase === 'purchaseOrderDetails') {
-            api = `/report/${type}`;
-        }
-        if (resourceCamelCase === 'inventoryEvaluation') {
-            api = `/report/${type}`;
-        }
-        if (resourceCamelCase === 'inventoryHistory') {
-            api = `/report/${type}`;
-        }
-        if (resourceCamelCase === 'averagePriceBySupplier') {
-            api = `/report/${type}`;
-        }
-        if (resourceCamelCase === 'numberOfAssetsByStatus') {
-            api = `/report/${type}`;
-        }
-        if (resourceCamelCase === 'assetUtilization') {
-            api = `/report/${type}`;
-        }
-        if (resourceCamelCase === 'userSession') {
-            api = `/report/${type}`;
-        }
-        if (resourceCamelCase === 'inUseSerializedAsset') {
-            api = `/report/${type}`;
-        }
-
+        var api = `/report/${type}`;
         axiosInstance()
             .get(`${api}${filterQuery}`, {
                 cancelToken: cancelTokenSource.token
@@ -523,30 +498,6 @@ const Report = () => {
 
         var api = '';
         api = `/report/${type}/export`;
-        // if (resourceCamelCase === 'purchaseOrderDetails') {
-        //     api = `/report/${type}/export`;
-        // }
-        // if (resourceCamelCase === 'inventoryEvaluation') {
-        //     api = `${productInventory.api}/report/purchase-order-price/export`;
-        // }
-        // if (resourceCamelCase === 'inventoryHistory') {
-        //     api = `${productInventory.api}/report/history-report/export`;
-        // }
-        // if (resourceCamelCase === 'averagePriceBySupplier') {
-        //     api = `${productInventory.api}/report/supplier-product-price/export`;
-        // }
-        // if (resourceCamelCase === 'numberOfAssetsByStatus') {
-        //     api = `/serialized-asset/report/assets-number-by-status/export`;
-        // }
-        // if (resourceCamelCase === 'assetUtilization') {
-        //     api = `/serialized-asset/report/assets-utilization/export`;
-        // }
-        // if (resourceCamelCase === 'userSession') {
-        //     api = `/report/user/user-session/export`;
-        // }
-        // if (resourceCamelCase === 'inUseSerializedAsset') {
-        //     api = `/serialized-asset/report/in-use-assets/export/`;
-        // }
 
         axiosInstance()
             .get(`${api}${filterQuery}&exportColumn=${JSON.stringify(columns)} `, {
