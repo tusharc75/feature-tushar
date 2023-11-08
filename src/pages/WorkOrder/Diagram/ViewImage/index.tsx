@@ -61,16 +61,32 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
     }
   }, [themeColor]);
 
+  const getImageScale = (url: string, canvasSize: { width: number; height: number }, maxSize: number = 400) => {
+    const image = new Image();
+    image.src = url;
+    image.onload = function () {
+      scaleToFit(this);
+    };
+    function scaleToFit(img) {
+      const scale = Math.min(canvasSize.width / img.width, canvasSize.height / img.height, maxSize / image.width, maxSize / image.height);
+      const x = canvasSize.width / 2 - (img.width / 2) * scale;
+      const y = canvasSize.height / 2 - (img.height / 2) * scale;
+
+      setImageState({
+        name: data?.name,
+        x,
+        y,
+        isDragging: false,
+        width: img.width * scale,
+        height: img.height * scale
+      });
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    setImageState({
-      name: data?.name,
-      x: widthHeight.width * 0.5 - 200,
-      y: widthHeight.height * 0.5 - 200,
-      isDragging: false,
-      width: 400,
-      height: 400
-    });
     setLoading(true);
+
     axiosInstance()
       .get('/user/download?fileName=' + data?.url, {
         responseType: 'blob'
@@ -82,7 +98,7 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
         reader.onloadend = function () {
           let base64data: any = reader.result;
           setUrl(base64data);
-          setLoading(false);
+          getImageScale(base64data, widthHeight, 500);
         };
       })
       .catch((err) => {
