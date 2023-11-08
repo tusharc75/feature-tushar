@@ -224,16 +224,22 @@ const AssetHistory = ({ id }) => {
     if (id) {
       fetchData();
     }
-  }, [id]);
+  }, [id, page, limit]);
+
+  const getQueryString = () => {
+    let deepFilter = `?page=${page}&limit=${limit}`;
+    return deepFilter;
+  };
 
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
     if (gridApi) {
       gridApi.setRowData([]);
     }
+    const queryString = getQueryString();
     axiosInstance()
-      .get(`/history/inventory/${id}`)
-      .then(({ data: { data } }) => {
+      .get(`/history/inventory/${id}${queryString}`)
+      .then(({ data: { data, count } }) => {
         data = data?.map((u, index) => ({
           ...u,
           _id: index + 1,
@@ -243,7 +249,7 @@ const AssetHistory = ({ id }) => {
           warehouse: u?.warehouse?.optionLabel,
           warehouseId: u?.warehouse?.optionValue
         }));
-        dispatch({ type: 'initialize', data: data, count: data.length });
+        dispatch({ type: 'initialize', data: data, count: count });
         dispatch({ type: 'loading', loading: false });
       })
       .catch((error) => {
