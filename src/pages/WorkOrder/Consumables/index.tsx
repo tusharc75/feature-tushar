@@ -197,7 +197,7 @@ const Consumables = ({
         width: 150,
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.qty || <NoDataCell />}</p>
       },
-      ...(user?.user?.brandPolicy?.workOrderConsumableRequest && user?.user?.brandPolicy?.workOrderConsumableConsume
+      ...(user?.user?.brandPolicy?.workOrderConsumableRequest && !user?.user?.brandPolicy?.workOrderConsumableConsumeHide
         ? [
           {
             accessor: 'requestedQty',
@@ -207,7 +207,7 @@ const Consumables = ({
           }
         ]
         : []),
-      ...(user?.user?.brandPolicy?.workOrderConsumableConsume ?
+      ...(!user?.user?.brandPolicy?.workOrderConsumableConsumeHide ?
         [{
           accessor: 'consumedQty',
           Header: 'Consumed Qty',
@@ -239,7 +239,7 @@ const Consumables = ({
               </IconButton>
             </HtmlTooltip>
           )}
-          {user?.user?.brandPolicy?.workOrderConsumableConsume &&
+          {!user?.user?.brandPolicy?.workOrderConsumableConsumeHide &&
             <HtmlTooltip title="History">
               <IconButton
                 size="small"
@@ -433,7 +433,7 @@ const Consumables = ({
           )}
           <Box display="flex" ml={'auto'}>
             <Box ml={1}></Box>
-            {user?.user?.brandPolicy?.workOrderConsumableConsume &&
+            {!user?.user?.brandPolicy?.workOrderConsumableConsumeHide &&
               <Button
                 disabled={selectedRecords?.filter((e) => !e?.hideSelection).length === 0}
                 onClick={() => setOpenConsumablesQtyDialog(true)}
