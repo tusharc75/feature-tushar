@@ -239,7 +239,7 @@ const Diagram = ({ resource, referenceId }) => {
             </Box>
           </Box>
         </Grid>
-        <Grid item xs={12} sm={7} md={7} lg={8} xl={9}>
+        <Grid item xs={12} sm={7} md={7} lg={8} xl={9} className="min-h-[600px]">
           <Box
             className="container-with-border relative"
             p={'20px'}
@@ -251,7 +251,7 @@ const Diagram = ({ resource, referenceId }) => {
             {selectedAttachment && (
               <>
                 {checkImageType(selectedAttachment?.url?.split('.')[1]) ? (
-                  <ViewImage data={selectedAttachment} key={selectedAttachment.url} fetchData={fetchData} />
+                  <ViewImage data={selectedAttachment} fetchData={fetchData} />
                 ) : checkpdfType(selectedAttachment?.url?.split('.')[1]) ? (
                   <ShowPdf data={selectedAttachment} key={selectedAttachment.url} />
                 ) : (
