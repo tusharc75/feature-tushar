@@ -10,11 +10,16 @@ import { Link } from 'react-router-dom';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { camelCase } from 'lodash';
 import { sidebarResource } from 'src/constants/helpers';
+import { useData } from 'src/StateProvider/Provider';
 
 const AssetHistory = ({ id }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [gridApi, setGridApi] = useState(null);
+
+  const {
+    state: { permissions }
+  }: any = useData();
 
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
@@ -174,8 +179,29 @@ const AssetHistory = ({ id }) => {
     </>
   );
 
+  const WarehouseRenderer = (params: any) => (
+    <>
+      {params.value ? (
+        permissions?.warehouse?.isRead ?
+          <Link
+            className="link"
+            title={params.value}
+            to={`${routes.warehouseDetail.path}/${params.data.warehouseId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {params.value}
+          </Link> :
+          <span>{params.value}</span>
+      ) : (
+        <NoDataCell />
+      )}
+    </>
+  );
+
   const frameworkComponents = {
     nameRenderer: NameRenderer,
+    warehouseRenderer: WarehouseRenderer,
     commonRenderer: CommonRenderer,
     daysRenderer: DaysRenderer,
     dateTimeRenderer: DateTimeRenderer
@@ -188,6 +214,7 @@ const AssetHistory = ({ id }) => {
     { field: 'days', headerName: 'Days', show: true, disabled: true, filter: false, cellRenderer: 'daysRenderer' },
     { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' },
     { field: 'comments', headerName: 'Comment', show: true, cellRenderer: 'commonRenderer' },
+    { field: 'warehouse', headerName: routes.warehouse.title, show: true, cellRenderer: 'warehouseRenderer' },
     { field: 'location', headerName: 'Location', show: true, cellRenderer: 'commonRenderer' },
     { field: 'ownerType', headerName: 'Owner Type', show: true, cellRenderer: 'commonRenderer' },
     { field: 'owner', headerName: 'Owner', show: true, cellRenderer: 'commonRenderer' }
@@ -197,24 +224,32 @@ const AssetHistory = ({ id }) => {
     if (id) {
       fetchData();
     }
-  }, [id]);
+  }, [id, page, limit]);
+
+  const getQueryString = () => {
+    let deepFilter = `?page=${page}&limit=${limit}`;
+    return deepFilter;
+  };
 
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
     if (gridApi) {
       gridApi.setRowData([]);
     }
+    const queryString = getQueryString();
     axiosInstance()
-      .get(`/history/inventory/${id}`)
-      .then(({ data: { data } }) => {
+      .get(`/history/inventory/${id}${queryString}`)
+      .then(({ data: { data, count } }) => {
         data = data?.map((u, index) => ({
           ...u,
           _id: index + 1,
           id: index + 1,
           reference: u?.reference?.optionLabel,
-          referenceId: u?.reference?.optionValue
+          referenceId: u?.reference?.optionValue,
+          warehouse: u?.warehouse?.optionLabel,
+          warehouseId: u?.warehouse?.optionValue
         }));
-        dispatch({ type: 'initialize', data: data, count: data.length });
+        dispatch({ type: 'initialize', data: data, count: count });
         dispatch({ type: 'loading', loading: false });
       })
       .catch((error) => {
