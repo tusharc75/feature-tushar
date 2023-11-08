@@ -75,11 +75,13 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
         scale = Math.min(canvasSize.width / img.width, canvasSize.height / img.height);
       }
 
-      // get the top left position of the image
-      const x = canvasSize.width / 2 - (img.width / 2) * scale;
-      const y = canvasSize.height / 2 - (img.height / 2) * scale;
       const imgWidth = img.width * scale;
       const imgHeight = img.height * scale;
+
+      // get the top left position of the image
+      const x = canvasSize.width / 2 - imgWidth / 2;
+      const y = canvasSize.height / 2 - imgHeight / 2;
+
       setImageState({
         name: data?.name,
         x,
