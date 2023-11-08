@@ -440,7 +440,7 @@ const Steps = ({
 
   const getFields = (step) => {
     let stepData = null;
-    let fieldData = { fields: [], formsData: [], values: {} };
+    let fieldData = { fields: [], formsData: [], values: {}, orignalValues: {} };
     let fieldsDataForCreate = step?.fields ? step?.fields : [];
     let tempServiceData = stepSubmitedData?.find((d) => d.uniqueId === selectedService?.uniqueId && d.stepId === step?._id);
 
@@ -450,6 +450,7 @@ const Steps = ({
         fieldData = {
           fields: fieldsDataForCreate,
           formsData: setFieldsInAscendingOrder(fieldsDataForCreate),
+          orignalValues: tempServiceData,
           values: getObjKeysWithValues(tempServiceData, fieldsDataForCreate)
         };
       }
@@ -458,6 +459,7 @@ const Steps = ({
         fieldData = {
           fields: fieldsDataForCreate,
           formsData: setFieldsInAscendingOrder(fieldsDataForCreate),
+          orignalValues: {},
           values: getObjKeys('', fieldsDataForCreate)
         };
       }
