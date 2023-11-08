@@ -254,7 +254,7 @@ const Zone = () => {
             <div className="flex flex-wrap gap-[8px] justify-end">
               <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
               <div className="flex gap-[8px] flex-wrap items-center">
-                <Button
+                {permissions?.zone?.isCreate && (<Button
                   variant={'contained'}
                   color="primary"
                   size="small"
@@ -265,7 +265,7 @@ const Zone = () => {
                   startIcon={<AddOutlined />}
                 >
                   Add
-                </Button>
+                </Button>)}
                 {permissions?.zone?.isDelete && (
                   <>
                     <Button
