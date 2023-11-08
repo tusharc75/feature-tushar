@@ -197,7 +197,7 @@ const Consumables = ({
         width: 150,
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.qty || <NoDataCell />}</p>
       },
-      ...(user?.user?.brandPolicy?.workOrderConsumableRequest
+      ...(user?.user?.brandPolicy?.workOrderConsumableRequest && user?.user?.brandPolicy?.workOrderConsumableConsume
         ? [
           {
             accessor: 'requestedQty',
@@ -207,13 +207,14 @@ const Consumables = ({
           }
         ]
         : []),
-      {
-        accessor: 'consumedQty',
-        Header: 'Consumed Qty',
-        primaryField: true,
-        width: 150,
-        Cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
-      }
+      ...(user?.user?.brandPolicy?.workOrderConsumableConsume ?
+        [{
+          accessor: 'consumedQty',
+          Header: 'Consumed Qty',
+          primaryField: true,
+          width: 150,
+          Cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
+        }] : [])
     ];
     extracolumns.push({
       accessor: 'action',
@@ -238,22 +239,24 @@ const Consumables = ({
               </IconButton>
             </HtmlTooltip>
           )}
-          <HtmlTooltip title="History">
-            <IconButton
-              size="small"
-              aria-label="History"
-              onClick={() => {
-                setHistoryDialog({
-                  open: true,
-                  _id: row?.original?._id,
-                  product: row?.original?.productId,
-                  productName: row?.original?.productName
-                });
-              }}
-            >
-              <HistoryIcon fontSize="small" color={'primary'} />
-            </IconButton>
-          </HtmlTooltip>
+          {user?.user?.brandPolicy?.workOrderConsumableConsume &&
+            <HtmlTooltip title="History">
+              <IconButton
+                size="small"
+                aria-label="History"
+                onClick={() => {
+                  setHistoryDialog({
+                    open: true,
+                    _id: row?.original?._id,
+                    product: row?.original?.productId,
+                    productName: row?.original?.productName
+                  });
+                }}
+              >
+                <HistoryIcon fontSize="small" color={'primary'} />
+              </IconButton>
+            </HtmlTooltip>
+          }
           {(allowedToEdit && hasChildFields) && (
             <HtmlTooltip title="Edit">
               <IconButton
@@ -430,18 +433,20 @@ const Consumables = ({
           )}
           <Box display="flex" ml={'auto'}>
             <Box ml={1}></Box>
-            <Button
-              disabled={selectedRecords?.filter((e) => !e?.hideSelection).length === 0}
-              onClick={() => setOpenConsumablesQtyDialog(true)}
-              color="primary"
-              size="small"
-              variant="contained"
-            >
-              {consumeRequest ? 'Request ' : 'Consume '}{' '}
-              {selectedRecords?.filter((e) => !e?.hideSelection).length > 0
-                ? '(' + selectedRecords?.filter((e) => !e?.hideSelection).length + ')'
-                : ''}
-            </Button>
+            {user?.user?.brandPolicy?.workOrderConsumableConsume &&
+              <Button
+                disabled={selectedRecords?.filter((e) => !e?.hideSelection).length === 0}
+                onClick={() => setOpenConsumablesQtyDialog(true)}
+                color="primary"
+                size="small"
+                variant="contained"
+              >
+                {consumeRequest ? 'Request ' : 'Consume '}{' '}
+                {selectedRecords?.filter((e) => !e?.hideSelection).length > 0
+                  ? '(' + selectedRecords?.filter((e) => !e?.hideSelection).length + ')'
+                  : ''}
+              </Button>
+            }
             <Box ml={1}></Box>
             <Button
               variant={'outlined'}
