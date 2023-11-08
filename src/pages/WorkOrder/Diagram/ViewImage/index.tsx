@@ -7,6 +7,7 @@ import CustomText from './CustomText';
 import axiosInstance from 'src/axios/axiosInstance';
 import Loader from 'src/components/Loader';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { b64toBlob } from 'src/constants/helpers';
 
 type TextType = {
   fontSize: number;
@@ -20,7 +21,7 @@ type TextType = {
   height: number;
 };
 
-const ViewImage = ({ data }) => {
+const ViewImage = ({ data, fetchData }) => {
   const toastConfig = useContext(CustomToastContext);
   const [themeColor] = useAppTheme();
   const stageRef = useRef(null);
@@ -113,13 +114,67 @@ const ViewImage = ({ data }) => {
     return () => window.removeEventListener('resize', watchContainerSize);
   }, [watchContainerSize]);
 
+  const handleSave = async () => {
+    const canvasElement: any = document.getElementById('canvas_layer');
+    const imgURL = canvasElement?.toDataURL();
+
+    const blob: any = b64toBlob(imgURL);
+    const type = `image/${data?.url?.split('.')[1]}`;
+
+    const file: any = new File([blob], data?.name, { type });
+
+    let formData = new FormData();
+    formData.append('file', file);
+
+    const res = await axiosInstance().post('/user/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+
+    axiosInstance()
+      .put(`/attachment/resource-attachment-type/${data?.attachmentId}`, {
+        oldUrl: data?.url,
+        url: res?.data?.fileName,
+        date: new Date()
+      })
+      .then(({ data }) => {
+        fetchData();
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
   return (
     <div className="absolute inset-2" ref={containerRef}>
-      <Box mb={1} display="flex">
-        <Button size="small" variant="outlined" color="primary" onClick={handleAddText}>
-          Add Text
+      <Box mb={1} display="flex" justifyContent="space-between" alignItems="center">
+        <Box>
+          <Button size="small" variant="outlined" color="primary" onClick={handleAddText}>
+            Add Text
+          </Button>
+          {selectedText && !editingText && (
+            <Button
+              size="small"
+              variant="outlined"
+              color="primary"
+              onClick={() => {
+                setTexts((state) => state.filter((s) => s.id !== selectedText));
+                if (selectedText) selectText(null);
+                if (editingText) setEditingText(null);
+                if (!editingTextRef) {
+                  editingTextRef.current.textRef.show();
+                  editingTextRef.current.transformRef.show();
+                  editingTextRef.current.transformRef.forceUpdate();
+                  editingTextRef.current = null;
+                }
+              }}
+            >
+              Remove Text
+            </Button>
+          )}
+        </Box>
+        <Button disabled={texts?.length > 0 ? false : true} size="small" variant="contained" color="primary" onClick={handleSave}>
+          Save
         </Button>
-        <Box component="span" mx={1} />
       </Box>
       {!loading ? (
         <Stage
