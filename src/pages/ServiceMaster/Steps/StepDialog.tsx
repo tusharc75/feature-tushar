@@ -258,7 +258,7 @@ export default function StepDialog({
     <>
       <Dialog
         maxWidth="md"
-        fullScreen={fullScreen || isMobile || !isTablet}
+        fullScreen={fullScreen}
         TransitionComponent={CustomDialogTransition}
         open={true}
         onClose={(e, reason) => {
@@ -360,9 +360,8 @@ export default function StepDialog({
                         <TextField
                           InputProps={{
                             startAdornment: (
-                              <InputAdornment position="start">{`${
-                                values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
-                              }`}</InputAdornment>
+                              <InputAdornment position="start">{`${values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
+                                }`}</InputAdornment>
                             )
                           }}
                           margin="dense"
@@ -385,9 +384,8 @@ export default function StepDialog({
                         <TextField
                           InputProps={{
                             startAdornment: (
-                              <InputAdornment position="start">{`${
-                                values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
-                              }`}</InputAdornment>
+                              <InputAdornment position="start">{`${values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
+                                }`}</InputAdornment>
                             )
                           }}
                           margin="dense"

@@ -263,7 +263,6 @@ const Steps = ({
       permissions
     }
   } = useData();
-  const workOrderConsumableHide = user?.brandPolicy?.workOrderConsumableHide === true ? true : false;
   const [viewStep, setViewStep] = React.useState({ open: false, step: null });
   const [isAllStepDone, setIsAllStepDone] = React.useState(false);
   const [attchmentsDialog, setAttchmentsDialog] = useState({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
@@ -1287,7 +1286,7 @@ const Steps = ({
                     Upload Documents
                   </MenuItem>
                   {(referencType === 'workOrder' || (referencType === 'workOrderTechnician' && user?.brandPolicy?.workOrderTechnicianConsumable)) &&
-                    !workOrderConsumableHide && (
+                    !user?.brandPolicy?.workOrderConsumableHide && (
                       <MenuItem
                         onClick={(e) => {
                           e.stopPropagation();

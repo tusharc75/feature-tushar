@@ -115,7 +115,7 @@ const Diagram = ({ resource, referenceId }) => {
               downloadExcel(data);
             }}
             variant="contained"
-            className="no-shadow"
+            className="no-shadow dark:[background:var(--dark-secondary)_!important]"
             color="inherit"
             endIcon={<BiDownload />}
           >

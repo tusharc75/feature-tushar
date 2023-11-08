@@ -197,7 +197,6 @@ const ManageServiceMaster = ({ isClone = false, serviceMasterId = null, onClose,
                             {form.sectionFields.map((field, index2) => (
                               <Grid key={index2} item xs={12} sm={6} md={6}>
                                 <FormTypes
-                                  isNew={Boolean(serviceMasterId)}
                                   {...field}
                                   fieldData={field}
                                   fields={initialData.fields}
