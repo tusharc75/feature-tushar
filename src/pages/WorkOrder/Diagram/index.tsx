@@ -17,6 +17,7 @@ import ViewImage from './ViewImage';
 import { getFileIcon, getFileNameWithExtension } from './utils';
 
 const Diagram = ({ resource, referenceId }) => {
+
   const toastConfig = useContext(CustomToastContext);
 
   const [rowData, setRowData] = useState(null);
@@ -26,27 +27,26 @@ const Diagram = ({ resource, referenceId }) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [selectedAttachment, setSelectedAttachment] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchData();
   }, [resource, referenceId]);
 
-  useEffect(() => {
-    setLoading(true);
-  }, [selectedAttachment]);
-
   const fetchData = async () => {
     axiosInstance()
       .get(`/attachment/resource-attachment-type?resource=${resource}&referenceId=${referenceId}&attachmentType=${ATTACHMENT_TYPE.diagram}`)
       .then(({ data: { data } }) => {
+        setRowData(data);
+        if (data?.length && !selectedAttachment) {
+          if (data[0]?.file?.length) {
+            setSelectedAttachment({ ...data[0]?.file[0], attachmentId: data[0]?._id });
+          }
+        }
         const expend: any = {};
         data?.forEach((file) => {
           expend[file?._id] = true;
         });
         setExpended(expend);
-        setRowData(data);
-        setSelectedAttachment(data[0]?.file[0]);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -63,6 +63,7 @@ const Diagram = ({ resource, referenceId }) => {
             type: 'success',
             message: data.message
           });
+          setSelectedAttachment(null)
           fetchData();
         })
         .catch((error) => {
@@ -146,18 +147,17 @@ const Diagram = ({ resource, referenceId }) => {
               </Button>
             </Box>
             <Box pt={2} pb={2}>
-              <Box className=" overflow-auto h-[calc(100vh-250px)]">
-                <div className=" grid gap-3">
+              <Box className="overflow-auto h-[calc(100vh-250px)]">
+                <div className="grid gap-3">
                   {rowData &&
                     rowData?.map((file, index) => {
                       return (
                         <div key={file._id} className="shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
                           <div
-                            className={`head flex items-center justify-between cursor-pointer w-full p-[8px_15px] ${
-                              expended[file?._id]
-                                ? 'bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)] rounded-[4px_4px_0_0]'
-                                : 'bg-[var(--accordion-summary-bg,#fff)] rounded-[4px]'
-                            }`}
+                            className={`head flex items-center justify-between cursor-pointer w-full p-[8px_15px] ${expended[file?._id]
+                              ? 'bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)] rounded-[4px_4px_0_0]'
+                              : 'bg-[var(--accordion-summary-bg,#fff)] rounded-[4px]'
+                              }`}
                             onClick={() => {
                               setExpended((prev) => ({
                                 ...prev,
@@ -211,7 +211,7 @@ const Diagram = ({ resource, referenceId }) => {
                                   <Box
                                     key={f.url}
                                     onClick={() => {
-                                      setSelectedAttachment(f);
+                                      setSelectedAttachment({ ...f, attachmentId: file?._id });
                                     }}
                                     className="px-[18px] py-[8px] cursor-pointer"
                                     style={{
@@ -244,7 +244,7 @@ const Diagram = ({ resource, referenceId }) => {
             </Box>
           </Box>
         </Grid>
-        <Grid item xs={12} sm={7} md={7} lg={8} xl={9}>
+        <Grid item xs={12} sm={7} md={7} lg={8} xl={9} className="min-h-[600px]">
           <Box
             className="container-with-border relative"
             p={'20px'}
@@ -256,9 +256,9 @@ const Diagram = ({ resource, referenceId }) => {
             {selectedAttachment && (
               <>
                 {checkImageType(selectedAttachment?.url?.split('.')[1]) ? (
-                  <ViewImage data={selectedAttachment} key={selectedAttachment.url} loading={loading} setLoading={setLoading} />
+                  <ViewImage data={selectedAttachment} fetchData={fetchData} />
                 ) : checkpdfType(selectedAttachment?.url?.split('.')[1]) ? (
-                  <ShowPdf data={selectedAttachment} key={selectedAttachment.url} loading={loading} setLoading={setLoading} />
+                  <ShowPdf data={selectedAttachment} />
                 ) : (
                   <ShowOtherFiles data={selectedAttachment} key={selectedAttachment.url} />
                 )}

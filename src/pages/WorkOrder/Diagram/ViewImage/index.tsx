@@ -7,6 +7,8 @@ import CustomText from './CustomText';
 import axiosInstance from 'src/axios/axiosInstance';
 import Loader from 'src/components/Loader';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { b64toBlob } from 'src/constants/helpers';
+import CustomButton from 'src/components/Helpers/CustomButton';
 
 type TextType = {
   fontSize: number;
@@ -20,7 +22,7 @@ type TextType = {
   height: number;
 };
 
-const ViewImage = ({ data, loading, setLoading }) => {
+const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
   const toastConfig = useContext(CustomToastContext);
   const [themeColor] = useAppTheme();
   const stageRef = useRef(null);
@@ -37,6 +39,9 @@ const ViewImage = ({ data, loading, setLoading }) => {
     width: window.innerWidth - 700,
     height: window.innerHeight - 250
   });
+  const [loading, setLoading] = useState(true);
+  const [isSubmitting, setSubmitting] = useState(false);
+
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -56,15 +61,34 @@ const ViewImage = ({ data, loading, setLoading }) => {
     }
   }, [themeColor]);
 
+  const getImageScale = (url: string, canvasSize: { width: number; height: number }, maxSize: number = 400) => {
+    const image = new Image();
+    image.src = url;
+    image.onload = function () {
+      scaleToFit(this);
+    };
+    function scaleToFit(img) {
+      const scale = Math.min(canvasSize.width / img.width, canvasSize.height / img.height, maxSize / img.height, maxSize / img.width);
+
+      // get the top left position of the image
+      const x = canvasSize.width / 2 - (img.width / 2) * scale;
+      const y = canvasSize.height / 2 - (img.height / 2) * scale;
+      const imgWidth = img.width * scale;
+      const imgHeight = img.height * scale;
+      setImageState({
+        name: data?.name,
+        x,
+        y,
+        isDragging: false,
+        width: imgWidth,
+        height: imgHeight
+      });
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    setImageState({
-      name: data?.name,
-      x: widthHeight.width * 0.5 - 200,
-      y: widthHeight.height * 0.5 - 200,
-      isDragging: false,
-      width: 400,
-      height: 400
-    });
+    setLoading(true);
 
     axiosInstance()
       .get('/user/download?fileName=' + data?.url, {
@@ -77,13 +101,13 @@ const ViewImage = ({ data, loading, setLoading }) => {
         reader.onloadend = function () {
           let base64data: any = reader.result;
           setUrl(base64data);
-          setLoading(false);
+          getImageScale(base64data, widthHeight, 500);
         };
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
-  }, [data]);
+  }, [data?.url]);
 
   useEffect(() => {
     if (!layerRef.current) return;
@@ -112,13 +136,74 @@ const ViewImage = ({ data, loading, setLoading }) => {
     return () => window.removeEventListener('resize', watchContainerSize);
   }, [watchContainerSize]);
 
+  const handleSave = async () => {
+    setSubmitting(true)
+    const canvasElement: any = document.getElementById('canvas_layer');
+    const imgURL = canvasElement?.toDataURL();
+    const blob: any = b64toBlob(imgURL);
+    const type = `image/${data?.url?.split('.')[1]}`;
+    const file: any = new File([blob], data?.name, { type });
+    let formData = new FormData();
+    formData.append('file', file);
+    const res = await axiosInstance().post('/user/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    axiosInstance().put(`/attachment/replace/${data?.attachmentId}`, { oldUrl: data?.url, url: res?.data?.fileName })
+      .then(({ data }) => {
+        setTexts([])
+        setSelectedAttachment(null)
+        fetchData();
+        setSubmitting(false)
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        setSubmitting(false)
+      });
+  };
+
+
   return (
     <div className="absolute inset-2" ref={containerRef}>
-      <Box mb={1} display="flex">
-        <Button size="small" variant="outlined" color="primary" onClick={handleAddText}>
-          Add Text
-        </Button>
-        <Box component="span" mx={1} />
+      <Box mb={1} display="flex" justifyContent="space-between" alignItems="center">
+        <Box>
+          <Button size="small" variant="outlined" color="primary" onClick={handleAddText}>
+            Add Text
+          </Button>
+          {selectedText && !editingText && (
+            <Button
+              size="small"
+              variant="outlined"
+              color="primary"
+              onClick={() => {
+                setTexts((state) => state.filter((s) => s.id !== selectedText));
+                if (selectedText) selectText(null);
+                if (editingText) setEditingText(null);
+                if (!editingTextRef) {
+                  editingTextRef.current.textRef.show();
+                  editingTextRef.current.transformRef.show();
+                  editingTextRef.current.transformRef.forceUpdate();
+                  editingTextRef.current = null;
+                }
+              }}
+            >
+              Remove Text
+            </Button>
+          )}
+        </Box>
+        {texts?.length > 0 &&
+          <CustomButton
+            disabled={isSubmitting}
+            loading={isSubmitting}
+            variant="contained"
+            color="primary"
+            type="submit"
+            onClick={(e) => {
+              handleSave();
+            }}
+          >
+            Save
+          </CustomButton>
+        }
       </Box>
       {!loading ? (
         <Stage
