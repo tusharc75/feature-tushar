@@ -8,6 +8,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import Loader from 'src/components/Loader';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { b64toBlob } from 'src/constants/helpers';
+import axios from 'axios';
 
 type TextType = {
   fontSize: number;
@@ -86,10 +87,12 @@ const ViewImage = ({ data, fetchData }) => {
 
   useEffect(() => {
     setLoading(true);
+    const source = axios.CancelToken.source();
 
     axiosInstance()
       .get('/user/download?fileName=' + data?.url, {
-        responseType: 'blob'
+        responseType: 'blob',
+        cancelToken: source.token
       })
       .then(({ data }) => {
         const file = new Blob([data], { type: 'application/pdf' });
@@ -104,6 +107,9 @@ const ViewImage = ({ data, fetchData }) => {
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
+    return () => {
+      source.cancel();
+    };
   }, [data?.url]);
 
   useEffect(() => {
