@@ -26,15 +26,10 @@ const Diagram = ({ resource, referenceId }) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [selectedAttachment, setSelectedAttachment] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchData();
   }, [resource, referenceId]);
-
-  useEffect(() => {
-    setLoading(true);
-  }, [selectedAttachment]);
 
   const fetchData = async () => {
     axiosInstance()
@@ -256,9 +251,9 @@ const Diagram = ({ resource, referenceId }) => {
             {selectedAttachment && (
               <>
                 {checkImageType(selectedAttachment?.url?.split('.')[1]) ? (
-                  <ViewImage data={selectedAttachment} key={selectedAttachment.url} loading={loading} setLoading={setLoading} />
+                  <ViewImage data={selectedAttachment} key={selectedAttachment.url} />
                 ) : checkpdfType(selectedAttachment?.url?.split('.')[1]) ? (
-                  <ShowPdf data={selectedAttachment} key={selectedAttachment.url} loading={loading} setLoading={setLoading} />
+                  <ShowPdf data={selectedAttachment} key={selectedAttachment.url} />
                 ) : (
                   <ShowOtherFiles data={selectedAttachment} key={selectedAttachment.url} />
                 )}

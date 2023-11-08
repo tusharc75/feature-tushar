@@ -20,7 +20,7 @@ type TextType = {
   height: number;
 };
 
-const ViewImage = ({ data, loading, setLoading }) => {
+const ViewImage = ({ data }) => {
   const toastConfig = useContext(CustomToastContext);
   const [themeColor] = useAppTheme();
   const stageRef = useRef(null);
@@ -37,6 +37,7 @@ const ViewImage = ({ data, loading, setLoading }) => {
     width: window.innerWidth - 700,
     height: window.innerHeight - 250
   });
+  const [loading, setLoading] = useState(true);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -65,7 +66,7 @@ const ViewImage = ({ data, loading, setLoading }) => {
       width: 400,
       height: 400
     });
-
+    setLoading(true);
     axiosInstance()
       .get('/user/download?fileName=' + data?.url, {
         responseType: 'blob'
