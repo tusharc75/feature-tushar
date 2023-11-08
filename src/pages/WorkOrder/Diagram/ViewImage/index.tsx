@@ -60,11 +60,11 @@ const ViewImage = ({ data, fetchData, loading, setLoading }) => {
   useEffect(() => {
     setImageState({
       name: data?.name,
-      x: widthHeight.width * 0.5 - 200,
-      y: widthHeight.height * 0.5 - 200,
+      x: 0,
+      y: 0,
       isDragging: false,
-      width: 400,
-      height: 400
+      width: widthHeight.width + 20,
+      height: widthHeight.height + 48
     });
 
     axiosInstance()
