@@ -115,7 +115,7 @@ const Diagram = ({ resource, referenceId }) => {
               downloadExcel(data);
             }}
             variant="contained"
-            className="no-shadow"
+            className="no-shadow dark:[background:var(--dark-secondary)_!important]"
             color="inherit"
             endIcon={<BiDownload />}
           >
@@ -153,10 +153,11 @@ const Diagram = ({ resource, referenceId }) => {
                       return (
                         <div key={file._id} className="shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
                           <div
-                            className={`head flex items-center justify-between cursor-pointer w-full p-[8px_15px] ${expended[file?._id]
-                              ? 'bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)] rounded-[4px_4px_0_0]'
-                              : 'bg-[var(--accordion-summary-bg,#fff)] rounded-[4px]'
-                              }`}
+                            className={`head flex items-center justify-between cursor-pointer w-full p-[8px_15px] ${
+                              expended[file?._id]
+                                ? 'bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)] rounded-[4px_4px_0_0]'
+                                : 'bg-[var(--accordion-summary-bg,#fff)] rounded-[4px]'
+                            }`}
                             onClick={() => {
                               setExpended((prev) => ({
                                 ...prev,
