@@ -61,30 +61,41 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
     }
   }, [themeColor]);
 
-  const getImageScale = (url: string, canvasSize: { width: number; height: number }, maxSize: number = 400) => {
-    const image = new Image();
-    image.src = url;
-    image.onload = function () {
-      scaleToFit(this);
-    };
-    function scaleToFit(img) {
-      const scale = Math.min(canvasSize.width / img.width, canvasSize.height / img.height, maxSize / image.width, maxSize / image.height);
-      const x = canvasSize.width / 2 - (img.width / 2) * scale;
-      const y = canvasSize.height / 2 - (img.height / 2) * scale;
+  // const getImageScale = (url: string, canvasSize: { width: number; height: number }, maxSize: number = 400) => {
+  //   const image = new Image();
+  //   image.src = url;
+  //   image.onload = function () {
+  //     scaleToFit(this);
+  //   };
+  //   function scaleToFit(img) {
+  //     const scale = Math.min(canvasSize.width / img.width, canvasSize.height / img.height, maxSize / img.height, maxSize / img.width);
 
-      setImageState({
-        name: data?.name,
-        x,
-        y,
-        isDragging: false,
-        width: img.width * scale,
-        height: img.height * scale
-      });
-      setLoading(false);
-    }
-  };
+  //     // get the top left position of the image
+  //     const x = canvasSize.width / 2 - (img.width / 2) * scale;
+  //     const y = canvasSize.height / 2 - (img.height / 2) * scale;
+  //     const imgWidth = img.width * scale;
+  //     const imgHeight = img.height * scale;
+  //     setImageState({
+  //       name: data?.name,
+  //       x,
+  //       y,
+  //       isDragging: false,
+  //       width: imgWidth,
+  //       height: imgHeight
+  //     });
+  //     setLoading(false);
+  //   }
+  // };
 
   useEffect(() => {
+    setImageState({
+      name: data?.name,
+      x: 0,
+      y: 0,
+      isDragging: false,
+      width: widthHeight.width + 20,
+      height: widthHeight.height + 48
+    });
     setLoading(true);
 
     axiosInstance()
@@ -98,13 +109,14 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
         reader.onloadend = function () {
           let base64data: any = reader.result;
           setUrl(base64data);
-          getImageScale(base64data, widthHeight, 500);
+          // getImageScale(base64data, widthHeight, 500);
+          setLoading(false);
         };
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
-  }, [data]);
+  }, [data?.url]);
 
   useEffect(() => {
     if (!layerRef.current) return;
