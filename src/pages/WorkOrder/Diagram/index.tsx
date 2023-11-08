@@ -46,7 +46,7 @@ const Diagram = ({ resource, referenceId }) => {
         });
         setExpended(expend);
         setRowData(data);
-        setSelectedAttachment(data[0]?.file[0]);
+        setSelectedAttachment({...data[0]?.file[0], attachmentId: data[0]?._id});
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -211,7 +211,7 @@ const Diagram = ({ resource, referenceId }) => {
                                   <Box
                                     key={f.url}
                                     onClick={() => {
-                                      setSelectedAttachment(f);
+                                      setSelectedAttachment({ ...f, attachmentId: file?._id });
                                     }}
                                     className="px-[18px] py-[8px] cursor-pointer"
                                     style={{
@@ -256,7 +256,7 @@ const Diagram = ({ resource, referenceId }) => {
             {selectedAttachment && (
               <>
                 {checkImageType(selectedAttachment?.url?.split('.')[1]) ? (
-                  <ViewImage data={selectedAttachment} key={selectedAttachment.url} loading={loading} setLoading={setLoading} />
+                  <ViewImage data={selectedAttachment} key={selectedAttachment.url} fetchData={fetchData} loading={loading} setLoading={setLoading} />
                 ) : checkpdfType(selectedAttachment?.url?.split('.')[1]) ? (
                   <ShowPdf data={selectedAttachment} key={selectedAttachment.url} loading={loading} setLoading={setLoading} />
                 ) : (
