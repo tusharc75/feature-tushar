@@ -22,7 +22,7 @@ const useStyles = makeStyles(() => ({
   }
 }));
 
-const TECHNICIAN_RESOURCE = [
+const RESOURCE = [
   {
     resource: sidebarResource.workOrder,
     title: routes.workOrder.title,
@@ -48,18 +48,15 @@ const WorkOrderTechnician = () => {
   const [serviceData, setServiceData] = useState([]);
 
   const [workOrderOptions, setWorkOrderOptions] = useState([]);
-  const [selectedWorkOrder, setSelectedWorkOrder] = useState(null);
   const [repairOrderOptions, setRepairOrderOptions] = useState([]);
-  const [selectedRepairOrder, setSelectedRepairOrder] = useState(null);
   const [productionOrderOptions, setProductionOrderOptions] = useState([]);
-  const [selectedProductionOrder, setSelectedProductionOrder] = useState(null);
 
   const [loading, setLoading] = useState(false);
   const [selectedServiceStatus, setSelectedServiceStatus] = useState([WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress, WORKORDER_SERVICE_STATUS.completed]);
 
   const [cardData, setCardData] = useState(null);
 
-  const [technicianFilterResources, settechnicianFilterResources] = useState([]);
+  const [resourceFilter, setResourceFilter] = useState([]);
   const [selectedResource, setSelectedResource] = useState(null)
   const [selectedResourceFilter, setSelectedResourceFilter] = useState(null)
 
@@ -69,12 +66,12 @@ const WorkOrderTechnician = () => {
 
   useEffect(() => {
     const options: any = [];
-    TECHNICIAN_RESOURCE?.forEach((item) => {
-      if (permissions[camelCase(item.resource)] && permissions[camelCase(item.resource)]?.isRead === true) {
+    RESOURCE?.forEach((item) => {
+      if (permissions[camelCase(item.resource)]) {
         options.push(item)
       }
     })
-    settechnicianFilterResources(options)
+    setResourceFilter(options)
   }, [])
 
   useEffect(() => {
@@ -94,19 +91,19 @@ const WorkOrderTechnician = () => {
   }, [serviceData, selectedServiceStatus]);
 
   useEffect(() => {
-    fetchData(selectedResource?.resource ? selectedResourceFilter?.resource : null);
+    fetchData();
   }, [selectedResourceFilter]);
 
-  const fetchData = (resource = null) => {
+  const fetchData = () => {
     setLoading(true);
     let api = `/work-order-technician`;
-    if (resource) {
-      api = api + `?${camelCase(resource)}=${selectedWorkOrder.optionValue}`;
+    if (selectedResource && selectedResourceFilter) {
+      api = api + `?${camelCase(selectedResource?.resource)}=${selectedResourceFilter?.optionValue}`;
     }
     axiosInstance()
       .get(api)
       .then(({ data: { data } }) => {
-        if (!selectedRepairOrder && !selectedWorkOrder && !selectedProductionOrder) {
+        if (!selectedResourceFilter) {
           const workOrderOption = [];
           const repairOrderOption = [];
           const productionOrderOption = [];
@@ -170,7 +167,7 @@ const WorkOrderTechnician = () => {
         <Box className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[4fr_4fr_6fr_auto] xl:grid-cols-[1fr_1fr_1fr_auto] items-start gap-4">
           <Box className={classes.inputs}>
             <Autocomplete
-              options={technicianFilterResources}
+              options={resourceFilter}
               fullWidth
               disabled={loading}
               getOptionLabel={(option: any) => option.title}
