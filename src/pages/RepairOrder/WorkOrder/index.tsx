@@ -90,15 +90,20 @@ const WorkOrder = ({
     const assignedUsersArrays = selectedRecords?.filter((product) => product?.assignedUsers).map((product) => product?.assignedUsers);
     const assignedUsers = assignedUsersArrays?.flat();
 
-    const uniqueAssignedUsers = assignedUsers.filter((obj, index, self) => index === self.findIndex((t) => JSON.stringify(t) === JSON.stringify(obj)));
+    const uniqueAssignedUsers = assignedUsers.filter(
+      (obj, index, self) => index === self.findIndex((t) => JSON.stringify(t) === JSON.stringify(obj))
+    );
     setAllAssignedUsers(uniqueAssignedUsers);
 
-    const assignedWorkStationsArrays = selectedRecords?.filter((product) => product?.assignedWorkStations).map((product) => product?.assignedWorkStations);
+    const assignedWorkStationsArrays = selectedRecords
+      ?.filter((product) => product?.assignedWorkStations)
+      .map((product) => product?.assignedWorkStations);
     const assignedWorkStations = assignedWorkStationsArrays?.flat();
 
-    const uniqueAssignedWorkStations = assignedWorkStations.filter((obj, index, self) => index === self.findIndex((t) => JSON.stringify(t) === JSON.stringify(obj)));
+    const uniqueAssignedWorkStations = assignedWorkStations.filter(
+      (obj, index, self) => index === self.findIndex((t) => JSON.stringify(t) === JSON.stringify(obj))
+    );
     setAllAssignedWorkStations(uniqueAssignedWorkStations);
-
   }, [selectedRecords]);
 
   const fetchFields = async () => {
@@ -273,7 +278,7 @@ const WorkOrder = ({
         Cell: ({ row }) => (row.original['qty'] ? <p> {row?.original?.qty}</p> : <NoDataCell />)
       }
     ];
-    const workStationColumn =  {
+    const workStationColumn = {
       accessor: 'assignedWorkStations',
       Header: 'Assigned Work Station',
       disableFilters: true,
@@ -281,21 +286,34 @@ const WorkOrder = ({
         row?.original['assignedWorkStations'] && row?.original['assignedWorkStations']?.length ? (
           row?.original['assignedWorkStations']?.map((e, i) => {
             return i === row?.original['assignedWorkStations'].length - 1 ? (
-              <a className="link text-truncate" target="_blank" href={`${routes.workStationsDetail.path}/${e.optionValue}`} rel="noreferrer">
+              <a
+                className="link text-truncate [flex-grow:0_!important]"
+                target="_blank"
+                href={`${routes.workStationsDetail.path}/${e.optionValue}`}
+                rel="noreferrer"
+              >
                 {e?.optionLabel}
               </a>
             ) : (
-              <a className="link text-truncate" target="_blank" href={`${routes.workStationsDetail.path}/${e.optionValue}`} rel="noreferrer">
-                {e?.optionLabel},{' '}
-              </a>
+              <>
+                <a
+                  className="link text-truncate [flex-grow:0_!important]"
+                  target="_blank"
+                  href={`${routes.workStationsDetail.path}/${e.optionValue}`}
+                  rel="noreferrer"
+                >
+                  {e?.optionLabel},
+                </a>
+                &nbsp;
+              </>
             );
           })
         ) : (
           <NoDataCell />
         )
-    }
+    };
     if (permissions?.workStations?.isRead) {
-      const assignedTechnicianIndex = coloum.findIndex(col => col.accessor === 'assignedUsers');
+      const assignedTechnicianIndex = coloum.findIndex((col) => col.accessor === 'assignedUsers');
       coloum.splice(assignedTechnicianIndex + 1, 0, workStationColumn);
     }
     coloum = [...coloum, ...newColumns];
@@ -359,7 +377,10 @@ const WorkOrder = ({
                     setConsumablesDialog({ open: true, ids: ids, data: [row?.original] });
                   }}
                 >
-                  <AddCircleOutlineIcon fontSize="small" color={row?.original?.workOrder?.status !== WORK_ORDER_STATUS.completed ? 'primary' : 'disabled'} />
+                  <AddCircleOutlineIcon
+                    fontSize="small"
+                    color={row?.original?.workOrder?.status !== WORK_ORDER_STATUS.completed ? 'primary' : 'disabled'}
+                  />
                 </IconButton>
               </HtmlTooltip>
             )}
@@ -417,7 +438,6 @@ const WorkOrder = ({
   };
 
   const handleDelete = async () => {
-
     if (deleteData?.some((e) => [MATERIAL_TYPE.product, MATERIAL_TYPE.service, MATERIAL_TYPE.package]?.includes(e.type))) {
       setDeleting(true);
 
@@ -428,12 +448,12 @@ const WorkOrder = ({
       const products = deleteData?.filter((e) => e.type === MATERIAL_TYPE.product);
       if (products?.length) {
         const ids = products?.map((r) => r?._id);
-       await axiosInstance().put(`${workOrder.api}/${workOrderId}/consumable/remove`, { ids: ids || [] })
+        await axiosInstance().put(`${workOrder.api}/${workOrderId}/consumable/remove`, { ids: ids || [] });
       }
       const servicePackage = deleteData?.filter((e) => [MATERIAL_TYPE.service, MATERIAL_TYPE.package]?.includes(e.type));
       if (servicePackage?.length) {
         const ids = servicePackage?.map((e) => e?.uniqueId);
-      await axiosInstance().put(`${workOrder.api}/service/${workOrderId}/remove`, { uniqueIds: ids })
+        await axiosInstance().put(`${workOrder.api}/service/${workOrderId}/remove`, { uniqueIds: ids });
 
         if (isPostWorkService && repairOrderData?.type === REPAIR_ORDER_TYPE.external) {
           createNewVersionQuote(true);
@@ -504,35 +524,37 @@ const WorkOrder = ({
     createWorkorderService(rows);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === MATERIAL_TYPE.service
-        ? parent?.serviceDetail?.serviceName
-        : parent.type === MATERIAL_TYPE.product
+      parent.detail = `${
+        parent.type === MATERIAL_TYPE.service
+          ? parent?.serviceDetail?.serviceName
+          : parent.type === MATERIAL_TYPE.product
           ? parent?.productDetail?.productName
           : parent.type === MATERIAL_TYPE.serializedAsset
-            ? parent?.serializedAssetDetail?.assetNumber
-            : parent?.packageDetail?.packageName
-        }`;
+          ? parent?.serializedAssetDetail?.assetNumber
+          : parent?.packageDetail?.packageName
+      }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === MATERIAL_TYPE.product
-            ? parent?.productDetail?.productDescription || ''
-            : parent.type === MATERIAL_TYPE.package
-              ? parent?.packageDetail?.packageDescription || ''
-              : parent.type === MATERIAL_TYPE.serializedAsset
-                ? parent?.serializedAssetDetail?.product?.productDescription || ''
-                : '';
+          ? parent?.productDetail?.productDescription || ''
+          : parent.type === MATERIAL_TYPE.package
+          ? parent?.packageDetail?.packageDescription || ''
+          : parent.type === MATERIAL_TYPE.serializedAsset
+          ? parent?.serializedAssetDetail?.product?.productDescription || ''
+          : '';
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qty = parent.qty;
-      parent.status = `${parent.type === MATERIAL_TYPE.service
-        ? parent.serviceDetail?.status
-        : parent.type === MATERIAL_TYPE.product
+      parent.status = `${
+        parent.type === MATERIAL_TYPE.service
+          ? parent.serviceDetail?.status
+          : parent.type === MATERIAL_TYPE.product
           ? parent.productDetail?.status
           : parent.type === MATERIAL_TYPE.serializedAsset
-            ? parent.serializedAssetDetail.status
-            : parent.packageDetail?.status
-        }`;
+          ? parent.serializedAssetDetail.status
+          : parent.packageDetail?.status
+      }`;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
 
       parent.hideSelection = false;
@@ -584,18 +606,18 @@ const WorkOrder = ({
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceName
           : _subRow.type === MATERIAL_TYPE.product
-            ? _subRow?.productDetail?.productName
-            : _subRow.type === MATERIAL_TYPE.serializedAsset
-              ? _subRow?.serializedAsset?.assetNumber
-              : _subRow?.packageDetail?.packageName;
+          ? _subRow?.productDetail?.productName
+          : _subRow.type === MATERIAL_TYPE.serializedAsset
+          ? _subRow?.serializedAsset?.assetNumber
+          : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === MATERIAL_TYPE.product
-            ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === MATERIAL_TYPE.package
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+          ? _subRow?.productDetail?.productDescription || ''
+          : _subRow.type === MATERIAL_TYPE.package
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
       _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
@@ -623,7 +645,6 @@ const WorkOrder = ({
       if (_subRow?.status === WORKORDER_SERVICE_STATUS.completed || !_subRow.canDelete) {
         _subRow.hideSelection = true;
       }
-
     });
     if (subRows.length === 0 && parent.type === 'package') {
       parent.isValid = false;
@@ -855,12 +876,12 @@ const WorkOrder = ({
                 >
                   Assign Work Station
                 </MenuItem>
-                )}
+              )}
               {!user?.brandPolicy?.workOrderConsumableHide && (
                 <MenuItem
                   disabled={
                     selectedRecords?.filter((d) => [MATERIAL_TYPE.serializedAsset, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0 &&
-                      checkUniqWorkOrder()
+                    checkUniqWorkOrder()
                       ? false
                       : true
                   }
@@ -899,11 +920,12 @@ const WorkOrder = ({
                   setCompleteConfirmBox(true);
                   closeActions();
                 }}
-                disabled={selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length &&
+                disabled={
+                  selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length &&
                   selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset && e?.canAutoCompleteWorkOrder)?.length ===
-                  selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length
-                  ? false
-                  : true
+                    selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length
+                    ? false
+                    : true
                 }
               >
                 Auto Complete Work Order(s)
