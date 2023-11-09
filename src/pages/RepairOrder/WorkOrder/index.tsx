@@ -259,13 +259,26 @@ const WorkOrder = ({
           row?.original['assignedUsers'] && row?.original['assignedUsers']?.length ? (
             row?.original['assignedUsers']?.map((e, i) => {
               return i === row?.original['assignedUsers'].length - 1 ? (
-                <a className="link text-truncate" target="_blank" href={`${routes.userDetail.path}/${e.optionValue}`} rel="noreferrer">
+                <a
+                  className="link text-truncate  [flex-grow:0_!important]"
+                  target="_blank"
+                  href={`${routes.userDetail.path}/${e.optionValue}`}
+                  rel="noreferrer"
+                >
                   {e?.optionLabel}
                 </a>
               ) : (
-                <a className="link text-truncate" target="_blank" href={`${routes.userDetail.path}/${e.optionValue}`} rel="noreferrer">
-                  {e?.optionLabel},{' '}
-                </a>
+                <>
+                  <a
+                    className="link text-truncate [flex-grow:0_!important]"
+                    target="_blank"
+                    href={`${routes.userDetail.path}/${e.optionValue}`}
+                    rel="noreferrer"
+                  >
+                    {e?.optionLabel},
+                  </a>
+                  &nbsp;
+                </>
               );
             })
           ) : (
