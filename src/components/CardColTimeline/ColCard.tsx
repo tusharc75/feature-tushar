@@ -88,7 +88,6 @@ const ColCard: React.FC<colDataInterface> = ({ data, cardOnClick, cardDataRows, 
         if (item.type === 'timer') {
           const stepTimes = getFieldsWithOtherDetails(data[item.accessor] || []);
           if (!stepTimes.length) return <div className="min-h-[20px]" />;
-          console.log(stepTimes);
           if (stepTimes.length > 0)
             return (
               <Typography key={index} className={styles.cardDetails}>
