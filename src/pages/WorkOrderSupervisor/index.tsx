@@ -16,6 +16,13 @@ import CardColTimeline, { datarowInterface } from 'src/components/CardColTimelin
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { useData } from 'src/StateProvider/Provider';
 
+
+const RESOURCE = [
+  { key: 'workOrder', resource: sidebarResource.workOrder, title: routes.workOrder.title },
+  { key: 'repairOrder', resource: sidebarResource.repairOrder, title: routes.repairOrder.title },
+  { key: 'productionOrder', resource: sidebarResource.productionOrder, title: routes.productionOrder.title },
+];
+
 const WorkOrderSupervisor = () => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -40,13 +47,7 @@ const WorkOrderSupervisor = () => {
     to: new Date(moment().endOf('month').format('YYYY/MM/DD'))
   });
 
-  const resourceMap = [
-    { key: 'workOrder', resource: sidebarResource.workOrder, title: routes.workOrder.title },
-    { key: 'repairOrder', resource: sidebarResource.repairOrder, title: routes.repairOrder.title },
-    { key: 'productionOrder', resource: sidebarResource.productionOrder, title: routes.productionOrder.title },
-  ];
-  
-  const resourceList: any = resourceMap.map((e) => { if(permissions[e.key]) return e; })
+  const resourceFilter: any = RESOURCE.map((e) => { if (permissions[e.key]) return e; })
 
   useEffect(() => {
     let timeout = setTimeout(fetchData, 600);
@@ -96,7 +97,7 @@ const WorkOrderSupervisor = () => {
   }, []);
 
   useEffect(() => {
-    if(selectedResource) {
+    if (selectedResource) {
       axiosInstance()
         .get(`/sa-formbuilder/lookup?lookupResource=${selectedResource.resource}`)
         .then(({ data: { data } }) => {
@@ -128,7 +129,7 @@ const WorkOrderSupervisor = () => {
     }
   };
 
-  const getQueryString = (isExport = false) => {
+  const getQueryString = () => {
     let deepFilter = '?';
     if (selectedUser) {
       deepFilter = `${deepFilter}&user=${selectedUser}`;
@@ -136,7 +137,7 @@ const WorkOrderSupervisor = () => {
     if (selectedService) {
       deepFilter = `${deepFilter}&services=${selectedService}`;
     }
-    if(selectedResource && selectedResourceOption) {
+    if (selectedResource && selectedResourceOption) {
       deepFilter = `${deepFilter}&${selectedResource.key}s=${selectedResourceOption}`;
     }
     if (globalFilters) {
@@ -178,7 +179,6 @@ const WorkOrderSupervisor = () => {
                 onChange={(e, val) => {
                   setSelectedUser(val && val.optionValue ? val.optionValue : '');
                 }}
-                // disableClearable
                 renderInput={(params) => (
                   <TextField
                     {...params}
@@ -213,11 +213,11 @@ const WorkOrderSupervisor = () => {
               />
               <Autocomplete
                 fullWidth
-                options={resourceList}
+                options={resourceFilter}
                 getOptionLabel={(option: any) => (option ? option?.title : '')}
                 value={selectedResource}
                 onChange={(e, val) => {
-                  if(!val) setSelectedResourceOption(null);
+                  setSelectedResourceOption(null);
                   setSelectedResource(val);
                 }}
                 renderInput={(params) => (
@@ -231,11 +231,10 @@ const WorkOrderSupervisor = () => {
                   />
                 )}
               />
-             {selectedResource && (
-              <Autocomplete
+              {selectedResource && (
+                <Autocomplete
                   fullWidth
                   options={resourceOptions}
-                  disabled = {!selectedResource}
                   getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
                   getOptionSelected={(option: any, val) => {
                     return option.optionValue === val.optionValue;
