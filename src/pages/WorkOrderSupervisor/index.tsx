@@ -135,10 +135,10 @@ const WorkOrderSupervisor = () => {
       deepFilter = `${deepFilter}&user=${selectedUser}`;
     }
     if (selectedService) {
-      deepFilter = `${deepFilter}&services=${selectedService}`;
+      deepFilter = `${deepFilter}&service=${selectedService}`;
     }
     if (selectedResource && selectedResourceOption) {
-      deepFilter = `${deepFilter}&${selectedResource.key}s=${selectedResourceOption}`;
+      deepFilter = `${deepFilter}&${selectedResource.key}=${selectedResourceOption}`;
     }
     if (globalFilters) {
       deepFilter = `${deepFilter}&from=${moment(globalFilters.from).format('YYYY/MM/DD')}&to=${moment(globalFilters.to).format('YYYY/MM/DD')}`;
