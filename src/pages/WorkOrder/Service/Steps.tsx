@@ -1539,6 +1539,7 @@ const Steps = ({
                   setUserAssignDialog(false);
                   fetchService();
                 }}
+                competencies={selectedService?.competencies}
               />
             )}
             {workStationAssignDialog && (
