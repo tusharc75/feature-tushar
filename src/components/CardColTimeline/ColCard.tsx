@@ -38,6 +38,7 @@ const ColCard: React.FC<colDataInterface> = ({ data, cardOnClick, cardDataRows, 
           return item.renderer(data);
         }
         if (item.type === 'linkTitle') {
+          if (!data[item.accessor]) return <div className="min-h-[20px]" />;
           return (
             <Typography key={index} component={'h5'} className={styles.cardTitle} title={data[item.accessor] || '--'}>
               <Link target="_blank" className={styles.cardDetailsLink} to={() => item.link(data)}>
@@ -47,6 +48,7 @@ const ColCard: React.FC<colDataInterface> = ({ data, cardOnClick, cardDataRows, 
           );
         }
         if (item.type === 'text') {
+          if (!data[item.accessor]) return <div className="min-h-[20px]" />;
           return (
             <Typography key={index} className={styles.cardDetails} title={data[item.accessor] || '--'}>
               <span>{item.title}: </span>
@@ -55,6 +57,7 @@ const ColCard: React.FC<colDataInterface> = ({ data, cardOnClick, cardDataRows, 
           );
         }
         if (item.type === 'link') {
+          if (!data[item.accessor]) return <div className="min-h-[20px]" />;
           return (
             <Typography key={index} className={styles.cardDetails}>
               <span>{item.title}: </span>
@@ -65,6 +68,7 @@ const ColCard: React.FC<colDataInterface> = ({ data, cardOnClick, cardDataRows, 
           );
         }
         if (item.type === 'date') {
+          if (!data[item.accessor]) return <div className="min-h-[20px]" />;
           return (
             <Typography key={index} className={styles.cardDetails}>
               <span>{item.title}: </span>
@@ -73,6 +77,7 @@ const ColCard: React.FC<colDataInterface> = ({ data, cardOnClick, cardDataRows, 
           );
         }
         if (item.type === 'dateTime') {
+          if (!data[item.accessor]) return <div className="min-h-[20px]" />;
           return (
             <Typography key={index} className={styles.cardDetails}>
               <span>{item.title}: </span>
@@ -81,6 +86,7 @@ const ColCard: React.FC<colDataInterface> = ({ data, cardOnClick, cardDataRows, 
           );
         }
         if (item.type === 'timer') {
+          if (!data[item.accessor]) return <div className="min-h-[20px]" />;
           const stepTimes = getFieldsWithOtherDetails(data[item.accessor] || []);
           if (stepTimes.length > 0)
             return (
