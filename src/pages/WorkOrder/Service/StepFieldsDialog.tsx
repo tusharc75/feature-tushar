@@ -283,7 +283,7 @@ const StepFieldsDialog = ({
                     <DetailsPage
                       containerPadding={'0px'}
                       gridSize={12}
-                      data={fieldData.values}
+                      data={fieldData.orignalValues}
                       fields={fieldData.fields.map((f) => ({ fieldData: f }))}
                     />
                   ) : (
