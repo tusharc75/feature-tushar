@@ -32,6 +32,8 @@ const WorkOrderTechnician = () => {
   const [selectedWorkOrder, setSelectedWorkOrder] = useState(null);
   const [repairOrderOptions, setRepairOrderOptions] = useState([]);
   const [selectedRepairOrder, setSelectedRepairOrder] = useState(null);
+  const [productionOrderOptions, setProductionOrderOptions] = useState([]);
+  const [selectedProductionOrder, setSelectedProductionOrder] = useState(null);
 
   const [loading, setLoading] = useState(false);
   const [selectedServiceStatus, setSelectedServiceStatus] = useState([WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress, WORKORDER_SERVICE_STATUS.completed]);
@@ -60,40 +62,45 @@ const WorkOrderTechnician = () => {
 
   useEffect(() => {
     fetchData();
-  }, [selectedWorkOrder, selectedRepairOrder]);
+  }, [selectedWorkOrder, selectedRepairOrder, selectedProductionOrder]);
 
   const fetchData = () => {
     setLoading(true);
     let api = `/work-order-technician`;
-    if (selectedWorkOrder && selectedRepairOrder) {
-      api = api + `?workOrder=${selectedWorkOrder.optionValue}&repairOrder=${selectedRepairOrder.optionValue}`;
-    } else if (selectedWorkOrder) {
+    if (selectedWorkOrder) {
       api = api + `?workOrder=${selectedWorkOrder.optionValue}`;
     } else if (selectedRepairOrder) {
       api = api + `?repairOrder=${selectedRepairOrder.optionValue}`;
+    } else if (selectedProductionOrder) {
+      api = api + `?productionOrder=${selectedProductionOrder.optionValue}`;
     }
     axiosInstance()
       .get(api)
       .then(({ data: { data } }) => {
-        if (!selectedRepairOrder && !selectedWorkOrder) {
+        if (!selectedRepairOrder && !selectedWorkOrder && !selectedProductionOrder) {
           const workOrderOption = [];
           const repairOrderOption = [];
+          const productionOrderOption = [];
           data?.forEach((item: any) => {
             if (item?.workOrderDetail && !workOrderOption?.find((e) => e.optionValue === item?.workOrderDetail?._id)) {
               workOrderOption.push({ optionValue: item?.workOrderDetail?._id, optionLabel: item?.workOrderDetail?.workOrderNumber });
             }
-            if (
-              item?.workOrderDetail?.repairOrder &&
-              !repairOrderOption?.find((e) => e.optionValue === item?.workOrderDetail?.repairOrder?.optionValue)
-            ) {
+            if (item?.workOrderDetail?.repairOrder && !repairOrderOption?.find((e) => e.optionValue === item?.workOrderDetail?.repairOrder?.optionValue)) {
               repairOrderOption.push({
                 optionValue: item?.workOrderDetail?.repairOrder?.optionValue,
                 optionLabel: item?.workOrderDetail?.repairOrder?.optionLabel
               });
             }
+            if (item?.workOrderDetail?.productionOrder && !productionOrderOption?.find((e) => e.optionValue === item?.workOrderDetail?.productionOrder?.optionValue)) {
+              productionOrderOption.push({
+                optionValue: item?.workOrderDetail?.productionOrder?.optionValue,
+                optionLabel: item?.workOrderDetail?.productionOrder?.optionLabel
+              });
+            }
           });
           setWorkOrderOptions(workOrderOption);
           setRepairOrderOptions(repairOrderOption);
+          setProductionOrderOptions(productionOrderOption);
         }
         setServiceData(data);
         if (selectedService) {
@@ -148,8 +155,7 @@ const WorkOrderTechnician = () => {
               />
             </Box>
           )}
-
-          {repairOrderOptions && (
+          {permissions?.repairOrder && (
             <Box className={classes.inputs}>
               <Autocomplete
                 options={repairOrderOptions}
@@ -161,11 +167,26 @@ const WorkOrderTechnician = () => {
                   setSelectedRepairOrder(newValue);
                 }}
                 size="small"
-                renderInput={(params) => <TextField {...params} label={`Select Repair Order`} variant="outlined" />}
+                renderInput={(params) => <TextField {...params} label={`Select ${routes.repairOrder.title}`} variant="outlined" />}
               />
             </Box>
           )}
-
+          {permissions?.productionOrder && (
+            <Box className={classes.inputs}>
+              <Autocomplete
+                options={productionOrderOptions}
+                fullWidth
+                getOptionLabel={(option: any) => option.optionLabel}
+                getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
+                value={selectedProductionOrder}
+                onChange={(event, newValue) => {
+                  setSelectedProductionOrder(newValue);
+                }}
+                size="small"
+                renderInput={(params) => <TextField {...params} label={`Select ${routes.productionOrder.title}`} variant="outlined" />}
+              />
+            </Box>
+          )}
           <Box className={classes.inputs}>
             <Autocomplete
               fullWidth
