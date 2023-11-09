@@ -157,7 +157,7 @@ const TransferInventoryDetailPage = () => {
       .then(() => {
         setDeleting(false);
         setShowConfirmBox(false);
-        history.goBack();
+        history.push(`${routes.transferInventory.path}`)
       })
       .catch((error) => {
         setDeleting(false);

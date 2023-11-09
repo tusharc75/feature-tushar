@@ -86,7 +86,7 @@ const EmployeeMasterDetail = () => {
             type: 'success',
             message: data?.message
           });
-          history.goBack();
+          history.push(`${routes.employeeMaster.path}`)
         })
         .catch((err) => {
           setShowConfirmBox(false);

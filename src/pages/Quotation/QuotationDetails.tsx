@@ -326,7 +326,7 @@ const QuotationDetails = () => {
       .put(`${quotation.api}/remove`, { ids: [id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.goBack();
+        history.push(`${routes.quotation.path}`)
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);

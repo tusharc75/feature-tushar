@@ -207,7 +207,7 @@ const TransferAssetDetailPage = () => {
       .then(() => {
         setDeleting(false);
         setShowConfirmBox(false);
-        history.goBack();
+        history.push(`${routes.transferAsset.path}`)
       })
       .catch((error) => {
         setDeleting(false);

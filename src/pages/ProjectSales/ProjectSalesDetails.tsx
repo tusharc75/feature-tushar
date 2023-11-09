@@ -208,7 +208,7 @@ const ProjectSalesDetails = () => {
         .then(() => {
           setDeleting(false);
           setShowConfirmBox(false);
-          history.goBack();
+          history.push(`${routes.projectSales.path}`)
         })
         .catch(() => {
           setDeleting(false);

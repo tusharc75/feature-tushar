@@ -78,7 +78,7 @@ export default function DeviceTemplatesDetails() {
           .put(`${routes.deviceTemplates.path}/remove`, { ids: [id] })
           .then(({ data }) => {
             setShowConfirmBox(false);
-            history.goBack();
+            history.push(`${routes.deviceTemplates.path}`)
           })
           .catch((err) => {
             setShowConfirmBox(false);

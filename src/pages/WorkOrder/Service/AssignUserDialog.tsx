@@ -10,8 +10,9 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import Autocomplete from '@material-ui/lab/Autocomplete/Autocomplete';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
+import { isArray } from 'lodash';
 
-const AssignUserDialog = ({ workOrderData, assignedUsers, reference, referenceData = null, handleClose, handleSucess }) => {
+const AssignUserDialog = ({ workOrderData, assignedUsers, reference, referenceData = null, competencies, handleClose, handleSucess }) => {
   const toastConfig = useContext(CustomToastContext);
   const [userList, setUserList] = useState([]);
   const [selectedUsers, setSelectedUsers] = useState(assignedUsers);
@@ -21,10 +22,14 @@ const AssignUserDialog = ({ workOrderData, assignedUsers, reference, referenceDa
   }, []);
 
   const fetchUserList = () => {
+    var api = `${workOrder.api}/technician-users`
+    if (competencies && isArray(competencies) && competencies?.length) {
+      api = api + `?competencies=${JSON.stringify(competencies)}`
+    }
     axiosInstance()
-      .get(`sa-formbuilder/lookup?lookupResource=User`)
+      .get(api)
       .then(({ data: { data } }) => {
-        setUserList(data['User']);
+        setUserList(data);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);

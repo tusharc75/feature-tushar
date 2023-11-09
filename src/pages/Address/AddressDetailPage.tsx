@@ -70,7 +70,7 @@ const AddressDetailPage = () => {
           .then(({ data }) => {
             setShowConfirmBox(false);
 
-            history.goBack();
+            history.push(`${routes.address.path}`)
           })
           .catch((err) => {
             setShowConfirmBox(false);
