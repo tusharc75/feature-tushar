@@ -16,6 +16,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { ImportIcon, ExportIcon } from 'src/assets/svg/svgIcons';
+import routes from 'src/components/Helpers/Routes';
 
 const DashboardBuilder = () => {
   const history = useHistory();
@@ -104,7 +105,7 @@ const DashboardBuilder = () => {
           type: 'success'
         });
         setSubmitting(false);
-        history.goBack();
+        history.push('/dashboard-master')
       })
       .catch((error) => {
         setSubmitting(false);
@@ -170,7 +171,7 @@ const DashboardBuilder = () => {
           type: 'success'
         });
         setSubmitting(false);
-        history.goBack();
+        history.push('/dashboard-master')
       })
       .catch((error) => {
         setSubmitting(false);

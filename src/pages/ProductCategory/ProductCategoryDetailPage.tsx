@@ -87,7 +87,7 @@ const ProductCategoryDetailPage = () => {
           .then(({ data }) => {
             setShowConfirmBox(false);
 
-            history.goBack();
+            history.push(`${routes.productCategory.path}`)
           })
           .catch((err) => {
             setShowConfirmBox(false);

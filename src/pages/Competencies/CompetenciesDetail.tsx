@@ -73,7 +73,7 @@ const CompetenciesDetail = () => {
             type: 'success',
             message: data?.message
           });
-          history.goBack();
+          history.push(`${routes.competencies.path}`)
         })
         .catch((err) => {
           setShowConfirmBox(false);

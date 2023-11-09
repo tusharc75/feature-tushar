@@ -88,7 +88,7 @@ const IrtTicketDetail = () => {
             type: 'success',
             message: data?.message
           });
-          history.goBack();
+          history.push(`${routes.irtTicket.path}`)
         })
         .catch((err) => {
           setShowConfirmBox(false);

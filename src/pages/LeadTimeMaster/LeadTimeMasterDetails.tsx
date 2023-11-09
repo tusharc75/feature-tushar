@@ -117,7 +117,7 @@ const LeadTimeMasterDetails = () => {
       .put(`${leadTimeMaster.api}/remove`, { ids: [id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.goBack();
+        history.push(`${routes.leadTimeMaster.path}`);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);

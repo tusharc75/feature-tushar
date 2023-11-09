@@ -74,7 +74,7 @@ const IotDataPointsDetail = () => {
             type: 'success',
             message: data?.message
           });
-          history.goBack();
+          history.push(`${routes.iotDataPoints.path}`)
         })
         .catch((err) => {
           setShowConfirmBox(false);
