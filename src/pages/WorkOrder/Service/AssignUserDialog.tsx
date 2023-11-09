@@ -22,9 +22,9 @@ const AssignUserDialog = ({ workOrderData, assignedUsers, reference, referenceDa
 
   const fetchUserList = () => {
     axiosInstance()
-      .get(`sa-formbuilder/lookup?lookupResource=User`)
+      .get(`${workOrder.api}/technician-users`)
       .then(({ data: { data } }) => {
-        setUserList(data['User']);
+        setUserList(data);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);

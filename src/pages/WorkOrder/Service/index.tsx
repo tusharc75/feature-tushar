@@ -689,11 +689,11 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                             </HtmlTooltip>
                                           </Box>
                                         )}
-                                        {data?.type === 'service' && data?.workStations?.length > 0 && (
+                                        {data?.type === 'service' && data?.assignedWorkStations?.length > 0 && (
                                           <Box ml={1}>
                                             <HtmlTooltip
                                               enterTouchDelay={0}
-                                              title={`Work Stations-${data?.workStations?.map((e) => e?.optionLabel)?.toString()}`}
+                                              title={`Work Stations-${data?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString()}`}
                                             >
                                               <span>
                                                 <WorkStations className=" align-text-top" />
@@ -950,11 +950,11 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                                 </HtmlTooltip>
                                               </Box>
                                             )}
-                                            {data?.type === 'service' && data?.workStations?.length > 0 && (
+                                            {data?.type === 'service' && data?.assignedWorkStations?.length > 0 && (
                                               <Box ml={1}>
                                                 <HtmlTooltip
                                                   enterTouchDelay={0}
-                                                  title={`Work Stations-${data?.workStations?.map((e) => e?.optionLabel)?.toString()}`}
+                                                  title={`Work Stations-${data?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString()}`}
                                                 >
                                                   <span>
                                                     <WorkStations className=" align-text-top" />
@@ -1241,7 +1241,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
               workOrderId: workOrderId
             }
           ]}
-          workStations={selectedService?.workStations}
+          workStations={selectedService?.assignedWorkStations}
           handleClose={() => {
             setWorkStationAssignDialog(false);
           }}
