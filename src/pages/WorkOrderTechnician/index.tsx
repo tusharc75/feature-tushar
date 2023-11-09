@@ -8,9 +8,10 @@ import RefreshIcon from '@material-ui/icons/Refresh';
 import React from 'react';
 import { useData } from 'src/StateProvider/Provider';
 import CloseIcon from '@material-ui/icons/Close';
-import { WORKORDER_SERVICE_STATUS, WORKORDER_TECHNICIAN_SERVICE_STATUS } from 'src/constants/helpers';
+import { sidebarResource, WORKORDER_SERVICE_STATUS, WORKORDER_TECHNICIAN_SERVICE_STATUS } from 'src/constants/helpers';
 import CardColTimeline, { groupBy } from 'src/components/CardColTimeline';
 import TechnicianDialog from './TechnicianDialog';
+import { camelCase } from 'lodash';
 
 const useStyles = makeStyles(() => ({
   '.MuiGrid-spacing-xs-1': {
@@ -21,6 +22,24 @@ const useStyles = makeStyles(() => ({
   }
 }));
 
+const RESOURCE = [
+  {
+    resource: sidebarResource.workOrder,
+    title: routes.workOrder.title,
+    fieldName: 'rentalJobName',
+  },
+  {
+    resource: sidebarResource.repairOrder,
+    title: routes.repairOrder.title,
+    fieldName: 'repairOrder',
+  },
+  {
+    resource: sidebarResource.productionOrder,
+    title: routes.productionOrder.title,
+    fieldName: 'repairOrder',
+  }
+]
+
 const WorkOrderTechnician = () => {
   const classes = useStyles();
 
@@ -29,20 +48,35 @@ const WorkOrderTechnician = () => {
   const [serviceData, setServiceData] = useState([]);
 
   const [workOrderOptions, setWorkOrderOptions] = useState([]);
-  const [selectedWorkOrder, setSelectedWorkOrder] = useState(null);
   const [repairOrderOptions, setRepairOrderOptions] = useState([]);
-  const [selectedRepairOrder, setSelectedRepairOrder] = useState(null);
   const [productionOrderOptions, setProductionOrderOptions] = useState([]);
-  const [selectedProductionOrder, setSelectedProductionOrder] = useState(null);
 
   const [loading, setLoading] = useState(false);
-  const [selectedServiceStatus, setSelectedServiceStatus] = useState([WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress, WORKORDER_SERVICE_STATUS.completed]);
+  const [selectedServiceStatus, setSelectedServiceStatus] = useState([
+    WORKORDER_SERVICE_STATUS.pending,
+    WORKORDER_SERVICE_STATUS.inProgress,
+    WORKORDER_SERVICE_STATUS.completed
+  ]);
 
   const [cardData, setCardData] = useState(null);
+
+  const [resourceFilter, setResourceFilter] = useState([]);
+  const [selectedResource, setSelectedResource] = useState(null)
+  const [selectedResourceFilter, setSelectedResourceFilter] = useState(null)
 
   const {
     state: { permissions, user }
   }: any = useData();
+
+  useEffect(() => {
+    const options: any = [];
+    RESOURCE?.forEach((item) => {
+      if (permissions[camelCase(item.resource)]) {
+        options.push(item)
+      }
+    })
+    setResourceFilter(options)
+  }, [])
 
   useEffect(() => {
     let data = serviceData
@@ -62,22 +96,18 @@ const WorkOrderTechnician = () => {
 
   useEffect(() => {
     fetchData();
-  }, [selectedWorkOrder, selectedRepairOrder, selectedProductionOrder]);
+  }, [selectedResourceFilter]);
 
   const fetchData = () => {
     setLoading(true);
     let api = `/work-order-technician`;
-    if (selectedWorkOrder) {
-      api = api + `?workOrder=${selectedWorkOrder.optionValue}`;
-    } else if (selectedRepairOrder) {
-      api = api + `?repairOrder=${selectedRepairOrder.optionValue}`;
-    } else if (selectedProductionOrder) {
-      api = api + `?productionOrder=${selectedProductionOrder.optionValue}`;
+    if (selectedResource && selectedResourceFilter) {
+      api = api + `?${camelCase(selectedResource?.resource)}=${selectedResourceFilter?.optionValue}`;
     }
     axiosInstance()
       .get(api)
       .then(({ data: { data } }) => {
-        if (!selectedRepairOrder && !selectedWorkOrder && !selectedProductionOrder) {
+        if (!selectedResourceFilter) {
           const workOrderOption = [];
           const repairOrderOption = [];
           const productionOrderOption = [];
@@ -139,54 +169,41 @@ const WorkOrderTechnician = () => {
       </Box>
       <Box className="detail-container-v1">
         <Box className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[4fr_4fr_6fr_auto] xl:grid-cols-[1fr_1fr_1fr_auto] items-start gap-4">
-          {workOrderOptions && (
-            <Box className={classes.inputs}>
-              <Autocomplete
-                options={workOrderOptions}
-                fullWidth
-                getOptionLabel={(option: any) => option.optionLabel}
-                getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
-                value={selectedWorkOrder}
-                onChange={(event, newValue) => {
-                  setSelectedWorkOrder(newValue);
-                }}
-                size="small"
-                renderInput={(params) => <TextField {...params} label={`Select Work Order`} variant="outlined" />}
-              />
-            </Box>
-          )}
-          {permissions?.repairOrder && (
-            <Box className={classes.inputs}>
-              <Autocomplete
-                options={repairOrderOptions}
-                fullWidth
-                getOptionLabel={(option: any) => option.optionLabel}
-                getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
-                value={selectedRepairOrder}
-                onChange={(event, newValue) => {
-                  setSelectedRepairOrder(newValue);
-                }}
-                size="small"
-                renderInput={(params) => <TextField {...params} label={`Select ${routes.repairOrder.title}`} variant="outlined" />}
-              />
-            </Box>
-          )}
-          {permissions?.productionOrder && (
-            <Box className={classes.inputs}>
-              <Autocomplete
-                options={productionOrderOptions}
-                fullWidth
-                getOptionLabel={(option: any) => option.optionLabel}
-                getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
-                value={selectedProductionOrder}
-                onChange={(event, newValue) => {
-                  setSelectedProductionOrder(newValue);
-                }}
-                size="small"
-                renderInput={(params) => <TextField {...params} label={`Select ${routes.productionOrder.title}`} variant="outlined" />}
-              />
-            </Box>
-          )}
+          <Box className={classes.inputs}>
+            <Autocomplete
+              options={resourceFilter}
+              fullWidth
+              disabled={loading}
+              getOptionLabel={(option: any) => option.title}
+              getOptionSelected={(option: any, value: any) => option.resource === value.resource}
+              value={selectedResource}
+              onChange={(event, newValue) => {
+                setSelectedResourceFilter(null);
+                setSelectedResource(newValue);
+              }}
+              size="small"
+              renderInput={(params) => <TextField {...params} label={`Select Resource`} variant="outlined" />}
+            />
+          </Box>
+          {
+            selectedResource && (
+              <Box className={classes.inputs}>
+                <Autocomplete
+                  options={selectedResource.resource === sidebarResource.workOrder ? workOrderOptions : selectedResource.resource === sidebarResource.repairOrder ? repairOrderOptions : productionOrderOptions}
+                  disabled={loading}
+                  fullWidth
+                  getOptionLabel={(option: any) => option.optionLabel}
+                  getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
+                  value={selectedResourceFilter}
+                  onChange={(event, newValue) => {
+                    setSelectedResourceFilter(newValue)
+                  }}
+                  size="small"
+                  renderInput={(params) => <TextField {...params} label={`Select ${selectedResource.title}`} variant="outlined" />}
+                />
+              </Box>
+            )
+          }
           <Box className={classes.inputs}>
             <Autocomplete
               fullWidth
@@ -233,6 +250,7 @@ const WorkOrderTechnician = () => {
             cardDataRows={cardDataRows}
             passFailStatus={true}
             passFailAccessor="serviceStatus"
+            cardHeight={user?.user?.brandPolicy?.workOrderTimer ? 150 : 130}
             sm={6}
             md={4}
             lg={3}

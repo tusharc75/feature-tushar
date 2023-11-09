@@ -4,33 +4,42 @@ import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from '../../components/Helpers/Routes';
 import { Autocomplete } from '@material-ui/lab';
 import { FormControl, InputLabel, Select, MenuItem } from '@material-ui/core';
-import { WORKORDER_SERVICE_STATUS, workOrderSupervisor } from '../../constants/helpers';
+import { WORKORDER_SERVICE_STATUS, sidebarResource, workOrderSupervisor } from '../../constants/helpers';
 import DateFnsUtils from '@date-io/date-fns';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import axiosInstance from 'src/axios/axiosInstance';
-import { prepareDataForGrid } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import moment from 'moment';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import { dateFormatForInputControl } from '../../constants/helpers';
 import CardColTimeline, { datarowInterface } from 'src/components/CardColTimeline';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { useData } from 'src/StateProvider/Provider';
+
+
+const RESOURCE = [
+  { key: 'workOrder', resource: sidebarResource.workOrder, title: routes.workOrder.title },
+  { key: 'repairOrder', resource: sidebarResource.repairOrder, title: routes.repairOrder.title },
+  { key: 'productionOrder', resource: sidebarResource.productionOrder, title: routes.productionOrder.title },
+];
 
 const WorkOrderSupervisor = () => {
   const toastConfig = useContext(CustomToastContext);
+  const {
+    state: { permissions }
+  }: any = useData();
 
   const [selectedUser, setSelectedUser] = useState(null);
-  const [selectedWorkOrder, setSelectedWorkOrder] = useState(null);
-  const [selectedRepairOrder, setSelectedRepairOrder] = useState(null);
   const [selectedService, setSelectedService] = useState(null);
 
   const [usersOption, setUsersOption] = useState([]);
-  const [workOrderOption, setWorkOrderOption] = useState([]);
-  const [repairOrderOption, setRepairOrderOption] = useState([]);
   const [serviceMasterOption, setServiceMasterOption] = useState([]);
 
   const [serviceData, setServiceData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [selectedResource, setSelectedResource] = useState(null);
+  const [resourceOptions, setResourceOptions] = useState([]);
+  const [selectedResourceOption, setSelectedResourceOption] = useState(null);
 
   const [timeFrame, setTimeFrame] = React.useState<any>('custom');
   const [globalFilters, setGlobalFilters] = useState({
@@ -38,12 +47,14 @@ const WorkOrderSupervisor = () => {
     to: new Date(moment().endOf('month').format('YYYY/MM/DD'))
   });
 
+  const resourceFilter: any = RESOURCE.map((e) => { if (permissions[e.key]) return e; })
+
   useEffect(() => {
     let timeout = setTimeout(fetchData, 600);
     return () => {
       clearTimeout(timeout);
     };
-  }, [selectedUser, selectedWorkOrder, selectedRepairOrder, selectedService, timeFrame, globalFilters.from, globalFilters.to]);
+  }, [selectedUser, selectedResourceOption, selectedService, timeFrame, globalFilters.from, globalFilters.to]);
 
   React.useEffect(() => {
     switch (timeFrame) {
@@ -78,14 +89,22 @@ const WorkOrderSupervisor = () => {
 
   useEffect(() => {
     axiosInstance()
-      .get(`/sa-formbuilder/lookup?lookupResource=User,Work Order,Repair Order,Service Master`)
+      .get(`/sa-formbuilder/lookup?lookupResource=User,Service Master`)
       .then(({ data: { data } }) => {
         setUsersOption(data['User']);
-        setWorkOrderOption(data['Work Order']);
-        setRepairOrderOption(data['Repair Order']);
         setServiceMasterOption(data['Service Master']);
       });
   }, []);
+
+  useEffect(() => {
+    if (selectedResource) {
+      axiosInstance()
+        .get(`/sa-formbuilder/lookup?lookupResource=${selectedResource.resource}`)
+        .then(({ data: { data } }) => {
+          setResourceOptions(data[selectedResource.resource]);
+        });
+    }
+  }, [selectedResource]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -110,19 +129,16 @@ const WorkOrderSupervisor = () => {
     }
   };
 
-  const getQueryString = (isExport = false) => {
+  const getQueryString = () => {
     let deepFilter = '?';
     if (selectedUser) {
       deepFilter = `${deepFilter}&user=${selectedUser}`;
     }
-    if (selectedWorkOrder) {
-      deepFilter = `${deepFilter}&workOrders=${selectedWorkOrder}`;
-    }
-    if (selectedRepairOrder) {
-      deepFilter = `${deepFilter}&repairOrders=${selectedRepairOrder}`;
-    }
     if (selectedService) {
       deepFilter = `${deepFilter}&services=${selectedService}`;
+    }
+    if (selectedResource && selectedResourceOption) {
+      deepFilter = `${deepFilter}&${selectedResource.key}s=${selectedResourceOption}`;
     }
     if (globalFilters) {
       deepFilter = `${deepFilter}&from=${moment(globalFilters.from).format('YYYY/MM/DD')}&to=${moment(globalFilters.to).format('YYYY/MM/DD')}`;
@@ -163,7 +179,6 @@ const WorkOrderSupervisor = () => {
                 onChange={(e, val) => {
                   setSelectedUser(val && val.optionValue ? val.optionValue : '');
                 }}
-                // disableClearable
                 renderInput={(params) => (
                   <TextField
                     {...params}
@@ -172,62 +187,6 @@ const WorkOrderSupervisor = () => {
                     name="user"
                     placeholder="Technician"
                     label="Technician"
-                    variant="outlined"
-                    fullWidth
-                  />
-                )}
-              />
-              <Autocomplete
-                fullWidth
-                options={workOrderOption}
-                getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                getOptionSelected={(option: any, val) => {
-                  return option.optionValue === val.optionValue;
-                }}
-                value={
-                  workOrderOption.filter((data) => data.optionValue === selectedWorkOrder).length
-                    ? workOrderOption.filter((data) => data.optionValue === selectedWorkOrder)[0]
-                    : ''
-                }
-                onChange={(e, val) => {
-                  setSelectedWorkOrder(val && val.optionValue ? val.optionValue : '');
-                }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    margin="none"
-                    size="small"
-                    name="workOrder"
-                    placeholder="Work Order"
-                    label="Work Order"
-                    variant="outlined"
-                    fullWidth
-                  />
-                )}
-              />
-              <Autocomplete
-                fullWidth
-                options={repairOrderOption}
-                getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                getOptionSelected={(option: any, val) => {
-                  return option.optionValue === val.optionValue;
-                }}
-                value={
-                  repairOrderOption.filter((data) => data.optionValue === selectedRepairOrder).length
-                    ? repairOrderOption.filter((data) => data.optionValue === selectedRepairOrder)[0]
-                    : ''
-                }
-                onChange={(e, val) => {
-                  setSelectedRepairOrder(val && val.optionValue ? val.optionValue : '');
-                }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    margin="none"
-                    size="small"
-                    name="repairOrder"
-                    placeholder="Repair Order"
-                    label="Repair Order"
                     variant="outlined"
                     fullWidth
                   />
@@ -252,6 +211,54 @@ const WorkOrderSupervisor = () => {
                   <TextField {...params} margin="none" size="small" name="user" placeholder="Service" label="Service" variant="outlined" fullWidth />
                 )}
               />
+              <Autocomplete
+                fullWidth
+                options={resourceFilter}
+                getOptionLabel={(option: any) => (option ? option?.title : '')}
+                value={selectedResource}
+                onChange={(e, val) => {
+                  setSelectedResourceOption(null);
+                  setSelectedResource(val);
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    margin="none"
+                    size="small"
+                    label="Select Resource"
+                    variant="outlined"
+                    fullWidth
+                  />
+                )}
+              />
+              {selectedResource && (
+                <Autocomplete
+                  fullWidth
+                  options={resourceOptions}
+                  getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                  getOptionSelected={(option: any, val) => {
+                    return option.optionValue === val.optionValue;
+                  }}
+                  value={
+                    resourceOptions.filter((data) => data.optionValue === selectedResourceOption).length
+                      ? resourceOptions.filter((data) => data.optionValue === selectedResourceOption)[0]
+                      : ''
+                  }
+                  onChange={(e, val) => {
+                    setSelectedResourceOption(val && val.optionValue ? val.optionValue : '');
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      margin="none"
+                      size="small"
+                      label={`Select ${selectedResource?.title}`}
+                      variant="outlined"
+                      fullWidth
+                    />
+                  )}
+                />
+              )}
               <FormControl fullWidth size="small" margin="none" variant="outlined">
                 <InputLabel id="duration">Select Duration</InputLabel>
                 <Select
