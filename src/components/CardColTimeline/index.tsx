@@ -50,6 +50,7 @@ const CardColTimeline: React.FC<CardColInterface> = ({
   isCreateNew,
   ...others
 }) => {
+  console.log(cardHeight);
   return (
     <Box className={`${styles.container} ${className}`} {...others}>
       <Grid container spacing={3}>
