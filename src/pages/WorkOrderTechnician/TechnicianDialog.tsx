@@ -35,6 +35,7 @@ const TechnicianDialog = ({ handleClose, selectedService }) => {
             title={`${selectedService?.serviceName} Steps`}
             onClose={handleClose}
             additionalTitle={
+                selectedService?.assetNumber &&
                 <Box ml={2}>
                     <Typography variant="h6" className={`title-layout text-truncate`}>
                         {`Asset : `}
@@ -55,8 +56,7 @@ const TechnicianDialog = ({ handleClose, selectedService }) => {
         ></CustomDialogHeader>
         <Box p={2}>
             <Steps
-                workOrderId={selectedService?.workOrderId}
-                warehouse={selectedService?.warehouse}
+                workOrderData={{ _id: selectedService?.workOrderId, warehouse: selectedService?.warehouse }}
                 selectedService={{ ...selectedService, stepSubmitedData: stepSubmitedData }}
                 allowedToEdit={selectedService?.status === WORKORDER_TECHNICIAN_SERVICE_STATUS[0] ? false : true}
                 setDisableCompleteFail={() => { }}

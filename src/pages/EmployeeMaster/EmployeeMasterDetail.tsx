@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Box, Button, Dialog, Grid, Tab, Tabs, Tooltip } from '@material-ui/core';
 import { useContext, useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
@@ -18,6 +18,8 @@ import ActivityButton from 'src/components/Activity/ActivityButton';
 import queryString from 'query-string';
 import TabPanel from 'src/components/TabPanel';
 import History from './History';
+import { RiLayoutFill } from 'react-icons/ri';
+import AssignEntityDialog from 'src/components/AssignRolesDialog/AssignEntityDialog';
 
 const EmployeeMasterDetail = () => {
   const { id } = useParams();
@@ -29,18 +31,21 @@ const EmployeeMasterDetail = () => {
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const [showAssignEntityDialog, setShowAssignEntityDialog] = useState(false);
   const parsed = queryString.parse(history.location.search);
   const { tab }: any = parsed;
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
+  const [roleAccessOfLoggedInUser, setRoleAccessOfLoggedInUser] = useState([]);
 
   const {
-    state: { permissions }
+    state: { permissions, user }
   }: any = useData();
 
   useEffect(() => {
     if (id) {
       fetchFields();
       fetchData();
+      fetchLoggedInUserRole();
     }
   }, [id]);
 
@@ -114,6 +119,26 @@ const EmployeeMasterDetail = () => {
     }
   };
 
+  const fetchLoggedInUserRole = async () => {
+    let roleIds = [];
+    await axiosInstance()
+      .get(`/user/${user.user?._id}`)
+      .then(({ data: { data } }) => {
+        data.entities.map((item) => {
+          item.role.forEach((role) => {
+            if (roleIds.includes(role?._id)) {
+            } else {
+              roleIds.push(role?._id);
+            }
+          });
+        });
+        setRoleAccessOfLoggedInUser(roleIds);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -123,6 +148,34 @@ const EmployeeMasterDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <>
+              {employeeMasterData?.userId ? (
+                <Button
+                  variant={'outlined'}
+                  size="small"
+                  onClick={() => {
+                    window.open(`${routes.userDetail.path}/${employeeMasterData?.userId}`);
+                  }}
+                  className={'btn-outline-v1'}
+                >
+                  View User
+                </Button>
+              ) : (
+                permissions?.employeeMaster?.isUpdate && (
+                  <Tooltip title="Give Portal Access" arrow placement="top">
+                    <Button
+                      size="small"
+                      variant={'outlined'}
+                      disabled={false}
+                      onClick={() => {
+                        setShowAssignEntityDialog(true);
+                      }}
+                      className={'btn-outline-v1'}
+                    >
+                      Give Portal Access
+                    </Button>
+                  </Tooltip>
+                )
+              )}
               {permissions?.employeeMaster?.isUpdate && (
                 <Button
                   variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -136,11 +189,11 @@ const EmployeeMasterDetail = () => {
 
               {permissions?.employeeMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             </>
-            <ActivityButton 
-              referenceId={employeeMasterData?._id} 
-              resource={ACTIVITY_RESOURCE.employeeMaster} 
+            <ActivityButton
+              referenceId={employeeMasterData?._id}
+              resource={ACTIVITY_RESOURCE.employeeMaster}
               resourceLabel={employeeMasterData?.employeeNumber}
-              />
+            />
           </Box>
         </Box>
       </Box>
@@ -156,25 +209,8 @@ const EmployeeMasterDetail = () => {
             }
           }}
         >
-
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                Details
-              </div>
-            }
-            {...a11yProps(0)}
-          />
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                History
-              </div>
-            }
-            {...a11yProps(1)}
-          />
+          <Tab className={'tabLayout'} label={<div className="d-flex align-items-center tab-font">Details</div>} {...a11yProps(0)} />
+          <Tab className={'tabLayout'} label={<div className="d-flex align-items-center tab-font">History</div>} {...a11yProps(1)} />
         </Tabs>
         <TabPanel value={tabValue} index={0}>
           {loading || !fields?.length ? (
@@ -209,6 +245,35 @@ const EmployeeMasterDetail = () => {
             fetchData();
           }}
         />
+      )}
+      {showAssignEntityDialog && (
+        <Dialog
+          fullWidth
+          maxWidth="xs"
+          open={showAssignEntityDialog}
+          onClose={() => {
+            setShowAssignEntityDialog(false);
+          }}
+          aria-labelledby="assign-roles-dialog"
+        >
+          <AssignEntityDialog
+            entitiesDialogOpen={showAssignEntityDialog}
+            handleCloseDialog={() => {
+              setShowAssignEntityDialog(false);
+            }}
+            type="entity"
+            ids={[id]}
+            assignedEntity={[]}
+            isRenderedFromContact={true}
+            regionalRole={false}
+            onSuccess={() => {
+              setShowAssignEntityDialog(false);
+              fetchData()
+            }}
+            roleAccessIds={roleAccessOfLoggedInUser}
+            contactResource={'employeeMaster'}
+          />
+        </Dialog>
       )}
     </Box>
   );

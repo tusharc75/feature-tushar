@@ -27,6 +27,7 @@ import Material from './Material';
 import WorkOrder from './WorkOrder';
 import LoadingTicket from './LoadingTicket';
 import Invoice from './Invoice';
+import ButtonWithPulse from 'src/components/ButtonWithPulse';
 
 function a11yProps(index: any) {
   return {
@@ -59,8 +60,6 @@ const ProductionOrderDetails = () => {
   const [locationKeys, setLocationKeys] = useState([]);
   const [currentStep, setCurrentStep] = useState(null);
   const [productionOrderProcessSteps, setProductionOrderProcessSteps] = useState(productionOrderSteps);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [statusOptions, setStatusOptions] = useState([]);
   const [stepFullScreen, setStepFullScreen] = useState(false);
 
   const productionOrderProcessStepsNames = React.useMemo(() => {
@@ -108,12 +107,6 @@ const ProductionOrderDetails = () => {
       .get(`/field?resource=${sidebarResource.productionOrder}`)
       .then(({ data: { data } }) => {
         setProductionOrderFields(data);
-        data.some((o) => {
-          if (o?.fieldData?.fieldName === 'status') {
-            setStatusOptions([...o.fieldData.option?.filter((e) => e.optionValue !== 'Deleted')]);
-            return true;
-          }
-        });
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -165,14 +158,10 @@ const ProductionOrderDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${productionOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
+      .then(({ data }) => {
+        fetchProductionOrderData();
+      })
       .catch((error) => { });
-  };
-
-  const handleStatusChange = (o) => {
-    if (o.optionValue && productionOrderData?.status !== o.optionValue) {
-      updateOrderStatus(o.optionValue);
-    }
   };
 
   const updateOrderStatus = (status) => {
@@ -191,14 +180,6 @@ const ProductionOrderDetails = () => {
       });
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
-
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -209,49 +190,20 @@ const ProductionOrderDetails = () => {
           <Box className="control-buttons-v1">
             {productionOrderData ? (
               <>
-                {permissions?.productionOrder?.isUpdate && allowedToEdit && (
-                  <Fragment>
-                    <Button
-                      variant="outlined"
-                      color="default"
-                      size="small"
-                      onClick={openActions}
-                      aria-controls="action-menu"
-                      className="btn-outline-v1"
-                      endIcon={<ExpandMore />}
-                    >
-                      Change Status
-                    </Button>
-                    <Menu
-                      anchorEl={anchorEl}
-                      keepMounted
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
-                      }}
-                      id="action-menu"
-                      open={Boolean(anchorEl)}
-                      onClose={closeActions}
-                    >
-                      {statusOptions?.map((o, index) => {
-                        return (
-                          <MenuItem
-                            disabled={index <= statusOptions.findIndex((d) => d.optionLabel === productionOrderData?.status)}
-                            onClick={() => {
-                              closeActions();
-                              handleStatusChange(o);
-                            }}
-                            value={o}
-                          >
-                            {o?.optionLabel}
-                          </MenuItem>
-                        );
-                      })}
-                    </Menu>
-                  </Fragment>
-                )}
-                {permissions?.productionOrder?.isUpdate && allowedToEdit && (
+                {permissions?.productionOrder?.isUpdate && allowedToEdit && productionOrderData?.status !== PRODUCTION_ORDER_STATUS.completed &&
+                  productionOrderData?.processStatus === productionOrderProcessStepsNames[productionOrderProcessStepsNames?.length - 1] &&
+                  (<ButtonWithPulse
+                    variant="outlined"
+                    color="default"
+                    size="small"
+                    onClick={() => { updateOrderStatus(PRODUCTION_ORDER_STATUS.completed) }}
+                    aria-controls="action-menu"
+                    className="btn-outline-v1"
+                  >
+                    Close
+                  </ButtonWithPulse>
+                  )}
+                {permissions?.productionOrder?.isUpdate && allowedToEdit && productionOrderData?.status !== PRODUCTION_ORDER_STATUS.completed && (
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'contained'}
                     className={'btn-outline-v1'}
@@ -337,6 +289,7 @@ const ProductionOrderDetails = () => {
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={allowedToEdit && permissions?.productionOrder?.isUpdate ? true : false}
                 allowedToDelete={allowedToDelete}
+                updateOrderStatus={updateOrderStatus}
               />
             )}
             {productionOrderProcessStepsNames[currentStep] === 'Work Order' && productionOrderData && (

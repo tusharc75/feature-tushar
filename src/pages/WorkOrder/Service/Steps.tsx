@@ -440,7 +440,7 @@ const Steps = ({
 
   const getFields = (step) => {
     let stepData = null;
-    let fieldData = { fields: [], formsData: [], values: {} };
+    let fieldData = { fields: [], formsData: [], values: {}, orignalValues: {} };
     let fieldsDataForCreate = step?.fields ? step?.fields : [];
     let tempServiceData = stepSubmitedData?.find((d) => d.uniqueId === selectedService?.uniqueId && d.stepId === step?._id);
 
@@ -450,6 +450,7 @@ const Steps = ({
         fieldData = {
           fields: fieldsDataForCreate,
           formsData: setFieldsInAscendingOrder(fieldsDataForCreate),
+          orignalValues: tempServiceData,
           values: getObjKeysWithValues(tempServiceData, fieldsDataForCreate)
         };
       }
@@ -458,6 +459,7 @@ const Steps = ({
         fieldData = {
           fields: fieldsDataForCreate,
           formsData: setFieldsInAscendingOrder(fieldsDataForCreate),
+          orignalValues: {},
           values: getObjKeys('', fieldsDataForCreate)
         };
       }
@@ -1022,9 +1024,9 @@ const Steps = ({
                               </HtmlTooltip>
                             </Box>
                           )}
-                          {step?.workStations?.length > 0 && (
+                          {step?.assignedWorkStations?.length > 0 && (
                             <Box ml={1}>
-                              <HtmlTooltip enterTouchDelay={0} title={`Work Stations-${step?.workStations?.map((e) => e?.optionLabel)?.toString()}`}>
+                              <HtmlTooltip enterTouchDelay={0} title={`Work Stations-${step?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString()}`}>
                                 <span>
                                   <WorkStations className=" align-text-top" />
                                 </span>
@@ -1549,7 +1551,7 @@ const Steps = ({
                     stepId: selectedStep?._id
                   }
                 ]}
-                workStations={selectedStep?.workStations}
+                workStations={selectedStep?.assignedWorkStations}
                 handleClose={() => {
                   setWorkStationAssignDialog(false);
                 }}
