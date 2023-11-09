@@ -98,6 +98,14 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
     setLoading(true);
     const source = axios.CancelToken.source();
 
+    // setImageState({
+    //   name: data?.name,
+    //   x: 0,
+    //   y: 0,
+    //   isDragging: false,
+    //   width: widthHeight.width + 20,
+    //   height: widthHeight.height + 48
+    // });
     axiosInstance()
       .get('/user/download?fileName=' + data?.url, {
         responseType: 'blob',
@@ -284,8 +292,8 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
           ref={inputRef}
           style={{
             position: 'absolute',
-            top: `${stageRef.current.container().offsetTop + editingText.y}px`,
-            left: `${stageRef.current.container().offsetLeft + editingText.x}px`,
+            top: `${stageRef.current?.container().offsetTop + editingText.y}px`,
+            left: `${stageRef.current?.container().offsetLeft + editingText.x}px`,
             width: editingText.width,
             overflow: 'hidden',
             resize: 'none',
