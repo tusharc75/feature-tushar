@@ -2620,14 +2620,6 @@ export const REPAIR_ORDER_STATUS = {
 export const PRODUCTION_ORDER_STATUS = {
   new: 'New',
   inProgress: 'In-Progress',
-  preWork: 'Pre-Work In-Progress',
-  postWork: 'Post-Work In-Progress',
-  buildingQuote: 'Building Quote',
-  waitingQuote: 'Waiting On Quote',
-  quoteAccepted: 'Quote Accepted',
-  quoteRejected: 'Quote Rejected',
-  readyToInvoice: 'Ready to Invoice',
-  invoiced: 'Invoiced',
   completed: 'Completed'
 };
 

@@ -10,7 +10,7 @@ import CustomReactTable from '../../../components/CustomReactTable/CustomReactTa
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import { CHILD_RESOURCE, MATERIAL_TYPE, productionOrder, sidebarResource } from '../../../constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, PRODUCTION_ORDER_STATUS, productionOrder, sidebarResource } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile } from 'react-device-detect';
 import { ExpandMore } from '@material-ui/icons';
@@ -25,7 +25,7 @@ import { flattenArray, generateCustomTableColumns } from 'src/constants/columns'
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import CreateProduct from 'src/components/Product/CreateProduct';
 
-const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, allowedToDelete }) => {
+const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, allowedToDelete, updateOrderStatus }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -195,7 +195,6 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
 
   const fetchData = async () => {
     setNextStep(false);
-
     var data: any = [];
     const response = await axiosInstance().get(`${productionOrder.api}/material/${productionOrderData._id}`);
     data = response?.data?.data;
@@ -231,6 +230,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
       showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
     });
   };
+
   const generateNestedData = (material, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
@@ -268,6 +268,9 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
         });
         fetchData();
         setSubmitting(false)
+        if (productionOrderData?.status === PRODUCTION_ORDER_STATUS.new) {
+          updateOrderStatus(PRODUCTION_ORDER_STATUS.inProgress);
+        }
       })
       .catch((error) => {
         setSubmitting(false)
