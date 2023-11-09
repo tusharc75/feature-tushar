@@ -295,14 +295,17 @@ const WorkOrder = ({
                 {e?.optionLabel}
               </a>
             ) : (
-              <a
-                className="link text-truncate [flex-grow:0_!important]"
-                target="_blank"
-                href={`${routes.workStationsDetail.path}/${e.optionValue}`}
-                rel="noreferrer"
-              >
-                {e?.optionLabel},&nbsp;
-              </a>
+              <>
+                <a
+                  className="link text-truncate [flex-grow:0_!important]"
+                  target="_blank"
+                  href={`${routes.workStationsDetail.path}/${e.optionValue}`}
+                  rel="noreferrer"
+                >
+                  {e?.optionLabel},
+                </a>
+                &nbsp;
+              </>
             );
           })
         ) : (
