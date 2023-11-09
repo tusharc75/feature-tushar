@@ -87,7 +87,7 @@ const DriverMasterDetail = () => {
             type: 'success',
             message: data?.message
           });
-          history.goBack();
+          history.push(`${routes.driverMaster.path}`);
         })
         .catch((err) => {
           setShowConfirmBox(false);

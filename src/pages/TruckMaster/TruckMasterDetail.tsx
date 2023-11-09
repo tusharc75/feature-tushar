@@ -89,7 +89,7 @@ const TruckMasterDetail = () => {
             type: 'success',
             message: data?.message
           });
-          history.goBack();
+          history.push(`${routes.truckMaster.path}`)
         })
         .catch((err) => {
           setShowConfirmBox(false);

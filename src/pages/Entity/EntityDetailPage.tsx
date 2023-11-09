@@ -127,7 +127,7 @@ const EntityDetailsPage = () => {
           .then(({ data }) => {
             setShowConfirmBox(false);
             fetchUserData();
-            history.goBack();
+            history.push(`${routes.entity.path}`);
           })
           .catch((err) => {
             setShowConfirmBox(false);

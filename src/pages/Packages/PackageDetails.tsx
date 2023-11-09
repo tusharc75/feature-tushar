@@ -122,7 +122,7 @@ const PackageDetails = () => {
       .put(`${packages.api}/remove`, { ids: [id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.goBack();
+        history.push(`${routes.packages.path}`)
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);

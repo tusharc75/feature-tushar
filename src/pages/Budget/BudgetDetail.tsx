@@ -76,7 +76,7 @@ const BudgetDetail = () => {
             type: 'success',
             message: data?.message
           });
-          history.goBack();
+          history.push(`${routes.budget.path}`);
         })
         .catch((err) => {
           setShowConfirmBox(false);

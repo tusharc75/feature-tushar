@@ -60,7 +60,7 @@ const StorageLocationDetailsPage = () => {
       .put(`${storageLocation.api}/remove`, { ids: [id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.goBack();
+        history.push(`${routes.storageLocation.path}`)
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);

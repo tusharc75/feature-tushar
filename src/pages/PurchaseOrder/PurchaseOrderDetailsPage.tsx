@@ -144,7 +144,7 @@ const PurchaseOrderDetailsPage = () => {
       .put(`${purchaseOrder.api}/remove`, { ids: [] })
       .then(() => {
         setShowConfirmBox(false);
-        history.goBack();
+        history.push(`${routes.purchaseOrder.path}`)
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);

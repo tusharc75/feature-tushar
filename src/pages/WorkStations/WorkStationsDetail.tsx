@@ -75,7 +75,7 @@ const WorkStationsDetail = () => {
               type: 'success',
               message: data?.message
             });
-            history.goBack();
+            history.push(`${routes.workStations.path}`)
           })
           .catch((err) => {
             setShowConfirmBox(false);

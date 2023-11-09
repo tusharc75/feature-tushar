@@ -387,7 +387,7 @@ const RoleDetailsPage = () => {
         .put(`/role/remove`, { ids: [id] })
         .then(() => {
           setShowConfirmBox(false);
-          history.goBack();
+          history.push(`${routes.role.path}`)
         })
         .catch((err) => {
           setShowConfirmBox(false);

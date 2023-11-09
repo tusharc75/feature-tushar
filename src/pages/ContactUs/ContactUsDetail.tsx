@@ -74,7 +74,7 @@ const BlogDetail = () => {
               type: 'success',
               message: data?.message
             });
-            history.goBack();
+            history.push(`${routes.contactUs.path}`)
           })
           .catch((err) => {
             setShowConfirmBox(false);

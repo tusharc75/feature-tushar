@@ -157,7 +157,7 @@ const RepairJobDetails = () => {
       .put(`${repairJob.api}/remove`, { ids: [id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.goBack();
+        history.push(`${routes.repairJob.path}`)
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
