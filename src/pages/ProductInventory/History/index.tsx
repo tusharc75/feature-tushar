@@ -181,7 +181,7 @@ const History = ({ product, warehouse, storageLocation }) => {
     ...(!user?.user?.brandPolicy?.hideInventoryCount ? [{ field: 'finalInventory', headerName: 'Final Quantity', show: true, cellRenderer: 'commonRenderer', filter: false, sortable: false }] : []),
     { field: 'price', headerName: `Cost ${curr}`, show: true, filter: false, cellRenderer: 'commonRenderer' },
     { field: 'totalPrice', headerName: `Amount ${curr}`, show: true, filter: false, cellRenderer: 'commonRenderer' },
-    ...(warehouse && warehouse?.split(',')?.length === 1
+    ...(selectedWarehouse && selectedWarehouse !== 'All'
       ? [
         {
           field: 'finalAvgPrice',
