@@ -6,15 +6,7 @@ import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import {
-  CHILD_RESOURCE,
-  MATERIAL_SUB_TYPE,
-  MATERIAL_TYPE,
-  WORKORDER_SERVICE_STATUS,
-  WORK_ORDER_STATUS,
-  productionOrder,
-  workOrder
-} from '../../../constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_SUB_TYPE, MATERIAL_TYPE, WORKORDER_SERVICE_STATUS, WORK_ORDER_STATUS, productionOrder, workOrder } from '../../../constants/helpers';
 import { map, orderBy, startCase, uniq } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
@@ -32,6 +24,7 @@ import { AutoCompleteIcon } from 'src/assets/svg/svgIcons';
 import AssignWorkStationDialog from 'src/pages/WorkOrder/Service/AssignWorkStationDialog';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+
 
 const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, setCurrentStep }) => {
   const {
@@ -129,11 +122,13 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         Cell: ({ row }) =>
           row.original.workOrder ? (
             <div className="d-flex gap-2 align-items-center">
-              <p className="text-truncate">{row.original.workOrderNumber}</p>
+              <p className="text-truncate">
+                {row.original.workOrderNumber}
+              </p>
               <IconButton
                 size="small"
                 onClick={() => {
-                  window.open(`${routes.workOrderDetail.path}/${row.original?.workOrder?._id}`);
+                  window.open(`${routes.workOrderDetail.path}/${row.original?.workOrder?._id}`)
                 }}
               >
                 <OpenInNewIcon fontSize="small" color={'primary'} />
@@ -158,26 +153,13 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
           row?.original['assignedUsers'] && row?.original['assignedUsers']?.length ? (
             row?.original['assignedUsers']?.map((e, i) => {
               return i === row?.original['assignedUsers'].length - 1 ? (
-                <a
-                  className="link text-truncate [flex-grow:0_!important]"
-                  target="_blank"
-                  href={`${routes.userDetail.path}/${e.optionValue}`}
-                  rel="noreferrer"
-                >
+                <a className="link text-truncate" target="_blank" href={`${routes.userDetail.path}/${e.optionValue}`} rel="noreferrer">
                   {e?.optionLabel}
                 </a>
               ) : (
-                <>
-                  <a
-                    className="link text-truncate [flex-grow:0_!important]"
-                    target="_blank"
-                    href={`${routes.userDetail.path}/${e.optionValue}`}
-                    rel="noreferrer"
-                  >
-                    {e?.optionLabel},
-                  </a>
-                  &nbsp;
-                </>
+                <a className="link text-truncate" target="_blank" href={`${routes.userDetail.path}/${e.optionValue}`} rel="noreferrer">
+                  {e?.optionLabel},{' '}
+                </a>
               );
             })
           ) : (
@@ -195,32 +177,19 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
           row?.original['assignedWorkStations'] && row?.original['assignedWorkStations']?.length ? (
             row?.original['assignedWorkStations']?.map((e, i) => {
               return i === row?.original['assignedWorkStations'].length - 1 ? (
-                <a
-                  className="link text-truncate [flex-grow:0_!important]"
-                  target="_blank"
-                  href={`${routes.workStationsDetail.path}/${e.optionValue}`}
-                  rel="noreferrer"
-                >
+                <a className="link text-truncate" target="_blank" href={`${routes.workStationsDetail.path}/${e.optionValue}`} rel="noreferrer">
                   {e?.optionLabel}
                 </a>
               ) : (
-                <>
-                  <a
-                    className="link text-truncate [flex-grow:0_!important]"
-                    target="_blank"
-                    href={`${routes.workStationsDetail.path}/${e.optionValue}`}
-                    rel="noreferrer"
-                  >
-                    {e?.optionLabel},
-                  </a>
-                  &nbsp;
-                </>
+                <a className="link text-truncate" target="_blank" href={`${routes.workStationsDetail.path}/${e.optionValue}`} rel="noreferrer">
+                  {e?.optionLabel},{' '}
+                </a>
               );
             })
           ) : (
             <NoDataCell />
           )
-      });
+      })
     }
     coloum = [...coloum, ...newColumns];
     coloum.push({
@@ -241,8 +210,8 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                     row?.original?.type === MATERIAL_TYPE.package && row?.original?.subRows?.length === 0
                       ? false
                       : row?.original?.status === WORKORDER_SERVICE_STATUS.pending
-                      ? false
-                      : true
+                        ? false
+                        : true
                   }
                   size="small"
                   aria-label="Details"
@@ -257,8 +226,8 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                       row?.original?.type === MATERIAL_TYPE.package && row?.original?.subRows?.length === 0
                         ? 'error'
                         : row?.original?.status === WORKORDER_SERVICE_STATUS.pending
-                        ? 'error'
-                        : 'disabled'
+                          ? 'error'
+                          : 'disabled'
                     }
                   />
                 </IconButton>
@@ -266,7 +235,8 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
             ) : row?.original?.type === MATERIAL_TYPE.product ? (
               <>
                 <IconButton
-                  disabled={row.original?.subRows?.length === 0 && row.original?.workOrderStatus !== WORK_ORDER_STATUS.completed ? false : true}
+                  disabled={row.original?.subRows?.length === 0
+                    && row.original?.workOrderStatus !== WORK_ORDER_STATUS.completed ? false : true}
                   size="small"
                   aria-label="Details"
                   onClick={() => {
@@ -274,12 +244,8 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                     setShowConfirmBox(true);
                   }}
                 >
-                  <Delete
-                    fontSize="small"
-                    color={
-                      row.original?.subRows?.length === 0 && row.original?.workOrderStatus !== WORK_ORDER_STATUS.completed ? 'error' : 'disabled'
-                    }
-                  />
+                  <Delete fontSize="small" color={row.original?.subRows?.length === 0
+                    && row.original?.workOrderStatus !== WORK_ORDER_STATUS.completed ? 'error' : 'disabled'} />
                 </IconButton>
               </>
             ) : null}
@@ -314,14 +280,9 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     let rows = data.material.filter((e) => e.type === MATERIAL_TYPE.product && e?.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail =
-        parent.type === MATERIAL_TYPE.service
-          ? parent?.serviceDetail?.serviceName
-          : parent.type === MATERIAL_TYPE.product
-          ? parent.productDetail?.productName
-          : parent.packageDetail?.packageName;
-      parent.description =
-        parent.type === MATERIAL_TYPE.product ? parent?.productDetail?.productDescription : parent?.packageDetail?.packageDescription;
+      parent.detail = parent.type === MATERIAL_TYPE.service ?
+        parent?.serviceDetail?.serviceName : parent.type === MATERIAL_TYPE.product ? parent.productDetail?.productName : parent.packageDetail?.packageName;
+      parent.description = parent.type === MATERIAL_TYPE.product ? parent?.productDetail?.productDescription : parent?.packageDetail?.packageDescription;
       parent.qty = parent.qty;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
       parent.hideSelection = false;
@@ -347,18 +308,12 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     let serviceIndex = 0;
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${_subRow.type === MATERIAL_TYPE.service ? alphabet[serviceIndex] : productIndex + 1}`;
-      _subRow.detail =
-        _subRow.type === MATERIAL_TYPE.service
-          ? _subRow?.serviceDetail?.serviceName
-          : _subRow.type === MATERIAL_TYPE.product
-          ? _subRow.productDetail?.productName
-          : _subRow.packageDetail?.packageName;
-      _subRow.description =
-        _subRow.type === MATERIAL_TYPE.service
-          ? _subRow?.serviceDetail?.serviceDescription
-          : _subRow.type === MATERIAL_TYPE.product
-          ? _subRow?.productDetail?.productDescription
-          : _subRow?.packageDetail?.packageDescription;
+      _subRow.detail = _subRow.type === MATERIAL_TYPE.service ?
+        _subRow?.serviceDetail?.serviceName : _subRow.type === MATERIAL_TYPE.product ?
+          _subRow.productDetail?.productName :
+          _subRow.packageDetail?.packageName;
+      _subRow.description = _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceDescription
+        : _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productDescription : _subRow?.packageDetail?.packageDescription;
       _subRow.qty = _subRow.qty;
       _subRow.workOrder = parent?.workOrder;
       _subRow.workOrderNumber = parent?.workOrder?.workOrderNumber;
@@ -381,22 +336,19 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   };
 
   const handleAddService = (ids) => {
-    setSubmitting(true);
+    setSubmitting(true)
     const allWorkOrders = selectedProducts?.map((e) => e.workOrder?._id);
     const data: any = {};
     data.serviceIds = ids;
     data.workOrderIds = [...new Set(allWorkOrders)];
-    axiosInstance()
-      .post(`${workOrder.api}/service`, data)
-      .then(() => {
-        setAddServicesDialog({ open: false, new: false });
-        fetchData();
-        setSubmitting(false);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        setSubmitting(false);
-      });
+    axiosInstance().post(`${workOrder.api}/service`, data).then(() => {
+      setAddServicesDialog({ open: false, new: false });
+      fetchData();
+      setSubmitting(false)
+    }).catch((err) => {
+      toastConfig.setToastConfig(err);
+      setSubmitting(false)
+    });
   };
 
   const handleDelete = () => {
@@ -430,10 +382,10 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
           toastConfig.setToastConfig(err);
         });
     } else if (deleteData?.filter((e: any) => !e?.subRows?.length && e?.workOrder?.status !== WORK_ORDER_STATUS.completed)?.length) {
-      handleWorkOrderDelete(
-        deleteData?.filter((e: any) => !e?.subRows?.length && e?.workOrder?.status !== WORK_ORDER_STATUS.completed)?.map((e) => e.workOrder?._id)
-      );
+      handleWorkOrderDelete(deleteData?.filter((e: any) => !e?.subRows?.length
+        && e?.workOrder?.status !== WORK_ORDER_STATUS.completed)?.map((e) => e.workOrder?._id));
     }
+
   };
 
   const handleWorkOrderDelete = (ids) => {
@@ -653,7 +605,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                 <MenuItem
                   disabled={
                     selectedProducts?.filter((d) => [MATERIAL_TYPE.product, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0 &&
-                    checkUniqWorkOrder()
+                      checkUniqWorkOrder()
                       ? false
                       : true
                   }
@@ -704,16 +656,15 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                   setShowConfirmBox(true);
                   closeActions();
                 }}
-                disabled={
-                  selectedProducts?.filter((e) => e.type === 'service').length ===
-                  selectedServices?.filter(
+                disabled={selectedProducts?.filter((e) => e.type === 'service').length
+                  === selectedServices?.filter(
                     (d) =>
                       d.type === 'service' &&
                       d.workOrder?._id === selectedServices[0]?.workOrder?._id &&
                       d.status === WORKORDER_SERVICE_STATUS.pending
                   )?.length
-                    ? false
-                    : true
+                  ? false
+                  : true
                 }
               >
                 Delete
@@ -730,7 +681,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
               columns={columns}
               data={rowsData}
               onSelect={(data) => {
-                setSelectedProducts(data);
+                setSelectedProducts(data)
                 setSelectedServices(data?.filter((d) => d.type === MATERIAL_TYPE.service && !d.hideSelection) || []);
               }}
               setWholeRowsCellColor={(rowData) => (rowData.type === 'service' ? 'isService' : '')}
@@ -752,11 +703,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         <AssignServiceDialog
           handleClose={() => setAddServicesDialog({ open: false, new: false })}
           onSuccess={(data) => {
-            handleAddService(
-              data?.map((e) => {
-                return { _id: e._id, qty: parseInt(e?.qty) || 1 };
-              })
-            );
+            handleAddService(data?.map((e) => { return { _id: e._id, qty: parseInt(e?.qty) || 1 } }));
           }}
           isSubmitting={isSubmitting}
         />
