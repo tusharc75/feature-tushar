@@ -98,9 +98,9 @@ const WorkOrderSupervisor = () => {
   useEffect(() => {
     if(selectedResource) {
       axiosInstance()
-        .get(`/sa-formbuilder/lookup?lookupResource=${selectedResource}`)
+        .get(`/sa-formbuilder/lookup?lookupResource=${selectedResource.resource}`)
         .then(({ data: { data } }) => {
-          setResourceOptions(data[selectedResource]);
+          setResourceOptions(data[selectedResource.resource]);
         });
     }
   }, [selectedResource]);
@@ -137,7 +137,7 @@ const WorkOrderSupervisor = () => {
       deepFilter = `${deepFilter}&services=${selectedService}`;
     }
     if(selectedResource && selectedResourceOption) {
-      deepFilter = `${deepFilter}&${selectedResource}=${selectedResourceOption}`;
+      deepFilter = `${deepFilter}&${selectedResource.key}s=${selectedResourceOption}`;
     }
     if (globalFilters) {
       deepFilter = `${deepFilter}&from=${moment(globalFilters.from).format('YYYY/MM/DD')}&to=${moment(globalFilters.to).format('YYYY/MM/DD')}`;
@@ -214,18 +214,11 @@ const WorkOrderSupervisor = () => {
               <Autocomplete
                 fullWidth
                 options={resourceList}
-                getOptionLabel={(option: any) => (option ? option.title : '')}
-                getOptionSelected={(option: any, val) => {
-                  return option.resource === val.resource;
-                }}
-                value={
-                  resourceList.filter((data) => data.resource === selectedResource).length
-                    ? resourceList.filter((data) => data.resource === selectedResource)[0]
-                    : ''
-                }
+                getOptionLabel={(option: any) => (option ? option?.title : '')}
+                value={selectedResource}
                 onChange={(e, val) => {
                   if(!val) setSelectedResourceOption(null);
-                  setSelectedResource(val && val.resource ? val.resource : '');
+                  setSelectedResource(val);
                 }}
                 renderInput={(params) => (
                   <TextField
