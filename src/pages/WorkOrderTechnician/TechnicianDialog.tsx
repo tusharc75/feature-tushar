@@ -55,8 +55,7 @@ const TechnicianDialog = ({ handleClose, selectedService }) => {
         ></CustomDialogHeader>
         <Box p={2}>
             <Steps
-                workOrderId={selectedService?.workOrderId}
-                warehouse={selectedService?.warehouse}
+                workOrderData={{ _id: selectedService?.workOrderId, warehouse: selectedService?.warehouse }}
                 selectedService={{ ...selectedService, stepSubmitedData: stepSubmitedData }}
                 allowedToEdit={selectedService?.status === WORKORDER_TECHNICIAN_SERVICE_STATUS[0] ? false : true}
                 setDisableCompleteFail={() => { }}
