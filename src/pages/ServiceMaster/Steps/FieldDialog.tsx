@@ -85,6 +85,24 @@ const FieldDialog = ({ handleClose, handleSucess, serviceId, steps, stepIds, ref
         data.push(_field_data);
       });
     });
+    const errorFields = []
+    const fieldNameMap: any = []
+    data?.forEach((e) => {
+      if (fieldNameMap?.find((ele) => ele.fieldName === e.fieldName)) {
+        errorFields.push(fieldNameMap?.find((ele) => ele.fieldName === e.fieldName)?.fieldLabel)
+      }
+      else {
+        fieldNameMap.push({ fieldName: e.fieldName, fieldLabel: e.fieldLabel })
+      }
+    })
+    if (errorFields?.length) {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'error',
+        message: `Field ${errorFields?.toString()} duplicate`
+      });
+      return false;
+    }
     if (reference === 'workOrder') {
       handleSucess(data);
     } else {
