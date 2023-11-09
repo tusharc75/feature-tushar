@@ -52,7 +52,11 @@ const WorkOrderTechnician = () => {
   const [productionOrderOptions, setProductionOrderOptions] = useState([]);
 
   const [loading, setLoading] = useState(false);
-  const [selectedServiceStatus, setSelectedServiceStatus] = useState([WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress, WORKORDER_SERVICE_STATUS.completed]);
+  const [selectedServiceStatus, setSelectedServiceStatus] = useState([
+    WORKORDER_SERVICE_STATUS.pending,
+    WORKORDER_SERVICE_STATUS.inProgress,
+    WORKORDER_SERVICE_STATUS.completed
+  ]);
 
   const [cardData, setCardData] = useState(null);
 
@@ -246,6 +250,7 @@ const WorkOrderTechnician = () => {
             cardDataRows={cardDataRows}
             passFailStatus={true}
             passFailAccessor="serviceStatus"
+            cardHeight={user?.user?.brandPolicy?.workOrderTimer ? 150 : 130}
             sm={6}
             md={4}
             lg={3}
