@@ -231,33 +231,35 @@ const WorkOrderSupervisor = () => {
                   />
                 )}
               />
+             {selectedResource && (
               <Autocomplete
-                fullWidth
-                options={resourceOptions}
-                disabled = {!selectedResource}
-                getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                getOptionSelected={(option: any, val) => {
-                  return option.optionValue === val.optionValue;
-                }}
-                value={
-                  resourceOptions.filter((data) => data.optionValue === selectedResourceOption).length
-                    ? resourceOptions.filter((data) => data.optionValue === selectedResourceOption)[0]
-                    : ''
-                }
-                onChange={(e, val) => {
-                  setSelectedResourceOption(val && val.optionValue ? val.optionValue : '');
-                }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    margin="none"
-                    size="small"
-                    label="Filters"
-                    variant="outlined"
-                    fullWidth
-                  />
-                )}
-              />
+                  fullWidth
+                  options={resourceOptions}
+                  disabled = {!selectedResource}
+                  getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                  getOptionSelected={(option: any, val) => {
+                    return option.optionValue === val.optionValue;
+                  }}
+                  value={
+                    resourceOptions.filter((data) => data.optionValue === selectedResourceOption).length
+                      ? resourceOptions.filter((data) => data.optionValue === selectedResourceOption)[0]
+                      : ''
+                  }
+                  onChange={(e, val) => {
+                    setSelectedResourceOption(val && val.optionValue ? val.optionValue : '');
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      margin="none"
+                      size="small"
+                      label={`Select ${selectedResource?.title}`}
+                      variant="outlined"
+                      fullWidth
+                    />
+                  )}
+                />
+              )}
               <FormControl fullWidth size="small" margin="none" variant="outlined">
                 <InputLabel id="duration">Select Duration</InputLabel>
                 <Select
