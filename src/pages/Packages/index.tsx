@@ -172,9 +172,9 @@ const PackageList = () => {
   );
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = `?page=${page}&limit=${limit}&filterpackagess=${selectedType}`;
+    let deepFilter = `?page=${page}&limit=${limit}`;
     if (isExport) {
-      deepFilter = `filterpackagess=${selectedType}`;
+      deepFilter = `?`;
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
