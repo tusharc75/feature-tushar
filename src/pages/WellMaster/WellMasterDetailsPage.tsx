@@ -72,7 +72,7 @@ const WellMasterDetailsPage = () => {
       .put(`${wellMaster.api}/remove`, { ids: [id] })
       .then(({ data }) => {
         setShowConfirmBox(false);
-        history.goBack();
+        history.push(`${routes.wellMaster.path}`)
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);

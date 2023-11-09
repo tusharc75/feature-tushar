@@ -159,7 +159,7 @@ const SalesOrderDetails = () => {
       .put(`${salesOrder.api}/remove`, { ids: [id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.goBack();
+        history.push(`${routes.salesOrder.path}`)
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);

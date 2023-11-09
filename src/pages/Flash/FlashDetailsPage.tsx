@@ -60,7 +60,7 @@ const FlashDetailsPage = () => {
       .put(`${flash.api}/remove`, { ids: [id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.goBack();
+        history.push(`${routes.flash.path}`);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);

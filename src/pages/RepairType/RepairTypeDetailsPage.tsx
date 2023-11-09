@@ -60,7 +60,7 @@ const RepairTypeDetailsPage = () => {
       .put(`${repairType.api}/remove`, { ids: [id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.goBack();
+        history.push(`${routes.repairType.path}`)
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);

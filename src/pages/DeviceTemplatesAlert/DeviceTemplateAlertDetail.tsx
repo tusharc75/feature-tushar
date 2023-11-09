@@ -74,7 +74,7 @@ const DeviceTemplateAlertDetail = () => {
             type: 'success',
             message: data?.message
           });
-          history.goBack();
+          history.push(`${routes.deviceTemplateAlert.path}`)
         })
         .catch((err) => {
           setShowConfirmBox(false);

@@ -102,7 +102,7 @@ const JobDetail = () => {
             type: 'success',
             message: data?.message
           });
-          history.goBack();
+          history.push(`${routes.job.path}`);
         })
         .catch((err) => {
           setShowConfirmBox(false);

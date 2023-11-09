@@ -103,7 +103,7 @@ const ZoneDetailPage = () => {
           .then(({ data }) => {
             setShowConfirmBox(false);
 
-            history.goBack();
+            history.push(`${routes.zone.path}`)
           })
           .catch((err) => {
             setShowConfirmBox(false);

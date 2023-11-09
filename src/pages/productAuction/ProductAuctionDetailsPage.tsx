@@ -97,7 +97,7 @@ const ProductAuctionDetailsPage = () => {
       .put(`${productAuction.api}/remove`, { ids: [id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.goBack();
+        history.push(`${routes.productAuction.path}`)
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);

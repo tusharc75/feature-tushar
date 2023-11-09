@@ -1024,9 +1024,9 @@ const Steps = ({
                               </HtmlTooltip>
                             </Box>
                           )}
-                          {step?.workStations?.length > 0 && (
+                          {step?.assignedWorkStations?.length > 0 && (
                             <Box ml={1}>
-                              <HtmlTooltip enterTouchDelay={0} title={`Work Stations-${step?.workStations?.map((e) => e?.optionLabel)?.toString()}`}>
+                              <HtmlTooltip enterTouchDelay={0} title={`Work Stations-${step?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString()}`}>
                                 <span>
                                   <WorkStations className=" align-text-top" />
                                 </span>
@@ -1539,6 +1539,7 @@ const Steps = ({
                   setUserAssignDialog(false);
                   fetchService();
                 }}
+                competencies={selectedService?.competencies}
               />
             )}
             {workStationAssignDialog && (
@@ -1551,7 +1552,7 @@ const Steps = ({
                     stepId: selectedStep?._id
                   }
                 ]}
-                workStations={selectedStep?.workStations}
+                workStations={selectedStep?.assignedWorkStations}
                 handleClose={() => {
                   setWorkStationAssignDialog(false);
                 }}

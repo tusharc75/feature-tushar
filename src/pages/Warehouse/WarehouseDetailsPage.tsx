@@ -77,7 +77,7 @@ const WarehouseDetailsPage = () => {
           .then(({ data }) => {
             setShowConfirmBox(false);
 
-            history.goBack();
+            history.push(`${routes.warehouse.path}`)
           })
           .catch((err) => {
             setShowConfirmBox(false);

@@ -93,7 +93,7 @@ const PricingConditionsDetails = () => {
       .put(`${pricingCondition.api}/remove`, { ids: [id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.goBack();
+        history.push(`${routes.pricingCondition.path}`)
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);

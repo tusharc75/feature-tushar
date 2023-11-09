@@ -90,7 +90,7 @@ const PlanningDetail = () => {
             type: 'success',
             message: data?.message
           });
-          history.goBack();
+          history.push(`${routes.planning.path}`)
         })
         .catch((err) => {
           setShowConfirmBox(false);

@@ -175,7 +175,7 @@ const ServiceOrderDetailsPage = () => {
       .put(`${fieldServiceOrder.api}/remove`, { ids: [serviceOrderData._id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.goBack();
+        history.push(`${routes.fieldServiceOrder.path}`)
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
