@@ -282,9 +282,11 @@ export default function useColumns() {
             canFilter: false,
             sortable: false,
             Cell: ({ row }) => (
-              <Avatar className="grid-avatar" src={row?.original?.[field?.fieldName]}>
-                <Image style={{ fontSize: 18 }} />
-              </Avatar>
+              <div>
+                <Avatar className="grid-avatar" src={row?.original?.[field?.fieldName]}>
+                  <Image style={{ fontSize: 18 }} />
+                </Avatar>
+              </div>
             ),
             width: 100
           }
