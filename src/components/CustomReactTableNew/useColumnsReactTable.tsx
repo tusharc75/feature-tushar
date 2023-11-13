@@ -186,7 +186,7 @@ export default function useColumns() {
             disabled: true,
             accessor: field?.fieldName === 'firstName' ? 'concatedName' : field.fieldName,
             Cell: ({ row }) =>
-              (permissions[permissionForLinks[field?.resource]]?.isRead||permissions[updatedTitle]?.isRead) ? (
+              permissions[permissionForLinks[field?.resource]]?.isRead || permissions[updatedTitle]?.isRead ? (
                 <Fragment>
                   {row?.original?.[field?.fieldName] ? (
                     <Link
@@ -282,9 +282,11 @@ export default function useColumns() {
             canFilter: false,
             sortable: false,
             Cell: ({ row }) => (
-              <Avatar className="grid-avatar" src={row?.original?.[field?.fieldName]}>
-                <Image style={{ fontSize: 18 }} />
-              </Avatar>
+              <div>
+                <Avatar className="grid-avatar" src={row?.original?.[field?.fieldName]}>
+                  <Image style={{ fontSize: 18 }} />
+                </Avatar>
+              </div>
             ),
             width: 100
           }
