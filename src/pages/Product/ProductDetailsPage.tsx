@@ -184,7 +184,7 @@ const ProductDetailsPage = () => {
       .put(`${product.api}/remove`, { ids: [id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.goBack();
+        history.push(`${routes.product.path}`)
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);

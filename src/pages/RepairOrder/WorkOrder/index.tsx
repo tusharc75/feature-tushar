@@ -260,26 +260,13 @@ const WorkOrder = ({
           row?.original['assignedUsers'] && row?.original['assignedUsers']?.length ? (
             row?.original['assignedUsers']?.map((e, i) => {
               return i === row?.original['assignedUsers'].length - 1 ? (
-                <a
-                  className="link text-truncate  [flex-grow:0_!important]"
-                  target="_blank"
-                  href={`${routes.userDetail.path}/${e.optionValue}`}
-                  rel="noreferrer"
-                >
+                <a className="link text-truncate" target="_blank" href={`${routes.userDetail.path}/${e.optionValue}`} rel="noreferrer">
                   {e?.optionLabel}
                 </a>
               ) : (
-                <>
-                  <a
-                    className="link text-truncate [flex-grow:0_!important]"
-                    target="_blank"
-                    href={`${routes.userDetail.path}/${e.optionValue}`}
-                    rel="noreferrer"
-                  >
-                    {e?.optionLabel},
-                  </a>
-                  &nbsp;
-                </>
+                <a className="link text-truncate" target="_blank" href={`${routes.userDetail.path}/${e.optionValue}`} rel="noreferrer">
+                  {e?.optionLabel},{' '}
+                </a>
               );
             })
           ) : (
@@ -539,12 +526,13 @@ const WorkOrder = ({
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = `${parent.type === MATERIAL_TYPE.service
-        ? parent?.serviceDetail?.serviceName
-        : parent.type === MATERIAL_TYPE.product
-          ? parent?.productDetail?.productName
-          : parent.type === MATERIAL_TYPE.serializedAsset
-            ? parent?.serializedAssetDetail?.assetNumber
-            : parent?.packageDetail?.packageName
+          ? parent?.serviceDetail?.serviceName
+          : parent.type === MATERIAL_TYPE.product
+            ? parent?.productDetail?.productName
+            : parent.type === MATERIAL_TYPE.serializedAsset
+              ? parent?.serializedAssetDetail?.assetNumber
+              : parent?.packageDetail?.packageName
+
         }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
@@ -560,12 +548,13 @@ const WorkOrder = ({
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qty = parent.qty;
       parent.status = `${parent.type === MATERIAL_TYPE.service
-        ? parent.serviceDetail?.status
-        : parent.type === MATERIAL_TYPE.product
-          ? parent.productDetail?.status
-          : parent.type === MATERIAL_TYPE.serializedAsset
-            ? parent.serializedAssetDetail.status
-            : parent.packageDetail?.status
+          ? parent.serviceDetail?.status
+          : parent.type === MATERIAL_TYPE.product
+            ? parent.productDetail?.status
+            : parent.type === MATERIAL_TYPE.serializedAsset
+              ? parent.serializedAssetDetail.status
+              : parent.packageDetail?.status
+
         }`;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
 
@@ -1041,6 +1030,7 @@ const WorkOrder = ({
                 fetchData();
                 setUserAssignDialog(false);
               }}
+              competencies={[]}
             />
           )}
           {workStationAssignDialog && (

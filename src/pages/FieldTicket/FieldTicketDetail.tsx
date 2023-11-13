@@ -121,7 +121,7 @@ const FieldTicketDetail = () => {
             type: 'success',
             message: data?.message
           });
-          history.goBack();
+          history.push(`${routes.fieldTicket.path}`)
         })
         .catch((err) => {
           setShowConfirmBox(false);

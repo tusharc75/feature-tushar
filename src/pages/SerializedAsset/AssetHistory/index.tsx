@@ -214,7 +214,7 @@ const AssetHistory = ({ id }) => {
   };
 
   const columns = [
-    { field: 'reference', headerName: 'Reference', show: true, cellRenderer: 'nameRenderer' },
+    { field: 'reference', headerName: 'Reference', show: true, filter: false, cellRenderer: 'nameRenderer' },
     { field: 'type', headerName: 'Type', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     { field: 'date', headerName: 'Date & Time', show: true, disabled: true, filter: false, cellRenderer: 'dateTimeRenderer' },
     { field: 'days', headerName: 'Days', show: true, disabled: true, filter: false, cellRenderer: 'daysRenderer' },

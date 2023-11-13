@@ -155,7 +155,7 @@ const WorkOrderDetails = () => {
       .put(`${workOrder.api}/remove`, { ids: [id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.goBack();
+        history.push(`${routes.workOrder.path}`)
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);

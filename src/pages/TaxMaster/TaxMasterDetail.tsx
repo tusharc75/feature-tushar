@@ -75,7 +75,7 @@ const TaxMasterDetail = () => {
             type: 'success',
             message: data?.message
           });
-          history.goBack();
+          history.push(`${routes.taxMaster.path}`)
         })
         .catch((err) => {
           setShowConfirmBox(false);

@@ -69,7 +69,7 @@ const ServiceMasterDetailsPage = () => {
       .put(`${serviceMaster.api}/remove`, { ids: [id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.goBack();
+        history.push(`${routes.serviceMaster.path}`)
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
