@@ -339,7 +339,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
         })
       }
 
-      checkReceivedProduct(result?.data?.data?.map((e) => { return { ...e, type: 'Product' } }));
+      checkReceivedProduct(rows);
 
       setRowsData(rows);
       setSelectedRecords([]);

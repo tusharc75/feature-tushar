@@ -62,11 +62,11 @@ const ResourceLogs = () => {
     if (selectedResource) {
       fetchData();
     }
-  }, [selectedResource, selectedOption]);
+  }, [selectedResource, selectedOption, page, limit]);
 
   const getQueryString = () => {
     let query = null;
-    query = `resource=${selectedResource?.optionValue}`;
+    query = `page=${page}&limit=${limit}&resource=${selectedResource?.optionValue}`;
     if (selectedOption) {
       query = `${query}&referenceId=${selectedOption.optionValue}`;
     }

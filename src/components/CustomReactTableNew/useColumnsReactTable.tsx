@@ -160,7 +160,7 @@ export default function useColumns() {
             ...commonFieldData,
             accessor: 'concatedName',
             Cell: ({ row }) => (
-              <Fragment>
+              <span>
                 {row?.original?.concatedName ? (
                   <Link
                     className="link text-truncate"
@@ -174,7 +174,7 @@ export default function useColumns() {
                 ) : (
                   <NoDataCell />
                 )}
-              </Fragment>
+              </span>
             )
           }
         };
@@ -187,7 +187,7 @@ export default function useColumns() {
             accessor: field?.fieldName === 'firstName' ? 'concatedName' : field.fieldName,
             Cell: ({ row }) =>
               permissions[permissionForLinks[field?.resource]]?.isRead || permissions[updatedTitle]?.isRead ? (
-                <Fragment>
+                <span>
                   {row?.original?.[field?.fieldName] ? (
                     <Link
                       className="link text-truncate"
@@ -201,7 +201,7 @@ export default function useColumns() {
                   ) : (
                     <NoDataCell />
                   )}
-                </Fragment>
+                </span>
               ) : (
                 <p className="text-truncate">{row?.original?.[field?.fieldName] ? <p>{row?.original?.[field?.fieldName]}</p> : <NoDataCell />}</p>
               )
@@ -229,7 +229,7 @@ export default function useColumns() {
             ...commonFieldData,
             Cell: ({ row }) =>
               permissions[permissionForLinks[field?.lookupResource]]?.isRead ? (
-                <Fragment>
+                <span>
                   {row?.original?.[field?.fieldName] ? (
                     <Link
                       className="link text-truncate"
@@ -243,7 +243,7 @@ export default function useColumns() {
                   ) : (
                     <NoDataCell />
                   )}
-                </Fragment>
+                </span>
               ) : (
                 <>
                   {row?.original?.[field?.fieldName] ? (
