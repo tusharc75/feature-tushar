@@ -192,11 +192,10 @@ const PurchaseOrderDetailsPage = () => {
   };
 
   const checkReceivedProduct = (data) => {
-    const products = data?.filter((e) => e.type === 'Product');
-    if (products?.length && purchaseOrderData?.status !== PURCHASE_ORDER_STATUS.closed) {
+    if (data?.length && purchaseOrderData?.status !== PURCHASE_ORDER_STATUS.closed) {
       var isCompleteReceived = false;
-      var isPartialReceived = products?.some((e) => e?.actualReceived);
-      if (products?.filter((e) => e?.qty - ((e?.actualReceived || 0) + (e?.rejectQuantity || 0)) > 0).length > 0) {
+      var isPartialReceived = data?.some((e) => e?.actualReceived);
+      if (data?.filter((e) => e?.qty - ((e?.actualReceived || 0) + (e?.rejectQuantity || 0)) > 0).length > 0) {
         isCompleteReceived = false;
       } else {
         isCompleteReceived = true;
