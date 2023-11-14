@@ -16,7 +16,8 @@ import {
   CHILD_RESOURCE,
   MATERIAL_TYPE,
   asyncForEach,
-  MATERIAL_SUB_TYPE
+  MATERIAL_SUB_TYPE,
+  REPAIR_ORDER_STATUS
 } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
@@ -525,12 +526,13 @@ const WorkOrder = ({
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = `${parent.type === MATERIAL_TYPE.service
-          ? parent?.serviceDetail?.serviceName
-          : parent.type === MATERIAL_TYPE.product
-            ? parent?.productDetail?.productName
-            : parent.type === MATERIAL_TYPE.serializedAsset
-              ? parent?.serializedAssetDetail?.assetNumber
-              : parent?.packageDetail?.packageName
+        ? parent?.serviceDetail?.serviceName
+        : parent.type === MATERIAL_TYPE.product
+          ? parent?.productDetail?.productName
+          : parent.type === MATERIAL_TYPE.serializedAsset
+            ? parent?.serializedAssetDetail?.assetNumber
+            : parent?.packageDetail?.packageName
+
         }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
@@ -546,12 +548,13 @@ const WorkOrder = ({
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qty = parent.qty;
       parent.status = `${parent.type === MATERIAL_TYPE.service
-          ? parent.serviceDetail?.status
-          : parent.type === MATERIAL_TYPE.product
-            ? parent.productDetail?.status
-            : parent.type === MATERIAL_TYPE.serializedAsset
-              ? parent.serializedAssetDetail.status
-              : parent.packageDetail?.status
+        ? parent.serviceDetail?.status
+        : parent.type === MATERIAL_TYPE.product
+          ? parent.productDetail?.status
+          : parent.type === MATERIAL_TYPE.serializedAsset
+            ? parent.serializedAssetDetail.status
+            : parent.packageDetail?.status
+
         }`;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
 
@@ -663,7 +666,7 @@ const WorkOrder = ({
       .post(`${workOrder.api}/service`, data)
       .then(() => {
         setAddServicesDialog({ open: false, new: false });
-        if (isPostWorkService && repairOrderData?.addQuotationStep) {
+        if (isPostWorkService && repairOrderData?.addQuotationStep && repairOrderData?.addConsumablesQuotation) {
           createNewVersionQuote(true);
         }
         fetchData();
@@ -785,6 +788,9 @@ const WorkOrder = ({
     axiosInstance()
       .post(`${workOrder.api}/${workOrderId}/consumable`, data)
       .then(({ data }) => {
+        if (repairOrderData?.processStatus === 'Execute' && repairOrderData?.status === REPAIR_ORDER_STATUS.quoteAccepted && repairOrderData?.addQuotationStep && repairOrderData?.addConsumablesQuotation) {
+          createNewVersionQuote(true);
+        }
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
