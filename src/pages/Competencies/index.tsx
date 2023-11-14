@@ -7,13 +7,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import {
-  getLocalStorageArrayData,
-  gridLoadingTimeout,
-  prepareDataForGrid,
-  removeLocalStorage,
-  sidebarResource
-} from '../../constants/helpers';
+import { getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, removeLocalStorage, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import { camelCase } from 'lodash';
@@ -246,23 +240,24 @@ const Competencies = () => {
       <CustomContainer>
         <div className="header-panel">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
-            <div className={'flex justify-between align-items-center gap-1 w-full'}>
-            </div>
+            <div className={'flex justify-between align-items-center gap-1 w-full'}></div>
             <div className="flex flex-wrap gap-[8px] justify-end">
               <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
               <div className="flex gap-[8px] flex-wrap items-center">
-                <Button
-                  variant={'contained'}
-                  color="primary"
-                  size="small"
-                  className={`no-shadow`}
-                  onClick={() => {
-                    setShowManageDialog({ open: true, isClone: false, idToClone: null });
-                  }}
-                  startIcon={<AddOutlined />}
-                >
-                  Add
-                </Button>
+                {permissions?.competencies?.isCreate && (
+                  <Button
+                    variant={'contained'}
+                    color="primary"
+                    size="small"
+                    className={`no-shadow`}
+                    onClick={() => {
+                      setShowManageDialog({ open: true, isClone: false, idToClone: null });
+                    }}
+                    startIcon={<AddOutlined />}
+                  >
+                    Add
+                  </Button>
+                )}
                 {permissions?.competencies?.isDelete && (
                   <>
                     <Button
@@ -290,11 +285,11 @@ const Competencies = () => {
                       onClose={closeActions}
                     >
                       <MenuItem
-                      disabled={
-                        !(
-                          (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length
-                        )
-                      }
+                        disabled={
+                          !(
+                            (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length
+                          )
+                        }
                         onClick={() => {
                           closeActions();
                           // eslint-disable-next-line no-lone-blocks
