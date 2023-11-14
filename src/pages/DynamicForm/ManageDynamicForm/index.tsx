@@ -15,7 +15,7 @@ import { CustomDialogTransition, GenerateResourceLineNumber } from 'src/constant
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../../constants/helpers';
 
-const ManageDynamicForm = ({ resource, resourcePath, onClose, onSuccess, redirected = true, isClone = false, id = null }) => {
+const ManageDynamicForm = ({ resource, resourcePath = '', onClose, onSuccess, redirected = true, isClone = false, id = null }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
@@ -69,6 +69,7 @@ const ManageDynamicForm = ({ resource, resourcePath, onClose, onSuccess, redirec
   };
 
   const handleSubmit = (values) => {
+    const primaryField = initialData?.fields?.find((e) => e?.primaryField);
     setSubmitting(true);
     if (id && !isClone) {
       values._id = id;
@@ -104,7 +105,7 @@ const ManageDynamicForm = ({ resource, resourcePath, onClose, onSuccess, redirec
             history.push(`${resourcePath}/detail/${data._id}`);
             onSuccess(data.data);
           } else{
-            onSuccess(data);
+            onSuccess(data, primaryField);
           }
           setSubmitting(true);
           toastConfig.setToastConfig({

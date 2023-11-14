@@ -4,7 +4,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { CHILD_RESOURCE, MATERIAL_SUB_TYPE, repairOrder, sidebarResource, workOrder } from 'src/constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_SUB_TYPE, QUOTATION_STATUS, WORK_ORDER_TYPE, repairOrder, sidebarResource, workOrder } from 'src/constants/helpers';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
@@ -53,6 +53,8 @@ const Consumables = ({
   const [updateDialog, setUpdateDialog] = useState({ open: false, data: null });
   const [isUpdating, setUpdating] = useState(false);
 
+  const [repairOrderData, setRepairOrderData] = useState(null);
+
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
@@ -75,6 +77,7 @@ const Consumables = ({
     setConsumeRequest(allowRequest);
     fetchColumns();
     fetchData();
+    fetchRepairOrderData();
   }, [allowedToEdit, workOrderId, consumeRequest]);
 
   const handleUpdate = async (row: any) => {
@@ -293,6 +296,18 @@ const Consumables = ({
     setColumns([...column, ...newColumns, ...extracolumns]);
   };
 
+  const fetchRepairOrderData = async () => {
+    axiosInstance()
+      .get(`${workOrder.api}/${workOrderId}/consumable/repair-order/quotation`).then(({ data }) => {
+        if(data?.data){
+          setRepairOrderData(data?.data);
+        }
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+
+  }
+
   const fetchData = async () => {
     setDataRows(null);
     var query = ``;
@@ -337,9 +352,13 @@ const Consumables = ({
         data.push({ product: e._id, qty: parseInt(e.qty), service, uniqueId, stepId, subType: materialSubType });
       }
     });
-    axiosInstance()
+    await axiosInstance()
       .post(`${workOrder.api}/${workOrderId}/consumable`, data)
       .then(({ data }) => {
+        if (repairOrderData && repairOrderData?.addConsumablesQuotation && repairOrderData?.addQuotationStep &&
+          repairOrderData?.quotation?.status === QUOTATION_STATUS.acceptByCustomer) {
+          createNewVersionQuote(repairOrderData?.quotation?.quotation, repairOrderData?.quotation?._id);
+        }
         fetchData();
         setIsSubmitting(false);
         setConsumablesDialog(false);
@@ -354,6 +373,16 @@ const Consumables = ({
         toastConfig.setToastConfig(error);
       });
   };
+
+  const createNewVersionQuote = async (quoteId, quoteVersionId) => {
+    axiosInstance()
+      .post(`/quotation/clone-version/${quoteId}/${quoteVersionId}`)
+      .then(() => {
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }
 
   const handleDelete = async (rows) => {
     const ids = rows.map((e) => e._id);
@@ -427,7 +456,11 @@ const Consumables = ({
       {allowedToEdit && (
         <Box className="flex flex-wrap mb-3 justify-between gap-2">
           {isCreate && permissions?.product?.isRead && (
-            <Button variant={'contained'} color="primary" size="small" onClick={() => setConsumablesDialog(true)}>
+            <Button
+              variant={'contained'}
+              color="primary"
+              size="small"
+              onClick={() => setConsumablesDialog(true)}>
               {materialSubType === MATERIAL_SUB_TYPE.bom ? `Add BOM` : `Add Products/Consumables`}
             </Button>
           )}
