@@ -526,12 +526,12 @@ const WorkOrder = ({
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = `${parent.type === MATERIAL_TYPE.service
-          ? parent?.serviceDetail?.serviceName
-          : parent.type === MATERIAL_TYPE.product
-            ? parent?.productDetail?.productName
-            : parent.type === MATERIAL_TYPE.serializedAsset
-              ? parent?.serializedAssetDetail?.assetNumber
-              : parent?.packageDetail?.packageName
+        ? parent?.serviceDetail?.serviceName
+        : parent.type === MATERIAL_TYPE.product
+          ? parent?.productDetail?.productName
+          : parent.type === MATERIAL_TYPE.serializedAsset
+            ? parent?.serializedAssetDetail?.assetNumber
+            : parent?.packageDetail?.packageName
 
         }`;
       parent.description =
@@ -548,12 +548,12 @@ const WorkOrder = ({
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qty = parent.qty;
       parent.status = `${parent.type === MATERIAL_TYPE.service
-          ? parent.serviceDetail?.status
-          : parent.type === MATERIAL_TYPE.product
-            ? parent.productDetail?.status
-            : parent.type === MATERIAL_TYPE.serializedAsset
-              ? parent.serializedAssetDetail.status
-              : parent.packageDetail?.status
+        ? parent.serviceDetail?.status
+        : parent.type === MATERIAL_TYPE.product
+          ? parent.productDetail?.status
+          : parent.type === MATERIAL_TYPE.serializedAsset
+            ? parent.serializedAssetDetail.status
+            : parent.packageDetail?.status
 
         }`;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
@@ -666,7 +666,7 @@ const WorkOrder = ({
       .post(`${workOrder.api}/service`, data)
       .then(() => {
         setAddServicesDialog({ open: false, new: false });
-        if (isPostWorkService && repairOrderData?.addQuotationStep) {
+        if (isPostWorkService && repairOrderData?.addQuotationStep && repairOrderData?.addConsumablesQuotation) {
           createNewVersionQuote(true);
         }
         fetchData();

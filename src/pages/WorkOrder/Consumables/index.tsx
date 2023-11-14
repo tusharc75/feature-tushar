@@ -53,7 +53,7 @@ const Consumables = ({
   const [updateDialog, setUpdateDialog] = useState({ open: false, data: null });
   const [isUpdating, setUpdating] = useState(false);
 
-  const [consumableAddSetting, setConsumableAddSetting] = useState(null);
+  const [repairOrderData, setRepairOrderData] = useState(null);
 
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -77,7 +77,7 @@ const Consumables = ({
     setConsumeRequest(allowRequest);
     fetchColumns();
     fetchData();
-    fetchROSettings();
+    fetchRepairOrderData();
   }, [allowedToEdit, workOrderId, consumeRequest]);
 
   const handleUpdate = async (row: any) => {
@@ -296,10 +296,12 @@ const Consumables = ({
     setColumns([...column, ...newColumns, ...extracolumns]);
   };
 
-  const fetchROSettings = async () => {
+  const fetchRepairOrderData = async () => {
     axiosInstance()
-      .get(`${workOrder.api}/${workOrderId}/consumable/quotation`).then(({ data }) => {
-        setConsumableAddSetting(data?.data);
+      .get(`${workOrder.api}/${workOrderId}/consumable/repair-order/quotation`).then(({ data }) => {
+        if(data?.data){
+          setRepairOrderData(data?.data);
+        }
       }).catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -353,13 +355,11 @@ const Consumables = ({
     await axiosInstance()
       .post(`${workOrder.api}/${workOrderId}/consumable`, data)
       .then(({ data }) => {
-        fetchData();
-        console.log(consumableAddSetting)
-        if (workOrderData?.type === WORK_ORDER_TYPE.repairOrder && consumableAddSetting && consumableAddSetting?.repairOrder?.addConsumablesQuotation
-          && consumableAddSetting?.repairOrder?.addQuotationStep && consumableAddSetting?.latestQuoteVersion?.status === QUOTATION_STATUS.acceptByCustomer) {
-          createNewVersionQuote(consumableAddSetting?.latestQuoteVersion?.quotation, consumableAddSetting?.latestQuoteVersion?._id);
+        if (repairOrderData && repairOrderData?.addConsumablesQuotation && repairOrderData?.addQuotationStep &&
+          repairOrderData?.quotation?.status === QUOTATION_STATUS.acceptByCustomer) {
+          createNewVersionQuote(repairOrderData?.quotation?.quotation, repairOrderData?.quotation?._id);
         }
-
+        fetchData();
         setIsSubmitting(false);
         setConsumablesDialog(false);
         toastConfig.setToastConfig({
@@ -456,10 +456,11 @@ const Consumables = ({
       {allowedToEdit && (
         <Box className="flex flex-wrap mb-3 justify-between gap-2">
           {isCreate && permissions?.product?.isRead && (
-            <Button variant={'contained'}
-              disabled={
-                workOrderData?.type === WORK_ORDER_TYPE.repairOrder && !consumableAddSetting}
-              color="primary" size="small" onClick={() => setConsumablesDialog(true)}>
+            <Button
+              variant={'contained'}
+              color="primary"
+              size="small"
+              onClick={() => setConsumablesDialog(true)}>
               {materialSubType === MATERIAL_SUB_TYPE.bom ? `Add BOM` : `Add Products/Consumables`}
             </Button>
           )}

@@ -1177,7 +1177,6 @@ const Steps = ({
                                       className={classes.stepButtons}
                                       onClick={(e) => {
                                         e.stopPropagation();
-                                        console.log(selectedService);
                                         if (selectedService?.status === WORKORDER_SERVICE_STATUS.completed) {
                                           setReOpenServiceDialog({ open: true, type: null, stepId: step._id, uniqueId: selectedService?.uniqueId });
                                         } else {
@@ -1246,9 +1245,7 @@ const Steps = ({
                             <MoreHoriz />
                           </IconButton>
 
-                          {allowedToEdit && ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                            selectedService?.status
-                          ) &&
+                          {allowedToEdit && ![WORKORDER_SERVICE_STATUS.skipped].includes(selectedService?.status) &&
                             <HtmlTooltip enterTouchDelay={0} title="Clone" placement="top" arrow>
                               <IconButton
                                 size="small"
