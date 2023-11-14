@@ -1,159 +1,175 @@
-import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
-import { AddOutlined, Delete, ExpandMore, FileCopy } from '@material-ui/icons';
-import React, { useState } from 'react';
-import { Link, useHistory } from 'react-router-dom';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { useData } from 'src/StateProvider/Provider';
-import axiosInstance from 'src/axios/axiosInstance';
-import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import CustomContainer from 'src/components/CustomContainer';
+import { Button, IconButton } from '@material-ui/core';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { useContext, useEffect, useState } from 'react';
+import { useHistory, Link } from 'react-router-dom';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomContainer from '../../components/CustomContainer';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import { getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, removeLocalStorage, sidebarResource } from '../../constants/helpers';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTableNew';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import { Menu, MenuItem } from '@material-ui/core';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import { gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
-import { getStaticFields } from 'src/constants/useColumns';
-import { staticFrameworkRender } from '../../constants/useColumns';
+import DeleteIcon from '@material-ui/icons/Delete';
 import { baseURL } from './builderHelpers';
 
-const Dashboards = () => {
+let searchTimeout;
+
+const DashBoards = () => {
+  const renderedFrom = 'dashboard-builder';
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
+  const toastConfig = useContext(CustomToastContext);
+
   const history = useHistory();
+  const { state, dispatch } = useTableReducer();
+  const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+
   const {
-    state: { permissions }
+    state: { user, permissions, selectedEntity }
   }: any = useData();
-  const { setToastConfig } = React.useContext(CustomToastContext);
-  const [showDeleteDialog, setShowDeleteDialog] = React.useState({ open: false, data: [], isLoading: false });
-  const [gridApi, setGridApi] = React.useState(null);
-  const [anchorEl, setAnchorEl] = React.useState(null);
 
-  const [state, dispatch] = React.useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
+  const [deleteRecord, setDeleteRecord] = useState(null);
 
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
 
-  React.useEffect(() => {
-    fetchFields();
+  useEffect(() => {
+    fetchGridColumns();
   }, []);
 
-  React.useEffect(() => {
-    fetchDashboards();
-  }, []);
-
-  const NameRenderer = (params) => (
-    <Link className="link" to={`dashboard-master/${params.data._id}`} title={params.value}>
-      {params.value}
-    </Link>
-  );
-
-  const removeDashboard = () => {
-    setShowDeleteDialog({
-      ...showDeleteDialog,
-      isLoading: true
-    });
-    axiosInstance()
-      .put(`${baseURL}/remove`, {
-        ids: showDeleteDialog.data
-      })
-      .then(() => {
-        fetchDashboards();
-        closeDeleteDialog();
-      })
-      .catch((err) => {
-        setToastConfig(err);
-        closeDeleteDialog();
-      });
-  };
-
-  const ActionRenderer = (params) => {
-    const { data } = params;
-    return (
-      <>
-        <HtmlTooltip title="Delete">
-          <span>
-            <IconButton
-              disabled={!permissions?.dashboardMaster?.isDelete}
-              size="small"
-              onClick={() => setShowDeleteDialog({ ...showDeleteDialog, open: true, data: [data?._id] })}
-            >
-              <Delete fontSize="small" color={permissions?.dashboardMaster?.isDelete ? 'error' : 'disabled'} />
-            </IconButton>
-          </span>
-        </HtmlTooltip>
-
-        <HtmlTooltip title="Clone">
-          <span>
-            <IconButton
-              disabled={!permissions?.dashboardMaster?.isCreate}
-              size="small"
-              onClick={() => history.push(`dashboard-master/${params.data._id}?type=clone`)}
-            >
-              <FileCopy fontSize="small" color={permissions?.dashboardMaster?.isCreate ? 'primary' : 'disabled'} />
-            </IconButton>
-          </span>
-        </HtmlTooltip>
-      </>
-    );
-  };
-
-  const frameworkComponents = {
-    nameRenderer: NameRenderer,
-    actionsRenderer: ActionRenderer,
-    ...staticFrameworkRender
-  };
-
-  const fetchFields = () => {
-    const coloum = [
-      {
-        field: 'name',
-        headerName: 'Dashboard Name',
-        show: true,
-        disabled: true,
-        cellRenderer: 'nameRenderer'
-      },
-      ...getStaticFields()
-    ];
-    setColumns(coloum);
-  };
-
-  const fetchDashboards = () => {
-    dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
+  useEffect(() => {
+    let millisec = Object.keys(search).length > 0 ? 600 : 5;
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
     }
+    searchTimeout = setTimeout(() => {
+      fetchData();
+    }, millisec);
+  }, [search]);
+
+  useEffect(() => {
+    fetchData();
+  }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
+
+  const fetchGridColumns = async () => {
+    const columns = [
+      {
+        accessor: 'name',
+        Header: 'Dashboard Name',
+        width: 185,
+        sticky: 'left',
+        Cell: ({ row }) => (
+          <Link className="link" to={`dashboard-master/${row?.original?._id}`}>
+            {row.original.name}
+          </Link>
+        )
+      },
+      ...getStaticFields(),
+      ActionsRenderer
+    ];
+    setColumns(columns);
+  };
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 100,
+    sticky: 'right',
+    disableFilters: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        {permissions?.dashboardMaster?.isCreate ? (
+          <HtmlTooltip title="Clone">
+            <IconButton size="small" aria-label="Clone" onClick={() => history.push(`dashboard-master/${row?.original._id}?type=clone`)}>
+              <FileCopyIcon fontSize="small" color="primary" />
+            </IconButton>
+          </HtmlTooltip>
+        ) : (
+          <HtmlTooltip className="cursor-stop" title="You do not have permission to clone/create">
+            <IconButton aria-label="Clone" size="small">
+              <FileCopyIcon fontSize="small" />
+            </IconButton>
+          </HtmlTooltip>
+        )}
+        {permissions?.dashboardMaster?.isDelete && (
+          <HtmlTooltip title="Delete">
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              onClick={() => {
+                setDeleteRecord(row.original);
+                setShowDeleteConfirmBox(true);
+              }}
+            >
+              <DeleteIcon color="error" />
+            </IconButton>
+          </HtmlTooltip>
+        )}
+      </>
+    )
+  };
+
+  const fetchData = async () => {
+    dispatch({ type: 'loading', loading: true });
+
     axiosInstance()
-      .get(baseURL)
+      .get(`${baseURL}`)
       .then(({ data: { data } }) => {
-        let rows = data?.map((u) => {
-          let finalObject = prepareDataForGrid(u);
-          let res = {
-            ...finalObject
-          };
-          return res;
+        let rows = data.map((u) => {
+          let finalObject = prepareDataForGrid(u, user);
+          finalObject['isChecked'] = false;
+          finalObject['allowedToEdit'] = permissions?.dashboardMaster?.isUpdate;
+          finalObject['canDelete'] = permissions?.dashboardMaster?.isDelete;
+          return finalObject;
         });
-        dispatch({ type: 'initialize', data: rows, count: rows.length });
+        dispatch({ type: 'initialize', data: rows, count: rows?.length });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      })
+      .finally(() => {
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
-      })
-      .catch((err) => {
-        setToastConfig(err);
-        dispatch({ type: 'loading', loading: false });
       });
   };
 
-  const closeDeleteDialog = () => {
-    setShowDeleteDialog({
-      open: false,
-      data: [],
-      isLoading: false
-    });
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
+  const handleDelete = () => {
+    setIsSubmitting(true);
+    let ids = [];
+    if (deleteRecord) {
+      ids.push(deleteRecord._id);
+    } else {
+      ids = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((d) => d._id);
+    }
+    axiosInstance()
+      .put(`${baseURL}/remove`, { ids: ids })
+      .then(() => {
+        removeLocalStorage(localStorageSelectedRecords);
+        fetchData();
+        setShowDeleteConfirmBox(false);
+        setDeleteRecord(null);
+        setAnchorEl(null);
+        setIsSubmitting(false);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setIsSubmitting(false);
+      });
   };
 
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
   };
 
   return (
@@ -162,92 +178,103 @@ const Dashboards = () => {
         <CustomBreadCrumbs routes={[{ title: 'Dashboard Master' }]} />
       </div>
       <CustomContainer>
-        <Box className="header-panel">
-          <div className="flex gap-2">
-            <Box className="ml-auto" />
-            {permissions?.dashboardMaster?.isCreate && (
-              <Button
-                color="primary"
-                variant="contained"
-                size="small"
-                disableRipple
-                startIcon={<AddOutlined />}
-                onClick={() => history.push(`dashboard-master/new`)}
-              >
-                Add
-              </Button>
-            )}
-
-            <Button
-              variant="outlined"
-              color="default"
-              size="small"
-              endIcon={<ExpandMore />}
-              onClick={openActions}
-              aria-controls="action-menu"
-              disabled={selectedRecords.length === 0}
-              className="new-dropdown-v1"
-            >
-              Actions
-            </Button>
-            <Menu
-              anchorEl={anchorEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
-              }}
-              id="action-menu"
-              open={Boolean(anchorEl)}
-              onClose={closeActions}
-            >
-              <MenuItem
-                disabled={!permissions?.report?.isDelete}
-                onClick={() => {
-                  closeActions();
-                  setShowDeleteDialog({
-                    ...showDeleteDialog,
-                    open: true,
-                    data: selectedRecords.map((d: any) => d._id)
-                  });
-                }}
-              >
-                Delete
-              </MenuItem>
-            </Menu>
+        <div className="header-panel">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+            <div className={'flex justify-between align-items-center gap-1 w-full'}></div>
+            <div className="flex flex-wrap gap-[8px] justify-end">
+              <div className="flex gap-[8px] flex-wrap items-center">
+                {permissions?.dashboardMaster?.isCreate && (
+                  <Button
+                    variant={'contained'}
+                    color="primary"
+                    size="small"
+                    className={`no-shadow`}
+                    onClick={() => history.push(`dashboard-master/new`)}
+                    startIcon={<AddOutlined />}
+                  >
+                    Add
+                  </Button>
+                )}
+                {permissions?.dashboardMaster?.isDelete && (
+                  <>
+                    <Button
+                      variant={'outlined'}
+                      color="default"
+                      size="small"
+                      onClick={openActions}
+                      className={`new-dropdown-v1`}
+                      aria-controls="action-menu"
+                      endIcon={<ExpandMore />}
+                      disabled={selectedRecords?.length ? false : true}
+                    >
+                      Actions
+                    </Button>
+                    <Menu
+                      anchorEl={anchorEl}
+                      keepMounted
+                      getContentAnchorEl={null}
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left'
+                      }}
+                      id="action-menu"
+                      open={Boolean(anchorEl)}
+                      onClose={closeActions}
+                    >
+                      <MenuItem
+                        disabled={
+                          !(
+                            (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length
+                          )
+                        }
+                        onClick={() => {
+                          closeActions();
+                          // eslint-disable-next-line no-lone-blocks
+                          {
+                            selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
+                          }
+                          setShowDeleteConfirmBox(true);
+                        }}
+                      >
+                        Delete
+                      </MenuItem>
+                    </Menu>
+                  </>
+                )}
+              </div>
+            </div>
           </div>
-        </Box>
-        <CustomAgGrid
-          columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameworkComponents}
-          setGridApi={setGridApi}
-          dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          actionWidth={150}
-          allowSelection={true}
-          allowAction={true}
-          isClientSideGrid={true}
-          loading={loading}
-          renderedFrom={'dashboard-builder'}
-          refreshGrid={fetchDashboards}
-        />
+        </div>
+        {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
+            columns={columns}
+            onSelect={() => {}}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            isClientSideGrid={true}
+            refreshGrid={fetchData}
+            showOnlyShowFilteredRecordSwitch={false}
+            showFilters={false}
+            resource={sidebarResource.dashboardMaster}
+          />
+        ) : null}
       </CustomContainer>
-      {showDeleteDialog.open && (
+      {showDeleteConfirmBox && (
         <ConfirmationDialog
-          open={true}
-          okBtnLoading={showDeleteDialog.isLoading}
-          message={'Are you sure you want delete?'}
-          onClose={closeDeleteDialog}
-          onOk={removeDashboard}
+          open={showDeleteConfirmBox}
+          message={`Are you sure you want to delete ?`}
+          onClose={() => {
+            setDeleteRecord(null);
+            setShowDeleteConfirmBox(false);
+          }}
+          okBtnLoading={isSubmitting}
+          onOk={handleDelete}
         />
       )}
     </section>
   );
 };
 
-export default Dashboards;
+export default DashBoards;
