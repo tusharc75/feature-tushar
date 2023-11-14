@@ -15,7 +15,7 @@ import { CustomDialogTransition, GenerateResourceLineNumber } from 'src/constant
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../../constants/helpers';
 
-const ManageDynamicForm = ({ resource, resourcePath, onClose, onSuccess, redirected = true, isClone = false, id = null }) => {
+const ManageDynamicForm = ({ resource, resourcePath = '', onClose, onSuccess, redirected = true, isClone = false, id = null }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });

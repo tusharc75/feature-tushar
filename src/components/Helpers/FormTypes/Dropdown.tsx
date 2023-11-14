@@ -27,6 +27,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { NewAddressOptionList } from '../../../StateProvider/AddressProvider';
 import axiosInstance from 'src/axios/axiosInstance';
 import ManageDynamicForm from 'src/pages/DynamicForm/ManageDynamicForm';
+import routes from 'src/components/Helpers/Routes';
 
 function dropdownOptions(options, values, fields, fieldData, newAddressOptionList = []) {
   const lookupDependentOn = fieldData?.lookupDependentOn;
@@ -1046,7 +1047,7 @@ function Dropdown({
                 </>
               </>
             )}
-            {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.iotDataPointsCategory && permissions?.iotDataPointsCategory?.isCreate && (
+            {fieldData?.lookup && (!(camelCase(fieldData?.lookupResource) in routes)) && permissions[camelCase(fieldData?.lookupResource)]?.isCreate && (
               <>
                 <>
                   <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
@@ -1062,8 +1063,7 @@ function Dropdown({
                   </HtmlTooltip>
                   {lookupDialog && (
                     <ManageDynamicForm
-                      resource={sidebarResource.iotDataPointsCategory}
-                      resourcePath={'/iot-data-points-category'}
+                      resource={fieldData?.lookupResource}
                       id={null}
                       isClone={false}
                       onClose={() => setLookupDialog(false)}
@@ -1073,7 +1073,7 @@ function Dropdown({
                         if (data?._id) {
                           let tempNewOption = {
                             default: true,
-                            optionLabel: data?.iotDataPointsCategoryName,
+                            optionLabel: data?.dynamicNumber,
                             optionValue: data?._id,
                             order: option.length,
                             ...(fieldData.lookupDependentOn && {
