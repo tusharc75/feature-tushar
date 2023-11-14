@@ -1,186 +1,135 @@
-import React, { useState, useEffect, Fragment, useContext, useReducer } from 'react';
-import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import MessageDialog from '../../components/Helpers/MessageDialog';
-import Tooltip from '@material-ui/core/Tooltip';
-import IconButton from '@material-ui/core/IconButton';
-import DeleteIcon from '@material-ui/icons/Delete';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import axiosInstance from '../../axios/axiosInstance';
-import styles from '../Leads/Header.module.scss';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import CustomContainer from '../../components/CustomContainer';
-import ManageAddressDialog from '../../components/Address/ManageAddressDialog';
-import routes from '../../components/Helpers/Routes';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import { Box, Menu, MenuItem } from '@material-ui/core';
-import SearchBox from '../../components/Helpers/SearchBox';
-import { getLocalStorageArrayData, gridLoadingTimeout, sidebarResource } from '../../constants/helpers';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import { useData } from '../../StateProvider/Provider';
+import { Button, IconButton } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
-import { prepareDataForGrid } from '../../constants/helpers';
-import { MdAdd } from 'react-icons/all';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { isMobile, isTablet } from 'react-device-detect';
-import { useHistory } from 'react-router-dom';
+import { useContext, useEffect, useState } from 'react';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomContainer from '../../components/CustomContainer';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
+import { getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, removeLocalStorage, sidebarResource } from '../../constants/helpers';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import routes from './../../components/Helpers/Routes';
 import { camelCase } from 'lodash';
-import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import ManageAddressDialog from '../../components/Address/ManageAddressDialog';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import styles from '../Leads/Header.module.scss';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import { Menu, MenuItem } from '@material-ui/core';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import DeleteIcon from '@material-ui/icons/Delete';
+
+let searchTimeout;
 
 const Address = () => {
   const renderedFrom = camelCase(routes?.address.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
-
-  const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const {
-    state: { permissions, user, selectedEntity }
-  }: any = useData();
+  const { state, dispatch } = useTableReducer();
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { getColumnData } = useColumns();
 
+  const {
+    state: { user, permissions, selectedEntity }
+  }: any = useData();
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
-  const [open, setOpen] = useState({ title: '', open: false, isClone: false, edit: false });
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [showUpdateWarningConfirmBox, setShowUpdateWarningConfirmBox] = useState(false);
-  const [columns, setColumns] = useState([]);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
+  //   const [showUpdateWarningConfirmBox, setShowUpdateWarningConfirmBox] = useState(false);
 
-  //  Grid Variables - Start
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
-    state;
+  const [columns, setColumns] = useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
 
   useEffect(() => {
     fetchGridColumns();
   }, []);
 
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get('/field?resource=Address')
-      .then(({ data: { data } }) => {
-        let columns = [];
-        let rendererNames = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.addressDetail.path, true);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName);
-            }
-          }
-        });
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent,
-          actionsRenderer: ActionsRenderer
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
-        columns = [...columns, ...getStaticFields()];
-        setColumns([...columns]);
-      });
-  };
-
-  const fetchData = () => {
-    dispatch({ type: 'loading', loading: true });
-    const queryString = getQueryString();
-    if (gridApi) {
-      gridApi.setRowData([]);
+  useEffect(() => {
+    let millisec = Object.keys(search).length > 0 ? 600 : 5;
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
     }
-    axiosInstance()
-      .get(`/address${queryString}`)
-      .then(({ data: { data, count } }) => {
-        let rows = data.map((u) => {
-          let finalObject = prepareDataForGrid(u, user);
-          finalObject['canDelete'] = permissions?.address?.isDelete;
-          finalObject['allowedToEdit'] = permissions?.address?.isUpdate;
-          finalObject['isChecked'] = false;
-          return finalObject;
-        });
-        if (appendRows) {
-          dispatch({
-            type: 'initialize',
-            data: [...dataRows, ...rows],
-            count: count,
-            selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
-          });
-        } else {
-          dispatch({
-            type: 'initialize',
-            data: rows,
-            count: count,
-            selectedRecords: rows.filter((f) => f.isChecked === true)
-          });
-        }
-
-        // dispatch({ type: 'initialize', data: rows, count: count });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        dispatch({ type: 'loading', loading: false });
-      })
-      .finally(() => {
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
-      });
-  };
+    searchTimeout = setTimeout(() => {
+      fetchData();
+    }, millisec);
+  }, [search]);
 
   useEffect(() => {
     fetchData();
-  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
+  }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
-  const ActionsRenderer = (params) => (
-    <>
-      <Tooltip
-        className={permissions?.address?.isCreate ? '' : 'cursor-stop'}
-        title={permissions?.address?.isCreate ? 'Clone' : 'You do not have permission to clone/create'}
-      >
-        <span>
-          <IconButton
-            disabled={!permissions?.address?.isCreate}
-            size="small"
-            aria-label="Clone"
-            onClick={() => {
-              setOpen({ title: 'Clone Address', open: true, edit: false, isClone: true });
-            }}
-          >
-            <FileCopyIcon fontSize="small" color="primary" />
-          </IconButton>
-        </span>
-      </Tooltip>
-      <Tooltip
-        className={permissions?.address?.isDelete ? '' : 'cursor-stop'}
-        title={permissions?.address?.isDelete ? 'Delete' : "You don't have permission to delete"}
-      >
-        <span>
-          <IconButton
-            disabled={!permissions?.address?.isDelete}
-            aria-label="Delete"
-            onClick={() => {
-              setDeleteRecord(params.data);
-              setShowDeleteConfirmBox(true);
-            }}
-          >
-            <DeleteIcon fontSize="small" color="error" />
-          </IconButton>
-        </span>
-      </Tooltip>
-    </>
-  );
+  const fetchGridColumns = async () => {
+    let data;
+    const response = await axiosInstance().get(`/field?resource=${sidebarResource.address}`);
+    data = response?.data?.data;
+    let columns = [];
+    data.forEach((o) => {
+      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.addressDetail.path, true);
+      if (currentColumn !== null) {
+        columns = [...columns, currentColumn?.columnData];
+      }
+      return o?.fieldData;
+    });
+    columns = [...columns, ...getStaticFields(), ActionsRenderer];
+    setColumns(columns);
+  };
+
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 100,
+    sticky: 'right',
+    disableFilters: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        {permissions?.address?.isCreate ? (
+          <HtmlTooltip title="Clone">
+            <IconButton
+              size="small"
+              aria-label="Clone"
+              onClick={() => {
+                setShowManageDialog({ open: true, isClone: true, idToClone: row.original._id });
+              }}
+            >
+              <FileCopyIcon fontSize="small" color="primary" />
+            </IconButton>
+          </HtmlTooltip>
+        ) : (
+          <HtmlTooltip className="cursor-stop" title="You do not have permission to clone/create">
+            <IconButton aria-label="Clone" size="small">
+              <FileCopyIcon fontSize="small" />
+            </IconButton>
+          </HtmlTooltip>
+        )}
+        {permissions?.address?.isDelete && (
+          <HtmlTooltip title="Delete">
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              onClick={() => {
+                setDeleteRecord(row.original);
+                setShowDeleteConfirmBox(true);
+              }}
+            >
+              <DeleteIcon color="error" />
+            </IconButton>
+          </HtmlTooltip>
+        )}
+      </>
+    )
+  };
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-
     if (isExport) {
       deepFilter = `?`;
     }
-
     const { filterByIds, deepFilters } = gridFilterParser(filters);
-
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
@@ -190,40 +139,70 @@ const Address = () => {
     if (filterByIds?.length || deepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
     }
-
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
-
     if (search) {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
-
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
-
     return deepFilter;
   };
 
+  const fetchData = async () => {
+    dispatch({ type: 'loading', loading: true });
+    const queryString = getQueryString();
+
+    axiosInstance()
+      .get(`${routes?.address.path}${queryString}`)
+      .then(({ data: { data, count } }) => {
+        let rows = data.map((u) => {
+          let finalObject = prepareDataForGrid(u, user);
+          finalObject['isChecked'] = false;
+          finalObject['allowedToEdit'] = permissions?.address?.isUpdate;
+          finalObject['canDelete'] = permissions?.address?.isDelete;
+          return finalObject;
+        });
+        dispatch({ type: 'initialize', data: rows, count: count });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      })
+      .finally(() => {
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
+      });
+  };
+
+  const handleSearch = (e) => {
+    dispatch({ type: 'search', search: e.target.value });
+  };
+
   const handleDelete = () => {
+    setIsSubmitting(true);
     let ids = [];
     if (deleteRecord) {
       ids.push(deleteRecord._id);
     } else {
-      ids = getLocalStorageArrayData(localStorageSelectedRecords)?.map((m) => m._id);
+      ids = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((d) => d._id);
     }
     axiosInstance()
-      .put(`/address/remove`, { ids: ids })
+      .put(`${routes?.address.path}/remove`, { ids: ids })
       .then(() => {
+        removeLocalStorage(localStorageSelectedRecords);
         fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
         setAnchorEl(null);
+        setIsSubmitting(false);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
+        setIsSubmitting(false);
       });
   };
 
@@ -234,59 +213,50 @@ const Address = () => {
   const closeActions = () => {
     setAnchorEl(null);
   };
-
-  const handleSearch = (e) => {
-    dispatch({ type: 'search', search: e.target.value });
-  };
-
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: routes.address.title }]} />
+        <CustomBreadCrumbs routes={[routes.address]} />
         <ImportExportLinks
           permissions={permissions?.address}
           module="address"
-          api={'address'}
-          afterImportCompleted={() => {
-            fetchData();
-          }}
+          api={routes?.address.path}
+          afterImportCompleted={() => {}}
           isExportAllOrSomeFeature={true}
           total={rowCount}
-          recordsToExport={getLocalStorageArrayData(localStorageSelectedRecords)?.length}
+          recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
           ids={
-            getLocalStorageArrayData(localStorageSelectedRecords)?.length
-              ? getLocalStorageArrayData(localStorageSelectedRecords)?.map((obj) => obj._id)
+            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+              ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
               : []
           }
           onExportToExcelSuccess={() => {
-            if (gridApi) gridApi.deselectAll();
-            else fetchData();
+            fetchData();
           }}
+          additionalParams={getQueryString(true)}
         />
       </div>
       <CustomContainer>
         <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className={'d-flex align-items-center gap-1'}></div>
-            <div className="flex flex-wrap gap-[8px]  justify-end">
-              <SearchBox onChange={handleSearch} className={styles.search_box_input} size="small" value={search} />
-
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+            <div className={'flex justify-between align-items-center gap-1 w-full'}></div>
+            <div className="flex flex-wrap gap-[8px] justify-end">
+              <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
               <div className="flex gap-[8px] flex-wrap items-center">
                 {permissions?.address?.isCreate && (
                   <Button
-                    onClick={() => {
-                      setOpen({ title: 'Add New Address', open: true, edit: false, isClone: false });
-                    }}
                     variant={'contained'}
-                    size="small"
                     color="primary"
+                    size="small"
                     className={`no-shadow`}
+                    onClick={() => {
+                      setShowManageDialog({ open: true, isClone: false, idToClone: null });
+                    }}
                     startIcon={<AddOutlined />}
                   >
                     Add
                   </Button>
                 )}
-
                 {permissions?.address?.isDelete && (
                   <>
                     <Button
@@ -294,10 +264,10 @@ const Address = () => {
                       color="default"
                       size="small"
                       onClick={openActions}
-                      disabled={getLocalStorageArrayData(localStorageSelectedRecords)?.length ? false : true}
+                      className={`new-dropdown-v1`}
                       aria-controls="action-menu"
-                      className={` new-dropdown-v1`}
                       endIcon={<ExpandMore />}
+                      disabled={selectedRecords?.length ? false : true}
                     >
                       Actions
                     </Button>
@@ -314,8 +284,17 @@ const Address = () => {
                       onClose={closeActions}
                     >
                       <MenuItem
+                      disabled={
+                        !(
+                          (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length
+                        )
+                      }
                         onClick={() => {
                           closeActions();
+                          // eslint-disable-next-line no-lone-blocks
+                          {
+                            selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
+                          }
                           setShowDeleteConfirmBox(true);
                         }}
                       >
@@ -328,90 +307,50 @@ const Address = () => {
             </div>
           </div>
         </div>
-
-        {Object.keys(frameWorkComponent).length > 0 ? (
-          isMobile && !isTablet ? (
-            <CustomSwipableList
-              allowSelection={true}
-              allowSwipe={true}
-              permissions={permissions?.address}
-              primaryField={columns?.find((d) => d.field)}
-              onClick={(data) => {
-                history.push(`${routes.addressDetail.path}/${data._id}`);
-              }}
-              dataRows={dataRows}
-              selectedRecords={getLocalStorageArrayData(localStorageSelectedRecords)}
-              dispatch={dispatch}
-              onEdit={(data) => {
-                history.push(`${routes.addressDetail.path}/${data._id}`);
-              }}
-              extraParamsToCheckDelete={true}
-              onDelete={(data) => {
-                setDeleteRecord(data);
-                setShowDeleteConfirmBox(true);
-              }}
-              rowCount={rowCount}
-              page={page}
-              loading={loading}
-              additionalDetails={[]}
-              chips={[]}
-              owerCollaboratorInitialsOrImages=""
-              onCreate={false}
-              showClone={false}
-              onClone={() => {}}
-              renderedFrom={renderedFrom}
-            />
-          ) : (
-            <CustomAgGrid
-              columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameWorkComponent}
-              setGridApi={setGridApi}
-              dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              actionWidth={110}
-              loading={loading}
-              renderedFrom={renderedFrom}
-              refreshGrid={fetchData}
-              showOnlyShowFilteredRecordSwitch={true}
-              showFilters={true}
-              resource={sidebarResource.address}
-            />
-          )
-        ) : null}
-
-        {showDeleteConfirmBox && (
-          <ConfirmationDialog
-            open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete Address ?`}
-            onClose={() => {
-              setDeleteRecord(null);
-              setShowDeleteConfirmBox(false);
-            }}
-            onOk={handleDelete}
-          />
-        )}
-
-        {open?.open && (
-          <ManageAddressDialog
-            onClose={() => setOpen({ title: '', open: false, edit: false, isClone: false })}
-            onSuccess={() => {
-              setOpen({ title: '', open: false, edit: false, isClone: false });
-              fetchData();
-            }}
-          />
-        )}
-        {showUpdateWarningConfirmBox ? (
-          <MessageDialog
-            open={showUpdateWarningConfirmBox}
-            message={`You are trying to update records which you do not have permission to update, Please remove those records from selection and try again.`}
-            onClose={() => setShowUpdateWarningConfirmBox(false)}
+        {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
+            columns={columns}
+            onSelect={() => {}}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            isClientSideGrid={false}
+            refreshGrid={fetchData}
+            showOnlyShowFilteredRecordSwitch={true}
+            showFilters={true}
+            resource={sidebarResource.address}
           />
         ) : null}
       </CustomContainer>
+      {showDeleteConfirmBox && (
+        <ConfirmationDialog
+          open={showDeleteConfirmBox}
+          message={`Are you sure you want to delete ${routes?.address?.title} ?`}
+          onClose={() => {
+            setDeleteRecord(null);
+            setShowDeleteConfirmBox(false);
+          }}
+          okBtnLoading={isSubmitting}
+          onOk={handleDelete}
+        />
+      )}
+      {showManageDialog.open && (
+        <ManageAddressDialog
+          onClose={() => setShowManageDialog({ open: false, isClone: false, idToClone: null })}
+          onSuccess={() => {
+            fetchData();
+            setShowManageDialog({ open: false, isClone: false, idToClone: null });
+          }}
+        />
+      )}
+      {/* {showUpdateWarningConfirmBox ? (
+        <MessageDialog
+          open={showUpdateWarningConfirmBox}
+          message={`You are trying to update records which you do not have permission to update, Please remove those records from selection and try again.`}
+          onClose={() => setShowUpdateWarningConfirmBox(false)}
+        />
+      ) : null} */}
     </section>
   );
 };
