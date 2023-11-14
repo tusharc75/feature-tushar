@@ -69,6 +69,7 @@ const ManageDynamicForm = ({ resource, resourcePath = '', onClose, onSuccess, re
   };
 
   const handleSubmit = (values) => {
+    const primaryField = initialData?.fields?.find((e) => e?.primaryField);
     setSubmitting(true);
     if (id && !isClone) {
       values._id = id;
@@ -104,7 +105,7 @@ const ManageDynamicForm = ({ resource, resourcePath = '', onClose, onSuccess, re
             history.push(`${resourcePath}/detail/${data._id}`);
             onSuccess(data.data);
           } else{
-            onSuccess(data);
+            onSuccess(data, primaryField);
           }
           setSubmitting(true);
           toastConfig.setToastConfig({

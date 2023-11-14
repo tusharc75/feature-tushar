@@ -1068,12 +1068,12 @@ function Dropdown({
                       isClone={false}
                       onClose={() => setLookupDialog(false)}
                       redirected={false}
-                      onSuccess={(data) => {
+                      onSuccess={(data, primaryField) => {
                         setLookupDialog(false);
                         if (data?._id) {
                           let tempNewOption = {
                             default: true,
-                            optionLabel: data?.dynamicNumber,
+                            optionLabel: primaryField ? data?.[primaryField?.fieldName] : '',
                             optionValue: data?._id,
                             order: option.length,
                             ...(fieldData.lookupDependentOn && {
