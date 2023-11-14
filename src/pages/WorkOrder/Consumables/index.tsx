@@ -4,7 +4,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { CHILD_RESOURCE, MATERIAL_SUB_TYPE, repairOrder, sidebarResource, workOrder } from 'src/constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_SUB_TYPE, QUOTATION_STATUS, WORK_ORDER_TYPE, repairOrder, sidebarResource, workOrder } from 'src/constants/helpers';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
@@ -53,6 +53,8 @@ const Consumables = ({
   const [updateDialog, setUpdateDialog] = useState({ open: false, data: null });
   const [isUpdating, setUpdating] = useState(false);
 
+  const [consumableAddSetting, setConsumableAddSetting] = useState(null);
+
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
@@ -75,6 +77,7 @@ const Consumables = ({
     setConsumeRequest(allowRequest);
     fetchColumns();
     fetchData();
+    fetchROSettings();
   }, [allowedToEdit, workOrderId, consumeRequest]);
 
   const handleUpdate = async (row: any) => {
@@ -293,6 +296,16 @@ const Consumables = ({
     setColumns([...column, ...newColumns, ...extracolumns]);
   };
 
+  const fetchROSettings = async () => {
+    axiosInstance()
+      .get(`${workOrder.api}/${workOrderId}/consumable/quotation`).then(({ data }) => {
+        setConsumableAddSetting(data?.data);
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+
+  }
+
   const fetchData = async () => {
     setDataRows(null);
     var query = ``;
@@ -337,10 +350,16 @@ const Consumables = ({
         data.push({ product: e._id, qty: parseInt(e.qty), service, uniqueId, stepId, subType: materialSubType });
       }
     });
-    axiosInstance()
+    await axiosInstance()
       .post(`${workOrder.api}/${workOrderId}/consumable`, data)
       .then(({ data }) => {
         fetchData();
+        console.log(consumableAddSetting)
+        if (workOrderData?.type === WORK_ORDER_TYPE.repairOrder && consumableAddSetting && consumableAddSetting?.repairOrder?.addConsumablesQuotation
+          && consumableAddSetting?.repairOrder?.addQuotationStep && consumableAddSetting?.latestQuoteVersion?.status === QUOTATION_STATUS.acceptByCustomer) {
+          createNewVersionQuote(consumableAddSetting?.latestQuoteVersion?.quotation, consumableAddSetting?.latestQuoteVersion?._id);
+        }
+
         setIsSubmitting(false);
         setConsumablesDialog(false);
         toastConfig.setToastConfig({
@@ -354,6 +373,16 @@ const Consumables = ({
         toastConfig.setToastConfig(error);
       });
   };
+
+  const createNewVersionQuote = async (quoteId, quoteVersionId) => {
+    axiosInstance()
+      .post(`/quotation/clone-version/${quoteId}/${quoteVersionId}`)
+      .then(() => {
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }
 
   const handleDelete = async (rows) => {
     const ids = rows.map((e) => e._id);
@@ -427,7 +456,10 @@ const Consumables = ({
       {allowedToEdit && (
         <Box className="flex flex-wrap mb-3 justify-between gap-2">
           {isCreate && permissions?.product?.isRead && (
-            <Button variant={'contained'} color="primary" size="small" onClick={() => setConsumablesDialog(true)}>
+            <Button variant={'contained'}
+              disabled={
+                workOrderData?.type === WORK_ORDER_TYPE.repairOrder && !consumableAddSetting}
+              color="primary" size="small" onClick={() => setConsumablesDialog(true)}>
               {materialSubType === MATERIAL_SUB_TYPE.bom ? `Add BOM` : `Add Products/Consumables`}
             </Button>
           )}
