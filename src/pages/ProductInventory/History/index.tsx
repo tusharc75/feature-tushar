@@ -1,27 +1,26 @@
-import Box from '@material-ui/core/Box/Box';
-import { useState, useEffect, useReducer, useContext, Fragment } from 'react';
-import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridComponents/CustomAgGrid';
-import routes from '../../../components/Helpers/Routes';
-import Grid from '@material-ui/core/Grid/Grid';
-import axiosInstance from 'src/axios/axiosInstance';
-import { gridLoadingTimeout, isObjectEmpty, productInventory, sidebarResource } from 'src/constants/helpers';
-import { prepareDataForGrid } from 'src/constants/helpers';
-import { useData } from 'src/StateProvider/Provider';
-import { CommonRenderer, DateTimeRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
-import { capitalize } from 'lodash';
-import { Link } from 'react-router-dom';
-import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { IconButton, TextField } from '@material-ui/core';
+import Box from '@material-ui/core/Box/Box';
+import Grid from '@material-ui/core/Grid/Grid';
 import { Autorenew } from '@material-ui/icons';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { Autocomplete } from '@material-ui/lab';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import RevertQtyDialog from './RevertQtyDialog';
-import { useAppTheme } from 'src/constants/AppConfig';
-import DurationFilter from 'src/components/DurationFilter';
+import { capitalize } from 'lodash';
 import moment from 'moment';
+import { useContext, useEffect, useReducer, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import DurationFilter from 'src/components/DurationFilter';
+import { useAppTheme } from 'src/constants/AppConfig';
+import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, productInventory, sidebarResource } from 'src/constants/helpers';
+import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridComponents/CustomAgGrid';
+import { CommonRenderer, DateTimeRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
+import NoDataCell from '../../../components/Helpers/NoDataCell';
+import routes from '../../../components/Helpers/Routes';
+import RevertQtyDialog from './RevertQtyDialog';
 
 const History = ({ product, warehouse, storageLocation }) => {
   const [themeColor] = useAppTheme();
@@ -376,7 +375,7 @@ const History = ({ product, warehouse, storageLocation }) => {
   return (
     <>
       {warehouseOptions ? (
-        <div className="pr-[0px] md:pr-[82px]">
+        <div className="md:pr-[82px]">
           <Grid container spacing={2} justifyContent="space-between">
             <Grid item md={3} sm={6} xs={12}>
               <Autocomplete
