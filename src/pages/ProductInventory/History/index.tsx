@@ -1,11 +1,6 @@
 import { IconButton, TextField } from '@material-ui/core';
 import Box from '@material-ui/core/Box/Box';
 import Grid from '@material-ui/core/Grid/Grid';
-import axiosInstance from 'src/axios/axiosInstance';
-import { gridLoadingTimeout, isObjectEmpty, productInventory, sidebarResource } from 'src/constants/helpers';
-import { prepareDataForGrid } from 'src/constants/helpers';
-import { useData } from 'src/StateProvider/Provider';
-import { CommonRenderer, DateTimeRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
 import { camelCase, capitalize } from 'lodash';
 import { Link } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -22,6 +17,10 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import RevertQtyDialog from './RevertQtyDialog';
+import moment from 'moment';
+import React, { useContext, useEffect, useReducer, useState } from 'react';
+import { Autocomplete } from '@material-ui/lab';
+import { Autorenew } from '@material-ui/icons';
 
 const History = ({ product, warehouse, storageLocation }) => {
   const renderedFrom = `${camelCase(routes.productInventory.title)}_history`;
