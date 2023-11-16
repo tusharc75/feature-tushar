@@ -1536,7 +1536,9 @@ const Steps = ({
                 handleClose={() => {
                   setAttchmentsDialog({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
                 }}
-                handleSuccess={() => {}}
+                handleSuccess={() => {
+                  setAttchmentsDialog({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
+                }}
               />
             )}
             {consumablesDialog.open && (

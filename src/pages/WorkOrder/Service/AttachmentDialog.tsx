@@ -52,26 +52,31 @@ export default function AttachmentDialog({ workOrderId, uniqueServiceId, stepId,
 
   const fetchData = async () => {
     setIsFetching(true);
-    axiosInstance()
-      .get(`${workOrder.api}/step/attachment?workOrderId=${workOrderId}&uniqueServiceId=${uniqueServiceId}${stepId ? `&stepId=${stepId}` : ''}`)
-      .then(({ data: { data } }) => {
-        if (!data) {
-          setInitialValues({ name: stepName, fileUrl: '' });
-          setIsFetching(false);
-          setIsEdit(false);
-        } else {
-          setIsEdit(true);
-          setCanEdit(data?.canEdit);
-          if (data?.file && data?.file?.length) {
-            data?.file?.sort((a: any, b: any) => {
-              return new Date(b?.date).getTime() - new Date(a?.date).getTime();
-            });
-            setOtherAttachments(data.file);
-          }
-          setIsFetching(false);
-          setInitialValues({ ...data, fileUrl: data.file && data.file.length && data.file ? data.file[0]?.url : '' });
+    var api = `${workOrder.api}/step/attachment?workOrderId=${workOrderId}`;
+    if (uniqueServiceId) {
+      api = api + `&uniqueServiceId=${uniqueServiceId}`;
+    }
+    if (stepId) {
+      api = api + `&stepId=${stepId}`;
+    }
+    axiosInstance().get(api).then(({ data: { data } }) => {
+      if (!data) {
+        setInitialValues({ name: stepName, fileUrl: '' });
+        setIsFetching(false);
+        setIsEdit(false);
+      } else {
+        setIsEdit(true);
+        setCanEdit(data?.canEdit);
+        if (data?.file && data?.file?.length) {
+          data?.file?.sort((a: any, b: any) => {
+            return new Date(b?.date).getTime() - new Date(a?.date).getTime();
+          });
+          setOtherAttachments(data.file);
         }
-      })
+        setIsFetching(false);
+        setInitialValues({ ...data, fileUrl: data.file && data.file.length && data.file ? data.file[0]?.url : '' });
+      }
+    })
       .catch((error) => {
         setInitialValues({ name: '', fileUrl: '' });
         setIsFetching(false);
@@ -85,7 +90,7 @@ export default function AttachmentDialog({ workOrderId, uniqueServiceId, stepId,
       setLoading(true);
       axiosInstance().put('attachment/deletemany', { ids: [values?._id] }).then(({ data }) => {
         setLoading(false);
-        handleClose();
+        handleSuccess();
       }).catch((error) => {
         setLoading(false);
         toastConfig.setToastConfig(error);
@@ -98,7 +103,7 @@ export default function AttachmentDialog({ workOrderId, uniqueServiceId, stepId,
         file: otherAttachments,
         serviceName: serviceName,
         workOrderId: workOrderId,
-        uniqueServiceId: uniqueServiceId,
+        ...(uniqueServiceId && { uniqueServiceId: uniqueServiceId }),
         ...(stepId && { stepId: stepId })
       };
       setLoading(true);
@@ -111,7 +116,7 @@ export default function AttachmentDialog({ workOrderId, uniqueServiceId, stepId,
             message: data.message
           });
           setLoading(false);
-          handleClose();
+          handleSuccess();
         })
         .catch((error) => {
           setLoading(false);
