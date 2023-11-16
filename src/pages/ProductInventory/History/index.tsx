@@ -9,7 +9,7 @@ import { gridLoadingTimeout, isObjectEmpty, productInventory, sidebarResource } 
 import { prepareDataForGrid } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import { CommonRenderer, DateTimeRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
-import { capitalize } from 'lodash';
+import { camelCase, capitalize } from 'lodash';
 import { Link } from 'react-router-dom';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { IconButton, TextField } from '@material-ui/core';
@@ -24,6 +24,9 @@ import DurationFilter from 'src/components/DurationFilter';
 import moment from 'moment';
 
 const History = ({ product, warehouse, storageLocation }) => {
+
+  const renderedFrom = `${camelCase(routes.productInventory.title)}_history`;
+
   const [themeColor] = useAppTheme();
   const isDarkTheme = themeColor === 'dark';
   const toastConfig = useContext(CustomToastContext);
@@ -50,7 +53,6 @@ const History = ({ product, warehouse, storageLocation }) => {
     to: new Date(),
   })
 
-  const renderedFrom = 'Product_Inventory_History';
 
   useEffect(() => {
     getWarehouse();
@@ -144,7 +146,7 @@ const History = ({ product, warehouse, storageLocation }) => {
   const curr = user?.user?.brandCurrency || "";
 
   const columns = [
-    { field: 'date', headerName: 'Date', show: true, cellRenderer: 'dateTimeRenderer', filter: false, sortable: false },
+    { field: 'date', headerName: 'Date', show: true, cellRenderer: 'dateTimeRenderer', filter: false, sortable: false, disabled: true },
     {
       field: 'referenceType',
       headerName: 'Reference Type',
@@ -169,6 +171,7 @@ const History = ({ product, warehouse, storageLocation }) => {
       cellRenderer: 'creditDebitRenderer',
       filter: false,
       sortable: false,
+      disabled: true,
       cellStyle: (params) => {
         if (params?.data?.type === 'Credit') {
           return { backgroundColor: isDarkTheme ? 'hsl(120 73% 40% / 1)' : '#90ee90' };
@@ -221,8 +224,8 @@ const History = ({ product, warehouse, storageLocation }) => {
   ];
 
   const columnState = JSON.parse(localStorage.getItem(renderedFrom));
-  if (columnState) {
-    columns.forEach((item) => {
+  if (columnState && columns) {
+    columns?.forEach((item) => {
       columnState.forEach((d) => {
         if (d.colId === item.field) {
           item.show = !d.hide;

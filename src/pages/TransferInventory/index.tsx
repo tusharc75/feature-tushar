@@ -1,4 +1,4 @@
-import { Box } from '@material-ui/core';
+import { Box, Tooltip } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import AddIcon from '@material-ui/icons/Add';
@@ -16,7 +16,6 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
@@ -115,11 +114,12 @@ const TransferInventory = () => {
       .then(({ data }) => {
         let rows = data.data?.map((u) => {
           let finalObject = prepareDataForGrid(u, user);
-          finalObject['canDelete'] =
-            permissions?.transferInventory?.isDelete &&
-            u?.status === TRANSFER_INVENTORY_STATUS.new &&
-            u?.products?.length === 0 &&
-            [...(u.collaborator || []), u.owner].some((d) => d?.optionValue === user?.user?._id);
+          // finalObject['canDelete'] =
+          //   permissions?.transferInventory?.isDelete &&
+          //   u?.status === TRANSFER_INVENTORY_STATUS.new &&
+          //   u?.products?.length === 0 &&
+          //   [...(u.collaborator || []), u.owner].some((d) => d?.optionValue === user?.user?._id);
+          finalObject['canDelete'] = permissions?.transferInventory?.isDelete && u?.canDelete;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] =
             permissions?.transferInventory?.isUpdate && [...(u.collaborator || []), u.owner].some((d) => d?.optionValue === user?.user?._id);
@@ -238,7 +238,7 @@ const TransferInventory = () => {
   const ActionsRenderer = (params) => (
     <>
       {permissions?.transferInventory?.isCreate && (
-        <HtmlTooltip title="Clone">
+        <Tooltip title="Clone">
           <IconButton
             size="small"
             aria-label="Clone"
@@ -248,10 +248,11 @@ const TransferInventory = () => {
           >
             <FileCopyIcon color="primary" />
           </IconButton>
-        </HtmlTooltip>
+        </Tooltip>
       )}
-      {params?.data?.canDelete && (
-        <HtmlTooltip title="Delete">
+
+      {params?.data?.canDelete ? (
+        <Tooltip title="Delete">
           <IconButton
             size="small"
             aria-label="Delete"
@@ -262,7 +263,13 @@ const TransferInventory = () => {
           >
             <DeleteIcon color="error" />
           </IconButton>
-        </HtmlTooltip>
+        </Tooltip>
+      ) : (
+        <Tooltip title="Don't have the permissions to Delete">
+          <IconButton size="small" aria-label="Delete" className="cursor-stop">
+            <DeleteIcon color="disabled" />
+          </IconButton>
+        </Tooltip>
       )}
     </>
   );
@@ -295,6 +302,24 @@ const TransferInventory = () => {
     setOpen(false);
   };
 
+  const toggleInner = TransferInventoryType && (
+    <ToggleButtonGroup
+      size="small"
+      className="toggle-button-layout"
+      value={TransferInventoryType[selectedType - 1].key}
+      exclusive
+      onChange={handleFilter}
+    >
+      {TransferInventoryType.map((k, index) => {
+        return (
+          <ToggleButton value={k.key} key={index}>
+            {k.key}
+          </ToggleButton>
+        );
+      })}
+    </ToggleButtonGroup>
+  );
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -321,13 +346,10 @@ const TransferInventory = () => {
         <div className="header-panel">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
             <div className={'d-flex flex-wrap align-items-center gap-1'}>
-              <div className="d-flex align-items-center">
-                {/* <GiStockpiles size={20} style={{ paddingBottom: '3px' }} className="headerLogo" />
-                <span className="listingHeader">{routes.transferInventory?.title} </span> */}
-              </div>
+              <div className="d-flex align-items-center"></div>
               {isMobile && !isTablet ? (
-                <div className="d-flex flex-wrap items-center justify-between w-full">
-                  <div></div>
+                <div className="d-flex flex-wrap items-center justify-between w-full gap-2">
+                  <div>{toggleInner}</div>
                   <div className="flex flex-wrap items-center gap-1">
                     <IconButton
                       onClick={handleClickOpen}
