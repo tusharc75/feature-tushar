@@ -50,8 +50,8 @@ const History = ({ product, warehouse, storageLocation }) => {
 
   const [duration, setDuration] = useState({
     from: new Date(moment().subtract('1', 'year').calendar()),
-    to: new Date(),
-  })
+    to: new Date()
+  });
 
 
   useEffect(() => {
@@ -91,9 +91,9 @@ const History = ({ product, warehouse, storageLocation }) => {
       let tempWarehouse =
         selectedWarehouse === 'All'
           ? warehouseOptions
-            ?.filter((d) => d.optionValue !== 'All')
-            .map((d) => d.optionValue)
-            .toString()
+              ?.filter((d) => d.optionValue !== 'All')
+              .map((d) => d.optionValue)
+              .toString()
           : selectedWarehouse;
 
       deepFilter = `${deepFilter}&warehouse=${tempWarehouse}`;
@@ -123,7 +123,7 @@ const History = ({ product, warehouse, storageLocation }) => {
           from: moment(duration?.from).format('MM/DD/YYYY'),
           to: moment(duration?.to).format('MM/DD/YYYY')
         }
-      })
+      });
     }
     if (updatedFilters?.length > 0) {
       deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
@@ -143,7 +143,7 @@ const History = ({ product, warehouse, storageLocation }) => {
       });
   };
 
-  const curr = user?.user?.brandCurrency || "";
+  const curr = user?.user?.brandCurrency || '';
 
   const columns = [
     { field: 'date', headerName: 'Date', show: true, cellRenderer: 'dateTimeRenderer', filter: false, sortable: false, disabled: true },
@@ -181,20 +181,22 @@ const History = ({ product, warehouse, storageLocation }) => {
         }
       }
     },
-    ...(!user?.user?.brandPolicy?.hideInventoryCount ? [{ field: 'finalInventory', headerName: 'Final Quantity', show: true, cellRenderer: 'commonRenderer', filter: false, sortable: false }] : []),
+    ...(!user?.user?.brandPolicy?.hideInventoryCount
+      ? [{ field: 'finalInventory', headerName: 'Final Quantity', show: true, cellRenderer: 'commonRenderer', filter: false, sortable: false }]
+      : []),
     { field: 'price', headerName: `Cost ${curr}`, show: true, filter: false, cellRenderer: 'commonRenderer' },
     { field: 'totalPrice', headerName: `Amount ${curr}`, show: true, filter: false, cellRenderer: 'commonRenderer' },
     ...(selectedWarehouse && selectedWarehouse !== 'All'
       ? [
-        {
-          field: 'finalAvgPrice',
-          headerName: `Final Average Cost ${curr}`,
-          show: true,
-          cellRenderer: 'commonRenderer',
-          filter: false,
-          sortable: false
-        }
-      ]
+          {
+            field: 'finalAvgPrice',
+            headerName: `Final Average Cost ${curr}`,
+            show: true,
+            cellRenderer: 'commonRenderer',
+            filter: false,
+            sortable: false
+          }
+        ]
       : []),
     {
       field: 'warehouse',
@@ -206,15 +208,15 @@ const History = ({ product, warehouse, storageLocation }) => {
     },
     ...(user?.user?.brandPolicy?.storageLocation
       ? [
-        {
-          field: 'storageLocation',
-          headerName: 'Storage Location',
-          show: true,
-          filter: false,
-          sortable: false,
-          cellRenderer: 'storageLocationRenderer'
-        }
-      ]
+          {
+            field: 'storageLocation',
+            headerName: 'Storage Location',
+            show: true,
+            filter: false,
+            sortable: false,
+            cellRenderer: 'storageLocationRenderer'
+          }
+        ]
       : []),
     { field: 'supplierPartNumber', headerName: 'Supplier Part Number', show: true, cellRenderer: 'commonRenderer', filter: true, sortable: false },
     { field: 'comment', headerName: 'Comment', show: true, cellRenderer: 'commonRenderer', filter: true, sortable: false },
@@ -284,7 +286,7 @@ const History = ({ product, warehouse, storageLocation }) => {
           {params.value}
         </Link>
       ) : params.data.referenceType === 'Bulk Asset Creation' ? (
-        <Link className="link" target='_blank' title={params.value} to={`${routes.bulkAssetCreationDetail.path}/${params.data.referenceId}`}>
+        <Link className="link" target="_blank" title={params.value} to={`${routes.bulkAssetCreationDetail.path}/${params.data.referenceId}`}>
           {params.value}
         </Link>
       ) : params.data.referenceType === 'Serialized Asset' ? (
@@ -332,9 +334,9 @@ const History = ({ product, warehouse, storageLocation }) => {
   const ActionsRenderer = (params) => (
     <>
       {(['Product Inventory', 'Reverted'].includes(params.data.referenceType) && !params?.data?.reverted) ||
-        ([sidebarResource.workOrder, sidebarResource.fieldTicket].includes(params.data.referenceType) &&
-          params.data.type?.toLowerCase() === 'debit' &&
-          params.data.qty - (params.data?.revertedQty || 0) > 0) ? (
+      ([sidebarResource.workOrder, sidebarResource.fieldTicket].includes(params.data.referenceType) &&
+        params.data.type?.toLowerCase() === 'debit' &&
+        params.data.qty - (params.data?.revertedQty || 0) > 0) ? (
         <Box pl={1}>
           <HtmlTooltip title="Revert">
             <IconButton
@@ -376,65 +378,60 @@ const History = ({ product, warehouse, storageLocation }) => {
 
   return (
     <>
-      {warehouseOptions && (
-        <Grid container justifyContent='space-between'>
-          <Grid item md={10} sm={10} xs={10}>
-            <Grid container spacing={2} justifyContent='space-between'>
-              <Grid item md={3} sm={6} xs={12}>
+      {warehouseOptions ? (
+        <div className="pr-[0px] md:pr-[82px]">
+          <Grid container spacing={2} justifyContent="space-between">
+            <Grid item md={3} sm={6} xs={12}>
+              <Autocomplete
+                options={warehouseOptions}
+                getOptionLabel={(option: any) => option.optionLabel}
+                disableClearable
+                getOptionSelected={(option: any, val) => option.optionValue === val}
+                value={
+                  warehouseOptions.filter((data) => data.optionValue === selectedWarehouse).length
+                    ? warehouseOptions.filter((data) => data.optionValue === selectedWarehouse)[0]
+                    : ''
+                }
+                onChange={(e, val) => {
+                  if (val !== null) {
+                    setSelectedWarehouse(val && val.optionValue ? val.optionValue : '');
+                    setSelectedStorageLocation(null);
+                  }
+                }}
+                renderInput={(params) => (
+                  <TextField {...params} margin="dense" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
+                )}
+              />
+            </Grid>
+            <Grid item md={3} sm={6} xs={12}>
+              {user?.user?.brandPolicy?.storageLocation && (
                 <Autocomplete
-                  options={warehouseOptions}
-                  getOptionLabel={(option: any) => option.optionLabel}
-                  disableClearable
+                  options={storageLocationOptions.filter((item) => item.warehouse === selectedWarehouse)}
+                  getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
                   getOptionSelected={(option: any, val) => option.optionValue === val}
                   value={
-                    warehouseOptions.filter((data) => data.optionValue === selectedWarehouse).length
-                      ? warehouseOptions.filter((data) => data.optionValue === selectedWarehouse)[0]
+                    storageLocationOptions.filter((data) => data.optionValue === selectedStorageLocation).length
+                      ? storageLocationOptions.filter((data) => data.optionValue === selectedStorageLocation)[0]
                       : ''
                   }
                   onChange={(e, val) => {
-                    if (val !== null) {
-                      setSelectedWarehouse(val && val.optionValue ? val.optionValue : '');
-                      setSelectedStorageLocation(null);
-                    }
+                    setSelectedStorageLocation(val?.optionValue);
                   }}
                   renderInput={(params) => (
-                    <TextField {...params} margin="dense" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
+                    <TextField {...params} margin="dense" name="storageLocation" label="Storage Location" variant="outlined" fullWidth />
                   )}
                 />
-              </Grid>
-              <Grid item md={3} sm={6} xs={12}>
-                {user?.user?.brandPolicy?.storageLocation && (
-                  <Autocomplete
-                    options={storageLocationOptions.filter((item) => item.warehouse === selectedWarehouse)}
-                    getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                    getOptionSelected={(option: any, val) => option.optionValue === val}
-                    value={
-                      storageLocationOptions.filter((data) => data.optionValue === selectedStorageLocation).length
-                        ? storageLocationOptions.filter((data) => data.optionValue === selectedStorageLocation)[0]
-                        : ''
-                    }
-                    onChange={(e, val) => {
-                      setSelectedStorageLocation(val?.optionValue);
-                    }}
-                    renderInput={(params) => (
-                      <TextField {...params} margin="dense" name="storageLocation" label="Storage Location" variant="outlined" fullWidth />
-                    )}
-                  />
-                )}
-              </Grid>
-              <Grid item md={6} sm={12} xs={12}>
-                <Box mt={1}>
-                  <DurationFilter
-                    label={''}
-                    defaultTimeFrame="1-year"
-                    duration={duration}
-                    setDuration={setDuration}
-                  />
-                </Box>
-              </Grid>
+              )}
+            </Grid>
+            <Grid item md={6} sm={12} xs={12}>
+              <Box mt={1}>
+                <DurationFilter label={''} defaultTimeFrame="1-year" duration={duration} setDuration={setDuration} />
+              </Box>
             </Grid>
           </Grid>
-        </Grid>
+        </div>
+      ) : (
+        <div className="min-h-[50px]" />
       )}
       <Grid item xs={12} md={12} sm={12}>
         {columns ? (

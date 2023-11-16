@@ -88,7 +88,7 @@ const CalendarView = ({ product, warehouse, storageLocation }) => {
       localizer={localizer}
       formats={formats}
       showAllEvents
-      style={{ height: 'calc(100vh - 200px)', borderRadius: '4px' }}
+      style={{ minHeight: 'calc(100vh - 200px)', borderRadius: '4px' }}
       views={{ month: true, week: true, day: true }}
       eventPropGetter={(obj) => ({
         style: {
