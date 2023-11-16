@@ -99,7 +99,11 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
 
   const TicketRenderer = (params) =>
     params?.value ? (
-      <p className="link text-truncate" title={params.value} onClick={() => window.open(`${routes.deliveryTicketDetail.path}/${params.data.loadingTicketId}`)}>
+      <p
+        className="link text-truncate"
+        title={params.value}
+        onClick={() => window.open(`${routes.deliveryTicketDetail.path}/${params.data.loadingTicketId}`)}
+      >
         {params.value}
       </p>
     ) : (
@@ -108,7 +112,11 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
 
   const WarehouseRenderer = (params) =>
     params?.value ? (
-      <p className="link text-truncate" title={params.value} onClick={() => window.open(`${routes.warehouseDetail.path}/${params.data?.warehouse?.optionValue}`)}>
+      <p
+        className="link text-truncate"
+        title={params.value}
+        onClick={() => window.open(`${routes.warehouseDetail.path}/${params.data?.warehouse?.optionValue}`)}
+      >
         {params.value}
       </p>
     ) : (
@@ -120,7 +128,11 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
       <p
         className="link text-truncate"
         title={params.value}
-        onClick={() => window.open(`${params.data.type === 'Asset' ? routes.serializedAssetDetail.path : routes.productDetail.path}/${params?.data?._id?.split('_')[0]}`)}
+        onClick={() =>
+          window.open(
+            `${params.data.type === 'Asset' ? routes.serializedAssetDetail.path : routes.productDetail.path}/${params?.data?._id?.split('_')[0]}`
+          )
+        }
       >
         {params.value}
       </p>
@@ -291,18 +303,18 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
       });
   };
 
-
   return (
     <Fragment>
-      <Box display="flex" justifyContent="flex-end" m={1}>
+      <Box className="flex flex-wrap justify-end gap-[8px]" my={1}>
         <PreviewDownload
           fileName={`${routes.transferInventory.title}-${transferInventoryData?.transferNumber}`}
           hideDetailButton={true}
           resource={sidebarResource.transferInventory}
           referenceId={transferInventoryData?._id}
-          columns={columns?.filter((e) => ['productName', 'productNumber', 'productDescription', 'productDescription', 'qty']?.includes(e.field))} />
+          columns={columns?.filter((e) => ['productName', 'productNumber', 'productDescription', 'productDescription', 'qty']?.includes(e.field))}
+        />
         {interPlantTransfer ? (
-          <Box ml={1}>
+          <Box>
             {allowedToEdit && canReceive && transferInventoryData?.status !== TRANSFER_INVENTORY_STATUS.delivered && (
               <Button
                 variant={'contained'}
@@ -317,7 +329,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
             )}
           </Box>
         ) : (
-          <Box ml={1}>
+          <>
             {allowedToEdit && canLoad && (
               <Button
                 variant={'outlined'}
@@ -329,7 +341,6 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
                 {`Create Loading Ticket`}
               </Button>
             )}
-            <Box component="span" ml={1} />
             {canReceive && (
               <Button
                 variant={'outlined'}
@@ -346,11 +357,11 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
                 {`Receive`}
               </Button>
             )}
-          </Box>
+          </>
         )}
       </Box>
       <Box>
-        {columns ?
+        {columns ? (
           <CustomAgGrid
             columns={columns}
             dataRows={dataRows}
@@ -368,11 +379,11 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
             renderedFrom={renderedFrom}
             refreshGrid={fetchProducts}
           />
-          : (
-            <Box p={2} height={500}>
-              <CommonSkeleton lenArray={[...Array(10).keys()]} />
-            </Box>
-          )}
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
       </Box>
       {showTicketDialog.open && (
         <ManageDeliveryTicket

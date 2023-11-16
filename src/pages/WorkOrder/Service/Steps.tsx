@@ -2,7 +2,17 @@ import React, { Fragment, useContext, useEffect, useRef, useState } from 'react'
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import { AiOutlinePlus } from 'react-icons/ai';
 import Button from '@material-ui/core/Button';
-import { ExpandMore, AccessTime, Info, DragIndicator, MoreHoriz, DeleteOutline, People, AddCircleOutline } from '@material-ui/icons';
+import {
+  ExpandMore,
+  AccessTime,
+  Info,
+  DragIndicator,
+  MoreHoriz,
+  DeleteOutline,
+  People,
+  AddCircleOutline,
+  FileCopyOutlined
+} from '@material-ui/icons';
 import {
   convertMsToTime,
   getChipColor,
@@ -237,7 +247,7 @@ const Steps = ({
   fetchService,
   referencType,
   stepSubmitedData,
-  handelClose = null,
+  handelClose = null
 }) => {
   const workOrderId = workOrderData?._id;
   const warehouse = workOrderData?.warehouse;
@@ -835,9 +845,9 @@ const Steps = ({
                     size="small"
                     disabled={
                       allowedToEdit &&
-                        ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                          selectedService?.status
-                        )
+                      ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                        selectedService?.status
+                      )
                         ? false
                         : true
                     }
@@ -857,9 +867,9 @@ const Steps = ({
                     size="small"
                     disabled={
                       allowedToEdit &&
-                        ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                          selectedService?.status
-                        )
+                      ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                        selectedService?.status
+                      )
                         ? false
                         : true
                     }
@@ -896,7 +906,7 @@ const Steps = ({
                   <MenuItem
                     disabled={
                       allowedToEdit &&
-                        serviceDetails?.steps?.filter((d) => selectedSteps?.includes(d?._id))?.every((element) => element?.isAllowToCheck === true)
+                      serviceDetails?.steps?.filter((d) => selectedSteps?.includes(d?._id))?.every((element) => element?.isAllowToCheck === true)
                         ? false
                         : true
                     }
@@ -1037,7 +1047,10 @@ const Steps = ({
                           )}
                           {step?.assignedWorkStations?.length > 0 && (
                             <Box ml={1}>
-                              <HtmlTooltip enterTouchDelay={0} title={`Work Stations-${step?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString()}`}>
+                              <HtmlTooltip
+                                enterTouchDelay={0}
+                                title={`Work Stations-${step?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString()}`}
+                              >
                                 <span>
                                   <WorkStations className=" align-text-top" />
                                 </span>
@@ -1090,8 +1103,8 @@ const Steps = ({
                                     {stepData?.status === WORKORDER_SERVICE_STEP_STATUS.pause
                                       ? 'Resume'
                                       : stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start
-                                        ? 'Pause'
-                                        : 'Restart'}
+                                      ? 'Pause'
+                                      : 'Restart'}
                                   </Button>
                                 ))}
                               {!stepData?.startDate && (isMeTechnician || !isAnyTechnician) ? (
@@ -1160,9 +1173,9 @@ const Steps = ({
                                 )
                               ) : null}
                               {stepData?.status &&
-                                ![WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status) &&
-                                ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) &&
-                                (isMeTechnician || !isAnyTechnician) ? (
+                              ![WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status) &&
+                              ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) &&
+                              (isMeTechnician || !isAnyTechnician) ? (
                                 [
                                   WORKORDER_SERVICE_STEP_STATUS.passed,
                                   WORKORDER_SERVICE_STEP_STATUS.failed,
@@ -1245,7 +1258,7 @@ const Steps = ({
                             <MoreHoriz />
                           </IconButton>
 
-                          {allowedToEdit && ![WORKORDER_SERVICE_STATUS.skipped].includes(selectedService?.status) &&
+                          {allowedToEdit && ![WORKORDER_SERVICE_STATUS.skipped].includes(selectedService?.status) && (
                             <HtmlTooltip enterTouchDelay={0} title="Clone" placement="top" arrow>
                               <IconButton
                                 size="small"
@@ -1259,9 +1272,10 @@ const Steps = ({
                                   }
                                 }}
                               >
-                                <AddCircleOutline style={{ fontSize: '20px' }} />
+                                <FileCopyOutlined style={{ fontSize: '18px' }} />
                               </IconButton>
-                            </HtmlTooltip>}
+                            </HtmlTooltip>
+                          )}
                           <HtmlTooltip enterTouchDelay={0} title="Delete" placement="top" arrow>
                             <IconButton
                               size="small"
@@ -1362,9 +1376,9 @@ const Steps = ({
                     }}
                     disabled={
                       allowedToEdit &&
-                        ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                          selectedService?.status
-                        )
+                      ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                        selectedService?.status
+                      )
                         ? false
                         : true
                     }
@@ -1465,18 +1479,20 @@ const Steps = ({
                 open={true}
                 message={
                   addServiceConfirmation.type === 'skipServices'
-                    ? `As per the logic applied on this step, service${addServiceConfirmation?.services?.length > 1 ? 's' : ''
-                    }  ${addServiceConfirmation?.services?.map((e) => e?.serviceName || '')?.toString()} has been skipped. Do you want to Skip ? `
+                    ? `As per the logic applied on this step, service${
+                        addServiceConfirmation?.services?.length > 1 ? 's' : ''
+                      }  ${addServiceConfirmation?.services?.map((e) => e?.serviceName || '')?.toString()} has been skipped. Do you want to Skip ? `
                     : addServiceConfirmation.type === 'returnToStepOnFail'
-                      ? `As per the logic applied on this step, we need to return to step ${addServiceConfirmation.step?.stepName || ''
+                    ? `As per the logic applied on this step, we need to return to step ${
+                        addServiceConfirmation.step?.stepName || ''
                       }. Do you want to continue ?`
-                      : addServiceConfirmation.type === 'isQuoteRevisionOnFail'
-                        ? ` Step fail requires Quotation Revision. Do you confirm on this?`
-                        : addServiceConfirmation.type === 'jumpStep'
-                          ? ` As per the logic applied on this step, we will skip few steps in this service. Do you want to continue?`
-                          : `As per the logic applied on this step, a new service  ${addServiceConfirmation.services
-                            ?.map((e) => e.serviceName)
-                            ?.toString()} has been added. Do you want to Add ? `
+                    : addServiceConfirmation.type === 'isQuoteRevisionOnFail'
+                    ? ` Step fail requires Quotation Revision. Do you confirm on this?`
+                    : addServiceConfirmation.type === 'jumpStep'
+                    ? ` As per the logic applied on this step, we will skip few steps in this service. Do you want to continue?`
+                    : `As per the logic applied on this step, a new service  ${addServiceConfirmation.services
+                        ?.map((e) => e.serviceName)
+                        ?.toString()} has been added. Do you want to Add ? `
                 }
                 onClose={() => {
                   setAddServiceConfirmation({ open: false, services: [], status: '', step: null, type: '' });
@@ -1520,7 +1536,7 @@ const Steps = ({
                 handleClose={() => {
                   setAttchmentsDialog({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
                 }}
-                handleSuccess={() => { }}
+                handleSuccess={() => {}}
               />
             )}
             {consumablesDialog.open && (
@@ -1627,9 +1643,9 @@ const Steps = ({
                   size="small"
                   disabled={
                     allowedToEdit &&
-                      ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                        selectedService?.status
-                      )
+                    ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                      selectedService?.status
+                    )
                       ? false
                       : true
                   }
