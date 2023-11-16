@@ -376,55 +376,57 @@ const History = ({ product, warehouse, storageLocation }) => {
   return (
     <>
       {warehouseOptions ? (
-        <Grid container spacing={2} justifyContent="space-between">
-          <Grid item md={3} sm={6} xs={12}>
-            <Autocomplete
-              options={warehouseOptions}
-              getOptionLabel={(option: any) => option.optionLabel}
-              disableClearable
-              getOptionSelected={(option: any, val) => option.optionValue === val}
-              value={
-                warehouseOptions.filter((data) => data.optionValue === selectedWarehouse).length
-                  ? warehouseOptions.filter((data) => data.optionValue === selectedWarehouse)[0]
-                  : ''
-              }
-              onChange={(e, val) => {
-                if (val !== null) {
-                  setSelectedWarehouse(val && val.optionValue ? val.optionValue : '');
-                  setSelectedStorageLocation(null);
-                }
-              }}
-              renderInput={(params) => (
-                <TextField {...params} margin="dense" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
-              )}
-            />
-          </Grid>
-          <Grid item md={3} sm={6} xs={12}>
-            {user?.user?.brandPolicy?.storageLocation && (
+        <div className="pr-[0px] md:pr-[82px]">
+          <Grid container spacing={2} justifyContent="space-between">
+            <Grid item md={3} sm={6} xs={12}>
               <Autocomplete
-                options={storageLocationOptions.filter((item) => item.warehouse === selectedWarehouse)}
-                getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                options={warehouseOptions}
+                getOptionLabel={(option: any) => option.optionLabel}
+                disableClearable
                 getOptionSelected={(option: any, val) => option.optionValue === val}
                 value={
-                  storageLocationOptions.filter((data) => data.optionValue === selectedStorageLocation).length
-                    ? storageLocationOptions.filter((data) => data.optionValue === selectedStorageLocation)[0]
+                  warehouseOptions.filter((data) => data.optionValue === selectedWarehouse).length
+                    ? warehouseOptions.filter((data) => data.optionValue === selectedWarehouse)[0]
                     : ''
                 }
                 onChange={(e, val) => {
-                  setSelectedStorageLocation(val?.optionValue);
+                  if (val !== null) {
+                    setSelectedWarehouse(val && val.optionValue ? val.optionValue : '');
+                    setSelectedStorageLocation(null);
+                  }
                 }}
                 renderInput={(params) => (
-                  <TextField {...params} margin="dense" name="storageLocation" label="Storage Location" variant="outlined" fullWidth />
+                  <TextField {...params} margin="dense" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
                 )}
               />
-            )}
+            </Grid>
+            <Grid item md={3} sm={6} xs={12}>
+              {user?.user?.brandPolicy?.storageLocation && (
+                <Autocomplete
+                  options={storageLocationOptions.filter((item) => item.warehouse === selectedWarehouse)}
+                  getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                  getOptionSelected={(option: any, val) => option.optionValue === val}
+                  value={
+                    storageLocationOptions.filter((data) => data.optionValue === selectedStorageLocation).length
+                      ? storageLocationOptions.filter((data) => data.optionValue === selectedStorageLocation)[0]
+                      : ''
+                  }
+                  onChange={(e, val) => {
+                    setSelectedStorageLocation(val?.optionValue);
+                  }}
+                  renderInput={(params) => (
+                    <TextField {...params} margin="dense" name="storageLocation" label="Storage Location" variant="outlined" fullWidth />
+                  )}
+                />
+              )}
+            </Grid>
+            <Grid item md={6} sm={12} xs={12}>
+              <Box mt={1}>
+                <DurationFilter label={''} defaultTimeFrame="1-year" duration={duration} setDuration={setDuration} />
+              </Box>
+            </Grid>
           </Grid>
-          <Grid item md={6} sm={12} xs={12}>
-            <Box mt={1}>
-              <DurationFilter label={''} defaultTimeFrame="1-year" duration={duration} setDuration={setDuration} />
-            </Box>
-          </Grid>
-        </Grid>
+        </div>
       ) : (
         <div className="min-h-[50px]" />
       )}
