@@ -206,6 +206,7 @@ export default function Attachment() {
       width: 120,
       sticky: 'right',
       disableFilters: true,
+      disableSortBy: true,
       canDrag: false,
       Cell: ({ row }) => {
         const allPdf = _.every(row.original?.file, (d) => _.endsWith(d?.url, '.pdf'));

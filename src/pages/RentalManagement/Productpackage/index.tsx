@@ -200,6 +200,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
       width: 50,
       sticky: 'right',
       disableFilters: true,
+      disableSortBy: true,
       canDrag: false,
       Cell: ({ row, rows }) => {
         return (
