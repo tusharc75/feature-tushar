@@ -207,6 +207,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
       Header: 'Actions',
       width: 100,
       sticky: 'right',
+      disableSortBy: true,
       Cell: ({ row }) => {
         return <div className="d-flex gap-1">
           {row?.original?.repairTypeId && (

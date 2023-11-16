@@ -291,7 +291,6 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
       });
   };
 
-  console.log(selectedRecords)
 
   return (
     <Fragment>
