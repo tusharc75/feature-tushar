@@ -42,6 +42,7 @@ export default function AttachmentDialog({ workOrderId, uniqueServiceId, stepId,
   const [attachmentToDelete, setAttachemnetToDelete] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
   const [fullScreen, setFullScreen] = useState(false);
   const [documentScanDialog, setDocumentScanDialog] = useState(false);
 
@@ -57,7 +58,9 @@ export default function AttachmentDialog({ workOrderId, uniqueServiceId, stepId,
         if (!data) {
           setInitialValues({ name: stepName, fileUrl: '' });
           setIsFetching(false);
+          setIsUpdating(false);
         } else {
+          setIsUpdating(true);
           setCanEdit(data?.canEdit);
           if (data?.file && data?.file?.length) {
             data?.file?.sort((a: any, b: any) => {
@@ -72,6 +75,7 @@ export default function AttachmentDialog({ workOrderId, uniqueServiceId, stepId,
       .catch((error) => {
         setInitialValues({ name: '', fileUrl: '' });
         setIsFetching(false);
+        setIsUpdating(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -237,7 +241,9 @@ export default function AttachmentDialog({ workOrderId, uniqueServiceId, stepId,
                     <CustomButton
                       type="button"
                       color="primary"
-                      disabled={loading || uploadingImageOrFileProgress > 0 || otherAttachments.length === 0}
+                      disabled={
+                        loading || isUpdating ? uploadingImageOrFileProgress > 0 : uploadingImageOrFileProgress > 0 || otherAttachments.length === 0
+                      }
                       loading={loading}
                       variant="contained"
                       onClick={submitForm}
