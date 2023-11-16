@@ -302,6 +302,24 @@ const TransferInventory = () => {
     setOpen(false);
   };
 
+  const toggleInner = TransferInventoryType && (
+    <ToggleButtonGroup
+      size="small"
+      className="toggle-button-layout"
+      value={TransferInventoryType[selectedType - 1].key}
+      exclusive
+      onChange={handleFilter}
+    >
+      {TransferInventoryType.map((k, index) => {
+        return (
+          <ToggleButton value={k.key} key={index}>
+            {k.key}
+          </ToggleButton>
+        );
+      })}
+    </ToggleButtonGroup>
+  );
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -328,13 +346,10 @@ const TransferInventory = () => {
         <div className="header-panel">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
             <div className={'d-flex flex-wrap align-items-center gap-1'}>
-              <div className="d-flex align-items-center">
-                {/* <GiStockpiles size={20} style={{ paddingBottom: '3px' }} className="headerLogo" />
-                <span className="listingHeader">{routes.transferInventory?.title} </span> */}
-              </div>
+              <div className="d-flex align-items-center"></div>
               {isMobile && !isTablet ? (
-                <div className="d-flex flex-wrap items-center justify-between w-full">
-                  <div></div>
+                <div className="d-flex flex-wrap items-center justify-between w-full gap-2">
+                  <div>{toggleInner}</div>
                   <div className="flex flex-wrap items-center gap-1">
                     <IconButton
                       onClick={handleClickOpen}
