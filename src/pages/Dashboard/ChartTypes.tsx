@@ -23,6 +23,7 @@ import { IFormDataType } from '../DashboardBuilder/builderHelpers';
 import getStaticData from './getStaticData';
 import StaticCards from './StaticCards';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { useAppTheme } from 'src/constants/AppConfig';
 
 export interface ChartDataType extends IFormDataType {
   _id: any;
@@ -41,6 +42,7 @@ interface Props {
 }
 
 const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullScreen, selectedDashboardId, fetchDashboards }: Props) => {
+  const [themeColor] = useAppTheme();
   const theme = useTheme();
   const isScreenSmall = useMediaQuery(theme.breakpoints.down('xs'));
   const { setToastConfig } = React.useContext(CustomToastContext);
@@ -132,6 +134,7 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
     axiosInstance()
       .get(url)
       .then(async ({ data: { data } }) => {
+        console.log(data);
         if (chart.kpi?.custom) {
           const cardData = await getStaticData(chartData, data, globalFilters.currency, currency);
           setChartData(cardData);
@@ -304,34 +307,54 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
               ) : chart.graphType === 'Map' ? (
                 <MapView height={isScreenSmall ? 350 : chart.column <= 6 ? 400 : 500} data={chartData} />
               ) : (
-                <Chart
-                  id={chart.uniqueId}
-                  type={chart.chartType?.toLowerCase()}
-                  data={{
-                    ...chartData,
-                    datasets: chartData.datasets?.map((d: any) => {
-                      if (!chart.stack) {
-                        delete d.stack;
-                      }
-                      return d;
-                    })
-                  }}
-                  options={{
-                    maintainAspectRatio: false,
-                    indexAxis: chart?.kpi?.horizontalBar ? 'y' : 'x',
-                    ...(chart.stack &&
-                      !chartData.datasets.some((d) => d.stack === 'stacked') && {
-                        scales: {
-                          x: {
-                            stacked: true
-                          },
-                          y: {
-                            stacked: true
+                <>
+                  <Chart
+                    id={chart.uniqueId}
+                    type={chart.chartType?.toLowerCase()}
+                    data={{
+                      ...chartData,
+                      datasets: chartData.datasets?.map((d: any) => {
+                        if (!chart.stack) {
+                          delete d.stack;
+                        }
+                        return d;
+                      })
+                    }}
+                    options={{
+                      maintainAspectRatio: false,
+                      indexAxis: chart?.kpi?.horizontalBar ? 'y' : 'x',
+                      scales: {
+                        x: {
+                          grid: {
+                            color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
+                          }
+                        },
+                        y: {
+                          grid: {
+                            color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
                           }
                         }
-                      })
-                  }}
-                />
+                      },
+                      ...(chart.stack &&
+                        !chartData.datasets.some((d) => d.stack === 'stacked') && {
+                          scales: {
+                            x: {
+                              stacked: true,
+                              grid: {
+                                color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
+                              }
+                            },
+                            y: {
+                              stacked: true,
+                              grid: {
+                                color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
+                              }
+                            }
+                          }
+                        })
+                    }}
+                  />
+                </>
               )
             ) : (
               <TableView
