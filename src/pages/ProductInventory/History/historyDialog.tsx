@@ -1,56 +1,38 @@
-import { useState, useEffect } from 'react';
-import { Box, Dialog, Button, Grid, Tab, Tabs, TextField, Typography } from '@material-ui/core';
+import { Box, Dialog } from '@material-ui/core';
+import { CalendarToday, List } from '@material-ui/icons';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
-import { CalendarToday, List } from '@material-ui/icons';
-import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition } from '../../../constants/helpers';
-import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
+import { useState } from 'react';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
-import History from './index';
+import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
+import { CustomDialogTransition } from '../../../constants/helpers';
 import CalendarView from './CalendarView';
+import History from './index';
 
 const HistoryDialog = ({ close, product, warehouse, storageLocation, productName }) => {
-
   const [currentView, setCurrentView] = useState('list');
 
   return (
     <Dialog fullScreen TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true} fullWidth>
       <CustomDialogHeader title={`History - ${productName}`} onClose={close} showRequiredLabel={false}></CustomDialogHeader>
       <CustomDialogContent>
-        <Box display="flex" justifyContent="flex-end" alignItems="center"
-          style={(isMobile && !isTablet) || currentView === "calendar" ? {} : { position: 'absolute', top: '65px', right: '10px' }}>
+        <Box className={`flex justify-end items-center min-h-[50px] ${currentView !== 'calendar' && 'md:absolute md:top-[65px] md:right-[16px]'} `}>
           <Box display="flex">
-            <ToggleButtonGroup
-              size="small"
-              exclusive
-              value={currentView}
-              onChange={(e, newVal) => {
-                setCurrentView(newVal);
-              }}
-            >
-              <ToggleButton value={'list'}>
+            <ToggleButtonGroup size="small" exclusive value={currentView} onChange={(e, newVal) => {}}>
+              <ToggleButton value={'list'} onClick={() => setCurrentView('list')}>
                 <List fontSize="small" />
               </ToggleButton>
-              <ToggleButton value={'calendar'}>
+              <ToggleButton value={'calendar'} onClick={() => setCurrentView('calendar')}>
                 <CalendarToday fontSize="small" />
               </ToggleButton>
             </ToggleButtonGroup>
           </Box>
         </Box>
         {currentView === 'list' ? (
-          <History
-            product={product}
-            warehouse={warehouse}
-            storageLocation={storageLocation}
-          />
+          <History product={product} warehouse={warehouse} storageLocation={storageLocation} />
         ) : (
           <div>
-            <CalendarView
-              product={product}
-              warehouse={warehouse}
-              storageLocation={storageLocation}
-            />
+            <CalendarView product={product} warehouse={warehouse} storageLocation={storageLocation} />
           </div>
         )}
       </CustomDialogContent>

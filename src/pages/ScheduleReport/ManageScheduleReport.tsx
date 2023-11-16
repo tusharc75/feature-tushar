@@ -14,6 +14,8 @@ import { FaDiceOne } from 'react-icons/fa';
 import Loader from 'src/components/Loader';
 import routes from './../../components/Helpers/Routes';
 import { useData } from '../../StateProvider/Provider';
+import { camelCase, kebabCase } from 'lodash';
+import React from 'react';
 
 type ValueTypes = {
   scheduleName: string;
@@ -49,6 +51,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const { state: { user, selectedEntity, permissions } }: any = useData();
   const [resourceOption, setResourceOption] = useState(null);
+  const [loadingColumns, setLoadingColumns] = useState(false);
 
   useEffect(() => {
     const options = []
@@ -201,130 +204,142 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
   }, [resourceColumns, formikRef.current?.values?.resource]);
 
   const fetchGridColumns = async (resource: any) => {
-    if (resource.key === 'purchaseOrderType') {
-      let resourceFieldData = [];
-      if (resource.value === 'Purchase Order Product') {
-        let {
-          data: { data: POFields }
-        } = await axiosInstance().get(`/field?resource=Purchase Order`);
-        let {
-          data: { data: POProductFields }
-        } = await axiosInstance().get(`/field?resource=Purchase Order Product`);
-        let {
-          data: { data: productFields }
-        } = await axiosInstance().get(`/field?resource=Product`);
-        let {
-          data: { data: productOption }
-        } = await axiosInstance().get(`sa-formbuilder/lookup?lookupResource=Product`);
+    setLoadingColumns(true);
+    try {
+      if (resource.key === 'purchaseOrderType') {
+        let resourceFieldData = [];
+        if (resource.value === 'Purchase Order Product') {
+          let {
+            data: { data: POFields }
+          } = await axiosInstance().get(`/field?resource=Purchase Order`);
+          let {
+            data: { data: POProductFields }
+          } = await axiosInstance().get(`/field?resource=Purchase Order Product`);
+          let {
+            data: { data: productFields }
+          } = await axiosInstance().get(`/field?resource=Product`);
+          let {
+            data: { data: productOption }
+          } = await axiosInstance().get(`sa-formbuilder/lookup?lookupResource=Product`);
 
-        POFields.filter((field) =>
-          ['purchaseOrderNumber', 'purchaseOrderDate', 'supplierAccount', 'warehouse'].includes(field?.fieldData.fieldName)
-        ).forEach((field: any) => {
-          resourceFieldData.push(field);
-        });
-
-        productFields
-          .filter((field) => ['productName'].includes(field?.fieldData.fieldName))
-          .forEach((field: any) => {
-            resourceFieldData.push({
-              ...field,
-              fieldData: { ...field.fieldData, fieldName: 'productId', type: 'dropDown', lookup: true, option: productOption?.Product || [] }
-            });
+          POFields.filter((field) =>
+            ['purchaseOrderNumber', 'purchaseOrderDate', 'supplierAccount', 'warehouse'].includes(field?.fieldData.fieldName)
+          ).forEach((field: any) => {
+            resourceFieldData.push(field);
           });
 
-        POProductFields.forEach((f) => {
-          if (['expectedDelivery', 'unit', 'taxSchedule'].includes(f.fieldData.fieldName)) {
-            f = {
-              ...f,
-              fieldData: {
-                ...f.fieldData,
-                type: ''
-              }
-            };
-          }
-
-          resourceFieldData.push(f);
-        });
-
-        resourceFieldData.push({
-          fieldData: {
-            fieldName: 'soldQty',
-            fieldLabel: 'Sold Qty',
-            type: 'text'
-          }
-        });
-      } else if (resource.value === 'Product Average Costing') {
-        let {
-          data: { data: productFields }
-        } = await axiosInstance().get(`/field?resource=Product`);
-        let {
-          data: { data: POFields }
-        } = await axiosInstance().get(`/field?resource=Purchase Order`);
-
-        POFields.filter((field) => ['purchaseOrderDate', 'warehouse'].includes(field?.fieldData.fieldName)).forEach((field) => {
-          if (field?.fieldData.fieldName === 'warehouse') {
-            resourceFieldData.push(field);
-          }
-          if (field?.fieldData.fieldName === 'purchaseOrderDate') {
-            resourceFieldData.push({
-              ...field,
-              fieldData: { ...field.fieldData, fieldLabel: 'Date', fieldName: 'date', type: 'date' }
+          productFields
+            .filter((field) => ['productName'].includes(field?.fieldData.fieldName))
+            .forEach((field: any) => {
+              resourceFieldData.push({
+                ...field,
+                fieldData: { ...field.fieldData, fieldName: 'productId', type: 'dropDown', lookup: true, option: productOption?.Product || [] }
+              });
             });
-          }
-        });
 
-        productFields.forEach((o: any) => {
-          resourceFieldData.push(o);
-        });
+          POProductFields.forEach((f) => {
+            if (['expectedDelivery', 'unit', 'taxSchedule'].includes(f.fieldData.fieldName)) {
+              f = {
+                ...f,
+                fieldData: {
+                  ...f.fieldData,
+                  type: ''
+                }
+              };
+            }
 
-        resourceFieldData.push(
-          {
-            fieldData: {
-              fieldName: 'qty',
-              fieldLabel: 'Qty',
-              type: 'text'
-            }
-          },
-          {
-            fieldData: {
-              fieldName: 'unitPrice',
-              fieldLabel: 'Unit Price',
-              type: 'text'
-            }
-          },
-          {
-            fieldData: {
-              fieldName: 'total',
-              fieldLabel: 'Total',
-              type: 'text'
-            }
-          }
-        );
-        if (productFields?.filter((e) => e.fieldData.fieldName === 'listPrice')?.length) {
+            resourceFieldData.push(f);
+          });
+
           resourceFieldData.push({
             fieldData: {
-              fieldName: 'margin',
-              fieldLabel: 'Margin',
+              fieldName: 'soldQty',
+              fieldLabel: 'Sold Qty',
               type: 'text'
             }
           });
-        }
-      }
-      setResourceColumns(resourceFieldData);
-    } else {
-      const { data: { data } }: any = await axiosInstance().get(`/field?resource=${resource.value}`);
-      if (resource.value === 'Serialized Asset') {
-        const { data: { data: lookupResource } } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Customer Account,Supplier Account`);
-        if (lookupResource) {
-          data?.forEach((e) => {
-            if (e?.fieldData?.fieldName === 'currentOwner') {
-              e.fieldData.lookup = true;
-              e.fieldData.option = [...lookupResource?.[`Customer Account`], ...lookupResource?.[`Supplier Account`]];
+        } else if (resource.value === 'Product Average Costing') {
+          let {
+            data: { data: productFields }
+          } = await axiosInstance().get(`/field?resource=Product`);
+          let {
+            data: { data: POFields }
+          } = await axiosInstance().get(`/field?resource=Purchase Order`);
+
+          POFields.filter((field) => ['purchaseOrderDate', 'warehouse'].includes(field?.fieldData.fieldName)).forEach((field) => {
+            if (field?.fieldData.fieldName === 'warehouse') {
+              resourceFieldData.push(field);
+            }
+            if (field?.fieldData.fieldName === 'purchaseOrderDate') {
+              resourceFieldData.push({
+                ...field,
+                fieldData: { ...field.fieldData, fieldLabel: 'Date', fieldName: 'date', type: 'date' }
+              });
             }
           });
+
+          productFields.forEach((o: any) => {
+            resourceFieldData.push(o);
+          });
+
+          resourceFieldData.push(
+            {
+              fieldData: {
+                fieldName: 'qty',
+                fieldLabel: 'Qty',
+                type: 'text'
+              }
+            },
+            {
+              fieldData: {
+                fieldName: 'unitPrice',
+                fieldLabel: 'Unit Price',
+                type: 'text'
+              }
+            },
+            {
+              fieldData: {
+                fieldName: 'total',
+                fieldLabel: 'Total',
+                type: 'text'
+              }
+            }
+          );
+          if (productFields?.filter((e) => e.fieldData.fieldName === 'listPrice')?.length) {
+            resourceFieldData.push({
+              fieldData: {
+                fieldName: 'margin',
+                fieldLabel: 'Margin',
+                type: 'text'
+              }
+            });
+          }
+        } else {
+          let {
+            data: { data: { columnFields, filterFields } }
+          } = await axiosInstance().get(`/report/${kebabCase(resource.value)}/column`);
+          resourceFieldData.push(...columnFields);
         }
+        setResourceColumns(resourceFieldData);
+      } else {
+        const { data: { data } }: any = await axiosInstance().get(`/field?resource=${resource.value}`);
+        if (resource.value === 'Serialized Asset') {
+          const { data: { data: lookupResource } } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Customer Account,Supplier Account`);
+          if (lookupResource) {
+            data?.forEach((e) => {
+              if (e?.fieldData?.fieldName === 'currentOwner') {
+                e.fieldData.lookup = true;
+                e.fieldData.option = [...lookupResource?.[`Customer Account`], ...lookupResource?.[`Supplier Account`]];
+              }
+            });
+          }
+        }
+        setResourceColumns(data);
       }
-      setResourceColumns(data);
+      setLoadingColumns(false);
+    } catch (err) {
+      setLoadingColumns(false);
+      setToastConfig(err);
     }
   };
 
@@ -596,6 +611,12 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                               label="Filters"
                               name="filters"
                               variant="outlined"
+                              InputProps={{
+                                ...params.InputProps,
+                                endAdornment: (<>
+                                  {loadingColumns && <CircularProgress size={18} color="inherit" />}
+                                </>)
+                              }}
                             />
                           )}
                         />
@@ -632,6 +653,15 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                               label="Columns"
                               name="columns"
                               variant="outlined"
+                              InputProps={{
+                                ...params.InputProps,
+                                endAdornment: (
+                                  <React.Fragment>
+                                    {loadingColumns ? <CircularProgress size={18} color="inherit" /> : null}
+                                    {params.InputProps.endAdornment}
+                                  </React.Fragment>
+                                )
+                              }}
                             />
                           )}
                         />

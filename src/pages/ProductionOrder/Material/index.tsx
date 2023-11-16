@@ -157,6 +157,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
       width: 70,
       sticky: 'right',
       disableFilters: true,
+      disableSortBy: true,
       canDrag: false,
       Cell: ({ row, rows }) => (
         <>
@@ -202,7 +203,8 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = parent.type === MATERIAL_TYPE.product ? parent.productDetail?.productName : parent.packageDetail?.packageName;
-      parent.description = parent.type === MATERIAL_TYPE.product ? parent?.productDetail?.productDescription : parent?.packageDetail?.packageDescription;
+      parent.description =
+        parent.type === MATERIAL_TYPE.product ? parent?.productDetail?.productDescription : parent?.packageDetail?.packageDescription;
       parent.qty = parent.qty;
       parent.qtyDisplay = parent.qty;
       parent.canDelete = parent?.workOrder ? false : true;
@@ -236,7 +238,8 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
       _subRow.detail = _subRow.type === MATERIAL_TYPE.product ? _subRow.productDetail?.productName : _subRow.packageDetail?.packageName;
-      _subRow.description = _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productDescription : _subRow?.packageDetail?.packageDescription;
+      _subRow.description =
+        _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productDescription : _subRow?.packageDetail?.packageDescription;
       _subRow.qty = _subRow.qty;
       _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
       _subRow.canDelete = _subRow?.workOrder ? false : true;
@@ -246,7 +249,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
   };
 
   const handleAdd = async (rows) => {
-    setSubmitting(true)
+    setSubmitting(true);
     const material: any = [];
     rows.forEach((d) => {
       const element: any = {};
@@ -267,13 +270,13 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
           message: data.message
         });
         fetchData();
-        setSubmitting(false)
+        setSubmitting(false);
         if (productionOrderData?.status === PRODUCTION_ORDER_STATUS.new) {
           updateOrderStatus(PRODUCTION_ORDER_STATUS.inProgress);
         }
       })
       .catch((error) => {
-        setSubmitting(false)
+        setSubmitting(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -413,7 +416,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
               endIcon={<ExpandMore />}
               className="new-dropdown-v1"
             >
-              {isMobile ? '' : 'Actions'}
+              Actions
             </Button>
             <Menu
               anchorEl={anchorEl}
@@ -499,23 +502,24 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
           isSubmitting={isSubmitting}
         />
       )}
-      {
-        addDialog.open && addDialog.type === 'newProduct' && (
-          <CreateProduct
-            handleClose={() => {
-              setAddDialog({ open: false, type: '', parentId: null })
-            }}
-            onSuccess={(d) => {
-              handleAdd([{
+      {addDialog.open && addDialog.type === 'newProduct' && (
+        <CreateProduct
+          handleClose={() => {
+            setAddDialog({ open: false, type: '', parentId: null });
+          }}
+          onSuccess={(d) => {
+            handleAdd([
+              {
                 ...d,
                 unitMain: d?.unit,
                 type: MATERIAL_TYPE.product
-              }]);
-            }}
-            isRedirectToDetailPage={false}
-            openFrom="productMaster" />
-        )
-      }
+              }
+            ]);
+          }}
+          isRedirectToDetailPage={false}
+          openFrom="productMaster"
+        />
+      )}
       {addDialog.open && addDialog.type === MATERIAL_TYPE.package && (
         <AssignPackageDialog
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}

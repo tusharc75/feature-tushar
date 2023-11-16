@@ -185,6 +185,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
           width: 130,
           sticky: 'right',
           disableFilters: true,
+          disableSortBy: true,
           canDrag: false,
           Cell: ({ row }) =>
             <>

@@ -148,6 +148,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
         width: 100,
         sticky: 'right',
         disableFilters: true,
+        disableSortBy: true,
         canDrag: false,
         Cell: ({ row }) => (
           <Grid container spacing={1}>

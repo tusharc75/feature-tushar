@@ -92,7 +92,7 @@ const Report = () => {
 
             let {
                 data: { data: { columnFields, filterFields } }
-            } = await await axiosInstance().get(`/report/${type}/column`);
+            } = await axiosInstance().get(`/report/${type}/column`);
             const customRendererTypes = ['refer', 'creditDebit', 'date', 'creditDebitType'];
             columnFields.forEach((o) => {
                 const currentColumn: any = getColumnData(type, o?.fieldData, '');

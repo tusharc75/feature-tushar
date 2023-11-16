@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import moment from 'moment';
 import { Avatar } from '@material-ui/core';
-import { dateFormat, sidebarResourceObjectFromValues } from 'src/constants/helpers';
+import { dateFormat, dateTimeFormat, sidebarResourceObjectFromValues } from 'src/constants/helpers';
 import { leadDetailPage } from 'src/routes/Lead';
 import routes from '../Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
@@ -300,6 +300,24 @@ export default function useColumns() {
                 {row?.original?.[field?.fieldName] ? (
                   <h5 className="createBy" title={`${moment(row?.original?.[field?.fieldName]).format(dateFormat)}`}>
                     {moment(row?.original?.[field?.fieldName])?.format(dateFormat)}
+                  </h5>
+                ) : (
+                  <NoDataCell />
+                )}
+              </>
+            ),
+            canFilter: false
+          }
+        };
+      } else if (field?.type === 'dateTime') {
+        return {
+          columnData: {
+            ...commonFieldData,
+            Cell: ({ row }) => (
+              <>
+                {row?.original?.[field?.fieldName] ? (
+                  <h5 className="createBy" title={`${moment(row?.original?.[field?.fieldName]).format(dateTimeFormat)}`}>
+                    {moment(row?.original?.[field?.fieldName])?.format(dateTimeFormat)}
                   </h5>
                 ) : (
                   <NoDataCell />

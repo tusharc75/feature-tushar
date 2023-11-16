@@ -213,6 +213,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
       width: permissions?.irtTicket?.isCreate ? 150 : 100,
       sticky: 'right',
       disableFilters: true,
+      disableSortBy: true,
       canDrag: false,
       Cell: ({ row, rows }) => {
         return allowedToEdit ? (

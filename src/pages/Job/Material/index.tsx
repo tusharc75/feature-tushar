@@ -104,6 +104,7 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
       width: 100,
       sticky: 'right',
       disableFilters: true,
+      disableSortBy: true,
       canDrag: false,
       Cell: ({ row, rows }) => (
         <>

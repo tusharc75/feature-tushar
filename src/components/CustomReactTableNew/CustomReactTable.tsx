@@ -124,6 +124,10 @@ function TempFilter({ filterValue, id, setFilters, customFilters }) {
 
         <GrFormClose
           onClick={() => {
+            if ((filterValue || '').trim() === '') {
+              setIsOpen(false);
+              return;
+            }
             handleFilterChange('');
             setIsOpen(false);
           }}

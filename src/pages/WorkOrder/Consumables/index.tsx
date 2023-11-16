@@ -226,6 +226,7 @@ const Consumables = ({
       minWidth: 150,
       sticky: 'right',
       disableFilters: true,
+      disableSortBy: true,
       canDrag: false,
       Cell: ({ row }: any) => (
         <div style={{ display: 'flex', justifyContent: 'right' }}>

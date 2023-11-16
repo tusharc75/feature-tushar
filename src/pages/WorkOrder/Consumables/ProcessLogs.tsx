@@ -83,6 +83,7 @@ function ProcessLogs({ onClose, logsData, productName, product }) {
       width: 80,
       sticky: 'right',
       disableFilters: true,
+      disableSortBy: true,
       canDrag: false,
       Cell: ({ row }) =>
         row.original?.qty - (row.original?.revertedQty || 0) > 0 && (

@@ -101,9 +101,13 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
               <IconButton
                 size="small"
                 onClick={() => {
-                  if (row.original.type === 'product') {
+                  if (row.original.type === MATERIAL_TYPE.product) {
                     window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                  } else {
+                  }
+                  else if (row.original.type === MATERIAL_TYPE.service) {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                  }
+                  else if (row.original.type === MATERIAL_TYPE.package) {
                     window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
                   }
                 }}
@@ -230,6 +234,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       width: 70,
       sticky: 'right',
       disableFilters: true,
+      disableSortBy: true,
       canDrag: false,
       Cell: ({ row }) => {
         return (
@@ -284,8 +289,8 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceName
           : parent.type === MATERIAL_TYPE.product
-          ? parent.productDetail?.productName
-          : parent.packageDetail?.packageName;
+            ? parent.productDetail?.productName
+            : parent.packageDetail?.packageName;
       parent.description =
         parent.type === MATERIAL_TYPE.product ? parent?.productDetail?.productDescription : parent?.packageDetail?.packageDescription;
       parent.qty = parent.qty;
@@ -321,14 +326,14 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceName
           : _subRow.type === MATERIAL_TYPE.product
-          ? _subRow.productDetail?.productName
-          : _subRow.packageDetail?.packageName;
+            ? _subRow.productDetail?.productName
+            : _subRow.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription
           : _subRow.type === MATERIAL_TYPE.product
-          ? _subRow?.productDetail?.productDescription
-          : _subRow?.packageDetail?.packageDescription;
+            ? _subRow?.productDetail?.productDescription
+            : _subRow?.packageDetail?.packageDescription;
       _subRow.qty = _subRow.qty;
       _subRow.workOrder = parent?.workOrder;
       _subRow.workOrderNumber = parent?.workOrder?.workOrderNumber;
@@ -635,7 +640,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                 <MenuItem
                   disabled={
                     selectedRecords?.filter((d) => [MATERIAL_TYPE.product, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0 &&
-                    checkUniqWorkOrder()
+                      checkUniqWorkOrder()
                       ? false
                       : true
                   }

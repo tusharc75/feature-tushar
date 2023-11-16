@@ -219,6 +219,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
         minWidth: 100,
         sticky: 'right',
         disableFilters: true,
+        disableSortBy: true,
         canDrag: false,
         Cell: ({ row, rows }: any) => (
           <>

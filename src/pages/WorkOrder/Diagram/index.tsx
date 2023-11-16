@@ -13,7 +13,7 @@ import ManageAttachment from 'src/components/Activity/Attachments/ManageAttachme
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { ATTACHMENT_TYPE, CustomDialogTransition } from 'src/constants/helpers';
-import ViewImage from './ViewImage';
+import ViewImage from './ViewImage1';
 import { getFileIcon, getFileNameWithExtension } from './utils';
 
 const Diagram = ({ resource, referenceId }) => {
@@ -256,7 +256,8 @@ const Diagram = ({ resource, referenceId }) => {
             {selectedAttachment && (
               <>
                 {checkImageType(selectedAttachment?.url?.split('.')[1]) ? (
-                  <ViewImage data={selectedAttachment} fetchData={fetchData} />
+                  // <ViewImage data={selectedAttachment} fetchData={fetchData} />
+                  <ViewImage data={selectedAttachment} fetchData={fetchData} setSelectedAttachment={setSelectedAttachment} />
                 ) : checkpdfType(selectedAttachment?.url?.split('.')[1]) ? (
                   <ShowPdf data={selectedAttachment} />
                 ) : (

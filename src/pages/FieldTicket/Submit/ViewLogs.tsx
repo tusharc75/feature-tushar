@@ -97,6 +97,7 @@ function ViewLogs({ fieldTicketData, handleClose }) {
       width: 50,
       sticky: 'right',
       disableFilters: true,
+      disableSortBy: true,
       canDrag: false,
       Cell: ({ row }) =>
         row.original.attachmentId ? (
