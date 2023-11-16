@@ -18,9 +18,11 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import ImagePreview from 'src/components/Activity/Email/ImagePreview';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, workOrder } from 'src/constants/helpers';
+import { ATTACHMENT_TYPE, CustomDialogTransition, workOrder } from 'src/constants/helpers';
 import AttachmentThumbnail from 'src/components/AttachmentThumbnail';
 import { sortBy } from 'lodash';
+import { Autocomplete } from '@material-ui/lab';
+import DocumentScanner from 'src/components/Activity/Helpers/DocumentScanner';
 
 const AttachmentSchema = object().shape({
   name: string().required('please add attachment name'),
@@ -41,6 +43,7 @@ export default function AttachmentDialog({ workOrderId, uniqueServiceId, stepId,
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
   const [fullScreen, setFullScreen] = useState(false);
+  const [documentScanDialog, setDocumentScanDialog] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -76,12 +79,14 @@ export default function AttachmentDialog({ workOrderId, uniqueServiceId, stepId,
   const handleSave = (values) => {
     let data = {
       name: values.name,
+      attachmentType: values?.attachmentType || '',
       file: otherAttachments,
       serviceName: serviceName,
       workOrderId: workOrderId,
       uniqueServiceId: uniqueServiceId,
       ...(stepId && { stepId: stepId })
     };
+
     setLoading(true);
     axiosInstance()
       .post(`${workOrder.api}/step/attachment`, data)
@@ -145,7 +150,7 @@ export default function AttachmentDialog({ workOrderId, uniqueServiceId, stepId,
                   <Form autoComplete="off" autoCorrect="off" noValidate>
                     <Box padding={1}>
                       <Grid container spacing={3}>
-                        <Grid item xs={12}>
+                        <Grid item xs={6}>
                           <TextField
                             variant="outlined"
                             type="text"
@@ -163,30 +168,56 @@ export default function AttachmentDialog({ workOrderId, uniqueServiceId, stepId,
                             }}
                           />
                         </Grid>
+                        <Grid item xs={6}>
+                          <Autocomplete
+                            id="attachmentType"
+                            size="small"
+                            options={Object.values(ATTACHMENT_TYPE)}
+                            renderInput={(params) => <TextField {...params} size="small" variant="outlined" label="Attachment Type" margin="dense" />}
+                            getOptionLabel={(option) => option}
+                            getOptionSelected={(option: any, value: any) => option === value}
+                            onChange={(e, val) => {
+                              setFieldValue('attachmentType', val);
+                            }}
+                            value={values['attachmentType']}
+                          />
+                        </Grid>
                         <Grid container item xs={12}>
-                          <Grid item xs={10} sm={11} md={11}>
-                            <FormTypes
-                              label="File"
-                              name="fileUrl"
-                              required={true}
-                              type="fileUpload"
-                              values={values}
-                              canEdit={canEdit}
-                              errors={errors}
-                              touched={touched}
-                              size="small"
-                              setFieldValue={(fname, file) => {
-                                setFieldValue('fileUrl', file);
-                                onUploadFile(file);
-                              }}
-                              doNotShowUploadedFile={true}
-                              imageOrFileUploadCompletePercentage={(completePercentage) => {
-                                setUploadingImageOrFileProgress(completePercentage);
-                              }}
-                            />
+                          <Grid item xs={12}>
+                            <div style={{ width: '100%' }}>
+                              <Box display="flex" flexDirection="row">
+                                <Box>
+                                  <FormTypes
+                                    label="File"
+                                    name="fileUrl"
+                                    required={true}
+                                    type="fileUpload"
+                                    values={values}
+                                    canEdit={canEdit}
+                                    errors={errors}
+                                    touched={touched}
+                                    size="small"
+                                    setFieldValue={(fname, file) => {
+                                      setFieldValue('fileUrl', file);
+                                      onUploadFile(file);
+                                    }}
+                                    doNotShowUploadedFile={true}
+                                    imageOrFileUploadCompletePercentage={(completePercentage) => {
+                                      setUploadingImageOrFileProgress(completePercentage);
+                                    }}
+                                  />
+                                </Box>
+                                <Box pl={2}>
+                                  <CustomButton variant="contained" color="primary" onClick={() => setDocumentScanDialog(true)}>
+                                    Scan Document
+                                  </CustomButton>
+                                </Box>
+                              </Box>
+                            </div>
                           </Grid>
-
-                          <AttachmentThumbnail attachments={otherAttachments} handleDeleteAttachment={handleDeleteAttachment} canEdit={canEdit} />
+                          <Grid item xs={12}>
+                            <AttachmentThumbnail attachments={otherAttachments} handleDeleteAttachment={handleDeleteAttachment} canEdit={canEdit} />
+                          </Grid>
                         </Grid>
                       </Grid>
                     </Box>
@@ -249,6 +280,14 @@ export default function AttachmentDialog({ workOrderId, uniqueServiceId, stepId,
                       setShowConfirmationDialog(false);
                     }}
                     onOk={() => handleDeleteAttachment(attachmentToDelete)}
+                  />
+                )}
+                {documentScanDialog && (
+                  <DocumentScanner
+                    open={setDocumentScanDialog}
+                    onClose={() => setDocumentScanDialog(false)}
+                    setFieldValue={setFieldValue}
+                    onUploadFile={onUploadFile}
                   />
                 )}
               </>
