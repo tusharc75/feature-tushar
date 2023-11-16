@@ -689,11 +689,11 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                             </HtmlTooltip>
                                           </Box>
                                         )}
-                                        {data?.type === 'service' && data?.workStations?.length > 0 && (
+                                        {data?.type === 'service' && data?.assignedWorkStations?.length > 0 && (
                                           <Box ml={1}>
                                             <HtmlTooltip
                                               enterTouchDelay={0}
-                                              title={`Work Stations-${data?.workStations?.map((e) => e?.optionLabel)?.toString()}`}
+                                              title={`Work Stations-${data?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString()}`}
                                             >
                                               <span>
                                                 <WorkStations className=" align-text-top" />
@@ -841,7 +841,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                 <button onClick={() => setBottomBarOpen((prev) => !prev)}>{bottomBarOpen ? <IoMdArrowDropdown /> : <IoMdArrowDropup />}</button>
               </div>
               <Box>
-                <Tabs aria-label="scrollable Tabs">
+                <Tabs aria-label="scrollable Tabs" key={serviceSteps.length || 0}>
                   {serviceSteps?.map((data, index) => {
                     let isTechnician = data?.assignedUsers?.some((u: any) => u?.optionValue === user?._id);
                     const style = stylesForEveryTab(selectedService, data, index, mobScreen);
@@ -950,11 +950,11 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                                 </HtmlTooltip>
                                               </Box>
                                             )}
-                                            {data?.type === 'service' && data?.workStations?.length > 0 && (
+                                            {data?.type === 'service' && data?.assignedWorkStations?.length > 0 && (
                                               <Box ml={1}>
                                                 <HtmlTooltip
                                                   enterTouchDelay={0}
-                                                  title={`Work Stations-${data?.workStations?.map((e) => e?.optionLabel)?.toString()}`}
+                                                  title={`Work Stations-${data?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString()}`}
                                                 >
                                                   <span>
                                                     <WorkStations className=" align-text-top" />
@@ -1154,7 +1154,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                 >
                   Add/Consume Products
                 </MenuItem>
-                )}
+              )}
               <MenuItem
                 disabled={
                   disableCompleteFail ||
@@ -1230,6 +1230,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
             setUserAssignDialog(false);
             fetchServiceData();
           }}
+          competencies={selectedService?.competencies}
         />
       )}
       {workStationAssignDialog && (
@@ -1241,7 +1242,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
               workOrderId: workOrderId
             }
           ]}
-          workStations={selectedService?.workStations}
+          workStations={selectedService?.assignedWorkStations}
           handleClose={() => {
             setWorkStationAssignDialog(false);
           }}

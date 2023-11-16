@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import moment from 'moment';
 import { Avatar } from '@material-ui/core';
-import { dateFormat, sidebarResourceObjectFromValues } from 'src/constants/helpers';
+import { dateFormat, dateTimeFormat, sidebarResourceObjectFromValues } from 'src/constants/helpers';
 import { leadDetailPage } from 'src/routes/Lead';
 import routes from '../Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
@@ -160,7 +160,7 @@ export default function useColumns() {
             ...commonFieldData,
             accessor: 'concatedName',
             Cell: ({ row }) => (
-              <Fragment>
+              <span>
                 {row?.original?.concatedName ? (
                   <Link
                     className="link text-truncate"
@@ -174,7 +174,7 @@ export default function useColumns() {
                 ) : (
                   <NoDataCell />
                 )}
-              </Fragment>
+              </span>
             )
           }
         };
@@ -186,8 +186,8 @@ export default function useColumns() {
             disabled: true,
             accessor: field?.fieldName === 'firstName' ? 'concatedName' : field.fieldName,
             Cell: ({ row }) =>
-              permissions[permissionForLinks[field?.resource]]?.isRead ? (
-                <Fragment>
+              permissions[permissionForLinks[field?.resource]]?.isRead || permissions[updatedTitle]?.isRead ? (
+                <span>
                   {row?.original?.[field?.fieldName] ? (
                     <Link
                       className="link text-truncate"
@@ -201,7 +201,7 @@ export default function useColumns() {
                   ) : (
                     <NoDataCell />
                   )}
-                </Fragment>
+                </span>
               ) : (
                 <p className="text-truncate">{row?.original?.[field?.fieldName] ? <p>{row?.original?.[field?.fieldName]}</p> : <NoDataCell />}</p>
               )
@@ -229,7 +229,7 @@ export default function useColumns() {
             ...commonFieldData,
             Cell: ({ row }) =>
               permissions[permissionForLinks[field?.lookupResource]]?.isRead ? (
-                <Fragment>
+                <span>
                   {row?.original?.[field?.fieldName] ? (
                     <Link
                       className="link text-truncate"
@@ -243,7 +243,7 @@ export default function useColumns() {
                   ) : (
                     <NoDataCell />
                   )}
-                </Fragment>
+                </span>
               ) : (
                 <>
                   {row?.original?.[field?.fieldName] ? (
@@ -282,9 +282,11 @@ export default function useColumns() {
             canFilter: false,
             sortable: false,
             Cell: ({ row }) => (
-              <Avatar className="grid-avatar" src={row?.original?.[field?.fieldName]}>
-                <Image style={{ fontSize: 18 }} />
-              </Avatar>
+              <div>
+                <Avatar className="grid-avatar" src={row?.original?.[field?.fieldName]}>
+                  <Image style={{ fontSize: 18 }} />
+                </Avatar>
+              </div>
             ),
             width: 100
           }
@@ -298,6 +300,24 @@ export default function useColumns() {
                 {row?.original?.[field?.fieldName] ? (
                   <h5 className="createBy" title={`${moment(row?.original?.[field?.fieldName]).format(dateFormat)}`}>
                     {moment(row?.original?.[field?.fieldName])?.format(dateFormat)}
+                  </h5>
+                ) : (
+                  <NoDataCell />
+                )}
+              </>
+            ),
+            canFilter: false
+          }
+        };
+      } else if (field?.type === 'dateTime') {
+        return {
+          columnData: {
+            ...commonFieldData,
+            Cell: ({ row }) => (
+              <>
+                {row?.original?.[field?.fieldName] ? (
+                  <h5 className="createBy" title={`${moment(row?.original?.[field?.fieldName]).format(dateTimeFormat)}`}>
+                    {moment(row?.original?.[field?.fieldName])?.format(dateTimeFormat)}
                   </h5>
                 ) : (
                   <NoDataCell />

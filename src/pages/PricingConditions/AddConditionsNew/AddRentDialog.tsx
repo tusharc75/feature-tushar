@@ -117,7 +117,6 @@ const AddRentDialog = (props) => {
                                 {fields.map((field) => (
                                     <Grid item xs={12} sm={6} key={field.fieldName}>
                                         <FormTypes
-                                            isNew={true}
                                             fieldData={field}
                                             values={formData.values}
                                             errors={{}}

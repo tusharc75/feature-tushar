@@ -187,6 +187,7 @@ const ProductsTable = ({ packageId, packageData }) => {
       width: 50,
       sticky: 'right',
       disableFilters: true,
+      disableSortBy: true,
       canDrag: false,
       Cell: ({ row }) => {
         return (

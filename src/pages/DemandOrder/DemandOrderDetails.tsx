@@ -109,7 +109,7 @@ const DemandOrderDetails = () => {
       .put(`${demandOrder.api}/remove`, { ids: [id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.goBack();
+        history.push(`${routes.demandOrder.path}`);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);

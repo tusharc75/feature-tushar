@@ -84,7 +84,7 @@ const SupportTicketDetail = () => {
             type: 'success',
             message: data?.message
           });
-          history.goBack();
+          history.push(`${routes.supportTicket.path}`)
         })
         .catch((err) => {
           setShowConfirmBox(false);

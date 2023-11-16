@@ -245,6 +245,7 @@ import FlashDetailsPage from './pages/Flash/FlashDetailsPage';
 import CreditMemo from './pages/CreditMemo';
 import CreditMemoDetail from './pages/CreditMemo/CreditMemoDetail';
 import GenerateInvoice from './pages/GenerateInvoice';
+import StandardReportView from './pages/Report/StandardReport'
 
 var notificationInterval: any = null;
 
@@ -726,6 +727,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.reports.path}/purchase-order-type/:type`}>
               <PurchaseOrderReport />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.reports.path}/standard-report/:type`}>
+              <StandardReportView />
             </PrivateRoute>
             <PrivateRoute exact path={`/schedule-report`}>
               <ScheduleReport />

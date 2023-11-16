@@ -95,7 +95,7 @@ const PurchaseRequisitionDetail = () => {
             type: 'success',
             message: data?.message
           });
-          history.goBack();
+          history.push(`${routes.purchaseRequisition.path}`)
         })
         .catch((err) => {
           setShowConfirmBox(false);

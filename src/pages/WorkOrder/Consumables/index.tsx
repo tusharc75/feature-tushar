@@ -4,7 +4,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { CHILD_RESOURCE, MATERIAL_SUB_TYPE, repairOrder, sidebarResource, workOrder } from 'src/constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_SUB_TYPE, QUOTATION_STATUS, WORK_ORDER_TYPE, repairOrder, sidebarResource, workOrder } from 'src/constants/helpers';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
@@ -53,6 +53,8 @@ const Consumables = ({
   const [updateDialog, setUpdateDialog] = useState({ open: false, data: null });
   const [isUpdating, setUpdating] = useState(false);
 
+  const [repairOrderData, setRepairOrderData] = useState(null);
+
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
@@ -75,6 +77,7 @@ const Consumables = ({
     setConsumeRequest(allowRequest);
     fetchColumns();
     fetchData();
+    fetchRepairOrderData();
   }, [allowedToEdit, workOrderId, consumeRequest]);
 
   const handleUpdate = async (row: any) => {
@@ -82,7 +85,7 @@ const Consumables = ({
     try {
       const data: any = row;
       delete data.workOrder;
-      await axiosInstance().put(`${repairOrder.api}/${workOrderId}/work-order/${workOrderId}`, { material: [data] });
+      await axiosInstance().put(`${workOrder.api}/${workOrderId}/material`, { material: [data] });
     } catch (error) {
       setUpdating(false);
       toastConfig.setToastConfig(error);
@@ -197,7 +200,7 @@ const Consumables = ({
         width: 150,
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.qty || <NoDataCell />}</p>
       },
-      ...(user?.user?.brandPolicy?.workOrderConsumableRequest
+      ...(user?.user?.brandPolicy?.workOrderConsumableRequest && !user?.user?.brandPolicy?.workOrderConsumableConsumeHide
         ? [
           {
             accessor: 'requestedQty',
@@ -207,13 +210,14 @@ const Consumables = ({
           }
         ]
         : []),
-      {
-        accessor: 'consumedQty',
-        Header: 'Consumed Qty',
-        primaryField: true,
-        width: 150,
-        Cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
-      }
+      ...(!user?.user?.brandPolicy?.workOrderConsumableConsumeHide ?
+        [{
+          accessor: 'consumedQty',
+          Header: 'Consumed Qty',
+          primaryField: true,
+          width: 150,
+          Cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
+        }] : [])
     ];
     extracolumns.push({
       accessor: 'action',
@@ -222,6 +226,7 @@ const Consumables = ({
       minWidth: 150,
       sticky: 'right',
       disableFilters: true,
+      disableSortBy: true,
       canDrag: false,
       Cell: ({ row }: any) => (
         <div style={{ display: 'flex', justifyContent: 'right' }}>
@@ -238,22 +243,24 @@ const Consumables = ({
               </IconButton>
             </HtmlTooltip>
           )}
-          <HtmlTooltip title="History">
-            <IconButton
-              size="small"
-              aria-label="History"
-              onClick={() => {
-                setHistoryDialog({
-                  open: true,
-                  _id: row?.original?._id,
-                  product: row?.original?.productId,
-                  productName: row?.original?.productName
-                });
-              }}
-            >
-              <HistoryIcon fontSize="small" color={'primary'}  />
-            </IconButton>
-          </HtmlTooltip>
+          {!user?.user?.brandPolicy?.workOrderConsumableConsumeHide &&
+            <HtmlTooltip title="History">
+              <IconButton
+                size="small"
+                aria-label="History"
+                onClick={() => {
+                  setHistoryDialog({
+                    open: true,
+                    _id: row?.original?._id,
+                    product: row?.original?.productId,
+                    productName: row?.original?.productName
+                  });
+                }}
+              >
+                <HistoryIcon fontSize="small" color={'primary'} />
+              </IconButton>
+            </HtmlTooltip>
+          }
           {(allowedToEdit && hasChildFields) && (
             <HtmlTooltip title="Edit">
               <IconButton
@@ -289,6 +296,18 @@ const Consumables = ({
     })
     setColumns([...column, ...newColumns, ...extracolumns]);
   };
+
+  const fetchRepairOrderData = async () => {
+    axiosInstance()
+      .get(`${workOrder.api}/${workOrderId}/consumable/repair-order/quotation`).then(({ data }) => {
+        if(data?.data){
+          setRepairOrderData(data?.data);
+        }
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+
+  }
 
   const fetchData = async () => {
     setDataRows(null);
@@ -334,9 +353,13 @@ const Consumables = ({
         data.push({ product: e._id, qty: parseInt(e.qty), service, uniqueId, stepId, subType: materialSubType });
       }
     });
-    axiosInstance()
+    await axiosInstance()
       .post(`${workOrder.api}/${workOrderId}/consumable`, data)
       .then(({ data }) => {
+        if (repairOrderData && repairOrderData?.addConsumablesQuotation && repairOrderData?.addQuotationStep &&
+          repairOrderData?.quotation?.status === QUOTATION_STATUS.acceptByCustomer) {
+          createNewVersionQuote(repairOrderData?.quotation?.quotation, repairOrderData?.quotation?._id);
+        }
         fetchData();
         setIsSubmitting(false);
         setConsumablesDialog(false);
@@ -351,6 +374,16 @@ const Consumables = ({
         toastConfig.setToastConfig(error);
       });
   };
+
+  const createNewVersionQuote = async (quoteId, quoteVersionId) => {
+    axiosInstance()
+      .post(`/quotation/clone-version/${quoteId}/${quoteVersionId}`)
+      .then(() => {
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }
 
   const handleDelete = async (rows) => {
     const ids = rows.map((e) => e._id);
@@ -424,24 +457,30 @@ const Consumables = ({
       {allowedToEdit && (
         <Box className="flex flex-wrap mb-3 justify-between gap-2">
           {isCreate && permissions?.product?.isRead && (
-            <Button variant={'contained'} color="primary" size="small" onClick={() => setConsumablesDialog(true)}>
+            <Button
+              variant={'contained'}
+              color="primary"
+              size="small"
+              onClick={() => setConsumablesDialog(true)}>
               {materialSubType === MATERIAL_SUB_TYPE.bom ? `Add BOM` : `Add Products/Consumables`}
             </Button>
           )}
           <Box display="flex" ml={'auto'}>
             <Box ml={1}></Box>
-            <Button
-              disabled={selectedRecords?.filter((e) => !e?.hideSelection).length === 0}
-              onClick={() => setOpenConsumablesQtyDialog(true)}
-              color="primary"
-              size="small"
-              variant="contained"
-            >
-              {consumeRequest ? 'Request ' : 'Consume '}{' '}
-              {selectedRecords?.filter((e) => !e?.hideSelection).length > 0
-                ? '(' + selectedRecords?.filter((e) => !e?.hideSelection).length + ')'
-                : ''}
-            </Button>
+            {!user?.user?.brandPolicy?.workOrderConsumableConsumeHide &&
+              <Button
+                disabled={selectedRecords?.filter((e) => !e?.hideSelection).length === 0}
+                onClick={() => setOpenConsumablesQtyDialog(true)}
+                color="primary"
+                size="small"
+                variant="contained"
+              >
+                {consumeRequest ? 'Request ' : 'Consume '}{' '}
+                {selectedRecords?.filter((e) => !e?.hideSelection).length > 0
+                  ? '(' + selectedRecords?.filter((e) => !e?.hideSelection).length + ')'
+                  : ''}
+              </Button>
+            }
             <Box ml={1}></Box>
             <Button
               variant={'outlined'}
@@ -503,7 +542,7 @@ const Consumables = ({
         {consumablesDialog && (
           <AssignProductDialog
             handleCloseDialog={() => setConsumablesDialog(false)}
-            ids={dataRows?.map((d) => d?.materialId) || []}
+            ids={materialSubType === MATERIAL_SUB_TYPE.consumable ? dataRows?.map((d) => d?.materialId) || [] : []}
             onSuccess={(rows) => {
               handleSubmit(rows);
             }}

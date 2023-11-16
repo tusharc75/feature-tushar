@@ -9,23 +9,34 @@ import { CommonRenderer, DateTimeRenderer } from '../../../components/AgGridComp
 import { Link } from 'react-router-dom';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { camelCase } from 'lodash';
-import { sidebarResource } from 'src/constants/helpers';
+import { isObjectEmpty, sidebarResource } from 'src/constants/helpers';
+import { useData } from 'src/StateProvider/Provider';
+import DurationFilter from 'src/components/DurationFilter';
+import moment from 'moment';
 
 const AssetHistory = ({ id }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [gridApi, setGridApi] = useState(null);
+  const [duration, setDuration] = useState({
+    from: new Date(moment().subtract('1', 'year').calendar()),
+    to: new Date()
+  });
+
+  const {
+    state: { permissions }
+  }: any = useData();
 
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, filters, sorting } = state;
 
   const NameRenderer = (params: { value: any; data: { type: string; referenceId: any } }) => (
     <>
       {params.value ? (
         params.data.type === 'Loading Ticket' ||
-          params.data.type === 'Receiving Ticket' ||
-          params.data.type === 'Return Ticket' ||
-          params.data.type === 'Delivery Ticket' ? (
+        params.data.type === 'Receiving Ticket' ||
+        params.data.type === 'Return Ticket' ||
+        params.data.type === 'Delivery Ticket' ? (
           <Link
             className="link"
             title={params.value}
@@ -174,20 +185,42 @@ const AssetHistory = ({ id }) => {
     </>
   );
 
+  const WarehouseRenderer = (params: any) => (
+    <>
+      {params.value ? (
+        permissions?.warehouse?.isRead ?
+          <Link
+            className="link"
+            title={params.value}
+            to={`${routes.warehouseDetail.path}/${params.data.warehouseId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {params.value}
+          </Link> :
+          <span>{params.value}</span>
+      ) : (
+        <NoDataCell />
+      )}
+    </>
+  );
+
   const frameworkComponents = {
     nameRenderer: NameRenderer,
+    warehouseRenderer: WarehouseRenderer,
     commonRenderer: CommonRenderer,
     daysRenderer: DaysRenderer,
     dateTimeRenderer: DateTimeRenderer
   };
 
   const columns = [
-    { field: 'reference', headerName: 'Reference', show: true, cellRenderer: 'nameRenderer' },
+    { field: 'reference', headerName: 'Reference', show: true, filter: false, cellRenderer: 'nameRenderer' },
     { field: 'type', headerName: 'Type', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     { field: 'date', headerName: 'Date & Time', show: true, disabled: true, filter: false, cellRenderer: 'dateTimeRenderer' },
     { field: 'days', headerName: 'Days', show: true, disabled: true, filter: false, cellRenderer: 'daysRenderer' },
     { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' },
     { field: 'comments', headerName: 'Comment', show: true, cellRenderer: 'commonRenderer' },
+    { field: 'warehouse', headerName: routes.warehouse.title, show: true, cellRenderer: 'warehouseRenderer' },
     { field: 'location', headerName: 'Location', show: true, cellRenderer: 'commonRenderer' },
     { field: 'ownerType', headerName: 'Owner Type', show: true, cellRenderer: 'commonRenderer' },
     { field: 'owner', headerName: 'Owner', show: true, cellRenderer: 'commonRenderer' }
@@ -197,24 +230,57 @@ const AssetHistory = ({ id }) => {
     if (id) {
       fetchData();
     }
-  }, [id]);
+  }, [id, page, limit, filters, sorting, duration]);
+
+  const getQueryString = () => {
+    let deepFilter = `?page=${page}&limit=${limit}`;
+
+    const updatedFilters = [];
+    if (!isObjectEmpty(filters)) {
+      Object.keys(filters).forEach((field) => {
+        updatedFilters.push({
+          field: field,
+          term: filters[field].filter
+        });
+      });
+    }
+    if (duration) {
+      updatedFilters.push({
+        field: 'date',
+        term: {
+          from: moment(duration?.from).format('MM/DD/YYYY'),
+          to: moment(duration?.to).format('MM/DD/YYYY')
+        }
+      });
+    }
+    if (updatedFilters?.length > 0) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
+    }
+    if (sorting.length > 0) {
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+    }
+    return deepFilter;
+  };
 
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
     if (gridApi) {
       gridApi.setRowData([]);
     }
+    const queryString = getQueryString();
     axiosInstance()
-      .get(`/history/inventory/${id}`)
-      .then(({ data: { data } }) => {
+      .get(`/history/inventory/${id}${queryString}`)
+      .then(({ data: { data, count } }) => {
         data = data?.map((u, index) => ({
           ...u,
           _id: index + 1,
           id: index + 1,
           reference: u?.reference?.optionLabel,
-          referenceId: u?.reference?.optionValue
+          referenceId: u?.reference?.optionValue,
+          warehouse: u?.warehouse?.optionLabel,
+          warehouseId: u?.warehouse?.optionValue
         }));
-        dispatch({ type: 'initialize', data: data, count: data.length });
+        dispatch({ type: 'initialize', data: data, count: count });
         dispatch({ type: 'loading', loading: false });
       })
       .catch((error) => {
@@ -225,6 +291,9 @@ const AssetHistory = ({ id }) => {
 
   return (
     <Box>
+      <Box width="60%">
+        <DurationFilter label={''} defaultTimeFrame="1-year" duration={duration} setDuration={setDuration} />
+      </Box>
       {columns ? (
         <CustomAgGrid
           columns={columns}
@@ -238,7 +307,6 @@ const AssetHistory = ({ id }) => {
           page={page}
           allowAction={false}
           allowSelection={false}
-          isClientSideGrid={true}
           loading={loading}
           renderedFrom={`${camelCase(routes?.serializedAsset.title)}_assetHistory`}
           refreshGrid={fetchData}

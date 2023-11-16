@@ -217,15 +217,19 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             width: 200,
             Cell: ({ row }) =>
               row?.original?.loadingTicket ? (
-                <Link
-                  className="link text-truncate"
-                  title={row?.original?.loadingTicket}
-                  to={`${routes.deliveryTicketDetail.path}/${row?.original?.loadingTicketId}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {row?.original?.loadingTicket}
-                </Link>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <p> {row?.original?.loadingTicket}</p>
+                  <Box ml={1}>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        window.open(`${routes.deliveryTicketDetail.path}/${row.original?.loadingTicketId}`);
+                      }}
+                    >
+                      <OpenInNewIcon fontSize="small" color="primary" />
+                    </IconButton>
+                  </Box>
+                </div>
               ) : (
                 <NoDataCell />
               )

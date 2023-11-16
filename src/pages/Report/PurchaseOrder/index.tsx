@@ -437,6 +437,7 @@ const Report = () => {
           },
           { field: 'price', headerName: `Cost ${curr}`, show: true, filter: false, cellRenderer: 'commonRenderer' },
           { field: 'totalPrice', headerName: `Amount ${curr}`, show: true, filter: false, cellRenderer: 'commonRenderer' },
+          { field: 'finalAvgPrice', headerName: `Final Average Cost ${curr}`, show: true, filter: false, cellRenderer: 'commonRenderer' },
           { field: 'warehouse', headerName: routes.warehouse.title, show: true, cellRenderer: 'commonRenderer' },
           ...(user?.user?.brandPolicy?.storageLocation
             ? [

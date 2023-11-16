@@ -257,7 +257,6 @@ const CreateProjectSales = ({
                                     <FormTypes
                                       {...field}
                                       disabled={Boolean(projectSalesId) && field.disableOnEdit}
-                                      isNew={Boolean(projectSalesId)}
                                       values={values}
                                       errors={errors}
                                       touched={touched}
@@ -279,7 +278,6 @@ const CreateProjectSales = ({
                                     <FormTypes
                                       {...field}
                                       disabled={Boolean(projectSalesId) && field.disableOnEdit}
-                                      isNew={Boolean(projectSalesId)}
                                       values={values}
                                       errors={errors}
                                       touched={touched}
@@ -302,7 +300,6 @@ const CreateProjectSales = ({
                                     <FormTypes
                                       {...field}
                                       disabled={Boolean(projectSalesId) && field.disableOnEdit}
-                                      isNew={Boolean(projectSalesId)}
                                       values={values}
                                       errors={errors}
                                       touched={touched}
@@ -370,7 +367,6 @@ const CreateProjectSales = ({
                                     <FormTypes
                                       {...field}
                                       disabled={Boolean(projectSalesId) && field.disableOnEdit}
-                                      isNew={Boolean(projectSalesId)}
                                       values={values}
                                       errors={errors}
                                       touched={touched}
@@ -399,7 +395,6 @@ const CreateProjectSales = ({
                                   ) : field.fieldName.trim() === 'amount' ? (
                                     <FormTypes
                                       disabled={Boolean(projectSalesId) && field.disableOnEdit}
-                                      isNew={Boolean(projectSalesId)}
                                       fieldId={field._id}
                                       lookup={field.lookup}
                                       // {...rest}
@@ -424,7 +419,6 @@ const CreateProjectSales = ({
                                   ) : (
                                     <FormTypes
                                       {...field}
-                                      isNew={Boolean(projectSalesId)}
                                       fieldData={field}
                                       fields={initialData.fields}
                                       values={values}
@@ -456,7 +450,6 @@ const CreateProjectSales = ({
                           <FormTypes
                             {...field}
                             disabled={Boolean(projectSalesId) && field.disableOnEdit}
-                            isNew={Boolean(projectSalesId)}
                             fieldData={field}
                             fields={initialData.fields}
                             values={values}

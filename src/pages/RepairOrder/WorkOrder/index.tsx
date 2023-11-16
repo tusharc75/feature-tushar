@@ -16,7 +16,8 @@ import {
   CHILD_RESOURCE,
   MATERIAL_TYPE,
   asyncForEach,
-  MATERIAL_SUB_TYPE
+  MATERIAL_SUB_TYPE,
+  REPAIR_ORDER_STATUS
 } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
@@ -90,15 +91,20 @@ const WorkOrder = ({
     const assignedUsersArrays = selectedRecords?.filter((product) => product?.assignedUsers).map((product) => product?.assignedUsers);
     const assignedUsers = assignedUsersArrays?.flat();
 
-    const uniqueAssignedUsers = assignedUsers.filter((obj, index, self) => index === self.findIndex((t) => JSON.stringify(t) === JSON.stringify(obj)));
+    const uniqueAssignedUsers = assignedUsers.filter(
+      (obj, index, self) => index === self.findIndex((t) => JSON.stringify(t) === JSON.stringify(obj))
+    );
     setAllAssignedUsers(uniqueAssignedUsers);
 
-    const assignedWorkStationsArrays = selectedRecords?.filter((product) => product?.assignedWorkStations).map((product) => product?.assignedWorkStations);
+    const assignedWorkStationsArrays = selectedRecords
+      ?.filter((product) => product?.assignedWorkStations)
+      .map((product) => product?.assignedWorkStations);
     const assignedWorkStations = assignedWorkStationsArrays?.flat();
 
-    const uniqueAssignedWorkStations = assignedWorkStations.filter((obj, index, self) => index === self.findIndex((t) => JSON.stringify(t) === JSON.stringify(obj)));
+    const uniqueAssignedWorkStations = assignedWorkStations.filter(
+      (obj, index, self) => index === self.findIndex((t) => JSON.stringify(t) === JSON.stringify(obj))
+    );
     setAllAssignedWorkStations(uniqueAssignedWorkStations);
-
   }, [selectedRecords]);
 
   const fetchFields = async () => {
@@ -273,7 +279,7 @@ const WorkOrder = ({
         Cell: ({ row }) => (row.original['qty'] ? <p> {row?.original?.qty}</p> : <NoDataCell />)
       }
     ];
-    const workStationColumn =  {
+    const workStationColumn = {
       accessor: 'assignedWorkStations',
       Header: 'Assigned Work Station',
       disableFilters: true,
@@ -281,21 +287,34 @@ const WorkOrder = ({
         row?.original['assignedWorkStations'] && row?.original['assignedWorkStations']?.length ? (
           row?.original['assignedWorkStations']?.map((e, i) => {
             return i === row?.original['assignedWorkStations'].length - 1 ? (
-              <a className="link text-truncate" target="_blank" href={`${routes.workStationsDetail.path}/${e.optionValue}`} rel="noreferrer">
+              <a
+                className="link text-truncate [flex-grow:0_!important]"
+                target="_blank"
+                href={`${routes.workStationsDetail.path}/${e.optionValue}`}
+                rel="noreferrer"
+              >
                 {e?.optionLabel}
               </a>
             ) : (
-              <a className="link text-truncate" target="_blank" href={`${routes.workStationsDetail.path}/${e.optionValue}`} rel="noreferrer">
-                {e?.optionLabel},{' '}
-              </a>
+              <>
+                <a
+                  className="link text-truncate [flex-grow:0_!important]"
+                  target="_blank"
+                  href={`${routes.workStationsDetail.path}/${e.optionValue}`}
+                  rel="noreferrer"
+                >
+                  {e?.optionLabel},
+                </a>
+                &nbsp;
+              </>
             );
           })
         ) : (
           <NoDataCell />
         )
-    }
+    };
     if (permissions?.workStations?.isRead) {
-      const assignedTechnicianIndex = coloum.findIndex(col => col.accessor === 'assignedUsers');
+      const assignedTechnicianIndex = coloum.findIndex((col) => col.accessor === 'assignedUsers');
       coloum.splice(assignedTechnicianIndex + 1, 0, workStationColumn);
     }
     coloum = [...coloum, ...newColumns];
@@ -306,6 +325,7 @@ const WorkOrder = ({
       width: 70,
       sticky: 'right',
       disableFilters: true,
+      disableSortBy: true,
       canDrag: false,
       Cell: ({ row }) => {
         return (
@@ -359,7 +379,10 @@ const WorkOrder = ({
                     setConsumablesDialog({ open: true, ids: ids, data: [row?.original] });
                   }}
                 >
-                  <AddCircleOutlineIcon fontSize="small" color={row?.original?.workOrder?.status !== WORK_ORDER_STATUS.completed ? 'primary' : 'disabled'} />
+                  <AddCircleOutlineIcon
+                    fontSize="small"
+                    color={row?.original?.workOrder?.status !== WORK_ORDER_STATUS.completed ? 'primary' : 'disabled'}
+                  />
                 </IconButton>
               </HtmlTooltip>
             )}
@@ -417,7 +440,6 @@ const WorkOrder = ({
   };
 
   const handleDelete = async () => {
-
     if (deleteData?.some((e) => [MATERIAL_TYPE.product, MATERIAL_TYPE.service, MATERIAL_TYPE.package]?.includes(e.type))) {
       setDeleting(true);
 
@@ -428,12 +450,12 @@ const WorkOrder = ({
       const products = deleteData?.filter((e) => e.type === MATERIAL_TYPE.product);
       if (products?.length) {
         const ids = products?.map((r) => r?._id);
-       await axiosInstance().put(`${workOrder.api}/${workOrderId}/consumable/remove`, { ids: ids || [] })
+        await axiosInstance().put(`${workOrder.api}/${workOrderId}/consumable/remove`, { ids: ids || [] });
       }
       const servicePackage = deleteData?.filter((e) => [MATERIAL_TYPE.service, MATERIAL_TYPE.package]?.includes(e.type));
       if (servicePackage?.length) {
         const ids = servicePackage?.map((e) => e?.uniqueId);
-      await axiosInstance().put(`${workOrder.api}/service/${workOrderId}/remove`, { uniqueIds: ids })
+        await axiosInstance().put(`${workOrder.api}/service/${workOrderId}/remove`, { uniqueIds: ids });
 
         if (isPostWorkService && repairOrderData?.type === REPAIR_ORDER_TYPE.external) {
           createNewVersionQuote(true);
@@ -511,6 +533,7 @@ const WorkOrder = ({
           : parent.type === MATERIAL_TYPE.serializedAsset
             ? parent?.serializedAssetDetail?.assetNumber
             : parent?.packageDetail?.packageName
+
         }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
@@ -532,6 +555,7 @@ const WorkOrder = ({
           : parent.type === MATERIAL_TYPE.serializedAsset
             ? parent.serializedAssetDetail.status
             : parent.packageDetail?.status
+
         }`;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
 
@@ -623,7 +647,6 @@ const WorkOrder = ({
       if (_subRow?.status === WORKORDER_SERVICE_STATUS.completed || !_subRow.canDelete) {
         _subRow.hideSelection = true;
       }
-
     });
     if (subRows.length === 0 && parent.type === 'package') {
       parent.isValid = false;
@@ -644,7 +667,7 @@ const WorkOrder = ({
       .post(`${workOrder.api}/service`, data)
       .then(() => {
         setAddServicesDialog({ open: false, new: false });
-        if (isPostWorkService && repairOrderData?.addQuotationStep) {
+        if (isPostWorkService && repairOrderData?.addQuotationStep && repairOrderData?.addConsumablesQuotation) {
           createNewVersionQuote(true);
         }
         fetchData();
@@ -716,7 +739,7 @@ const WorkOrder = ({
         data?.forEach((e) => {
           delete e.workOrder;
         });
-        await axiosInstance().put(`${repairOrder.api}/${repairOrderData._id}/work-order/${id}`, { material: data });
+        await axiosInstance().put(`${workOrder.api}/${id}/material`, { material: data });
       });
     } catch (error) {
       setUpdating(false);
@@ -766,6 +789,9 @@ const WorkOrder = ({
     axiosInstance()
       .post(`${workOrder.api}/${workOrderId}/consumable`, data)
       .then(({ data }) => {
+        if (repairOrderData?.processStatus === 'Execute' && repairOrderData?.status === REPAIR_ORDER_STATUS.quoteAccepted && repairOrderData?.addQuotationStep && repairOrderData?.addConsumablesQuotation) {
+          createNewVersionQuote(true);
+        }
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -855,7 +881,7 @@ const WorkOrder = ({
                 >
                   Assign Work Station
                 </MenuItem>
-                )}
+              )}
               {!user?.brandPolicy?.workOrderConsumableHide && (
                 <MenuItem
                   disabled={
@@ -899,11 +925,12 @@ const WorkOrder = ({
                   setCompleteConfirmBox(true);
                   closeActions();
                 }}
-                disabled={selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length &&
-                  selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset && e?.canAutoCompleteWorkOrder)?.length ===
-                  selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length
-                  ? false
-                  : true
+                disabled={
+                  selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length &&
+                    selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset && e?.canAutoCompleteWorkOrder)?.length ===
+                    selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length
+                    ? false
+                    : true
                 }
               >
                 Auto Complete Work Order(s)
@@ -1004,6 +1031,7 @@ const WorkOrder = ({
                 fetchData();
                 setUserAssignDialog(false);
               }}
+              competencies={[]}
             />
           )}
           {workStationAssignDialog && (

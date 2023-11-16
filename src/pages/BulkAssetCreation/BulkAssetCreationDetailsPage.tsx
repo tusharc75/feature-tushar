@@ -149,7 +149,7 @@ const BulkAssetCreationDetailsPage = () => {
       .put(`${bulkAssetCreation.api}/remove`, { ids: [] })
       .then(() => {
         setShowConfirmBox(false);
-        history.goBack();
+        history.push(`${routes.bulkAssetCreation.path}`)
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);

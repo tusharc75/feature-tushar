@@ -59,7 +59,7 @@ const TransactionLockDetail = () => {
       .put(`${routes.transactionLock.path}/remove`, { ids: [id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.goBack();
+        history.push(`${routes.transactionLock.path}`)
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);

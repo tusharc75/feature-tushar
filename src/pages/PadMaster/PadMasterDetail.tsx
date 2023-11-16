@@ -72,7 +72,7 @@ const PadMasterDetail = () => {
                 type: 'success',
                 message: data?.message
               });
-              history.goBack();
+              history.push(`${routes.padMaster.path}`)
             })
             .catch((err) => {
               setShowConfirmBox(false);

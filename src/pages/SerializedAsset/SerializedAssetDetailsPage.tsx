@@ -181,7 +181,7 @@ const SerializedAssetDetailsPage = () => {
       .put(`${serializedAsset.api}/remove`, { ids: [] })
       .then(() => {
         setShowConfirmBox(false);
-        history.goBack();
+        history.push(`${routes.serializedAsset.path}`)
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);

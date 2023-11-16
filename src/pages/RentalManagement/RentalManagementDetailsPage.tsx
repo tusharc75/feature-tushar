@@ -312,7 +312,7 @@ const RentalManagementDetailsPage = () => {
       .put(`${rentalManagement.api}/remove`, { ids: [rentalManagementData._id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.goBack();
+        history.push(`${routes.rentalManagement.path}`)
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);

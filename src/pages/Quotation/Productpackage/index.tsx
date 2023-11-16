@@ -213,6 +213,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
       width: 150,
       sticky: 'right',
       disableFilters: true,
+      disableSortBy: true,
       canDrag: false,
       Cell: ({ row, rows }) => (
         <>

@@ -35,6 +35,7 @@ const TechnicianDialog = ({ handleClose, selectedService }) => {
             title={`${selectedService?.serviceName} Steps`}
             onClose={handleClose}
             additionalTitle={
+                selectedService?.assetNumber &&
                 <Box ml={2}>
                     <Typography variant="h6" className={`title-layout text-truncate`}>
                         {`Asset : `}

@@ -64,6 +64,7 @@ const AdditionalCost = ({ invoiceData, setNextStep, renderedFrom }) => {
           width: 100,
           sticky: 'right',
           disableFilters: true,
+          disableSortBy: true,
           canDrag: false,
           Cell: ({ row }) => (
             <Grid container spacing={1}>

@@ -73,8 +73,7 @@ const InventoryCycleDetailPage = () => {
         .put(`/inventory-cycle/remove`, { ids: [id] })
         .then(({ data }) => {
           setShowConfirmBox(false);
-
-          history.goBack();
+          history.push(`${routes.inventoryCycle.path}`);
         })
         .catch((err) => {
           setShowConfirmBox(false);

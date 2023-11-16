@@ -89,7 +89,7 @@ const SurveysDetail = () => {
             type: 'success',
             message: data?.message
           });
-          history.goBack();
+          history.push(`${routes.surveys.path}`)
         })
         .catch((err) => {
           setShowConfirmBox(false);
