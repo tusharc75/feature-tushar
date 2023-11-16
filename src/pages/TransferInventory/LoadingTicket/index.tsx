@@ -291,6 +291,8 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
       });
   };
 
+  console.log(selectedRecords)
+
   return (
     <Fragment>
       <Box display="flex" justifyContent="flex-end" m={1}>
@@ -349,79 +351,29 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
         )}
       </Box>
       <Box>
-        {columns ? (
-          isMobile && !isTablet ? (
-            <CustomSwipableList
-              allowSelection={allowedToEdit || canReceive}
-              allowSwipe={true}
-              permissions={true}
-              primaryField={columns?.find((d: any) => d.primaryField)}
-              onClick={(data) => {
-                if (data.type === 'Asset') {
-                  history.push(`${routes.serializedAssetDetail.path}/${data._id}`);
-                } else {
-                  history.push(`${routes.productDetail.path}/${data._id}`);
-                }
-              }}
-              dataRows={dataRows}
-              selectedRecords={selectedRecords}
-              dispatch={dispatch}
-              onEdit={false}
-              extraParamsToCheckDelete={true}
-              onDelete={false}
-              rowCount={rowCount}
-              page={page}
-              loading={loading}
-              additionalDetails={[]}
-              chips={[
-                {
-                  label: 'Type : ',
-                  field: 'type'
-                },
-                {
-                  label: 'Qty : ',
-                  field: 'qty'
-                },
-                {
-                  label: 'Status : ',
-                  field: 'status'
-                },
-                {
-                  label: 'Loading Ticket : ',
-                  field: 'loadingTicket',
-                  onClick: (data) => history.push(`${routes.deliveryTicketDetail.path}/${data.loadingTicketId}`)
-                }
-              ]}
-              owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-              onCreate={false}
-              showClone={false}
-              onClone={() => { }}
-              renderedFrom={renderedFrom}
-            />
-          ) : (
-            <CustomAgGrid
-              columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameworkComponents}
-              setGridApi={setGridApi}
-              dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              allowAction={false}
-              loading={loading}
-              isClientSideGrid={true}
-              allowSelection={allowedToEdit || canReceive}
-              renderedFrom={renderedFrom}
-              refreshGrid={fetchProducts}
-            />
-          )
-        ) : (
-          <Box p={2} height={500}>
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Box>
-        )}
+        {columns ?
+          <CustomAgGrid
+            columns={columns}
+            dataRows={dataRows}
+            frameworkComponents={frameworkComponents}
+            setGridApi={setGridApi}
+            dispatch={dispatch}
+            rowCount={rowCount}
+            limit={limit}
+            pageSizes={pageSizes}
+            page={page}
+            allowAction={false}
+            loading={loading}
+            isClientSideGrid={true}
+            allowSelection={allowedToEdit || canReceive}
+            renderedFrom={renderedFrom}
+            refreshGrid={fetchProducts}
+          />
+          : (
+            <Box p={2} height={500}>
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Box>
+          )}
       </Box>
       {showTicketDialog.open && (
         <ManageDeliveryTicket

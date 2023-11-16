@@ -24,7 +24,7 @@ import { camelCase } from 'lodash';
 
 let searchTimeout;
 
-const AssignServiceDialog = ({ onSuccess, handleClose, ids = [], extraStaticFilter = [], isSubmitting = false }) => {
+const AssignServiceDialog = ({ onSuccess, handleClose, ids = [], extraStaticFilter = [], isSubmitting = false, hideQty = false }) => {
   const renderedFrom = `${camelCase(routes.serviceMaster?.title)}_assign`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -95,7 +95,12 @@ const AssignServiceDialog = ({ onSuccess, handleClose, ids = [], extraStaticFilt
         };
         setFrameWorkComponent({ ...tempFrameworkComponent });
         columns = [...columns, ...getStaticFields()];
-        setColumns([...defaultColumns, ...columns]);
+        if (hideQty) {
+          setColumns([...columns]);
+        }
+        else {
+          setColumns([...defaultColumns, ...columns]);
+        }
       });
   };
 
