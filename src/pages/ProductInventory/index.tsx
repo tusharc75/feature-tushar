@@ -1,48 +1,43 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import { Link } from 'react-router-dom';
-import { Grid, IconButton, Tooltip, Button, Menu, MenuItem, Chip, Checkbox, FormControlLabel } from '@material-ui/core';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import axiosInstance from 'src/axios/axiosInstance';
-import { GiStockpiles } from 'react-icons/gi';
-import { Box, TextField } from '@material-ui/core';
-import SearchBox from 'src/components/Helpers/SearchBox';
-import styles from '../Leads/Header.module.scss';
-import routes from 'src/components/Helpers/Routes';
-import { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
-import CustomAgGridEditable from 'src/components/AgGridComponents/CustomAgGridEditable';
-import {
-  isObjectEmpty,
-  gridLoadingTimeout,
-  productInventory,
-  getLocalStorageArrayData,
-  removeLocalStorage,
-  TOOLTIP_MESSAGE
-} from 'src/constants/helpers';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { useData } from 'src/StateProvider/Provider';
-import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
-import { prepareDataForGrid } from 'src/constants/helpers';
-import { isMobile, isTablet } from 'react-device-detect';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, Button, Checkbox, Chip, FormControlLabel, IconButton, Menu, MenuItem, TextField } from '@material-ui/core';
+import { ExpandMore } from '@material-ui/icons';
+import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
+import HistoryIcon from '@material-ui/icons/History';
 import InfoIcon from '@material-ui/icons/Info';
-import SoftHoldDialog from './SoftHold';
+import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
+import SettingsIcon from '@material-ui/icons/Settings';
+import VisibilityOutlinedIcon from '@material-ui/icons/VisibilityOutlined';
+import { Autocomplete } from '@material-ui/lab';
+import { camelCase } from 'lodash';
+import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
+import CustomAgGridEditable from 'src/components/AgGridComponents/CustomAgGridEditable';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
+import routes from 'src/components/Helpers/Routes';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import {
+  TOOLTIP_MESSAGE,
+  getLocalStorageArrayData,
+  gridLoadingTimeout,
+  isObjectEmpty,
+  prepareDataForGrid,
+  productInventory,
+  removeLocalStorage
+} from 'src/constants/helpers';
+import useColumns, { getFrameworkComponents } from 'src/constants/useColumns';
+import { NumberRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
+import HtmlTooltip from '../../components/CustomTooltipTitle';
+import styles from '../Leads/Header.module.scss';
+import AddRemoveDialog from './AddRemove';
 import HistoryDialog from './History/historyDialog';
 import SerialNumberDialog from './SerialNumber/SerialNumberDialog';
-import { camelCase, set } from 'lodash';
-import useColumns, { getFrameworkComponents, getStaticFields } from 'src/constants/useColumns';
-import HtmlTooltip from '../../components/CustomTooltipTitle';
-import NoDataCell from '../../components/Helpers/NoDataCell';
-import HistoryIcon from '@material-ui/icons/History';
-import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
-import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
-import AddRemoveDialog from './AddRemove';
-import { ExpandMore } from '@material-ui/icons';
-import VisibilityOutlinedIcon from '@material-ui/icons/VisibilityOutlined';
-import { useHistory } from 'react-router-dom';
-import { NumberRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
-import SettingsIcon from '@material-ui/icons/Settings';
 import SettingsDialog from './SettingsDialog';
+import SoftHoldDialog from './SoftHold';
 
 let searchTimeout;
 
