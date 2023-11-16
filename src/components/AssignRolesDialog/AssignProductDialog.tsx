@@ -24,7 +24,8 @@ const AssignProductDialog = ({
   serialized = null,
   extraDeepFilter = [],
   extraFilterById = [],
-  isSubmitting = false
+  isSubmitting = false,
+  hideQty = false
 }) => {
   const renderedFrom = `${camelCase(routes.product?.title)}_assign`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
@@ -98,7 +99,12 @@ const AssignProductDialog = ({
         };
         setFrameWorkComponent({ ...tempFrameworkComponent });
         columns = [...columns, ...getStaticFields()];
-        setColumns([...defaultColumns, ...columns]);
+        if (hideQty) {
+          setColumns([...columns]);
+        }
+        else {
+          setColumns([...defaultColumns, ...columns]);
+        }
       });
   };
 
