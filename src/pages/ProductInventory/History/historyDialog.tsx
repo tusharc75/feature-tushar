@@ -11,46 +11,35 @@ import History from './index';
 import CalendarView from './CalendarView';
 
 const HistoryDialog = ({ close, product, warehouse, storageLocation, productName }) => {
-
   const [currentView, setCurrentView] = useState('list');
+
+  const detectMobile = isMobile && !isTablet;
 
   return (
     <Dialog fullScreen TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true} fullWidth>
       <CustomDialogHeader title={`History - ${productName}`} onClose={close} showRequiredLabel={false}></CustomDialogHeader>
       <CustomDialogContent>
-        <Box display="flex" justifyContent="flex-end" alignItems="center"
-          style={(isMobile && !isTablet) || currentView === "calendar" ? {} : { position: 'absolute', top: '65px', right: '10px' }}>
+        <Box
+          className={`flex justify-end items-center min-h-[50px] ${
+            !detectMobile && currentView !== 'calendar' && 'absolute top-[65px] right-[16px]'
+          } `}
+        >
           <Box display="flex">
-            <ToggleButtonGroup
-              size="small"
-              exclusive
-              value={currentView}
-              onChange={(e, newVal) => {
-                setCurrentView(newVal);
-              }}
-            >
-              <ToggleButton value={'list'}>
+            <ToggleButtonGroup size="small" exclusive value={currentView} onChange={(e, newVal) => {}}>
+              <ToggleButton value={'list'} onClick={() => setCurrentView('list')}>
                 <List fontSize="small" />
               </ToggleButton>
-              <ToggleButton value={'calendar'}>
+              <ToggleButton value={'calendar'} onClick={() => setCurrentView('calendar')}>
                 <CalendarToday fontSize="small" />
               </ToggleButton>
             </ToggleButtonGroup>
           </Box>
         </Box>
         {currentView === 'list' ? (
-          <History
-            product={product}
-            warehouse={warehouse}
-            storageLocation={storageLocation}
-          />
+          <History product={product} warehouse={warehouse} storageLocation={storageLocation} />
         ) : (
           <div>
-            <CalendarView
-              product={product}
-              warehouse={warehouse}
-              storageLocation={storageLocation}
-            />
+            <CalendarView product={product} warehouse={warehouse} storageLocation={storageLocation} />
           </div>
         )}
       </CustomDialogContent>
