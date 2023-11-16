@@ -31,6 +31,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { AutoCompleteIcon } from 'src/assets/svg/svgIcons';
 import AssignWorkStationDialog from 'src/pages/WorkOrder/Service/AssignWorkStationDialog';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
+import AttachmentDialog from 'src/pages/WorkOrder/Service/AttachmentDialog';
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
 const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, setCurrentStep }) => {
@@ -53,6 +54,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   const [isDeleting, setDeleting] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
   const [consumablesDialog, setConsumablesDialog] = useState({ open: false, ids: [], data: null });
+  const [attachmentsDialog, setAttachmentsDialog] = useState({ open: false, workOrderId: null, uniqueServiceId: null, serviceName: null });
 
   const [selectedRecords, setSelectedRecords] = useState([]);
 
@@ -611,6 +613,15 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                 Add New Service
               </MenuItem>
               <MenuItem
+                disabled = {selectedRecords.length>1 || selectedRecords[0]?.type!=="service"}
+                onClick={() => {
+                  closeActions();
+                  setAttachmentsDialog({open: true, workOrderId: selectedRecords[0]?.workOrder?._id , uniqueServiceId: selectedRecords[0]?.uniqueId , serviceName: selectedRecords[0]?.serviceDetail?.serviceName })
+                }}
+              >
+                Upload Documents
+              </MenuItem>
+              <MenuItem
                 disabled={selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length > 0 ? false : true}
                 onClick={() => {
                   closeActions();
@@ -839,6 +850,19 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
           }}
           serialized={false}
           isSubmitting={isSubmitting}
+        />
+      )}
+      {attachmentsDialog.open && (
+        <AttachmentDialog
+          workOrderId={attachmentsDialog.workOrderId}
+          uniqueServiceId={attachmentsDialog.uniqueServiceId}
+          stepId={null}
+          serviceName={attachmentsDialog.serviceName}
+          stepName={attachmentsDialog.serviceName}
+          handleClose={() => {
+            setAttachmentsDialog({ open: false, workOrderId: null, uniqueServiceId: null, serviceName: null });
+          }}
+          handleSuccess={() => {}}
         />
       )}
     </Fragment>
