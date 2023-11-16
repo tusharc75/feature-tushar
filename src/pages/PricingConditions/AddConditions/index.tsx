@@ -4,15 +4,7 @@ import {
   Grid,
   Box,
   Button,
-  Paper,
-  Typography,
   IconButton,
-  Tab,
-  Tabs,
-  ButtonGroup,
-  Container,
-  InputAdornment,
-  TextField,
   Menu
 } from '@material-ui/core';
 import { Autocomplete, Skeleton } from '@material-ui/lab';
@@ -23,13 +15,16 @@ import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { pricingCondition, gridLoadingTimeout, downloadExcel, removeLocalStorage, getLocalStorageArrayData, PRICING_TYPE } from '../../../constants/helpers';
+import {
+  pricingCondition,
+  gridLoadingTimeout,
+  PRICING_TYPE
+} from '../../../constants/helpers';
 import EditIcon from '@material-ui/icons/Edit';
 import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridComponents/CustomAgGrid';
 import { CommonRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
 import GridDeleteIcon from '../../../components/Helpers/GridDeleteIcon';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import AddExistingMaterialDialog from '../AddExistingMaterialDialog';
 import ConditionDialog from './ConditionDialog';
 import { camelCase, startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
@@ -37,8 +32,10 @@ import { ExpandMore } from '@material-ui/icons';
 import { isMobile, isTablet } from 'react-device-detect';
 import styles from '../../Leads/Header.module.scss';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
+import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
+import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
+import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 
 const AddConditions = ({ pricingConditionId, detailData }) => {
   const renderFrom = camelCase(`${routes?.pricingCondition.title}_condition_selected`);
@@ -60,6 +57,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const localStorageSelectedRecords = `${renderFrom}_selected`;
+  const [isSubmitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     fetchCondition();
@@ -76,14 +74,17 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       .then(({ data: { data } }) => {
         setCondition(JSON.parse(JSON.stringify(data)));
         data.forEach((element) => {
-          element.detail = `${element.materialType === 'product'
-            ? element.productDetail?.productName
-            : element.materialType === 'service'
+          element.detail = `${
+            element.materialType === 'product'
+              ? element.productDetail?.productName
+              : element.materialType === 'service'
               ? element.serviceDetail?.serviceName
               : element.packageDetail?.packageName
-            }`;
+          }`;
           element.materialType = startCase(element.materialType);
-          element.conditionType = PRICING_TYPE?.filter((e) => element.conditionType?.includes(e.optionValue))?.map((e) => e.optionLabel)?.toString();
+          element.conditionType = PRICING_TYPE?.filter((e) => element.conditionType?.includes(e.optionValue))
+            ?.map((e) => e.optionLabel)
+            ?.toString();
           element.unit = element.unit?.toString();
           element.pricingMethod = element.pricingMethod?.toString();
         });
@@ -98,17 +99,24 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
   };
 
   const handleAdd = (rows) => {
-    const data = [];
-    rows.forEach((element) => {
-      data.push({ materialId: element._id, materialType: addMaterialDialog.materialType });
+    setSubmitting(true);
+    const condition: any = [];
+    rows.forEach((d) => {
+      const element: any = {};
+      element.materialId = d._id;
+      element.materialType = addMaterialDialog.materialType;
+      condition.push(element);
     });
+
     axiosInstance()
-      .post(`${pricingCondition.api}/condition/${pricingConditionId}`, { condition: data })
+      .post(`${pricingCondition.api}/condition/${pricingConditionId}`, { condition })
       .then(({ data: { data } }) => {
         setAddMaterialDialog({ open: false, materialType: '' });
         fetchCondition();
+        setSubmitting(false);
       })
       .catch((error) => {
+        setSubmitting(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -167,9 +175,10 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
           size="small"
           onClick={() => {
             window.open(
-              `${params.data.materialType === 'Product'
-                ? routes.productDetail.path
-                : params.data.materialType === 'Service'
+              `${
+                params.data.materialType === 'Product'
+                  ? routes.productDetail.path
+                  : params.data.materialType === 'Service'
                   ? routes.serviceMasterDetail.path
                   : routes.packagesDetail.path
               }/${params.data.materialId}`
@@ -380,7 +389,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
                   title: 'Service Import',
                   api: `${pricingCondition.api}/import?materialType=service&child=true&ids=${JSON.stringify([pricingConditionId])}`,
                   type: 'import'
-                },
+                }
               ]}
             />
           </Box>
@@ -411,14 +420,41 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
           </Box>
         )}
       </Grid>
-      {addMaterialDialog.open && (
-        <AddExistingMaterialDialog
-          type={addMaterialDialog.materialType}
+      {addMaterialDialog.open && addMaterialDialog.materialType === 'product' && (
+        <AssignProductDialog
+          handleCloseDialog={() => setAddMaterialDialog({ open: false, materialType: '' })}
+          onSuccess={(product) => {
+            handleAdd(product);
+          }}
+          ids={condition?.filter(c => c?.materialType === addMaterialDialog.materialType)?.map((e) => e.materialId)}
+          isSubmitting={isSubmitting}
+          hideQty={true}
+        />
+      )}
+      {addMaterialDialog.open && addMaterialDialog.materialType === 'package' && (
+        <AssignPackageDialog
+          onSuccess={(rows) => {
+            handleAdd(rows);
+          }}
           handleClose={() => {
             setAddMaterialDialog({ open: false, materialType: '' });
           }}
-          handleAdd={handleAdd}
-          ignoreIds={condition?.map((e) => e.materialId)}
+          ids={condition?.filter(c => c?.materialType === addMaterialDialog.materialType)?.map((e) => e.materialId)}
+          isSubmitting={isSubmitting}
+          hideQty={true}
+        />
+      )}
+      {addMaterialDialog.open && addMaterialDialog.materialType === 'service' && (
+        <AssignServiceDialog
+          onSuccess={(services) => {
+            handleAdd(services);
+          }}
+          handleClose={() => {
+            setAddMaterialDialog({ open: false, materialType: '' });
+          }}
+          ids={condition?.filter(c => c?.materialType === addMaterialDialog.materialType)?.map((e) => e.materialId)}
+          isSubmitting={isSubmitting}
+          hideQty={true}
         />
       )}
       {showDialog.open && conditionData && (
@@ -439,8 +475,9 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete pricing setup condition  ${deleteRecord?.productDetail?.productName || deleteRecord?.packageDetail?.packageName || ''
-            } ?`}
+          message={`Are you sure you want to delete pricing setup condition  ${
+            deleteRecord?.productDetail?.productName || deleteRecord?.packageDetail?.packageName || ''
+          } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

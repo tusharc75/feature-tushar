@@ -613,15 +613,6 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                 Add New Service
               </MenuItem>
               <MenuItem
-                disabled = {selectedRecords.length>1 || selectedRecords[0]?.type!=="service"}
-                onClick={() => {
-                  closeActions();
-                  setAttachmentsDialog({open: true, workOrderId: selectedRecords[0]?.workOrder?._id , uniqueServiceId: selectedRecords[0]?.uniqueId , serviceName: selectedRecords[0]?.serviceDetail?.serviceName })
-                }}
-              >
-                Upload Documents
-              </MenuItem>
-              <MenuItem
                 disabled={selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length > 0 ? false : true}
                 onClick={() => {
                   closeActions();
@@ -695,6 +686,35 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                 disabled={selectedRecords.some((e) => e?.canAutoCompleteWorkOrder) ? false : true}
               >
                 Auto Complete Work Order(s)
+              </MenuItem>
+              <MenuItem
+                disabled={checkUniqWorkOrder() && (
+                  selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
+                  selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.length === 1
+                ) ? false : true}
+                onClick={() => {
+                  closeActions();
+                  const parentProduct = selectedRecords?.find((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)
+                  if (parentProduct) {
+                    setAttachmentsDialog({
+                      open: true,
+                      workOrderId: parentProduct?.workOrder?._id,
+                      uniqueServiceId: null,
+                      serviceName: parentProduct?.workOrder?.workOrderNumber
+                    })
+                  }
+                  else {
+                    const service = selectedRecords?.find((e) => e.type === MATERIAL_TYPE.service);
+                    setAttachmentsDialog({
+                      open: true,
+                      workOrderId: service?.workOrder?._id,
+                      uniqueServiceId: service?.uniqueId,
+                      serviceName: service?.serviceDetail?.serviceName
+                    })
+                  }
+                }}
+              >
+                Upload Documents
               </MenuItem>
               <MenuItem
                 onClick={() => {
@@ -857,12 +877,25 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
           workOrderId={attachmentsDialog.workOrderId}
           uniqueServiceId={attachmentsDialog.uniqueServiceId}
           stepId={null}
-          serviceName={attachmentsDialog.serviceName}
           stepName={attachmentsDialog.serviceName}
+          serviceName={attachmentsDialog.serviceName}
           handleClose={() => {
-            setAttachmentsDialog({ open: false, workOrderId: null, uniqueServiceId: null, serviceName: null });
+            setAttachmentsDialog({
+              open: false,
+              workOrderId: null,
+              uniqueServiceId: null,
+              serviceName: null
+            });
           }}
-          handleSuccess={() => {}}
+          handleSuccess={() => {
+            fetchData()
+            setAttachmentsDialog({
+              open: false,
+              workOrderId: null,
+              uniqueServiceId: null,
+              serviceName: null
+            });
+          }}
         />
       )}
     </Fragment>
