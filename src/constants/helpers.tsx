@@ -2377,7 +2377,7 @@ export const REPORT_LIST = [
     permission: 'serializedAsset',
     key: 'purchaseOrderType',
     // key: 'standardReport',
-    type: 'InUseSerializedAsset'
+    type: 'inUseSerializedAsset'
   }
 ];
 
