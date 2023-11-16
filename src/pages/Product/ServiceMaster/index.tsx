@@ -437,7 +437,14 @@ const ServiceMaster = (props: Props) => {
   };
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
-    if (updatedData.type === 'Product') {
+    if (updatedData.type === 'Service') {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'warning',
+        message: 'The default service quantity is set to 1 and cannot be changed.'
+      });
+    }
+    else if (updatedData.type === 'Product') {
       const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
       if (rowData && parseInt(inputField['qty'])) {
         handleSaveData({ _id: rowData._id, qty: parseInt(inputField['qty']) });
@@ -571,6 +578,7 @@ const ServiceMaster = (props: Props) => {
             setOpenAddDialog(false)
           }}
           isSubmitting={isSubmitting}
+          hideQty={true}
         />
       )}
       {arrangeView && (

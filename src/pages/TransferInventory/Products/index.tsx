@@ -379,63 +379,25 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
         </Box>
       )}
       <Box mt={1}>
-        {columns ? (
-          isMobile && !isTablet ? (
-            <CustomSwipableList
-              allowSelection={allowedToEdit}
-              allowSwipe={allowedToEdit}
-              permissions={permissions?.transferInventory}
-              primaryField={columns?.find((d: any) => d.primaryField)}
-              onClick={(data) => {
-                history.push(`${routes.productDetail.path}/${data._id}`);
-              }}
-              dataRows={dataRows}
-              selectedRecords={selectedRecords}
-              dispatch={dispatch}
-              onEdit={(data) => { }}
-              extraParamsToCheckDelete={true}
-              onDelete={(data) => { }}
-              rowCount={rowCount}
-              page={page}
-              loading={loading}
-              chips={[
-                {
-                  label: 'Quantity: ',
-                  field: 'qty'
-                },
-                {
-                  label: 'Serialized Product: ',
-                  field: 'serializedProduct'
-                }
-              ]}
-              additionalDetails={[]}
-              owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-              onCreate={false}
-              showClone={false}
-              onClone={(data) => { }}
-              renderedFrom={renderedFrom}
-            />
-          ) : (
-            <CustomAgGridEditable
-              columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameworkComponents}
-              setGridApi={setGridApi}
-              dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              allowAction={allowedToEdit}
-              actionWidth={120}
-              allowSelection={allowedToEdit}
-              isClientSideGrid={true}
-              loading={loading}
-              onCellValueChanged={onCellValueChanged}
-              renderedFrom={renderedFrom}
-              refreshGrid={fetchProducts}
-            />
-          )
+        {columns ? (<CustomAgGridEditable
+          columns={columns}
+          dataRows={dataRows}
+          frameworkComponents={frameworkComponents}
+          setGridApi={setGridApi}
+          dispatch={dispatch}
+          rowCount={rowCount}
+          limit={limit}
+          pageSizes={pageSizes}
+          page={page}
+          allowAction={allowedToEdit}
+          actionWidth={120}
+          allowSelection={allowedToEdit}
+          isClientSideGrid={true}
+          loading={loading}
+          onCellValueChanged={onCellValueChanged}
+          renderedFrom={renderedFrom}
+          refreshGrid={fetchProducts}
+        />
         ) : (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
