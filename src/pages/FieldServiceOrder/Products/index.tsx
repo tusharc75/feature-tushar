@@ -142,6 +142,7 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
       width: 50,
       sticky: 'right',
       disableFilters: true,
+      disableSortBy: true,
       canDrag: false,
       Cell: ({ row }) => {
         return allowedToEdit && (row.original.type === 'product' || row.original.type === 'Manual Entry') ? (

@@ -157,6 +157,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
       width: 70,
       sticky: 'right',
       disableFilters: true,
+      disableSortBy: true,
       canDrag: false,
       Cell: ({ row, rows }) => (
         <>

@@ -183,6 +183,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
       width: 100,
       sticky: 'right',
       disableFilters: true,
+      disableSortBy: true,
       canDrag: false,
       Cell: ({ row, rows }) => (
         <>

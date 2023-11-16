@@ -77,6 +77,7 @@ const DashBoards = () => {
   const ActionsRenderer = {
     accessor: 'action',
     Header: 'Actions',
+    disableSortBy: true,
     minWidth: 100,
     width: 100,
     sticky: 'right',

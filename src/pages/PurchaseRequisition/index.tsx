@@ -86,6 +86,7 @@ const PurchaseRequisition = () => {
     width: 130,
     sticky: 'right',
     disableFilters: true,
+    disableSortBy: true,
     canDrag: false,
     Cell: ({ row }) => (
       <>

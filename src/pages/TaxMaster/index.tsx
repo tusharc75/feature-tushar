@@ -85,6 +85,7 @@ const TaxMaster = () => {
     width: 110,
     sticky: 'right',
     disableFilters: true,
+    disableSortBy: true,
     canDrag: false,
     Cell: ({ row }) => (
       <>
