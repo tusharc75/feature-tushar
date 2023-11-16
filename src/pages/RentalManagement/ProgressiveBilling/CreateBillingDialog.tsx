@@ -183,6 +183,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
       width: 50,
       sticky: 'right',
       disableFilters: true,
+      disableSortBy: true,
       canDrag: false,
       Cell: ({ row }) =>
         row.original.isEditable && (

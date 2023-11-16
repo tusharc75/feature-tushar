@@ -154,6 +154,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
       width: 50,
       sticky: 'right',
       disableFilters: true,
+      disableSortBy: true,
       Cell: ({ row }) => (
         <>
           <HtmlTooltip title={allowedToEdit ? 'Edit' : ''}>
