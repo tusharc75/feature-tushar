@@ -146,7 +146,6 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
               obj.datasets[i].borderColor = cList[0];
               obj.datasets[i].backgroundColor = `${cList[0].replace(/[\d.]+\)$/g, '0.5)')}`;
             }
-            // console.log(chart.chartTitle === 'Total Booked Volume In MT Vs Total Offered Volume In MT Vs Budget' && obj);
           }
         }
       }
