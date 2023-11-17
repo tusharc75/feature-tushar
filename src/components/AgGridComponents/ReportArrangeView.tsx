@@ -101,14 +101,10 @@ const ReportArrangeView = (props: ArrangeColumnsProps) => {
       const index = layedCols.indexOf(col.field);
       const colData = savedColumns.find((_col) => _col.colId === col.field);
       if (index > -1) {
-        if(selectedReportView && colData){
-          newCols[index] = { ...col, show: (selectedReportView && colData) ? !colData.hide : true };
-        }else{
-          newCols[index] = {...col}
-        }  
+        newCols[index] = { ...col, show: selectedReportView && colData ? !colData.hide : true };
       }
     });
-  
+
     const allNotVisible = columns.some((col) => col.show === false);
 
     if (allNotVisible) {
