@@ -202,8 +202,8 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
     let rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = parent.type === MATERIAL_TYPE.product ? parent.productDetail?.productName : parent.packageDetail?.packageName;
-      parent.description =
+      parent.detail = parent?.detail ? parent?.detail : parent.type === MATERIAL_TYPE.product ? parent.productDetail?.productName : parent.packageDetail?.packageName;
+      parent.description = parent?.description ? parent?.description :
         parent.type === MATERIAL_TYPE.product ? parent?.productDetail?.productDescription : parent?.packageDetail?.packageDescription;
       parent.qty = parent.qty;
       parent.qtyDisplay = parent.qty;
@@ -237,8 +237,8 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = _subRow.type === MATERIAL_TYPE.product ? _subRow.productDetail?.productName : _subRow.packageDetail?.packageName;
-      _subRow.description =
+      _subRow.detail = _subRow?.detail ? _subRow?.detail : _subRow.type === MATERIAL_TYPE.product ? _subRow.productDetail?.productName : _subRow.packageDetail?.packageName;
+      _subRow.description = _subRow?.description ? _subRow?.description :
         _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productDescription : _subRow?.packageDetail?.packageDescription;
       _subRow.qty = _subRow.qty;
       _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
@@ -262,12 +262,6 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
         element.parentId = addDialog.parentId;
         material.push(element);
       })
-      // element.materialId = d._id;
-      // element.type = d?.type || addDialog.type;
-      // element.unit = d?.unitMain && d?.unitMain?.length ? d.unitMain[0] : d?.unit ? d?.unit : '';
-      // element.qty = d.qty ? parseFloat(d.qty) : 1;
-      // element.parentId = addDialog.parentId;
-      // material.push(element);
     })
     axiosInstance()
       .post(`${productionOrder.api}/material/${productionOrderData._id}`, { material })
