@@ -140,18 +140,20 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, statusOptions, 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = `${
-        parent.type === 'product'
+        parent.type === MATERIAL_TYPE.product
           ? parent.productDetail?.productName
-          : parent.type === 'service'
+          : parent.type === MATERIAL_TYPE.service
           ? parent.serviceDetail?.serviceName
           : parent.packageDetail?.packageName
       }`;
       parent.description =
         parent.type === MATERIAL_TYPE.product
           ? parent?.productDetail?.productDescription
-          : parent.type === 'package'
+          : parent.type === MATERIAL_TYPE.package
           ? parent?.packageDetail?.packageDescription
-          : parent?.serviceDetail?.serviceDescription;
+          : parent?.type === MATERIAL_TYPE.manualEntry
+            ? parent?.description
+            : parent?.serviceDetail?.serviceDescription;
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qty = parent.qty;
