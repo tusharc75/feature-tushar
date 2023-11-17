@@ -36,7 +36,7 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
 
   const fetchFields = async () => {
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.productionOrderDetail}`);
-    var data = response?.data?.data;
+    var data = response?.data?.data?.filter((e) => !['detail', 'description']?.includes(e?.fieldName));
     data = CURReplaceByCurrencySingle(data, productionOrderData?.currency || 'USD');
     data?.forEach((e) => {
       e.isColumnEditable = false;
