@@ -60,7 +60,9 @@ const PurchaseOrderViews = (props) => {
     try {
       const product = await axiosInstance().get(`${purchaseOrder.api}/product/${pId}`);
       const assets = await axiosInstance().get(`${purchaseOrder.api}/${pId}/assets`);
+      const manualEntry = await axiosInstance().get(`${purchaseOrder.api}/cost/${pId}`);
       const allProducts = product?.data?.data;
+      const allManualEntry = manualEntry?.data?.data;
       const allSerializedAssets = assets?.data?.data?.serializedAsset;
       const allSerialNumber = assets?.data?.data?.productSerialNumber;
 
@@ -82,9 +84,10 @@ const PurchaseOrderViews = (props) => {
       ];
       var flowEdge: any[] = [];
       xPosition += 300;
+      var yPosition = 0;
       var productReceived = 0;
       const allProductId = {};
-      allProducts?.map((item, pIdx) => {
+      allProducts?.map((item) => {
         allProductId[item?.productId] = `${item?.productId}_${item?._id}`;
         if (item?.actualReceived > 0) productReceived += 1;
         flow.push({
@@ -98,7 +101,7 @@ const PurchaseOrderViews = (props) => {
             ref_id: item?.productId,
             label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item?.productDetail?.productName}</div>
           },
-          position: { x: xPosition, y: pIdx * 80 },
+          position: { x: xPosition, y: yPosition },
           style: customNodeStyles.product
         });
         flowEdge.push({
@@ -106,6 +109,29 @@ const PurchaseOrderViews = (props) => {
           source: `${pId}`,
           target: `${item?.productId}_${item?._id}`
         });
+        yPosition += 80;
+      });
+      allManualEntry?.map((item) => {
+        flow.push({
+          id: `${item?._id}`,
+          type: 'default',
+          className: 'dark-node',
+          sourcePosition: 'right',
+          targetPosition: 'left',
+          data: {
+            ref_type: 'manualEntry',
+            ref_id: item?._id,
+            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item?.description}</div>
+          },
+          position: { x: xPosition, y: yPosition },
+          style: customNodeStyles.product
+        });
+        flowEdge.push({
+          id: `${pId}_${item?._id}_edge`,
+          source: `${pId}`,
+          target: `${item?._id}`
+        });
+        yPosition += 80;
       });
 
       const serialisedAssetInProduct = {};
@@ -192,6 +218,14 @@ const PurchaseOrderViews = (props) => {
             target: `${pId}_received`
           });
         });
+
+      allManualEntry?.map((item) => {
+        flowEdge.push({
+          id: `${pId}_${item?._id}_received_edge`,
+          source: `${item?._id}`,
+          target: `${pId}_received`
+        });
+      })
       allSerializedAssets?.map((item, sIdx) => {
         flowEdge.push({
           id: `${pId}_${item}_received_edge`,
