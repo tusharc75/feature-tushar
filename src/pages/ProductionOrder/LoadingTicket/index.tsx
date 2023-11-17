@@ -88,12 +88,12 @@ const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, rende
 
     const fetchFields = async () => {
         const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.productionOrderDetail}`);
-        var data = response?.data?.data;
+        var data = response?.data?.data?.filter((e) => !['detail', 'description']?.includes(e?.fieldName));
         data = CURReplaceByCurrencySingle(data, productionOrderData?.currency || 'USD');
         data?.forEach((e) => {
             e.isColumnEditable = false;
         });
-        const newColumns = generateCustomTableColumns(data, productionOrderData?.currency || 'USD', renderedFrom)?.filter((e) => !['detail', 'description']?.includes(e['accessor']));
+        const newColumns = generateCustomTableColumns(data, productionOrderData?.currency || 'USD', renderedFrom);
         let coloum: any = [
             {
                 accessor: 'index',
