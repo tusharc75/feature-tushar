@@ -41,7 +41,7 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
     data?.forEach((e) => {
       e.isColumnEditable = false;
     });
-    const newColumns = generateCustomTableColumns(data, productionOrderData?.currency || 'USD', renderedFrom)?.filter((e) => !['Detail', 'Description']?.includes(e['Header']));
+    const newColumns = generateCustomTableColumns(data, productionOrderData?.currency || 'USD', renderedFrom)?.filter((e) => !['detail', 'description']?.includes(e['accessor']));
     let coloum: any = [
       {
         accessor: 'index',
