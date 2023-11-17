@@ -26,6 +26,8 @@ import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
+import { TouchBackend } from 'react-dnd-touch-backend';
+import { isMobile, isTablet } from 'react-device-detect';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -158,14 +160,14 @@ const ReportArrangeView = (props: ArrangeColumnsProps) => {
           columnState: columnState,
           name: reportName.trimEnd()
         })
-        .then(({data: {data}}) => {
+        .then(({ data: { data } }) => {
           setSubmitting(false);
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
             message: 'Settings saved successfully'
           });
-          setSelectedReportView(data)
+          setSelectedReportView(data);
           onClose();
         })
         .catch((error) => {
@@ -180,14 +182,14 @@ const ReportArrangeView = (props: ArrangeColumnsProps) => {
           columnState: columnState,
           name: reportName.trimEnd()
         })
-        .then(({data: {data}}) => {
+        .then(({ data: { data } }) => {
           setSubmitting(false);
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
             message: 'Settings saved successfully'
           });
-          setSelectedReportView(data)
+          setSelectedReportView(data);
           onClose();
         })
         .catch((error) => {
@@ -254,7 +256,7 @@ const ReportArrangeView = (props: ArrangeColumnsProps) => {
               <Switch size="small" checked={allChecked} onChange={handleToggleAll} />
             </ListItemSecondaryAction>
           </ListItem>
-          <DndProvider backend={HTML5Backend}>
+          <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
             {sortedColumns.map((column, index) => (
               <RenderListItem
                 key={column.field}

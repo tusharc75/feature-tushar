@@ -141,24 +141,24 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                 </IconButton>
               </HtmlTooltip>
             ) : (
-              <IconButton
-                size="small"
-                onClick={() => {
-                  if (row.original.type === 'service') {
-                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === 'product') {
-                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === 'asset') {
-                    window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
-                  } else {
-                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                  }
-                }}
-              >
-                <OpenInNewIcon fontSize="small" color="primary" />
-              </IconButton>
+              row.original?.type === 'asset' && row.original?.isNonSerializeAsset ? null :
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    if (row.original.type === 'service') {
+                      window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                    } else if (row.original.type === 'product') {
+                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                    } else if (row.original.type === 'asset') {
+                      window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
+                    } else {
+                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                    }
+                  }}
+                >
+                  <OpenInNewIcon fontSize="small" color="primary" />
+                </IconButton>
             )}
-
             {row.original.isBulkAssetCreation && (
               <HtmlTooltip title={`${routes.bulkAssetCreation.title}`}>
                 <IconButton
@@ -209,7 +209,8 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                         }
                         setDeleteData([
                           {
-                            _id: row.original.inventory,
+                            _id: row.original.uniqueId,
+                            assetId: row.original.inventory,
                             assetNumber: row.original.detail,
                             isNonSerializeAsset: row.original.isNonSerializeAsset,
                             isTransferAsset: isTransferAsset
@@ -470,6 +471,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         manualStatus: _inventory.inventoryDetail?.manualStatus,
         warehouse: _inventory.inventoryDetail?.warehouse,
         _id: _inventory.inventory,
+        uniqueId: _inventory._id,
         isValid: _inventory.inventoryDetail?.manualStatus === ASSET_STATUS.reserved ? false : true,
         isTransferAsset: isTransferAsset,
         transferData: transferData,
@@ -482,6 +484,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
     nonSerializeAsset_result?.forEach((_inventory, k) => {
       subRows.push({
         _id: _inventory.id,
+        uniqueId: _inventory.id,
         inventory: _inventory.id,
         index: `${parent.index}.${k + 1}`,
         detail: _inventory?.assetNumber,
@@ -878,7 +881,8 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                       isTransferAsset = true;
                     }
                     dataTodelete.push({
-                      _id: element?.inventory,
+                      _id: element.uniqueId,
+                      assetId: element.inventory,
                       assetNumber: element?.detail,
                       isNonSerializeAsset: element?.isNonSerializeAsset,
                       isTransferAsset: isTransferAsset
