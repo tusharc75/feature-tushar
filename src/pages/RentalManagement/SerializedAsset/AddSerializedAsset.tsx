@@ -200,7 +200,7 @@ const AddSerializedAsset = ({
     }
     let api = '';
     if (Number(tabValue) === 2) {
-      api = `${serializedAsset.api}/in-use${queryString}&rental=${referenceData?._id}`;
+      api = `${serializedAsset.api}/in-use${queryString}&rentalJobId=${referenceData?._id}`;
     } else {
       api = `${serializedAsset.api}${queryString}`;
     }
@@ -274,7 +274,7 @@ const AddSerializedAsset = ({
         deepFilter = `${deepFilter}&transferable=true`;
       } else if (referenceType === 'Rental Job') {
         const dateFilter = { from: referenceData?.fromDate, to: referenceData?.toDate };
-        deepFilter = `${deepFilter}&rental=true&date=${JSON.stringify(dateFilter)}`;
+        deepFilter = `${deepFilter}&rental=true&rentalJobId=${referenceData?._id}&date=${JSON.stringify(dateFilter)}`;
       } else {
         deepFilter = `${deepFilter}&availableAsset=true`;
       }
