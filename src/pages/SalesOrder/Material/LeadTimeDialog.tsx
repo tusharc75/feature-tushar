@@ -30,14 +30,14 @@ function LeadTimeDialog({ salesOrderId, data, onClose, handleSucess }) {
     };
 
     axiosInstance()
-      .put(`${salesOrder.api}/productpackage/${salesOrderId}/lead-time`, value)
-      .then((res) => {
+      .put(`${salesOrder.api}/material/${salesOrderId}/lead-time`, value)
+      .then(({ data }) => {
         setLoading(false);
         handleSucess();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: 'Lead time updated successfully'
+          message: data.message
         });
       })
       .catch((err) => {
@@ -209,7 +209,7 @@ function LeadTimeDialog({ salesOrderId, data, onClose, handleSucess }) {
         {showConfirmDialog ? (
           <ConfirmCancelDialog
             open={showConfirmDialog}
-            onSave={() => {}}
+            onSave={() => { }}
             onClose={() => {
               setShowConfirmDialog(false);
               onClose();
