@@ -25,6 +25,7 @@ import UpdateProductDialog from './UpdateProductDialog';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { generateCustomTableColumns } from 'src/constants/columns';
 import EditIcon from '@material-ui/icons/Edit';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
 const Consumables = ({
   isCreate,
@@ -54,6 +55,8 @@ const Consumables = ({
   const [isUpdating, setUpdating] = useState(false);
 
   const [repairOrderData, setRepairOrderData] = useState(null);
+
+  const [reviseQuotation, setReviseQuotation] = useState(false);
 
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -358,7 +361,7 @@ const Consumables = ({
       .then(({ data }) => {
         if (repairOrderData && repairOrderData?.addConsumablesQuotation && repairOrderData?.addQuotationStep &&
           repairOrderData?.quotation?.status === QUOTATION_STATUS.acceptByCustomer) {
-          createNewVersionQuote(repairOrderData?.quotation?.quotation, repairOrderData?.quotation?._id);
+          setReviseQuotation(true);
         }
         fetchData();
         setIsSubmitting(false);
@@ -603,6 +606,20 @@ const Consumables = ({
             workOrderData={workOrderData}
           />
         )}
+        {reviseQuotation && (
+          <ConfirmationDialog
+            open={reviseQuotation}
+            message={`Do you want to revise the Quotation ?`}
+            onClose={() => {
+              setReviseQuotation(false);
+              fetchData();
+            }}
+            onOk={()=>{
+              createNewVersionQuote(repairOrderData?.quotation?.quotation, repairOrderData?.quotation?._id);
+              setReviseQuotation(false);
+            }}
+          />
+      )}
       </Grid>
     </>
   );

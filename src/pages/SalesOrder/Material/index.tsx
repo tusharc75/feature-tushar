@@ -8,7 +8,7 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import Add from '@material-ui/icons/Add';
-import { MATERIAL_TYPE, pricingCondition, salesOrder } from '../../../constants/helpers';
+import { MATERIAL_TYPE, SALES_ORDER_STATUS, pricingCondition, salesOrder } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -27,8 +27,9 @@ import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageD
 import AddIcon from '@material-ui/icons/Add';
 import { ExpandMore, KeyboardArrowDown } from '@material-ui/icons';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
+import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 
-const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen, fetchSalesOrderData }) => {
+const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen, fetchSalesOrderData, updateJobStatus }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -64,6 +65,10 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen, f
     var data = await fetch_salesOrder_product_fields(salesOrderData?.currency);
     setAllFields(JSON.parse(JSON.stringify(data)));
     const newColumns = generateCustomTableColumns(data, salesOrderData?.currency, renderedFrom);
+    let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
+    if (qtyIndex > -1) {
+      newColumns[qtyIndex].accessor = 'qtyDisplay';
+    }
     const isPriceRequired = data.filter((el) => el.fieldName === 'price' && el.required).length > 0;
     setIsRateRequired(isPriceRequired);
     let coloum: any = [
@@ -210,6 +215,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen, f
                 aria-label="Details"
                 onClick={() => {
                   const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                  getNestedSubRows(obj, row.original);
                   setDeleteData(obj);
                 }}
               >
@@ -245,7 +251,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen, f
             : parent?.serviceDetail?.serviceDescription;
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
-      parent.qty = parent.qty;
+      parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + salesOrderData?.currency?.toLowerCase()] ? true : !isRateRequired;
       parent.subRows = generateNestedData(data.material, parent);
     });
@@ -260,7 +266,8 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen, f
 
   const generateNestedData = (material, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
-    subRows.forEach((_subRow, j) => {
+    subRows.forEach((_subRow, index) => {
+      _subRow.index = parent.index + '.' + `${index + 1}`;
       _subRow.detail = `${_subRow.type === MATERIAL_TYPE.product
         ? _subRow.productDetail?.productName
         : _subRow.type === MATERIAL_TYPE.service
@@ -275,7 +282,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen, f
             : _subRow?.serviceDetail?.serviceDescription;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
-      _subRow.qty = `${parent.qty * _subRow.qty} `;
+      _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
       _subRow.isValid = _subRow['finalPrice_' + salesOrderData?.currency?.toLowerCase()] ? true : false;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
@@ -341,6 +348,9 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen, f
         fetchData();
         fetchSalesOrderData()
         setSubmitting(false);
+        if (salesOrderData?.status === SALES_ORDER_STATUS.new) {
+          updateJobStatus(SALES_ORDER_STATUS.inProgress)
+        }
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
