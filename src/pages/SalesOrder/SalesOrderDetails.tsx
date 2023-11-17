@@ -295,6 +295,7 @@ const SalesOrderDetails = () => {
                 renderedFrom={`${renderedFrom}_grid-1`}
                 stepFullScreen={stepFullScreen}
                 fetchSalesOrderData={fetchSalesOrderData}
+                updateJobStatus={updateJobStatus}
               />
             )}
             {currentStep === 1 && salesOrderData && (
