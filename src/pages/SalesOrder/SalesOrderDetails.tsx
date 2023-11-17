@@ -29,6 +29,7 @@ import ManageSalesOrderDialog from './ManageSalesOrderDialog';
 import Material from './Material';
 import Process from './Process';
 import SalesOrderView from './View';
+import ButtonWithPulse from 'src/components/ButtonWithPulse';
 
 const SalesOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -54,12 +55,28 @@ const SalesOrderDetails = () => {
   const [currentStep, setCurrentStep] = useState(null);
   const [statusOptions, setStatusOptions] = useState([]);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [stepFullScreen, setStepFullScreen] = useState(false);
+  const [showClosedConfirmBox, setShowClosedConfirmBox] = useState(false);
+  const [steps, setSteps] = useState([]);
+
+  useEffect(() => {
+    axiosInstance()
+      .get(`/field?resource=Product&view=true`)
+      .then(({ data: { data } }) => {
+        if (data?.some((d) => d?.fieldData?.fieldName === 'procurementMethod')) {
+          setSteps(salesOrderProcessSteps);
+        } else {
+          setSteps(salesOrderProcessSteps?.filter((s) => s.name !== 'Process'));
+        }
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }, []);
 
   const salesOrderProcessStepsNames = React.useMemo(() => {
-    return salesOrderProcessSteps.map((item) => item.name);
-  }, [salesOrderProcessSteps]);
+    return steps.map((item) => item.name);
+  }, [steps]);
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
@@ -72,20 +89,6 @@ const SalesOrderDetails = () => {
       'aria-controls': `main-tabpanel-${index}`
     };
   }
-
-  const handleStatusChange = (o) => {
-    if (o.optionValue && salesOrderData?.status !== o.optionValue) {
-      updateJobStatus(o.optionValue);
-    }
-  };
-
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
 
   useEffect(() => {
     if (id) {
@@ -132,7 +135,7 @@ const SalesOrderDetails = () => {
       const response: any = await axiosInstance().get(`${salesOrder.api}/${id}`);
       data = response?.data?.data;
 
-      setCurrentStep(getIndex(data?.processStatus, salesOrderProcessSteps));
+      setCurrentStep(getIndex(data?.processStatus, steps));
 
       setHeadingLabel(data.salesOrderNo);
       setCustomizedRoutes([routes.salesOrder, { title: `${data.salesOrderNo}` }]);
@@ -159,7 +162,7 @@ const SalesOrderDetails = () => {
       .put(`${salesOrder.api}/remove`, { ids: [id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.push(`${routes.salesOrder.path}`)
+        history.push(`${routes.salesOrder.path}`);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -193,6 +196,19 @@ const SalesOrderDetails = () => {
           <Box className="control-buttons-v1">
             {salesOrderData ? (
               <>
+                {permissions?.salesOrder?.isUpdate && [SALES_ORDER_STATUS.invoiced].includes(salesOrderData?.status) && (
+                  <ButtonWithPulse
+                    variant={'outlined'}
+                    color="default"
+                    size="small"
+                    onClick={() => {
+                      setShowClosedConfirmBox(true);
+                    }}
+                    className={'btn-outline-v1'}
+                  >
+                    Close
+                  </ButtonWithPulse>
+                )}
                 {permissions?.salesOrder?.isUpdate && allowedToEdit && (
                   <Button
                     className={'btn-outline-v1'}
@@ -207,50 +223,6 @@ const SalesOrderDetails = () => {
                 {permissions?.salesOrder?.isDelete && [SALES_ORDER_STATUS.invoiced, SALES_ORDER_STATUS.closed].includes(salesOrderData?.status) && (
                   <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
                 )}
-
-                {permissions?.salesOrder?.isUpdate &&
-                  [SALES_ORDER_STATUS.readyToInvoice, SALES_ORDER_STATUS.invoiced].includes(salesOrderData?.status) && (
-                    <>
-                      <Button
-                        variant="outlined"
-                        color="default"
-                        size="small"
-                        onClick={openActions}
-                        aria-controls="action-menu"
-                        className="btn-outline-v1"
-                        endIcon={isMobile ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
-                      >
-                        {isMobile ? <GrStatusInfo size={20} /> : 'Change Status'}
-                      </Button>
-                      <Menu
-                        anchorEl={anchorEl}
-                        keepMounted
-                        getContentAnchorEl={null}
-                        anchorOrigin={{
-                          vertical: 'bottom',
-                          horizontal: 'left'
-                        }}
-                        id="action-menu"
-                        open={Boolean(anchorEl)}
-                        onClose={closeActions}
-                      >
-                        {statusOptions?.map((o, index) => {
-                          return (
-                            <MenuItem
-                              disabled={index <= statusOptions.findIndex((d) => d.optionLabel === salesOrderData?.status)}
-                              onClick={() => {
-                                closeActions();
-                                handleStatusChange(o);
-                              }}
-                              value={o}
-                            >
-                              {o?.optionLabel}
-                            </MenuItem>
-                          );
-                        })}
-                      </Menu>
-                    </>
-                  )}
               </>
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
@@ -318,7 +290,7 @@ const SalesOrderDetails = () => {
           <Steps
             isNextStep={false}
             nextStep={nextStep}
-            steps={salesOrderProcessSteps}
+            steps={steps}
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
             isStepEnded={[SALES_ORDER_STATUS.invoiced, SALES_ORDER_STATUS.closed].includes(salesOrderData?.status)}
@@ -367,6 +339,18 @@ const SalesOrderDetails = () => {
             setShowConfirmBox(false);
           }}
           onOk={handleDelete}
+        />
+      )}
+      {showClosedConfirmBox && (
+        <ConfirmationDialog
+          open={showClosedConfirmBox}
+          message={`Are you sure you want to close ?`}
+          onClose={() => {
+            setShowClosedConfirmBox(false);
+          }}
+          onOk={() => {
+            updateJobStatus(SALES_ORDER_STATUS.closed);
+          }}
         />
       )}
       {openUpdateDialog && (

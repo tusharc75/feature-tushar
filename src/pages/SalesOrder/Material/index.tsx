@@ -50,7 +50,6 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [leadTimeDialog, setLeadTimeDialog] = useState({ open: false, data: null });
 
-
   const [isSubmitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -146,17 +145,21 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
           return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
         }
       },
-      {
-        accessor: 'leadTime',
-        Header: 'Lead Time (Days)',
-        Cell: ({ row }) => (row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0),
-        Footer: (info) => {
-          const total = info.rows
-            .filter((f) => f.values.hasOwnProperty('leadTime') && !isNaN(f.values['leadTime']))
-            .reduce((sum, row) => parseInt(row.values['leadTime']) + sum, 0);
-          return <>{total}</>;
-        }
-      }
+      ...(permissions?.leadTimeMaster
+        ? [
+            {
+              accessor: 'leadTime',
+              Header: 'Lead Time (Days)',
+              Cell: ({ row }) => (row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0),
+              Footer: (info) => {
+                const total = info.rows
+                  .filter((f) => f.values.hasOwnProperty('leadTime') && !isNaN(f.values['leadTime']))
+                  .reduce((sum, row) => parseInt(row.values['leadTime']) + sum, 0);
+                return <>{total}</>;
+              }
+            }
+          ]
+        : [])
     ];
     const isPriceRequired = data.filter((el) => el.fieldName === 'price' && el.required).length > 0;
     setIsRateRequired(isPriceRequired);
@@ -182,15 +185,17 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
             >
               <EditIcon fontSize="small" color="primary" />
             </IconButton>
-            <IconButton
-              size="small"
-              aria-label="Details"
-              onClick={() => {
-                setLeadTimeDialog({ open: true, data: row.original });
-              }}
-            >
-              <DateRangeIcon fontSize="small" color="primary" />
-            </IconButton>
+            {permissions?.leadTimeMaster && (
+              <IconButton
+                size="small"
+                aria-label="Details"
+                onClick={() => {
+                  setLeadTimeDialog({ open: true, data: row.original });
+                }}
+              >
+                <DateRangeIcon fontSize="small" color="primary" />
+              </IconButton>
+            )}
             <Box ml={1} />
             <IconButton
               size="small"
@@ -219,18 +224,19 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === 'product'
-        ? parent.productDetail?.productName
-        : parent.type === 'service'
+      parent.detail = `${
+        parent.type === 'product'
+          ? parent.productDetail?.productName
+          : parent.type === 'service'
           ? parent.serviceDetail?.serviceName
           : parent.packageDetail?.packageName
-        }`;
+      }`;
       parent.description =
         parent.type === 'product'
           ? parent?.productDetail?.productDescription
           : parent.type === 'package'
-            ? parent?.packageDetail?.packageDescription
-            : parent?.serviceDetail?.serviceDescription;
+          ? parent?.packageDetail?.packageDescription
+          : parent?.serviceDetail?.serviceDescription;
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qty = parent.qty;
@@ -249,18 +255,19 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
   const generateNestedData = (material, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
-      _subRow.detail = `${_subRow.type === 'product'
-        ? _subRow.productDetail?.productName
-        : _subRow.type === 'service'
+      _subRow.detail = `${
+        _subRow.type === 'product'
+          ? _subRow.productDetail?.productName
+          : _subRow.type === 'service'
           ? _subRow.serviceDetail?.serviceName
           : _subRow.packageDetail?.packageName
-        }`;
+      }`;
       _subRow.description =
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productDescription
           : _subRow.type === 'package'
-            ? _subRow?.packageDetail?.packageDescription
-            : _subRow?.serviceDetail?.serviceDescription;
+          ? _subRow?.packageDetail?.packageDescription
+          : _subRow?.serviceDetail?.serviceDescription;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qty = `${parent.qty * _subRow.qty} `;
