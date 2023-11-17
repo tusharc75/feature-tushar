@@ -136,6 +136,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
 
   const [isSubmitting, setSubmitting] = useState(false);
 
+  const [reviseQuotation, setReviseQuotation] = useState(false);
+
   useEffect(() => {
     fetchServiceData();
   }, [workOrderId]);
@@ -302,7 +304,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
       .then(() => {
         setServiceDialog({ open: false, type: '', uniqueId: null, preWork: null });
         if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(quotationData?.status)) {
-          createNewVersionQuote();
+          setReviseQuotation(true);
         } else {
           fetchServiceData();
         }
@@ -327,7 +329,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           message: data?.message
         });
         if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(quotationData?.status)) {
-          createNewVersionQuote();
+          setReviseQuotation(true);
         } else {
           fetchServiceData();
         }
@@ -1407,6 +1409,22 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           }}
         />
       )}
+
+      {reviseQuotation && (
+          <ConfirmationDialog
+            open={reviseQuotation}
+            message={`Do you want to revise the Quotation ?`}
+            onClose={() => {
+              setReviseQuotation(false);
+              fetchServiceData();
+            }}
+            onOk={()=>{
+              createNewVersionQuote();
+              setReviseQuotation(false);
+            }}
+          />
+      )}
+
     </Box>
   );
 };
