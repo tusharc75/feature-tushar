@@ -89,7 +89,7 @@ const SalesOrderDetails = () => {
 
   useEffect(() => {
     if (id && steps?.length) {
-      getRessourceFields();
+      getFields();
       fetchSalesOrderData();
     }
   }, [id, steps]);
@@ -109,7 +109,7 @@ const SalesOrderDetails = () => {
       });
   };
 
-  const getRessourceFields = async () => {
+  const getFields = async () => {
     try {
       const response: any = await axiosInstance().get('/field?resource=Sales Order');
       setSalesOrderFields(response?.data?.data);

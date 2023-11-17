@@ -303,7 +303,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         parent.workOrderStatus = parent?.workOrder?.status;
       }
       parent.subRows = generateNestedData(data.material, parent);
-      if (parent?.workOrder?.status === WORK_ORDER_STATUS.new && parent?.subRows?.some((obj) => obj.type === MATERIAL_TYPE.service)) {
+      if (parent?.workOrder?.status === WORK_ORDER_STATUS.new) {
         parent.canAutoCompleteWorkOrder = true;
       }
       parent.canDelete = false;
