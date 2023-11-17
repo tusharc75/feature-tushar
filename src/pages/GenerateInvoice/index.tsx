@@ -74,7 +74,7 @@ const GENERATE_RESOURCE = [
     fieldName: 'salesOrderNumber',
     invoiceFieldName: 'salesOrder',
     progressiveBilling: false,
-    path: routes.salesOrder.path,
+    path: routes.salesOrderDetail.path,
     title: routes.salesOrder.title
   }
 ];

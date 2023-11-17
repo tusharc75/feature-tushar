@@ -8,7 +8,7 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import Add from '@material-ui/icons/Add';
-import { pricingCondition, salesOrder } from '../../../constants/helpers';
+import { MATERIAL_TYPE, SALES_ORDER_STATUS, pricingCondition, salesOrder } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -27,8 +27,9 @@ import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageD
 import AddIcon from '@material-ui/icons/Add';
 import { ExpandMore, KeyboardArrowDown } from '@material-ui/icons';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
+import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 
-const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen }) => {
+const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen, fetchSalesOrderData, updateJobStatus }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -55,12 +56,21 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
   useEffect(() => {
     fetchFields();
   }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [columns]);
+
   const fetchFields = async () => {
     var data = await fetch_salesOrder_product_fields(salesOrderData?.currency);
     setAllFields(JSON.parse(JSON.stringify(data)));
-
     const newColumns = generateCustomTableColumns(data, salesOrderData?.currency, renderedFrom);
-
+    let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
+    if (qtyIndex > -1) {
+      newColumns[qtyIndex].accessor = 'qtyDisplay';
+    }
+    const isPriceRequired = data.filter((el) => el.fieldName === 'price' && el.required).length > 0;
+    setIsRateRequired(isPriceRequired);
     let coloum: any = [
       {
         accessor: 'index',
@@ -75,6 +85,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
       {
         accessor: 'type',
         Header: 'Type',
+        width: 100,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -101,7 +112,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
               </p>
             }
 
-            {row?.original?.type !== 'service' && (
+            {row?.original?.type !== MATERIAL_TYPE.service && (
               <Box ml={1} className="d-flex align-items-center">
                 {row.original?.subRows?.length > 0 && (
                   <span title={`There are ${row.original?.subRows?.length} product(s) in this package`}>({row.original?.subRows?.length})</span>
@@ -122,9 +133,9 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
               <IconButton
                 size="small"
                 onClick={() => {
-                  if (row.original.type === 'service') {
+                  if (row.original.type === MATERIAL_TYPE.service) {
                     window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === 'product') {
+                  } else if (row.original.type === MATERIAL_TYPE.product) {
                     window.open(`${routes.productDetail.path}/${row.original.materialId}`);
                   } else {
                     window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
@@ -147,22 +158,20 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
       },
       ...(permissions?.leadTimeMaster
         ? [
-            {
-              accessor: 'leadTime',
-              Header: 'Lead Time (Days)',
-              Cell: ({ row }) => (row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0),
-              Footer: (info) => {
-                const total = info.rows
-                  .filter((f) => f.values.hasOwnProperty('leadTime') && !isNaN(f.values['leadTime']))
-                  .reduce((sum, row) => parseInt(row.values['leadTime']) + sum, 0);
-                return <>{total}</>;
-              }
+          {
+            accessor: 'leadTime',
+            Header: 'Lead Time (Days)',
+            Cell: ({ row }) => (row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0),
+            Footer: (info) => {
+              const total = info.rows
+                .filter((f) => f.values.hasOwnProperty('leadTime') && !isNaN(f.values['leadTime']))
+                .reduce((sum, row) => parseInt(row.values['leadTime']) + sum, 0);
+              return <>{total}</>;
             }
-          ]
+          }
+        ]
         : [])
     ];
-    const isPriceRequired = data.filter((el) => el.fieldName === 'price' && el.required).length > 0;
-    setIsRateRequired(isPriceRequired);
     coloum = [...coloum, ...newColumns];
     coloum.push({
       accessor: 'action',
@@ -206,6 +215,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
                 aria-label="Details"
                 onClick={() => {
                   const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                  getNestedSubRows(obj, row.original);
                   setDeleteData(obj);
                 }}
               >
@@ -215,12 +225,10 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
           </>
         )
     });
-
     setColumns(coloum);
-    fetchMaterialData();
   };
 
-  const fetchMaterialData = async () => {
+  const fetchData = async () => {
     setNextStep(false);
     var data: any = [];
     const response = await axiosInstance().get(`${salesOrder.api}/material/${salesOrderData._id}`);
@@ -229,27 +237,26 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === 'product'
-          ? parent.productDetail?.productName
-          : parent.type === 'service'
+      parent.detail = `${parent.type === MATERIAL_TYPE.product
+        ? parent.productDetail?.productName
+        : parent.type === MATERIAL_TYPE.service
           ? parent.serviceDetail?.serviceName
           : parent.packageDetail?.packageName
-      }`;
+        }`;
       parent.description =
-        parent.type === 'product'
+        parent.type === MATERIAL_TYPE.product
           ? parent?.productDetail?.productDescription
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription
-          : parent?.serviceDetail?.serviceDescription;
+          : parent.type === MATERIAL_TYPE.package
+            ? parent?.packageDetail?.packageDescription
+            : parent?.serviceDetail?.serviceDescription;
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
-      parent.qty = parent.qty;
-      parent.isValid = parent['finalPrice_' + salesOrderData?.currency?.toLowerCase()] ? true : false;
+      parent.qtyDisplay = parent.qty;
+      parent.isValid = parent['finalPrice_' + salesOrderData?.currency?.toLowerCase()] ? true : !isRateRequired;
       parent.subRows = generateNestedData(data.material, parent);
     });
     if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
-      setNextStep(true);
+      setNextStep(false);
     } else {
       setNextStep(true);
     }
@@ -259,30 +266,30 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
 
   const generateNestedData = (material, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
-    subRows.forEach((_subRow, j) => {
-      _subRow.detail = `${
-        _subRow.type === 'product'
-          ? _subRow.productDetail?.productName
-          : _subRow.type === 'service'
+    subRows.forEach((_subRow, index) => {
+      _subRow.index = parent.index + '.' + `${index + 1}`;
+      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.product
+        ? _subRow.productDetail?.productName
+        : _subRow.type === MATERIAL_TYPE.service
           ? _subRow.serviceDetail?.serviceName
           : _subRow.packageDetail?.packageName
-      }`;
+        }`;
       _subRow.description =
-        _subRow.type === 'product'
+        _subRow.type === MATERIAL_TYPE.product
           ? _subRow?.productDetail?.productDescription
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription
-          : _subRow?.serviceDetail?.serviceDescription;
+          : _subRow.type === MATERIAL_TYPE.package
+            ? _subRow?.packageDetail?.packageDescription
+            : _subRow?.serviceDetail?.serviceDescription;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
-      _subRow.qty = `${parent.qty * _subRow.qty} `;
+      _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
       _subRow.isValid = _subRow['finalPrice_' + salesOrderData?.currency?.toLowerCase()] ? true : false;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
-    if (subRows.length === 0 && parent.type === 'package') {
+    if (subRows.length === 0 && parent.type === MATERIAL_TYPE.package) {
       parent.isValid = false;
     }
-    if (parent.type === 'package') {
+    if (parent.type === MATERIAL_TYPE.package) {
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
     }
     return subRows;
@@ -338,8 +345,12 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
       .post(`${salesOrder.api}/material/${salesOrderData._id}`, { material })
       .then(() => {
         setAddDialog({ open: false, type: '', parentId: null });
-        fetchMaterialData();
+        fetchData();
+        fetchSalesOrderData()
         setSubmitting(false);
+        if (salesOrderData?.status === SALES_ORDER_STATUS.new) {
+          updateJobStatus(SALES_ORDER_STATUS.inProgress)
+        }
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -384,7 +395,8 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
         } else {
           setIsProductEdit({ open: false, isBulkedit: false, showSaveAndNext: false });
         }
-        fetchMaterialData();
+        fetchData();
+        fetchSalesOrderData()
       })
       .catch((error) => {
         setUpdating(false);
@@ -398,7 +410,8 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
       .put(`${salesOrder.api}/material/${salesOrderData?._id}/delete`, { ids: rows })
       .then(() => {
         setDeleting(false);
-        fetchMaterialData();
+        fetchData();
+        fetchSalesOrderData()
         setDeleteData(null);
       })
       .catch((error) => {
@@ -468,11 +481,11 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
               <MenuItem
                 color="primary"
                 onClick={() => {
-                  setAddDialog({ open: true, type: 'product', parentId: null });
+                  setAddDialog({ open: true, type: MATERIAL_TYPE.product, parentId: null });
                   closeAddMenu();
                 }}
               >
-                {`Add Products`}
+                {`Add Existing Products`}
               </MenuItem>
             )}
 
@@ -480,22 +493,22 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
               <MenuItem
                 color="primary"
                 onClick={() => {
-                  setAddDialog({ open: true, type: 'package', parentId: null });
+                  setAddDialog({ open: true, type: MATERIAL_TYPE.package, parentId: null });
                   closeAddMenu();
                 }}
               >
-                {`Add Packages`}
+                {`Add Existing Packages`}
               </MenuItem>
             )}
             {permissions?.serviceMaster?.isRead && (
               <MenuItem
                 color="primary"
                 onClick={() => {
-                  setAddDialog({ open: true, type: 'service', parentId: null });
+                  setAddDialog({ open: true, type: MATERIAL_TYPE.service, parentId: null });
                   closeAddMenu();
                 }}
               >
-                {`Add Services`}
+                {`Add Existing Services`}
               </MenuItem>
             )}
           </Menu>
@@ -565,11 +578,11 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
               columns={columns}
               data={rowsData}
-              setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
               onSelect={setSelectedProducts}
               childrenProperty="subRows"
               uniqueKey="_id"
               renderedFrom="sales_order_product_package"
+              setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
               isClientSideGrid={true}
             />
           </Box>
@@ -625,27 +638,27 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
           <MenuList>
             <MenuItem
               onClick={() => {
-                setAddDialog({ open: true, type: 'product', parentId: addchildDialog.parentId });
+                setAddDialog({ open: true, type: MATERIAL_TYPE.product, parentId: addchildDialog.parentId });
                 setAddchildDialog({ open: false, parentId: null, top: null, bottom: null });
               }}
             >
-              Product
+              Add Existing Products
             </MenuItem>
             <MenuItem
               onClick={() => {
-                setAddDialog({ open: true, type: 'package', parentId: addchildDialog.parentId });
+                setAddDialog({ open: true, type: MATERIAL_TYPE.package, parentId: addchildDialog.parentId });
                 setAddchildDialog({ open: false, parentId: null, top: null, bottom: null });
               }}
             >
-              Package
+              Add Existing Packages
             </MenuItem>
             <MenuItem
               onClick={() => {
-                setAddDialog({ open: true, type: 'service', parentId: addchildDialog.parentId });
+                setAddDialog({ open: true, type: MATERIAL_TYPE.service, parentId: addchildDialog.parentId });
                 setAddchildDialog({ open: false, parentId: null, top: null, bottom: null });
               }}
             >
-              Services
+              Add Existing Services
             </MenuItem>
           </MenuList>
         </Popover>
@@ -659,11 +672,11 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
           }}
           handleSucess={() => {
             setLeadTimeDialog({ open: false, data: null });
-            fetchMaterialData();
+            fetchData();
           }}
         />
       )}
-      {addDialog.open && addDialog.type === 'product' && (
+      {addDialog.open && addDialog.type === MATERIAL_TYPE.product && (
         <AssignProductDialog
           handleCloseDialog={() => setAddDialog({ open: false, type: '', parentId: null })}
           onSuccess={(d) => {
@@ -672,7 +685,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
           isSubmitting={isSubmitting}
         />
       )}
-      {addDialog.open && addDialog.type === 'service' && (
+      {addDialog.open && addDialog.type === MATERIAL_TYPE.service && (
         <AssignServiceDialog
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
           onSuccess={(rows) => {
@@ -681,7 +694,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
           isSubmitting={isSubmitting}
         />
       )}
-      {addDialog.open && addDialog.type === 'package' && (
+      {addDialog.open && addDialog.type === MATERIAL_TYPE.package && (
         <AssignPackageDialog
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
           onSuccess={(rows) => {

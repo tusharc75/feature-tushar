@@ -22,7 +22,7 @@ import DeleteButton from '../../components/Helpers/DeleteButton';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import TabPanel from '../../components/TabPanel';
-import { ACTIVITY_RESOURCE, SALES_ORDER_STATUS, salesOrder, salesOrderProcessSteps } from '../../constants/helpers';
+import { ACTIVITY_RESOURCE, INVOICE_STATUS, SALES_ORDER_STATUS, salesOrder, salesOrderProcessSteps } from '../../constants/helpers';
 import AdditionalCost from './AdditionalCost';
 import Invoice from './Invoice';
 import ManageSalesOrderDialog from './ManageSalesOrderDialog';
@@ -43,17 +43,14 @@ const SalesOrderDetails = () => {
     state: { user, permissions }
   }: any = useData();
 
-  const [headingLabel, setHeadingLabel] = useState('');
   const [loading, setLoading] = useState(false);
   const [salesOrderData, setSalesOrderData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [salesOrderFields, setSalesOrderFields] = useState([]);
-  const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [nextStep, setNextStep] = useState(true);
   const [currentStep, setCurrentStep] = useState(null);
-  const [statusOptions, setStatusOptions] = useState([]);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [showClosedConfirmBox, setShowClosedConfirmBox] = useState(false);
@@ -91,11 +88,11 @@ const SalesOrderDetails = () => {
   }
 
   useEffect(() => {
-    if (id) {
-      getRessourceFields();
+    if (id && steps?.length) {
+      getFields();
       fetchSalesOrderData();
     }
-  }, [id]);
+  }, [id, steps]);
 
   useEffect(() => {
     if (currentStep !== null && currentStep >= 0 && currentStep <= 5) {
@@ -106,21 +103,15 @@ const SalesOrderDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${salesOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
   };
 
-  const getRessourceFields = async () => {
+  const getFields = async () => {
     try {
       const response: any = await axiosInstance().get('/field?resource=Sales Order');
-      response?.data?.data.some((o) => {
-        if (o?.fieldData?.fieldName === 'status') {
-          setStatusOptions([...o.fieldData.option]);
-          return true;
-        }
-      });
       setSalesOrderFields(response?.data?.data);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -129,23 +120,21 @@ const SalesOrderDetails = () => {
 
   const fetchSalesOrderData = async () => {
     setLoading(true);
-
     try {
       let data;
       const response: any = await axiosInstance().get(`${salesOrder.api}/${id}`);
       data = response?.data?.data;
-
-      setCurrentStep(getIndex(data?.processStatus, steps));
-
-      setHeadingLabel(data.salesOrderNo);
-      setCustomizedRoutes([routes.salesOrder, { title: `${data.salesOrderNo}` }]);
-      setSalesOrderData(data);
-
+      if ([INVOICE_STATUS.invoiced, INVOICE_STATUS.closed]?.includes(data?.status)) {
+        setCurrentStep(steps?.length - 1);
+      } else {
+        setCurrentStep(getIndex(data?.processStatus, steps));
+      }
       var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
       if (user?.role?.selectedEntity?.superAdminAccess) {
         isAllowedToEdit = true;
       }
       setAllowedToEdit(isAllowedToEdit);
+      setSalesOrderData(data);
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -190,7 +179,7 @@ const SalesOrderDetails = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={customizedRoutes} />
+          <CustomBreadCrumbs routes={[routes.salesOrder, { title: `${salesOrderData?.salesOrderNo}` }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -209,7 +198,7 @@ const SalesOrderDetails = () => {
                     Close
                   </ButtonWithPulse>
                 )}
-                {permissions?.salesOrder?.isUpdate && allowedToEdit && (
+                {permissions?.salesOrder?.isUpdate && allowedToEdit && ![SALES_ORDER_STATUS.closed].includes(salesOrderData?.status) && (
                   <Button
                     className={'btn-outline-v1'}
                     variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -220,14 +209,17 @@ const SalesOrderDetails = () => {
                   </Button>
                 )}
 
-                {permissions?.salesOrder?.isDelete && [SALES_ORDER_STATUS.invoiced, SALES_ORDER_STATUS.closed].includes(salesOrderData?.status) && (
+                {permissions?.salesOrder?.isDelete && salesOrderData?.canDelete && (
                   <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
                 )}
               </>
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
             )}
-            <ActivityButton referenceId={salesOrderData?._id} resource={ACTIVITY_RESOURCE.salesOrder} resourceLabel={salesOrderData?.salesOrderNo} />
+            <ActivityButton
+              referenceId={salesOrderData?._id}
+              resource={ACTIVITY_RESOURCE.salesOrder}
+              resourceLabel={salesOrderData?.salesOrderNo} />
           </Box>
         </Box>
       </Box>
@@ -302,6 +294,8 @@ const SalesOrderDetails = () => {
                 setNextStep={setNextStep}
                 renderedFrom={`${renderedFrom}_grid-1`}
                 stepFullScreen={stepFullScreen}
+                fetchSalesOrderData={fetchSalesOrderData}
+                updateJobStatus={updateJobStatus}
               />
             )}
             {currentStep === 1 && salesOrderData && (
@@ -320,7 +314,6 @@ const SalesOrderDetails = () => {
                 salesOrderData={salesOrderData}
                 setNextStep={setNextStep}
                 updateJobStatus={updateJobStatus}
-                statusOptions={statusOptions}
                 renderedFrom={`${renderedFrom}_grid-5`}
                 stepFullScreen={stepFullScreen}
               />
@@ -334,7 +327,7 @@ const SalesOrderDetails = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this sales order: ${headingLabel} ?`}
+          message={`Are you sure you want to delete this sales order: ${salesOrderData?.salesOrderNo} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}
@@ -350,6 +343,7 @@ const SalesOrderDetails = () => {
           }}
           onOk={() => {
             updateJobStatus(SALES_ORDER_STATUS.closed);
+            setShowClosedConfirmBox(false);
           }}
         />
       )}

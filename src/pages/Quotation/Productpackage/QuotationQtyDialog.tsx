@@ -56,7 +56,6 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
   const [allFields, setAllFields] = useState([]);
   const [fields, setFields] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [loading, setLoading] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [saveAndNext, setSaveAndNext] = useState(false);
   const ref = useRef(null);
@@ -64,7 +63,6 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
   const [priceConditionListConst, setPriceConditionListConst] = useState([]);
 
   const toastConfig = useContext(CustomToastContext);
-
 
   const [priceMethodList, setPriceMethodList] = useState([]);
 
@@ -444,10 +442,16 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
                                           label={field.fieldLabel}
                                           name={field.fieldName}
                                           type={field.type}
-                                          options={field.option}
                                           setFieldValue={(name, value) => {
                                             setFieldValue(name, value);
                                           }}
+                                          options={
+                                            field.fieldName === 'pricingMethod' && priceConditionList && values['pricingCondition']
+                                              ? priceMethodList
+                                              : field.fieldName === 'pricingCondition' && values['pricingMethod']
+                                                ? priceConditionList
+                                                : field.option
+                                          }
                                           onChange={(e, val) => {
                                             const value = val && val.optionValue ? val.optionValue : '';
                                             if (field.fieldName === 'pricingCondition') {
