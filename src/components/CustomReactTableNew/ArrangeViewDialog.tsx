@@ -29,6 +29,7 @@ import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import { startCase } from 'lodash';
 import { isMobile, isTablet } from 'react-device-detect';
+import { TouchBackend } from 'react-dnd-touch-backend';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -268,7 +269,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
           )}
 
           {!searchVal ? (
-            <DndProvider backend={HTML5Backend}>
+            <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
               {sortedColumns.map(
                 (column, index) =>
                   column?.id !== 'selection' &&

@@ -82,6 +82,8 @@ const WorkOrder = ({
 
   const [isSubmitting, setSubmitting] = useState(false);
 
+  const [reviseQuotation, setReviseQuotation] = useState(false);
+
   useEffect(() => {
     fetchFields();
     fetchData();
@@ -458,7 +460,7 @@ const WorkOrder = ({
         await axiosInstance().put(`${workOrder.api}/service/${workOrderId}/remove`, { uniqueIds: ids });
 
         if (isPostWorkService && repairOrderData?.type === REPAIR_ORDER_TYPE.external) {
-          createNewVersionQuote(true);
+          setReviseQuotation(true);
         }
       }
       setDeleting(false);
@@ -565,7 +567,7 @@ const WorkOrder = ({
         parent.serviceStatus = parent?.workOrder?.status;
       }
       parent.subRows = generateNestedData(data.material, parent);
-      if (parent?.workOrder?.status === WORK_ORDER_STATUS.new && parent?.subRows?.some((obj) => obj.type === MATERIAL_TYPE.service)) {
+      if (parent?.workOrder?.status === WORK_ORDER_STATUS.new) {
         parent.canAutoCompleteWorkOrder = true;
       }
       parent.canDelete = false;
@@ -668,7 +670,7 @@ const WorkOrder = ({
       .then(() => {
         setAddServicesDialog({ open: false, new: false });
         if (isPostWorkService && repairOrderData?.addQuotationStep && repairOrderData?.addConsumablesQuotation) {
-          createNewVersionQuote(true);
+          setReviseQuotation(true);
         }
         fetchData();
         setSubmitting(false);
@@ -789,8 +791,8 @@ const WorkOrder = ({
     axiosInstance()
       .post(`${workOrder.api}/${workOrderId}/consumable`, data)
       .then(({ data }) => {
-        if (repairOrderData?.processStatus === 'Execute' && repairOrderData?.status === REPAIR_ORDER_STATUS.quoteAccepted && repairOrderData?.addQuotationStep && repairOrderData?.addConsumablesQuotation) {
-          createNewVersionQuote(true);
+        if (isPostWorkService && repairOrderData?.status === REPAIR_ORDER_STATUS.quoteAccepted && repairOrderData?.addQuotationStep && repairOrderData?.addConsumablesQuotation) {
+          setReviseQuotation(true)
         }
         toastConfig.setToastConfig({
           open: true,
@@ -1077,6 +1079,18 @@ const WorkOrder = ({
               onOk={handleAutoComplete}
             />
           )}
+
+          {reviseQuotation && (
+            <ConfirmationDialog
+              open={reviseQuotation}
+              message={`Do you want to revise the Quotation ?`}
+              onClose={() => {
+                setReviseQuotation(false);
+              }}
+              onOk={() => createNewVersionQuote(true)}
+            />
+          )}
+
           {arrangeView && (
             <ArrangeView
               data={
