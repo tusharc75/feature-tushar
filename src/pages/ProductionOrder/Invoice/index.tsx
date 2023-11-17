@@ -177,13 +177,13 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
     let rows = data.material.filter((e) => e.type === MATERIAL_TYPE.product && e?.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail =
+      parent.detail = parent.detail ? parent.detail :
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceName
           : parent.type === MATERIAL_TYPE.product
             ? parent.productDetail?.productName
             : parent.packageDetail?.packageName;
-      parent.description =
+      parent.description = parent.description ? parent.description :
         parent.type === MATERIAL_TYPE.product ? parent?.productDetail?.productDescription : parent?.packageDetail?.packageDescription;
       parent.qty = parent.qty;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
