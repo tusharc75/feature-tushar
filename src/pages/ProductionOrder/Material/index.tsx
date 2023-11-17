@@ -54,7 +54,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
     var data = response?.data?.data;
     data = CURReplaceByCurrencySingle(data, productionOrderData?.currency || 'USD');
     setAllFields(JSON.parse(JSON.stringify(data)));
-    const newColumns = generateCustomTableColumns(data, productionOrderData?.currency || 'USD', renderedFrom);
+    let newColumns = generateCustomTableColumns(data, productionOrderData?.currency || 'USD', renderedFrom)?.filter((e) => !['Detail', 'Description']?.includes(e['Header']));
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';

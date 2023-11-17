@@ -93,7 +93,7 @@ const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, rende
         data?.forEach((e) => {
             e.isColumnEditable = false;
         });
-        const newColumns = generateCustomTableColumns(data, productionOrderData?.currency || 'USD', renderedFrom);
+        const newColumns = generateCustomTableColumns(data, productionOrderData?.currency || 'USD', renderedFrom)?.filter((e) => !['Detail', 'Description']?.includes(e['Header']));
         let coloum: any = [
             {
                 accessor: 'index',
