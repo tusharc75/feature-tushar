@@ -981,7 +981,7 @@ const Steps = ({
                             </span>
                           </Box>
                           <div className="flex items-start gap-2 w-full">
-                            <Typography className={`${classes.heading} flex-grow`} style={{ fontWeight: '600' }}>
+                            <Typography className={`${classes.heading} flex-grow [word-break:break-all]`} style={{ fontWeight: '600' }}>
                               {step.stepName}
                             </Typography>
                             {isMobile && !isTablet && (
