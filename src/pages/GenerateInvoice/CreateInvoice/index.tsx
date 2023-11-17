@@ -76,7 +76,9 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
         ? CHILD_RESOURCE.subleaseProduct
         : resource === sidebarResource.fieldTicket
           ? CHILD_RESOURCE.fieldTicketMateial
-          : CHILD_RESOURCE.quotationProduct;
+          : sidebarResource.salesOrder
+            ? CHILD_RESOURCE.salesOrderProduct
+            : CHILD_RESOURCE.quotationProduct;
 
     const response = await axiosInstance().get(`/field/child?resource=${childResourceName}`);
     data = response?.data?.data;
