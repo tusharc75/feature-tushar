@@ -11,13 +11,13 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { DragIndicator } from '@material-ui/icons';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import update from 'immutability-helper';
+import { TouchBackend } from 'react-dnd-touch-backend';
 
 const ItemTypes = {
   CARD: 'card'
 };
 
 export default function ArrangeView({ columns, setColumns }) {
-
   const [open, setOpen] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [isSubmitting, setSubmitting] = useState(false);
@@ -45,7 +45,11 @@ export default function ArrangeView({ columns, setColumns }) {
 
   const onSave = () => {
     setSubmitting(true);
-    setColumns(column.map((e) => { return { fieldName: e.fieldName, fieldLabel: e.fieldLabel } }));
+    setColumns(
+      column.map((e) => {
+        return { fieldName: e.fieldName, fieldLabel: e.fieldLabel };
+      })
+    );
     setSubmitting(false);
     onClose();
   };
@@ -83,7 +87,7 @@ export default function ArrangeView({ columns, setColumns }) {
           />
           <CustomDialogContent>
             <List component="nav" aria-label="main mailbox folders">
-              <DndProvider backend={HTML5Backend}>
+              <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
                 {column.map(({ fieldLabel, id }, index) => (
                   <RenderListItem key={id} index={index} id={id} fieldLabel={fieldLabel} moveCard={moveCard} />
                 ))}
