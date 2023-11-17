@@ -461,6 +461,7 @@ const ManageSerializedAsset = ({
                                         isTooltip={field?.isTooltip || false}
                                         tooltipMessage={field?.tooltipMessage}
                                         size="small"
+                                        fields={allFields}
                                       />
                                     </>
                                   )}

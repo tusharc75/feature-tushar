@@ -42,7 +42,7 @@ export default function AttachmentDialog({ workOrderId, uniqueServiceId, stepId,
   const [attachmentToDelete, setAttachemnetToDelete] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
+  const [isEdit, setIsEdit] = useState(false);
   const [fullScreen, setFullScreen] = useState(false);
   const [documentScanDialog, setDocumentScanDialog] = useState(false);
 
@@ -52,61 +52,77 @@ export default function AttachmentDialog({ workOrderId, uniqueServiceId, stepId,
 
   const fetchData = async () => {
     setIsFetching(true);
-    axiosInstance()
-      .get(`${workOrder.api}/step/attachment?workOrderId=${workOrderId}&uniqueServiceId=${uniqueServiceId}${stepId ? `&stepId=${stepId}` : ''}`)
-      .then(({ data: { data } }) => {
-        if (!data) {
-          setInitialValues({ name: stepName, fileUrl: '' });
-          setIsFetching(false);
-          setIsUpdating(false);
-        } else {
-          setIsUpdating(true);
-          setCanEdit(data?.canEdit);
-          if (data?.file && data?.file?.length) {
-            data?.file?.sort((a: any, b: any) => {
-              return new Date(b?.date).getTime() - new Date(a?.date).getTime();
-            });
-            setOtherAttachments(data.file);
-          }
-          setIsFetching(false);
-          setInitialValues({ ...data, fileUrl: data.file && data.file.length && data.file ? data.file[0]?.url : '' });
+    var api = `${workOrder.api}/step/attachment?workOrderId=${workOrderId}`;
+    if (uniqueServiceId) {
+      api = api + `&uniqueServiceId=${uniqueServiceId}`;
+    }
+    if (stepId) {
+      api = api + `&stepId=${stepId}`;
+    }
+    axiosInstance().get(api).then(({ data: { data } }) => {
+      if (!data) {
+        setInitialValues({ name: stepName, fileUrl: '' });
+        setIsFetching(false);
+        setIsEdit(false);
+      } else {
+        setIsEdit(true);
+        setCanEdit(data?.canEdit);
+        if (data?.file && data?.file?.length) {
+          data?.file?.sort((a: any, b: any) => {
+            return new Date(b?.date).getTime() - new Date(a?.date).getTime();
+          });
+          setOtherAttachments(data.file);
         }
-      })
+        setIsFetching(false);
+        setInitialValues({ ...data, fileUrl: data.file && data.file.length && data.file ? data.file[0]?.url : '' });
+      }
+    })
       .catch((error) => {
         setInitialValues({ name: '', fileUrl: '' });
         setIsFetching(false);
-        setIsUpdating(false);
+        setIsEdit(false);
         toastConfig.setToastConfig(error);
       });
   };
 
   const handleSave = (values) => {
-    let data = {
-      name: values.name,
-      attachmentType: values?.attachmentType || '',
-      file: otherAttachments,
-      serviceName: serviceName,
-      workOrderId: workOrderId,
-      uniqueServiceId: uniqueServiceId,
-      ...(stepId && { stepId: stepId })
-    };
-
-    setLoading(true);
-    axiosInstance()
-      .post(`${workOrder.api}/step/attachment`, data)
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
+    if (isEdit && otherAttachments?.length === 0) {
+      setLoading(true);
+      axiosInstance().put('attachment/deletemany', { ids: [values?._id] }).then(({ data }) => {
         setLoading(false);
-        handleClose();
-      })
-      .catch((error) => {
+        handleSuccess();
+      }).catch((error) => {
         setLoading(false);
         toastConfig.setToastConfig(error);
       });
+    }
+    else {
+      let data = {
+        name: values.name,
+        attachmentType: values?.attachmentType || '',
+        file: otherAttachments,
+        serviceName: serviceName,
+        workOrderId: workOrderId,
+        ...(uniqueServiceId && { uniqueServiceId: uniqueServiceId }),
+        ...(stepId && { stepId: stepId })
+      };
+      setLoading(true);
+      axiosInstance()
+        .post(`${workOrder.api}/step/attachment`, data)
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          setLoading(false);
+          handleSuccess();
+        })
+        .catch((error) => {
+          setLoading(false);
+          toastConfig.setToastConfig(error);
+        });
+    }
   };
 
   const onUploadFile = (file) => {
@@ -242,7 +258,7 @@ export default function AttachmentDialog({ workOrderId, uniqueServiceId, stepId,
                       type="button"
                       color="primary"
                       disabled={
-                        loading || isUpdating ? uploadingImageOrFileProgress > 0 : uploadingImageOrFileProgress > 0 || otherAttachments.length === 0
+                        loading || isEdit ? uploadingImageOrFileProgress > 0 : uploadingImageOrFileProgress > 0 || otherAttachments.length === 0
                       }
                       loading={loading}
                       variant="contained"

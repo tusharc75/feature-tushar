@@ -31,6 +31,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { AutoCompleteIcon } from 'src/assets/svg/svgIcons';
 import AssignWorkStationDialog from 'src/pages/WorkOrder/Service/AssignWorkStationDialog';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
+import AttachmentDialog from 'src/pages/WorkOrder/Service/AttachmentDialog';
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
 const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, setCurrentStep }) => {
@@ -53,6 +54,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   const [isDeleting, setDeleting] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
   const [consumablesDialog, setConsumablesDialog] = useState({ open: false, ids: [], data: null });
+  const [attachmentsDialog, setAttachmentsDialog] = useState({ open: false, workOrderId: null, uniqueServiceId: null, serviceName: null });
 
   const [selectedRecords, setSelectedRecords] = useState([]);
 
@@ -686,6 +688,35 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                 Auto Complete Work Order(s)
               </MenuItem>
               <MenuItem
+                disabled={checkUniqWorkOrder() && (
+                  selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
+                  selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.length === 1
+                ) ? false : true}
+                onClick={() => {
+                  closeActions();
+                  const parentProduct = selectedRecords?.find((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)
+                  if (parentProduct) {
+                    setAttachmentsDialog({
+                      open: true,
+                      workOrderId: parentProduct?.workOrder?._id,
+                      uniqueServiceId: null,
+                      serviceName: parentProduct?.workOrder?.workOrderNumber
+                    })
+                  }
+                  else {
+                    const service = selectedRecords?.find((e) => e.type === MATERIAL_TYPE.service);
+                    setAttachmentsDialog({
+                      open: true,
+                      workOrderId: service?.workOrder?._id,
+                      uniqueServiceId: service?.uniqueId,
+                      serviceName: service?.serviceDetail?.serviceName
+                    })
+                  }
+                }}
+              >
+                Upload Documents
+              </MenuItem>
+              <MenuItem
                 onClick={() => {
                   setDeleteData(selectedRecords);
                   setShowConfirmBox(true);
@@ -839,6 +870,32 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
           }}
           serialized={false}
           isSubmitting={isSubmitting}
+        />
+      )}
+      {attachmentsDialog.open && (
+        <AttachmentDialog
+          workOrderId={attachmentsDialog.workOrderId}
+          uniqueServiceId={attachmentsDialog.uniqueServiceId}
+          stepId={null}
+          stepName={attachmentsDialog.serviceName}
+          serviceName={attachmentsDialog.serviceName}
+          handleClose={() => {
+            setAttachmentsDialog({
+              open: false,
+              workOrderId: null,
+              uniqueServiceId: null,
+              serviceName: null
+            });
+          }}
+          handleSuccess={() => {
+            fetchData()
+            setAttachmentsDialog({
+              open: false,
+              workOrderId: null,
+              uniqueServiceId: null,
+              serviceName: null
+            });
+          }}
         />
       )}
     </Fragment>
