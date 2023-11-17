@@ -65,7 +65,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   const fetchFields = async () => {
     await axiosInstance().post(`${productionOrder.api}/${productionOrderData._id}/work-order`);
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.productionOrderDetail}`);
-    var data = response?.data?.data;
+    var data = response?.data?.data?.filter((e) => !['detail', 'description']?.includes(e?.fieldName));
     data = CURReplaceByCurrencySingle(data, productionOrderData?.currency || 'USD');
     data?.forEach((e) => {
       e.isColumnEditable = false;
