@@ -20,7 +20,7 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { isMobile } from 'react-device-detect';
-import { Delete, ExpandMore } from '@material-ui/icons';
+import { CheckCircle, Delete, ExpandMore } from '@material-ui/icons';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
@@ -105,11 +105,9 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                 onClick={() => {
                   if (row.original.type === MATERIAL_TYPE.product) {
                     window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                  }
-                  else if (row.original.type === MATERIAL_TYPE.service) {
+                  } else if (row.original.type === MATERIAL_TYPE.service) {
                     window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                  }
-                  else if (row.original.type === MATERIAL_TYPE.package) {
+                  } else if (row.original.type === MATERIAL_TYPE.package) {
                     window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
                   }
                 }}
@@ -252,7 +250,11 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                   }}
                   disabled={row?.original?.canAutoCompleteWorkOrder ? false : true}
                 >
-                  <AutoCompleteIcon size={18} />
+                  {row.original['workOrderStatus'] === 'Completed' ? (
+                    <CheckCircle className="[font-size:19px_!important]" />
+                  ) : (
+                    <AutoCompleteIcon size={18} />
+                  )}
                 </IconButton>
               </HtmlTooltip>
             )}
@@ -287,14 +289,18 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     let rows = data.material.filter((e) => e.type === MATERIAL_TYPE.product && e?.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = parent.detail ? parent.detail :
-        parent.type === MATERIAL_TYPE.service
-          ? parent?.serviceDetail?.serviceName
-          : parent.type === MATERIAL_TYPE.product
-            ? parent.productDetail?.productName
-            : parent.packageDetail?.packageName;
-      parent.description = parent.description ? parent.description :
-        parent.type === MATERIAL_TYPE.product ? parent?.productDetail?.productDescription : parent?.packageDetail?.packageDescription;
+      parent.detail = parent.detail
+        ? parent.detail
+        : parent.type === MATERIAL_TYPE.service
+        ? parent?.serviceDetail?.serviceName
+        : parent.type === MATERIAL_TYPE.product
+        ? parent.productDetail?.productName
+        : parent.packageDetail?.packageName;
+      parent.description = parent.description
+        ? parent.description
+        : parent.type === MATERIAL_TYPE.product
+        ? parent?.productDetail?.productDescription
+        : parent?.packageDetail?.packageDescription;
       parent.qty = parent.qty;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
       parent.hideSelection = false;
@@ -324,18 +330,20 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     let serviceIndex = 0;
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${_subRow.type === MATERIAL_TYPE.service ? alphabet[serviceIndex] : productIndex + 1}`;
-      _subRow.detail = _subRow.detail ? _subRow.detail :
-        _subRow.type === MATERIAL_TYPE.service
-          ? _subRow?.serviceDetail?.serviceName
-          : _subRow.type === MATERIAL_TYPE.product
-            ? _subRow.productDetail?.productName
-            : _subRow.packageDetail?.packageName;
-      _subRow.description = _subRow.description ? _subRow.description :
-        _subRow.type === MATERIAL_TYPE.service
-          ? _subRow?.serviceDetail?.serviceDescription
-          : _subRow.type === MATERIAL_TYPE.product
-            ? _subRow?.productDetail?.productDescription
-            : _subRow?.packageDetail?.packageDescription;
+      _subRow.detail = _subRow.detail
+        ? _subRow.detail
+        : _subRow.type === MATERIAL_TYPE.service
+        ? _subRow?.serviceDetail?.serviceName
+        : _subRow.type === MATERIAL_TYPE.product
+        ? _subRow.productDetail?.productName
+        : _subRow.packageDetail?.packageName;
+      _subRow.description = _subRow.description
+        ? _subRow.description
+        : _subRow.type === MATERIAL_TYPE.service
+        ? _subRow?.serviceDetail?.serviceDescription
+        : _subRow.type === MATERIAL_TYPE.product
+        ? _subRow?.productDetail?.productDescription
+        : _subRow?.packageDetail?.packageDescription;
       _subRow.qty = _subRow.qty;
       _subRow.workOrder = parent?.workOrder;
       _subRow.workOrderNumber = parent?.workOrder?.workOrderNumber;
@@ -642,7 +650,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                 <MenuItem
                   disabled={
                     selectedRecords?.filter((d) => [MATERIAL_TYPE.product, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0 &&
-                      checkUniqWorkOrder()
+                    checkUniqWorkOrder()
                       ? false
                       : true
                   }
@@ -688,29 +696,31 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                 Auto Complete Work Order(s)
               </MenuItem>
               <MenuItem
-                disabled={checkUniqWorkOrder() && (
-                  selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
-                  selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.length === 1
-                ) ? false : true}
+                disabled={
+                  checkUniqWorkOrder() &&
+                  (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
+                    selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.length === 1)
+                    ? false
+                    : true
+                }
                 onClick={() => {
                   closeActions();
-                  const parentProduct = selectedRecords?.find((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)
+                  const parentProduct = selectedRecords?.find((e) => e.type === MATERIAL_TYPE.product && !e?.parentId);
                   if (parentProduct) {
                     setAttachmentsDialog({
                       open: true,
                       workOrderId: parentProduct?.workOrder?._id,
                       uniqueServiceId: null,
                       serviceName: parentProduct?.workOrder?.workOrderNumber
-                    })
-                  }
-                  else {
+                    });
+                  } else {
                     const service = selectedRecords?.find((e) => e.type === MATERIAL_TYPE.service);
                     setAttachmentsDialog({
                       open: true,
                       workOrderId: service?.workOrder?._id,
                       uniqueServiceId: service?.uniqueId,
                       serviceName: service?.serviceDetail?.serviceName
-                    })
+                    });
                   }
                 }}
               >
@@ -888,7 +898,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
             });
           }}
           handleSuccess={() => {
-            fetchData()
+            fetchData();
             setAttachmentsDialog({
               open: false,
               workOrderId: null,
