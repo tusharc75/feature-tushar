@@ -209,7 +209,8 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                         }
                         setDeleteData([
                           {
-                            _id: row.original.inventory,
+                            _id: row.original.uniqueId,
+                            assetId: row.original.inventory,
                             assetNumber: row.original.detail,
                             isNonSerializeAsset: row.original.isNonSerializeAsset,
                             isTransferAsset: isTransferAsset
@@ -458,6 +459,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           canRemove = true;
         }
       }
+      console.log(_inventory)
       subRows.push({
         ..._inventory,
         index: `${parent.index}.${k + 1}`,
@@ -470,6 +472,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         manualStatus: _inventory.inventoryDetail?.manualStatus,
         warehouse: _inventory.inventoryDetail?.warehouse,
         _id: _inventory.inventory,
+        uniqueId:_inventory._id,
         isValid: _inventory.inventoryDetail?.manualStatus === ASSET_STATUS.reserved ? false : true,
         isTransferAsset: isTransferAsset,
         transferData: transferData,
