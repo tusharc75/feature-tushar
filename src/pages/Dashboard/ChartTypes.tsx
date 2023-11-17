@@ -127,6 +127,51 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
     return () => clearTimeout(fetchTimeout);
   }, [filterValues, globalFilters, selectedEntity]);
 
+  const swapChartColors = React.useCallback(
+    (colorMap: { [index: string]: string[] }) => {
+      if (!chartData?.datasets) return null;
+      const obj = chartData;
+      for (let i = 0; i < chartData?.datasets.length; i++) {
+        const d = chartData?.datasets[i];
+        const color: string = d.borderColor;
+
+        for (let x in colorMap) {
+          const cList: string[] = colorMap[x];
+          if (cList.length !== 2 || !obj.datasets[i].fill) return null;
+          if (cList.includes(color)) {
+            if (themeColor === 'dark') {
+              obj.datasets[i].borderColor = cList[1];
+              obj.datasets[i].backgroundColor = cList[1];
+            } else {
+              obj.datasets[i].borderColor = cList[0];
+              obj.datasets[i].backgroundColor = `${cList[0].replace(/[\d.]+\)$/g, '0.5)')}`;
+            }
+            // console.log(chart.chartTitle === 'Total Booked Volume In MT Vs Total Offered Volume In MT Vs Budget' && obj);
+          }
+        }
+      }
+      return obj;
+    },
+    [themeColor, chartData]
+  );
+
+  React.useEffect(() => {
+    /*
+    colors and color list name should be unique
+    first color is original ↓ color and second color ↓ is for dark theme
+    */
+    const colorMap = {
+      color1: ['rgba(255, 99, 132, 1)', 'rgba(255, 99, 132, 0.5)'],
+      color2: ['rgba(54, 162, 235, 1)', 'rgba(54, 162, 235, 0.5)'],
+      color3: ['rgba(255, 99, 132, 0.6)', 'rgba(255, 150, 132, 0.5)']
+    };
+    const obj = swapChartColors(colorMap);
+    if (!obj) return;
+    setChartData(obj);
+
+    return () => setChartData(null);
+  }, [swapChartColors]);
+
   const fetchData = () => {
     const urlParams = getParams();
     setLoading(true);
@@ -134,7 +179,6 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
     axiosInstance()
       .get(url)
       .then(async ({ data: { data } }) => {
-        console.log(data);
         if (chart.kpi?.custom) {
           const cardData = await getStaticData(chartData, data, globalFilters.currency, currency);
           setChartData(cardData);
@@ -309,6 +353,7 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
               ) : (
                 <>
                   <Chart
+                    key={themeColor}
                     id={chart.uniqueId}
                     type={chart.chartType?.toLowerCase()}
                     data={{
