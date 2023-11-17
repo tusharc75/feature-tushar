@@ -12,7 +12,6 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
@@ -31,6 +30,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageSalesOrderDialog from './ManageSalesOrderDialog';
 import SalesOrderHeader from './SalesOrderHeader';
+import DeleteIcon from '@material-ui/icons/Delete';
 
 let salesOrderTimeout;
 
@@ -176,19 +176,29 @@ const SalesOrder = () => {
         </Tooltip>
       )}
 
-      <GridDeleteIcon
-        hasDeletePermission={permissions?.salesOrder?.isDelete}
-        ownerId={user?.user?._id}
-        userId={user?.user?._id}
-        onDelete={() =>
-          setSingleSalesOrderDelete({
-            show: true,
-            id: params.data._id,
-            salesOrderName: `${params.data.salesOrderNo}`
-          })
-        }
-        entity="sales order"
-      />
+      {params.data.canDelete ? (
+        <Tooltip title="Delete">
+          <IconButton
+            size="small"
+            aria-label="Delete"
+            onClick={() => {
+              setSingleSalesOrderDelete({
+                show: true,
+                id: params.data._id,
+                salesOrderName: `${params.data.salesOrderNo}`
+              });
+            }}
+          >
+            <DeleteIcon fontSize="small" color="error" />
+          </IconButton>
+        </Tooltip>
+      ) : (
+        <Tooltip className="cursor-stop" title="You do not have permission to delete">
+          <IconButton aria-label="Delete" size="small">
+            <DeleteIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      )}
     </>
   );
 
@@ -257,7 +267,7 @@ const SalesOrder = () => {
           let finalObject = prepareDataForGrid(u, user);
           finalObject['isChecked'] = false;
           finalObject['allowedToEdit'] = permissions?.salesOrder?.isUpdate;
-          finalObject['canDelete'] = permissions?.salesOrder?.isDelete;
+          finalObject['canDelete'] = permissions?.salesOrder?.isDelete && u?.canDelete;
           return finalObject;
         });
         if (appendRows) {

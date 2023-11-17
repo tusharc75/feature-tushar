@@ -14,15 +14,21 @@ import { fetch_salesOrder_product_fields } from '../../../components/SalesOrder/
 import { generateCustomTableColumns } from 'src/constants/columns';
 import PreviewDownload from 'src/components/PreviewDownload';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
+import { useData } from 'src/StateProvider/Provider';
 
 const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, statusOptions, renderedFrom, stepFullScreen }) => {
+  const {
+    state: { permissions }
+  }: any = useData();
+
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [rowsData, setRowsData] = useState(null);
   const [columns, setColumns] = useState(null);
 
   useEffect(() => {
     if (
-      statusOptions.findIndex((d) => d.optionLabel === SALES_ORDER_STATUS.readyToInvoice) > statusOptions.findIndex((d) => d.optionLabel === salesOrderData?.status)
+      statusOptions.findIndex((d) => d.optionLabel === SALES_ORDER_STATUS.readyToInvoice) >
+      statusOptions.findIndex((d) => d.optionLabel === salesOrderData?.status)
     ) {
       updateJobStatus(SALES_ORDER_STATUS.readyToInvoice);
     }
@@ -100,17 +106,21 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, statusOptions, 
           return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
         }
       },
-      {
-        accessor: 'leadTime',
-        Header: 'Lead Time (Days)',
-        Cell: ({ row }) => (row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0),
-        Footer: (info) => {
-          const total = info.rows
-            .filter((f) => f.values.hasOwnProperty('leadTime') && !isNaN(f.values['leadTime']))
-            .reduce((sum, row) => parseInt(row.values['leadTime']) + sum, 0);
-          return <>{total}</>;
-        }
-      }
+      ...(permissions?.leadTimeMaster
+        ? [
+            {
+              accessor: 'leadTime',
+              Header: 'Lead Time (Days)',
+              Cell: ({ row }) => (row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0),
+              Footer: (info) => {
+                const total = info.rows
+                  .filter((f) => f.values.hasOwnProperty('leadTime') && !isNaN(f.values['leadTime']))
+                  .reduce((sum, row) => parseInt(row.values['leadTime']) + sum, 0);
+                return <>{total}</>;
+              }
+            }
+          ]
+        : [])
     ];
     coloum = [...coloum, ...newColumns];
     setColumns(coloum);
@@ -129,20 +139,19 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, statusOptions, 
     rows = [...rows, ...additionalCostRows];
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === MATERIAL_TYPE.product
-        ? parent.productDetail?.productName
-        : parent.type === MATERIAL_TYPE.service
+      parent.detail = `${
+        parent.type === 'product'
+          ? parent.productDetail?.productName
+          : parent.type === 'service'
           ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName || ''
-        }`;
+          : parent.packageDetail?.packageName
+      }`;
       parent.description =
         parent.type === MATERIAL_TYPE.product
           ? parent?.productDetail?.productDescription
-          : parent.type === MATERIAL_TYPE.package
-            ? parent?.packageDetail?.packageDescription
-            : parent?.type === MATERIAL_TYPE.manualEntry
-              ? parent?.description
-              : parent?.serviceDetail?.serviceDescription;
+          : parent.type === 'package'
+          ? parent?.packageDetail?.packageDescription
+          : parent?.serviceDetail?.serviceDescription;
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qty = parent.qty;
@@ -160,18 +169,19 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, statusOptions, 
   const generateNestedData = (material, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
-      _subRow.detail = `${_subRow.type === 'product'
-        ? _subRow.productDetail?.productName
-        : _subRow.type === 'service'
+      _subRow.detail = `${
+        _subRow.type === 'product'
+          ? _subRow.productDetail?.productName
+          : _subRow.type === 'service'
           ? _subRow.serviceDetail?.serviceName
           : _subRow.packageDetail?.packageName
-        }`;
+      }`;
       _subRow.description =
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productDescription
           : _subRow.type === 'package'
-            ? _subRow?.packageDetail?.packageDescription
-            : _subRow?.serviceDetail?.serviceDescription;
+          ? _subRow?.packageDetail?.packageDescription
+          : _subRow?.serviceDetail?.serviceDescription;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qty = `${parent.qty * _subRow.qty} `;
@@ -195,7 +205,8 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, statusOptions, 
           resource={sidebarResource.salesOrder}
           referenceId={salesOrderData._id}
           columns={columns}
-          isSendEmail={true} />
+          isSendEmail={true}
+        />
       </Box>
       <Grid item xs={12} md={12} sm={12}>
         {columns && rowsData ? (
