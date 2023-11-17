@@ -45,6 +45,9 @@ function AssignStepDialog({ consumables, steps, loading, handleCloseDialog, onSu
         onClose={handleCloseDialog}
       />
       <CustomDialogContent>
+        <Box pb={2} pt={1}>
+          <Typography variant="subtitle2"> Please select the step if you intend to assign the consumables at the step level.</Typography>
+        </Box>
         {consumables?.length &&
           consumables?.map((item, index) => {
             return (

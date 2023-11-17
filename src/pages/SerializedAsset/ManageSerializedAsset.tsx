@@ -248,7 +248,6 @@ const ManageSerializedAsset = ({
                                       <Box display="flex">
                                         <Box flexGrow={1}>
                                           <FormTypes
-                                            isNew={Boolean(productInventoryId)}
                                             {...field}
                                             disabled={productId ? true :
                                               Boolean(productInventoryId) && !isClone ? field.disableOnEdit || field.isUneditable : field.isUneditable}
@@ -310,7 +309,6 @@ const ManageSerializedAsset = ({
                                       <Box display="flex">
                                         <Box flexGrow={1}>
                                           <FormTypes
-                                            isNew={Boolean(productInventoryId)}
                                             {...field}
                                             disabled={productCategory ? true :
                                               Boolean(productInventoryId) && !isClone ? field.disableOnEdit || field.isUneditable : field.isUneditable}
@@ -360,7 +358,6 @@ const ManageSerializedAsset = ({
                                     </Grid>
                                   ) : field.fieldName === 'productDescription' ? (
                                     <FormTypes
-                                      isNew={Boolean(productInventoryId)}
                                       {...field}
                                       disabled={true}
                                       fieldData={field}
@@ -383,7 +380,6 @@ const ManageSerializedAsset = ({
                                     />
                                   ) : field.fieldName === 'warehouse' ? (
                                     <FormTypes
-                                      isNew={Boolean(productInventoryId)}
                                       {...field}
                                       disabled={
                                         Boolean(productInventoryId) && !isClone ? field.disableOnEdit || field.isUneditable : field.isUneditable
@@ -411,7 +407,6 @@ const ManageSerializedAsset = ({
                                     />
                                   ) : field.fieldName === 'assetNumber' ? (
                                     <FormTypes
-                                      isNew={Boolean(productInventoryId)}
                                       {...field}
                                       disabled={
                                         values['assetNumberType']
@@ -443,7 +438,6 @@ const ManageSerializedAsset = ({
                                   ) : (
                                     <>
                                       <FormTypes
-                                        isNew={Boolean(productInventoryId)}
                                         {...field}
                                         disabled={
                                           Boolean(productInventoryId) && !isClone ? field?.disableOnEdit || field?.isUneditable : field?.isUneditable
@@ -467,6 +461,7 @@ const ManageSerializedAsset = ({
                                         isTooltip={field?.isTooltip || false}
                                         tooltipMessage={field?.tooltipMessage}
                                         size="small"
+                                        fields={allFields}
                                       />
                                     </>
                                   )}

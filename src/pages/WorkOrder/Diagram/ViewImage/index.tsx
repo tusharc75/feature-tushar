@@ -7,6 +7,9 @@ import CustomText from './CustomText';
 import axiosInstance from 'src/axios/axiosInstance';
 import Loader from 'src/components/Loader';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { b64toBlob } from 'src/constants/helpers';
+import CustomButton from 'src/components/Helpers/CustomButton';
+import axios from 'axios';
 
 type TextType = {
   fontSize: number;
@@ -20,7 +23,7 @@ type TextType = {
   height: number;
 };
 
-const ViewImage = ({ data, loading, setLoading }) => {
+const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
   const toastConfig = useContext(CustomToastContext);
   const [themeColor] = useAppTheme();
   const stageRef = useRef(null);
@@ -37,6 +40,8 @@ const ViewImage = ({ data, loading, setLoading }) => {
     width: window.innerWidth - 700,
     height: window.innerHeight - 250
   });
+  const [loading, setLoading] = useState(true);
+  const [isSubmitting, setSubmitting] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -56,19 +61,55 @@ const ViewImage = ({ data, loading, setLoading }) => {
     }
   }, [themeColor]);
 
-  useEffect(() => {
-    setImageState({
-      name: data?.name,
-      x: widthHeight.width * 0.5 - 200,
-      y: widthHeight.height * 0.5 - 200,
-      isDragging: false,
-      width: 400,
-      height: 400
-    });
+  const getImageScale = (url: string, canvasSize: { width: number; height: number }, maxSize: number | false = 400) => {
+    const image = new Image();
+    image.src = url;
+    image.onload = function () {
+      scaleToFit(this);
+    };
+    function scaleToFit(img) {
+      let scale = 0;
+      if (maxSize) {
+        scale = Math.min(canvasSize.width / img.width, canvasSize.height / img.height, maxSize / img.height, maxSize / img.width);
+      } else {
+        scale = Math.min(canvasSize.width / img.width, canvasSize.height / img.height);
+      }
 
+      const imgWidth = img.width * scale;
+      const imgHeight = img.height * scale;
+
+      // get the top left position of the image
+      const x = canvasSize.width / 2 - imgWidth / 2;
+      const y = canvasSize.height / 2 - imgHeight / 2;
+
+      setImageState({
+        name: data?.name,
+        x,
+        y,
+        isDragging: false,
+        width: imgWidth,
+        height: imgHeight
+      });
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    setLoading(true);
+    const source = axios.CancelToken.source();
+
+    // setImageState({
+    //   name: data?.name,
+    //   x: 0,
+    //   y: 0,
+    //   isDragging: false,
+    //   width: widthHeight.width + 20,
+    //   height: widthHeight.height + 48
+    // });
     axiosInstance()
       .get('/user/download?fileName=' + data?.url, {
-        responseType: 'blob'
+        responseType: 'blob',
+        cancelToken: source.token
       })
       .then(({ data }) => {
         const file = new Blob([data], { type: 'application/pdf' });
@@ -77,13 +118,18 @@ const ViewImage = ({ data, loading, setLoading }) => {
         reader.onloadend = function () {
           let base64data: any = reader.result;
           setUrl(base64data);
+          getImageScale(base64data, widthHeight, false);
           setLoading(false);
         };
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
-  }, [data]);
+
+    return () => {
+      source.cancel();
+    };
+  }, [data?.url]);
 
   useEffect(() => {
     if (!layerRef.current) return;
@@ -112,13 +158,74 @@ const ViewImage = ({ data, loading, setLoading }) => {
     return () => window.removeEventListener('resize', watchContainerSize);
   }, [watchContainerSize]);
 
+  const handleSave = async () => {
+    setSubmitting(true);
+    const canvasElement: any = document.getElementById('canvas_layer');
+    const imgURL = canvasElement?.toDataURL();
+    const blob: any = b64toBlob(imgURL);
+    const type = `image/${data?.url?.split('.')[1]}`;
+    const file: any = new File([blob], data?.name, { type });
+    let formData = new FormData();
+    formData.append('file', file);
+    const res = await axiosInstance().post('/user/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    axiosInstance()
+      .put(`/attachment/replace/${data?.attachmentId}`, { oldUrl: data?.url, url: res?.data?.fileName })
+      .then(({ data }) => {
+        setTexts([]);
+        setSelectedAttachment(null);
+        fetchData();
+        setSubmitting(false);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        setSubmitting(false);
+      });
+  };
+
   return (
     <div className="absolute inset-2" ref={containerRef}>
-      <Box mb={1} display="flex">
-        <Button size="small" variant="outlined" color="primary" onClick={handleAddText}>
-          Add Text
-        </Button>
-        <Box component="span" mx={1} />
+      <Box mb={1} display="flex" justifyContent="space-between" alignItems="center">
+        <Box>
+          <Button size="small" variant="outlined" color="primary" onClick={handleAddText}>
+            Add Text
+          </Button>
+          {selectedText && !editingText && (
+            <Button
+              size="small"
+              variant="outlined"
+              color="primary"
+              onClick={() => {
+                setTexts((state) => state.filter((s) => s.id !== selectedText));
+                if (selectedText) selectText(null);
+                if (editingText) setEditingText(null);
+                if (!editingTextRef) {
+                  editingTextRef.current.textRef.show();
+                  editingTextRef.current.transformRef.show();
+                  editingTextRef.current.transformRef.forceUpdate();
+                  editingTextRef.current = null;
+                }
+              }}
+            >
+              Remove Text
+            </Button>
+          )}
+        </Box>
+        {texts?.length > 0 && (
+          <CustomButton
+            disabled={isSubmitting}
+            loading={isSubmitting}
+            variant="contained"
+            color="primary"
+            type="submit"
+            onClick={(e) => {
+              handleSave();
+            }}
+          >
+            Save
+          </CustomButton>
+        )}
       </Box>
       {!loading ? (
         <Stage
@@ -185,8 +292,8 @@ const ViewImage = ({ data, loading, setLoading }) => {
           ref={inputRef}
           style={{
             position: 'absolute',
-            top: `${stageRef.current.container().offsetTop + editingText.y}px`,
-            left: `${stageRef.current.container().offsetLeft + editingText.x}px`,
+            top: `${stageRef.current?.container().offsetTop + editingText.y}px`,
+            left: `${stageRef.current?.container().offsetLeft + editingText.x}px`,
             width: editingText.width,
             overflow: 'hidden',
             resize: 'none',

@@ -207,6 +207,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
       width: 50,
       sticky: 'right',
       disableFilters: true,
+      disableSortBy: true,
       canDrag: false,
       Cell: ({ row }) =>
         <div className="d-flex gap-1">

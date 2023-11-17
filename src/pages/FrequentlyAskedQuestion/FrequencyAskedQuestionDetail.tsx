@@ -73,7 +73,7 @@ const FrequencyAskedQuestionDetail = () => {
             type: 'success',
             message: data?.message
           });
-          history.goBack();
+          history.push(`${routes.frequentlyAskedQuestion.path}`)
         })
         .catch((err) => {
           setShowConfirmBox(false);

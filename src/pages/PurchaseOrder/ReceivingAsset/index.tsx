@@ -185,6 +185,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
           width: 130,
           sticky: 'right',
           disableFilters: true,
+          disableSortBy: true,
           canDrag: false,
           Cell: ({ row }) =>
             <>
@@ -339,7 +340,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
         })
       }
 
-      checkReceivedProduct(result?.data?.data?.map((e) => { return { ...e, type: 'Product' } }));
+      checkReceivedProduct(rows);
 
       setRowsData(rows);
       setSelectedRecords([]);

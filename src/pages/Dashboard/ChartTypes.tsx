@@ -23,6 +23,7 @@ import { IFormDataType } from '../DashboardBuilder/builderHelpers';
 import getStaticData from './getStaticData';
 import StaticCards from './StaticCards';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { useAppTheme } from 'src/constants/AppConfig';
 
 export interface ChartDataType extends IFormDataType {
   _id: any;
@@ -41,6 +42,7 @@ interface Props {
 }
 
 const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullScreen, selectedDashboardId, fetchDashboards }: Props) => {
+  const [themeColor] = useAppTheme();
   const theme = useTheme();
   const isScreenSmall = useMediaQuery(theme.breakpoints.down('xs'));
   const { setToastConfig } = React.useContext(CustomToastContext);
@@ -124,6 +126,50 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
     const fetchTimeout = setTimeout(fetchData, 200);
     return () => clearTimeout(fetchTimeout);
   }, [filterValues, globalFilters, selectedEntity]);
+
+  const swapChartColors = React.useCallback(
+    (colorMap: { [index: string]: string[] }) => {
+      if (!chartData?.datasets) return null;
+      const obj = chartData;
+      for (let i = 0; i < chartData?.datasets.length; i++) {
+        const d = chartData?.datasets[i];
+        const color: string = d.borderColor;
+
+        for (let x in colorMap) {
+          const cList: string[] = colorMap[x];
+          if (cList.length !== 2 || !obj.datasets[i].fill) return null;
+          if (cList.includes(color)) {
+            if (themeColor === 'dark') {
+              obj.datasets[i].borderColor = cList[1];
+              obj.datasets[i].backgroundColor = cList[1];
+            } else {
+              obj.datasets[i].borderColor = cList[0];
+              obj.datasets[i].backgroundColor = `${cList[0].replace(/[\d.]+\)$/g, '0.5)')}`;
+            }
+          }
+        }
+      }
+      return obj;
+    },
+    [themeColor, chartData]
+  );
+
+  React.useEffect(() => {
+    /*
+    colors and color list name should be unique
+    first color is original ↓ color and second color ↓ is for dark theme
+    */
+    const colorMap = {
+      color1: ['rgba(255, 99, 132, 1)', 'rgba(255, 99, 132, 0.5)'],
+      color2: ['rgba(54, 162, 235, 1)', 'rgba(54, 162, 235, 0.5)'],
+      color3: ['rgba(255, 99, 132, 0.6)', 'rgba(255, 150, 132, 0.5)']
+    };
+    const obj = swapChartColors(colorMap);
+    if (!obj) return;
+    setChartData(obj);
+
+    return () => setChartData(null);
+  }, [swapChartColors]);
 
   const fetchData = () => {
     const urlParams = getParams();
@@ -304,34 +350,55 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
               ) : chart.graphType === 'Map' ? (
                 <MapView height={isScreenSmall ? 350 : chart.column <= 6 ? 400 : 500} data={chartData} />
               ) : (
-                <Chart
-                  id={chart.uniqueId}
-                  type={chart.chartType?.toLowerCase()}
-                  data={{
-                    ...chartData,
-                    datasets: chartData.datasets?.map((d: any) => {
-                      if (!chart.stack) {
-                        delete d.stack;
-                      }
-                      return d;
-                    })
-                  }}
-                  options={{
-                    maintainAspectRatio: false,
-                    indexAxis: chart?.kpi?.horizontalBar ? 'y' : 'x',
-                    ...(chart.stack &&
-                      !chartData.datasets.some((d) => d.stack === 'stacked') && {
-                        scales: {
-                          x: {
-                            stacked: true
-                          },
-                          y: {
-                            stacked: true
+                <>
+                  <Chart
+                    key={themeColor}
+                    id={chart.uniqueId}
+                    type={chart.chartType?.toLowerCase()}
+                    data={{
+                      ...chartData,
+                      datasets: chartData.datasets?.map((d: any) => {
+                        if (!chart.stack) {
+                          delete d.stack;
+                        }
+                        return d;
+                      })
+                    }}
+                    options={{
+                      maintainAspectRatio: false,
+                      indexAxis: chart?.kpi?.horizontalBar ? 'y' : 'x',
+                      scales: {
+                        x: {
+                          grid: {
+                            color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
+                          }
+                        },
+                        y: {
+                          grid: {
+                            color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
                           }
                         }
-                      })
-                  }}
-                />
+                      },
+                      ...(chart.stack &&
+                        !chartData.datasets.some((d) => d.stack === 'stacked') && {
+                          scales: {
+                            x: {
+                              stacked: true,
+                              grid: {
+                                color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
+                              }
+                            },
+                            y: {
+                              stacked: true,
+                              grid: {
+                                color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
+                              }
+                            }
+                          }
+                        })
+                    }}
+                  />
+                </>
               )
             ) : (
               <TableView

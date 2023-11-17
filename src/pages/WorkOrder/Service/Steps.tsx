@@ -2,7 +2,17 @@ import React, { Fragment, useContext, useEffect, useRef, useState } from 'react'
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import { AiOutlinePlus } from 'react-icons/ai';
 import Button from '@material-ui/core/Button';
-import { ExpandMore, AccessTime, Info, DragIndicator, MoreHoriz, DeleteOutline, People, AddCircleOutline } from '@material-ui/icons';
+import {
+  ExpandMore,
+  AccessTime,
+  Info,
+  DragIndicator,
+  MoreHoriz,
+  DeleteOutline,
+  People,
+  AddCircleOutline,
+  FileCopyOutlined
+} from '@material-ui/icons';
 import {
   convertMsToTime,
   getChipColor,
@@ -276,6 +286,8 @@ const Steps = ({
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState({ open: false, loading: false, steps: [] });
   const [selectedSteps, setSelectedSteps] = useState<string[]>([]);
   const [isCompleteAllLoading, setIsCompleteAllLoading] = useState(false);
+  const [reOpenServiceDialog, setReOpenServiceDialog] = useState({ open: false, type: null, stepId: null });
+  const [loadingStep, setLoadingStep] = useState(false);
 
   useEffect(() => {
     if ((!selectedServiceRef.current || selectedServiceRef.current !== selectedService._id) && selectedService._id) {
@@ -440,7 +452,7 @@ const Steps = ({
 
   const getFields = (step) => {
     let stepData = null;
-    let fieldData = { fields: [], formsData: [], values: {} };
+    let fieldData = { fields: [], formsData: [], values: {}, orignalValues: {} };
     let fieldsDataForCreate = step?.fields ? step?.fields : [];
     let tempServiceData = stepSubmitedData?.find((d) => d.uniqueId === selectedService?.uniqueId && d.stepId === step?._id);
 
@@ -450,6 +462,7 @@ const Steps = ({
         fieldData = {
           fields: fieldsDataForCreate,
           formsData: setFieldsInAscendingOrder(fieldsDataForCreate),
+          orignalValues: tempServiceData,
           values: getObjKeysWithValues(tempServiceData, fieldsDataForCreate)
         };
       }
@@ -458,6 +471,7 @@ const Steps = ({
         fieldData = {
           fields: fieldsDataForCreate,
           formsData: setFieldsInAscendingOrder(fieldsDataForCreate),
+          orignalValues: {},
           values: getObjKeys('', fieldsDataForCreate)
         };
       }
@@ -529,6 +543,7 @@ const Steps = ({
   };
 
   const handleStartEnd = (type, stepId) => {
+    setLoadingStep(true);
     axiosInstance()
       .put(`${workOrder.api}/${workOrderId}/step/${type}`, {
         uniqueId: selectedService?.uniqueId,
@@ -536,14 +551,17 @@ const Steps = ({
         stepId: stepId
       })
       .then(({ data }) => {
+        setLoadingStep(false);
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
           message: data.message
         });
         fetchService();
+        setReOpenServiceDialog({ open: false, type: null, stepId: null });
       })
       .catch((error) => {
+        setLoadingStep(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -769,17 +787,22 @@ const Steps = ({
       uniqueId: selectedService?.uniqueId,
       stepId: step?._id
     };
+    setLoadingStep(true);
     axiosInstance()
       .put(`${workOrder.api}/step/clone-step`, payload)
       .then(({ data }) => {
+        setLoadingStep(false);
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
           message: data.message
         });
+        setReOpenServiceDialog({ open: false, type: null, stepId: null });
+        fetchService();
         fetchServiceData();
       })
       .catch((error) => {
+        setLoadingStep(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -958,7 +981,7 @@ const Steps = ({
                             </span>
                           </Box>
                           <div className="flex items-start gap-2 w-full">
-                            <Typography className={`${classes.heading} flex-grow`} style={{ fontWeight: '600' }}>
+                            <Typography className={`${classes.heading} flex-grow [word-break:break-all]`} style={{ fontWeight: '600' }}>
                               {step.stepName}
                             </Typography>
                             {isMobile && !isTablet && (
@@ -1022,9 +1045,12 @@ const Steps = ({
                               </HtmlTooltip>
                             </Box>
                           )}
-                          {step?.workStations?.length > 0 && (
+                          {step?.assignedWorkStations?.length > 0 && (
                             <Box ml={1}>
-                              <HtmlTooltip enterTouchDelay={0} title={`Work Stations-${step?.workStations?.map((e) => e?.optionLabel)?.toString()}`}>
+                              <HtmlTooltip
+                                enterTouchDelay={0}
+                                title={`Work Stations-${step?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString()}`}
+                              >
                                 <span>
                                   <WorkStations className=" align-text-top" />
                                 </span>
@@ -1164,7 +1190,11 @@ const Steps = ({
                                       className={classes.stepButtons}
                                       onClick={(e) => {
                                         e.stopPropagation();
-                                        handleStartEnd('reopen', step._id);
+                                        if (selectedService?.status === WORKORDER_SERVICE_STATUS.completed) {
+                                          setReOpenServiceDialog({ open: true, type: null, stepId: step._id });
+                                        } else {
+                                          handleStartEnd('reopen', step._id);
+                                        }
                                       }}
                                     >
                                       Re-Open/Test
@@ -1228,21 +1258,24 @@ const Steps = ({
                             <MoreHoriz />
                           </IconButton>
 
-                          {allowedToEdit && ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                            selectedService?.status
-                          ) &&
+                          {allowedToEdit && ![WORKORDER_SERVICE_STATUS.skipped].includes(selectedService?.status) && (
                             <HtmlTooltip enterTouchDelay={0} title="Clone" placement="top" arrow>
                               <IconButton
                                 size="small"
                                 color="inherit"
                                 aria-label="Clone"
                                 onClick={() => {
-                                  cloneStep(step);
+                                  if (selectedService?.status === WORKORDER_SERVICE_STATUS.completed) {
+                                    setReOpenServiceDialog({ open: true, type: 'clone', stepId: step._id });
+                                  } else {
+                                    cloneStep(step);
+                                  }
                                 }}
                               >
-                                <AddCircleOutline style={{ fontSize: '20px' }} />
+                                <FileCopyOutlined style={{ fontSize: '18px' }} />
                               </IconButton>
-                            </HtmlTooltip>}
+                            </HtmlTooltip>
+                          )}
                           <HtmlTooltip enterTouchDelay={0} title="Delete" placement="top" arrow>
                             <IconButton
                               size="small"
@@ -1501,7 +1534,9 @@ const Steps = ({
                 handleClose={() => {
                   setAttchmentsDialog({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
                 }}
-                handleSuccess={() => { }}
+                handleSuccess={() => {
+                  setAttchmentsDialog({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
+                }}
               />
             )}
             {consumablesDialog.open && (
@@ -1537,6 +1572,7 @@ const Steps = ({
                   setUserAssignDialog(false);
                   fetchService();
                 }}
+                competencies={selectedService?.competencies}
               />
             )}
             {workStationAssignDialog && (
@@ -1549,7 +1585,7 @@ const Steps = ({
                     stepId: selectedStep?._id
                   }
                 ]}
-                workStations={selectedStep?.workStations}
+                workStations={selectedStep?.assignedWorkStations}
                 handleClose={() => {
                   setWorkStationAssignDialog(false);
                 }}
@@ -1569,6 +1605,28 @@ const Steps = ({
                 okBtnLoading={showDeleteConfirmBox.loading}
                 onOk={() => {
                   deleteSteps();
+                }}
+              />
+            )}
+            {reOpenServiceDialog.open && (
+              <ConfirmationDialog
+                open={reOpenServiceDialog.open}
+                message={`By performing this action, the service status will change from ${WORKORDER_SERVICE_STATUS.completed} to ${WORKORDER_SERVICE_STATUS.inProgress}. Do you wish to continue?`}
+                onClose={() => {
+                  setReOpenServiceDialog({ open: false, type: null, stepId: null });
+                }}
+                forwardText={'Continue'}
+                okBtnLoading={loadingStep}
+                onOk={() => {
+                  setLoadingStep(true);
+                  if (reOpenServiceDialog.type === 'clone') {
+                    cloneStep({
+                      workOrderId: workOrderId,
+                      _id: reOpenServiceDialog.stepId
+                    });
+                  } else {
+                    handleStartEnd('reopen', reOpenServiceDialog.stepId);
+                  }
                 }}
               />
             )}

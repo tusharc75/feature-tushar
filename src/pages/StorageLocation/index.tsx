@@ -1,154 +1,154 @@
-import { Box, Menu, MenuItem } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
-import IconButton from '@material-ui/core/IconButton';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import DeleteIcon from '@material-ui/icons/Delete';
+import { Button, IconButton } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { camelCase } from 'lodash';
-import { useContext, useEffect, useReducer, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
-import { MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
-import { GiStockpiles } from 'react-icons/gi';
+import { useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import HtmlTooltip from '../../components/CustomTooltipTitle';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import routes from '../../components/Helpers/Routes';
-import SearchBox from '../../components/Helpers/SearchBox';
-import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
-import MobileSortDialog from '../../components/MobileSortDialog';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, sidebarResource, storageLocation } from '../../constants/helpers';
-import useColumns, { getFrameworkComponents, getStaticFields, gridFilterParser } from '../../constants/useColumns';
-import styles from '../Leads/Header.module.scss';
+import {
+  storageLocation,
+  getLocalStorageArrayData,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  removeLocalStorage,
+  sidebarResource
+} from '../../constants/helpers';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import routes from './../../components/Helpers/Routes';
+import { camelCase } from 'lodash';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 import ManageStorageLocation from './ManageStorageLocation';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import styles from '../Leads/Header.module.scss';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import { Menu, MenuItem } from '@material-ui/core';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import DeleteIcon from '@material-ui/icons/Delete';
+
+let searchTimeout;
 
 const StorageLocation = () => {
-  let renderedFrom = camelCase(routes.storageLocation?.title);
+  const renderedFrom = camelCase(routes?.storageLocation.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
-
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
-
-  const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
-  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
-  const [deleteRecord, setDeleteRecord] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [gridApi, setGridApi] = useState(null);
-  const [sortOpen, setSortOpen] = useState(false);
-  const [columns, setColumns] = useState([]);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
-    state;
-
-  const [isOpenDialog, setisOpenDialog] = useState(false);
+  const { state, dispatch } = useTableReducer();
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { getColumnData } = useColumns();
 
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
-  const { getColumnData } = useColumns();
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
+  const [deleteRecord, setDeleteRecord] = useState(null);
+
+  const [columns, setColumns] = useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
 
   useEffect(() => {
     fetchGridColumns();
   }, []);
 
   useEffect(() => {
-    fetchData();
-  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
-
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get(`/field?resource=${storageLocation.resource}`)
-      .then(({ data: { data } }) => {
-        let columns = [];
-        let rendererNames = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(routes.storageLocation?.title, o?.fieldData, routes.storageLocationDetail.path, true);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName);
-            }
-          }
-        });
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent,
-          actionsRenderer: ActionsRenderer
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
-        columns = [...columns, ...getStaticFields()];
-        setColumns([...columns]);
-      });
-  };
-
-  const fetchData = () => {
-    dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
+    let millisec = Object.keys(search).length > 0 ? 600 : 5;
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
     }
-    const queryString = getQueryString();
-    axiosInstance()
-      .get(`${storageLocation.api}${queryString}`)
-      .then(({ data: { data } }) => {
-        let rows = data?.data?.map((u) => {
-          let finalObject = prepareDataForGrid(u);
-          finalObject['isChecked'] = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions?.storageLocation?.isUpdate;
-          finalObject['canDelete'] = permissions?.storageLocation?.isDelete;
-          let res = {
-            ...finalObject
-          };
-          return res;
-        });
-        if (appendRows) {
-          dispatch({
-            type: 'initialize',
-            data: [...dataRows, ...rows],
-            count: data?.count,
-            selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
-          });
-        } else {
-          dispatch({
-            type: 'initialize',
-            data: rows,
-            count: data?.count,
-            selectedRecords: rows.filter((f) => f.isChecked === true)
-          });
-        }
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        dispatch({ type: 'loading', loading: false });
-      });
+    searchTimeout = setTimeout(() => {
+      fetchData();
+    }, millisec);
+  }, [search]);
+
+  useEffect(() => {
+    fetchData();
+  }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
+
+  const fetchGridColumns = async () => {
+    let data;
+    const response = await axiosInstance().get(`/field?resource=${sidebarResource.storageLocation}`);
+    data = response?.data?.data;
+    let columns = [];
+    data.forEach((o) => {
+      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.storageLocationDetail.path, true);
+      if (currentColumn !== null) {
+        columns = [...columns, currentColumn?.columnData];
+      }
+      return o?.fieldData;
+    });
+    columns = [...columns, ...getStaticFields(), ActionsRenderer];
+    setColumns(columns);
   };
 
-  const getQueryString = () => {
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 110,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        {permissions?.storageLocation?.isCreate ? (
+          <HtmlTooltip title="Clone">
+            <IconButton
+              size="small"
+              aria-label="Clone"
+              onClick={() => {
+                setShowManageDialog({ open: true, isClone: true, idToClone: row.original._id });
+              }}
+            >
+              <FileCopyIcon fontSize="small" color="primary" />
+            </IconButton>
+          </HtmlTooltip>
+        ) : (
+          <HtmlTooltip className="cursor-stop" title="You do not have permission to clone/create">
+            <IconButton aria-label="Clone" size="small">
+              <FileCopyIcon fontSize="small" />
+            </IconButton>
+          </HtmlTooltip>
+        )}
+        {permissions?.storageLocation?.isDelete && (
+          <HtmlTooltip title="Delete">
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              onClick={() => {
+                setDeleteRecord(row.original);
+                setShowDeleteConfirmBox(true);
+              }}
+            >
+              <DeleteIcon color="error" />
+            </IconButton>
+          </HtmlTooltip>
+        )}
+      </>
+    )
+  };
+
+  const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
+    if (isExport) {
+      deepFilter = `?`;
+    }
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
-
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
     if (deepFilters?.length) {
       deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
     }
-
     if (filterByIds?.length || deepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
     }
-
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
@@ -161,8 +161,39 @@ const StorageLocation = () => {
     }
     return deepFilter;
   };
+  const fetchData = async () => {
+    dispatch({ type: 'loading', loading: true });
+    const queryString = getQueryString();
+
+    axiosInstance()
+      .get(`${storageLocation.api}${queryString}`)
+      .then(({ data: { data} }) => {
+        let count = data?.count;
+        let rows = data?.data?.map((u) => {
+          let finalObject = prepareDataForGrid(u, user);
+          finalObject['isChecked'] = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some((s) => s._id === u._id);
+          finalObject['allowedToEdit'] = permissions?.storageLocation?.isUpdate;
+          finalObject['canDelete'] = permissions?.storageLocation?.isDelete;
+          return finalObject;
+        });
+        dispatch({ type: 'initialize', data: rows, count: count });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      })
+      .finally(() => {
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
+      });
+  };
+
+  const handleSearch = (e) => {
+    dispatch({ type: 'search', search: e.target.value });
+  };
 
   const handleDelete = () => {
+    setIsSubmitting(true);
     let ids = [];
     if (deleteRecord) {
       ids.push(deleteRecord._id);
@@ -172,50 +203,17 @@ const StorageLocation = () => {
     axiosInstance()
       .put(`${storageLocation.api}/remove`, { ids: ids })
       .then(() => {
+        removeLocalStorage(localStorageSelectedRecords);
         fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
         setAnchorEl(null);
+        setIsSubmitting(false);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
+        setIsSubmitting(false);
       });
-  };
-
-  const ActionsRenderer = (params) => (
-    <>
-      {permissions?.storageLocation?.isCreate && (
-        <HtmlTooltip title="Clone">
-          <IconButton
-            size="small"
-            aria-label="Clone"
-            onClick={() => {
-              setShowManageDialog({ open: true, isClone: true, idToClone: params.data._id });
-            }}
-          >
-            <FileCopyIcon color="primary" />
-          </IconButton>
-        </HtmlTooltip>
-      )}
-      {permissions?.storageLocation?.isDelete && (
-        <HtmlTooltip title="Delete">
-          <IconButton
-            size="small"
-            aria-label="Delete"
-            onClick={() => {
-              setDeleteRecord(params.data);
-              setShowDeleteConfirmBox(true);
-            }}
-          >
-            <DeleteIcon color="error" />
-          </IconButton>
-        </HtmlTooltip>
-      )}
-    </>
-  );
-
-  const handleSearch = (e) => {
-    dispatch({ type: 'search', search: e.target.value });
   };
 
   const openActions = (event) => {
@@ -226,33 +224,15 @@ const StorageLocation = () => {
     setAnchorEl(null);
   };
 
-  const handleOpen = () => {
-    setisOpenDialog(true);
-  };
-
-  const handleClickOpen = () => {
-    setSortOpen(true);
-  };
-
-  const handleClickClose = () => {
-    setSortOpen(false);
-  };
-
-  const handleFilterClose = () => {
-    setisOpenDialog(false);
-  };
-
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[routes.storageLocation]} />
         <ImportExportLinks
           permissions={permissions?.storageLocation}
-          module="purchase order"
+          module="storageLocation"
           api={storageLocation.api}
-          afterImportCompleted={() => {
-            fetchData();
-          }}
+          afterImportCompleted={() => {}}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
@@ -262,79 +242,27 @@ const StorageLocation = () => {
               : []
           }
           onExportToExcelSuccess={() => {
-            if (gridApi) gridApi.deselectAll();
-            else fetchData();
+            fetchData();
           }}
+          additionalParams={getQueryString(true)}
         />
       </div>
-      <div className="main-container">
+      <CustomContainer>
         <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className={'d-flex align-items-center gap-1'}>
-              <div className="d-flex align-items-center">
-                <GiStockpiles size={20} style={{ paddingBottom: '3px' }} className="headerLogo" />
-                <span className="listingHeader">{routes.storageLocation?.title} </span>
-              </div>
-              {isMobile ? (
-                <div className="d-flex flex-wrap items-center justify-between w-full">
-                  <div></div>
-                  <div className="flex flex-wrap items-center gap-1 ml-auto">
-                    <IconButton
-                      onClick={handleClickOpen}
-                      id="demo-customized-button"
-                      aria-controls="demo-customized-menu"
-                      aria-haspopup="true"
-                      aria-expanded={'true'}
-                      className={'mobileIconButton secondary'}
-                      size="small"
-                    >
-                      <TbArrowsSort className="rotate-90" size={16} />
-                    </IconButton>
-                    <MobileSortDialog
-                      isOpen={sortOpen}
-                      handleClose={handleClickClose}
-                      contentPart={null}
-                      secHeading={['Sort Purchase Order']}
-                      columns={columns}
-                      dispatch={dispatch}
-                    />
-                    <IconButton
-                      id="demo-customized-button"
-                      aria-controls="demo-customized-menu"
-                      aria-haspopup="true"
-                      aria-expanded={'true'}
-                      className={'mobileIconButton secondary'}
-                      size="small"
-                      onClick={handleOpen}
-                    >
-                      <MdOutlineFilterAlt size={16} />
-                    </IconButton>
-                    <MobileFilterDialog
-                      isOpen={isOpenDialog}
-                      handleClose={handleFilterClose}
-                      contentPart={null}
-                      columns={columns}
-                      dispatch={dispatch}
-                      title={routes?.storageLocation?.title}
-                      filters={filters}
-                      resource={sidebarResource.storageLocation}
-                    />
-                  </div>
-                </div>
-              ) : null}
-            </div>
-            <div className="flex flex-wrap gap-[8px]  justify-end">
-              <SearchBox onChange={handleSearch} className={isMobile ? styles.search_box_input : ''} size="small" value={search} />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+            <div className={'flex justify-between align-items-center gap-1 w-full'}></div>
+            <div className="flex flex-wrap gap-[8px] justify-end">
+              <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
               <div className="flex gap-[8px] flex-wrap items-center">
                 {permissions?.storageLocation?.isCreate && (
                   <Button
+                    variant={'contained'}
+                    color="primary"
+                    size="small"
+                    className={`no-shadow`}
                     onClick={() => {
                       setShowManageDialog({ open: true, isClone: false, idToClone: null });
                     }}
-                    variant={'contained'}
-                    size="small"
-                    color="primary"
-                    className={`no-shadow`}
                     startIcon={<AddOutlined />}
                   >
                     Add
@@ -347,10 +275,10 @@ const StorageLocation = () => {
                       color="default"
                       size="small"
                       onClick={openActions}
-                      disabled={selectedRecords.length ? false : true}
+                      className={`new-dropdown-v1`}
                       aria-controls="action-menu"
-                      className={` new-dropdown-v1`}
                       endIcon={<ExpandMore />}
+                      disabled={selectedRecords?.length ? false : true}
                     >
                       Actions
                     </Button>
@@ -367,6 +295,11 @@ const StorageLocation = () => {
                       onClose={closeActions}
                     >
                       <MenuItem
+                      disabled={
+                        !(
+                          (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length
+                        )
+                      }
                         onClick={() => {
                           closeActions();
                           // eslint-disable-next-line no-lone-blocks
@@ -383,90 +316,45 @@ const StorageLocation = () => {
                 )}
               </div>
             </div>
-            <DisplayFiltersForMobile resource={sidebarResource.storageLocation} />
           </div>
         </div>
         {columns ? (
-          Object.keys(frameWorkComponent).length > 0 ? (
-            isMobile && !isTablet ? (
-              <CustomSwipableList
-                allowSelection={true}
-                allowSwipe={true}
-                permissions={permissions?.storageLocation}
-                primaryField={columns?.find((d) => d.primaryField)}
-                onClick={(data) => {
-                  history.push(`${routes.storageLocationDetail.path}/${data._id}`);
-                }}
-                dataRows={dataRows}
-                selectedRecords={getLocalStorageArrayData(`${localStorageSelectedRecords}`)}
-                dispatch={dispatch}
-                onEdit={(data) => {
-                  history.push(`${routes.storageLocationDetail.path}/${data._id}`);
-                }}
-                extraParamsToCheckDelete={true}
-                onDelete={(data) => {
-                  setDeleteRecord(data);
-                  setShowDeleteConfirmBox(true);
-                }}
-                rowCount={rowCount}
-                page={page}
-                loading={loading}
-                additionalDetails={[]}
-                chips={[]}
-                onCreate={false}
-                showClone={true}
-                onClone={(data) => {
-                  setShowManageDialog({ open: true, isClone: true, idToClone: data._id });
-                }}
-                renderedFrom={renderedFrom}
-              />
-            ) : (
-              <CustomAgGrid
-                columns={columns}
-                dataRows={dataRows}
-                frameworkComponents={frameWorkComponent}
-                setGridApi={setGridApi}
-                dispatch={dispatch}
-                rowCount={rowCount}
-                limit={limit}
-                pageSizes={pageSizes}
-                page={page}
-                actionWidth={150}
-                loading={loading}
-                renderedFrom={renderedFrom}
-                refreshGrid={fetchData}
-                showOnlyShowFilteredRecordSwitch={true}
-                showFilters={true}
-                resource={sidebarResource.storageLocation}
-              />
-            )
-          ) : null
-        ) : (
-          <Box p={2} height={500}>
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Box>
-        )}
-      </div>
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
+            columns={columns}
+            onSelect={() => {}}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            isClientSideGrid={false}
+            refreshGrid={fetchData}
+            showOnlyShowFilteredRecordSwitch={true}
+            showFilters={true}
+            resource={sidebarResource.storageLocation}
+          />
+        ) : null}
+      </CustomContainer>
+      {showDeleteConfirmBox && (
+        <ConfirmationDialog
+          open={showDeleteConfirmBox}
+          message={`Are you sure you want to delete ${routes?.storageLocation?.title} ${deleteRecord?.storageLocationName || ''} ?`}
+          onClose={() => {
+            setDeleteRecord(null);
+            setShowDeleteConfirmBox(false);
+          }}
+          okBtnLoading={isSubmitting}
+          onOk={handleDelete}
+        />
+      )}
       {showManageDialog.open && (
         <ManageStorageLocation
           isClone={showManageDialog.isClone}
           storageLocationId={showManageDialog.idToClone}
           onClose={() => setShowManageDialog({ open: false, isClone: false, idToClone: null })}
           onSuccess={() => {
-            setShowManageDialog({ open: false, isClone: false, idToClone: null });
             fetchData();
+            setShowManageDialog({ open: false, isClone: false, idToClone: null });
           }}
-        />
-      )}
-      {showDeleteConfirmBox && (
-        <ConfirmationDialog
-          open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes.storageLocation?.title?.toLowerCase()} ${deleteRecord?.storageLocation || ''} ? `}
-          onClose={() => {
-            setDeleteRecord(null);
-            setShowDeleteConfirmBox(false);
-          }}
-          onOk={handleDelete}
         />
       )}
     </section>

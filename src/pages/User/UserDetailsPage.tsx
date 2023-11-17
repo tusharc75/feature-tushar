@@ -445,7 +445,7 @@ const UserDetailsPage = () => {
           .put(`/user/remove`, { ids: [deleteUserRec] })
           .then(({ data }) => {
             setShowConfirmBox(false);
-            history.goBack();
+            history.push(`${routes.user.path}`)
           })
           .catch((err) => {
             setShowConfirmBox(false);

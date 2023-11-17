@@ -85,7 +85,7 @@ const ProductAuctionDetailsPage = () => {
       .get(`${productAuction.api}/${id}`)
       .then(({ data: { data } }) => {
         setProductAuctionData(data);
-        setBids(data.bids);
+        {data?.bids && setBids(data?.bids)}
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -97,7 +97,7 @@ const ProductAuctionDetailsPage = () => {
       .put(`${productAuction.api}/remove`, { ids: [id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.goBack();
+        history.push(`${routes.productAuction.path}`)
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);

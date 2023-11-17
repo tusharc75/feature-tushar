@@ -1,5 +1,17 @@
 import { Fragment, useState, useEffect, useContext } from 'react';
-import { Box, Button, CircularProgress, Dialog, Divider, InputAdornment, List, ListItem, ListItemText, TextField, Typography } from '@material-ui/core';
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Dialog,
+  Divider,
+  InputAdornment,
+  List,
+  ListItem,
+  ListItemText,
+  TextField,
+  Typography
+} from '@material-ui/core';
 import DateUtils from '@date-io/date-fns';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import { Autocomplete } from '@material-ui/lab';
@@ -12,7 +24,13 @@ import { read, utils, writeFile } from 'xlsx';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import { capitalize, isEmpty } from 'lodash';
 import axiosInstance from 'src/axios/axiosInstance';
-import { convertDateInDateTime, currencyCodeToSymbol, dateFormatForInputControl, productInventory, sidebarResource } from '../../../constants/helpers';
+import {
+  convertDateInDateTime,
+  currencyCodeToSymbol,
+  dateFormatForInputControl,
+  productInventory,
+  sidebarResource
+} from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import moment from 'moment';
 import { useData } from 'src/StateProvider/Provider';
@@ -45,7 +63,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
     state: { user }
   }: any = useData();
 
-  const curr = user?.user?.brandCurrency || "";
+  const curr = user?.user?.brandCurrency || '';
   const currSymbol = currencyCodeToSymbol(curr);
 
   useEffect(() => {
@@ -120,11 +138,11 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
           product.length > 1
             ? product?.map((e) => ({ product: e._id, qty: parseInt(values.qty), price: parseFloat(values.price), serialNumber: [] }))
             : product?.map((e) => ({
-              product: e._id,
-              qty: parseInt(values.qty),
-              price: parseFloat(values.price),
-              serialNumber: values['serialNumbers']
-            })),
+                product: e._id,
+                qty: parseInt(values.qty),
+                price: parseFloat(values.price),
+                serialNumber: values['serialNumbers']
+              })),
         warehouse: warehouse,
         storageLocation: values.storageLocation,
         receiveDate: values.customDate,
@@ -180,7 +198,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
     if (values.qty <= 0) {
       errors['qty'] = 'Please enter valid qty';
     }
-    
+
     if (values.customDate === null || !moment(values.customDate).isValid()) {
       errors['customDate'] = 'Please select valid date';
     }
@@ -198,7 +216,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
     }
 
     if (type === 'add') {
-      if (parseFloat(values.price) <= 0 || values.price === "") {
+      if (parseFloat(values.price) <= 0 || values.price === '') {
         errors['price'] = 'Please enter valid cost';
       }
     }
@@ -309,7 +327,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
         initialData && (
           <Formik initialValues={initialData} onSubmit={handleSubmit} validateOnMount validate={validate}>
             {({ touched, errors, setFieldValue, values }) => (
-              <Form autoComplete="off" autoCorrect="off" noValidate>
+              <Form autoComplete="off" autoCorrect="off" noValidate className="flex flex-col min-h-full">
                 <MuiPickersUtilsProvider utils={DateUtils}>
                   <CustomDialogHeader
                     title={`${capitalize(type)} Inventory`}
@@ -325,7 +343,10 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                     <List style={{ padding: 0 }}>
                       <ListItem key={product[0]?._id}>
                         {product?.length === 1 ? (
-                          <ListItemText primary={product[0]?.productName} secondary={!user?.user?.brandPolicy?.hideInventoryCount && `Inventory : ${currentInventory}`} />
+                          <ListItemText
+                            primary={product[0]?.productName}
+                            secondary={!user?.user?.brandPolicy?.hideInventoryCount && `Inventory : ${currentInventory}`}
+                          />
                         ) : (
                           <ListItemText primary={`${product?.length} Products`} />
                         )}
@@ -364,7 +385,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                             setFieldValue('price', e.target.value);
                           }}
                           InputProps={{
-                            startAdornment: <InputAdornment position="start">{currSymbol}</InputAdornment>,
+                            startAdornment: <InputAdornment position="start">{currSymbol}</InputAdornment>
                           }}
                         />
                       </Box>

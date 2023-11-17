@@ -15,7 +15,7 @@ import {
   CircularProgress,
   Typography
 } from '@material-ui/core';
-import { DragHandle,ExpandMore } from '@material-ui/icons';
+import { DragHandle, ExpandMore } from '@material-ui/icons';
 import { XYCoord } from 'dnd-core';
 import { DndProvider, useDrag, useDrop, DropTargetMonitor } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -27,6 +27,8 @@ import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { debounce, uniq } from 'lodash';
 import { Accordion, AccordionSummary, AccordionDetails } from 'src/components/CustomAccordion';
+import { TouchBackend } from 'react-dnd-touch-backend';
+import { isMobile, isTablet } from 'react-device-detect';
 
 const ItemTypes = {
   CARD: 'card',
@@ -176,7 +178,7 @@ const ArrangeView = (props) => {
           <span>Drag & Drop to arrange</span>
         </Box>
         <br />
-        <DndProvider backend={HTML5Backend}>
+        <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
           {sections.map((section, sectionIndex) => (
             <SectionDrag
               isDivider={sections.length !== sectionIndex + 1}
@@ -186,11 +188,7 @@ const ArrangeView = (props) => {
               moveSection={moveSection}
             >
               <Accordion>
-                <AccordionSummary
-                  expandIcon={<ExpandMore />}
-                  aria-controls={`section-${sectionIndex}-content`}
-                  id={`section-${sectionIndex}-header`}
-                >
+                <AccordionSummary expandIcon={<ExpandMore />} aria-controls={`section-${sectionIndex}-content`} id={`section-${sectionIndex}-header`}>
                   <Typography variant="subtitle1">{section}</Typography>
                 </AccordionSummary>
                 <AccordionDetails>

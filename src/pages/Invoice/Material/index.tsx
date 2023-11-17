@@ -183,6 +183,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
       width: 100,
       sticky: 'right',
       disableFilters: true,
+      disableSortBy: true,
       canDrag: false,
       Cell: ({ row, rows }) =>
         <>

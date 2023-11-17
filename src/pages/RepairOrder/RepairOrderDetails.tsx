@@ -67,7 +67,7 @@ const RepairOrderDetails = () => {
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [repairOrderFields, setRepairOrderFields] = useState([]);
   const [nextStep, setNextStep] = useState(true);
-  const [prevStep, setPrevStep] = useState(false);
+  const [prevStep, setPrevStep] = useState(true);
 
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [allowedToEdit, setAllowedToEdit] = useState(false);

@@ -30,14 +30,14 @@ function LeadTimeDialog({ salesOrderId, data, onClose, handleSucess }) {
     };
 
     axiosInstance()
-      .put(`${salesOrder.api}/productpackage/${salesOrderId}/lead-time`, value)
-      .then((res) => {
+      .put(`${salesOrder.api}/material/${salesOrderId}/lead-time`, value)
+      .then(({ data }) => {
         setLoading(false);
         handleSucess();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: 'Lead time updated successfully'
+          message: data.message
         });
       })
       .catch((err) => {
@@ -99,16 +99,16 @@ function LeadTimeDialog({ salesOrderId, data, onClose, handleSucess }) {
           <Grid container>
             <Grid item xs={12}>
               <Box style={{ maxHeight: '350px', overflow: 'auto' }} border={1} mt={2} mb={1} borderColor="var(--common-border-color)" width={'100%'}>
-                <Box p={1} bgcolor="grey.200">
-                  <Grid container xs={12}>
-                    <Grid item xs={6}>
+                <Box p={1} className="bg-[var(--dark-primary,_#eeeeee)] ">
+                  <div className="min-[600px]:grid min-[600px]:grid-cols-[5fr_5fr_2fr] gap-[8px]">
+                    <div className="max-[600px]:hidden">
                       <Typography variant="body2">Lead Time Status</Typography>
-                    </Grid>
-                    <Grid item xs={4}>
+                    </div>
+                    <div className="max-[600px]:hidden">
                       <Typography variant="body2">{leadTimeMasterSteps?.length && totalDays ? `${totalDays} Days` : 'Days'}</Typography>
-                    </Grid>
-                    <Grid item xs={2}>
-                      <Grid container justifyContent="flex-end">
+                    </div>
+                    <div>
+                      <div className="flex justify-end items-center gap-2">
                         <IconButton
                           size="small"
                           aria-label="setting"
@@ -116,16 +116,19 @@ function LeadTimeDialog({ salesOrderId, data, onClose, handleSucess }) {
                             handleAddLTMSteps();
                           }}
                         >
+                          <Typography variant="body2" className="min-[600px]:hidden max-[600px]:p-1">
+                            Add
+                          </Typography>
                           <AddCircleOutlineIcon fontSize="small" />
                         </IconButton>
-                      </Grid>
-                    </Grid>
-                  </Grid>
+                      </div>
+                    </div>
+                  </div>
                 </Box>
                 {leadTimeMasterSteps?.map((steps, index) => (
                   <Box key={index} p={1} borderTop={1} borderColor="var(--common-border-color)" width={'100%'}>
                     <Grid container spacing={1}>
-                      <Grid item xs={6}>
+                      <Grid item xs={10} sm={5}>
                         <Autocomplete
                           options={leadTimeStatusDropdown || []}
                           getOptionLabel={(option) => option}
@@ -148,7 +151,7 @@ function LeadTimeDialog({ salesOrderId, data, onClose, handleSucess }) {
                           )}
                         />
                       </Grid>
-                      <Grid item xs={4}>
+                      <Grid item xs={10} sm={5}>
                         <TextField
                           id="Days-Field"
                           variant="outlined"
@@ -206,7 +209,7 @@ function LeadTimeDialog({ salesOrderId, data, onClose, handleSucess }) {
         {showConfirmDialog ? (
           <ConfirmCancelDialog
             open={showConfirmDialog}
-            onSave={() => {}}
+            onSave={() => { }}
             onClose={() => {
               setShowConfirmDialog(false);
               onClose();

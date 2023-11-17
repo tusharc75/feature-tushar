@@ -136,6 +136,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
 
   const [isSubmitting, setSubmitting] = useState(false);
 
+  const [reviseQuotation, setReviseQuotation] = useState(false);
+
   useEffect(() => {
     fetchServiceData();
   }, [workOrderId]);
@@ -302,7 +304,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
       .then(() => {
         setServiceDialog({ open: false, type: '', uniqueId: null, preWork: null });
         if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(quotationData?.status)) {
-          createNewVersionQuote();
+          setReviseQuotation(true);
         } else {
           fetchServiceData();
         }
@@ -327,7 +329,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           message: data?.message
         });
         if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(quotationData?.status)) {
-          createNewVersionQuote();
+          setReviseQuotation(true);
         } else {
           fetchServiceData();
         }
@@ -689,11 +691,11 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                             </HtmlTooltip>
                                           </Box>
                                         )}
-                                        {data?.type === 'service' && data?.workStations?.length > 0 && (
+                                        {data?.type === 'service' && data?.assignedWorkStations?.length > 0 && (
                                           <Box ml={1}>
                                             <HtmlTooltip
                                               enterTouchDelay={0}
-                                              title={`Work Stations-${data?.workStations?.map((e) => e?.optionLabel)?.toString()}`}
+                                              title={`Work Stations-${data?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString()}`}
                                             >
                                               <span>
                                                 <WorkStations className=" align-text-top" />
@@ -841,7 +843,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                 <button onClick={() => setBottomBarOpen((prev) => !prev)}>{bottomBarOpen ? <IoMdArrowDropdown /> : <IoMdArrowDropup />}</button>
               </div>
               <Box>
-                <Tabs aria-label="scrollable Tabs">
+                <Tabs aria-label="scrollable Tabs" key={serviceSteps.length || 0}>
                   {serviceSteps?.map((data, index) => {
                     let isTechnician = data?.assignedUsers?.some((u: any) => u?.optionValue === user?._id);
                     const style = stylesForEveryTab(selectedService, data, index, mobScreen);
@@ -950,11 +952,11 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                                 </HtmlTooltip>
                                               </Box>
                                             )}
-                                            {data?.type === 'service' && data?.workStations?.length > 0 && (
+                                            {data?.type === 'service' && data?.assignedWorkStations?.length > 0 && (
                                               <Box ml={1}>
                                                 <HtmlTooltip
                                                   enterTouchDelay={0}
-                                                  title={`Work Stations-${data?.workStations?.map((e) => e?.optionLabel)?.toString()}`}
+                                                  title={`Work Stations-${data?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString()}`}
                                                 >
                                                   <span>
                                                     <WorkStations className=" align-text-top" />
@@ -1154,7 +1156,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                 >
                   Add/Consume Products
                 </MenuItem>
-                )}
+              )}
               <MenuItem
                 disabled={
                   disableCompleteFail ||
@@ -1230,6 +1232,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
             setUserAssignDialog(false);
             fetchServiceData();
           }}
+          competencies={selectedService?.competencies}
         />
       )}
       {workStationAssignDialog && (
@@ -1241,7 +1244,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
               workOrderId: workOrderId
             }
           ]}
-          workStations={selectedService?.workStations}
+          workStations={selectedService?.assignedWorkStations}
           handleClose={() => {
             setWorkStationAssignDialog(false);
           }}
@@ -1369,7 +1372,9 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           handleClose={() => {
             setAttchmentsDialog({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
           }}
-          handleSuccess={() => {}}
+          handleSuccess={() => {
+            setAttchmentsDialog({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
+          }}
         />
       )}
       {showManagePurchaseOrder && (
@@ -1404,6 +1409,22 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           }}
         />
       )}
+
+      {reviseQuotation && (
+          <ConfirmationDialog
+            open={reviseQuotation}
+            message={`Do you want to revise the Quotation ?`}
+            onClose={() => {
+              setReviseQuotation(false);
+              fetchServiceData();
+            }}
+            onOk={()=>{
+              createNewVersionQuote();
+              setReviseQuotation(false);
+            }}
+          />
+      )}
+
     </Box>
   );
 };

@@ -26,6 +26,8 @@ import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import { isEqual } from 'lodash';
+import { TouchBackend } from 'react-dnd-touch-backend';
+import { isMobile, isTablet } from 'react-device-detect';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -59,7 +61,6 @@ const ItemTypes = {
   CARD: 'card'
 };
 
-
 const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
   const {
     onClose,
@@ -89,12 +90,12 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
       const data = localStorage.getItem('gridMetaData');
       const gridMetaData = JSON.parse(data || '{}');
       const hiddenCols = gridMetaData[renderedFrom]?.hide || [];
-  
+
       const updatedCols = columns.map((col) => ({
         ...col,
-        isVisible: !hiddenCols.includes(col.id),
+        isVisible: !hiddenCols.includes(col.id)
       }));
-  
+
       setSortedColumns(updatedCols);
       setOldData(updatedCols.map(({ id, isVisible }) => ({ [id]: isVisible })));
     } catch (ex) {
@@ -106,15 +107,12 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
 
   useEffect(() => {
     const tempColumns = sortedColumns?.length > 0 ? sortedColumns : [...columns];
-    if (tempColumns?.some(s => s.sticky === undefined && !s.isVisible)) {
-      setAllChecked(false)
+    if (tempColumns?.some((s) => s.sticky === undefined && !s.isVisible)) {
+      setAllChecked(false);
     } else {
-      setAllChecked(true)
+      setAllChecked(true);
     }
-
-  }, [sortedColumns])
-
-
+  }, [sortedColumns]);
 
   const handleToggle = (column: any, event: React.ChangeEvent<HTMLInputElement>) => {
     const newColumns = [...sortedColumns];
@@ -138,23 +136,25 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
     sortedColumns.forEach((f) => {
       let object = {};
       Object.keys(f).forEach((ff) => {
-        if (typeof f[ff] !== "function" && typeof f[ff] !== "object") {
+        if (typeof f[ff] !== 'function' && typeof f[ff] !== 'object') {
           object[ff] = f[ff];
         }
-      })
+      });
       dataToStore.push(object);
-    })
+    });
 
     if (renderedFrom && renderedFrom !== '') {
       const hidedColumns = dataToStore?.filter((o) => !o?.isVisible && !['expander', 'selection', 'action']?.includes(o?.id)).map((o) => o?.id);
 
-      const columnOrder = dataToStore?.filter((o) => o?.sticky === undefined && !['expander', 'selection', 'action']?.includes(o?.id)).map((o) => o?.id);
+      const columnOrder = dataToStore
+        ?.filter((o) => o?.sticky === undefined && !['expander', 'selection', 'action']?.includes(o?.id))
+        .map((o) => o?.id);
 
       updateGridHiddenColumns(hidedColumns, columnOrder);
     }
 
-    setColumnOrder([...sortedColumns.map(m => m.id)])
-    setHiddenColumns([...sortedColumns].filter(f => f.sticky === undefined && f.isVisible === false).map(m => m.id))
+    setColumnOrder([...sortedColumns.map((m) => m.id)]);
+    setHiddenColumns([...sortedColumns].filter((f) => f.sticky === undefined && f.isVisible === false).map((m) => m.id));
     onClose();
   };
 
@@ -162,10 +162,10 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
     if (renderedFrom && renderedFrom !== '') {
       updateGridHiddenColumns([], []);
     }
-    setColumnOrder(defaultColumns?.map((col) => col?.id || col?.accessor))
-    setHiddenColumns([])
-    onClose()
-  }
+    setColumnOrder(defaultColumns?.map((col) => col?.id || col?.accessor));
+    setHiddenColumns([]);
+    onClose();
+  };
 
   const moveItem = React.useCallback(
     (dragIndex: number, hoverIndex: number) => {
@@ -185,7 +185,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
   useEffect(() => {
     if (!searchVal) return;
     const matchedColumns = sortedColumns.filter((col) => {
-      const fieldName = typeof col.Header === "string" ? col.Header.toLowerCase() : "";
+      const fieldName = typeof col.Header === 'string' ? col.Header.toLowerCase() : '';
       return fieldName.includes(searchVal.toLowerCase());
     });
     setSearchedColumns(matchedColumns);
@@ -210,7 +210,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
                 Toggle and Drag & Drop to arrange
               </ListSubheader>
               <TextField
-                type='search'
+                type="search"
                 value={searchVal}
                 onChange={(e) => setSearchVal(e.target.value)}
                 size="small"
@@ -222,28 +222,28 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
           }
           className={classes.root}
         >
-          {
-            !searchVal &&
+          {!searchVal && (
             <ListItem disableGutters dense>
               <ListItemText primary="Column Name" />
               <ListItemSecondaryAction>
                 <ListItemText primary="Toggle (hide/show)" />
               </ListItemSecondaryAction>
             </ListItem>
-          }
-          {
-            !searchVal &&
+          )}
+          {!searchVal && (
             <ListItem disableGutters>
               <ListItemText primary="All Columns" />
               <ListItemSecondaryAction>
-                {
-                  setHiddenColumns ? <Switch size="small" checked={allChecked} onChange={handleToggleAll} /> :
-                    (getToggleHideAllColumnsProps ? <Switch size="small" {...getToggleHideAllColumnsProps()} /> : "")
-
-                }
+                {setHiddenColumns ? (
+                  <Switch size="small" checked={allChecked} onChange={handleToggleAll} />
+                ) : getToggleHideAllColumnsProps ? (
+                  <Switch size="small" {...getToggleHideAllColumnsProps()} />
+                ) : (
+                  ''
+                )}
               </ListItemSecondaryAction>
             </ListItem>
-          }
+          )}
 
           {/* {lockedItem.map((col) => (
             <ListItem divider disableGutters disabled={col?.disabled} key={col.field}>
@@ -254,7 +254,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
             </ListItem>
           ))} */}
           {!searchVal ? (
-            <DndProvider backend={HTML5Backend}>
+            <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
               {sortedColumns.map((column, index) => (
                 <RenderListItem
                   key={column.id}
@@ -269,12 +269,20 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
             </DndProvider>
           ) : searchedColumns.length > 0 ? (
             searchedColumns.map((column, index) => (
-              <ListItem key={`${column.id}-${index}`} divider disableGutters disabled={column.disabled} className={column.sticky ? "d-none" : ""}>
+              <ListItem key={`${column.id}-${index}`} divider disableGutters disabled={column.disabled} className={column.sticky ? 'd-none' : ''}>
                 <ListItemText id="switch-list-column" primary={column.Header} />
-                <ListItemSecondaryAction >
-                  {column.sticky ? "" : <Switch size="small" checked={column.isVisible} onChange={(e) => {
-                    handleToggle(column, e)
-                  }} />}
+                <ListItemSecondaryAction>
+                  {column.sticky ? (
+                    ''
+                  ) : (
+                    <Switch
+                      size="small"
+                      checked={column.isVisible}
+                      onChange={(e) => {
+                        handleToggle(column, e);
+                      }}
+                    />
+                  )}
                 </ListItemSecondaryAction>
               </ListItem>
             ))
@@ -292,11 +300,18 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
         <Button variant="outlined" color="primary" onClick={resetColumnOrder}>
           Reset
         </Button>
-        <Button variant="contained" color="primary" disableElevation
-          disabled={isEqual(oldData, sortedColumns.map(d => {
-            return { [d.id]: d.isVisible }
-          }))}
-          onClick={handleSaveChange}>
+        <Button
+          variant="contained"
+          color="primary"
+          disableElevation
+          disabled={isEqual(
+            oldData,
+            sortedColumns.map((d) => {
+              return { [d.id]: d.isVisible };
+            })
+          )}
+          onClick={handleSaveChange}
+        >
           Save changes
         </Button>
       </CustomDialogFooter>
@@ -369,14 +384,16 @@ const RenderListItem = (props: ItemProps) => {
       return { id, index };
     },
     collect: (monitor: any) => ({
-      isDragging: monitor.isDragging(),
+      isDragging: monitor.isDragging()
     })
   });
 
   const opacity = isDragging ? 0 : 1;
   drag(drop(ref));
 
-  return column.sticky ? <div className="d-none" /> :
+  return column.sticky ? (
+    <div className="d-none" />
+  ) : (
     <div ref={ref} style={{ opacity }} data-handler-id={handlerId}>
       <ListItem divider disableGutters disabled={column.disabled || column?.primaryField}>
         <ListItemIcon className={`${classes.cursor} pl-2`}>
@@ -384,12 +401,18 @@ const RenderListItem = (props: ItemProps) => {
         </ListItemIcon>
         <ListItemText id={column.id} primary={column.Header} />
         <ListItemSecondaryAction>
-          <Switch size="small" disabled={column.disabled || column?.primaryField} checked={column.isVisible} onChange={(e) => {
-            handleToggle(column, e)
-          }} />
+          <Switch
+            size="small"
+            disabled={column.disabled || column?.primaryField}
+            checked={column.isVisible}
+            onChange={(e) => {
+              handleToggle(column, e);
+            }}
+          />
         </ListItemSecondaryAction>
       </ListItem>
     </div>
+  );
 };
 
 export default ArrangeViewDialog;

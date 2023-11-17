@@ -10,7 +10,7 @@ import CustomReactTable from '../../../components/CustomReactTable/CustomReactTa
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import { CHILD_RESOURCE, MATERIAL_TYPE, productionOrder, sidebarResource } from '../../../constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, PRODUCTION_ORDER_STATUS, asyncForEach, productionOrder, sidebarResource } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile } from 'react-device-detect';
 import { ExpandMore } from '@material-ui/icons';
@@ -25,7 +25,7 @@ import { flattenArray, generateCustomTableColumns } from 'src/constants/columns'
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import CreateProduct from 'src/components/Product/CreateProduct';
 
-const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, allowedToDelete }) => {
+const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, allowedToDelete, updateOrderStatus }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -51,10 +51,10 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
 
   const fetchFields = async () => {
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.productionOrderDetail}`);
-    var data = response?.data?.data;
+    var data = response?.data?.data?.filter((e) => !['detail', 'description']?.includes(e?.fieldName));
     data = CURReplaceByCurrencySingle(data, productionOrderData?.currency || 'USD');
     setAllFields(JSON.parse(JSON.stringify(data)));
-    const newColumns = generateCustomTableColumns(data, productionOrderData?.currency || 'USD', renderedFrom);
+    let newColumns = generateCustomTableColumns(data, productionOrderData?.currency || 'USD', renderedFrom)
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';
@@ -157,6 +157,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
       width: 70,
       sticky: 'right',
       disableFilters: true,
+      disableSortBy: true,
       canDrag: false,
       Cell: ({ row, rows }) => (
         <>
@@ -195,15 +196,15 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
 
   const fetchData = async () => {
     setNextStep(false);
-
     var data: any = [];
     const response = await axiosInstance().get(`${productionOrder.api}/material/${productionOrderData._id}`);
     data = response?.data?.data;
     let rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = parent.type === MATERIAL_TYPE.product ? parent.productDetail?.productName : parent.packageDetail?.packageName;
-      parent.description = parent.type === MATERIAL_TYPE.product ? parent?.productDetail?.productDescription : parent?.packageDetail?.packageDescription;
+      parent.detail = parent?.detail ? parent?.detail : parent.type === MATERIAL_TYPE.product ? parent.productDetail?.productName : parent.packageDetail?.packageName;
+      parent.description = parent?.description ? parent?.description :
+        parent.type === MATERIAL_TYPE.product ? parent?.productDetail?.productDescription : parent?.packageDetail?.packageDescription;
       parent.qty = parent.qty;
       parent.qtyDisplay = parent.qty;
       parent.canDelete = parent?.workOrder ? false : true;
@@ -231,12 +232,14 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
       showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
     });
   };
+
   const generateNestedData = (material, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = _subRow.type === MATERIAL_TYPE.product ? _subRow.productDetail?.productName : _subRow.packageDetail?.packageName;
-      _subRow.description = _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productDescription : _subRow?.packageDetail?.packageDescription;
+      _subRow.detail = _subRow?.detail ? _subRow?.detail : _subRow.type === MATERIAL_TYPE.product ? _subRow.productDetail?.productName : _subRow.packageDetail?.packageName;
+      _subRow.description = _subRow?.description ? _subRow?.description :
+        _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productDescription : _subRow?.packageDetail?.packageDescription;
       _subRow.qty = _subRow.qty;
       _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
       _subRow.canDelete = _subRow?.workOrder ? false : true;
@@ -246,17 +249,20 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
   };
 
   const handleAdd = async (rows) => {
-    setSubmitting(true)
+    setSubmitting(true);
     const material: any = [];
-    rows.forEach((d) => {
-      const element: any = {};
-      element.materialId = d._id;
-      element.type = d?.type || addDialog.type;
-      element.unit = d?.unitMain && d?.unitMain?.length ? d.unitMain[0] : d?.unit ? d?.unit : '';
-      element.qty = d.qty ? parseFloat(d.qty) : 1;
-      element.parentId = addDialog.parentId;
-      material.push(element);
-    });
+    await asyncForEach(rows, async (d) => {
+      const qty = d.qty ? parseFloat(d.qty) : 1;
+      await asyncForEach(Array.from(Array(qty).keys()), async (i: any) => {
+        const element: any = {};
+        element.materialId = d._id;
+        element.type = d?.type || addDialog.type;
+        element.unit = d?.unitMain && d?.unitMain?.length ? d.unitMain[0] : d?.unit ? d?.unit : '';
+        element.qty = 1;
+        element.parentId = addDialog.parentId;
+        material.push(element);
+      })
+    })
     axiosInstance()
       .post(`${productionOrder.api}/material/${productionOrderData._id}`, { material })
       .then(({ data }) => {
@@ -267,10 +273,13 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
           message: data.message
         });
         fetchData();
-        setSubmitting(false)
+        setSubmitting(false);
+        if (productionOrderData?.status === PRODUCTION_ORDER_STATUS.new) {
+          updateOrderStatus(PRODUCTION_ORDER_STATUS.inProgress);
+        }
       })
       .catch((error) => {
-        setSubmitting(false)
+        setSubmitting(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -410,7 +419,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
               endIcon={<ExpandMore />}
               className="new-dropdown-v1"
             >
-              {isMobile ? '' : 'Actions'}
+              Actions
             </Button>
             <Menu
               anchorEl={anchorEl}
@@ -496,23 +505,24 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
           isSubmitting={isSubmitting}
         />
       )}
-      {
-        addDialog.open && addDialog.type === 'newProduct' && (
-          <CreateProduct
-            handleClose={() => {
-              setAddDialog({ open: false, type: '', parentId: null })
-            }}
-            onSuccess={(d) => {
-              handleAdd([{
+      {addDialog.open && addDialog.type === 'newProduct' && (
+        <CreateProduct
+          handleClose={() => {
+            setAddDialog({ open: false, type: '', parentId: null });
+          }}
+          onSuccess={(d) => {
+            handleAdd([
+              {
                 ...d,
                 unitMain: d?.unit,
                 type: MATERIAL_TYPE.product
-              }]);
-            }}
-            isRedirectToDetailPage={false}
-            openFrom="productMaster" />
-        )
-      }
+              }
+            ]);
+          }}
+          isRedirectToDetailPage={false}
+          openFrom="productMaster"
+        />
+      )}
       {addDialog.open && addDialog.type === MATERIAL_TYPE.package && (
         <AssignPackageDialog
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}

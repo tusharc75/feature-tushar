@@ -39,6 +39,7 @@ import Pagination from './Pagination';
 import { BiFilterAlt } from 'react-icons/bi';
 import GridFilter from './Filters';
 import type { TInitialState } from './useTableReducer';
+import { TouchBackend } from 'react-dnd-touch-backend';
 
 interface CustomCheckBoxProps extends CheckboxProps {
   indeterminate: any;
@@ -124,6 +125,10 @@ function TempFilter({ filterValue, id, setFilters, customFilters }) {
 
         <GrFormClose
           onClick={() => {
+            if ((filterValue || '').trim() === '') {
+              setIsOpen(false);
+              return;
+            }
             handleFilterChange('');
             setIsOpen(false);
           }}
@@ -707,7 +712,7 @@ function CustomReactTable({
   };
 
   return (
-    <DndProvider backend={HTML5Backend}>
+    <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
       <div className="custom-react-table custom-react-table-v1 vertical-center">
         <div className="table-container-v1" style={{ position: 'relative' }}>
           <GridHeader

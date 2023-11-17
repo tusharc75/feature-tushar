@@ -87,7 +87,7 @@ const TrailerMasterDetail = () => {
             type: 'success',
             message: data?.message
           });
-          history.goBack();
+          history.push(`${routes.trailerMaster.path}`)
         })
         .catch((err) => {
           setShowConfirmBox(false);

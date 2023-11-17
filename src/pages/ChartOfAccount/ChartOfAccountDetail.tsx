@@ -74,7 +74,7 @@ const ChartOfAccountDetail = () => {
               type: 'success',
               message: data?.message
             });
-            history.goBack();
+            history.push(`${routes.chartOfAccount.path}`)
           })
           .catch((err) => {
             setShowConfirmBox(false);

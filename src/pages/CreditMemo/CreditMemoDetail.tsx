@@ -74,7 +74,7 @@ const creditMemoDetail = () => {
               type: 'success',
               message: data?.message
             });
-            history.goBack();
+            history.push(`${routes.creditMemo.path}`)
           })
           .catch((err) => {
             setShowConfirmBox(false);

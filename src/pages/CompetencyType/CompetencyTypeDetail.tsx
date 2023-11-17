@@ -77,7 +77,7 @@ const CompetencyMasterDetail = () => {
               type: 'success',
               message: data?.message
             });
-            history.goBack();
+            history.push(`${routes.competencyType.path}`)
           })
           .catch((err) => {
             setShowConfirmBox(false);

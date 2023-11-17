@@ -16,6 +16,9 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { ImportIcon, ExportIcon } from 'src/assets/svg/svgIcons';
+import routes from 'src/components/Helpers/Routes';
+import { TouchBackend } from 'react-dnd-touch-backend';
+import { isMobile, isTablet } from 'react-device-detect';
 
 const DashboardBuilder = () => {
   const history = useHistory();
@@ -104,7 +107,7 @@ const DashboardBuilder = () => {
           type: 'success'
         });
         setSubmitting(false);
-        history.goBack();
+        history.push('/dashboard-master');
       })
       .catch((error) => {
         setSubmitting(false);
@@ -170,7 +173,7 @@ const DashboardBuilder = () => {
           type: 'success'
         });
         setSubmitting(false);
-        history.goBack();
+        history.push('/dashboard-master');
       })
       .catch((error) => {
         setSubmitting(false);
@@ -266,7 +269,7 @@ const DashboardBuilder = () => {
                     )}
                   </Box>
                 )}
-                <DndProvider backend={HTML5Backend}>
+                <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
                   <DashboardView
                     selectedData={selectedData}
                     formData={formData}

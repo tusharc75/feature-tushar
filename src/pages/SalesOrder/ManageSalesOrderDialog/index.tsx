@@ -28,7 +28,7 @@ import { isEqual } from 'lodash';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, onClose, onSuccess, open }) => {
-  
+
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
 
@@ -59,7 +59,7 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
       const response: any = await axiosInstance().get('/field?resource=Sales Order');
       fieldData = response?.data?.data;
 
-      fieldData = fieldData?.filter((e) => !['quotation'].includes(e?.fieldData?.fieldName));
+      fieldData = fieldData?.filter((e) => !['quotation', 'invoice'].includes(e?.fieldData?.fieldName));
 
       const fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
       const fieldsDataForUpdate = fieldData?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);

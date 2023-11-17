@@ -76,7 +76,7 @@ const MarketSegmentDetail = () => {
             type: 'success',
             message: data?.message
           });
-          history.goBack();
+          history.push(`${routes.marketSegment.path}`)
         })
         .catch((err) => {
           setShowConfirmBox(false);

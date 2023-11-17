@@ -4,10 +4,13 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import axiosInstance from 'src/axios/axiosInstance';
 import Loader from 'src/components/Loader';
 
-const ShowPdf = ({ data, loading, setLoading }) => {
+const ShowPdf = ({ data }) => {
   const toastConfig = useContext(CustomToastContext);
+  const [loading, setLoading] = useState(false);
   const [url, seturl] = useState();
+
   useEffect(() => {
+    setLoading(true);
     axiosInstance()
       .get(`user/download?fileName=${data?.url}`, {
         responseType: 'blob'

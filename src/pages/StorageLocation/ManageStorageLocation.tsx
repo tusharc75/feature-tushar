@@ -213,7 +213,6 @@ const ManageStorageLocation = ({ isClone = false, storageLocationId = null, onCl
                             {form.sectionFields.map((field, index2) => (
                               <Grid key={index2} item xs={12} sm={6} md={6}>
                                 <FormTypes
-                                  isNew={Boolean(storageLocationId)}
                                   {...field}
                                   fieldData={field}
                                   disabled={Boolean(storageLocationId) && field.disableOnEdit && !isClone}

@@ -59,7 +59,7 @@ const WellNumberDetail = () => {
       .put(`${routes.wellNumber.path}/remove`, { ids: [id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.goBack();
+        history.push(`${routes.wellNumber.path}`)
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);

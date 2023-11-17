@@ -192,7 +192,6 @@ const ManageProductAuction = ({ isClone = false, productAuctionId = null, onClos
                             {form.sectionFields.map((field, index2) => (
                               <Grid key={index2} item xs={12} sm={6} md={6}>
                                 <FormTypes
-                                  isNew={Boolean(productAuctionId)}
                                   {...field}
                                   fieldData={field}
                                   disabled={

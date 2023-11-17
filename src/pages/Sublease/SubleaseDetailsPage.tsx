@@ -163,7 +163,7 @@ const SubleaseDetailsPage = () => {
       .put(`${sublease.api}/remove`, { ids: [] })
       .then(() => {
         setShowConfirmBox(false);
-        history.goBack();
+        history.push(`${routes.sublease.path}`)
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);

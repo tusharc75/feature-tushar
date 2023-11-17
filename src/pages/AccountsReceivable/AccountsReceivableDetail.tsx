@@ -81,7 +81,7 @@ const AccountsReceivableDetail = () => {
             type: 'success',
             message: data?.message
           });
-          history.goBack();
+          history.push(`${routes.accountsReceivable.path}`)
         })
         .catch((err) => {
           setShowConfirmBox(false);

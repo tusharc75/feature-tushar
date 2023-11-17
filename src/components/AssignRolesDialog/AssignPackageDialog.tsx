@@ -16,7 +16,7 @@ import { camelCase } from 'lodash';
 
 let searchTimeout;
 
-const AssignPackageDialog = ({ onSuccess, handleClose, packageType = null, ids = [], isSubmitting = false }) => {
+const AssignPackageDialog = ({ onSuccess, handleClose, packageType = null, ids = [], isSubmitting = false, hideQty = false }) => {
   const renderedFrom = `${camelCase(routes.packages?.title)}_assign`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -75,7 +75,12 @@ const AssignPackageDialog = ({ onSuccess, handleClose, packageType = null, ids =
         };
         setFrameWorkComponent({ ...tempFrameworkComponent });
         columns = [...columns, ...getStaticFields()];
-        setColumns([...defaultColumns, ...columns]);
+        if (hideQty) {
+          setColumns([...columns]);
+        }
+        else {
+          setColumns([...defaultColumns, ...columns]);
+        }
       });
   };
 

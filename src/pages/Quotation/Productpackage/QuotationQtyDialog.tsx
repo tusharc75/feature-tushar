@@ -1,4 +1,4 @@
-import { FC, useEffect, useState, Fragment, useRef } from 'react';
+import { FC, useEffect, useState, Fragment, useRef, useContext } from 'react';
 import { Button, Dialog, Grid, Box } from '@material-ui/core';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
@@ -18,6 +18,9 @@ import { autoCalculateSpecificFields, handleAutoCalculation } from '../../../con
 import moment from 'moment';
 import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
 import { bulkUpdate, calculateRowsField } from 'src/components/RentalManagment/helper';
+import routes from 'src/components/Helpers/Routes';
+import axiosInstance from '../../../axios/axiosInstance';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -53,13 +56,13 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
   const [allFields, setAllFields] = useState([]);
   const [fields, setFields] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [loading, setLoading] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [saveAndNext, setSaveAndNext] = useState(false);
   const ref = useRef(null);
   const [priceConditionList, setPriceConditionList] = useState([]);
   const [priceConditionListConst, setPriceConditionListConst] = useState([]);
 
+  const toastConfig = useContext(CustomToastContext);
 
   const [priceMethodList, setPriceMethodList] = useState([]);
 
@@ -180,6 +183,21 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
     EvaluteproductFields(data);
   };
 
+  const fetchTaxRate = async (billingAddress: any, taxCode = null) => {
+    const zipCode = billingAddress?.zipCode;
+    const state = billingAddress?.state;
+    let materialType;
+    if (isBulkedit) materialType = rowData[0]?.type;
+    else materialType = rowData?.type;
+    try {
+      const response = await axiosInstance().get(
+        `${routes?.taxMaster.path}/by-zipcode?zipCode=${zipCode}&state=${state}&materialType=${materialType}${taxCode && `&taxCode=${taxCode}`}`
+      );
+      return response?.data?.data || [];
+    } catch (e) {
+      toastConfig.setToastConfig(e);
+    }
+  };
 
   async function getPricing(values: any, pricingMethodOptions: any = null) {
     if (rowData) {
@@ -239,14 +257,21 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
     }
   }
 
-
-  const EvaluteproductFields = (fields) => {
+  const EvaluteproductFields = async (fields) => {
     const sections = uniq(map(fields, 'sectionName'));
     const customData = sections.map((name) => {
       let sectionFields = fields.filter((field) => field.sectionName === name);
       sectionFields = orderBy(sectionFields, 'order', 'asc');
       return { name, sectionFields };
     });
+    if (quotationData?.taxCode || (quotationData?.billingAddress && (quotationData?.billingAddress?.zipCode || quotationData?.billingAddress?.state))) {
+      const taxCodeOptions = await fetchTaxRate(quotationData?.billingAddress, quotationData?.taxCode?.optionValue || null);
+      fields?.forEach((e: any) => {
+        if (e?.fieldName === 'taxCode') {
+          e.option = taxCodeOptions;
+        }
+      });
+    }
     setFields(customData);
   };
 
@@ -276,29 +301,6 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
       }
     }
   };
-
-  // const getPricing = async (values: any) => {
-  //   if (rowData) {
-  //     if (values?.qty > 0 && values?.pricingMethod !== '' && values?.unit !== '') {
-  //       const priceData = await calculatePrice([
-  //         {
-  //           materialId: rowData.materialId,
-  //           type: rowData.type,
-  //           qty: values.qty,
-  //           pricingMethod: values.pricingMethod,
-  //           unit: values.unit
-  //         }
-  //       ]);
-  //       if (priceData && priceData.length && priceData[0].mrp) {
-  //         let price: any = priceData[0].mrp;
-  //         return price;
-  //       }
-  //       return 0;
-  //     } else {
-  //       return 0;
-  //     }
-  //   }
-  // };
 
   function validate(values) {
     const errors = {};
@@ -387,7 +389,7 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
                                     tooltipMessage={field.tooltipMessage}
                                     size="small"
                                   />
-                                ) : rateChangeFields.includes(field.fieldName) && !isBulkedit ? (
+                                ) : field.fieldName === 'taxCode' ? (
                                   <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
                                     <Box display="flex">
                                       <Box flexGrow={1}>
@@ -404,7 +406,52 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
                                           options={field.option}
                                           setFieldValue={(name, value) => {
                                             setFieldValue(name, value);
+                                            const taxCode = field.option?.find((d) => d.optionValue === value);
+                                            setFieldValue('taxPercentage', taxCode?.taxRate || 0);
+                                            const result = autoCalculateSpecificFields(
+                                              { ['taxPercentage']: taxCode?.taxRate || 0 },
+                                              values,
+                                              initialData.fields
+                                            );
+                                            if (Object.keys(result).length >= 1) {
+                                              for (var x in result) {
+                                                setFieldValue(x, result[x]);
+                                              }
+                                            }
                                           }}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={field.isTooltip}
+                                          tooltipMessage={field.tooltipMessage}
+                                          size="small"
+                                        />
+                                      </Box>
+                                    </Box>
+                                  </Grid>
+                                ) : rateChangeFields.includes(field.fieldName) && !isBulkedit ? (
+                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                    <Box display="flex">
+                                      <Box flexGrow={1}>
+                                        <FormTypes
+                                          {...field}
+                                          fields={initialData.fields}
+                                          fieldData={field}
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          setFieldValue={(name, value) => {
+                                            setFieldValue(name, value);
+                                          }}
+                                          options={
+                                            field.fieldName === 'pricingMethod' && priceConditionList && values['pricingCondition']
+                                              ? priceMethodList
+                                              : field.fieldName === 'pricingCondition' && values['pricingMethod']
+                                                ? priceConditionList
+                                                : field.option
+                                          }
                                           onChange={(e, val) => {
                                             const value = val && val.optionValue ? val.optionValue : '';
                                             if (field.fieldName === 'pricingCondition') {
