@@ -17,11 +17,9 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { useData } from 'src/StateProvider/Provider';
 
 const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, renderedFrom, stepFullScreen }) => {
-  const {
-    state: { permissions }
-  }: any = useData();
 
-  const [selectedProducts, setSelectedProducts] = useState([]);
+  const { state: { permissions } }: any = useData();
+
   const [rowsData, setRowsData] = useState(null);
   const [columns, setColumns] = useState(null);
 
@@ -52,6 +50,7 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, renderedFrom, s
       {
         accessor: 'type',
         Header: 'Type',
+        width: 100,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => {
           return row.original?.type ? (
@@ -71,24 +70,25 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, renderedFrom, s
         Cell: ({ row }) => {
           return row.original?.detail ? (
             <div style={{ display: 'flex', alignItems: 'center' }}>
-              {<p title={row.original?.detail}>{row.original?.detail}</p>}
-
-              <Box ml={1}>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    if (row.original.type === 'service') {
-                      window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                    } else if (row.original.type === 'product') {
-                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                    } else {
-                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                    }
-                  }}
-                >
-                  <OpenInNewIcon fontSize="small" color="primary" />
-                </IconButton>
-              </Box>
+              <p title={row.original?.detail}>{row.original?.detail}</p>
+              {row.original.type !== MATERIAL_TYPE.manualEntry &&
+                <Box ml={1}>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      if (row.original.type === MATERIAL_TYPE.service) {
+                        window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                      } else if (row.original.type === MATERIAL_TYPE.product) {
+                        window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                      } else {
+                        window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                      }
+                    }}
+                  >
+                    <OpenInNewIcon fontSize="small" color="primary" />
+                  </IconButton>
+                </Box>
+              }
             </div>
           ) : (
             <NoDataCell />
@@ -130,67 +130,51 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, renderedFrom, s
     const response = await axiosInstance().get(`${salesOrder.api}/material/${salesOrderData._id}`);
     data = response?.data?.data;
     let rows = data.material.filter((e) => e.parentId === null);
+
     const additionalCost = await axiosInstance().get(`${salesOrder.api}/additionalcost/${salesOrderData._id}`);
     const additionalCostRows = additionalCost?.data?.data;
     additionalCostRows.forEach((r) => r.type = MATERIAL_TYPE.manualEntry);
+
     rows = [...rows, ...additionalCostRows];
+
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === MATERIAL_TYPE.product
-          ? parent.productDetail?.productName
-          : parent.type === MATERIAL_TYPE.service
-            ? parent.serviceDetail?.serviceName
-            : parent.packageDetail?.packageName || ''
-        }`;
-      parent.description =
-        parent.type === MATERIAL_TYPE.product
-          ? parent?.productDetail?.productDescription
-          : parent.type === MATERIAL_TYPE.package
-            ? parent?.packageDetail?.packageDescription
-            : parent?.type === MATERIAL_TYPE.manualEntry
-              ? parent?.description
-              : parent?.serviceDetail?.serviceDescription;
+      parent.detail = parent.type === MATERIAL_TYPE.product ? parent.productDetail?.productName
+        : parent.type === MATERIAL_TYPE.service ? parent.serviceDetail?.serviceName
+          : parent.type === MATERIAL_TYPE.package ? parent.packageDetail?.packageName
+            : parent.type === MATERIAL_TYPE.manualEntry ? parent?.description : '';
+      parent.description = parent.type === MATERIAL_TYPE.product ? parent?.productDetail?.productDescription
+        : parent.type === MATERIAL_TYPE.package ? parent?.packageDetail?.packageDescription
+          : parent?.type === MATERIAL_TYPE.manualEntry ? parent?.description
+            : parent?.type === MATERIAL_TYPE.service ? parent?.serviceDetail?.serviceDescription : '';
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qty = parent.qty;
-      parent.isValid = parent['finalPrice_' + salesOrderData?.currency?.toLowerCase()] ? true : false;
+      parent.isValid = true;
       parent.subRows = generateNestedData(data.material, parent);
     });
-    if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
-      setNextStep(true);
-    } else {
-      setNextStep(true);
-    }
     setRowsData(rows);
   };
 
   const generateNestedData = (material, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
-      _subRow.detail = `${_subRow.type === 'product'
-        ? _subRow.productDetail?.productName
-        : _subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
+      _subRow.detail = _subRow.type === MATERIAL_TYPE.product ? _subRow.productDetail?.productName
+        : _subRow.type === MATERIAL_TYPE.service ? _subRow.serviceDetail?.serviceName
           : _subRow.packageDetail?.packageName
-        }`;
+        ;
       _subRow.description =
-        _subRow.type === 'product'
+        _subRow.type === MATERIAL_TYPE.product
           ? _subRow?.productDetail?.productDescription
-          : _subRow.type === 'package'
+          : _subRow.type === MATERIAL_TYPE.package
             ? _subRow?.packageDetail?.packageDescription
             : _subRow?.serviceDetail?.serviceDescription;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qty = `${parent.qty * _subRow.qty} `;
-      _subRow.isValid = _subRow['finalPrice_' + salesOrderData?.currency?.toLowerCase()] ? true : false;
+      _subRow.isValid = true;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
-    if (subRows.length === 0 && parent.type === 'package') {
-      parent.isValid = false;
-    }
-    if (parent.type === 'package') {
-      parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
-    }
     return subRows;
   };
 
@@ -214,11 +198,12 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, renderedFrom, s
                 columns={columns}
                 data={rowsData}
                 setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
-                onSelect={setSelectedProducts}
+                onSelect={() => { }}
                 childrenProperty="subRows"
                 uniqueKey="_id"
                 renderedFrom="sales_order_product_package"
                 isClientSideGrid={true}
+                hideSelection={true}
               />
             </Box>
           </>

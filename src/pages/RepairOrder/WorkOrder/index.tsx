@@ -567,7 +567,7 @@ const WorkOrder = ({
         parent.serviceStatus = parent?.workOrder?.status;
       }
       parent.subRows = generateNestedData(data.material, parent);
-      if (parent?.workOrder?.status === WORK_ORDER_STATUS.new && parent?.subRows?.some((obj) => obj.type === MATERIAL_TYPE.service)) {
+      if (parent?.workOrder?.status === WORK_ORDER_STATUS.new) {
         parent.canAutoCompleteWorkOrder = true;
       }
       parent.canDelete = false;
@@ -790,7 +790,7 @@ const WorkOrder = ({
     }
     axiosInstance()
       .post(`${workOrder.api}/${workOrderId}/consumable`, data)
-      .then(({ data }) => {   
+      .then(({ data }) => {
         if (isPostWorkService && repairOrderData?.status === REPAIR_ORDER_STATUS.quoteAccepted && repairOrderData?.addQuotationStep && repairOrderData?.addConsumablesQuotation) {
           setReviseQuotation(true)
         }
