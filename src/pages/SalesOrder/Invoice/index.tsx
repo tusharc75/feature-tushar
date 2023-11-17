@@ -16,7 +16,7 @@ import PreviewDownload from 'src/components/PreviewDownload';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { useData } from 'src/StateProvider/Provider';
 
-const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, statusOptions, renderedFrom, stepFullScreen }) => {
+const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, renderedFrom, stepFullScreen }) => {
   const {
     state: { permissions }
   }: any = useData();
@@ -26,10 +26,7 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, statusOptions, 
   const [columns, setColumns] = useState(null);
 
   useEffect(() => {
-    if (
-      statusOptions.findIndex((d) => d.optionLabel === SALES_ORDER_STATUS.readyToInvoice) >
-      statusOptions.findIndex((d) => d.optionLabel === salesOrderData?.status)
-    ) {
+    if ([SALES_ORDER_STATUS.new, SALES_ORDER_STATUS.inProgress]?.includes(salesOrderData?.status)) {
       updateJobStatus(SALES_ORDER_STATUS.readyToInvoice);
     }
   }, []);
@@ -108,25 +105,25 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, statusOptions, 
       },
       ...(permissions?.leadTimeMaster
         ? [
-            {
-              accessor: 'leadTime',
-              Header: 'Lead Time (Days)',
-              Cell: ({ row }) => (row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0),
-              Footer: (info) => {
-                const total = info.rows
-                  .filter((f) => f.values.hasOwnProperty('leadTime') && !isNaN(f.values['leadTime']))
-                  .reduce((sum, row) => parseInt(row.values['leadTime']) + sum, 0);
-                return <>{total}</>;
-              }
+          {
+            accessor: 'leadTime',
+            Header: 'Lead Time (Days)',
+            Cell: ({ row }) => (row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0),
+            Footer: (info) => {
+              const total = info.rows
+                .filter((f) => f.values.hasOwnProperty('leadTime') && !isNaN(f.values['leadTime']))
+                .reduce((sum, row) => parseInt(row.values['leadTime']) + sum, 0);
+              return <>{total}</>;
             }
-          ]
+          }
+        ]
         : [])
     ];
     coloum = [...coloum, ...newColumns];
     setColumns(coloum);
     fetchData();
   };
-  
+
   const fetchData = async () => {
     setNextStep(false);
     var data: any = [];
@@ -139,21 +136,20 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, statusOptions, 
     rows = [...rows, ...additionalCostRows];
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === MATERIAL_TYPE.product
+      parent.detail = `${parent.type === MATERIAL_TYPE.product
           ? parent.productDetail?.productName
           : parent.type === MATERIAL_TYPE.service
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName || ''
-      }`;
+            ? parent.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName || ''
+        }`;
       parent.description =
         parent.type === MATERIAL_TYPE.product
           ? parent?.productDetail?.productDescription
           : parent.type === MATERIAL_TYPE.package
-          ? parent?.packageDetail?.packageDescription
-          : parent?.type === MATERIAL_TYPE.manualEntry
-            ? parent?.description
-            : parent?.serviceDetail?.serviceDescription;
+            ? parent?.packageDetail?.packageDescription
+            : parent?.type === MATERIAL_TYPE.manualEntry
+              ? parent?.description
+              : parent?.serviceDetail?.serviceDescription;
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qty = parent.qty;
@@ -171,19 +167,18 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, statusOptions, 
   const generateNestedData = (material, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
-      _subRow.detail = `${
-        _subRow.type === 'product'
-          ? _subRow.productDetail?.productName
-          : _subRow.type === 'service'
+      _subRow.detail = `${_subRow.type === 'product'
+        ? _subRow.productDetail?.productName
+        : _subRow.type === 'service'
           ? _subRow.serviceDetail?.serviceName
           : _subRow.packageDetail?.packageName
-      }`;
+        }`;
       _subRow.description =
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productDescription
           : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription
-          : _subRow?.serviceDetail?.serviceDescription;
+            ? _subRow?.packageDetail?.packageDescription
+            : _subRow?.serviceDetail?.serviceDescription;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qty = `${parent.qty * _subRow.qty} `;
