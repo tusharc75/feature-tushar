@@ -144,7 +144,7 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, statusOptions, 
           ? parent.productDetail?.productName
           : parent.type === MATERIAL_TYPE.service
           ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
+          : parent.packageDetail?.packageName || ''
       }`;
       parent.description =
         parent.type === MATERIAL_TYPE.product
