@@ -59,8 +59,8 @@ const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, rende
             );
             rows.forEach((parent, i) => {
                 parent.index = i + 1;
-                parent.detail = parent.productDetail?.productName;
-                parent.description = parent?.productDetail?.productDescription;
+                parent.detail = parent.detail ? parent.detail : parent.productDetail?.productName;
+                parent.description = parent.description ? parent.description : parent?.productDetail?.productDescription;
                 parent.qty = parent.qty;
             });
             deliveryTicketList?.map((obj) => {
