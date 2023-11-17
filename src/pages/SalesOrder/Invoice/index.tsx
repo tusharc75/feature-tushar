@@ -3,7 +3,7 @@ import { useState, useEffect, Fragment } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import Grid from '@material-ui/core/Grid/Grid';
 import { IconButton } from '@material-ui/core';
-import { SALES_ORDER_STATUS, salesOrder, sidebarResource } from '../../../constants/helpers';
+import { MATERIAL_TYPE, SALES_ORDER_STATUS, salesOrder, sidebarResource } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import { isMobile } from 'react-device-detect';
 import routes from '../../../components/Helpers/Routes';
@@ -50,39 +50,47 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, statusOptions, 
         accessor: 'type',
         Header: 'Type',
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <p>{`${startCase(row.original?.type)} `}</p>
-          </div>
-        )
+        Cell: ({ row }) => {
+          return row.original?.type ? (
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <p>{`${startCase(row.original?.type)} `}</p>
+            </div>
+          ) : (
+            <NoDataCell />
+          );
+        }
       },
       {
         accessor: 'detail',
         Header: 'Detail',
         minWidth: 300,
         width: 300,
-        Cell: ({ row }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            {<p title={row.original?.detail}>{row.original?.detail}</p>}
+        Cell: ({ row }) => {
+          return row.original?.detail ? (
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              {<p title={row.original?.detail}>{row.original?.detail}</p>}
 
-            <Box ml={1}>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  if (row.original.type === 'service') {
-                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === 'product') {
-                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                  } else {
-                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                  }
-                }}
-              >
-                <OpenInNewIcon fontSize="small" color="primary" />
-              </IconButton>
-            </Box>
-          </div>
-        )
+              <Box ml={1}>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    if (row.original.type === 'service') {
+                      window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                    } else if (row.original.type === 'product') {
+                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                    } else {
+                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                    }
+                  }}
+                >
+                  <OpenInNewIcon fontSize="small" color="primary" />
+                </IconButton>
+              </Box>
+            </div>
+          ) : (
+            <NoDataCell />
+          );
+        }
       },
       {
         accessor: 'description',
@@ -106,28 +114,35 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, statusOptions, 
     ];
     coloum = [...coloum, ...newColumns];
     setColumns(coloum);
-    fetchMaterialData();
+    fetchData();
   };
-  const fetchMaterialData = async () => {
+  
+  const fetchData = async () => {
     setNextStep(false);
     var data: any = [];
     const response = await axiosInstance().get(`${salesOrder.api}/material/${salesOrderData._id}`);
     data = response?.data?.data;
-    const rows = data.material.filter((e) => e.parentId === null);
+    let rows = data.material.filter((e) => e.parentId === null);
+    const additionalCost = await axiosInstance().get(`${salesOrder.api}/additionalcost/${salesOrderData._id}`);
+    const additionalCostRows = additionalCost?.data?.data;
+    additionalCostRows.forEach((r) => r.type = MATERIAL_TYPE.manualEntry);
+    rows = [...rows, ...additionalCostRows];
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === 'product'
+      parent.detail = `${parent.type === MATERIAL_TYPE.product
         ? parent.productDetail?.productName
-        : parent.type === 'service'
+        : parent.type === MATERIAL_TYPE.service
           ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
+          : parent.packageDetail?.packageName || ''
         }`;
       parent.description =
-        parent.type === 'product'
+        parent.type === MATERIAL_TYPE.product
           ? parent?.productDetail?.productDescription
-          : parent.type === 'package'
+          : parent.type === MATERIAL_TYPE.package
             ? parent?.packageDetail?.packageDescription
-            : parent?.serviceDetail?.serviceDescription;
+            : parent?.type === MATERIAL_TYPE.manualEntry
+              ? parent?.description
+              : parent?.serviceDetail?.serviceDescription;
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qty = parent.qty;
