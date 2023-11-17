@@ -175,39 +175,44 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen })
       canDrag: false,
       Cell: ({ row, rows }) =>
         !row.original.hideSelection && (
-          <Grid container spacing={1}>
-            <IconButton
-              size="small"
-              aria-label="Details"
-              onClick={() => {
-                handleOpen(row, rows);
-              }}
-            >
-              <EditIcon fontSize="small" color="primary" />
-            </IconButton>
-            {permissions?.leadTimeMaster && (
+          <>
+            <HtmlTooltip title={'Edit'} placement="top" enterTouchDelay={0} arrow>
               <IconButton
                 size="small"
                 aria-label="Details"
                 onClick={() => {
-                  setLeadTimeDialog({ open: true, data: row.original });
+                  handleOpen(row, rows);
                 }}
               >
-                <DateRangeIcon fontSize="small" color="primary" />
+                <EditIcon fontSize="small" color="primary" />
               </IconButton>
+            </HtmlTooltip>
+            {permissions?.leadTimeMaster && (
+              <HtmlTooltip title={'Lead Time'} placement="top" enterTouchDelay={0} arrow>
+                <IconButton
+                  size="small"
+                  aria-label="Details"
+                  onClick={() => {
+                    setLeadTimeDialog({ open: true, data: row.original });
+                  }}
+                >
+                  <DateRangeIcon fontSize="small" color="primary" />
+                </IconButton>
+              </HtmlTooltip>
             )}
-            <Box ml={1} />
-            <IconButton
-              size="small"
-              aria-label="Details"
-              onClick={() => {
-                const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                setDeleteData(obj);
-              }}
-            >
-              <DeleteIcon fontSize="small" color="error" />
-            </IconButton>
-          </Grid>
+            <HtmlTooltip title={'Delete'} placement="top" enterTouchDelay={0} arrow>
+              <IconButton
+                size="small"
+                aria-label="Details"
+                onClick={() => {
+                  const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                  setDeleteData(obj);
+                }}
+              >
+                <DeleteIcon fontSize="small" color="error" />
+              </IconButton>
+            </HtmlTooltip>
+          </>
         )
     });
 
