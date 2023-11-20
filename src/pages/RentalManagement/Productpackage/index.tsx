@@ -413,6 +413,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
           const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
           Object.assign(element, calValues);
         }
+        delete element.listPrice;
       });
     }
     axiosInstance()
@@ -445,6 +446,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
       delete element.serviceDetail;
       delete element.parentName;
       delete element.subRows;
+      delete element.listPrice;
     });
     setUpdating(true);
     axiosInstance()
