@@ -4,7 +4,7 @@ import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import { Form, Formik } from 'formik';
 import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from 'src/components/Helpers/FormTypes';
-import { workOrder, WORKORDER_SERVICE_STEP_STATUS, yupSchema, convertMsToTime } from 'src/constants/helpers';
+import { workOrder, WORKORDER_SERVICE_STEP_STATUS, yupSchema, convertMsToTime, sidebarResource } from 'src/constants/helpers';
 import { dateTimeFormat } from 'src/constants/helpers';
 import moment from 'moment';
 import styles from './StepFieldsDialog.module.scss';
@@ -92,7 +92,7 @@ const StepFieldsDialog = ({
   step,
   workOrderId,
   stepData,
-  referencType,
+  resource,
   allowedToEdit,
   selectedService = null,
   eidtable = true
@@ -450,7 +450,7 @@ const StepFieldsDialog = ({
           }}
           stepId={''}
           stepData={step}
-          notEditable={referencType === 'workOrderTechnician' ? true : step?.customStep === true ? false : true}
+          notEditable={resource === sidebarResource.workOrderTechnician ? true : step?.customStep === true ? false : true}
           steps={steps}
           reference={'workOrder'}
           workOrderId={workOrderId}
