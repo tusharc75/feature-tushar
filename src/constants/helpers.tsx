@@ -2710,6 +2710,11 @@ export const PRICING_TYPE = [
   { optionLabel: 'Sell', optionValue: 'Price' }
 ];
 
+export const PRICING_SETUP_TYPE = {
+  price: `Price`,
+  rent: `Rent`
+};
+
 export const SERVICE_TYPE = {
   shopService: 'Shop Service',
   fieldService: 'Field Service'
