@@ -205,25 +205,6 @@ const WorkOrderDetails = () => {
     }
   };
 
-  const handleReset = () => {
-    axiosInstance()
-      .put(`${workOrder.api}/create-version/${id}`)
-      .then((data) => {
-        fetchWorkOrderData()
-        setTabValue(0);
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: `Work order reset to inital stage.`
-        });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        setShowConfirmBox(false);
-      });
-  };
-
-
   function a11yProps(index: any) {
     return {
       id: `main-tab-${index}`,
@@ -290,16 +271,6 @@ const WorkOrderDetails = () => {
                     onClick={() => setOpenUpdateDialog(true)}
                   >
                     {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
-                  </Button>
-                )}
-                {permissions?.workOrder?.isUpdate && allowedToEdit && !workOrderData?.deleted && !completed && (
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    className={'btn-outline-v1'}
-                    size="small"
-                    onClick={() => handleReset()}
-                  >
-                    {isMobile && !isTablet ? <EditIcon /> : 'Reset'}
                   </Button>
                 )}
                 {permissions?.workOrder?.isDelete && allowedToEdit && workOrderData?.canDelete && !workOrderData?.deleted && (
