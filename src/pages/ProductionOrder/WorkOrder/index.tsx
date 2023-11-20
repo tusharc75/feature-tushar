@@ -65,7 +65,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   const fetchFields = async () => {
     await axiosInstance().post(`${productionOrder.api}/${productionOrderData._id}/work-order`);
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.productionOrderDetail}`);
-    var data = response?.data?.data?.filter((e) => !['detail', 'description']?.includes(e?.fieldName));
+    var data = response?.data?.data?.filter((e) => !['detail', 'description', 'workOrderNumber']?.includes(e?.fieldName));
     data = CURReplaceByCurrencySingle(data, productionOrderData?.currency || 'USD');
     data?.forEach((e) => {
       e.isColumnEditable = false;
@@ -292,15 +292,15 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       parent.detail = parent.detail
         ? parent.detail
         : parent.type === MATERIAL_TYPE.service
-        ? parent?.serviceDetail?.serviceName
-        : parent.type === MATERIAL_TYPE.product
-        ? parent.productDetail?.productName
-        : parent.packageDetail?.packageName;
+          ? parent?.serviceDetail?.serviceName
+          : parent.type === MATERIAL_TYPE.product
+            ? parent.productDetail?.productName
+            : parent.packageDetail?.packageName;
       parent.description = parent.description
         ? parent.description
         : parent.type === MATERIAL_TYPE.product
-        ? parent?.productDetail?.productDescription
-        : parent?.packageDetail?.packageDescription;
+          ? parent?.productDetail?.productDescription
+          : parent?.packageDetail?.packageDescription;
       parent.qty = parent.qty;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
       parent.hideSelection = false;
@@ -333,17 +333,17 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       _subRow.detail = _subRow.detail
         ? _subRow.detail
         : _subRow.type === MATERIAL_TYPE.service
-        ? _subRow?.serviceDetail?.serviceName
-        : _subRow.type === MATERIAL_TYPE.product
-        ? _subRow.productDetail?.productName
-        : _subRow.packageDetail?.packageName;
+          ? _subRow?.serviceDetail?.serviceName
+          : _subRow.type === MATERIAL_TYPE.product
+            ? _subRow.productDetail?.productName
+            : _subRow.packageDetail?.packageName;
       _subRow.description = _subRow.description
         ? _subRow.description
         : _subRow.type === MATERIAL_TYPE.service
-        ? _subRow?.serviceDetail?.serviceDescription
-        : _subRow.type === MATERIAL_TYPE.product
-        ? _subRow?.productDetail?.productDescription
-        : _subRow?.packageDetail?.packageDescription;
+          ? _subRow?.serviceDetail?.serviceDescription
+          : _subRow.type === MATERIAL_TYPE.product
+            ? _subRow?.productDetail?.productDescription
+            : _subRow?.packageDetail?.packageDescription;
       _subRow.qty = _subRow.qty;
       _subRow.workOrder = parent?.workOrder;
       _subRow.workOrderNumber = parent?.workOrder?.workOrderNumber;
@@ -650,7 +650,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                 <MenuItem
                   disabled={
                     selectedRecords?.filter((d) => [MATERIAL_TYPE.product, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0 &&
-                    checkUniqWorkOrder()
+                      checkUniqWorkOrder()
                       ? false
                       : true
                   }
@@ -698,8 +698,8 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
               <MenuItem
                 disabled={
                   checkUniqWorkOrder() &&
-                  (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
-                    selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.length === 1)
+                    (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
+                      selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.length === 1)
                     ? false
                     : true
                 }

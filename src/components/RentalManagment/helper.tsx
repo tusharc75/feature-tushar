@@ -1,5 +1,5 @@
 
-import { CHILD_RESOURCE, getObjKeysWithValues, pricingCondition } from '../../constants/helpers';
+import { CHILD_RESOURCE, PRICING_SETUP_TYPE, getObjKeysWithValues, pricingCondition } from '../../constants/helpers';
 import { objectStore, findOne } from '../../constants/indexdbhelper';
 import axiosInstance from '../../axios/axiosInstance';
 import { autoCalculateSpecificFields, CURReplaceByCurrencySingle } from '../../constants/formulaUtility';
@@ -30,11 +30,9 @@ export const fetch_rental_cost_fields = async (currency, isOffline) => {
 }
 
 export const calculatePrice = (rentalManagementData: any = null, arr: any[]) => {
-    //materialType can be =["product","packages","productCategory"]
-    //conditionType can be =["Price","Rent","Discount","Charge","Tax"]
     if (rentalManagementData) {
         const data: any = {};
-        data.conditionType = ['Rent'];
+        data.conditionType = [PRICING_SETUP_TYPE.rent];
         data.material = arr.map((ele) => ({
             materialId: ele?.materialId,
             materialType: ele?.type,
