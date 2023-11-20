@@ -407,7 +407,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
   const handleUpdateQty = (rows, saveAndNext = false) => {
     setLoadingEdit(true);
     axiosInstance()
-      .put(`${purchaseOrder.api}/product/${purchaseOrderData._id}/update`, { orderDetails: rows })
+      .put(`${purchaseOrder.api}/product/${purchaseOrderData._id}/update`, { products: rows })
       .then(() => {
         setAddProductDialog(false);
         fetchData();
