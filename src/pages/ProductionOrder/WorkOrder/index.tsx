@@ -63,7 +63,11 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   }, [productionOrderData]);
 
   const fetchFields = async () => {
-    await axiosInstance().post(`${productionOrder.api}/${productionOrderData._id}/work-order`);
+    try {
+      await axiosInstance().post(`${productionOrder.api}/${productionOrderData._id}/work-order`);
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.productionOrderDetail}`);
     var data = response?.data?.data?.filter((e) => !['detail', 'description', 'workOrderNumber']?.includes(e?.fieldName));
     data = CURReplaceByCurrencySingle(data, productionOrderData?.currency || 'USD');
