@@ -133,19 +133,6 @@ const WorkOrderTechnician = () => {
           setProductionOrderOptions(productionOrderOption);
         }
         setServiceData(data);
-        if (selectedService) {
-          const tempSelected = data?.find((e) => e._id === selectedService?.uniqueId && e?.service?._id === selectedService?._id);
-          if (tempSelected) {
-            let tempServiceData = tempSelected?.service;
-            tempServiceData['uniqueId'] = tempSelected?._id;
-            tempServiceData['status'] = tempSelected?.status;
-            tempServiceData['assetNumber'] = tempSelected?.workOrderDetail?.serializedAsset?.optionLabel;
-            tempServiceData['assetId'] = tempSelected?.workOrderDetail?.serializedAsset?.optionValue;
-            tempServiceData['workOrderId'] = tempSelected?.workOrderDetail?._id;
-            tempServiceData['warehouse'] = tempSelected?.workOrderDetail?.warehouse;
-            setSelectedService(tempServiceData);
-          }
-        }
         setLoading(false);
       })
       ?.catch((err) => {
@@ -261,6 +248,7 @@ const WorkOrderTechnician = () => {
               tempServiceData['assetNumber'] = data?.workOrderDetail?.serializedAsset?.optionLabel;
               tempServiceData['assetId'] = data?.workOrderDetail?.serializedAsset?.optionValue;
               tempServiceData['workOrderId'] = data?.workOrderDetail?._id;
+              tempServiceData['workOrderNumber'] = data?.workOrderDetail?.workOrderNumber;
               tempServiceData['warehouse'] = data?.workOrderDetail?.warehouse;
               setSelectedService(tempServiceData);
               setServiceOpen(true);
