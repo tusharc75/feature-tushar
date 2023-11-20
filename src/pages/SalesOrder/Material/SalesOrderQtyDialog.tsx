@@ -13,7 +13,7 @@ import CustomButton from '../../../components/Helpers/CustomButton';
 import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from '../../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
-import { uniq, map, orderBy, isEqual } from 'lodash';
+import { uniq, map, orderBy, isEqual, uniqBy } from 'lodash';
 import { autoCalculateSpecificFields, handleAutoCalculation } from '../../../constants/formulaUtility';
 import moment from 'moment';
 import { fetch_salesOrder_product_fields } from 'src/components/SalesOrder/helper';
@@ -32,7 +32,7 @@ interface EditDialogProps {
   showSaveAndNext?: Boolean;
 }
 
-const rateChangeFields = ['unit', 'pricingMethod'];
+const rateChangeFields = ['unit', 'pricingMethod', 'pricingCondition'];
 
 const SalesOrderQtyDialog: FC<EditDialogProps> = ({
   calculatePrice,
@@ -53,6 +53,8 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = ({
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [saveAndNext, setSaveAndNext] = useState(false);
+  const [priceConditionList, setPriceConditionList] = useState([]);
+
   const ref = useRef(null);
 
   useEffect(() => {
@@ -110,6 +112,7 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = ({
       if (rowData?.[`${rowData.type}Detail`]?.pricingMethod) {
         pricingMethodOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`]?.pricingMethod);
       }
+      await getPricing(rowData);
       data.forEach((element) => {
         if (element.fieldName === 'unit') {
           element.option = unitOptions;
@@ -165,7 +168,7 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = ({
 
   const getPricing = async (values: any) => {
     if (rowData) {
-      if (values?.qty > 0 && values?.pricingMethod !== '' && values?.unit !== '') {
+      if (values?.qty > 0 && values?.unit !== '') {
         const priceData = await calculatePrice([
           {
             materialId: rowData.materialId,
@@ -175,6 +178,18 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = ({
             unit: values.unit
           }
         ]);
+        let tempPriceData = priceData.filter((d) => d.mrp !== undefined && d.mrp !== null && d.mrp !== 0);
+        setPriceConditionList(
+          uniqBy(
+            tempPriceData.map((d) => {
+              return {
+                optionLabel: d?.conditionName,
+                optionValue: d?.conditionId
+              };
+            }),
+            'optionValue'
+          )
+        );
         if (priceData && priceData.length && priceData[0].mrp) {
           let price: any = priceData[0].mrp;
           return price;
@@ -287,7 +302,7 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = ({
                                           label={field.fieldLabel}
                                           name={field.fieldName}
                                           type={field.type}
-                                          options={field.option}
+                                          options={field.fieldName === 'pricingCondition' ? priceConditionList : field.option}
                                           setFieldValue={(name, value) => {
                                             setFieldValue(name, value);
                                           }}
