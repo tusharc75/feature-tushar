@@ -412,7 +412,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
           <Box display="flex">
             <ImportExportMenu
               permissions={permissions?.productionOrder}
-              module="po-material"
+              module={routes.productionOrder.title}
               api={`${productionOrder.api}/material/${productionOrderData._id}`}
               afterImportCompleted={() => {
                 fetchData();
