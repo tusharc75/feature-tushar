@@ -340,6 +340,8 @@ const WorkOrderDetails = () => {
               allowedToEdit={allowedToEdit}
               completed={completed}
               fetchWorkOrderData={fetchWorkOrderData}
+              resource={sidebarResource.workOrder}
+              technicianSelectedService={null}
             />
           )}
         </TabPanel>
