@@ -427,7 +427,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
       delete element?.subRows;
     });
     axiosInstance()
-      .put(`${purchaseOrder.api}/product/${purchaseOrderData._id}/update`, { products: rows })
+      .put(`${purchaseOrder.api}/product/${purchaseOrderData._id}/update`, { orderDetails: rows })
       .then(() => {
         setAddProductDialog(false);
         fetchData();
