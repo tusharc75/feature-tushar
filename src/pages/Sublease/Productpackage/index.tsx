@@ -10,7 +10,7 @@ import CustomReactTable from '../../../components/CustomReactTable/CustomReactTa
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { sublease, pricingCondition, SUBLEASE_TYPE, SUBLEASE_STATUS } from '../../../constants/helpers';
+import { sublease, pricingCondition, SUBLEASE_TYPE, SUBLEASE_STATUS, PRICING_SETUP_TYPE } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import QtyDialog from './QtyDialog';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
@@ -388,7 +388,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
   const calculatePrice = (arr: any[]) => {
     if (subleaseData) {
       const data: any = {};
-      data.conditionType = ['Rent'];
+      data.conditionType = [PRICING_SETUP_TYPE.rent];
       data.material = arr.map((ele) => ({
         materialId: ele?.materialId,
         materialType: ele?.type,

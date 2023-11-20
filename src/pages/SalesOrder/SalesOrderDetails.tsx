@@ -185,7 +185,7 @@ const SalesOrderDetails = () => {
           <Box className="control-buttons-v1">
             {salesOrderData ? (
               <>
-                {permissions?.salesOrder?.isUpdate && [SALES_ORDER_STATUS.invoiced].includes(salesOrderData?.status) && (
+                {permissions?.salesOrder?.isUpdate && [SALES_ORDER_STATUS.readyToInvoice, SALES_ORDER_STATUS.invoiced].includes(salesOrderData?.status) && (
                   <ButtonWithPulse
                     variant={'outlined'}
                     color="default"
@@ -288,7 +288,7 @@ const SalesOrderDetails = () => {
             isStepEnded={[SALES_ORDER_STATUS.invoiced, SALES_ORDER_STATUS.closed].includes(salesOrderData?.status)}
           />
           <ContentFullScreen title={salesOrderProcessStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-            {currentStep === 0 && salesOrderData && (
+            {salesOrderProcessStepsNames[currentStep] === salesOrderProcessSteps[0].name && salesOrderData && (
               <Material
                 salesOrderData={salesOrderData}
                 setNextStep={setNextStep}
@@ -298,7 +298,7 @@ const SalesOrderDetails = () => {
                 updateJobStatus={updateJobStatus}
               />
             )}
-            {currentStep === 1 && salesOrderData && (
+            {salesOrderProcessStepsNames[currentStep] === salesOrderProcessSteps[1].name && salesOrderData && (
               <AdditionalCost
                 salesOrderData={salesOrderData}
                 setNextStep={setNextStep}
@@ -306,10 +306,13 @@ const SalesOrderDetails = () => {
                 allowedToEdit={allowedToEdit}
               />
             )}
-            {currentStep === 2 && salesOrderData && (
-              <Process salesOrderData={salesOrderData} setNextStep={setNextStep} stepFullScreen={stepFullScreen} />
+            {salesOrderProcessStepsNames[currentStep] === salesOrderProcessSteps[2].name && salesOrderData && (
+              <Process
+                salesOrderData={salesOrderData}
+                setNextStep={setNextStep}
+                stepFullScreen={stepFullScreen} />
             )}
-            {currentStep === 3 && salesOrderData && (
+            {salesOrderProcessStepsNames[currentStep] === salesOrderProcessSteps[3].name && salesOrderData && (
               <Invoice
                 salesOrderData={salesOrderData}
                 setNextStep={setNextStep}

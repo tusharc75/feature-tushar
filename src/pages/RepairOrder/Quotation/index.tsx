@@ -7,7 +7,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import { quotation, pricingCondition, repairOrder, QUOTATION_STATUS, REPAIR_ORDER_STATUS, sidebarResource } from '../../../constants/helpers';
+import { quotation, pricingCondition, repairOrder, QUOTATION_STATUS, REPAIR_ORDER_STATUS, sidebarResource, PRICING_SETUP_TYPE } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
@@ -460,7 +460,7 @@ const Quotation = ({
   const calculatePrice = (arr: any[]) => {
     if (quotationData) {
       const data: any = {};
-      data.conditionType = ['Rent'];
+      data.conditionType = [PRICING_SETUP_TYPE.price];
       data.material = arr.map((ele) => ({
         materialId: ele?.materialId,
         materialType: ele?.type,
