@@ -1,68 +1,67 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
 import ReactFlow, { ControlButton, Controls, ReactFlowProvider } from 'react-flow-renderer';
-import { useHistory } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
-import { repairOrder, deliveryTicket, sidebarResource, COLOUR_MASTER, REPAIR_ORDER_STATUS } from 'src/constants/helpers';
+import { repairOrder, deliveryTicket, sidebarResource, COLOUR_MASTER, REPAIR_ORDER_STATUS, MATERIAL_TYPE } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import { MdZoomOutMap } from 'react-icons/md';
 import { ExpandLess, ExpandMore } from '@material-ui/icons';
 import { Box, Button, Paper, Typography } from '@material-ui/core';
-import _, { capitalize } from 'lodash';
-import { useData } from 'src/StateProvider/Provider';
 
 const customNodeStyles = {
   repairOrder: {
-    name: 'RepairOrder',
+    name: routes.repairOrder.title,
     background: '#E2F8FF',
     borderColor: '#8BCBDF'
-  },
-  workOrder: { name: 'WorkOrder', ...COLOUR_MASTER.repairJob },
-  repairOrderClosed: {
-    name: 'RepairOrder Closed',
-    ...COLOUR_MASTER.repairJob
   },
   productAssets: {
     name: 'Assets',
     ...COLOUR_MASTER.assets
   },
+  workOrder: {
+    name: routes.workOrder.title,
+    ...COLOUR_MASTER.repairJob
+  },
   loadingTicket: {
     name: 'Loading Ticket',
     ...COLOUR_MASTER.loadingTicket
-  }
+  },
+  repairOrderClosed: {
+    name: `${routes.repairOrder.title} Closed`,
+    ...COLOUR_MASTER.repairJob
+  },
 };
 
-const RepairOrderViews = (props) => {
-  const { repairOrderNumber, repairOrderId, repairOrderStatus } = props;
+const RepairOrderViews = ({ repairOrderNumber, repairOrderId, repairOrderStatus }) => {
+
+  const toastConfig = useContext(CustomToastContext);
 
   const [flowData, setFlowData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const history = useHistory();
-  const toastConfig = useContext(CustomToastContext);
   const [fullScreenOpen, setFullScreenOpen] = useState(false);
-  const [dropdown, setDropdown] = useState(false);
   const [colorInfo, setColorInfo] = useState(false);
-  const {
-    state: { user }
-  }: any = useData();
 
   useEffect(() => {
-    fetchViewsData();
+    fetchData();
   }, [repairOrderNumber]);
 
-  async function fetchViewsData() {
+
+  const fetchData = async () => {
     setLoading(true);
     try {
       const repairOrderData: any = await axiosInstance().get(`${repairOrder.api}/${repairOrderId}/work-order/service`);
+      const material = repairOrderData?.data?.data?.material;
+
       const loadingTicket = await axiosInstance().get(
         `${deliveryTicket.api}/typewise?referenceType=${sidebarResource.repairOrder}&referenceId=${repairOrderId}`
       );
-      const allAssets = repairOrderData?.data?.data?.material;
-      const serializedAssetDetails = allAssets?.filter((s) => s?.type === 'serializedAsset')?.map((material) => material.serializedAssetDetail);
-      const workOrders = allAssets?.filter((s) => s?.type === 'serializedAsset' && s?.workOrder)?.map((material) => material?.workOrder) || [];
       const allLoadingTicket = loadingTicket?.data?.data || [];
+
+      const serializedAsset = material?.filter((s) => s?.type === MATERIAL_TYPE.serializedAsset)?.map((material) => material.serializedAssetDetail);
+      const workOrders = material?.filter((s) => s?.type === MATERIAL_TYPE.serializedAsset && s?.workOrder)?.map((material) => material?.workOrder) || [];
+
       var xPosition = 0;
       var flow: any[] = [
         {
@@ -87,8 +86,8 @@ const RepairOrderViews = (props) => {
         }
       ];
       var flowEdge: any[] = [];
-      if (allAssets?.length) xPosition = xPosition + 300;
-      serializedAssetDetails?.map((asset, index) => {
+      if (material?.length) xPosition = xPosition + 300;
+      serializedAsset?.map((asset, index) => {
         flow.push({
           id: `${asset._id}`,
           type: 'default',
@@ -119,6 +118,7 @@ const RepairOrderViews = (props) => {
           arrowHeadType: 'arrow'
         });
       });
+
       if (workOrders.length > 0) xPosition += 300;
       workOrders?.map((workOrder, index) => {
         flow.push({
@@ -151,7 +151,7 @@ const RepairOrderViews = (props) => {
         });
       });
 
-      if (allLoadingTicket.length && allAssets.length) xPosition += 300;
+      if (allLoadingTicket.length && material.length) xPosition += 300;
       allLoadingTicket?.map((loadingTicket, index) => {
         index++;
         flow.push({
@@ -177,9 +177,10 @@ const RepairOrderViews = (props) => {
           style: customNodeStyles.loadingTicket
         });
         loadingTicket?.productInventory?.map((productInventory) => {
+          const workOrder = workOrders?.find((e) => e.serializedAsset === productInventory.optionValue);
           flowEdge.push({
             id: `asset-loading-${productInventory.optionValue}-${loadingTicket._id}`,
-            source: productInventory.optionValue,
+            source: workOrder?._id,
             target: loadingTicket._id,
             arrowHeadType: 'arrow'
           });
@@ -188,7 +189,6 @@ const RepairOrderViews = (props) => {
 
       if (repairOrderStatus === REPAIR_ORDER_STATUS.completed) {
         xPosition += 300;
-
         flow.push({
           id: `${repairOrderId}-closed`,
           type: 'output',
