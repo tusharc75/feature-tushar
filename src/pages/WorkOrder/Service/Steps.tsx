@@ -19,6 +19,7 @@ import {
   getObjKeys,
   getObjKeysWithValues,
   setFieldsInAscendingOrder,
+  sidebarResource,
   workOrder,
   WORKORDER_SERVICE_STATUS,
   WORKORDER_SERVICE_STEP_STATUS
@@ -245,7 +246,7 @@ const Steps = ({
   allowedToEdit,
   setDisableCompleteFail,
   fetchService,
-  referencType,
+  resource,
   stepSubmitedData,
   handelClose = null
 }) => {
@@ -577,7 +578,7 @@ const Steps = ({
       .then(({ data }) => {
         const result = data?.data;
         if (type === WORKORDER_SERVICE_STEP_STATUS.passed && result?.isPassAddon && result?.passAddon?.length) {
-          if (referencType === 'workOrderTechnician') {
+          if (resource === sidebarResource.workOrderTechnician) {
             handleAddService(
               result?.passAddon?.map((e) => e._id),
               step
@@ -592,7 +593,7 @@ const Steps = ({
             });
           }
         } else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isFailAddon && result?.failAddon?.length) {
-          if (referencType === 'workOrderTechnician') {
+          if (resource === sidebarResource.workOrderTechnician) {
             handleAddService(
               result?.failAddon?.map((e) => e._id),
               step
@@ -607,19 +608,19 @@ const Steps = ({
             });
           }
         } else if (type === WORKORDER_SERVICE_STEP_STATUS.passed && result?.isJumpStepPass && result?.jumpStepsPass?.length) {
-          if (referencType !== 'workOrderTechnician') {
+          if (resource === sidebarResource.workOrder) {
             setAddServiceConfirmation((s) => ({ ...s, status: WORKORDER_SERVICE_STEP_STATUS.passed, open: true, type: 'jumpStep' }));
           }
         } else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isJumpStepFail && result?.jumpStepsFail?.length) {
-          if (referencType !== 'workOrderTechnician') {
+          if (resource === sidebarResource.workOrder) {
             setAddServiceConfirmation((s) => ({ ...s, status: WORKORDER_SERVICE_STEP_STATUS.failed, open: true, type: 'jumpStep' }));
           }
         } else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isQuoteRevisionOnFail) {
-          if (referencType !== 'workOrderTechnician') {
+          if (resource === sidebarResource.workOrder) {
             setAddServiceConfirmation((s) => ({ ...s, status: WORKORDER_SERVICE_STEP_STATUS.failed, open: true, type: 'isQuoteRevisionOnFail' }));
           }
         } else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isReturnToStepOnFail && result?.returnToStepOnFail) {
-          if (referencType !== 'workOrderTechnician') {
+          if (resource === sidebarResource.workOrder) {
             const returnStep = serviceDetails?.steps?.find((e) => e._id === result?.returnToStepOnFail) || {};
             setAddServiceConfirmation((s) => ({
               ...s,
@@ -838,7 +839,7 @@ const Steps = ({
                 )}
               </div>
               <div className={`d-flex flex-wrap align-center justify-end gap-[8px] ml-auto ${serviceDetails?.steps?.length ? 'h-auto' : 'h-[500]'}`}>
-                {referencType !== 'workOrderTechnician' && (
+                {resource === sidebarResource.workOrder && (
                   <Button
                     variant="outlined"
                     color="primary"
@@ -860,7 +861,7 @@ const Steps = ({
                     Add Steps
                   </Button>
                 )}
-                {serviceDetails?.steps?.length > 0 && referencType !== 'workOrderTechnician' && (
+                {serviceDetails?.steps?.length > 0 && resource === sidebarResource.workOrder && (
                   <Button
                     variant="outlined"
                     color="primary"
@@ -927,12 +928,12 @@ const Steps = ({
             <div className={classes.root}>
               {serviceDetails?.steps?.map((step, index) => {
                 const { stepData, isStepValid } = getFields(step);
-                if (referencType === 'workOrderTechnician' && stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.skipped) {
+                if (resource === sidebarResource.workOrderTechnician && stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.skipped) {
                   return '';
                 }
                 let isAnyTechnician = selectedService?.assignedUsers?.length ? true : false;
                 let isMeTechnician = selectedService?.assignedUsers?.find((u) => u?.optionValue === user?._id) || false;
-                if (referencType === 'workOrderTechnician') {
+                if (resource === sidebarResource.workOrderTechnician) {
                   isMeTechnician = true;
                 }
                 return (
@@ -977,7 +978,7 @@ const Steps = ({
                         <Box className="flex items-center gap-2 flex-grow text-[var(--primary-text)]">
                           <Box>
                             <span className="bg-[var(--primary)] dark:bg-[var(--dark-primary)] rounded-full text-white text-[13px] px-[12px] py-[1px]">
-                              {referencType === 'workOrderTechnician' ? step?.order : `${selectedService?.order}.${step?.order || index + 1}`}
+                              {resource === sidebarResource.workOrderTechnician ? step?.order : `${selectedService?.order}.${step?.order || index + 1}`}
                             </span>
                           </Box>
                           <div className="flex items-start gap-2 w-full">
@@ -1318,7 +1319,7 @@ const Steps = ({
                   >
                     Upload Documents
                   </MenuItem>
-                  {(referencType === 'workOrder' || (referencType === 'workOrderTechnician' && user?.brandPolicy?.workOrderTechnicianConsumable)) &&
+                  {(resource === sidebarResource.workOrder || (resource === sidebarResource.workOrderTechnician && user?.brandPolicy?.workOrderTechnicianConsumable)) &&
                     !user?.brandPolicy?.workOrderConsumableHide && (
                       <MenuItem
                         onClick={(e) => {
@@ -1336,7 +1337,7 @@ const Steps = ({
                         Add/Consume Products
                       </MenuItem>
                     )}
-                  {referencType !== 'workOrderTechnician' && (
+                  {resource === sidebarResource.workOrder && (
                     <MenuItem
                       disabled={Boolean(getFields(selectedStep)?.stepData?.startDate)}
                       onClick={(e) => {
@@ -1348,7 +1349,7 @@ const Steps = ({
                       Assign Technicians
                     </MenuItem>
                   )}
-                  {referencType !== 'workOrderTechnician' && permissions?.workStations?.isRead && (
+                  {resource === sidebarResource.workOrder && permissions?.workStations?.isRead && (
                     <MenuItem
                       onClick={(e) => {
                         e.stopPropagation();
@@ -1385,7 +1386,7 @@ const Steps = ({
                   >
                     Clone Step
                   </MenuItem>
-                  {referencType !== 'workOrderTechnician' && (
+                  {resource === sidebarResource.workOrder && (
                     <MenuItem
                       onClick={(e) => {
                         e.stopPropagation();
@@ -1426,7 +1427,7 @@ const Steps = ({
                   setFieldDialog(false);
                   fetchServiceData();
                 }}
-                referencType={referencType}
+                resource={resource}
                 handleSubmit={handleSubmit}
                 selectedService={selectedService}
                 allowedToEdit={allowedToEdit}
@@ -1634,7 +1635,7 @@ const Steps = ({
         ) : (
           <>
             <Box textAlign="center" p={2}>
-              {referencType !== 'workOrderTechnician' && (
+              {resource === sidebarResource.workOrder && (
                 <Button
                   variant="outlined"
                   color="primary"
