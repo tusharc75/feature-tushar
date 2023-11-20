@@ -74,7 +74,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const CardView = ({ data, fields, setTrailerMasterId, setOpen, setDeleteRecord, setShowDeleteConfirmBox }) => {
+const CardView = ({ data, fields, setShowManageDialog, setDeleteRecord, setShowDeleteConfirmBox }) => {
   const classes = useStyles();
   const history = useHistory();
   const {
@@ -115,8 +115,7 @@ const CardView = ({ data, fields, setTrailerMasterId, setOpen, setDeleteRecord, 
                         aria-label="Clone"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setTrailerMasterId(trailerMaster?._id);
-                          setOpen({ open: true, isClone: true });
+                          setShowManageDialog({open: true, isClone: true, idToClone:trailerMaster?._id })
                         }}
                       >
                         <FileCopyIcon />

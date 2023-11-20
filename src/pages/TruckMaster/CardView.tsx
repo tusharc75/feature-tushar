@@ -79,7 +79,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const CardView = ({ data, fields, setTruckMasterId, setOpen, setDeleteRecord, setShowDeleteConfirmBox }) => {
+const CardView = ({ data, fields, setShowManageDialog, setDeleteRecord, setShowDeleteConfirmBox }) => {
   const classes = useStyles();
   const history = useHistory();
   const [showActivity, setActivityShow] = useState({ open: false, referenceId: '' });
@@ -158,8 +158,7 @@ const CardView = ({ data, fields, setTruckMasterId, setOpen, setDeleteRecord, se
                         aria-label="Clone"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setTruckMasterId(truckMaster?._id);
-                          setOpen({ open: true, isClone: true });
+                          setShowManageDialog({open: true, isClone: true, idToClone:truckMaster?._id })
                         }}
                       >
                         <FileCopyIcon />
