@@ -555,53 +555,54 @@ function CustomReactTable({
     }
   }, [sortBy]);
 
-  // useEffect(() => {
-  //   let flatSelectedData = [];
-  //   Object.keys(selectedRowIds).forEach((key) => {
-  //     const splittedArray = key.split('.');
-  //     if (splittedArray.length <= 1 && selectedRowIds[key]) {
-  //       const { subRows, ...rest } = data[key];
-  //       flatSelectedData.push({ ...rest });
-  //     } else if (selectedRowIds[key]) {
-  //       let dataToStore = null;
-  //       splittedArray.forEach((f, index) => {
-  //         if (index === 0) {
-  //           dataToStore = { ...data[f] };
-  //         } else {
-  //           dataToStore = { ...dataToStore['subRows'][f] };
-  //         }
-  //       });
-  //       const { subRows, ...rest } = dataToStore;
-  //       flatSelectedData.push({ ...rest });
-  //     }
-  //   });
-  //   if (onSelect) onSelect([...flatSelectedData]);
-  //   dispatch({
-  //     type: 'selection',
-  //     selectedRecords: [...flatSelectedData]
-  //   });
-  // }, [selectedRowIds]);
-
   useEffect(() => {
-    if (!selectedFlatRows.length) {
-      if (onSelect) onSelect([]);
-      dispatch({
-        type: 'selection',
-        selectedRecords: []
-      });
-      return;
-    }
-    const selectedData = [];
-    for (const row of selectedFlatRows) {
-      const { subRows, ...rest } = row.original;
-      selectedData.push({ ...rest });
-    }
-    if (onSelect) onSelect(selectedData);
+    let flatSelectedData = [];
+    Object.keys(selectedRowIds).forEach((key) => {
+      const splittedArray = key.split('.');
+      if (splittedArray.length <= 1 && selectedRowIds[key]) {
+        const { subRows, ...rest } = data[key];
+        flatSelectedData.push({ ...rest });
+      } else if (selectedRowIds[key]) {
+        let dataToStore = null;
+        splittedArray.forEach((f, index) => {
+          if (index === 0) {
+            dataToStore = { ...data[f] };
+          } else {
+            dataToStore = { ...dataToStore['subRows'][f] };
+          }
+        });
+        const { subRows, ...rest } = dataToStore;
+        flatSelectedData.push({ ...rest });
+      }
+    });
+    if (onSelect) onSelect([...flatSelectedData]);
     dispatch({
       type: 'selection',
-      selectedRecords: selectedData
+      selectedRecords: [...flatSelectedData]
     });
-  }, [selectedFlatRows.length]);
+
+  }, [selectedRowIds]);
+
+  // useEffect(() => {
+  //   if (!selectedFlatRows.length) {
+  //     if (onSelect) onSelect([]);
+  //     dispatch({
+  //       type: 'selection',
+  //       selectedRecords: []
+  //     });
+  //     return;
+  //   }
+  //   const selectedData = [];
+  //   for (const row of selectedFlatRows) {
+  //     const { subRows, ...rest } = row.original;
+  //     selectedData.push({ ...rest });
+  //   }
+  //   if (onSelect) onSelect(selectedData);
+  //   dispatch({
+  //     type: 'selection',
+  //     selectedRecords: selectedData
+  //   });
+  // }, [selectedFlatRows.length]);
 
 
   const reorder = (item: any, newIndex: number) => {
