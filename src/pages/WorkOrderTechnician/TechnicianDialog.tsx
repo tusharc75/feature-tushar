@@ -71,7 +71,7 @@ const TechnicianDialog = ({ handleClose, selectedService }) => {
                 <Service
                     workOrderData={workOrderData}
                     workOrderId={selectedService?.workOrderId}
-                    allowedToEdit={selectedService?.status === WORKORDER_SERVICE_STATUS.backlog ? false : true}
+                    allowedToEdit={[WORKORDER_SERVICE_STATUS.backlog, WORKORDER_SERVICE_STATUS.inProgressByOther]?.includes(selectedService?.status) ? false : true}
                     completed={completed}
                     fetchWorkOrderData={fetchWorkOrderData}
                     resource={sidebarResource.workOrderTechnician}
