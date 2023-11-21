@@ -2,7 +2,7 @@ import { Box, Dialog, Typography, Grid } from '@material-ui/core';
 import routes from 'src/components/Helpers/Routes';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { useData } from 'src/StateProvider/Provider';
-import { CustomDialogTransition, WORK_ORDER_STATUS, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, WORKORDER_SERVICE_STATUS, WORK_ORDER_STATUS, sidebarResource } from 'src/constants/helpers';
 import axiosInstance from 'src/axios/axiosInstance';
 import { useContext, useEffect, useState } from 'react';
 import Service from '../WorkOrder/Service';
@@ -71,7 +71,7 @@ const TechnicianDialog = ({ handleClose, selectedService }) => {
                 <Service
                     workOrderData={workOrderData}
                     workOrderId={selectedService?.workOrderId}
-                    allowedToEdit={true}
+                    allowedToEdit={selectedService?.status === WORKORDER_SERVICE_STATUS.backlog ? false : true}
                     completed={completed}
                     fetchWorkOrderData={fetchWorkOrderData}
                     resource={sidebarResource.workOrderTechnician}

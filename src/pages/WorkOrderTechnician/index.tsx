@@ -86,7 +86,8 @@ const WorkOrderTechnician = () => {
         newObj['serviceName'] = item.service?.serviceName;
         newObj['workOrderNumber'] = item.workOrderDetail?.workOrderNumber;
         newObj['serializedAsset'] = item.workOrderDetail?.serializedAsset?.optionLabel;
-        newObj['status'] = item.status;
+        newObj['serializedAsset'] = item.workOrderDetail?.serializedAsset?.optionLabel;
+        newObj['assignedWorkStations'] = item?.assignedWorkStations?.map((e) => e.optionLabel)?.toString();
         return newObj;
       });
 
@@ -144,6 +145,7 @@ const WorkOrderTechnician = () => {
     { accessor: 'serviceName', type: 'title' },
     { accessor: 'workOrderNumber', title: 'Work Order', type: 'text' },
     { accessor: 'serializedAsset', title: 'Asset', type: 'text' },
+    { accessor: 'assignedWorkStations', title: 'Work Stations', type: 'text' },
     ...(user?.user?.brandPolicy?.workOrderTimer ? [{ accessor: 'stepData', title: 'Time', type: 'timer' }] : [])
   ];
 
@@ -249,7 +251,6 @@ const WorkOrderTechnician = () => {
               tempServiceData['assetId'] = data?.workOrderDetail?.serializedAsset?.optionValue;
               tempServiceData['workOrderId'] = data?.workOrderDetail?._id;
               tempServiceData['workOrderNumber'] = data?.workOrderDetail?.workOrderNumber;
-              tempServiceData['warehouse'] = data?.workOrderDetail?.warehouse;
               setSelectedService(tempServiceData);
               setServiceOpen(true);
             }}
