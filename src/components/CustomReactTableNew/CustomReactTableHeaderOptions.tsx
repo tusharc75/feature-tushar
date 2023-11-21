@@ -86,25 +86,14 @@ function CustomReactTableHeaderOptions({
   const [chipData, setChipData] = useState([]);
   const [isFilterPresent, setIsFilterPresent] = useState<boolean>(false);
 
-  useEffect(() => {
-    const saved = localStorage.getItem(`${renderedFrom}_selected`);
-    if (saved) {
-      try {
-        const initialValue = JSON.parse(saved);
-        setDisableSelectionSwitch(selectedRecords === 0);
-        if (initialValue?.length === 0 && checked) {
-          setChecked(false);
-          dispatchTable({
-            type: 'showFilteredRecordsOnly'
-          });
-        }
-      } catch {
-        setDisableSelectionSwitch(true);
-      }
-    } else {
+  useEffect(()=>{
+    if(selectedRecords === 0){
       setDisableSelectionSwitch(true);
+    }else{
+      setDisableSelectionSwitch(false);
     }
-  }, [selectedRecords]);
+  },[selectedRecords])
+
 
   const clearSingleFilter = (name) => {
     // Create a copy of the customFilters object
