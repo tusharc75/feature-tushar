@@ -174,7 +174,7 @@ const ProductionOrder = () => {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
-      const savedRecords = selectedRecords || [];
+      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
     return deepFilter;
@@ -189,7 +189,7 @@ const ProductionOrder = () => {
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
-          finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);;
+          finalObject['isChecked'] = false;
           finalObject['allowedToEdit'] = permissions?.productionOrder?.isUpdate;
           finalObject['canDelete'] = permissions?.productionOrder?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;
           return finalObject;
@@ -216,7 +216,7 @@ const ProductionOrder = () => {
     if (deleteRecord) {
       ids.push(deleteRecord._id);
     } else {
-      ids = selectedRecords?.map((d) => d._id);
+      ids = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((d) => d._id);
     }
     axiosInstance()
       .put(`${productionOrder.api}/remove`, { ids: ids })
@@ -226,6 +226,7 @@ const ProductionOrder = () => {
           type: 'success',
           message: data.message
         });
+        removeLocalStorage(localStorageSelectedRecords);
         fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
@@ -239,7 +240,7 @@ const ProductionOrder = () => {
   };
 
   const showConfirmBox = () => {
-    if (selectedRecords?.find((d) => d.canDelete === false)) {
+    if (getLocalStorageArrayData(localStorageSelectedRecords)?.find((d) => d.canDelete === false)) {
       setShowDeleteWarningConfirmBox(true);
     } else {
       setShowDeleteConfirmBox(true);
@@ -272,10 +273,10 @@ const ProductionOrder = () => {
           afterImportCompleted={() => {}}
           isExportAllOrSomeFeature={true}
           total={rowCount}
-          recordsToExport={selectedRecords?.length}
+          recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
           ids={
-            selectedRecords?.length
-              ? selectedRecords?.map((obj) => obj._id)
+            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+              ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
               : []
           }
           onExportToExcelSuccess={() => {
