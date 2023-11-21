@@ -140,12 +140,16 @@ const WorkOrderTechnician = () => {
       });
   };
 
-  const cardDataRows: any[] = [
-    { accessor: 'serviceName', type: 'title' },
-    { accessor: 'workOrderNumber', title: 'Work Order', type: 'text' },
-    { accessor: 'serializedAsset', title: 'Asset', type: 'text' },
-    ...(user?.user?.brandPolicy?.workOrderTimer ? [{ accessor: 'stepData', title: 'Time', type: 'timer' }] : [])
-  ];
+  const cardDataRows: any[] = React.useMemo(()=>{
+    return (
+      [
+        { accessor: 'serviceName', type: 'title' },
+        { accessor: 'workOrderNumber', title: 'Work Order', type: 'text' },
+        { accessor: 'serializedAsset', title: 'Asset', type: 'text' },
+        ...(Boolean(user?.user?.brandPolicy?.workOrderTimer) ? [{ accessor: 'stepData', title: 'Time', type: 'timer' }] : [])
+      ]
+    )
+  },[user]);  
 
   return (
     <Box className="main-container-v1">
@@ -237,7 +241,7 @@ const WorkOrderTechnician = () => {
             cardDataRows={cardDataRows}
             passFailStatus={true}
             passFailAccessor="serviceStatus"
-            cardHeight={user?.user?.brandPolicy?.workOrderTimer ? 150 : 130}
+            cardHeight={Boolean(user?.user?.brandPolicy?.workOrderTimer) ? 150 : 130}
             sm={6}
             md={4}
             lg={3}
