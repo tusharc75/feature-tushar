@@ -15,6 +15,7 @@ export interface colDataInterface extends React.HTMLAttributes<HTMLDivElement> {
   createNew?: () => void;
   createNewText?: string;
   isCreateNew?: boolean;
+  containerHeight: number;
 }
 
 const RenderColumns: React.FC<colDataInterface> = ({
@@ -26,7 +27,8 @@ const RenderColumns: React.FC<colDataInterface> = ({
   cardHeight = 130,
   createNew,
   isCreateNew,
-  createNewText
+  createNewText,
+  containerHeight,
 }) => {
   const listRef = React.useRef(null);
   const Row = ({ index, style }) => {
@@ -48,7 +50,7 @@ const RenderColumns: React.FC<colDataInterface> = ({
 
   return (
     <div className="col group">
-      <List ref={listRef} style={{ overflowX: 'hidden' }} height={800} itemCount={data.length} itemSize={cardHeight} width={'100%'}>
+      <List ref={listRef} style={{ overflowX: 'hidden' }} height={containerHeight || 600} itemCount={data.length} itemSize={cardHeight} width={'100%'}>
         {Row}
       </List>
       {createNew && isCreateNew && (
