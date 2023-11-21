@@ -434,19 +434,6 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
   const handleSaveData = async (rows: any, saveAndNext = false) => {
     rows.forEach((element) => {
       element.pricingCondition = element.pricingCondition?.optionValue ? element.pricingCondition?.optionValue : element.pricingCondition; // temporary fix
-      delete element.index;
-      delete element.detail;
-      delete element.serializedProduct;
-      delete element.qtyDisplay;
-      delete element.isValid;
-      delete element.hideSelection;
-      delete element.assetQty;
-      delete element.productDetail;
-      delete element.packageDetail;
-      delete element.serviceDetail;
-      delete element.parentName;
-      delete element.subRows;
-      delete element.listPrice;
     });
     setUpdating(true);
     axiosInstance()
