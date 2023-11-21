@@ -253,8 +253,6 @@ function CustomReactTable({
     Filter: DefaultColumnFilter
   };
 
-
-
   const [cellValue, setCellValue] = React.useState('');
   const [baseColumns, setBaseColumns] = React.useState([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -274,14 +272,13 @@ function CustomReactTable({
     setBaseColumns(columns);
   }, [columns]);
 
-
   const handleAllSelect = (checked) => {
     if (checked) {
       localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
     }
   };
 
-  const handleCellSelection = (row)=>{}
+  const handleCellSelection = (row) => {};
 
   const newColumns = React.useMemo(
     () =>
@@ -447,7 +444,6 @@ function CustomReactTable({
   );
   const updateData = () => {};
 
-
   const returnHiddenCols = () => {
     const storedColumns = JSON.parse(localStorage.getItem(renderedFrom));
 
@@ -491,7 +487,7 @@ function CustomReactTable({
         autoResetExpanded: false,
         hiddenColumns:
           hideSelection && hideAction ? ['selection', 'action'] : hideSelection ? ['selection'] : hideAction ? ['action'] : returnHiddenCols(),
-        selectedRowIds: selectedRecords,
+        selectedRowIds: selectedRecords
       },
       getSubRows: (row: any) => row[childrenProperty],
       sortTypes: {
@@ -559,7 +555,6 @@ function CustomReactTable({
     }
   }, [sortBy]);
 
-
   useEffect(() => {
     let flatSelectedData = [];
     Object.keys(selectedRowIds).forEach((key) => {
@@ -586,7 +581,8 @@ function CustomReactTable({
       selectedRecords: [...flatSelectedData]
     });
 
-  }, [selectedRowIds]);
+  }, [selectedRowIds, renderedFrom]);
+
 
   const reorder = (item: any, newIndex: number) => {
     const { index: currentIndex } = item;
@@ -736,7 +732,7 @@ function CustomReactTable({
               renderedFrom={renderedFrom}
               dispatchTable={dispatch}
               showOnlyShowFilteredRecordSwitch={showOnlyShowFilteredRecordSwitch}
-              selectedRecords={selectedRecords.length}
+              selectedRecords={selectedFlatRows.length}
               showFilters={showFilters}
               handleFilterOpen={handleFilterOpen}
               selectedFilter={selectedFilter}
