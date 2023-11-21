@@ -253,8 +253,6 @@ function CustomReactTable({
     Filter: DefaultColumnFilter
   };
 
-
-
   const [cellValue, setCellValue] = React.useState('');
   const [baseColumns, setBaseColumns] = React.useState([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -274,14 +272,13 @@ function CustomReactTable({
     setBaseColumns(columns);
   }, [columns]);
 
-
   const handleAllSelect = (checked) => {
     if (checked) {
       localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
     }
   };
 
-  const handleCellSelection = (row)=>{}
+  const handleCellSelection = (row) => {};
 
   const newColumns = React.useMemo(
     () =>
@@ -447,7 +444,6 @@ function CustomReactTable({
   );
   const updateData = () => {};
 
-
   const returnHiddenCols = () => {
     const storedColumns = JSON.parse(localStorage.getItem(renderedFrom));
 
@@ -491,7 +487,7 @@ function CustomReactTable({
         autoResetExpanded: false,
         hiddenColumns:
           hideSelection && hideAction ? ['selection', 'action'] : hideSelection ? ['selection'] : hideAction ? ['action'] : returnHiddenCols(),
-        selectedRowIds: selectedRecords,
+        selectedRowIds: selectedRecords
       },
       getSubRows: (row: any) => row[childrenProperty],
       sortTypes: {
@@ -559,34 +555,54 @@ function CustomReactTable({
     }
   }, [sortBy]);
 
+  // useEffect(() => {
+  //   let flatSelectedData = [];
+  //   Object.keys(selectedRowIds).forEach((key) => {
+  //     const splittedArray = key.split('.');
+  //     if (splittedArray.length <= 1 && selectedRowIds[key]) {
+  //       const { subRows, ...rest } = data[key];
+  //       flatSelectedData.push({ ...rest });
+  //     } else if (selectedRowIds[key]) {
+  //       let dataToStore = null;
+  //       splittedArray.forEach((f, index) => {
+  //         if (index === 0) {
+  //           dataToStore = { ...data[f] };
+  //         } else {
+  //           dataToStore = { ...dataToStore['subRows'][f] };
+  //         }
+  //       });
+  //       const { subRows, ...rest } = dataToStore;
+  //       flatSelectedData.push({ ...rest });
+  //     }
+  //   });
+  //   if (onSelect) onSelect([...flatSelectedData]);
+  //   dispatch({
+  //     type: 'selection',
+  //     selectedRecords: [...flatSelectedData]
+  //   });
+  // }, [selectedRowIds]);
 
   useEffect(() => {
-    let flatSelectedData = [];
-    Object.keys(selectedRowIds).forEach((key) => {
-      const splittedArray = key.split('.');
-      if (splittedArray.length <= 1 && selectedRowIds[key]) {
-        const { subRows, ...rest } = data[key];
-        flatSelectedData.push({ ...rest });
-      } else if (selectedRowIds[key]) {
-        let dataToStore = null;
-        splittedArray.forEach((f, index) => {
-          if (index === 0) {
-            dataToStore = { ...data[f] };
-          } else {
-            dataToStore = { ...dataToStore['subRows'][f] };
-          }
-        });
-        const { subRows, ...rest } = dataToStore;
-        flatSelectedData.push({ ...rest });
-      }
-    });
-    if (onSelect) onSelect([...flatSelectedData]);
+    if (!selectedFlatRows.length) {
+      if (onSelect) onSelect([]);
+      dispatch({
+        type: 'selection',
+        selectedRecords: []
+      });
+      return;
+    }
+    const selectedData = [];
+    for (const row of selectedFlatRows) {
+      const { subRows, ...rest } = row.original;
+      selectedData.push({ ...rest });
+    }
+    if (onSelect) onSelect(selectedData);
     dispatch({
       type: 'selection',
-      selectedRecords: [...flatSelectedData]
+      selectedRecords: selectedData
     });
+  }, [selectedFlatRows.length]);
 
-  }, [selectedRowIds]);
 
   const reorder = (item: any, newIndex: number) => {
     const { index: currentIndex } = item;
@@ -736,7 +752,7 @@ function CustomReactTable({
               renderedFrom={renderedFrom}
               dispatchTable={dispatch}
               showOnlyShowFilteredRecordSwitch={showOnlyShowFilteredRecordSwitch}
-              selectedRecords={selectedRecords.length}
+              selectedRecords={selectedFlatRows.length}
               showFilters={showFilters}
               handleFilterOpen={handleFilterOpen}
               selectedFilter={selectedFilter}
