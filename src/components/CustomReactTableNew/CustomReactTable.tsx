@@ -260,6 +260,21 @@ function CustomReactTable({
   const [currentFomValue, setCurrentFomValue] = useState({});
   const renderedFromContext = React.useContext(renderedFrom);
 
+  const [selectedRow, setSelectedRow] = useState([])
+
+  const getPreviouslySelectedRowIndex = () => {
+    const len = selectedRow.length;
+    const obj = {};
+    for (let i = 0; i < len; i++) {
+      const id = selectedRow[i]?.id;
+      const index = data.findIndex(row => row?.id === id)
+      if (index >= 0) {
+        obj[index] = true;
+      }
+    }
+    return obj;
+  }
+
   const handleFilterOpen = () => {
     setIsFilterOpen(true);
   };
@@ -487,7 +502,8 @@ function CustomReactTable({
         autoResetExpanded: false,
         hiddenColumns:
           hideSelection && hideAction ? ['selection', 'action'] : hideSelection ? ['selection'] : hideAction ? ['action'] : returnHiddenCols(),
-        selectedRowIds: selectedRecords
+        // selectedRowIds: selectedRecords
+        selectedRowIds: getPreviouslySelectedRowIndex()
       },
       getSubRows: (row: any) => row[childrenProperty],
       sortTypes: {
@@ -555,11 +571,39 @@ function CustomReactTable({
     }
   }, [sortBy]);
 
+  // useEffect(() => {
+  //   let flatSelectedData = [];
+  //   Object.keys(selectedRowIds).forEach((key) => {
+  //     const splittedArray = key.split('.');
+  //     if (splittedArray.length <= 1 && selectedRowIds[key]) {
+  //       const { subRows, ...rest } = data[key];
+  //       flatSelectedData.push({ ...rest });
+  //     } else if (selectedRowIds[key]) {
+  //       let dataToStore = null;
+  //       splittedArray.forEach((f, index) => {
+  //         if (index === 0) {
+  //           dataToStore = { ...data[f] };
+  //         } else {
+  //           dataToStore = { ...dataToStore['subRows'][f] };
+  //         }
+  //       });
+  //       const { subRows, ...rest } = dataToStore;
+  //       flatSelectedData.push({ ...rest });
+  //     }
+  //   });
+  //   if (onSelect) onSelect([...flatSelectedData]);
+  //   dispatch({
+  //     type: 'selection',
+  //     selectedRecords: [...flatSelectedData]
+  //   });
+
+  // }, [selectedRowIds, renderedFrom]);
+
   useEffect(() => {
     let flatSelectedData = [];
     Object.keys(selectedRowIds).forEach((key) => {
       const splittedArray = key.split('.');
-      if (splittedArray.length <= 1 && selectedRowIds[key]) {
+      if (splittedArray.length === 0) {
         const { subRows, ...rest } = data[key];
         flatSelectedData.push({ ...rest });
       } else if (selectedRowIds[key]) {
@@ -575,11 +619,24 @@ function CustomReactTable({
         flatSelectedData.push({ ...rest });
       }
     });
-    if (onSelect) onSelect([...flatSelectedData]);
+
+    const includedRow: any = []
+    const notIncludedRow: any = []
+
+    selectedRow.forEach(row => {
+      if (data.find(d => d.id === row.id)) {
+        includedRow.push(row)
+      } else {
+        notIncludedRow.push(row)
+      }
+    });
+
+    if (onSelect)  onSelect([...notIncludedRow, ...flatSelectedData]);;
     dispatch({
       type: 'selection',
-      selectedRecords: [...flatSelectedData]
+      selectedRecords: [...notIncludedRow, ...flatSelectedData]
     });
+    setSelectedRow([...notIncludedRow, ...flatSelectedData]);
 
   }, [selectedRowIds, renderedFrom]);
 
@@ -732,7 +789,7 @@ function CustomReactTable({
               renderedFrom={renderedFrom}
               dispatchTable={dispatch}
               showOnlyShowFilteredRecordSwitch={showOnlyShowFilteredRecordSwitch}
-              selectedRecords={selectedFlatRows.length}
+              selectedRecords={selectedRow?.length}
               showFilters={showFilters}
               handleFilterOpen={handleFilterOpen}
               selectedFilter={selectedFilter}
