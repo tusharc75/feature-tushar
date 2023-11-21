@@ -4,7 +4,7 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import axiosInstance from '../../../axios/axiosInstance';
-import { groupBy, unionBy, uniqBy } from 'lodash';
+import { unionBy, uniqBy } from 'lodash';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -15,7 +15,7 @@ import CustomButton from '../../../components/Helpers/CustomButton';
 import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from '../../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
-import { uniq, map, orderBy, isEqual, intersection } from 'lodash';
+import { uniq, map, orderBy, isEqual } from 'lodash';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import moment from 'moment';
 import {
@@ -338,7 +338,11 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
           rows = [...rows, ...packages];
         });
       }
-      handleSaveData(rows);
+      const updatedRows: any = [];
+      rows?.forEach((ele) => {
+        updatedRows.push({...getObjKeysWithValues(ele, allFields)});
+      })
+      handleSaveData(updatedRows);
     } else {
       if (rowData.parentId && !showConfirmationDialog) {
         setShowConfirmationDialog(true);
