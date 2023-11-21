@@ -233,16 +233,11 @@ const WorkOrderTechnician = () => {
         </Box>
         {cardData && (
           <CardColTimeline
-            mt={3}
             data={cardData}
             loading={loading}
             cardDataRows={cardDataRows}
             passFailStatus={true}
             passFailAccessor="serviceStatus"
-            cardHeight={user?.user?.brandPolicy?.workOrderTimer ? 150 : 130}
-            sm={6}
-            md={4}
-            lg={3}
             cardOnClick={(e, data) => {
               let tempServiceData = data?.service;
               tempServiceData['uniqueId'] = data?._id;
