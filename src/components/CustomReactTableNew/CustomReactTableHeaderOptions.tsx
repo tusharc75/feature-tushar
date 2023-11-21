@@ -135,6 +135,7 @@ function CustomReactTableHeaderOptions({
                   dispatchTable({
                     type: 'showFilteredRecordsOnly'
                   });
+                  dispatchTable({ type: 'pageChange', page: 0 });
                 }
               }}
               className="show-only-selected-switch"
