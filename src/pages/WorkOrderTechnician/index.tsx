@@ -1,4 +1,4 @@
-import { Box, Button, Checkbox, Chip, Grid, IconButton, makeStyles, TextField } from '@material-ui/core';
+import { Box, Button, Checkbox, Chip, Grid, IconButton,  TextField } from '@material-ui/core';
 import { useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
@@ -13,14 +13,7 @@ import CardColTimeline, { groupBy } from 'src/components/CardColTimeline';
 import TechnicianDialog from './TechnicianDialog';
 import { camelCase } from 'lodash';
 
-const useStyles = makeStyles(() => ({
-  '.MuiGrid-spacing-xs-1': {
-    width: 'calc(100vw + 14px)'
-  },
-  inputs: {
-    boxShadow: '0px 4.74053px 23.7026px rgba(0, 0, 0, 0.06)'
-  }
-}));
+
 
 const RESOURCE = [
   {
@@ -41,7 +34,7 @@ const RESOURCE = [
 ]
 
 const WorkOrderTechnician = () => {
-  const classes = useStyles();
+
 
   const [serviceOpen, setServiceOpen] = useState(false);
   const [selectedService, setSelectedService] = useState(null);
@@ -158,7 +151,7 @@ const WorkOrderTechnician = () => {
       </Box>
       <Box className="detail-container-v1">
         <Box className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[4fr_4fr_6fr_auto] xl:grid-cols-[1fr_1fr_1fr_auto] items-start gap-4">
-          <Box className={classes.inputs}>
+          <Box className={`shadow-[0px_4.74053px_23.7026px_rgba(0,_0,_0,_0.06)]`}>
             <Autocomplete
               options={resourceFilter}
               fullWidth
@@ -176,7 +169,7 @@ const WorkOrderTechnician = () => {
           </Box>
           {
             selectedResource && (
-              <Box className={classes.inputs}>
+              <Box className={`shadow-[0px_4.74053px_23.7026px_rgba(0,_0,_0,_0.06)]`}>
                 <Autocomplete
                   options={selectedResource.resource === sidebarResource.workOrder ? workOrderOptions : selectedResource.resource === sidebarResource.repairOrder ? repairOrderOptions : productionOrderOptions}
                   disabled={loading}
@@ -193,7 +186,7 @@ const WorkOrderTechnician = () => {
               </Box>
             )
           }
-          <Box className={classes.inputs}>
+          <Box className={`shadow-[0px_4.74053px_23.7026px_rgba(0,_0,_0,_0.06)]`}>
             <Autocomplete
               fullWidth
               multiple
@@ -209,6 +202,7 @@ const WorkOrderTechnician = () => {
               size="small"
               renderInput={(params) => <TextField {...params} label="Status" variant="outlined" />}
               value={selectedServiceStatus}
+              limitTags={2}
               renderTags={(value, getTagProps) =>
                 value.map((option, index) => {
                   return (

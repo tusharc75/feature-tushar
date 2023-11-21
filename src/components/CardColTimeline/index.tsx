@@ -97,12 +97,12 @@ const CardColTimeline: React.FC<CardColInterface> = ({
 
   return (
     <div className={`${styles.container} ${className}`} {...others} ref={containerRef} >
-      <div className='py-4 grid grid-flow-col auto-cols-[100%] sm:auto-cols-[50%] md:auto-cols-[35%] lg:auto-cols-[30%] xl:auto-cols-[24%] gap-[10px] md:scroll-px-[24px] overflow-auto snap-mandatory snap-x'>
+      <div className='py-4 flex  gap-[10px] md:scroll-px-[24px] overflow-auto snap-mandatory snap-x'>
         {Object.keys(data).map((col) => {
           return (
             <div
              key={col}
-              className={`${styles.singleCol} snap-start`}
+              className={`${styles.singleCol} snap-start min-w-[min(100%,350px)]`}
               style={
                 {
                   '--bg': Boolean(data[col].color)
