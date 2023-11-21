@@ -581,28 +581,7 @@ function CustomReactTable({
       selectedRecords: [...flatSelectedData]
     });
 
-  }, [selectedRowIds]);
-
-  // useEffect(() => {
-  //   if (!selectedFlatRows.length) {
-  //     if (onSelect) onSelect([]);
-  //     dispatch({
-  //       type: 'selection',
-  //       selectedRecords: []
-  //     });
-  //     return;
-  //   }
-  //   const selectedData = [];
-  //   for (const row of selectedFlatRows) {
-  //     const { subRows, ...rest } = row.original;
-  //     selectedData.push({ ...rest });
-  //   }
-  //   if (onSelect) onSelect(selectedData);
-  //   dispatch({
-  //     type: 'selection',
-  //     selectedRecords: selectedData
-  //   });
-  // }, [selectedFlatRows.length]);
+  }, [selectedRowIds, renderedFrom]);
 
 
   const reorder = (item: any, newIndex: number) => {

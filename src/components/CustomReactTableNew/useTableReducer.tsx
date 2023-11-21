@@ -15,7 +15,7 @@ function reducer(state: TInitialState, action: TActios) {
         error: false,
         dataRows: action.data,
         rowCount: action.count,
-        selectedRecords: action.selectedRecords || []
+        selectedRecords: action.selectedRecords ? action.selectedRecords : action.data.filter((f) => f.isChecked === true) || []
       };
 
     case 'selection':
