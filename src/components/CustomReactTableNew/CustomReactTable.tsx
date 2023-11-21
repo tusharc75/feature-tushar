@@ -260,13 +260,12 @@ function CustomReactTable({
   const [currentFomValue, setCurrentFomValue] = useState({});
   const renderedFromContext = React.useContext(renderedFrom);
 
-  const [selectedRow, setSelectedRow] = useState([])
 
   const getPreviouslySelectedRowIndex = () => {
-    const len = selectedRow.length;
+    const len = selectedRecords.length;
     const obj = {};
     for (let i = 0; i < len; i++) {
-      const id = selectedRow[i]?.id;
+      const id = selectedRecords[i]?.id;
       const index = data.findIndex(row => row?.id === id)
       if (index >= 0) {
         obj[index] = true;
@@ -623,7 +622,7 @@ function CustomReactTable({
     const includedRow: any = []
     const notIncludedRow: any = []
 
-    selectedRow.forEach(row => {
+    selectedRecords.forEach(row => {
       if (data.find(d => d.id === row.id)) {
         includedRow.push(row)
       } else {
@@ -636,7 +635,7 @@ function CustomReactTable({
       type: 'selection',
       selectedRecords: [...notIncludedRow, ...flatSelectedData]
     });
-    setSelectedRow([...notIncludedRow, ...flatSelectedData]);
+    // setSelectedRow([...notIncludedRow, ...flatSelectedData]);
 
   }, [selectedRowIds, renderedFrom]);
 
@@ -789,7 +788,7 @@ function CustomReactTable({
               renderedFrom={renderedFrom}
               dispatchTable={dispatch}
               showOnlyShowFilteredRecordSwitch={showOnlyShowFilteredRecordSwitch}
-              selectedRecords={selectedRow?.length}
+              selectedRecords={selectedRecords?.length}
               showFilters={showFilters}
               handleFilterOpen={handleFilterOpen}
               selectedFilter={selectedFilter}
