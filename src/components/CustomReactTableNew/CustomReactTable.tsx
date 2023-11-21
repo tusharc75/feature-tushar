@@ -231,6 +231,7 @@ function CustomReactTable({
   hideAction = false
 }) {
   const {
+    showFilteredRecordsOnly,
     currentEditingCellPosition,
     dataRows: data,
     rowCount,
@@ -252,11 +253,14 @@ function CustomReactTable({
     Filter: DefaultColumnFilter
   };
 
+
+
   const [cellValue, setCellValue] = React.useState('');
   const [baseColumns, setBaseColumns] = React.useState([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState(null);
   const [currentFomValue, setCurrentFomValue] = useState({});
+  const renderedFromContext = React.useContext(renderedFrom);
 
   const handleFilterOpen = () => {
     setIsFilterOpen(true);
@@ -270,31 +274,14 @@ function CustomReactTable({
     setBaseColumns(columns);
   }, [columns]);
 
-  const handleCellSelection = (row) => {
-    if (!isClientSideGrid) {
-      try {
-        let oldSelectedRecords = localStorage.getItem(`${renderedFrom}_selected`) ? JSON.parse(localStorage.getItem(`${renderedFrom}_selected`)) : [];
-
-        if (!row.isSelected && !oldSelectedRecords.some((s) => s['_id'] === row?.original?._id)) {
-          oldSelectedRecords = [...oldSelectedRecords, row?.original];
-
-          localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(oldSelectedRecords));
-        } else if (row.isSelected) {
-          if (oldSelectedRecords.length > 0) {
-            localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(oldSelectedRecords.filter((f) => f['_id'] !== row?.original?._id)));
-          }
-        }
-      } catch (ex) {
-        console.error('Error in getting / storing selected records');
-      }
-    }
-  };
 
   const handleAllSelect = (checked) => {
     if (checked) {
       localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
     }
   };
+
+  const handleCellSelection = (row)=>{}
 
   const newColumns = React.useMemo(
     () =>
@@ -433,6 +420,7 @@ function CustomReactTable({
       return {};
     }
   };
+
   const returnSavedColOrder = () => {
     const gridMetaData = getDataFromLocalStorage();
     const colOrder = gridMetaData[renderedFrom]?.order || [];
@@ -458,6 +446,7 @@ function CustomReactTable({
     []
   );
   const updateData = () => {};
+
 
   const returnHiddenCols = () => {
     const storedColumns = JSON.parse(localStorage.getItem(renderedFrom));
@@ -500,15 +489,9 @@ function CustomReactTable({
         pageIndex: page,
         expanded: false,
         autoResetExpanded: false,
-        // hiddenColumns: hideSelection ? ['selection', 'action'] : returnHiddenCols(),
         hiddenColumns:
           hideSelection && hideAction ? ['selection', 'action'] : hideSelection ? ['selection'] : hideAction ? ['action'] : returnHiddenCols(),
-        selectedRowIds: localStorage.getItem(`${renderedFrom}_selected`)
-          ? Object.assign(
-              {},
-              data.map((d) => JSON.parse(localStorage.getItem(`${renderedFrom}_selected`)).some((obj) => obj._id === d._id))
-            )
-          : {}
+        selectedRowIds: selectedRecords,
       },
       getSubRows: (row: any) => row[childrenProperty],
       sortTypes: {
@@ -576,6 +559,7 @@ function CustomReactTable({
     }
   }, [sortBy]);
 
+
   useEffect(() => {
     let flatSelectedData = [];
     Object.keys(selectedRowIds).forEach((key) => {
@@ -602,19 +586,6 @@ function CustomReactTable({
       selectedRecords: [...flatSelectedData]
     });
 
-    if (renderedFrom) {
-      try {
-        let oldSelectedRecords = localStorage.getItem(`${renderedFrom}_selected`) ? JSON.parse(localStorage.getItem(`${renderedFrom}_selected`)) : [];
-        if (oldSelectedRecords.length > 0) {
-          const uniqueRecords = uniqBy([...oldSelectedRecords, ...flatSelectedData], '_id');
-          localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(uniqueRecords));
-        } else {
-          localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(flatSelectedData));
-        }
-      } catch (ex) {
-        console.error('Error in getting / storing selected records');
-      }
-    }
   }, [selectedRowIds]);
 
   const reorder = (item: any, newIndex: number) => {
@@ -765,7 +736,7 @@ function CustomReactTable({
               renderedFrom={renderedFrom}
               dispatchTable={dispatch}
               showOnlyShowFilteredRecordSwitch={showOnlyShowFilteredRecordSwitch}
-              selectedRecords={selectedFlatRows?.length}
+              selectedRecords={selectedRecords.length}
               showFilters={showFilters}
               handleFilterOpen={handleFilterOpen}
               selectedFilter={selectedFilter}
