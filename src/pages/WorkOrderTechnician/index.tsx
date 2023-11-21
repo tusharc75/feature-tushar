@@ -239,7 +239,7 @@ const WorkOrderTechnician = () => {
             cardDataRows={cardDataRows}
             passFailStatus={true}
             passFailAccessor="serviceStatus"
-            cardHeight={user?.user?.brandPolicy?.workOrderTimer ? 150 : 130}
+            // cardHeight={user?.user?.brandPolicy?.workOrderTimer ? 150 : 130}
             sm={6}
             md={4}
             lg={3}

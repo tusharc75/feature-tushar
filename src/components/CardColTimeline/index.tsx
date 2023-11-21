@@ -31,6 +31,15 @@ export interface datarowInterface {
   renderer?: (data: any) => string;
 }
 
+const HEADER_HEIGHT = 90;
+const ROW_HEIGHT = 20;
+
+const calcCardHeight = (cardDataRows: datarowInterface[]) => {
+  const head = cardDataRows?.find(c=>c.type === 'title')
+  if(!head) return ROW_HEIGHT * cardDataRows.length
+  return HEADER_HEIGHT + (cardDataRows.length - 1) * ROW_HEIGHT
+}
+
 const CardColTimeline: React.FC<CardColInterface> = ({
   data,
   loading,
@@ -44,12 +53,13 @@ const CardColTimeline: React.FC<CardColInterface> = ({
   md = 4,
   lg = false,
   xl = false,
-  cardHeight,
+  cardHeight = calcCardHeight(cardDataRows),
   createNew,
   createNewText,
   isCreateNew,
   ...others
 }) => {
+
   return (
     <Box className={`${styles.container} ${className}`} {...others}>
       <Grid container spacing={3}>
