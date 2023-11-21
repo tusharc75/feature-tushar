@@ -35,7 +35,7 @@ const HEADER_HEIGHT = 90;
 const ROW_HEIGHT = 20;
 
 const calcCardHeight = (cardDataRows: datarowInterface[]) => {
-  const head = cardDataRows.find(c=>c.type === 'title')
+  const head = cardDataRows?.find(c=>c.type === 'title')
   if(!head) return ROW_HEIGHT * cardDataRows.length
   return HEADER_HEIGHT + (cardDataRows.length - 1) * ROW_HEIGHT
 }
