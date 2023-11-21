@@ -240,7 +240,6 @@ const SerializedAssetTest = () => {
           type: 'initialize',
           data: rows,
           count: data.count,
-          selectedRecords: rows.filter((f) => f.isChecked === true)
         });
       })
       .catch((error) => {
