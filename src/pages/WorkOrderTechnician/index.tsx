@@ -86,7 +86,8 @@ const WorkOrderTechnician = () => {
         newObj['serviceName'] = item.service?.serviceName;
         newObj['workOrderNumber'] = item.workOrderDetail?.workOrderNumber;
         newObj['serializedAsset'] = item.workOrderDetail?.serializedAsset?.optionLabel;
-        newObj['status'] = item.status;
+        newObj['serializedAsset'] = item.workOrderDetail?.serializedAsset?.optionLabel;
+        newObj['assignedWorkStations'] = item?.assignedWorkStations?.map((e) => e.optionLabel)?.toString();
         return newObj;
       });
 
@@ -140,16 +141,13 @@ const WorkOrderTechnician = () => {
       });
   };
 
-  const cardDataRows: any[] = React.useMemo(()=>{
-    return (
-      [
-        { accessor: 'serviceName', type: 'title' },
-        { accessor: 'workOrderNumber', title: 'Work Order', type: 'text' },
-        { accessor: 'serializedAsset', title: 'Asset', type: 'text' },
-        ...(Boolean(user?.user?.brandPolicy?.workOrderTimer) ? [{ accessor: 'stepData', title: 'Time', type: 'timer' }] : [])
-      ]
-    )
-  },[user]);  
+  const cardDataRows: any[] = [
+    { accessor: 'serviceName', type: 'title' },
+    { accessor: 'workOrderNumber', title: 'Work Order', type: 'text' },
+    { accessor: 'serializedAsset', title: 'Asset', type: 'text' },
+    { accessor: 'assignedWorkStations', title: 'Work Stations', type: 'text' },
+    ...(user?.user?.brandPolicy?.workOrderTimer ? [{ accessor: 'stepData', title: 'Time', type: 'timer' }] : [])
+  ];
 
   return (
     <Box className="main-container-v1">
@@ -241,7 +239,7 @@ const WorkOrderTechnician = () => {
             cardDataRows={cardDataRows}
             passFailStatus={true}
             passFailAccessor="serviceStatus"
-            cardHeight={Boolean(user?.user?.brandPolicy?.workOrderTimer) ? 150 : 130}
+            // cardHeight={Boolean(user?.user?.brandPolicy?.workOrderTimer) ? 150 : 130}
             sm={6}
             md={4}
             lg={3}
@@ -253,7 +251,6 @@ const WorkOrderTechnician = () => {
               tempServiceData['assetId'] = data?.workOrderDetail?.serializedAsset?.optionValue;
               tempServiceData['workOrderId'] = data?.workOrderDetail?._id;
               tempServiceData['workOrderNumber'] = data?.workOrderDetail?.workOrderNumber;
-              tempServiceData['warehouse'] = data?.workOrderDetail?.warehouse;
               setSelectedService(tempServiceData);
               setServiceOpen(true);
             }}
