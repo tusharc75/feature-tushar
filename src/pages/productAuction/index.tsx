@@ -10,10 +10,8 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import {
   productAuction,
-  getLocalStorageArrayData,
   gridLoadingTimeout,
   prepareDataForGrid,
-  removeLocalStorage,
   sidebarResource
 } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
@@ -32,7 +30,6 @@ let searchTimeout;
 
 const ProductAuction = () => {
   const renderedFrom = camelCase(routes?.productAuction.title);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const toastConfig = useContext(CustomToastContext);
 
   const history = useHistory();
@@ -156,8 +153,7 @@ const ProductAuction = () => {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || [])?.map((m) => m._id))}`;
     }
     return deepFilter;
   };
@@ -171,7 +167,7 @@ const ProductAuction = () => {
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u, user);
-          finalObject['isChecked'] = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some((s) => s._id === u._id);
+          finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions?.productAuction?.isUpdate;
           finalObject['canDelete'] = permissions?.productAuction?.isDelete;
           return finalObject;
@@ -198,12 +194,12 @@ const ProductAuction = () => {
     if (deleteRecord) {
       ids.push(deleteRecord._id);
     } else {
-      ids = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((d) => d._id);
+      ids = selectedRecords?.map((d) => d._id);
     }
     axiosInstance()
       .put(`${productAuction.api}/remove`, { ids: ids })
       .then(() => {
-        removeLocalStorage(localStorageSelectedRecords);
+        dispatch({ type: 'selection', selectedRecords: [] });
         fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
@@ -230,17 +226,13 @@ const ProductAuction = () => {
         <CustomBreadCrumbs routes={[routes.productAuction]} />
         <ImportExportLinks
           permissions={permissions?.productAuction}
-          module="productAuction"
+          module={routes.productAuction.title}
           api={productAuction.api}
-          afterImportCompleted={() => {}}
+          afterImportCompleted={() => {fetchData()}}
           isExportAllOrSomeFeature={true}
           total={rowCount}
-          recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-          ids={
-            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-              ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-              : []
-          }
+          recordsToExport={selectedRecords?.length}
+          ids={selectedRecords?.map((obj) => obj._id)}
           onExportToExcelSuccess={() => {
             fetchData();
           }}
@@ -300,7 +292,7 @@ const ProductAuction = () => {
                           setShowDeleteConfirmBox(true);
                         }}
                       >
-                        Delete
+                        {`Delete (${selectedRecords?.length})`}
                       </MenuItem>
                     </Menu>
                   </>

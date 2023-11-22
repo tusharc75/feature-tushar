@@ -10,13 +10,15 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 
 const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
-  
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
   const [addOpen, setAddOpen] = useState({ open: false, invoiceData: null });
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
+  const [deleteData, setDeleteData] = useState(null);
   const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
@@ -68,7 +70,8 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
           size="small"
           aria-label="Clone"
           onClick={() => {
-            handleDelete([params.data?._id]);
+            setShowDeleteConfirmBox(true);
+            setDeleteData([params.data?._id]);
           }}
         >
           <DeleteIcon color="error" />
@@ -77,20 +80,24 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
     </>
   );
 
-  const handleDelete = async (removeIds) => {
-    axiosInstance()
-      .put(`${purchaseOrder.api}/invoice/${purchaseOrderData?._id}/remove`, { ids: removeIds })
-      .then(({ data }) => {
-        fetchData();
-        toastConfig.setToastConfig({
-          open: true,
-          message: data.message,
-          severity: 'success'
+  const handleDelete = async () => {
+    if (deleteData) {
+      axiosInstance()
+        .put(`${purchaseOrder.api}/invoice/${purchaseOrderData?._id}/remove`, { ids: deleteData })
+        .then(({ data }) => {
+          fetchData();
+          setShowDeleteConfirmBox(false);
+          toastConfig.setToastConfig({
+            open: true,
+            message: data.message,
+            severity: 'success'
+          });
+        })
+        .catch((err) => {
+          setShowDeleteConfirmBox(false);
+          toastConfig.setToastConfig(err);
         });
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+    }
   };
 
   const frameworkComponents = {
@@ -146,6 +153,14 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
             fetchData();
             setAddOpen({ open: false, invoiceData: null });
           }}
+        />
+      )}
+      {showDeleteConfirmBox && (
+        <ConfirmationDialogRaw
+          open={showDeleteConfirmBox}
+          message={`Are you sure you want to delete  ? `}
+          onClose={() => setShowDeleteConfirmBox(false)}
+          onOk={handleDelete}
         />
       )}
     </Fragment>

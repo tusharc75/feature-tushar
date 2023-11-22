@@ -170,7 +170,7 @@ export const serviceOrderSteps: stepInterface[] = [
   { name: 'Field Ticket Invoice', title: 'Invoices', icon: 'invoice' }
 ];
 
-export const WORKORDER_TECHNICIAN_SERVICE_STATUS = ['Backlog', 'Pending', 'In-Progress', 'Completed'];
+export const WORKORDER_TECHNICIAN_SERVICE_STATUS = ['Backlog', 'Pending', 'In-Progress', 'Completed', 'In-Progress By Other'];
 
 export const accountTemplateFileName = 'Accounts-Template.xlsx';
 export const accountImportErrorFileName = 'Accounts-Errors.xlsx';
@@ -2531,7 +2531,8 @@ export const WORKORDER_SERVICE_STATUS = {
   inProgress: 'In-Progress',
   completed: 'Completed',
   failed: 'Failed',
-  skipped: 'Skipped'
+  skipped: 'Skipped',
+  inProgressByOther: 'In-Progress By Other',
 };
 
 export const WORKORDER_SERVICE_STEP_STATUS = {
@@ -2709,6 +2710,11 @@ export const PRICING_TYPE = [
   { optionLabel: 'Rent', optionValue: 'Rent' },
   { optionLabel: 'Sell', optionValue: 'Price' }
 ];
+
+export const PRICING_SETUP_TYPE = {
+  price: `Price`,
+  rent: `Rent`
+};
 
 export const SERVICE_TYPE = {
   shopService: 'Shop Service',

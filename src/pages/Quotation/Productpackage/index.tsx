@@ -9,7 +9,7 @@ import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Add from '@material-ui/icons/Add';
-import { quotation, pricingCondition, supplierContact, QUOTATION_TYPE, MATERIAL_TYPE, ASSET_STATUS, SERVICE_TYPE } from '../../../constants/helpers';
+import { quotation, pricingCondition, supplierContact, QUOTATION_TYPE, MATERIAL_TYPE, ASSET_STATUS, SERVICE_TYPE, PRICING_SETUP_TYPE } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import QuotationQtyDialog from './QuotationQtyDialog';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
@@ -491,7 +491,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
   const calculatePrice = (arr: any[]) => {
     if (quotationData) {
       const data: any = {};
-      data.conditionType = quotationData.type === QUOTATION_TYPE.salesOrder ? ['Sell'] : ['Rent'];
+      data.conditionType = quotationData.type === QUOTATION_TYPE.salesOrder ? [PRICING_SETUP_TYPE.price] : [PRICING_SETUP_TYPE.rent];
       data.material = arr.map((ele) => ({
         materialId: ele?.materialId,
         materialType: ele?.type,

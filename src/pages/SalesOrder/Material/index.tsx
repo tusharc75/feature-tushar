@@ -8,7 +8,7 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import Add from '@material-ui/icons/Add';
-import { MATERIAL_TYPE, SALES_ORDER_STATUS, pricingCondition, salesOrder } from '../../../constants/helpers';
+import { MATERIAL_TYPE, PRICING_SETUP_TYPE, SALES_ORDER_STATUS, pricingCondition, salesOrder } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -433,7 +433,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen, f
   const calculatePrice = (arr: any[]) => {
     if (salesOrderData) {
       const data: any = {};
-      data.conditionType = ['Price'];
+      data.conditionType = [PRICING_SETUP_TYPE.price];
       data.material = arr.map((ele) => ({
         materialId: ele?.materialId,
         materialType: ele?.type,

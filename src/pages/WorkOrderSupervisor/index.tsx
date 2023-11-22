@@ -150,7 +150,7 @@ const WorkOrderSupervisor = () => {
     { accessor: 'workOrderNumber', type: 'linkTitle', link: (data) => `${routes.workOrderDetail.path}/${data?._id}` },
     { accessor: 'serviceName', title: 'Service Name', type: 'text' },
     { accessor: 'assignedUser', title: 'Technician', type: 'text' },
-    { accessor: 'expectedCompletionDate', title: 'Due Date', type: 'date' }
+    { accessor: 'expectedCompletionDate', title: 'Due Date', type: 'date' },
   ];
 
   return (

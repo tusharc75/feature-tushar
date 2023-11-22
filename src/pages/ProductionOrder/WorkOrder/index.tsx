@@ -20,7 +20,7 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { isMobile } from 'react-device-detect';
-import { Delete, ExpandMore } from '@material-ui/icons';
+import { CheckCircle, Delete, ExpandMore } from '@material-ui/icons';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
@@ -63,9 +63,13 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   }, [productionOrderData]);
 
   const fetchFields = async () => {
-    await axiosInstance().post(`${productionOrder.api}/${productionOrderData._id}/work-order`);
+    try {
+      await axiosInstance().post(`${productionOrder.api}/${productionOrderData._id}/work-order`);
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.productionOrderDetail}`);
-    var data = response?.data?.data?.filter((e) => !['detail', 'description']?.includes(e?.fieldName));
+    var data = response?.data?.data?.filter((e) => !['detail', 'description', 'workOrderNumber']?.includes(e?.fieldName));
     data = CURReplaceByCurrencySingle(data, productionOrderData?.currency || 'USD');
     data?.forEach((e) => {
       e.isColumnEditable = false;
@@ -105,11 +109,9 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                 onClick={() => {
                   if (row.original.type === MATERIAL_TYPE.product) {
                     window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                  }
-                  else if (row.original.type === MATERIAL_TYPE.service) {
+                  } else if (row.original.type === MATERIAL_TYPE.service) {
                     window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                  }
-                  else if (row.original.type === MATERIAL_TYPE.package) {
+                  } else if (row.original.type === MATERIAL_TYPE.package) {
                     window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
                   }
                 }}
@@ -252,7 +254,11 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                   }}
                   disabled={row?.original?.canAutoCompleteWorkOrder ? false : true}
                 >
-                  <AutoCompleteIcon size={18} />
+                  {row.original['workOrderStatus'] === 'Completed' ? (
+                    <CheckCircle className="[font-size:19px_!important]" />
+                  ) : (
+                    <AutoCompleteIcon size={18} />
+                  )}
                 </IconButton>
               </HtmlTooltip>
             )}
@@ -287,14 +293,18 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     let rows = data.material.filter((e) => e.type === MATERIAL_TYPE.product && e?.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = parent.detail ? parent.detail :
-        parent.type === MATERIAL_TYPE.service
+      parent.detail = parent.detail
+        ? parent.detail
+        : parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceName
           : parent.type === MATERIAL_TYPE.product
             ? parent.productDetail?.productName
             : parent.packageDetail?.packageName;
-      parent.description = parent.description ? parent.description :
-        parent.type === MATERIAL_TYPE.product ? parent?.productDetail?.productDescription : parent?.packageDetail?.packageDescription;
+      parent.description = parent.description
+        ? parent.description
+        : parent.type === MATERIAL_TYPE.product
+          ? parent?.productDetail?.productDescription
+          : parent?.packageDetail?.packageDescription;
       parent.qty = parent.qty;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
       parent.hideSelection = false;
@@ -324,14 +334,16 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     let serviceIndex = 0;
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${_subRow.type === MATERIAL_TYPE.service ? alphabet[serviceIndex] : productIndex + 1}`;
-      _subRow.detail = _subRow.detail ? _subRow.detail :
-        _subRow.type === MATERIAL_TYPE.service
+      _subRow.detail = _subRow.detail
+        ? _subRow.detail
+        : _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceName
           : _subRow.type === MATERIAL_TYPE.product
             ? _subRow.productDetail?.productName
             : _subRow.packageDetail?.packageName;
-      _subRow.description = _subRow.description ? _subRow.description :
-        _subRow.type === MATERIAL_TYPE.service
+      _subRow.description = _subRow.description
+        ? _subRow.description
+        : _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription
           : _subRow.type === MATERIAL_TYPE.product
             ? _subRow?.productDetail?.productDescription
@@ -629,10 +641,14 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                   disabled={selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length > 0 ? false : true}
                   onClick={() => {
                     closeActions();
-                    const services = selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service);
-                    const assignedWorkStations = services?.map((e) => e?.assignedWorkStations) || [];
-                    const uniqueAssignedWorkStations = [...new Set(assignedWorkStations.flat())];
-                    setWorkStationAssignDialog({ open: true, assignedWorkStations: uniqueAssignedWorkStations });
+                    const uniqueAssignedWorkStations: any = flatMap(selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.map((e) => e?.assignedWorkStations || []))
+                    const assignedWorkStations = [];
+                    uniqueAssignedWorkStations?.forEach((e: any) => {
+                      if (!assignedWorkStations?.find((ele) => ele.optionValue === e.optionValue)) {
+                        assignedWorkStations.push(e)
+                      }
+                    })
+                    setWorkStationAssignDialog({ open: true, assignedWorkStations: assignedWorkStations });
                   }}
                 >
                   Assign Work Station
@@ -688,29 +704,31 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                 Auto Complete Work Order(s)
               </MenuItem>
               <MenuItem
-                disabled={checkUniqWorkOrder() && (
-                  selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
-                  selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.length === 1
-                ) ? false : true}
+                disabled={
+                  checkUniqWorkOrder() &&
+                    (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
+                      selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.length === 1)
+                    ? false
+                    : true
+                }
                 onClick={() => {
                   closeActions();
-                  const parentProduct = selectedRecords?.find((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)
+                  const parentProduct = selectedRecords?.find((e) => e.type === MATERIAL_TYPE.product && !e?.parentId);
                   if (parentProduct) {
                     setAttachmentsDialog({
                       open: true,
                       workOrderId: parentProduct?.workOrder?._id,
                       uniqueServiceId: null,
                       serviceName: parentProduct?.workOrder?.workOrderNumber
-                    })
-                  }
-                  else {
+                    });
+                  } else {
                     const service = selectedRecords?.find((e) => e.type === MATERIAL_TYPE.service);
                     setAttachmentsDialog({
                       open: true,
                       workOrderId: service?.workOrder?._id,
                       uniqueServiceId: service?.uniqueId,
                       serviceName: service?.serviceDetail?.serviceName
-                    })
+                    });
                   }
                 }}
               >
@@ -730,175 +748,195 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
           </Box>
         )}
       </Box>
-      {columns && rowsData ? (
-        <>
-          <Box zIndex={5} width={'100%'}>
-            <CustomReactTable
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
-              columns={columns}
-              data={rowsData}
-              onSelect={(data) => {
-                setSelectedRecords(data?.filter((d) => !d.hideSelection) || []);
-              }}
-              setWholeRowsCellColor={(rowData) => (rowData.type === 'service' ? 'isService' : '')}
-              childrenProperty="subRows"
-              uniqueKey="_id"
-              renderedFrom={renderedFrom}
-              isClientSideGrid={true}
-              hideSelection={!allowedToEdit}
-            />
+      {
+        columns && rowsData ? (
+          <>
+            <Box zIndex={5} width={'100%'}>
+              <CustomReactTable
+                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
+                columns={columns}
+                data={rowsData}
+                onSelect={(data) => {
+                  setSelectedRecords(data?.filter((d) => !d.hideSelection) || []);
+                }}
+                setWholeRowsCellColor={(rowData) => (rowData.type === 'service' ? 'isService' : '')}
+                childrenProperty="subRows"
+                uniqueKey="_id"
+                renderedFrom={renderedFrom}
+                isClientSideGrid={true}
+                hideSelection={!allowedToEdit}
+              />
+            </Box>
+          </>
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
-        </>
-      ) : (
-        <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>
-      )}
+        )
+      }
 
-      {addServicesDialog.open && !addServicesDialog.new && (
-        <AssignServiceDialog
-          handleClose={() => setAddServicesDialog({ open: false, new: false })}
-          onSuccess={(data) => {
-            handleAddService(
-              data?.map((e) => {
-                return { _id: e._id, qty: parseInt(e?.qty) || 1 };
-              })
-            );
-          }}
-          isSubmitting={isSubmitting}
-        />
-      )}
-      {addServicesDialog.open && addServicesDialog.new && (
-        <ManageServiceMaster
-          isClone={false}
-          serviceMasterId={null}
-          onClose={() => setAddServicesDialog({ open: false, new: false })}
-          onSuccess={({ data }) => {
-            handleAddService([{ _id: data._id, qty: 1 }]);
-          }}
-          isRedirectToDetailPage={false}
-        />
-      )}
-      {userAssignDialog.open && (
-        <AssignUserDialog
-          workOrderData={selectedRecords
-            .filter((e) => e.type === MATERIAL_TYPE.service)
-            .map((d) => {
-              return {
-                uniqueId: d?.uniqueId,
-                workOrderId: d?.workOrder?._id
-              };
-            })}
-          reference="service"
-          assignedUsers={userAssignDialog.assignedUsers}
-          handleClose={() => {
-            setUserAssignDialog({ open: false, assignedUsers: [] });
-          }}
-          handleSucess={() => {
-            fetchData();
-            setUserAssignDialog({ open: false, assignedUsers: [] });
-          }}
-          competencies={uniq(
-            flatMap(selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.map((e) => e?.serviceDetail?.competencies || []))
-          )}
-        />
-      )}
-      {workStationAssignDialog.open && (
-        <AssignWorkStationDialog
-          warehouse={productionOrderData?.warehouse}
-          workOrderData={selectedRecords
-            .filter((e) => e.type === MATERIAL_TYPE.service)
-            .map((d) => {
-              return {
-                uniqueId: d?.uniqueId,
-                workOrderId: d?.workOrder?._id
-              };
-            })}
-          workStations={workStationAssignDialog.assignedWorkStations}
-          handleClose={() => {
-            setWorkStationAssignDialog({ open: false, assignedWorkStations: [] });
-          }}
-          handleSucess={() => {
-            fetchData();
-            setWorkStationAssignDialog({ open: false, assignedWorkStations: [] });
-          }}
-        />
-      )}
-      {arrangeView && (
-        <ArrangeView
-          data={
-            selectedRecords
-              ?.filter((e) => e.type === MATERIAL_TYPE.service)
-              ?.map((d) => {
-                return { _id: d?.uniqueId, name: d?.serviceDetail?.serviceName, order: d?.order, preWork: d?.preWork };
-              }) || []
-          }
-          title={'Arrange Services'}
-          handleClose={() => setArrangeView(false)}
-          handleSubmit={(data) => handleArrangeUpdate(data, selectedRecords[0]?.workOrder?._id)}
-          loading={false}
-        />
-      )}
-      {showConfirmBox && (
-        <ConfirmationDialog
-          okBtnLoading={isDeleting}
-          open={showConfirmBox}
-          message={`Are you sure you want to delete this item(s)`}
-          onClose={() => {
-            setShowConfirmBox(false);
-          }}
-          onOk={handleDelete}
-        />
-      )}
-      {completeConfirmBox && (
-        <ConfirmationDialog
-          open={completeConfirmBox}
-          okBtnLoading={isCompleting}
-          message={`Are you sure you want to Auto Complete this Work Order(s)`}
-          onClose={() => {
-            setCompleteConfirmBox(false);
-          }}
-          onOk={handleAutoComplete}
-        />
-      )}
-      {consumablesDialog.open && (
-        <AssignProductDialog
-          handleCloseDialog={() => setConsumablesDialog({ open: false, ids: [], data: null })}
-          ids={consumablesDialog.ids}
-          onSuccess={(rows) => {
-            handleAddConsumables(rows, consumablesDialog?.data ? consumablesDialog?.data : selectedRecords);
-          }}
-          serialized={false}
-          isSubmitting={isSubmitting}
-        />
-      )}
-      {attachmentsDialog.open && (
-        <AttachmentDialog
-          workOrderId={attachmentsDialog.workOrderId}
-          uniqueServiceId={attachmentsDialog.uniqueServiceId}
-          stepId={null}
-          stepName={attachmentsDialog.serviceName}
-          serviceName={attachmentsDialog.serviceName}
-          handleClose={() => {
-            setAttachmentsDialog({
-              open: false,
-              workOrderId: null,
-              uniqueServiceId: null,
-              serviceName: null
-            });
-          }}
-          handleSuccess={() => {
-            fetchData()
-            setAttachmentsDialog({
-              open: false,
-              workOrderId: null,
-              uniqueServiceId: null,
-              serviceName: null
-            });
-          }}
-        />
-      )}
-    </Fragment>
+      {
+        addServicesDialog.open && !addServicesDialog.new && (
+          <AssignServiceDialog
+            handleClose={() => setAddServicesDialog({ open: false, new: false })}
+            onSuccess={(data) => {
+              handleAddService(
+                data?.map((e) => {
+                  return { _id: e._id, qty: parseInt(e?.qty) || 1 };
+                })
+              );
+            }}
+            isSubmitting={isSubmitting}
+          />
+        )
+      }
+      {
+        addServicesDialog.open && addServicesDialog.new && (
+          <ManageServiceMaster
+            isClone={false}
+            serviceMasterId={null}
+            onClose={() => setAddServicesDialog({ open: false, new: false })}
+            onSuccess={({ data }) => {
+              handleAddService([{ _id: data._id, qty: 1 }]);
+            }}
+            isRedirectToDetailPage={false}
+          />
+        )
+      }
+      {
+        userAssignDialog.open && (
+          <AssignUserDialog
+            workOrderData={selectedRecords
+              .filter((e) => e.type === MATERIAL_TYPE.service)
+              .map((d) => {
+                return {
+                  uniqueId: d?.uniqueId,
+                  workOrderId: d?.workOrder?._id
+                };
+              })}
+            reference="service"
+            assignedUsers={userAssignDialog.assignedUsers}
+            handleClose={() => {
+              setUserAssignDialog({ open: false, assignedUsers: [] });
+            }}
+            handleSucess={() => {
+              fetchData();
+              setUserAssignDialog({ open: false, assignedUsers: [] });
+            }}
+            competencies={uniq(
+              flatMap(selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.map((e) => e?.serviceDetail?.competencies || []))
+            )}
+          />
+        )
+      }
+      {
+        workStationAssignDialog.open && (
+          <AssignWorkStationDialog
+            warehouse={productionOrderData?.warehouse}
+            workOrderData={selectedRecords
+              .filter((e) => e.type === MATERIAL_TYPE.service)
+              .map((d) => {
+                return {
+                  uniqueId: d?.uniqueId,
+                  workOrderId: d?.workOrder?._id
+                };
+              })}
+            workStations={workStationAssignDialog.assignedWorkStations}
+            handleClose={() => {
+              setWorkStationAssignDialog({ open: false, assignedWorkStations: [] });
+            }}
+            handleSucess={() => {
+              fetchData();
+              setWorkStationAssignDialog({ open: false, assignedWorkStations: [] });
+            }}
+          />
+        )
+      }
+      {
+        arrangeView && (
+          <ArrangeView
+            data={
+              selectedRecords
+                ?.filter((e) => e.type === MATERIAL_TYPE.service)
+                ?.map((d) => {
+                  return { _id: d?.uniqueId, name: d?.serviceDetail?.serviceName, order: d?.order, preWork: d?.preWork };
+                }) || []
+            }
+            title={'Arrange Services'}
+            handleClose={() => setArrangeView(false)}
+            handleSubmit={(data) => handleArrangeUpdate(data, selectedRecords[0]?.workOrder?._id)}
+            loading={false}
+          />
+        )
+      }
+      {
+        showConfirmBox && (
+          <ConfirmationDialog
+            okBtnLoading={isDeleting}
+            open={showConfirmBox}
+            message={`Are you sure you want to delete this item(s)`}
+            onClose={() => {
+              setShowConfirmBox(false);
+            }}
+            onOk={handleDelete}
+          />
+        )
+      }
+      {
+        completeConfirmBox && (
+          <ConfirmationDialog
+            open={completeConfirmBox}
+            okBtnLoading={isCompleting}
+            message={`Are you sure you want to Auto Complete this Work Order(s)`}
+            onClose={() => {
+              setCompleteConfirmBox(false);
+            }}
+            onOk={handleAutoComplete}
+          />
+        )
+      }
+      {
+        consumablesDialog.open && (
+          <AssignProductDialog
+            handleCloseDialog={() => setConsumablesDialog({ open: false, ids: [], data: null })}
+            ids={consumablesDialog.ids}
+            onSuccess={(rows) => {
+              handleAddConsumables(rows, consumablesDialog?.data ? consumablesDialog?.data : selectedRecords);
+            }}
+            serialized={false}
+            isSubmitting={isSubmitting}
+          />
+        )
+      }
+      {
+        attachmentsDialog.open && (
+          <AttachmentDialog
+            workOrderId={attachmentsDialog.workOrderId}
+            uniqueServiceId={attachmentsDialog.uniqueServiceId}
+            stepId={null}
+            stepName={attachmentsDialog.serviceName}
+            serviceName={attachmentsDialog.serviceName}
+            handleClose={() => {
+              setAttachmentsDialog({
+                open: false,
+                workOrderId: null,
+                uniqueServiceId: null,
+                serviceName: null
+              });
+            }}
+            handleSuccess={() => {
+              fetchData();
+              setAttachmentsDialog({
+                open: false,
+                workOrderId: null,
+                uniqueServiceId: null,
+                serviceName: null
+              });
+            }}
+          />
+        )
+      }
+    </Fragment >
   );
 };
 

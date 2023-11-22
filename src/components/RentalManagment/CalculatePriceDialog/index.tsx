@@ -23,7 +23,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import Loader from 'src/components/Loader';
-import { getUniqueCurrencies, pricingCondition } from 'src/constants/helpers';
+import { PRICING_SETUP_TYPE, getUniqueCurrencies, pricingCondition } from 'src/constants/helpers';
 
 const CalculatePriceDialog = ({ handleSucess, onClose, referenceData, material }) => {
   const [pricingConditionData, setPricingConditionData] = useState([]);
@@ -40,7 +40,7 @@ const CalculatePriceDialog = ({ handleSucess, onClose, referenceData, material }
 
   const fetchCalculatePrice = () => {
     const data: any = {};
-    data.conditionType = ['Rent'];
+    data.conditionType = [PRICING_SETUP_TYPE.rent];
     data.material = material
       .filter((d) => d.parentId === null && (d.listPrice === null || d.listPrice === undefined || d.listPrice === 0))
       .map((ele) => ({

@@ -24,6 +24,7 @@ import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageD
 import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import CreateProduct from 'src/components/Product/CreateProduct';
+import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 
 const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, allowedToDelete, updateOrderStatus }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -409,6 +410,18 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
             </Menu>
           </Box>
           <Box display="flex">
+            <ImportExportMenu
+              permissions={permissions?.productionOrder}
+              module={routes.productionOrder.title}
+              api={`${productionOrder.api}/material/${productionOrderData._id}`}
+              afterImportCompleted={() => {
+                fetchData();
+              }}
+              isExportAllOrSomeFeature={true}
+              ids={[]}
+            />
+            <Box ml={1} />
+
             <Button
               disabled={selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true}
               variant={isMobile ? 'text' : 'outlined'}

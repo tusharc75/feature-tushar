@@ -9,7 +9,6 @@ import NoDataCell from '../../../components/Helpers/NoDataCell';
 import {
   CHILD_RESOURCE,
   MATERIAL_TYPE,
-  WORKORDER_SERVICE_STATUS,
   WORK_ORDER_STATUS,
   productionOrder,
   sidebarResource
@@ -23,6 +22,7 @@ import PreviewDownload from 'src/components/PreviewDownload';
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
 const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
+  
   const {
     state: { user, permissions }
   }: any = useData();
@@ -36,7 +36,7 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
 
   const fetchFields = async () => {
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.productionOrderDetail}`);
-    var data = response?.data?.data?.filter((e) => !['detail', 'description']?.includes(e?.fieldName));
+    var data = response?.data?.data?.filter((e) => !['detail', 'description', 'workOrderNumber']?.includes(e?.fieldName));
     data = CURReplaceByCurrencySingle(data, productionOrderData?.currency || 'USD');
     data?.forEach((e) => {
       e.isColumnEditable = false;
@@ -58,15 +58,14 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
         Header: 'Type',
         disableFilters: true,
         sticky: isMobile ? 'none' : 'left',
-        width: 200,
+        width: 100,
         Cell: ({ row }) => (row.original['type'] ? <p>{`${startCase(row.original?.type)} `}</p> : <NoDataCell />)
       },
       {
         accessor: 'detail',
         Header: ' Details',
-        minWidth: 300,
-        width: 300,
-        sticky: isMobile ? 'none' : 'left',
+        minWidth: 200,
+        width: 200,
         Cell: ({ row, rows }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p className="text-truncate">{row.original?.detail}</p>
@@ -74,8 +73,10 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
               <IconButton
                 size="small"
                 onClick={() => {
-                  if (row.original.type === 'product') {
+                  if (row.original.type === MATERIAL_TYPE.product) {
                     window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === MATERIAL_TYPE.service) {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
                   } else {
                     window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
                   }
@@ -98,6 +99,7 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
       {
         accessor: 'workOrder',
         Header: 'Work Order',
+        width: 200,
         Cell: ({ row }) =>
           row.original.workOrder ? (
             <div className="d-flex gap-2 align-items-center">
@@ -118,12 +120,14 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
       {
         accessor: 'workOrderStatus',
         Header: 'Result',
+        width: 200,
         Cell: ({ row }) => (row?.original['workOrderStatus'] ? <p> {row?.original?.workOrderStatus}</p> : <NoDataCell />)
       },
       {
         accessor: 'assignedUsers',
         Header: 'Assigned Technician',
         disableFilters: true,
+        width: 200,
         Cell: ({ row }) =>
           row?.original['assignedUsers'] && row?.original['assignedUsers']?.length ? (
             row?.original['assignedUsers']?.map((e, i) => {
@@ -147,6 +151,7 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
         accessor: 'assignedWorkStations',
         Header: 'Assigned Work Station',
         disableFilters: true,
+        width: 200,
         Cell: ({ row }) =>
           row?.original['assignedWorkStations'] && row?.original['assignedWorkStations']?.length ? (
             row?.original['assignedWorkStations']?.map((e, i) => {
@@ -245,7 +250,7 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
                   columns={columns}
                   data={rowsData}
                   onSelect={() => { }}
-                  setWholeRowsCellColor={(rowData) => (rowData.type === 'service' ? 'isService' : '')}
+                  setWholeRowsCellColor={(rowData) => (rowData.type === MATERIAL_TYPE.service ? 'isService' : '')}
                   childrenProperty="subRows"
                   uniqueKey="_id"
                   renderedFrom={renderedFrom}

@@ -23,12 +23,48 @@ interface CardColInterface extends BoxProps {
   createNewText?: string;
 }
 
-export interface datarowInterface {
+export type datarowInterface = TDate | TDateTime | TText | TTimer | TLink | TTitle | TLinkTitle;
+  
+
+type TCommon = {
   accessor: string;
   title?: string;
-  type: 'date' | 'dateTime' | 'text' | 'timer' | 'link' | 'title' | 'linkTitle';
-  link?: (data: any) => string;
+  // type: 'date' | 'dateTime' | 'text' | 'timer' | 'link' | 'title' | 'linkTitle';
   renderer?: (data: any) => string;
+};
+
+type TDate = TCommon & {
+  type: 'date';
+}
+type TDateTime = TCommon & {
+  type: 'dateTime';
+}
+type TText = TCommon & {
+  type: 'text';
+}
+type TTimer = TCommon & {
+  type: 'timer';
+}
+type TLink = TCommon & {
+  type: 'link';
+  link: (data: any) => string;
+}
+type TTitle = TCommon & {
+  type: 'title';
+}
+type TLinkTitle = TCommon & {
+  type: 'linkTitle';
+  link: (data: any) => string;
+}
+
+
+const HEADER_HEIGHT = 90;
+const ROW_HEIGHT = 20;
+
+const calcCardHeight = (cardDataRows: datarowInterface[]) => {
+  const head = cardDataRows?.find(c=> c.type === 'title' || c.type === "linkTitle")
+  if(!head) return ROW_HEIGHT * cardDataRows.length
+  return HEADER_HEIGHT + (cardDataRows.length - 1) * ROW_HEIGHT
 }
 
 const CardColTimeline: React.FC<CardColInterface> = ({
@@ -44,26 +80,29 @@ const CardColTimeline: React.FC<CardColInterface> = ({
   md = 4,
   lg = false,
   xl = false,
-  cardHeight,
+  cardHeight = calcCardHeight(cardDataRows),
   createNew,
   createNewText,
   isCreateNew,
   ...others
 }) => {
+  const containerRef = React.useRef<HTMLDivElement | null>(null)
+  const [containerHeight, setContainerHeight] = React.useState(600);
+
+  React.useLayoutEffect(()=>{
+    if(containerRef.current) setContainerHeight(containerRef.current.clientHeight - 125)
+  },[containerRef])
+
+
+
   return (
-    <Box className={`${styles.container} ${className}`} {...others}>
-      <Grid container spacing={3}>
+    <div className={`${styles.container} ${className}`} {...others} ref={containerRef} >
+      <div className='py-4 flex  gap-[10px] md:scroll-px-[24px] overflow-auto snap-mandatory snap-x'>
         {Object.keys(data).map((col) => {
           return (
-            <Grid
-              item
-              xs={xs}
-              sm={sm}
-              md={md}
-              lg={lg}
-              xl={xl}
-              spacing={2}
-              className={styles.singleCol}
+            <div
+             key={col}
+              className={`${styles.singleCol} snap-start min-w-[min(100%,350px)]`}
               style={
                 {
                   '--bg': Boolean(data[col].color)
@@ -100,14 +139,15 @@ const CardColTimeline: React.FC<CardColInterface> = ({
                     isCreateNew={isCreateNew}
                     createNew={createNew}
                     createNewText={createNewText}
+                    containerHeight={containerHeight}
                   />
                 )}
               </div>
-            </Grid>
+            </div>
           );
         })}
-      </Grid>
-    </Box>
+      </div>
+    </div>
   );
 };
 

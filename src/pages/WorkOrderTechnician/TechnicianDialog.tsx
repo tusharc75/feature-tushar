@@ -1,11 +1,13 @@
-import { Box, Dialog, Typography } from '@material-ui/core';
+import { Box, Dialog, Typography, Grid } from '@material-ui/core';
 import routes from 'src/components/Helpers/Routes';
-import Steps from '../WorkOrder/Service/Steps';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { useData } from 'src/StateProvider/Provider';
-import { CustomDialogTransition, WORKORDER_TECHNICIAN_SERVICE_STATUS, workOrder } from 'src/constants/helpers';
+import { CustomDialogTransition, WORKORDER_SERVICE_STATUS, WORK_ORDER_STATUS, sidebarResource } from 'src/constants/helpers';
 import axiosInstance from 'src/axios/axiosInstance';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import Service from '../WorkOrder/Service';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 
 const TechnicianDialog = ({ handleClose, selectedService }) => {
@@ -14,16 +16,26 @@ const TechnicianDialog = ({ handleClose, selectedService }) => {
         state: { permissions, user }
     }: any = useData();
 
-    const [stepSubmitedData, setStepSubmitedData] = useState([]);
+    const toastConfig = useContext(CustomToastContext);
+
+    const [completed, setCompleted] = useState(false);
+    const [workOrderData, setWorkOrderData] = useState(null);
 
     useEffect(() => {
-        fetchService();
+        fetchWorkOrderData();
     }, [selectedService]);
 
-    const fetchService = async () => {
-        const stepDataResponse = await axiosInstance().get(`${workOrder.api}/${selectedService?.workOrderId}/steps-data`);
-        setStepSubmitedData(stepDataResponse?.data?.data || []);
-    }
+    const fetchWorkOrderData = () => {
+        axiosInstance()
+            .get(`${routes.workOrder.path}/${selectedService?.workOrderId}`)
+            .then(({ data: { data } }) => {
+                setCompleted(data?.status === WORK_ORDER_STATUS.completed || data?.deleted ? true : false);
+                setWorkOrderData({ ...data });
+            })
+            .catch((err) => {
+                toastConfig.setToastConfig(err);
+            });
+    };
 
     return (<Dialog
         fullScreen={true}
@@ -32,7 +44,7 @@ const TechnicianDialog = ({ handleClose, selectedService }) => {
         open={true}>
         <CustomDialogHeader
             showRequiredLabel={false}
-            title={`${selectedService?.serviceName} Steps`}
+            title={`${selectedService?.workOrderNumber}`}
             onClose={handleClose}
             additionalTitle={
                 selectedService?.assetNumber &&
@@ -55,16 +67,20 @@ const TechnicianDialog = ({ handleClose, selectedService }) => {
             }
         ></CustomDialogHeader>
         <Box p={2}>
-            <Steps
-                workOrderData={{ _id: selectedService?.workOrderId, warehouse: selectedService?.warehouse }}
-                selectedService={{ ...selectedService, stepSubmitedData: stepSubmitedData }}
-                allowedToEdit={selectedService?.status === WORKORDER_TECHNICIAN_SERVICE_STATUS[0] ? false : true}
-                setDisableCompleteFail={() => { }}
-                fetchService={fetchService}
-                referencType={'workOrderTechnician'}
-                handelClose={handleClose}
-                stepSubmitedData={stepSubmitedData}
-            />
+            {workOrderData ?
+                <Service
+                    workOrderData={workOrderData}
+                    workOrderId={selectedService?.workOrderId}
+                    allowedToEdit={[WORKORDER_SERVICE_STATUS.backlog, WORKORDER_SERVICE_STATUS.inProgressByOther]?.includes(selectedService?.status) ? false : true}
+                    completed={completed}
+                    fetchWorkOrderData={fetchWorkOrderData}
+                    resource={sidebarResource.workOrderTechnician}
+                    technicianSelectedService={selectedService.uniqueId}
+                /> :
+                <Grid container spacing={2} >
+                    <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                </Grid>
+            }
         </Box>
     </Dialog>
     );
