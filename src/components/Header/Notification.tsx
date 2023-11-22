@@ -1,33 +1,14 @@
-import {
-  Badge,
-  Box,
-  Button,
-  IconButton,
-  List,
-  ListItem,
-  Menu,
-  MenuItem,
-  Popover,
-  Tab,
-  Tabs,
-  Tooltip,
-  Typography,
-  useMediaQuery
-} from '@material-ui/core';
-import Avatar from '@material-ui/core/Avatar';
-import Grid from '@material-ui/core/Grid';
-import { ClearAll, DoneAllOutlined, Image, Settings } from '@material-ui/icons';
+import { Badge, Box, Button, IconButton, List, ListItem, Menu, MenuItem, Popover, Typography, useMediaQuery } from '@material-ui/core';
+import { ClearAll, DoneAllOutlined, Settings } from '@material-ui/icons';
 import { useContext, useMemo, useState } from 'react';
-import { AiOutlineClear } from 'react-icons/ai';
-import { FiCheckCircle } from 'react-icons/fi';
 import { useHistory } from 'react-router-dom';
+import { Accepted, Assigned, Rejected } from 'src/assets/notificationIcons';
 import { CustomNotificationCountContext } from '../../StateProvider/CustomNotificationCountContext/CustomNotificationCountContext';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import axiosInstance from '../../axios/axiosInstance';
 import { displayCardDate } from '../../constants/helpers';
-import { Accepted, Assigned, Rejected } from 'src/assets/notificationIcons';
 
 import styles from './Header.module.scss';
 
@@ -243,11 +224,9 @@ const NotificationContent = ({ isLoading, handleMarkAllRead, handleClearAll, han
 
   const getIcon = (title: string) => {
     let icon = Assigned;
-
     const compareTitle = (nameList: string[], title) => {
       return nameList.some((s) => title.toLowerCase().includes(s.toLowerCase()));
     };
-
     switch (true) {
       case compareTitle(['accepted', 'completed', 'finished'], title):
         icon = Accepted;
@@ -270,16 +249,23 @@ const NotificationContent = ({ isLoading, handleMarkAllRead, handleClearAll, han
       <div className={``}>
         <div className="[border-bottom:1px_solid_var(--common-border-color)] flex justify-between items-center px-[20px] py-[10px]">
           <h6 className="text-[16px] font-semibold ">Notifications</h6>
-          <HtmlTooltip title={'Mark all as read'} enterTouchDelay={0} placement="top" arrow>
-            <IconButton
-              disabled={isLoading}
-              onClick={() => {
-                handleMarkAllRead();
-              }}
-              size={'small'}
-            >
-              <DoneAllOutlined />
-            </IconButton>
+          <HtmlTooltip
+            title={isLoading || data?.unread?.length === 0 ? 'No new notification' : 'Mark all as read'}
+            enterTouchDelay={0}
+            placement="top"
+            arrow
+          >
+            <span>
+              <IconButton
+                disabled={isLoading || data?.unread?.length === 0}
+                onClick={() => {
+                  handleMarkAllRead();
+                }}
+                size={'small'}
+              >
+                <DoneAllOutlined />
+              </IconButton>
+            </span>
           </HtmlTooltip>
         </div>
         <div className={`flex items-center gap-1 justify-between px-[20px] py-[8px] [border-bottom:1px_solid_var(--common-border-color)]`}>
