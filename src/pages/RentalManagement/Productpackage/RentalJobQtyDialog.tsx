@@ -340,7 +340,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       }
       const updatedRows: any = [];
       rows?.forEach((ele) => {
-        updatedRows.push({...getObjKeysWithValues(ele, allFields)});
+        updatedRows.push({ _id: ele._id, ...getObjKeysWithValues(ele, fields) })
       })
       handleSaveData(updatedRows);
     } else {

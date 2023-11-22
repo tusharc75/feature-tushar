@@ -247,6 +247,10 @@ export const bulkUpdate = (values, selectedProducts, material, allFields, curren
             rows = [...rows, ...packages]
         })
     }
-
-    return rows;
+    
+    let updatedRows: any = [];
+    rows = rows?.forEach((e : any) => {
+        updatedRows.push({_id: e._id, ...getObjKeysWithValues(e, allFields)});
+    })
+    return updatedRows;
 };
