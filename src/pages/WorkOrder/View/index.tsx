@@ -78,13 +78,16 @@ const WorkOrderViews = (props) => {
   async function fetchViewsData() {
     setLoading(true);
     try {
-      const workOrderData: any = await axiosInstance().get(`${routes.workOrder.path}/${workOrderId}/steps-data`);
+      const allDetails: any = await axiosInstance().get(`${routes.workOrder.path}/${workOrderId}/detail`);
+      const stepData = allDetails?.data?.data?.stepData;
       const stepDatas = {};
-      workOrderData?.data?.data
+
+      stepData
         ?.filter((s) => s?.passFailStatus)
         ?.map((s) => {
           stepDatas[s?.stepId] = s?.passFailStatus;
         });
+
       var xPosition = 0;
       var flow: any[] = [
         {
@@ -102,8 +105,8 @@ const WorkOrderViews = (props) => {
         }
       ];
       var flowEdge: any[] = [];
-      const workOrderServices = await axiosInstance().get(`${routes.workOrder.path}/service/${workOrderId}`);
-      const allServices = workOrderServices?.data?.data || [];
+
+      const allServices =  allDetails?.data?.data?.services || [];
       const allSteps = [];
       if (allServices?.length) xPosition += 300;
       let serviceStepIdx = 0;

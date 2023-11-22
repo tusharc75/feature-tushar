@@ -101,20 +101,20 @@ const ReportArrangeView = (props: ArrangeColumnsProps) => {
       const index = layedCols.indexOf(col.field);
       const colData = savedColumns.find((_col) => _col.colId === col.field);
       if (index > -1) {
-        newCols[index] = { ...col, show: selectedReportView && colData ? !colData.hide : true };
+        if (selectedReportView && colData) {
+          newCols[index] = { ...col, show: (selectedReportView && colData) ? !colData.hide : true };
+        } else {
+          newCols[index] = { ...col }
+        }
       }
     });
-
-    const allNotVisible = columns.some((col) => col.show === false);
-
+    const allNotVisible = columns.some((col) => !col.show);
     if (allNotVisible) {
       setAllChecked(false);
     } else {
       setAllChecked(true);
     }
-
     newCols = newCols.filter((item) => item);
-
     setSortedColumns(newCols);
   }, [columns, columnApi, selectedReportView]);
 
@@ -123,8 +123,15 @@ const ReportArrangeView = (props: ArrangeColumnsProps) => {
     const checked = event.target.checked;
     const getFieldIndex = sortedColumns.findIndex((d) => d.field === column.field);
     newColumns[getFieldIndex].show = checked;
-
-    if (!checked) {
+    if (checked) {
+      const allNotVisible = sortedColumns.some((col) => !col.show);
+      if (allNotVisible) {
+        setAllChecked(false);
+      } else {
+        setAllChecked(true);
+      }
+    }
+    else {
       setAllChecked(false);
     }
     setSortedColumns(newColumns);

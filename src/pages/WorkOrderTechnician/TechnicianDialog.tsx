@@ -48,7 +48,7 @@ const TechnicianDialog = ({ handleClose, selectedService }) => {
             onClose={handleClose}
             additionalTitle={
                 selectedService?.assetNumber &&
-                <Box ml={2}>
+                <Box ml={2} title={selectedService?.assetNumber} >
                     <Typography variant="h6" className={`title-layout text-truncate`}>
                         {`Asset : `}
                         {permissions?.serializedAsset?.isRead ? (
