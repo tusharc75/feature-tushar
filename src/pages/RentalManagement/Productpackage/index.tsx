@@ -20,7 +20,7 @@ import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/Offl
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BiChevronDown } from 'react-icons/bi';
-import { calculateRowsField, fetch_rental_product_fields, getNestedSubRows } from '../../../components/RentalManagment/helper';
+import { calculateRowsFieldNew, fetch_rental_product_fields, getNestedSubRows } from '../../../components/RentalManagment/helper';
 import { startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import CalculatePriceDialog from 'src/components/RentalManagment/CalculatePriceDialog';
@@ -553,7 +553,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
         }
       }
       let rows: any = [{ ...rowData, ...updatedData }];
-      rows = await calculateRowsField(material, inputField, allFields, updatedData);
+      rows = await calculateRowsFieldNew(material, inputField, allFields, updatedData);
       handleSaveData(rows);
       setShowConfirmationDialog({ open: false, data: {} });
     }

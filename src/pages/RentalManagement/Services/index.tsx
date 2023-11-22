@@ -18,7 +18,7 @@ import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/Offl
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BiChevronDown } from 'react-icons/bi';
-import { calculatePrice, calculateRowsField, fetch_rental_product_fields, getNestedSubRows } from '../../../components/RentalManagment/helper';
+import { calculatePrice, calculateRowsFieldNew, fetch_rental_product_fields, getNestedSubRows } from '../../../components/RentalManagment/helper';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import { startCase } from 'lodash';
@@ -384,7 +384,6 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
     rows.forEach((d) => {
       const element: any = {};
       element.materialId = d._id;
-      element.detail = d?.serviceName || d?.packageName || '';
       element.type = d?.type || addExistingProductDialog.type;
       element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : d.unit ? d.unit : '';
       element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : d.pricingMethod ? d.pricingMethod : '';
@@ -443,21 +442,6 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
   };
 
   const handleSaveData = async (rows: any, saveAndNext = false) => {
-    rows.forEach((element) => {
-      element.pricingCondition = element.pricingCondition?.optionValue ? element.pricingCondition?.optionValue : element.pricingCondition; // temporary fix
-      delete element.index;
-      delete element.detail;
-      delete element.serializedProduct;
-      delete element.qtyDisplay;
-      delete element.isValid;
-      delete element.hideSelection;
-      delete element.assetQty;
-      delete element.productDetail;
-      delete element.packageDetail;
-      delete element.serviceDetail;
-      delete element.parentName;
-      delete element.subRows;
-    });
     setUpdating(true);
     axiosInstance()
       .put(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`, { material: rows })
@@ -531,7 +515,7 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
       inputField['qty'] = inputField['qtyDisplay'];
     }
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(material, inputField, allFields, updatedData);
+    rows = await calculateRowsFieldNew(material, inputField, allFields, updatedData);
     handleSaveData(rows);
   };
 
