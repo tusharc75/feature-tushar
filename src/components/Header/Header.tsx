@@ -1,61 +1,59 @@
-import React, { useState, useRef, useContext, useEffect } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
+import { useAccount, useMsal } from '@azure/msal-react';
 import {
   AppBar,
-  Toolbar,
+  Badge,
+  Box,
+  ButtonBase,
+  Chip,
   IconButton,
   Menu,
   MenuItem,
-  Box,
-  Badge,
-  Chip,
-  Typography,
-  useMediaQuery,
-  ButtonBase,
   Popover,
+  Toolbar,
   Tooltip,
-  Button
+  Typography,
+  useMediaQuery
 } from '@material-ui/core';
-import Grid from '@material-ui/core/Grid';
 import Avatar from '@material-ui/core/Avatar';
-import { MoreVert as MoreIcon, Clear as ClearIcon, Notifications, ExpandMore, Brightness1, Close, Image } from '@material-ui/icons';
+import Grid from '@material-ui/core/Grid';
+import { makeStyles } from '@material-ui/core/styles';
+import { Brightness1, Close, ExpandMore, Image, MoreVert as MoreIcon } from '@material-ui/icons';
 import SyncIcon from '@material-ui/icons/Sync';
+import { isEmpty } from 'lodash';
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import { AiOutlineClear } from 'react-icons/ai';
+import { FiCheckCircle } from 'react-icons/fi';
+import { useHistory, useLocation } from 'react-router-dom';
 import io, { Socket } from 'socket.io-client';
-import { useHistory, Link, useLocation } from 'react-router-dom';
-import { useData } from '../../StateProvider/Provider';
-import UserProfile from './../UserProfile';
-import { SET_CHATTER, SET_SELECTED_ENTITY, SET_START_TOUR, SET_USER, SET_SEARCH, USER_LOADING } from '../../StateProvider/actionTypes';
-import axiosInstance from '../../axios/axiosInstance';
+import { useAppTheme } from 'src/constants/AppConfig';
+import { CustomChatNotificationCountContext } from '../../StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext';
 import { CustomNotificationCountContext } from '../../StateProvider/CustomNotificationCountContext/CustomNotificationCountContext';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import routes from '../Helpers/Routes';
-import { useAccount, useMsal } from '@azure/msal-react';
-import { isEmpty } from 'lodash';
-import { FiCheckCircle } from 'react-icons/fi';
-import { displayCardDate } from '../../constants/helpers';
-import ChatIcon from '@material-ui/icons/Chat';
-import { CustomChatNotificationCountContext } from '../../StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext';
-import { backendApi } from '../../config';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
-import { AiOutlineClear } from 'react-icons/ai';
-import { useAppTheme } from 'src/constants/AppConfig';
+import { useData } from '../../StateProvider/Provider';
+import { SET_CHATTER, SET_SELECTED_ENTITY, SET_USER } from '../../StateProvider/actionTypes';
+import axiosInstance from '../../axios/axiosInstance';
+import { backendApi } from '../../config';
+import { displayCardDate } from '../../constants/helpers';
+import routes from '../Helpers/Routes';
+import UserProfile from './../UserProfile';
 
 import { useScrollDirection } from 'src/hooks/useScroll';
 
-import styles from './Header.module.scss';
 import { HiOutlineMenuAlt1 } from 'react-icons/hi';
+import styles from './Header.module.scss';
 
-import { SearchBar } from './SearchBar';
-import DashboardModal, { ModalHead } from '../DashboardModal';
-import { userManual } from 'src/pages/Home';
 import { FiExternalLink } from 'react-icons/fi';
 import { SVG } from 'src/assets';
+import { userManual } from 'src/pages/Home';
+import DashboardModal, { ModalHead } from '../DashboardModal';
+import { SearchBar } from './SearchBar';
 
-import { MoonIcon, SunIcon } from 'src/assets/svg/svgIcons';
-import NotificationsNoneIcon from '@material-ui/icons/NotificationsNone';
 import ChatBubbleOutlineOutlinedIcon from '@material-ui/icons/ChatBubbleOutlineOutlined';
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
-import { useStore, SIDEBAR_OPEN, SIDEBAR_OPENED_BY_BUTTON } from 'src/StateProvider/fastContext';
+import { SIDEBAR_OPEN, SIDEBAR_OPENED_BY_BUTTON, useStore } from 'src/StateProvider/fastContext';
+import { MoonIcon, SunIcon } from 'src/assets/svg/svgIcons';
+import Notification from './Notification';
 
 const useStyles = makeStyles((theme) => ({
   grow: {
@@ -143,16 +141,10 @@ const Header = () => {
   const isEntitiesMenuOpen = Boolean(entitiesEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
-  const notification = useContext(CustomNotificationCountContext);
   const chatNotification = useContext(CustomChatNotificationCountContext);
   const toastConfig = useContext(CustomToastContext);
   const { isOffline, isSynch } = useContext(CustomOfflineContext);
 
-  const [loadingNotifications, setLoadingNotifications] = useState(false);
-  const [notificationList, setNotificationList] = useState([]);
-
-  // For FullScreen Notification - Start
-  const [fullScreenNotificationAnchorEl, setFullScreenNotificationAnchorEl] = React.useState(null);
   const scrollPos = useScrollDirection(40);
 
   const [modalContent, setModalContent] = useState<ModalHead | null>(null);
@@ -189,59 +181,6 @@ const Header = () => {
         toastConfig.setToastConfig(error);
       });
   };
-
-  const handleFullScreenNotificationClick = (event) => {
-    setFullScreenNotificationAnchorEl(event.currentTarget);
-    setLoadingNotifications(true);
-
-    axiosInstance()
-      .get('/notification/all')
-      .then(({ data: { data } }) => {
-        setNotificationList(data);
-        setLoadingNotifications(false);
-        notification.setCount(0);
-      })
-      .catch((error) => {
-        setLoadingNotifications(false);
-        toastConfig.setToastConfig(error);
-      });
-  };
-
-  const handleFullScreenNotificationClose = () => {
-    setFullScreenNotificationAnchorEl(null);
-  };
-
-  const fullScreenNotificationOpen = Boolean(fullScreenNotificationAnchorEl);
-  const fullScreenNotificationId = fullScreenNotificationOpen ? 'full-screen-notification' : undefined;
-  // For FullScreen Notification - End
-
-  // For MobileScreen Notification - Start
-  const [mobileScreenNotificationAnchorEl, setMobileScreenNotificationAnchorEl] = React.useState(null);
-
-  const handleMobileScreenNotificationClick = async (event) => {
-    setMobileScreenNotificationAnchorEl(event.currentTarget);
-    setLoadingNotifications(true);
-
-    await axiosInstance()
-      .get('/notification/all')
-      .then(({ data: { data } }) => {
-        setNotificationList(data);
-        setLoadingNotifications(false);
-        notification.setCount(0);
-      })
-      .catch((error) => {
-        setLoadingNotifications(false);
-        toastConfig.setToastConfig(error);
-      });
-  };
-
-  const handleMobileScreenNotificationClose = () => {
-    setMobileScreenNotificationAnchorEl(null);
-  };
-
-  const mobileScreenNotificationOpen = Boolean(mobileScreenNotificationAnchorEl);
-  const mobileScreenNotificationId = mobileScreenNotificationOpen ? 'mobile-screen-notification' : undefined;
-  // For MobileScreen Notification - End
 
   const [loadingChatNotifications, setLoadingChatNotifications] = useState(false);
   const [chatNotificationList, setChatNotificationList] = useState([]);
@@ -299,7 +238,6 @@ const Header = () => {
         chatNotification.setCount(0);
       })
       .catch((error) => {
-        setLoadingNotifications(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -327,7 +265,6 @@ const Header = () => {
         chatNotification.setCount(0);
       })
       .catch((error) => {
-        setLoadingNotifications(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -401,7 +338,7 @@ const Header = () => {
   window.addEventListener('storage', (event) => {
     if (event.storageArea == localStorage) {
       let token = localStorage.getItem('token');
-      if (token == undefined) {
+      if (token === undefined) {
         window.location.reload();
       }
     }
@@ -495,129 +432,6 @@ const Header = () => {
       <MenuItem>Option 2</MenuItem>
     </Menu>
   );
-
-  const NotificationContent = ({ data }) => {
-    return (
-      <div className={`${data.length === 0 ? classes.notificationHeight : classes.notificationHeightWithData}`} style={{ position: 'relative' }}>
-        <div className={`d-flex align-items-center gap-1`}>
-          <div className={`${classes.markAll} `}>
-            <Typography
-              onClick={() => {
-                axiosInstance()
-                  .put('/notification/all-read', { toggle: true })
-                  .then(({ data }) => {
-                    let updatedNotificationList = [];
-                    notificationList.map((notification) => {
-                      notification.read = true;
-                      updatedNotificationList.push(notification);
-                    });
-
-                    setNotificationList(updatedNotificationList);
-                    toastConfig.setToastConfig({
-                      open: true,
-                      message: data.message,
-                      type: 'success'
-                    });
-
-                    setFullScreenNotificationAnchorEl(null);
-                    setMobileScreenNotificationAnchorEl(null);
-                  })
-                  .catch((error) => {
-                    toastConfig.setToastConfig(error);
-                  });
-              }}
-              className="cursor-pointer"
-              style={{ marginRight: 20 }}
-            >
-              <FiCheckCircle className="mr-2 pt-1" size={16} />
-              <span>Mark all as read</span>
-            </Typography>
-          </div>
-          <div className={`${classes.markAll} `}>
-            <Typography
-              onClick={() => {
-                axiosInstance()
-                  .put('/notification/clear')
-                  .then(({ data }) => {
-                    toastConfig.setToastConfig({
-                      open: true,
-                      message: data.message,
-                      type: 'success'
-                    });
-                    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-                    !isMobile ? handleFullScreenNotificationClick : handleMobileScreenNotificationClick;
-                    setFullScreenNotificationAnchorEl(null);
-                    setMobileScreenNotificationAnchorEl(null);
-                  })
-                  .catch((error) => {
-                    toastConfig.setToastConfig(error);
-                  });
-              }}
-              className="cursor-pointer"
-            >
-              <AiOutlineClear className="mr-2 pt-1" size={16} />
-              <span>Clear all</span>
-            </Typography>
-          </div>
-        </div>
-        <div className={classes.notificationContent}>
-          {data.map((d, index) => {
-            return (
-              <div
-                style={{
-                  borderBottom: '1px solid var(--common-border-color)'
-                }}
-                className={`${d.read === true ? '' : 'light-grey-bg'} p-3 cursor-pointer`}
-                key={index}
-                onClick={() => {
-                  if (d.read === false) {
-                    axiosInstance()
-                      .put('/user/notification/read', {
-                        toggle: true,
-                        notificationId: d.notificationId
-                      })
-                      .then(() => {})
-                      .catch((error) => {
-                        toastConfig.setToastConfig(error);
-                      });
-                  }
-
-                  handleFullScreenNotificationClose();
-                  handleMobileScreenNotificationClose();
-
-                  if (d?.entity) {
-                    handleRedirect(d?.entity, d?.resourceId, d?.resourcePath);
-                  } else {
-                    history.push(d?.resourceId ? `${d?.resourcePath}/${d?.resourceId}` : d?.resourcePath, { data: d?.of ? d?.of : null });
-                  }
-                }}
-              >
-                {
-                  <>
-                    <Grid container>
-                      <Grid item xs={2} md={2}>
-                        <Avatar style={{ height: 30, width: 30 }} src={d?.avatar}>
-                          <Image style={{ fontSize: 24 }} />
-                        </Avatar>
-                      </Grid>
-                      <Grid item xs={10} md={10}>
-                        <h6>{displayCardDate(d?.date)}</h6>
-                        <h4>{d.title}</h4>
-                        <h5>{d.description}</h5>
-                      </Grid>
-                    </Grid>
-                  </>
-                }
-              </div>
-            );
-          })}
-        </div>
-        {/* <Button style={{ position: "sticky", bottom: 0 }} fullWidth variant="contained" color="primary" onClick={() => { }}>
-        View All &#8599;
-      </Button> */}
-      </div>
-    );
-  };
 
   const ChatNotificationContent = ({ data }) => {
     return (
@@ -842,44 +656,7 @@ const Header = () => {
           )}
         </Popover>
       </MenuItem>
-
-      <MenuItem onClick={mobileScreenNotificationAnchorEl === null ? handleMobileScreenNotificationClick : () => {}}>
-        <Badge
-          variant="dot"
-          overlap="circular"
-          badgeContent={notification ? notification.count : 0}
-          color="secondary"
-          aria-describedby={mobileScreenNotificationId}
-        >
-          <NotificationsNoneIcon />
-        </Badge>
-        <Box component="span" mx={1} />
-        <p>Notifications</p>
-
-        <Popover
-          id={mobileScreenNotificationId}
-          open={mobileScreenNotificationOpen}
-          anchorEl={mobileScreenNotificationAnchorEl}
-          onClose={handleMobileScreenNotificationClose}
-          anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'center'
-          }}
-          transformOrigin={{
-            vertical: 'top',
-            horizontal: 'center'
-          }}
-        >
-          {loadingNotifications ? (
-            <Typography className="m-3">Loading Notifications...</Typography>
-          ) : notificationList.length === 0 ? (
-            <Typography className="m-3">No Notifications found</Typography>
-          ) : (
-            <NotificationContent data={notificationList} />
-          )}
-        </Popover>
-      </MenuItem>
-
+      <Notification />
       <MenuItem onClick={openHelperModal}>
         <HelpOutlineIcon />
         <Box component="span" mx={1} my={2} />
@@ -1055,42 +832,7 @@ const Header = () => {
                   </IconButton>
                 </Tooltip>
 
-                <IconButton
-                  id="notificationButton"
-                  aria-describedby={fullScreenNotificationId}
-                  aria-label="settings"
-                  color="inherit"
-                  title="Notifications"
-                  onClick={handleFullScreenNotificationClick}
-                  className={styles.showIconLayout}
-                >
-                  <Badge variant="dot" overlap="circular" badgeContent={notification ? notification.count : 0} color="secondary">
-                    <NotificationsNoneIcon className="setIcon" />
-                  </Badge>
-                </IconButton>
-                <Popover
-                  className="mr-2"
-                  id={fullScreenNotificationId}
-                  open={fullScreenNotificationOpen}
-                  anchorEl={fullScreenNotificationAnchorEl}
-                  onClose={handleFullScreenNotificationClose}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'center'
-                  }}
-                  transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'center'
-                  }}
-                >
-                  {loadingNotifications ? (
-                    <Typography className="m-3">Loading Notifications...</Typography>
-                  ) : notificationList.length === 0 ? (
-                    <Typography className="m-3">No Notifications found</Typography>
-                  ) : (
-                    <NotificationContent data={notificationList} />
-                  )}
-                </Popover>
+                <Notification />
               </div>
 
               {/* Remove below false to show chat notification icon */}
