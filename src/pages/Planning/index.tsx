@@ -10,10 +10,8 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import {
   PLANNING_STATUS,
-  getLocalStorageArrayData,
   gridLoadingTimeout,
   prepareDataForGrid,
-  removeLocalStorage,
   sidebarResource
 } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
@@ -35,7 +33,6 @@ let searchTimeout;
 
 const Planning = () => {
   const renderedFrom = camelCase(routes?.planning.title);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const toastConfig = useContext(CustomToastContext);
 
   const types = [
@@ -219,8 +216,7 @@ const Planning = () => {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || [])?.map((m) => m._id))}`;
     }
     return deepFilter;
   };
@@ -262,12 +258,12 @@ const Planning = () => {
     if (deleteRecord) {
       ids.push(deleteRecord._id);
     } else {
-      ids = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((d) => d._id);
+      ids = selectedRecords?.map((d) => d._id);
     }
     axiosInstance()
       .put(`${routes?.planning?.path}/remove`, { ids: ids })
       .then(() => {
-        removeLocalStorage(localStorageSelectedRecords);
+        dispatch({ type: 'selection', selectedRecords: [] });
         fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
@@ -318,17 +314,13 @@ const Planning = () => {
         <CustomBreadCrumbs routes={[routes.planning]} />
         <ImportExportLinks
           permissions={permissions?.planning}
-          module="planning"
+          module={routes.planning.title}
           api={routes?.planning?.path}
-          afterImportCompleted={() => {}}
+          afterImportCompleted={() => {fetchData()}}
           isExportAllOrSomeFeature={true}
           total={rowCount}
-          recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-          ids={
-            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-              ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-              : []
-          }
+          recordsToExport={selectedRecords?.length}
+          ids={selectedRecords?.map((obj) => obj._id)}
           onExportToExcelSuccess={() => {
             fetchData();
           }}
@@ -435,7 +427,7 @@ const Planning = () => {
                           setShowDeleteConfirmBox(true);
                         }}
                       >
-                        Delete
+                        {`Delete (${selectedRecords?.length})`}
                       </MenuItem>
                     </Menu>
                   </>

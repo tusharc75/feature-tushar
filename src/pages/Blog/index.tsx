@@ -8,7 +8,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, removeLocalStorage, sidebarResource } from '../../constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import { camelCase } from 'lodash';
@@ -24,7 +24,6 @@ let searchTimeout;
 
 const Blog = () => {
   const renderedFrom = camelCase(routes?.blog.title);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const { state, dispatch } = useTableReducer();
@@ -147,8 +146,7 @@ const Blog = () => {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || [])?.map((m) => m._id))}`;
     }
     return deepFilter;
   };
@@ -190,12 +188,12 @@ const Blog = () => {
     if (deleteRecord) {
       ids.push(deleteRecord._id);
     } else {
-      ids = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((d) => d._id);
+      ids = selectedRecords?.map((d) => d._id);
     }
     axiosInstance()
       .put(`${routes?.blog.path}/remove`, { ids: ids })
       .then(() => {
-        removeLocalStorage(localStorageSelectedRecords);
+        dispatch({ type: 'selection', selectedRecords: [] });
         fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
@@ -222,17 +220,13 @@ const Blog = () => {
         <CustomBreadCrumbs routes={[routes.blog]} />
         <ImportExportLinks
           permissions={permissions?.blog}
-          module="blog"
+          module={routes.blog.title}
           api={routes?.blog.path}
-          afterImportCompleted={() => {}}
+          afterImportCompleted={() => {fetchData()}}
           isExportAllOrSomeFeature={true}
           total={rowCount}
-          recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-          ids={
-            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-              ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-              : []
-          }
+          recordsToExport={selectedRecords?.length}
+          ids={selectedRecords?.map((obj) => obj._id)}
           onExportToExcelSuccess={() => {
             fetchData();
           }}
@@ -302,7 +296,7 @@ const Blog = () => {
                           setShowDeleteConfirmBox(true);
                         }}
                       >
-                        Delete
+                        {`Delete (${selectedRecords?.length})`}
                       </MenuItem>
                     </Menu>
                   </>

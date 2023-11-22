@@ -254,7 +254,7 @@ const DemandOrder = () => {
           permissions={permissions?.demandOrder}
           module="demandOrder"
           api={demandOrder.api}
-          afterImportCompleted={() => {}}
+          afterImportCompleted={() => {fetchData()}}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}

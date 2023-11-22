@@ -6,7 +6,7 @@ import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import {termsAndCondition, getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, removeLocalStorage, sidebarResource } from '../../constants/helpers';
+import {termsAndCondition, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import { camelCase } from 'lodash';
@@ -23,7 +23,6 @@ let searchTimeout;
 
 const TermsAndCondition = () => {
   const renderedFrom = camelCase(routes?.termsAndConditions.title);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer();
@@ -146,8 +145,7 @@ const TermsAndCondition = () => {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
     }
     return deepFilter;
   };
@@ -189,12 +187,12 @@ const TermsAndCondition = () => {
     if (deleteRecord) {
       ids.push(deleteRecord._id);
     } else {
-      ids = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((d) => d._id);
+      ids = selectedRecords?.map((d) => d._id);
     }
     axiosInstance()
       .put(`${termsAndCondition.api}/remove`, { ids: ids })
       .then(() => {
-        removeLocalStorage(localStorageSelectedRecords);
+        dispatch({ type: 'selection', selectedRecords: [] });
         fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
@@ -281,7 +279,7 @@ const TermsAndCondition = () => {
                           setShowDeleteConfirmBox(true);
                         }}
                       >
-                        Delete
+                        {`Delete (${selectedRecords?.length})`}
                       </MenuItem>
                     </Menu>
                   </>

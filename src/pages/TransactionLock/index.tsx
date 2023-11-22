@@ -8,7 +8,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, removeLocalStorage, sidebarResource } from '../../constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import { camelCase } from 'lodash';
@@ -25,7 +25,6 @@ let searchTimeout;
 
 const TransactionLock = () => {
   const renderedFrom = camelCase(routes?.transactionLock.title);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const toastConfig = useContext(CustomToastContext);
 
   const history = useHistory();
@@ -149,8 +148,7 @@ const TransactionLock = () => {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
     }
     return deepFilter;
   };
@@ -164,7 +162,7 @@ const TransactionLock = () => {
         let count = data?.count;
         let rows = data?.data?.map((u) => {
           let finalObject = prepareDataForGrid(u, user);
-          finalObject['isChecked'] = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some((s) => s._id === u._id);
+          finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions?.transactionLock?.isUpdate;
           finalObject['canDelete'] = permissions?.transactionLock?.isDelete;
           return finalObject;
@@ -191,12 +189,12 @@ const TransactionLock = () => {
     if (deleteRecord) {
       ids.push(deleteRecord._id);
     } else {
-      ids = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((d) => d._id);
+      ids = selectedRecords?.map((d) => d._id);
     }
     axiosInstance()
       .put(`${routes.transactionLock.path}/remove`, { ids: ids })
       .then(() => {
-        removeLocalStorage(localStorageSelectedRecords);
+        dispatch({ type: 'selection', selectedRecords: [] });
         fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
@@ -223,17 +221,13 @@ const TransactionLock = () => {
         <CustomBreadCrumbs routes={[routes.transactionLock]} />
         <ImportExportLinks
           permissions={permissions?.transactionLock}
-          module="transactionLock"
+          module={routes.transactionLock.title}
           api={routes.transactionLock.path}
-          afterImportCompleted={() => {}}
+          afterImportCompleted={() => {fetchData()}}
           isExportAllOrSomeFeature={true}
           total={rowCount}
-          recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-          ids={
-            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-              ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-              : []
-          }
+          recordsToExport={selectedRecords?.length}
+          ids={selectedRecords?.map((obj) => obj._id)}
           onExportToExcelSuccess={() => {
             fetchData();
           }}
@@ -302,7 +296,7 @@ const TransactionLock = () => {
                           setShowDeleteConfirmBox(true);
                         }}
                       >
-                        Delete
+                        {`Delete (${selectedRecords?.length})`}
                       </MenuItem>
                     </Menu>
                   </>
