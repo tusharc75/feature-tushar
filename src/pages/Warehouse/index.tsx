@@ -10,7 +10,7 @@ import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import { AiOutlineDeploymentUnit } from 'react-icons/ai';
 import EntitySelectionsDialog from 'src/components/EntitySelections';
 import AssignUserDialog from 'src/components/AssignRolesDialog/NewAssignUserDialog';
-import { getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, removeLocalStorage, sidebarResource } from '../../constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import { camelCase } from 'lodash';
@@ -28,7 +28,6 @@ let searchTimeout;
 
 const Warehouse = () => {
   const renderedFrom = camelCase(routes?.warehouse.title);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
@@ -167,7 +166,7 @@ const Warehouse = () => {
   const handleAssignUser = (data) => {
     setIsAssigning(true);
     const user = data?.map((e) => e?._id);
-    const warehouse = getLocalStorageArrayData(localStorageSelectedRecords)?.map((m) => m._id);
+    const warehouse = selectedRecords?.map((m) => m._id);
     axiosInstance()
       .post(`${routes.warehouse.path}/user/assign`, { warehouse, user })
       .then(({ data }) => {
@@ -176,7 +175,7 @@ const Warehouse = () => {
           type: 'success',
           message: data.message
         });
-        localStorage.removeItem(localStorageSelectedRecords);
+        dispatch({ type: 'selection', selectedRecords: [] });
         fetchData();
         setUserAssignDialog(false);
         setIsAssigning(false);
@@ -209,8 +208,7 @@ const Warehouse = () => {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
     }
     return deepFilter;
   };
@@ -225,7 +223,7 @@ const Warehouse = () => {
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u, user);
           finalObject['canDelete'] = permissions?.warehouse?.isDelete;
-          finalObject['isChecked'] = getLocalStorageArrayData(localStorageSelectedRecords)?.some((s) => s._id === u._id);
+          finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions?.warehouse?.isUpdate;
           return finalObject;
         });
@@ -251,12 +249,12 @@ const Warehouse = () => {
     if (deleteRecord) {
       ids.push(deleteRecord._id);
     } else {
-      ids = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((d) => d._id);
+      ids = selectedRecords?.map((d) => d._id);
     }
     axiosInstance()
       .put(`${routes?.warehouse.path}/remove`, { ids: ids })
       .then(() => {
-        removeLocalStorage(localStorageSelectedRecords);
+        dispatch({ type: 'selection', selectedRecords: [] });
         fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
@@ -283,17 +281,13 @@ const Warehouse = () => {
         <CustomBreadCrumbs routes={[routes.warehouse]} />
         <ImportExportLinks
           permissions={permissions?.warehouse}
-          module="warehouse"
+          module={routes.warehouse.title}
           api={routes?.warehouse.path}
-          afterImportCompleted={() => {}}
+          afterImportCompleted={() => {fetchData()}}
           isExportAllOrSomeFeature={true}
           total={rowCount}
-          recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-          ids={
-            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-              ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-              : []
-          }
+          recordsToExport={selectedRecords?.length}
+          ids={selectedRecords?.map((obj) => obj._id)}
           onExportToExcelSuccess={() => {
             fetchData();
           }}
@@ -309,8 +303,8 @@ const Warehouse = () => {
                   {
                     title: 'Assign Users Export',
                     api: `warehouse/user/template?export=true${
-                      getLocalStorageArrayData(`${localStorageSelectedRecords}`).length
-                        ? `&ids=${JSON.stringify(getLocalStorageArrayData(`${localStorageSelectedRecords}`).map((obj) => obj._id))}`
+                      selectedRecords.length
+                        ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}`
                         : ''
                     }`,
                     type: 'export'
@@ -384,7 +378,7 @@ const Warehouse = () => {
                           setShowDeleteConfirmBox(true);
                         }}
                       >
-                        Delete
+                        {`Delete (${selectedRecords?.length})`}
                       </MenuItem>
                     )}
                     {permissions?.warehouse?.isUpdate && (

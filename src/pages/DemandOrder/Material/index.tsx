@@ -6,7 +6,6 @@ import axiosInstance from '../../../axios/axiosInstance';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
-
 import { ExpandMore } from '@material-ui/icons';
 import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -454,7 +453,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
                   closeActions();
                 }}
               >
-                Delete
+                {`Delete (${selectedRecords?.length})`}
               </MenuItem>
             </Menu>
           </Box>
