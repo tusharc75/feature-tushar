@@ -250,7 +250,7 @@ const NotificationContent = ({ isLoading, handleMarkAllRead, handleClearAll, han
         <div className="[border-bottom:1px_solid_var(--common-border-color)] flex justify-between items-center px-[20px] py-[10px]">
           <h6 className="text-[16px] font-semibold ">Notifications</h6>
           <HtmlTooltip
-            title={isLoading || data?.unread?.length === 0 ? 'No new notification' : 'Mark all as read'}
+            title={isLoading || data?.unread?.length === 0 ? 'No Unread notification' : 'Mark all as read'}
             enterTouchDelay={0}
             placement="top"
             arrow
