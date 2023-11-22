@@ -354,7 +354,7 @@ const Productpackage = ({
       const element: any = {};
       element.materialId = d._id;
       element.type = addExistingProductDialog.type;
-      element.unit = d?.unitMain && d?.unitMain?.length ? d?.unitMain[0] : '';
+      // element.unit = d?.unitMain && d?.unitMain?.length ? d?.unitMain[0] : '';
       element.qty = d.qty ? parseFloat(d.qty) : 1;
       element.parentId = d?.parentId || addExistingProductDialog.parentId || null;
       material.push(element);
