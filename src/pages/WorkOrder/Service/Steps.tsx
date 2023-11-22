@@ -301,7 +301,7 @@ const Steps = ({
 
   const fetchServiceData = async () => {
     setSelectedSteps([]);
-    
+
     const serviceDetailResponse = await axiosInstance().get(`${workOrder.api}/service/detail/${workOrderId}/${selectedService._id}/${selectedService.uniqueId}`);
     var serviceDetail = serviceDetailResponse?.data?.data;
     serviceDetail.steps = serviceDetail?.steps?.sort((a, b) => a?.order - b?.order);
@@ -370,7 +370,8 @@ const Steps = ({
       setDisableCompleteFail(!allStepsDone);
       setIsAllStepDone(allStepsDone);
 
-      if (allStepsDone && [WORKORDER_SERVICE_STATUS.inProgress, WORKORDER_SERVICE_STATUS.pending].includes(selectedService.status)) {
+      if (allStepsDone && [WORKORDER_SERVICE_STATUS.inProgress, WORKORDER_SERVICE_STATUS.pending].includes(selectedService.status)
+        && addNewStep.open === false) {
         setOpenCompleteDialog(true);
       }
     }
@@ -1401,7 +1402,7 @@ const Steps = ({
                 </Menu>
               )}
               {isAllStepDone && [WORKORDER_SERVICE_STATUS.inProgress, WORKORDER_SERVICE_STATUS.pending].includes(selectedService.status) && (
-                <Box pt={2}>
+                <Box m={2}>
                   <Grid container justify="flex-end">
                     <Button
                       variant="contained"
