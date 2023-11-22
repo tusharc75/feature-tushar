@@ -1,4 +1,5 @@
 import { FileIcon, AudioFile, VideoFile, AIFile, PDFFile, PowerPointFile, ImageFile, ExcelFile, WordFile, ZIPFile } from './icons';
+export * from './icons';
 
 export const fileIcons = [
   {
