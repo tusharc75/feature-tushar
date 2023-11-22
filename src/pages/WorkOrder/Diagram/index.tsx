@@ -17,7 +17,6 @@ import ViewImage from './ViewImage1';
 import { getFileIcon, getFileNameWithExtension } from './utils';
 
 const Diagram = ({ resource, referenceId }) => {
-
   const toastConfig = useContext(CustomToastContext);
 
   const [rowData, setRowData] = useState(null);
@@ -63,7 +62,7 @@ const Diagram = ({ resource, referenceId }) => {
             type: 'success',
             message: data.message
           });
-          setSelectedAttachment(null)
+          setSelectedAttachment(null);
           fetchData();
         })
         .catch((error) => {
@@ -154,10 +153,11 @@ const Diagram = ({ resource, referenceId }) => {
                       return (
                         <div key={file._id} className="shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
                           <div
-                            className={`head flex items-center justify-between cursor-pointer w-full p-[8px_15px] ${expended[file?._id]
-                              ? 'bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)] rounded-[4px_4px_0_0]'
-                              : 'bg-[var(--accordion-summary-bg,#fff)] rounded-[4px]'
-                              }`}
+                            className={`head flex items-center justify-between cursor-pointer w-full p-[8px_15px] ${
+                              expended[file?._id]
+                                ? 'bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)] rounded-[4px_4px_0_0]'
+                                : 'bg-[var(--accordion-summary-bg,#fff)] rounded-[4px]'
+                            }`}
                             onClick={() => {
                               setExpended((prev) => ({
                                 ...prev,
@@ -168,7 +168,9 @@ const Diagram = ({ resource, referenceId }) => {
                             <div className="flex items-center">
                               <span className="p-1">{expended[file?._id] ? <ExpandMoreIcon /> : <KeyboardArrowRight />}</span>
                               <Box ml={2}>
-                                <Typography style={{ fontWeight: 600 }}>{file?.name}</Typography>
+                                <Typography style={{ fontWeight: 600 }} className=" break-all" title={file?.name}>
+                                  {file?.name}
+                                </Typography>
                               </Box>
                             </div>
                             <div className="flex gap-2">
