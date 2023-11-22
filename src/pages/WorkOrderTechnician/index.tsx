@@ -1,4 +1,4 @@
-import { Box, Button, Checkbox, Chip, Grid, IconButton,  TextField } from '@material-ui/core';
+import { Box, Button, Checkbox, Chip, Grid, IconButton, TextField } from '@material-ui/core';
 import { useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
@@ -202,7 +202,6 @@ const WorkOrderTechnician = () => {
               size="small"
               renderInput={(params) => <TextField {...params} label="Status" variant="outlined" />}
               value={selectedServiceStatus}
-              limitTags={2}
               renderTags={(value, getTagProps) =>
                 value.map((option, index) => {
                   return (
@@ -220,7 +219,7 @@ const WorkOrderTechnician = () => {
               }}
             />
           </Box>
-          
+
           <IconButton size="small" onClick={() => fetchData()} style={{ display: 'flex', marginTop: '4px', marginLeft: 'auto' }}>
             <RefreshIcon />
           </IconButton>
