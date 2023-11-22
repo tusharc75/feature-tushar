@@ -291,8 +291,8 @@ const Steps = ({
   const [loadingStep, setLoadingStep] = useState(false);
 
   useEffect(() => {
-    if ((!selectedServiceRef.current || selectedServiceRef.current !== selectedService._id) && selectedService._id) {
-      selectedServiceRef.current = selectedService._id;
+    if ((!selectedServiceRef.current || selectedServiceRef.current !== selectedService.uniqueId) && selectedService.uniqueId) {
+      selectedServiceRef.current = selectedService.uniqueId;
       setServiceDetails(null);
       setSelectedSteps([]);
     }
@@ -302,7 +302,7 @@ const Steps = ({
   const fetchServiceData = async () => {
     setSelectedSteps([]);
 
-    const serviceDetailResponse = await axiosInstance().get(`${workOrder.api}/service/detail/${selectedService._id}/${workOrderId}`);
+    const serviceDetailResponse = await axiosInstance().get(`${workOrder.api}/service/detail/${workOrderId}/${selectedService._id}/${selectedService.uniqueId}`);
     var serviceDetail = serviceDetailResponse?.data?.data;
     serviceDetail.steps = serviceDetail?.steps?.sort((a, b) => a?.order - b?.order);
 
@@ -370,7 +370,8 @@ const Steps = ({
       setDisableCompleteFail(!allStepsDone);
       setIsAllStepDone(allStepsDone);
 
-      if (allStepsDone && [WORKORDER_SERVICE_STATUS.inProgress, WORKORDER_SERVICE_STATUS.pending].includes(selectedService.status)) {
+      if (allStepsDone && [WORKORDER_SERVICE_STATUS.inProgress, WORKORDER_SERVICE_STATUS.pending].includes(selectedService.status)
+        && addNewStep.open === false) {
         setOpenCompleteDialog(true);
       }
     }
@@ -807,6 +808,7 @@ const Steps = ({
         toastConfig.setToastConfig(error);
       });
   };
+
 
   return (
     <>
@@ -1400,7 +1402,7 @@ const Steps = ({
                 </Menu>
               )}
               {isAllStepDone && [WORKORDER_SERVICE_STATUS.inProgress, WORKORDER_SERVICE_STATUS.pending].includes(selectedService.status) && (
-                <Box pt={2}>
+                <Box m={2}>
                   <Grid container justify="flex-end">
                     <Button
                       variant="contained"

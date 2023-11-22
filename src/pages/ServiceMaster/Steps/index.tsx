@@ -18,7 +18,7 @@ import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import FieldDialog from './FieldDialog';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import { ExpandMore } from '@material-ui/icons';
+import { Build, ExpandMore } from '@material-ui/icons';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import DragIndicatorIcon from '@material-ui/icons/DragIndicator';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
@@ -140,7 +140,7 @@ const Steps = ({ serviceId }) => {
             }}
             size="small"
           >
-            <AddCircleOutlineIcon color="primary" fontSize="small" />
+            <Build color="primary" fontSize="small" />
           </IconButton>
         </HtmlTooltip>
         <HtmlTooltip title="Delete">
