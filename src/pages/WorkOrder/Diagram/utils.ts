@@ -1,5 +1,4 @@
-import { fileIcons } from 'src/assets/fileIcons';
-import { FileIcon } from 'src/assets/fileIcons/icons';
+import { fileIcons, FileIcon } from 'src/assets/fileIcons';
 
 export const getFileIcon = (fileName: string) => {
   let extension = fileName?.substring(fileName?.lastIndexOf('.'))?.toLowerCase();
