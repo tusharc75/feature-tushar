@@ -8,29 +8,24 @@ function reducer(state: TInitialState, action: TActios) {
         ...state,
         loading: action.loading
       };
-
     case 'initialize':
       return {
         ...state,
         error: false,
         dataRows: action.data,
         rowCount: action.count,
-        selectedRecords: action.selectedRecords ? action.selectedRecords : action.data.filter((f) => f.isChecked === true) || []
       };
-
     case 'selection':
       return {
         ...state,
         selectedRecords: action.selectedRecords
       };
-
     case 'update':
       return {
         ...state,
         dataRows: action.data,
         loading: false
       };
-
     case 'filter':
       return {
         ...state,
@@ -38,27 +33,23 @@ function reducer(state: TInitialState, action: TActios) {
         filters: action.filters,
         page: 0
       };
-
     case 'sort':
       return {
         ...state,
         sorting: action.sorting,
         loading: true
       };
-
     case 'search':
       return {
         ...state,
         search: action.search,
         loading: true
       };
-
     case 'pageChange':
       return {
         ...state,
         page: action.page
       };
-
     case 'pageSizeChange':
       return {
         ...state,
@@ -77,10 +68,15 @@ function reducer(state: TInitialState, action: TActios) {
         loading: false
       };
     case 'currentEditingCellPosition':
-      return { ...state, currentEditingCellPosition: action.cellPosition };
+      return {
+        ...state,
+        currentEditingCellPosition: action.cellPosition
+      };
     case 'showFilteredRecordsOnly':
-      return { ...state, showFilteredRecordsOnly: !state.showFilteredRecordsOnly };
-
+      return {
+        ...state,
+        showFilteredRecordsOnly: !state.showFilteredRecordsOnly
+      };
     default:
       break;
   }
@@ -119,9 +115,10 @@ export type TInitialState = {
   error: boolean;
   showFilteredRecordsOnly: boolean;
 };
+
 export type TActios =
   | { type: 'loading'; loading: boolean }
-  | { type: 'initialize'; data: any[]; count: number; selectedRecords?: any[] }
+  | { type: 'initialize'; data: any[]; count: number; }
   | { type: 'selection'; selectedRecords: any[] }
   | { type: 'update'; data: any[] }
   | { type: 'filter'; filters: any }
