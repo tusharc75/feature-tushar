@@ -367,7 +367,6 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
     rows.forEach((d) => {
       const element: any = {};
       element.materialId = d._id;
-      element.detail = d.type === 'product' ? d?.productName : d.type === 'package' ? d?.packageName : '';
       element.type = d?.type || addExistingProductDialog.type;
       element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
       element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
@@ -413,6 +412,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
           const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
           Object.assign(element, calValues);
         }
+        delete element.listPrice;
       });
     }
     axiosInstance()
@@ -431,21 +431,6 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
   };
 
   const handleSaveData = async (rows: any, saveAndNext = false) => {
-    rows.forEach((element) => {
-      element.pricingCondition = element.pricingCondition?.optionValue ? element.pricingCondition?.optionValue : element.pricingCondition; // temporary fix
-      delete element.index;
-      delete element.detail;
-      delete element.serializedProduct;
-      delete element.qtyDisplay;
-      delete element.isValid;
-      delete element.hideSelection;
-      delete element.assetQty;
-      delete element.productDetail;
-      delete element.packageDetail;
-      delete element.serviceDetail;
-      delete element.parentName;
-      delete element.subRows;
-    });
     setUpdating(true);
     axiosInstance()
       .put(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`, { material: rows })
