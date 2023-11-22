@@ -8,8 +8,7 @@ import mimeDb from 'mime-db';
 import { Fragment, useContext, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
-import { fileIcons } from 'src/assets/fileIcons';
-import { FileIcon } from 'src/assets/fileIcons/icons';
+import { fileIcons, FileIcon } from 'src/assets/fileIcons';
 import axiosInstance from 'src/axios/axiosInstance';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
