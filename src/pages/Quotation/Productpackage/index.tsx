@@ -24,7 +24,7 @@ import LeadTimeDialog from './LeadTimeDialog';
 import DateRangeIcon from '@material-ui/icons/DateRange';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
-import { calculateRowsField, getNestedSubRows } from 'src/components/RentalManagment/helper';
+import { calculateRowsFieldNew, getNestedSubRows } from 'src/components/RentalManagment/helper';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
@@ -419,21 +419,6 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
   };
 
   const handleSaveData = async (rows: any, saveAndNext = false) => {
-    rows.forEach((element) => {
-      delete element.index;
-      delete element.detail;
-      delete element.qtyDisplay;
-      delete element.isValid;
-      delete element.hideSelection;
-      delete element.productDetail;
-      delete element.packageDetail;
-      delete element.serviceDetail;
-      delete element.serializedAssetDetail;
-      delete element.subRows;
-      delete element.leadTime;
-      delete element.leadTimeData;
-      delete element.serializedProduct;
-    });
     setUpdating(true);
     axiosInstance()
       .put(`${quotation.api}/productpackage/${quotationData._id}/${versionId}`, { material: rows })
@@ -561,7 +546,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
       inputField['qty'] = inputField['qtyDisplay'];
     }
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
+    rows = await calculateRowsFieldNew(flattenArray(rowsData), inputField, allFields, updatedData);
     handleSaveData(rows);
   };
 

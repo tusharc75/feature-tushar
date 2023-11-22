@@ -17,7 +17,7 @@ import { uniq, map, orderBy, isEqual, unionBy, uniqBy } from 'lodash';
 import { autoCalculateSpecificFields, handleAutoCalculation } from '../../../constants/formulaUtility';
 import moment from 'moment';
 import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
-import { bulkUpdate, calculateRowsField } from 'src/components/RentalManagment/helper';
+import { bulkUpdate, calculateRowsFieldNew } from 'src/components/RentalManagment/helper';
 import routes from 'src/components/Helpers/Routes';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -126,7 +126,14 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
       });
       setInitialData({
         fields: data,
-        values: { ...getObjKeys('', data), estimateStartDate: quotationData.estimateStartDate, estimateEndDate: '', actualStartDate: '', actualEndDate: '', tenure: '', }
+        values: {
+          ...getObjKeys('', data),
+          estimateStartDate: quotationData.estimateStartDate,
+          estimateEndDate: '',
+          actualStartDate: '',
+          actualEndDate: '',
+          tenure: ''
+        }
       });
     } else {
       let unitOptions: any = [];
@@ -145,18 +152,22 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
             element.disabled = true;
           }
           if (element.fieldName === 'unit') {
-            element.option = [{
-              optionLabel: 'Piece',
-              optionValue: 'Piece'
-            }]
-            element.value = 'Piece'
+            element.option = [
+              {
+                optionLabel: 'Piece',
+                optionValue: 'Piece'
+              }
+            ];
+            element.value = 'Piece';
           }
           if (element.fieldName === 'pricingMethod') {
-            element.option = [{
-              optionValue: 'Per Job',
-              optionLabel: 'Per Job'
-            }]
-            element.value = 'Per Job'
+            element.option = [
+              {
+                optionValue: 'Per Job',
+                optionLabel: 'Per Job'
+              }
+            ];
+            element.value = 'Per Job';
           }
         } else {
           if (element.fieldName === 'unit') {
@@ -264,7 +275,10 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
       sectionFields = orderBy(sectionFields, 'order', 'asc');
       return { name, sectionFields };
     });
-    if (quotationData?.taxCode || (quotationData?.billingAddress && (quotationData?.billingAddress?.zipCode || quotationData?.billingAddress?.state))) {
+    if (
+      quotationData?.taxCode ||
+      (quotationData?.billingAddress && (quotationData?.billingAddress?.zipCode || quotationData?.billingAddress?.state))
+    ) {
       const taxCodeOptions = await fetchTaxRate(quotationData?.billingAddress, quotationData?.taxCode?.optionValue || null);
       fields?.forEach((e: any) => {
         if (e?.fieldName === 'taxCode') {
@@ -290,12 +304,17 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
   const handleSubmit = async (values) => {
     if (isBulkedit) {
       const rows = bulkUpdate(values, selectedProducts, material, allFields, quotationData?.currency);
-      handleSaveData(rows);
+      const result: any = [];
+      rows?.forEach((e) => {
+        const data = getObjKeysWithValues(e, allFields);
+        result.push({ _id: e?._id, materialId: e?.materialId, ...data });
+      });
+      handleSaveData(result);
     } else {
       if (rowData.parentId && !showConfirmationDialog) {
         setShowConfirmationDialog(true);
       } else {
-        const rows = await calculateRowsField(material, values, allFields, rowData);
+        const rows = await calculateRowsFieldNew(material, values, allFields, rowData);
         handleSaveData(rows, saveAndNext);
         setShowConfirmationDialog(false);
       }
@@ -449,8 +468,8 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
                                             field.fieldName === 'pricingMethod' && priceConditionList && values['pricingCondition']
                                               ? priceMethodList
                                               : field.fieldName === 'pricingCondition' && values['pricingMethod']
-                                                ? priceConditionList
-                                                : field.option
+                                              ? priceConditionList
+                                              : field.option
                                           }
                                           onChange={(e, val) => {
                                             const value = val && val.optionValue ? val.optionValue : '';
@@ -649,4 +668,3 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
 };
 
 export default QuotationQtyDialog;
-
