@@ -470,6 +470,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
         setLoadingEdit(false);
       })
       .catch((error) => {
+        setLoadingEdit(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -501,6 +502,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
         setLoadingEdit(false);
       })
       .catch((error) => {
+        setLoadingEdit(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -552,6 +554,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
         setLoadingEdit(false);
       })
       .catch((error) => {
+        setLoadingEdit(false);
         toastConfig.setToastConfig(error);
       });
   };
