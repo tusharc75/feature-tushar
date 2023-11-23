@@ -369,6 +369,7 @@ function Product({ id }) {
             handleAdd(rows);
           }}
           serialized={false}
+          extraDeepFilter={[{ field: 'expenseItem', term: 'No' }]}
           isSubmitting={isSubmitting}
         />
       )}
