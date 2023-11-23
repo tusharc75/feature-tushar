@@ -19,7 +19,7 @@ import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { calculateRowsField } from 'src/components/RentalManagment/helper';
+import { calculateRowsFieldNew } from 'src/components/RentalManagment/helper';
 import CostDialog from './CostDialog';
 import ServiceDialog from './ServiceDialog';
 import AddIcon from '@material-ui/icons/Add';
@@ -384,7 +384,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
 
   const handleAddProduct = (rows) => {
     setAddingProducts(true);
-    let tempProductArray = rows?.map((d) => ({
+    let products = rows?.map((d) => ({
       productId: d.productId || d._id,
       qty: d.qty ? parseInt(d.qty) : 1,
       expectedDelivery: purchaseOrderData?.deliveryDate,
@@ -392,7 +392,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
       costCode: d?.costCode ? d?.costCode : ''
     }));
     axiosInstance()
-      .post(`${purchaseOrder.api}/product/${purchaseOrderData._id}/add`, { orderDetails: tempProductArray })
+      .post(`${purchaseOrder.api}/product/${purchaseOrderData._id}/add`, { products })
       .then(() => {
         setAddProductDialog(false);
         fetchData();
@@ -406,26 +406,6 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
 
   const handleUpdateQty = (rows, saveAndNext = false) => {
     setLoadingEdit(true);
-    rows.forEach((element) => {
-      delete element?.allowedToEdit;
-      delete element?.assets;
-      delete element?.description;
-      delete element?.detail;
-      delete element?.hideSelection;
-      delete element?.isValid;
-      delete element?.id;
-      delete element?.index;
-      delete element?.isChecked;
-      delete element?.productDetail;
-      delete element?.materialId;
-      delete element?.productNumber;
-      delete element?.serializedProduct;
-      delete element?.serializedProductView;
-      delete element?.type;
-      delete element?.parentId;
-      delete element?.productCategory;
-      delete element?.subRows;
-    });
     axiosInstance()
       .put(`${purchaseOrder.api}/product/${purchaseOrderData._id}/update`, { products: rows })
       .then(() => {
@@ -590,15 +570,18 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
         }
       }
       let rows: any = [{ ...rowData, ...updatedData }];
-      rows = await calculateRowsField(material, inputField, productFields, updatedData);
+      rows = await calculateRowsFieldNew(material, inputField, productFields, updatedData);
+      rows?.forEach(element => {
+        element.productId = updatedData?.productId
+      });
       handleUpdateQty(rows);
     } else if (rowData?.type === 'Service') {
       let rows: any = [{ ...rowData, ...updatedData }];
-      rows = await calculateRowsField(material, inputField, serviceFields, updatedData);
+      rows = await calculateRowsFieldNew(material, inputField, serviceFields, updatedData);
       handleUpdateService(rows);
     } else if (rowData?.type === 'Manual Entry') {
       let rows: any = [{ ...rowData, ...updatedData }];
-      rows = await calculateRowsField(material, inputField, costFields, updatedData);
+      rows = await calculateRowsFieldNew(material, inputField, costFields, updatedData);
       handleUpdateCost(rows);
     }
   };

@@ -1,4 +1,4 @@
-import { Box, Button, Checkbox, Chip, Grid, IconButton, makeStyles, TextField } from '@material-ui/core';
+import { Box, Button, Checkbox, Chip, Grid, IconButton, TextField } from '@material-ui/core';
 import { useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
@@ -13,14 +13,7 @@ import CardColTimeline, { groupBy } from 'src/components/CardColTimeline';
 import TechnicianDialog from './TechnicianDialog';
 import { camelCase } from 'lodash';
 
-const useStyles = makeStyles(() => ({
-  '.MuiGrid-spacing-xs-1': {
-    width: 'calc(100vw + 14px)'
-  },
-  inputs: {
-    boxShadow: '0px 4.74053px 23.7026px rgba(0, 0, 0, 0.06)'
-  }
-}));
+
 
 const RESOURCE = [
   {
@@ -41,7 +34,7 @@ const RESOURCE = [
 ]
 
 const WorkOrderTechnician = () => {
-  const classes = useStyles();
+
 
   const [serviceOpen, setServiceOpen] = useState(false);
   const [selectedService, setSelectedService] = useState(null);
@@ -86,7 +79,8 @@ const WorkOrderTechnician = () => {
         newObj['serviceName'] = item.service?.serviceName;
         newObj['workOrderNumber'] = item.workOrderDetail?.workOrderNumber;
         newObj['serializedAsset'] = item.workOrderDetail?.serializedAsset?.optionLabel;
-        newObj['status'] = item.status;
+        newObj['serializedAsset'] = item.workOrderDetail?.serializedAsset?.optionLabel;
+        newObj['assignedWorkStations'] = item?.assignedWorkStations?.map((e) => e.optionLabel)?.toString();
         return newObj;
       });
 
@@ -133,19 +127,6 @@ const WorkOrderTechnician = () => {
           setProductionOrderOptions(productionOrderOption);
         }
         setServiceData(data);
-        if (selectedService) {
-          const tempSelected = data?.find((e) => e._id === selectedService?.uniqueId && e?.service?._id === selectedService?._id);
-          if (tempSelected) {
-            let tempServiceData = tempSelected?.service;
-            tempServiceData['uniqueId'] = tempSelected?._id;
-            tempServiceData['status'] = tempSelected?.status;
-            tempServiceData['assetNumber'] = tempSelected?.workOrderDetail?.serializedAsset?.optionLabel;
-            tempServiceData['assetId'] = tempSelected?.workOrderDetail?.serializedAsset?.optionValue;
-            tempServiceData['workOrderId'] = tempSelected?.workOrderDetail?._id;
-            tempServiceData['warehouse'] = tempSelected?.workOrderDetail?.warehouse;
-            setSelectedService(tempServiceData);
-          }
-        }
         setLoading(false);
       })
       ?.catch((err) => {
@@ -157,6 +138,7 @@ const WorkOrderTechnician = () => {
     { accessor: 'serviceName', type: 'title' },
     { accessor: 'workOrderNumber', title: 'Work Order', type: 'text' },
     { accessor: 'serializedAsset', title: 'Asset', type: 'text' },
+    { accessor: 'assignedWorkStations', title: 'Work Stations', type: 'text' },
     ...(user?.user?.brandPolicy?.workOrderTimer ? [{ accessor: 'stepData', title: 'Time', type: 'timer' }] : [])
   ];
 
@@ -169,7 +151,7 @@ const WorkOrderTechnician = () => {
       </Box>
       <Box className="detail-container-v1">
         <Box className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[4fr_4fr_6fr_auto] xl:grid-cols-[1fr_1fr_1fr_auto] items-start gap-4">
-          <Box className={classes.inputs}>
+          <Box className={`shadow-[0px_4.74053px_23.7026px_rgba(0,_0,_0,_0.06)]`}>
             <Autocomplete
               options={resourceFilter}
               fullWidth
@@ -187,7 +169,7 @@ const WorkOrderTechnician = () => {
           </Box>
           {
             selectedResource && (
-              <Box className={classes.inputs}>
+              <Box className={`shadow-[0px_4.74053px_23.7026px_rgba(0,_0,_0,_0.06)]`}>
                 <Autocomplete
                   options={selectedResource.resource === sidebarResource.workOrder ? workOrderOptions : selectedResource.resource === sidebarResource.repairOrder ? repairOrderOptions : productionOrderOptions}
                   disabled={loading}
@@ -204,7 +186,7 @@ const WorkOrderTechnician = () => {
               </Box>
             )
           }
-          <Box className={classes.inputs}>
+          <Box className={`shadow-[0px_4.74053px_23.7026px_rgba(0,_0,_0,_0.06)]`}>
             <Autocomplete
               fullWidth
               multiple
@@ -237,6 +219,7 @@ const WorkOrderTechnician = () => {
               }}
             />
           </Box>
+
           <IconButton size="small" onClick={() => fetchData()} style={{ display: 'flex', marginTop: '4px', marginLeft: 'auto' }}>
             <RefreshIcon />
           </IconButton>
@@ -244,16 +227,11 @@ const WorkOrderTechnician = () => {
         </Box>
         {cardData && (
           <CardColTimeline
-            mt={3}
             data={cardData}
             loading={loading}
             cardDataRows={cardDataRows}
             passFailStatus={true}
             passFailAccessor="serviceStatus"
-            cardHeight={user?.user?.brandPolicy?.workOrderTimer ? 150 : 130}
-            sm={6}
-            md={4}
-            lg={3}
             cardOnClick={(e, data) => {
               let tempServiceData = data?.service;
               tempServiceData['uniqueId'] = data?._id;
@@ -261,7 +239,7 @@ const WorkOrderTechnician = () => {
               tempServiceData['assetNumber'] = data?.workOrderDetail?.serializedAsset?.optionLabel;
               tempServiceData['assetId'] = data?.workOrderDetail?.serializedAsset?.optionValue;
               tempServiceData['workOrderId'] = data?.workOrderDetail?._id;
-              tempServiceData['warehouse'] = data?.workOrderDetail?.warehouse;
+              tempServiceData['workOrderNumber'] = data?.workOrderDetail?.workOrderNumber;
               setSelectedService(tempServiceData);
               setServiceOpen(true);
             }}

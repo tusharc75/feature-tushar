@@ -482,7 +482,7 @@ const ProductDetailsPage = () => {
                                   <Typography variant="subtitle2">{routes?.serializedAsset?.title}</Typography>
                                   {permissions?.serializedAsset?.isCreate && (
                                     <IconButton
-                                      title="Manage Plant(s)"
+                                      title={`Create ${routes.serializedAsset.title}`}
                                       color="primary"
                                       size="small"
                                       onClick={() => {

@@ -240,7 +240,6 @@ const SerializedAssetTest = () => {
           type: 'initialize',
           data: rows,
           count: data.count,
-          selectedRecords: rows.filter((f) => f.isChecked === true)
         });
       })
       .catch((error) => {
@@ -301,8 +300,7 @@ const SerializedAssetTest = () => {
       deepFilter = `${deepFilter}&subleaseAsset=0`;
     }
     if (showFilteredRecordsOnly) {
-      const savedRecords = selectedRecords;
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
     }
     return `${deepFilter}&filterType=and&filterByIdType=and`;
   };
@@ -386,7 +384,7 @@ const SerializedAssetTest = () => {
         <CustomBreadCrumbs routes={[routes.serializedAsset]} />
         <ImportExportLinks
           permissions={permissions?.serializedAsset}
-          module="product inventory"
+          module={routes.productInventory.title}
           api={serializedAsset.api}
           afterImportCompleted={() => {
             fetchProductInventory();
@@ -588,7 +586,7 @@ const SerializedAssetTest = () => {
                       setShowDeleteConfirmBox(true);
                     }}
                   >
-                    Delete
+                    {`Delete (${selectedRecords?.length})`}
                   </MenuItem>
                   {permissions?.serializedAsset?.isUpdate &&
                     allowUpdateStatus &&

@@ -20,7 +20,7 @@ import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/Offl
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BiChevronDown } from 'react-icons/bi';
-import { calculateRowsField, fetch_rental_product_fields, getNestedSubRows } from '../../../components/RentalManagment/helper';
+import { calculateRowsFieldNew, fetch_rental_product_fields, getNestedSubRows } from '../../../components/RentalManagment/helper';
 import { startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import CalculatePriceDialog from 'src/components/RentalManagment/CalculatePriceDialog';
@@ -219,7 +219,8 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
             </HtmlTooltip>
             {allowedToEdit ? (
               row.original.hideSelection ? (
-                <HtmlTooltip title={'Asset is already assigned'}>
+                <HtmlTooltip title={row.original.assetQty ? 'Asset is already assigned' :
+                  row.original?.status ? rentalManagementMessage.loadingAlreadyCreated : ''}>
                   <span>
                     <IconButton size="small" aria-label="Details" disabled={true}>
                       <DeleteIcon fontSize="small" color={'disabled'} />
@@ -367,7 +368,6 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
     rows.forEach((d) => {
       const element: any = {};
       element.materialId = d._id;
-      element.detail = d.type === 'product' ? d?.productName : d.type === 'package' ? d?.packageName : '';
       element.type = d?.type || addExistingProductDialog.type;
       element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
       element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
@@ -413,6 +413,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
           const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
           Object.assign(element, calValues);
         }
+        delete element.listPrice;
       });
     }
     axiosInstance()
@@ -431,21 +432,6 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
   };
 
   const handleSaveData = async (rows: any, saveAndNext = false) => {
-    rows.forEach((element) => {
-      element.pricingCondition = element.pricingCondition?.optionValue ? element.pricingCondition?.optionValue : element.pricingCondition; // temporary fix
-      delete element.index;
-      delete element.detail;
-      delete element.serializedProduct;
-      delete element.qtyDisplay;
-      delete element.isValid;
-      delete element.hideSelection;
-      delete element.assetQty;
-      delete element.productDetail;
-      delete element.packageDetail;
-      delete element.serviceDetail;
-      delete element.parentName;
-      delete element.subRows;
-    });
     setUpdating(true);
     axiosInstance()
       .put(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`, { material: rows })
@@ -568,7 +554,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
         }
       }
       let rows: any = [{ ...rowData, ...updatedData }];
-      rows = await calculateRowsField(material, inputField, allFields, updatedData);
+      rows = await calculateRowsFieldNew(material, inputField, allFields, updatedData);
       handleSaveData(rows);
       setShowConfirmationDialog({ open: false, data: {} });
     }

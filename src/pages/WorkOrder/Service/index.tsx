@@ -11,7 +11,8 @@ import {
   WORKORDER_SERVICE_STATUS,
   WORKORDER_SERVICE_STEP_STATUS,
   WORK_ORDER_STATUS,
-  getChipColor
+  getChipColor,
+  sidebarResource
 } from 'src/constants/helpers';
 import { Badge, Box, Chip, Dialog, Divider, Grid, IconButton, Menu, MenuItem, Paper, TextField, Tooltip, useMediaQuery } from '@material-ui/core';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -50,7 +51,6 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { Add, ExpandMore } from '@material-ui/icons';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 import AssignWorkStationDialog from './AssignWorkStationDialog';
-import WorkOutlineIcon from '@material-ui/icons/WorkOutline';
 
 const getTotalTime = (stepTimes: any) => {
   let totalTimes = 0;
@@ -61,7 +61,7 @@ const getTotalTime = (stepTimes: any) => {
       totalTimes += new Date().getTime() - new Date(item?.pauseDate || item?.startDate).getTime();
     }
   });
-  stepTimes.forEach((item) => {});
+  stepTimes.forEach((item) => { });
   return { shouldTimerRun, totalTimes };
 };
 
@@ -102,7 +102,7 @@ const RenderTotalTime = ({ stepTimes }: any) => {
   );
 };
 
-const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWorkOrderData }) => {
+const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWorkOrderData, resource, technicianSelectedService }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: {
@@ -122,7 +122,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
   const [logsDialog, setLogsDialog] = useState(false);
   const [commentsDialog, setCommentsDialog] = useState(false);
   const [showManagePurchaseOrder, setShowManagePurchaseOrder] = useState(false);
-  const [isColapsed, setIsColapsed] = useState(false);
+  const [isColapsed, setIsColapsed] = useState(resource === sidebarResource.workOrder ? false : true);
   const mobScreen = useMediaQuery('(max-width:768px)');
   const [disableCompleteFail, setDisableCompleteFail] = useState(false);
   const [openCompleteDialog, setOpenCompleteDialog] = useState(false);
@@ -224,16 +224,33 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
             });
           }
         }
+
+        if (resource === sidebarResource.workOrderTechnician) {
+          services?.forEach((element) => {
+            if (element?.uniqueId === technicianSelectedService) {
+              element.clickable = true;
+            }
+            else {
+              element.clickable = false;
+            }
+          });
+        }
+
         if (selectedService) {
           setSelectedService(services?.find((e) => e?.uniqueId === selectedService?.uniqueId) || null);
         } else {
-          setSelectedService(services[pendingServiceIndex]);
+          if (technicianSelectedService) {
+            setSelectedService(services?.find((e) => e?.uniqueId === technicianSelectedService) || null);
+          }
+          else {
+            setSelectedService(services[pendingServiceIndex]);
+          }
         }
       }
       setServiceSteps(services);
       if (
         services.filter((e) => e.type === 'service' && e.status === WORKORDER_SERVICE_STATUS.completed)?.length ===
-          services.filter((e) => e.type === 'service')?.length &&
+        services.filter((e) => e.type === 'service')?.length &&
         workOrderData?.status !== WORK_ORDER_STATUS.completed
       ) {
         fetchWorkOrderData();
@@ -519,6 +536,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                   }}
                 >
                   {!isColapsed && (
+                    resource === sidebarResource.workOrder &&
                     <>
                       <Button
                         variant={'outlined'}
@@ -751,20 +769,22 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                               <MoreHorizIcon />
                                             </IconButton>
                                           </div>
-                                          <div style={{ flexBasis: 'max-content' }}>
-                                            <HtmlTooltip enterTouchDelay={0} title="Delete" placement="top" arrow>
-                                              <IconButton
-                                                size="small"
-                                                color="inherit"
-                                                style={{ color: 'red', marginTop: '3px' }}
-                                                aria-label="delete"
-                                                disabled={allowedToEdit && data?.status === WORKORDER_SERVICE_STATUS.pending ? false : true}
-                                                onClick={() => setShowConfirmBox(true)}
-                                              >
-                                                <DeleteOutlineIcon style={{ fontSize: '18px' }} />
-                                              </IconButton>
-                                            </HtmlTooltip>
-                                          </div>
+                                          {resource === sidebarResource.workOrder &&
+                                            <div style={{ flexBasis: 'max-content' }}>
+                                              <HtmlTooltip enterTouchDelay={0} title="Delete" placement="top" arrow>
+                                                <IconButton
+                                                  size="small"
+                                                  color="inherit"
+                                                  style={{ color: 'red', marginTop: '3px' }}
+                                                  aria-label="delete"
+                                                  disabled={allowedToEdit && data?.status === WORKORDER_SERVICE_STATUS.pending ? false : true}
+                                                  onClick={() => setShowConfirmBox(true)}
+                                                >
+                                                  <DeleteOutlineIcon style={{ fontSize: '18px' }} />
+                                                </IconButton>
+                                              </HtmlTooltip>
+                                            </div>
+                                          }
                                           {/* PassFail */}
                                           <div style={{ flexBasis: '100%' }}>
                                             {data?.type === 'service' && data?.serviceStatus && (
@@ -827,7 +847,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                       allowedToEdit={isAllowedToServiceEdit && selectedService?.clickable}
                       setDisableCompleteFail={setDisableCompleteFail}
                       fetchService={fetchServiceData}
-                      referencType="workOrder"
+                      resource={resource}
                       stepSubmitedData={stepSubmitedData}
                     />
                   ) : (
@@ -990,20 +1010,20 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                                                       data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
                                                         ? '#E1FCE3'
                                                         : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                        ? '#fabebe'
-                                                        : '#FFF5DD',
+                                                          ? '#fabebe'
+                                                          : '#FFF5DD',
                                                     color:
                                                       data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
                                                         ? '#048E0A'
                                                         : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                        ? '#fa0202'
-                                                        : '#FF8C21',
+                                                          ? '#fa0202'
+                                                          : '#FF8C21',
                                                     background:
                                                       data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
                                                         ? '#E1FCE3'
                                                         : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                                                        ? '#fabebe'
-                                                        : '#FFF5DD',
+                                                          ? '#fabebe'
+                                                          : '#FFF5DD',
                                                     fontWeight: 700
                                                   }}
                                                 />
@@ -1082,7 +1102,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           )}
           {anchorEl && (
             <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
-              {allowedToEdit && (
+              {allowedToEdit && resource === sidebarResource.workOrder && (
                 <MenuItem
                   disabled={!allowedToEdit}
                   onClick={() => {
@@ -1093,7 +1113,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                   Assign Technicians
                 </MenuItem>
               )}
-              {allowedToEdit && permissions?.workStations?.isRead && (
+              {allowedToEdit && resource === sidebarResource.workOrder && permissions?.workStations?.isRead && (
                 <MenuItem
                   disabled={!allowedToEdit}
                   onClick={() => {
@@ -1104,29 +1124,33 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                   Assign Work Stations
                 </MenuItem>
               )}
-              <MenuItem
-                disabled={!allowedToEdit}
-                onClick={() => {
-                  setServiceDialog({ open: true, type: 'service', uniqueId: selectedService.uniqueId, preWork: selectedService.preWork });
-                  setAnchorEl(null);
-                }}
-              >
-                Add Existing Services
-              </MenuItem>
-              <MenuItem
-                disabled={
-                  !allowedToEdit ||
-                  [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                    selectedService?.status
-                  )
-                }
-                onClick={() => {
-                  setAssignSteps(true);
-                  setAnchorEl(null);
-                }}
-              >
-                Add Steps
-              </MenuItem>
+              {resource === sidebarResource.workOrder &&
+                <MenuItem
+                  disabled={!allowedToEdit}
+                  onClick={() => {
+                    setServiceDialog({ open: true, type: 'service', uniqueId: selectedService.uniqueId, preWork: selectedService.preWork });
+                    setAnchorEl(null);
+                  }}
+                >
+                  Add Existing Services
+                </MenuItem>
+              }
+              {resource === sidebarResource.workOrder &&
+                <MenuItem
+                  disabled={
+                    !allowedToEdit ||
+                    [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                      selectedService?.status
+                    )
+                  }
+                  onClick={() => {
+                    setAssignSteps(true);
+                    setAnchorEl(null);
+                  }}
+                >
+                  Add Steps
+                </MenuItem>
+              }
               <MenuItem
                 onClick={() => {
                   setAttchmentsDialog({
@@ -1138,10 +1162,12 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                   });
                   setAnchorEl(null);
                 }}
+                disabled={!allowedToEdit}
               >
                 Upload Documents
               </MenuItem>
               {!user?.brandPolicy?.workOrderConsumableHide && (
+                resource === sidebarResource.workOrder &&
                 <MenuItem
                   onClick={() => {
                     setConsumablesDialog({
@@ -1188,7 +1214,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
               >
                 Comments
               </MenuItem>
-              {user?.brandPolicy?.subcontractPurchaseOrder && (
+              {user?.brandPolicy?.subcontractPurchaseOrder && resource === sidebarResource.workOrder && (
                 <MenuItem
                   onClick={() => {
                     setShowManagePurchaseOrder(true);
@@ -1198,15 +1224,16 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                   Subcontract PO
                 </MenuItem>
               )}
-              <MenuItem
-                disabled={allowedToEdit && selectedService?.status === WORKORDER_SERVICE_STATUS.pending ? false : true}
-                onClick={() => {
-                  handleRemoveService(selectedService?.uniqueId);
-                  setAnchorEl(null);
-                }}
-              >
-                Delete
-              </MenuItem>
+              {resource === sidebarResource.workOrder &&
+                <MenuItem
+                  disabled={allowedToEdit && selectedService?.status === WORKORDER_SERVICE_STATUS.pending ? false : true}
+                  onClick={() => {
+                    handleRemoveService(selectedService?.uniqueId);
+                    setAnchorEl(null);
+                  }}
+                >
+                  Delete
+                </MenuItem>}
             </Menu>
           )}
         </Grid>
@@ -1411,18 +1438,18 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
       )}
 
       {reviseQuotation && (
-          <ConfirmationDialog
-            open={reviseQuotation}
-            message={`Do you want to revise the Quotation ?`}
-            onClose={() => {
-              setReviseQuotation(false);
-              fetchServiceData();
-            }}
-            onOk={()=>{
-              createNewVersionQuote();
-              setReviseQuotation(false);
-            }}
-          />
+        <ConfirmationDialog
+          open={reviseQuotation}
+          message={`Do you want to revise the Quotation ?`}
+          onClose={() => {
+            setReviseQuotation(false);
+            fetchServiceData();
+          }}
+          onOk={() => {
+            createNewVersionQuote();
+            setReviseQuotation(false);
+          }}
+        />
       )}
 
     </Box>

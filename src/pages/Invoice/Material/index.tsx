@@ -8,7 +8,7 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import Add from '@material-ui/icons/Add';
-import { pricingCondition, invoice } from '../../../constants/helpers';
+import { pricingCondition, invoice, PRICING_SETUP_TYPE } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import DeleteIcon from '@material-ui/icons/Delete';
 import AddIcon from '@material-ui/icons/Add';
@@ -409,7 +409,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
   const calculatePrice = (arr: any[]) => {
     if (invoiceData) {
       const data: any = {};
-      data.conditionType = ['Rent'];
+      data.conditionType = [PRICING_SETUP_TYPE.rent];
       data.material = arr.map((ele) => ({
         materialId: ele?.materialId,
         materialType: ele?.type,

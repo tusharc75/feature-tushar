@@ -3,7 +3,6 @@ import { Button, Dialog, Grid, Box } from '@material-ui/core';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import axiosInstance from '../../../axios/axiosInstance';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';

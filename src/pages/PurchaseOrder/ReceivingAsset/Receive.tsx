@@ -579,7 +579,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
         <CustomAssetDialog
           handleClose={() => setAssetNumberDialog({ open: false, material: [], receiveDate: null })}
           products={assetNumberDialog.material?.filter((e) => e.serializedProduct
-            && e.type === MATERIAL_TYPE.product)?.map((e) => { return { id: e._id, productName: material.find((u) => u._id === e._id)?.productName, qty: e.assetQuantity } })}
+            && e.type === MATERIAL_TYPE.product)?.map((e) => { return { id: e._id, productName: material.find((u) => u._id === e._id)?.detail, qty: e.assetQuantity } })}
           handleSuccess={(rows) => {
             const material = assetNumberDialog.material;
             material?.forEach((e) => {
