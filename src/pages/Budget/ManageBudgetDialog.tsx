@@ -44,7 +44,7 @@ const budgetMonths = [
 ];
 
 export default function ManageBudgetDialog({ open, onSuccess, onClose, budgetId, isClone }) {
-  const { budgetApi } = budget;
+  const { api } = budget;
   const toastConfig = useContext(CustomToastContext);
 
   const [initialData, setInitialData] = useState({
@@ -113,7 +113,7 @@ export default function ManageBudgetDialog({ open, onSuccess, onClose, budgetId,
           let newFields = [];
 
           axiosInstance()
-            .get(`${budgetApi}/${budgetId}`)
+            .get(`${api}/${budgetId}`)
             .then(({ data: { data } }) => {
               data.year = new Date(`${data.year}-01-01`);
 
@@ -154,7 +154,7 @@ export default function ManageBudgetDialog({ open, onSuccess, onClose, budgetId,
     if (budgetId && !isClone) {
       values._id = budgetId;
       axiosInstance()
-        .put(budgetApi, values)
+        .put(api, values)
         .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
@@ -171,7 +171,7 @@ export default function ManageBudgetDialog({ open, onSuccess, onClose, budgetId,
         });
     } else {
       axiosInstance()
-        .post(budgetApi, values)
+        .post(api, values)
         .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
