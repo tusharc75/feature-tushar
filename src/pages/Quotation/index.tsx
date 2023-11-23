@@ -55,7 +55,7 @@ const Quotation = () => {
   const [renderCount, setRenderCount] = useState(0);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showManageQuotationDialog, setShowManageQuotationDialog] = useState({ open: false, isClone: false, idToClone: null });
+  const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [accountDetails, setAccountDetails] = useState({
@@ -196,7 +196,7 @@ const Quotation = () => {
               size="small"
               aria-label="Clone"
               onClick={() => {
-                setShowManageQuotationDialog({ open: true, isClone: true, idToClone: row.original._id });
+                setShowManageDialog({ open: true, isClone: true, idToClone: row.original._id });
               }}
             >
               <FileCopyIcon fontSize="small" color="primary" />
@@ -209,7 +209,7 @@ const Quotation = () => {
             </IconButton>
           </HtmlTooltip>
         )}
-        {row?.original?.canDelete && permissions?.quotation?.isDelete && (
+        {row?.original?.canDelete && (
           <HtmlTooltip title="Delete">
             <IconButton
               size="small"
@@ -398,7 +398,7 @@ const Quotation = () => {
                       size="small"
                       className={`no-shadow`}
                       onClick={() => {
-                        setShowManageQuotationDialog({ open: true, isClone: false, idToClone: null });
+                        setShowManageDialog({ open: true, isClone: false, idToClone: null });
                       }}
                       startIcon={<AddOutlined />}
                     >
@@ -482,15 +482,15 @@ const Quotation = () => {
           />
         )}
       </CustomContainer>
-      {showManageQuotationDialog.open && (
+      {showManageDialog.open && (
         <ManageQuotationDialog
-          isClone={showManageQuotationDialog.isClone}
-          open={showManageQuotationDialog.open}
-          quotationId={showManageQuotationDialog.idToClone}
-          onClose={() => setShowManageQuotationDialog({ open: false, isClone: false, idToClone: null })}
+          isClone={showManageDialog.isClone}
+          open={showManageDialog.open}
+          quotationId={showManageDialog.idToClone}
+          onClose={() => setShowManageDialog({ open: false, isClone: false, idToClone: null })}
           onSuccess={() => {
             fetchData();
-            setShowManageQuotationDialog({ open: false, isClone: false, idToClone: null });
+            setShowManageDialog({ open: false, isClone: false, idToClone: null });
           }}
         />
       )}
