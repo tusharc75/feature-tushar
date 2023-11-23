@@ -59,7 +59,7 @@ const CustomAssetDialog = ({ products, loading, handleClose, handleSuccess }) =>
     const handleSubmit = (values) => {
         const data: any = [...products];
         data?.forEach((ele) => {
-            ele.assetNumbers = values?.products?.filter((e) => e.assetNumberType === ASSET_NUMBER_TYPE.manual)?.map((e) => e.assetNumber)
+            ele.assetNumbers = values?.products?.filter((e) => e.assetNumberType === ASSET_NUMBER_TYPE.manual && e.id === ele.id)?.map((e) => e.assetNumber)
         })
         handleSuccess(data)
     };
