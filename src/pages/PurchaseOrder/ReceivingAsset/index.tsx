@@ -242,19 +242,21 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
                   </span>
                 </HtmlTooltip>
               }
-              <HtmlTooltip title="Logs">
-                <span>
-                  <IconButton
-                    size="small"
-                    aria-label="Log"
-                    onClick={() => {
-                      setLogDialog({ open: true, _id: row?.original?._id, detail: row?.original?.detail });
-                    }}
-                  >
-                    <TrackChangesIcon fontSize="small" color={'primary'} />
-                  </IconButton>
-                </span>
-              </HtmlTooltip>
+              {row?.original?.type !== MATERIAL_TYPE.serializedAsset &&
+                <HtmlTooltip title="Logs">
+                  <span>
+                    <IconButton
+                      size="small"
+                      aria-label="Log"
+                      onClick={() => {
+                        setLogDialog({ open: true, _id: row?.original?._id, detail: row?.original?.detail });
+                      }}
+                    >
+                      <TrackChangesIcon fontSize="small" color={'primary'} />
+                    </IconButton>
+                  </span>
+                </HtmlTooltip>
+              }
             </>
         }
       ]
@@ -379,7 +381,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
               style={isMobile && !isTablet ? { color: 'var(--secondary)' } : {}}
               disabled={
                 selectedRecords.length === 0 ||
-                (selectedRecords?.filter((e: any) => e.qty !== (e?.rejectQuantity || 0 + e?.assetQty || 0)).length > 0
+                (selectedRecords?.filter((e: any) => (e.qty - ((e?.rejectQuantity || 0) + (e?.assetQty || 0)) > 0))?.length > 0
                   ? false
                   : true)
               }
