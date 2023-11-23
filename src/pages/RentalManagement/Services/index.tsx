@@ -222,7 +222,8 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
             </HtmlTooltip>
             {allowedToEdit ? (
               row.original.hideSelection ? (
-                <HtmlTooltip title={'Asset is already assigned'}>
+                <HtmlTooltip title={row.original.assetQty ? 'Asset is already assigned' :
+                  row.original?.status ? rentalManagementMessage.loadingAlreadyCreated : ''}>
                   <span>
                     <IconButton size="small" aria-label="Details" disabled={true}>
                       <DeleteIcon fontSize="small" color={'disabled'} />
