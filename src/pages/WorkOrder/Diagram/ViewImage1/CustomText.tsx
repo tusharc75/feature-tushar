@@ -13,12 +13,12 @@ const CustomText = ({ textState, setTextState, onEdit, editingTextRef, onSelect 
       prevTexts.map((text) =>
         text.id === id
           ? {
-              ...text,
-              width: ref.offsetWidth,
-              height: ref.offsetHeight,
-              x: position.x,
-              y: position.y
-            }
+            ...text,
+            width: ref.offsetWidth,
+            height: ref.offsetHeight,
+            x: position.x,
+            y: position.y
+          }
           : text
       )
     );
@@ -31,9 +31,9 @@ const CustomText = ({ textState, setTextState, onEdit, editingTextRef, onSelect 
       prevTexts.map((text) =>
         text.id === textState.id
           ? {
-              ...text,
-              isFixed: false
-            }
+            ...text,
+            isFixed: false
+          }
           : text
       )
     );
@@ -47,7 +47,7 @@ const CustomText = ({ textState, setTextState, onEdit, editingTextRef, onSelect 
       size={{ width: textState.width, height: textState.height }}
       onDrag={(e, d) => handleDrag(textState.id, d)}
       onResize={(e, direction, ref, delta, position) => handleResize(textState.id, direction, ref, delta, position)}
-      style={{}}
+      style={{ color: 'black' }}
     >
       <div
         ref={textRef}
@@ -64,7 +64,7 @@ const CustomText = ({ textState, setTextState, onEdit, editingTextRef, onSelect 
         <span
           style={{
             fontSize: textState.fontSize,
-            color: 'white',
+            color: 'black',
             textAlign: 'center',
             width: '100%',
             height: '100%'
