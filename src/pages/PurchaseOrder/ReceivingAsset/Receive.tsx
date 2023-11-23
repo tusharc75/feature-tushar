@@ -583,7 +583,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
           handleSuccess={(rows) => {
             const material = assetNumberDialog.material;
             material?.forEach((e) => {
-              e.assetNumbers = rows?.find((ele) => isEqual(ele._id, e.id))?.assetNumbers || []
+              e.assetNumbers = rows?.find((ele) => isEqual(ele.id, e._id))?.assetNumbers || []
             })
             handleReceive(material, assetNumberDialog.receiveDate)
           }}
