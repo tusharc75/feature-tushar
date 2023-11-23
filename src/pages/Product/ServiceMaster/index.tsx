@@ -600,17 +600,9 @@ const ServiceMaster = (props: Props) => {
           handleCloseDialog={() => setAssignProductDialog({ open: false, products: null, service: null, uniqueId: null, steps: null })}
           onSuccess={(d: any) => {
             setAssignStepsToConsumablesDialog({ open: true, consumables: d, service: assignProductDialog.service, steps: assignProductDialog.steps });
-            // const data = d?.map((d) => {
-            //   return {
-            //     product: d?.id,
-            //     qty: Number(d.qty),
-            //     service: assignProductDialog.service,
-            //     uniqueId: assignProductDialog.uniqueId
-            //   };
-            // });
-            // handleAssignConsumable(data);
           }}
           serialized={false}
+          extraDeepFilter={[{ field: 'expenseItem', term: 'No' }]}
         />
       )}
       {assignStepsToConsumablesDialog.open && (
