@@ -550,6 +550,7 @@ const Consumables = ({
               handleSubmit(rows);
             }}
             serialized={false}
+            extraDeepFilter={[{ field: 'expenseItem', term: 'No' }]}
             isSubmitting={isSubmitting}
           />
         )}

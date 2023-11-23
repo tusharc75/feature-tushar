@@ -1128,6 +1128,7 @@ const WorkOrder = ({
               }}
               serialized={false}
               isSubmitting={isSubmitting}
+              extraDeepFilter={[{ field: 'expenseItem', term: 'No' }]}
             />
           )}
         </Grid>
