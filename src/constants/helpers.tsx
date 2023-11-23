@@ -931,7 +931,7 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
     } else if (key.type !== 'currencyAmount' && (key.type === 'converter' || key.isConverter === true)) {
       key.displayUnits &&
         key.displayUnits.forEach((_unit) => {
-          obj[key.fieldName + '_' + _unit.toLowerCase()] = value && value !== '' ? parseFloat(value) : value;
+          obj[key.fieldName + '_' + _unit.toLowerCase()] = value && value !== '' ? parseFloat(value) : 0;
         });
     } else if (key.type === 'currencyAmount') {
       key.displayCurrency &&
@@ -939,14 +939,14 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
           if (key.isConverter && key.displayUnits.length) {
             key.displayUnits &&
               key.displayUnits.forEach((_unit) => {
-                obj[key.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()] = value && value !== '' ? parseFloat(value) : value;
+                obj[key.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()] = value && value !== '' ? parseFloat(value) : 0;
               });
           } else {
-            obj[key.fieldName + '_' + _currency.toLowerCase()] = value && value !== '' ? parseFloat(value) : value;
+            obj[key.fieldName + '_' + _currency.toLowerCase()] = value && value !== '' ? parseFloat(value) : 0;
           }
         });
     } else if (key.type === 'decimal') {
-      obj[key.fieldName] = value && value !== '' ? parseFloat(value) : value;
+      obj[key.fieldName] = value && value !== '' ? parseFloat(value) : 0;
     } else if (key.type === 'lookUpDisplay') {
     } else {
       obj[key.fieldName] = value;
