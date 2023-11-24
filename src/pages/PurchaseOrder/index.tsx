@@ -9,12 +9,12 @@ import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { MdAccountCircle, MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
+import { MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
+import { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -25,11 +25,10 @@ import SearchBox from 'src/components/Helpers/SearchBox';
 import HideWhenOffline from 'src/components/HideWhenOffline';
 import MobileFilterDialog, { DisplayFiltersForMobile } from 'src/components/MobileFilterDialog';
 import MobileSortDialog from 'src/components/MobileSortDialog';
-import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
-import { getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, purchaseOrder, sidebarResource } from 'src/constants/helpers';
-import useColumns, { getFrameworkComponents, getStaticFields, gridFilterParser } from 'src/constants/useColumns';
+import { getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, purchaseOrder, removeLocalStorage, sidebarResource } from 'src/constants/helpers';
 import styles from '../Leads/Header.module.scss';
 import ManagePurchaseOrder from './ManagePurchaseOrder';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns } from 'src/components/CustomReactTableNew';
 
 const PurchaseOrder = () => {
   const PurchaseOrderType = [
@@ -55,12 +54,10 @@ const PurchaseOrder = () => {
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [gridApi, setGridApi] = useState(null);
   const [sortOpen, setSortOpen] = useState(false);
-  const [columns, setColumns] = useState([]);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
+  const [columns, setColumns] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
+  const { dataRows, rowCount, page, limit, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
   const [isOpenDialog, setisOpenDialog] = useState(false);
   const [fromSalesOrder, setFromSalesOrder] = useState(history.location?.state?.salesOrder);
@@ -95,62 +92,91 @@ const PurchaseOrder = () => {
 
   const fetchGridColumns = () => {
     axiosInstance()
-      .get('/field?resource=Purchase Order')
+      .get(`/field?resource=${sidebarResource.purchaseOrder}`)
       .then(({ data: { data } }) => {
         let columns = [];
-        let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.purchaseOrderDetail.path, true);
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productionOrderDetail.path, true);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName);
-            }
           }
+          return o?.fieldData;
         });
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent,
-          actionsRenderer: ActionsRenderer
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
-        columns = [...columns, ...getStaticFields()];
-        setColumns([...columns]);
+        columns = [...columns, ...getStaticFields(), ActionsRenderer];
+        setColumns(columns);
+        console.log(columns);
       });
+  };
+
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 110,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        {
+          permissions?.purchaseOrder?.isCreate && (
+            <HtmlTooltip title="Clone">
+              <IconButton
+                size="small"
+                aria-label="Clone"
+                onClick={() => {
+                  setShowManagePurchaseOrderDialog({ open: true, isClone: true, idToClone: row.original._id });
+                }}
+              >
+                <FileCopyIcon color="primary" />
+              </IconButton>
+            </HtmlTooltip>
+          )
+        }
+        {
+          permissions?.purchaseOrder?.isDelete && row.original.canDelete && !row.original.deleted && (
+            <HtmlTooltip title="Delete">
+              <IconButton
+                size="small"
+                aria-label="Delete"
+                onClick={() => {
+                  setDeleteRecord(row.original);
+                  setShowDeleteConfirmBox(true);
+                }}
+              >
+                <DeleteIcon color="error" />
+              </IconButton>
+            </HtmlTooltip>
+          )
+        }
+      </>)
   };
 
   const fetchPurchaseOrder = () => {
     dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
     const queryString = getQueryString();
     axiosInstance()
       .get(`${purchaseOrder.api}${queryString}`)
       .then(({ data: { data, count } }) => {
         let rows = data?.map((u) => {
           const { owner, collaborator, ...restProperties } = u;
-          let finalObject = prepareDataForGrid(u);
+          const finalObject = prepareDataForGrid(u, user);
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id);
-          let res = {
-            ...finalObject
-          };
-          return res;
+          return finalObject;
         });
         if (appendRows) {
           dispatch({
             type: 'initialize',
             data: [...dataRows, ...rows],
             count: count,
-            selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
           });
         } else {
           dispatch({
             type: 'initialize',
             data: rows,
             count: count,
-            selectedRecords: rows.filter((f) => f.isChecked === true)
           });
         }
         // dispatch({ type: 'initialize', data: rows, count: count });
@@ -246,38 +272,6 @@ const PurchaseOrder = () => {
     }
   };
 
-  const ActionsRenderer = (params) => (
-    <>
-      {permissions?.purchaseOrder?.isCreate && (
-        <HtmlTooltip title="Clone">
-          <IconButton
-            size="small"
-            aria-label="Clone"
-            onClick={() => {
-              setShowManagePurchaseOrderDialog({ open: true, isClone: true, idToClone: params.data._id });
-            }}
-          >
-            <FileCopyIcon color="primary" />
-          </IconButton>
-        </HtmlTooltip>
-      )}
-      {permissions?.purchaseOrder?.isDelete && params?.data?.canDelete && !params?.data?.deleted && (
-        <HtmlTooltip title="Delete">
-          <IconButton
-            size="small"
-            aria-label="Delete"
-            onClick={() => {
-              setDeleteRecord(params.data);
-              setShowDeleteConfirmBox(true);
-            }}
-          >
-            <DeleteIcon color="error" />
-          </IconButton>
-        </HtmlTooltip>
-      )}
-    </>
-  );
-
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
   };
@@ -350,8 +344,8 @@ const PurchaseOrder = () => {
               : []
           }
           onExportToExcelSuccess={() => {
-            if (gridApi) gridApi.deselectAll();
-            else fetchPurchaseOrder();
+            removeLocalStorage(`${localStorageSelectedRecords}`);
+            fetchPurchaseOrder();
           }}
           additionalParams={getQueryString(true)}
         />
@@ -512,7 +506,7 @@ const PurchaseOrder = () => {
                   <MenuItem
                     disabled={
                       permissions?.purchaseOrder?.isDelete &&
-                      selectedRecords?.filter((e) => e.canDelete && !e.deleted)?.length === selectedRecords?.length
+                        selectedRecords?.filter((e) => e.canDelete && !e.deleted)?.length === selectedRecords?.length
                         ? false
                         : true
                     }
@@ -530,93 +524,19 @@ const PurchaseOrder = () => {
           </div>
         </div>
         {columns ? (
-          Object.keys(frameWorkComponent).length > 0 ? (
-            isMobile && !isTablet ? (
-              <CustomSwipableList
-                key={selectedType}
-                allowSelection={true}
-                allowSwipe={true}
-                permissions={permissions.purchaseOrder}
-                primaryField={columns?.find((d) => d.primaryField)}
-                onClick={(data) => {
-                  history.push(`${routes.purchaseOrderDetail.path}/${data._id}`);
-                }}
-                dataRows={dataRows}
-                selectedRecords={selectedRecords}
-                dispatch={dispatch}
-                onEdit={(data) => {
-                  history.push(`${routes.purchaseOrderDetail.path}/${data._id}`);
-                }}
-                extraParamsToCheckDelete={true}
-                onDelete={(data) => {
-                  setDeleteRecord(data);
-                  setShowDeleteConfirmBox(true);
-                }}
-                rowCount={rowCount}
-                page={page}
-                loading={loading}
-                additionalDetails={[
-                  {
-                    icon: <MdAccountCircle size={18} />,
-                    field: 'supplierAccount'
-                  }
-                ]}
-                chips={[
-                  {
-                    label: 'Purchase Order Date:  ',
-                    fieldType: 'date',
-                    field: 'purchaseOrderDate'
-                  },
-                  {
-                    label: 'Plant:  ',
-                    field: 'warehouse'
-                  },
-                  {
-                    label: 'Delivery Date: ',
-                    field: 'deliveryDate',
-                    fieldType: 'date',
-                    setBackground: (data) => {
-                      return data.status === '' && new Date() > new Date(data.deliveryDate) ? { backgroundColor: '#efcccc' } : null;
-                    }
-                  },
-                  {
-                    label: 'Status: ',
-                    field: 'status'
-                  }
-                ]}
-                onCreate={false}
-                showClone={true}
-                onClone={(data) => {
-                  setShowManagePurchaseOrderDialog({ open: true, isClone: true, idToClone: data._id });
-                }}
-                renderedFrom={renderedFrom}
-              />
-            ) : (
-              <CustomAgGrid
-                columns={columns}
-                dataRows={dataRows}
-                frameworkComponents={frameWorkComponent}
-                setGridApi={setGridApi}
-                dispatch={dispatch}
-                rowCount={rowCount}
-                limit={limit}
-                pageSizes={pageSizes}
-                page={page}
-                actionWidth={150}
-                loading={loading}
-                renderedFrom={renderedFrom}
-                rowClassRules={{
-                  'red-data-row': function (params) {
-                    return params.data.deleted;
-                  }
-                }}
-                refreshGrid={fetchPurchaseOrder}
-                showOnlyShowFilteredRecordSwitch={true}
-                showFilters={true}
-                resource={sidebarResource.purchaseOrder}
-              />
-            )
-          ) : null
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
+            columns={columns}
+            onSelect={() => { }}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            isClientSideGrid={true}
+            refreshGrid={fetchPurchaseOrder}
+            showOnlyShowFilteredRecordSwitch={true}
+            showFilters={true}
+            resource={sidebarResource.purchaseOrder}
+          />
         ) : (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
