@@ -17,7 +17,7 @@ import { uniq, map, orderBy, isEqual, uniqBy } from 'lodash';
 import { autoCalculateSpecificFields, handleAutoCalculation } from '../../../constants/formulaUtility';
 import moment from 'moment';
 import { fetch_salesOrder_product_fields } from 'src/components/SalesOrder/helper';
-import { bulkUpdate, calculateRowsField } from 'src/components/RentalManagment/helper';
+import { bulkUpdate, calculateRowsFieldNew } from 'src/components/RentalManagment/helper';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -159,7 +159,7 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = ({
       if (rowData.parentId && !showConfirmationDialog) {
         setShowConfirmationDialog(true);
       } else {
-        const rows = await calculateRowsField(material, values, allFields, rowData);
+        const rows = await calculateRowsFieldNew(material, values, allFields, rowData);
         handleSaveData(rows, saveAndNext);
         setShowConfirmationDialog(false);
       }

@@ -4,9 +4,9 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import axiosInstance from '../../../axios/axiosInstance';
-import { unionBy, uniqBy } from 'lodash';
+import { uniqBy } from 'lodash';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE } from '../../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, arrayToDropwdownOption } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
@@ -267,7 +267,11 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
         const calValues = autoCalculateSpecificFields(values, { ...element, ...values, ...tempRate }, allFields);
         rows.push({ _id: element._id, ...calValues });
       });
-      handleSaveData(rows);
+      let updatedRows: any = [];
+      rows = rows?.forEach((e : any) => {
+          updatedRows.push({_id: e._id, ...getObjKeysWithValues(e, allFields)});
+      })
+      handleSaveData(updatedRows);
     } else {
       const rows = await calculateRowsFieldNew(material, values, allFields, rowData);
       handleSaveData(rows, saveAndNext);

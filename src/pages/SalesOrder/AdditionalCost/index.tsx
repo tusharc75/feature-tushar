@@ -144,11 +144,6 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom, allowedToEd
   };
 
   const handleUpdateCost = (rows: any, saveAndNext = false) => {
-    rows.forEach((element) => {
-      delete element.index;
-      delete element.isValid;
-      delete element.hideSelection;
-    });
     setUpdating(true);
     axiosInstance()
       .put(`${salesOrder.api}/additionalcost/${salesOrderData._id}/update`, { additionalCost: rows })

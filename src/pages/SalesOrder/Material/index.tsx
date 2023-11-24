@@ -359,21 +359,6 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen, f
   };
 
   const handleSaveData = async (rows: any, saveAndNext = false) => {
-    rows.forEach((element) => {
-      delete element.index;
-      delete element.detail;
-      delete element.description;
-      delete element.qtyDisplay;
-      delete element.isValid;
-      delete element.hideSelection;
-      delete element.assetQty;
-      delete element.productDetail;
-      delete element.packageDetail;
-      delete element.serviceDetail;
-      delete element.subRows;
-      delete element.leadTime;
-      delete element.leadTimeData;
-    });
     setUpdating(true);
     axiosInstance()
       .put(`${salesOrder.api}/material/${salesOrderData._id}`, { material: rows })
