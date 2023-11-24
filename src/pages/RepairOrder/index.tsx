@@ -1,66 +1,59 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import { Link, useHistory } from 'react-router-dom';
-import { Chip, Grid, IconButton, Tooltip, Fab } from '@material-ui/core';
-import { FaClone } from 'react-icons/fa';
-import { FaRegistered } from 'react-icons/fa';
-import queryString from 'query-string';
-import {
-  gridLoadingTimeout,
-  repairOrder,
-  prepareDataForGrid,
-  getLocalStorageArrayData,
-  removeLocalStorage,
-  sidebarResource
-} from '../../constants/helpers';
-import CustomContainer from '../../components/CustomContainer';
-import routes from './../../components/Helpers/Routes';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import MessageDialog from '../../components/Helpers/MessageDialog';
-import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { useData } from '../../StateProvider/Provider';
-import axiosInstance from '../../axios/axiosInstance';
-import { isMobile, isTablet } from 'react-device-detect';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField, gridFilterParser } from '../../constants/useColumns';
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { camelCase } from 'lodash';
-import { SiStatuspage } from 'react-icons/all';
-import ManageRepairOrder from './ManageRepairOrder';
-import RepairOrderHeader from './RepairOrderHeader';
+import { useContext, useEffect, useState } from 'react';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomContainer from 'src/components/CustomContainer';
+import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
+import MessageDialog from 'src/components/Helpers/MessageDialog';
+import routes from 'src/components/Helpers/Routes';
+import { gridLoadingTimeout, prepareDataForGrid, repairOrder, sidebarResource } from 'src/constants/helpers';
+import { useHistory } from 'react-router-dom';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import queryString from 'query-string';
+import { useData } from 'src/StateProvider/Provider';
+import { Button, Chip, IconButton, Menu, MenuItem } from '@material-ui/core';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import styles from '../Leads/Header.module.scss';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
 import DeleteIcon from '@material-ui/icons/Delete';
+import ManageRepairOrder from './ManageRepairOrder';
 
-let repairOrderTimeout;
+let searchTimeout;
 
 const RepairOrder = () => {
-  const RepairOrderType = [
+  let renderedFrom = camelCase(routes.repairOrder?.title);
+  const toastConfig = useContext(CustomToastContext);
+
+  const types = [
     {
-      key: `My ${routes?.repairOrder.title}`,
+      key: `My ${routes.repairOrder.title}`,
       value: 1
     },
     {
-      key: `All ${routes?.repairOrder.title}`,
+      key: `All ${routes.repairOrder.title}`,
       value: 2
     }
   ];
 
-  const renderedFrom = camelCase(routes?.repairOrder.title);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
-
-  const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
+  let { type, referenceId, referenceType }: any = queryString.parse(history.location.search);
+  const { state, dispatch } = useTableReducer();
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { getColumnData } = useColumns();
+
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
-  let { type, referenceId, referenceType }: any = queryString.parse(history.location.search);
+
+  const [columns, setColumns] = useState(null);
   const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
+  const [anchorEl, setAnchorEl] = useState(null);
   const [renderCount, setRenderCount] = useState(0);
-  const [deleteLoading, setDeleteLoading] = useState(false);
-  const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
-  const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
-  const [deleteRecord, setDeleteRecord] = useState<any>({});
   const [showManageRepairOrderDialog, setShowManageRepairOrderDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [singleRepairOrderDelete, setSingleRepairOrderDelete] = useState({
@@ -68,51 +61,11 @@ const RepairOrder = () => {
     show: false,
     repairOrderNumber: ''
   });
-
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
-    state;
-  const [frameworkComponents, setFrameworkComponents] = useState({});
-  const [columns, setColumns] = useState([]);
-
-  const { getColumnData } = useColumns();
-
-  useEffect(() => {
-    fetchGridColumns();
-  }, []);
-
-  const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=Repair Order`);
-    data = response?.data?.data;
-    let columns = [];
-    let rendererNames = [];
-    data.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.repairOrderDetail.path, true);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-          rendererNames.push(currentColumn?.rendererName);
-        }
-      }
-      return o?.fieldData;
-    });
-    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-    tempFrameworkComponent = {
-      ...tempFrameworkComponent,
-      actionsRenderer: ActionsRenderer
-    };
-    setFrameworkComponents({ ...tempFrameworkComponent });
-    let staticFields = getStaticFields();
-    staticFields.forEach((field) => {
-      columns.push(checkStaticField(renderedFrom, field));
-    });
-    setColumns([...columns]);
-  };
-
-  //  Grid Variables - End
+  const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
+  const [deleteRecord, setDeleteRecord] = useState<any>({});
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const [locationKeys, setLocationKeys] = useState([]);
+
   useEffect(() => {
     return history.listen((location) => {
       const { type }: any = queryString.parse(history.location.search);
@@ -134,84 +87,88 @@ const RepairOrder = () => {
   }, [locationKeys]);
 
   useEffect(() => {
+    fetchGridColumns();
+  }, []);
+
+  useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (repairOrderTimeout) {
-      clearTimeout(repairOrderTimeout);
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
     }
-    repairOrderTimeout = setTimeout(() => {
-      fetchRepairOrders();
+    searchTimeout = setTimeout(() => {
+      fetchData();
     }, millisec);
   }, [search]);
 
   useEffect(() => {
     if (renderCount > 0) {
-      fetchRepairOrders();
+      fetchData();
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
-  const handleSingleDeleteRepairOrder = async () => {
-    dispatch({ type: 'loading', loading: true });
-    axiosInstance()
-      .put(`${repairOrder.api}/remove`, {
-        ids: [singleRepairOrderDelete.id]
-      })
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-        fetchRepairOrders();
-        dispatch({ type: 'loading', loading: false });
-        setSingleRepairOrderDelete({ id: null, show: false, repairOrderNumber: '' });
-      })
-      .catch((error) => {
-        dispatch({ type: 'loading', loading: false });
-        toastConfig.setToastConfig(error);
-      });
+  const fetchGridColumns = async () => {
+    let data;
+    const response = await axiosInstance().get(`/field?resource=Repair Order`);
+    data = response?.data?.data;
+    let columns = [];
+    data.forEach((o) => {
+      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.repairOrderDetail.path, true);
+      if (currentColumn !== null) {
+        columns = [...columns, currentColumn?.columnData];
+      }
+      return o?.fieldData;
+    });
+    columns = [...columns, ...getStaticFields(), ActionsRenderer];
+    setColumns(columns);
   };
 
-  const ActionsRenderer = (params) => (
-    <>
-      {permissions?.repairOrder?.isCreate ? (
-        <Tooltip title="Clone">
-          <IconButton
-            size="small"
-            aria-label="Clone"
-            onClick={() => {
-              setShowManageRepairOrderDialog({ open: true, isClone: true, idToClone: params.data._id });
-            }}
-          >
-            <FaClone fontSize="small" style={{ color: 'var(--primary)' }} />
-          </IconButton>
-        </Tooltip>
-      ) : (
-        <Tooltip className="cursor-stop" title="You do not have permission to clone/create">
-          <IconButton aria-label="Clone" size="small">
-            <FaClone fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      )}
-      {params?.data?.canDelete && (
-        <HtmlTooltip title="Delete">
-          <IconButton
-            size="small"
-            style={{ marginLeft: '5px' }}
-            aria-label="Delete"
-            onClick={() => {
-              setSingleRepairOrderDelete({
-                show: true,
-                id: params.data._id,
-                repairOrderNumber: `${params.data.repairOrderNumber}`
-              });
-            }}
-          >
-            <DeleteIcon color="error" style={{ width: '18px' }} />
-          </IconButton>
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 100,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        <HtmlTooltip title={permissions?.repairOrder?.isCreate ? 'Clone' : ''}>
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Clone"
+              disabled={permissions?.repairOrder?.isCreate ? false : true}
+              onClick={() => {
+                setShowManageRepairOrderDialog({ open: true, isClone: true, idToClone: row?.original?._id });
+              }}
+            >
+              <FileCopyIcon fontSize="small" color={permissions?.repairOrder?.isCreate ? 'primary' : 'disabled'} />
+            </IconButton>
+          </span>
         </HtmlTooltip>
-      )}
-    </>
-  );
+
+        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : ''}>
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              disabled={row?.original?.canDelete ? false : true}
+              onClick={() => {
+                setSingleRepairOrderDelete({
+                  show: true,
+                  id: row?.original?._id,
+                  repairOrderNumber: `${row?.original?.repairOrderNumber}`
+                });
+              }}
+            >
+              <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+      </>
+    )
+  };
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
@@ -248,111 +205,47 @@ const RepairOrder = () => {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(getLocalStorageArrayData(localStorageSelectedRecords)?.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || [])?.map((m) => m._id))}`;
     }
     return deepFilter;
   };
 
-  const fetchRepairOrders = async () => {
+  const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
-    try {
-      let data: any = [],
-        count;
-      const response: any = await axiosInstance().get(`${repairOrder.api}${queryString}`);
-      data = response?.data?.data;
-      count = response?.data?.count;
-      let rows = data.map((u) => {
-        let finalObject: any = prepareDataForGrid(u, user);
-        finalObject['isChecked'] = false;
-        finalObject['allowedToEdit'] = permissions?.repairOrder?.isUpdate;
-        finalObject['canDelete'] = permissions?.repairOrder?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;
-        return finalObject;
-      });
-      if (appendRows) {
-        dispatch({ type: 'initialize', data: [...dataRows, ...rows], count: count });
-      } else {
+    axiosInstance()
+      .get(`${repairOrder.api}${queryString}`)
+      .then(({ data: { data, count } }) => {
+        let rows = data.map((u) => {
+          let finalObject: any = prepareDataForGrid(u, user);
+          finalObject['isSelected'] = false;
+          finalObject['canDelete'] = permissions?.repairOrder?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;
+          return finalObject;
+        });
         dispatch({ type: 'initialize', data: rows, count: count });
-      }
-      setTimeout(() => {
-        dispatch({ type: 'loading', loading: false });
-      }, gridLoadingTimeout);
-    } catch (error) {
-      dispatch({ type: 'loading', loading: false });
-      toastConfig.setToastConfig(error);
-    }
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      })
+      .finally(() => {
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
+      });
   };
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-  const handleRepairOrderTypeSel = (filterValues) => {
-    dispatch({ type: 'setPage', page: 0 });
-    setSelectedType(filterValues);
+  const onTypeChange = (event, type) => {
+    dispatch({ type: 'pageChange', page: 0 });
+    const value = types.find((d) => d.key === type).value;
+    setSelectedType(value);
     if (referenceId && referenceType) {
-      history.push(`?type=${filterValues}&referenceType=${referenceType}&referenceId=${referenceId}`);
+      history.push(`?type=${value}&referenceType=${referenceType}&referenceId=${referenceId}`);
     } else {
-      history.push(`?type=${filterValues}`);
-    }
-  };
-
-  const handleTransferEntityDialog = () => {
-    setShowTransferEntityDialog(true);
-  };
-
-  const showConfirmBox = (row) => {
-    if (row) {
-      setIsConformDialogVisible(true);
-      if (row && row._id) {
-        setDeleteRecord(row);
-      }
-    } else {
-      if (getLocalStorageArrayData(localStorageSelectedRecords)?.find((d) => d.canDelete === false)) {
-        setShowDeleteWarningConfirmBox(true);
-      } else {
-        setIsConformDialogVisible(true);
-      }
-    }
-  };
-
-  const clickCreateNew = () => {
-    setShowManageRepairOrderDialog({ open: true, isClone: false, idToClone: null });
-  };
-
-  const handleDeleteRepairOrder = async () => {
-    setDeleteLoading(true);
-    let recordsToDelete = [];
-    if (deleteRecord?._id) {
-      recordsToDelete.push(deleteRecord?._id);
-    } else {
-      recordsToDelete = getLocalStorageArrayData(localStorageSelectedRecords)?.map((o) => o._id);
-    }
-    if (recordsToDelete.length > 0) {
-      axiosInstance()
-        .put(`${repairOrder.api}/remove`, {
-          ids: recordsToDelete
-        })
-        .then(({ data }) => {
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-          removeLocalStorage(localStorageSelectedRecords);
-          setIsConformDialogVisible(false);
-          setDeleteLoading(false);
-          if (deleteRecord) setDeleteRecord({});
-          fetchRepairOrders();
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-          setIsConformDialogVisible(false);
-          setDeleteLoading(false);
-        });
+      history.push(`?type=${value}`);
     }
   };
 
@@ -365,7 +258,85 @@ const RepairOrder = () => {
     history.replace({
       search: queryParams.toString()
     });
-    fetchRepairOrders();
+    fetchData();
+  };
+
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+
+  const showConfirmBox = (row) => {
+    if (row) {
+      setIsConformDialogVisible(true);
+      if (row && row._id) {
+        setDeleteRecord(row);
+      }
+    } else {
+      if (selectedRecords?.find((d) => d.canDelete === false)) {
+        setShowDeleteWarningConfirmBox(true);
+      } else {
+        setIsConformDialogVisible(true);
+      }
+    }
+  };
+
+  const handleSingleDeleteRepairOrder = async () => {
+    dispatch({ type: 'loading', loading: true });
+    axiosInstance()
+      .put(`${repairOrder.api}/remove`, {
+        ids: [singleRepairOrderDelete.id]
+      })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        fetchData();
+        dispatch({ type: 'loading', loading: false });
+        setSingleRepairOrderDelete({ id: null, show: false, repairOrderNumber: '' });
+      })
+      .catch((error) => {
+        dispatch({ type: 'loading', loading: false });
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const handleDeleteRepairOrder = async () => {
+    setDeleteLoading(true);
+    let recordsToDelete = [];
+    if (deleteRecord?._id) {
+      recordsToDelete.push(deleteRecord?._id);
+    } else {
+      recordsToDelete = selectedRecords?.map((o) => o._id);
+    }
+    if (recordsToDelete.length > 0) {
+      axiosInstance()
+        .put(`${repairOrder.api}/remove`, {
+          ids: recordsToDelete
+        })
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          dispatch({ type: 'selection', selectedRecords: [] });
+          setIsConformDialogVisible(false);
+          setDeleteLoading(false);
+          if (deleteRecord) setDeleteRecord({});
+          fetchData();
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+          setIsConformDialogVisible(false);
+          setDeleteLoading(false);
+        });
+    }
   };
 
   return (
@@ -374,119 +345,123 @@ const RepairOrder = () => {
         <CustomBreadCrumbs routes={[routes.repairOrder]} />
         <ImportExportLinks
           permissions={permissions?.repairOrder}
-          module="repairOrder"
+          module={routes.repairOrder.title}
           api={repairOrder.api}
           afterImportCompleted={() => {
-            fetchRepairOrders();
+            fetchData();
           }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
-          recordsToExport={getLocalStorageArrayData(localStorageSelectedRecords)?.length}
-          ids={
-            getLocalStorageArrayData(localStorageSelectedRecords)?.length
-              ? getLocalStorageArrayData(localStorageSelectedRecords)?.map((obj) => obj._id)
-              : []
-          }
+          recordsToExport={selectedRecords?.length}
+          ids={selectedRecords?.map((obj) => obj._id)}
           onExportToExcelSuccess={() => {
-            if (gridApi) gridApi.deselectAll();
-            else fetchRepairOrders();
+            fetchData();
           }}
           additionalParams={getQueryString(true)}
         />
       </div>
       <CustomContainer>
         <div className="header-panel">
-          <RepairOrderHeader
-            selectedType={selectedType}
-            selectedRecords={getLocalStorageArrayData(localStorageSelectedRecords)}
-            onTypeChange={handleRepairOrderTypeSel}
-            options={RepairOrderType}
-            onSearch={handleSearch}
-            columns={columns}
-            dispatch={dispatch}
-            searchVal={search}
-            RepairOrderPermissions={permissions?.repairOrder}
-            onCreate={clickCreateNew}
-            showConfirmBox={showConfirmBox}
-            canDelete={getLocalStorageArrayData(localStorageSelectedRecords)?.length === 0}
-            icon={<FaRegistered className="headerLogo" />}
-            heading={routes.repairOrder.title}
-            showTransferEntityDialog={handleTransferEntityDialog}
-            filters={filters}
-            resource={sidebarResource.repairOrder}
-          >
-            {referenceType && <Chip className="ml-3" color="primary" label={`Rental Job : ${referenceType}`} onDelete={updateQueryParams} />}
-          </RepairOrderHeader>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className={'flex justify-between align-items-center gap-1 w-full'}>
+              <div>
+                <ToggleButtonGroup
+                  size="small"
+                  className="align-items-center gap-1 "
+                  value={types[selectedType - 1].key}
+                  exclusive
+                  onChange={onTypeChange}
+                >
+                  {types.map((k, index) => {
+                    return (
+                      <ToggleButton value={k.key} key={index}>
+                        {k.key}
+                      </ToggleButton>
+                    );
+                  })}
+                </ToggleButtonGroup>
+                {referenceType && <Chip className="ml-3" color="primary" label={`Rental Job : ${referenceType}`} onDelete={updateQueryParams} />}
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-[8px] justify-end">
+              <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
+              <div className="flex gap-[8px] flex-wrap items-center">
+                {permissions?.sublease?.isCreate && (
+                  <Button
+                    onClick={() => {
+                      setShowManageRepairOrderDialog({ open: true, isClone: false, idToClone: null });
+                    }}
+                    variant={'contained'}
+                    size="small"
+                    color="primary"
+                    className={'no-shadow'}
+                    startIcon={<AddOutlined />}
+                  >
+                    Add
+                  </Button>
+                )}
+                <Button
+                  variant={'outlined'}
+                  color="default"
+                  size="small"
+                  onClick={openActions}
+                  className={`new-dropdown-v1`}
+                  aria-controls="action-menu"
+                  endIcon={<ExpandMore />}
+                  disabled={selectedRecords?.length ? false : true}
+                >
+                  Actions
+                </Button>
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  id="action-menu"
+                  open={Boolean(anchorEl)}
+                  onClose={closeActions}
+                >
+                  <MenuItem
+                    disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
+                    onClick={() => {
+                      closeActions();
+                      showConfirmBox(null);
+                    }}
+                  >
+                    {`Delete (${selectedRecords?.length})`}
+                  </MenuItem>
+                </Menu>
+              </div>
+            </div>
+          </div>
         </div>
-        {Object.keys(frameworkComponents).length > 0 ? (
-          isMobile && !isTablet ? (
-            <CustomSwipableList
-              key={selectedType}
-              allowSelection={true}
-              allowSwipe={true}
-              permissions={permissions?.repairOrder}
-              primaryField={columns?.find((d) => d.primaryField)}
-              onClick={(data) => {
-                history.push(`${routes.repairOrderDetail.path}/${data._id}`);
-              }}
-              dataRows={dataRows}
-              selectedRecords={getLocalStorageArrayData(localStorageSelectedRecords)}
-              dispatch={dispatch}
-              onEdit={(data) => {
-                history.push(`${routes.repairOrderDetail.path}/${data._id}`);
-              }}
-              extraParamsToCheckDelete={true}
-              onDelete={(data) => {
-                setDeleteRecord(data._id);
-                setIsConformDialogVisible(true);
-              }}
-              rowCount={rowCount}
-              page={page}
-              loading={loading}
-              chips={[
-                {
-                  icon: <SiStatuspage />,
-                  label: 'Status: ',
-                  field: 'status'
-                }
-              ]}
-              onCreate={false}
-              showClone={true}
-              onClone={(data) => {
-                setShowManageRepairOrderDialog({ open: true, isClone: true, idToClone: data._id });
-              }}
-              renderedFrom={renderedFrom}
-            />
-          ) : (
-            <CustomAgGrid
-              columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameworkComponents}
-              setGridApi={setGridApi}
-              dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              actionWidth={100}
-              loading={loading}
-              renderedFrom={renderedFrom}
-              refreshGrid={fetchRepairOrders}
-              showOnlyShowFilteredRecordSwitch={true}
-              showFilters={true}
-              resource={sidebarResource.repairOrder}
-            />
-          )
+        {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
+            columns={columns}
+            onSelect={() => {}}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            isClientSideGrid={false}
+            refreshGrid={fetchData}
+            showOnlyShowFilteredRecordSwitch={true}
+            showFilters={true}
+            resource={sidebarResource.repairOrder}
+          />
         ) : null}
 
-        {showDeleteWarningConfirmBox ? (
+        {showDeleteWarningConfirmBox && (
           <MessageDialog
             open={showDeleteWarningConfirmBox}
             message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
             onClose={() => setShowDeleteWarningConfirmBox(false)}
           />
-        ) : null}
-        {isConfirmDialogVisible ? (
+        )}
+        {isConfirmDialogVisible && (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
             message={`Are you sure you want to delete ${deleteRecord?.repairOrderNumber ? 'Repair Order' : 'Repair Orders'}   ${
@@ -499,9 +474,9 @@ const RepairOrder = () => {
             okBtnLoading={deleteLoading}
             onOk={handleDeleteRepairOrder}
           />
-        ) : null}
+        )}
 
-        {singleRepairOrderDelete.show ? (
+        {singleRepairOrderDelete.show && (
           <ConfirmationDialog
             open={singleRepairOrderDelete.show}
             message={`Are you sure you want to delete Repair Order: ${singleRepairOrderDelete.repairOrderNumber}?`}
@@ -514,19 +489,19 @@ const RepairOrder = () => {
             }
             onOk={handleSingleDeleteRepairOrder}
           />
-        ) : null}
+        )}
+        {showManageRepairOrderDialog.open && (
+          <ManageRepairOrder
+            isClone={showManageRepairOrderDialog.isClone}
+            repairOrderId={showManageRepairOrderDialog.idToClone}
+            onClose={() => setShowManageRepairOrderDialog({ open: false, isClone: false, idToClone: null })}
+            onSuccess={(data) => {
+              history.push(`${routes.repairOrderDetail.path}/${data._id}`);
+              setShowManageRepairOrderDialog({ open: false, isClone: false, idToClone: null });
+            }}
+          />
+        )}
       </CustomContainer>
-      {showManageRepairOrderDialog.open && (
-        <ManageRepairOrder
-          isClone={showManageRepairOrderDialog.isClone}
-          repairOrderId={showManageRepairOrderDialog.idToClone}
-          onClose={() => setShowManageRepairOrderDialog({ open: false, isClone: false, idToClone: null })}
-          onSuccess={(data) => {
-            history.push(`${routes.repairOrderDetail.path}/${data._id}`);
-            setShowManageRepairOrderDialog({ open: false, isClone: false, idToClone: null });
-          }}
-        />
-      )}
     </section>
   );
 };
