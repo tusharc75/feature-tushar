@@ -460,7 +460,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
                   closeAddMenu();
                 }}
               >
-                {`Add Products`}
+                {`Add Existing Products`}
               </MenuItem>
             )}
 
@@ -472,7 +472,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
                   closeAddMenu();
                 }}
               >
-                {`Add Packages`}
+                {`Add Existing Packages`}
               </MenuItem>
             )}
             {permissions?.serviceMaster?.isRead && (
@@ -483,7 +483,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
                   closeAddMenu();
                 }}
               >
-                {`Add Services`}
+                {`Add Existing Services`}
               </MenuItem>
             )}
             <MenuItem
@@ -493,7 +493,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
                 closeAddMenu();
               }}
             >
-              {`Add Assets`}
+              {`Add Existing Assets`}
             </MenuItem>
           </Menu>
         </Box>

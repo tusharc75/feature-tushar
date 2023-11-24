@@ -309,9 +309,6 @@ const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, h
   };
 
   const handleSaveData = async (rows: any, saveAndNext = false) => {
-    rows.forEach((element) => {
-      element.pricingCondition = element.pricingCondition?.optionValue ? element.pricingCondition?.optionValue : element.pricingCondition; // temporary fix
-    });
     setUpdating(true);
     axiosInstance()
       .put(`${fieldTicket.api}/${fieldTicketData?._id}/material`, { material: rows })

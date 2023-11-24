@@ -14,7 +14,6 @@ import { CURReplaceByCurrencySingle } from '../../../constants/formulaUtility';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import { CHILD_RESOURCE } from '../../../constants/helpers';
 import { generateCustomTableColumns, flattenArray } from '../../../constants/columns';
-import { GrBusinessService } from 'react-icons/all';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { Add, ExpandMore } from '@material-ui/icons';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
@@ -162,11 +161,6 @@ const AdditionalCost = ({ quotationData, setNextStep, renderedFrom, version, all
   };
 
   const handleUpdateCost = (rows: any, saveAndNext = false) => {
-    rows.forEach((element) => {
-      delete element.index;
-      delete element.isValid;
-      delete element.hideSelection;
-    });
     setUpdating(true);
     axiosInstance()
       .put(`${quotation.api}/additionalcost/${quotationData._id}/${versionId}/update`, { additionalCost: rows })
@@ -232,16 +226,16 @@ const AdditionalCost = ({ quotationData, setNextStep, renderedFrom, version, all
       <Box display="flex" justifyContent="space-between" m={1}>
         <Box display="flex">
           <Button
-            variant={isMobile ? 'outlined' : 'text'}
             color="primary"
-            className="btn-outline-v1"
+            variant="outlined"
             size="small"
             onClick={() => {
               setShowCostDialog({ open: true, showSaveAndNext: false });
               setSelectedCostData(null);
             }}
+            startIcon={<Add />}
           >
-            {isMobile ? <Add /> : 'Add'}
+            Add
           </Button>
         </Box>
         <div className="d-flex gap-2">
