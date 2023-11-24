@@ -53,6 +53,7 @@ const TechnicianDialog = ({ handleClose, selectedService }) => {
                         {`Asset : `}
                         {permissions?.serializedAsset?.isRead ? (
                             <a
+                                rel="noreferrer"
                                 target="_blank"
                                 style={{ textDecoration: 'underline', textUnderlineOffset: '5px' }}
                                 href={`${routes.serializedAssetDetail.path}/${selectedService?.assetId}`}
@@ -76,6 +77,7 @@ const TechnicianDialog = ({ handleClose, selectedService }) => {
                     fetchWorkOrderData={fetchWorkOrderData}
                     resource={sidebarResource.workOrderTechnician}
                     technicianSelectedService={selectedService.uniqueId}
+                    minHeightClass={'md:h-[calc(100vh-150px)]'}
                 /> :
                 <Grid container spacing={2} >
                     <CommonSkeleton lenArray={[...Array(10).keys()]} />

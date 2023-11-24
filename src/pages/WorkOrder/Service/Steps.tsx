@@ -232,7 +232,8 @@ const Steps = ({
   fetchService,
   resource,
   stepSubmitedData,
-  handelClose = null
+  handelClose = null,
+  minHeightClass=null
 }) => {
   const workOrderId = workOrderData?._id;
   const warehouse = workOrderData?.warehouse;
@@ -915,7 +916,7 @@ const Steps = ({
                 </Menu>
               </div>
             </div>
-            <div className={`w-full h-[calc(100vh-265px)] overflow-y-auto max-[767px]:h-[calc(100vh-364px)] max-[600px]:h-[calc(100vh-368px)]`}>
+            <div className={`w-full ${minHeightClass ? minHeightClass : 'h-[calc(100vh-265px)] '} max-[767px]:h-[calc(100vh-364px)] max-[600px]:h-[calc(100vh-368px)] overflow-y-auto`}>
               {serviceDetails?.steps?.map((step, index) => {
                 const { stepData, isStepValid } = getFields(step);
                 if (resource === sidebarResource.workOrderTechnician && stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.skipped) {

@@ -352,17 +352,6 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
 
   const handleSaveData = async (rows: any, saveAndNext = false) => {
     setUpdating(true);
-    rows.forEach((element) => {
-      delete element.index;
-      delete element.detail;
-      delete element.qtyDisplay;
-      delete element.isValid;
-      delete element.hideSelection;
-      delete element.productDetail;
-      delete element.packageDetail;
-      delete element.serviceDetail;
-      delete element.subRows;
-    });
     axiosInstance()
       .put(`${routes.invoice.path}/material/${invoiceData._id}`, { material: rows })
       .then(({ data }) => {
@@ -471,7 +460,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
                   closeAddMenu();
                 }}
               >
-                {`Add Products`}
+                {`Add Existing Products`}
               </MenuItem>
             )}
 
@@ -483,7 +472,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
                   closeAddMenu();
                 }}
               >
-                {`Add Packages`}
+                {`Add Existing Packages`}
               </MenuItem>
             )}
             {permissions?.serviceMaster?.isRead && (
@@ -494,7 +483,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
                   closeAddMenu();
                 }}
               >
-                {`Add Services`}
+                {`Add Existing Services`}
               </MenuItem>
             )}
             <MenuItem
@@ -504,7 +493,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
                 closeAddMenu();
               }}
             >
-              {`Add Assets`}
+              {`Add Existing Assets`}
             </MenuItem>
           </Menu>
         </Box>

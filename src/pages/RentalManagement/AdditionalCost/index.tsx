@@ -13,7 +13,7 @@ import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { calculateRowsFieldNew, fetch_rental_cost_fields } from '../../../components/RentalManagment/helper';
+import { calculateRowsField, fetch_rental_cost_fields } from '../../../components/RentalManagment/helper';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import { BiChevronDown } from 'react-icons/bi';
 import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
@@ -222,7 +222,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsFieldNew(flattenArray(rowsData), inputField, allFields, updatedData);
+    rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
     handleUpdateCost(rows);
   };
 

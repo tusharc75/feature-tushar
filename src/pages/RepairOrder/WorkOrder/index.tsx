@@ -742,15 +742,14 @@ const WorkOrder = ({
           delete e.workOrder;
         });
         await axiosInstance().put(`${workOrder.api}/${id}/material`, { material: data });
+        setUpdating(false);
+        fetchData();
+        setIsBulkEdit(false);
+        setUpdateDialog({ open: false, data: null });
       });
     } catch (error) {
       setUpdating(false);
       toastConfig.setToastConfig(error);
-    } finally {
-      setUpdating(false);
-      fetchData();
-      setIsBulkEdit(false);
-      setUpdateDialog({ open: false, data: null });
     }
   };
 

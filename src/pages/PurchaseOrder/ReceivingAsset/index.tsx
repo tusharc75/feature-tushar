@@ -294,7 +294,6 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
 
         res.subRows = [];
         const subRows = serializedAsset?.filter((e) => e?.product?.optionValue === res?.materialId);
-        console.log(subRows)
         if (subRows?.length) {
           let actualReceived = item.actualReceived;
           let index = 1;

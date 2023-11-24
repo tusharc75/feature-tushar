@@ -1,17 +1,8 @@
-import React, { useState, useEffect, useContext, Fragment, useReducer } from 'react';
+import { useState, useEffect, useContext, Fragment, useReducer } from 'react';
 import {
-  Grid,
   Box,
   Button,
-  Paper,
-  Typography,
   IconButton,
-  Tab,
-  Tabs,
-  ButtonGroup,
-  Container,
-  InputAdornment,
-  TextField,
   MenuItem,
   Menu
 } from '@material-ui/core';
@@ -22,9 +13,8 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { bulkAssetCreation, CHILD_RESOURCE } from 'src/constants/helpers';
 import EditIcon from '@material-ui/icons/Edit';
-import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
+import { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
 import { CommonRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
-
 import GridDeleteIcon from 'src/components/Helpers/GridDeleteIcon';
 import CustomAgGridEditable from 'src/components/AgGridComponents/CustomAgGridEditable';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -37,7 +27,6 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CustomRenderCell from 'src/components/Helpers/CustomRenderCell';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import BulkAssetCreationQtyDialog from './BulkAssetCreationQtyDialog';
-import styles from '../../Leads/Header.module.scss';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import useColumns, { getFrameworkComponents } from 'src/constants/useColumns';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
@@ -318,7 +307,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
   return (
     <Fragment>
       {allowedToEdit && permissions?.bulkAssetCreation?.isUpdate && (
-        <Box className="flex flex-wrap gap-2 justify-between">
+        <Box m={1} className="flex flex-wrap gap-2 justify-between">
           <Box>
             <Button
               variant={'contained'}

@@ -419,21 +419,6 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
   };
 
   const handleSaveData = async (rows: any, saveAndNext = false) => {
-    rows.forEach((element) => {
-      delete element.index;
-      delete element.detail;
-      delete element.qtyDisplay;
-      delete element.isValid;
-      delete element.hideSelection;
-      delete element.productDetail;
-      delete element.packageDetail;
-      delete element.serviceDetail;
-      delete element.serializedAssetDetail;
-      delete element.subRows;
-      delete element.leadTime;
-      delete element.leadTimeData;
-      delete element.serializedProduct;
-    });
     setUpdating(true);
     axiosInstance()
       .put(`${quotation.api}/productpackage/${quotationData._id}/${versionId}`, { material: rows })

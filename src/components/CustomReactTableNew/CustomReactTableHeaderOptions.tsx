@@ -88,6 +88,12 @@ function CustomReactTableHeaderOptions({
 
   useEffect(()=>{
     if(selectedRecords === 0){
+      if ( checked) {
+        setChecked(false);
+        dispatchTable({
+          type: 'showFilteredRecordsOnly'
+        });
+      }
       setDisableSelectionSwitch(true);
     }else{
       setDisableSelectionSwitch(false);
