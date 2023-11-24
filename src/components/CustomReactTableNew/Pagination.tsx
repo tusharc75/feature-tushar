@@ -39,6 +39,10 @@ const Pagination: FC<PaginationProps> = ({
     setTextFieldValue(1);
   };
 
+  useEffect(() => {
+    setTextFieldValue(page+1);
+  }, [page])
+  
   const visibleDataText = useMemo(() => {
     const fromValue = page * rowsPerPage + 1;
     let toValue = page * rowsPerPage + rowsPerPage;
