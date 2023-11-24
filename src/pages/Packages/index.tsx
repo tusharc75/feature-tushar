@@ -24,7 +24,7 @@ import ProductListDialog from './ProductListDialog';
 
 let searchTimeout;
 
-const Packages = () => {
+const PackageList = () => {
   const renderedFrom = camelCase(routes?.packages.title);
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer();
@@ -396,4 +396,4 @@ const Packages = () => {
   );
 };
 
-export default Packages;
+export default PackageList;
