@@ -27,9 +27,9 @@ import MobileFilterDialog, { DisplayFiltersForMobile } from 'src/components/Mobi
 import MobileSortDialog from 'src/components/MobileSortDialog';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import { getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, sidebarResource, transferAsset } from 'src/constants/helpers';
-import useColumns, { getFrameworkComponents, getStaticFields, gridFilterParser } from 'src/constants/useColumns';
 import styles from '../Leads/Header.module.scss';
 import ManageTransferAsset from './ManageTransferAsset';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 
 const TransferAsset = () => {
   const TransferAssetType = [
@@ -48,12 +48,9 @@ const TransferAsset = () => {
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [isDeleting, setDeleting] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [gridApi, setGridApi] = useState(null);
-  const [columns, setColumns] = useState([]);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
+  const [columns, setColumns] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, appendRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } =
+  const { dataRows, appendRows, rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } =
     state;
   const [open, setOpen] = React.useState(false);
   const [isOpenDialog, setisOpenDialog] = useState(false);
@@ -78,36 +75,70 @@ const TransferAsset = () => {
 
   const fetchGridColumns = () => {
     axiosInstance()
-      .get('/field?resource=Transfer Asset')
+      .get(`/field?resource=${sidebarResource.transferAsset}`)
       .then(({ data: { data } }) => {
         let columns = [];
-        let rendererNames = [];
         data.forEach((o) => {
           let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.transferAssetDetail.path, true);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName);
-            }
           }
         });
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent,
-          actionsRenderer: ActionsRenderer
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
-        columns = [...columns, ...getStaticFields()];
+        columns = [...columns, ...getStaticFields(), ActionsRenderer];
         setColumns([...columns]);
       });
   };
 
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 110,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        {permissions?.transferAsset?.isCreate && (
+          <HtmlTooltip title="Clone">
+            <IconButton
+              size="small"
+              aria-label="Clone"
+              onClick={() => {
+                setShowManageTransferAssetDialog({ open: true, isClone: true, idToClone: row.original._id });
+              }}
+            >
+              <FileCopyIcon color="primary" />
+            </IconButton>
+          </HtmlTooltip>
+        )}
+        {permissions?.transferAsset?.isDelete && row.original.status === 'New' ? (
+          <Tooltip title="Delete">
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              onClick={() => {
+                setDeleteRecord(row.original);
+                setShowDeleteConfirmBox(true);
+              }}
+            >
+              <DeleteIcon color="error" />
+            </IconButton>
+          </Tooltip>
+        ) : (
+          <Tooltip title="Don't have the permissions to Delete">
+            <IconButton size="small" aria-label="Delete" className="cursor-stop">
+              <DeleteIcon color="disabled" />
+            </IconButton>
+          </Tooltip>
+        )}
+      </>
+    )
+  };
+
   const fetchTransferAsset = () => {
     dispatch({ type: 'loading', loading: true });
-
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
 
     const queryString = getQueryString();
     axiosInstance()
@@ -218,7 +249,6 @@ const TransferAsset = () => {
         fetchTransferAsset();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
-        setAnchorEl(null);
         setDeleting(false);
       })
       .catch((error) => {
@@ -244,54 +274,8 @@ const TransferAsset = () => {
     }
   };
 
-  const ActionsRenderer = (params) => (
-    <>
-      {permissions?.transferAsset?.isCreate && (
-        <HtmlTooltip title="Clone">
-          <IconButton
-            size="small"
-            aria-label="Clone"
-            onClick={() => {
-              setShowManageTransferAssetDialog({ open: true, isClone: true, idToClone: params.data._id });
-            }}
-          >
-            <FileCopyIcon color="primary" />
-          </IconButton>
-        </HtmlTooltip>
-      )}
-      {permissions?.transferAsset?.isDelete && params?.data.status === 'New' ? (
-        <Tooltip title="Delete">
-          <IconButton
-            size="small"
-            aria-label="Delete"
-            onClick={() => {
-              setDeleteRecord(params.data);
-              setShowDeleteConfirmBox(true);
-            }}
-          >
-            <DeleteIcon color="error" />
-          </IconButton>
-        </Tooltip>
-      ) : (
-        <Tooltip title="Don't have the permissions to Delete">
-          <IconButton size="small" aria-label="Delete" className="cursor-stop">
-            <DeleteIcon color="disabled" />
-          </IconButton>
-        </Tooltip>
-      )}
-    </>
-  );
-
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
-  };
-
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
   };
 
   const handleOpen = () => {
@@ -354,8 +338,7 @@ const TransferAsset = () => {
               : []
           }
           onExportToExcelSuccess={() => {
-            if (gridApi) gridApi.deselectAll();
-            else fetchTransferAsset();
+            fetchTransferAsset();
           }}
           additionalParams={getQueryString(true)}
         />
@@ -439,90 +422,19 @@ const TransferAsset = () => {
           </div>
         </div>
         {columns ? (
-          Object.keys(frameWorkComponent).length > 0 ? (
-            isMobile && !isTablet ? (
-              <CustomSwipableList
-                key={selectedType}
-                allowSelection={true}
-                allowSwipe={true}
-                permissions={permissions?.transferAsset}
-                primaryField={columns?.find((d) => d.primaryField)}
-                onClick={(data) => {
-                  history.push(`${routes.transferAssetDetail.path}/${data._id}`);
-                }}
-                dataRows={dataRows}
-                selectedRecords={selectedRecords}
-                dispatch={dispatch}
-                actionCol={(data) => {
-                  const params = { data };
-                  return <ActionsRenderer {...params} />;
-                }}
-                extraParamsToCheckDelete={false}
-                // onEdit={() => {}}
-                // onDelete={(data) => {
-                //   setDeleteRecord(data);
-                //   setShowDeleteConfirmBox(true);
-                // }}
-                rowCount={rowCount}
-                page={page}
-                loading={loading}
-                chips={[
-                  {
-                    icons: <RiFileTransferFill />,
-                    label: 'Transfer From Plant: ',
-                    field: 'transferFromPlant'
-                  },
-                  {
-                    icons: <RiFolderTransferFill />,
-                    label: 'Transfer To Plant: ',
-                    field: 'transferToPlant'
-                  },
-                  {
-                    icons: <GiCargoShip />,
-                    label: 'Plant Ship To: ',
-                    field: 'plantShipTo'
-                  },
-                  {
-                    icon: <SiStatuspage />,
-                    label: 'Status: ',
-                    field: 'status: '
-                  }
-                ]}
-                additionalDetails={[
-                  {
-                    icon: <CiUser size={18} />,
-                    field: 'transferType'
-                  }
-                ]}
-                owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-                onCreate={false}
-                showClone={false}
-                // onClone={(data) => {
-                //   setShowManageTransferAssetDialog({ open: true, isClone: true, idToClone: data._id });
-                // }}
-                renderedFrom={renderedFrom}
-              />
-            ) : (
-              <CustomAgGrid
-                columns={columns}
-                dataRows={dataRows}
-                frameworkComponents={frameWorkComponent}
-                setGridApi={setGridApi}
-                dispatch={dispatch}
-                rowCount={rowCount}
-                limit={limit}
-                pageSizes={pageSizes}
-                page={page}
-                actionWidth={150}
-                loading={loading}
-                renderedFrom={renderedFrom}
-                refreshGrid={fetchTransferAsset}
-                showOnlyShowFilteredRecordSwitch={true}
-                showFilters={true}
-                resource={sidebarResource.transferAsset}
-              />
-            )
-          ) : null
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
+            columns={columns}
+            onSelect={() => { }}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            isClientSideGrid={false}
+            refreshGrid={fetchTransferAsset}
+            showOnlyShowFilteredRecordSwitch={true}
+            showFilters={true}
+            resource={sidebarResource.productionOrder}
+          />
         ) : (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
@@ -544,9 +456,8 @@ const TransferAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.transferAsset?.title?.toLowerCase()} ${
-            deleteRecord?._id ? deleteRecord?.transferAssetNumber : ''
-          } ? `}
+          message={`Are you sure you want to delete the ${routes?.transferAsset?.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.transferAssetNumber : ''
+            } ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
