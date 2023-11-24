@@ -2,7 +2,7 @@ import { Badge, Box, Button, IconButton, List, ListItem, Menu, MenuItem, Popover
 import { ClearAll, DoneAllOutlined, Settings } from '@material-ui/icons';
 import { useContext, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { Accepted, Assigned, Rejected, Changed } from 'src/assets/notificationIcons';
+import { Accepted, Assigned, Rejected, Changed, Created } from 'src/assets/notificationIcons';
 import { CustomNotificationCountContext } from '../../StateProvider/CustomNotificationCountContext/CustomNotificationCountContext';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -227,11 +227,13 @@ const NotificationContent = ({ isLoading, handleMarkAllRead, handleClearAll, han
 
   const getIcon = (title: string) => {
     let icon = Assigned;
+
     const compareTitle = (nameList: string[], title) => {
       return nameList.some((s) => title.toLowerCase().includes(s.toLowerCase()));
     };
+
     switch (true) {
-      case compareTitle(['accepted', 'completed', 'finished', 'Created'], title):
+      case compareTitle(['accepted', 'completed', 'finished'], title):
         icon = Accepted;
         break;
       case compareTitle(['assigned'], title):
@@ -243,6 +245,9 @@ const NotificationContent = ({ isLoading, handleMarkAllRead, handleClearAll, han
       case compareTitle(['changes', 'changed', 'change'], title):
         icon = Changed;
         break;
+      case compareTitle(['Created', 'Creates', 'create'], title):
+        icon = Created;
+        break;
       default:
         icon = Assigned;
         break;
@@ -251,7 +256,7 @@ const NotificationContent = ({ isLoading, handleMarkAllRead, handleClearAll, han
   };
 
   const boldMatchPattern = (title:string) => {
-    const regex = new RegExp(`([A-Z]+_[0-9]+)|([0-9]+)|(fail)(ed|s)?|(pass)(ed)?|(complete)(d|s)?|(start)(ed|s)?|(assign)(ed)?|(reject)(ed|s)?|(accept)(ed|s)?|(create)(d|s)?|(change)(s|d)?`, 'gi')
+    const regex = new RegExp(`([A-Z]+_[0-9]+)|([0-9]+)|(fail)(ed|s)?|(pass)(ed)?|(complete)(d|s)?|(start)(ed|s)?|(assign)(ed)?|(reject)(ed|s)?|(accept)(ed|s)?|(create)(d|s)?|(change)(s|d)?`, 'gi');
     const data = title.replace(regex, '<strong>$&</strong>');
     return data;
   }
