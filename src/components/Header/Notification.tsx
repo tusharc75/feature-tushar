@@ -250,8 +250,8 @@ const NotificationContent = ({ isLoading, handleMarkAllRead, handleClearAll, han
     return icon;
   };
 
-  const boldMatchPattern = (title:string)=>{
-    const regex = new RegExp(`([A-Z]+_[0-9]+)|([0-9]+)|([F-f]+ail)(ed)?|([P-p]ass)(ed)?|([C-c]+omplete)(d)?|([S-s]+tart)(ed)?|([A-a]+ssign)(ed)?|([R-r]+eject)(ed)?|([A-a]+ccept)(ed)?|([C-c]+reate)(d)?|([C-c]+hange)(s|d)?`, 'gi')
+  const boldMatchPattern = (title:string) => {
+    const regex = new RegExp(`([A-Z]+_[0-9]+)|([0-9]+)|(fail)(ed)?|(pass)(ed)?|(complete)(d)?|(start)(ed)?|(assign)(ed)?|(reject)(ed)?|(accept)(ed)?|(create)(d)?|(change)(s|d)?`, 'gi')
     const data = title.replace(regex, '<strong>$&</strong>')
     return data
   }
