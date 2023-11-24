@@ -185,22 +185,21 @@ const RentalManagement = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip title={permissions?.rentalManagement?.isCreate ? 'Clone' : cloneDisable}>
-          <span>
-            <IconButton
-              size="small"
-              aria-label="Clone"
-              disabled={permissions?.rentalManagement?.isCreate ? false : true}
-              onClick={() => {
-                setShowManageRentalManagementDialog({ open: true, isClone: true, idToClone: row?.original?._id });
-              }}
-            >
-              <FileCopyIcon fontSize="small" color={permissions?.rentalManagement?.isCreate ? 'primary' : 'disabled'} />
-            </IconButton>
-          </span>
-        </HtmlTooltip>
-
         <HideWhenOffline>
+          <HtmlTooltip title={permissions?.rentalManagement?.isCreate ? 'Clone' : cloneDisable}>
+            <span>
+              <IconButton
+                size="small"
+                aria-label="Clone"
+                disabled={permissions?.rentalManagement?.isCreate ? false : true}
+                onClick={() => {
+                  setShowManageRentalManagementDialog({ open: true, isClone: true, idToClone: row?.original?._id });
+                }}
+              >
+                <FileCopyIcon fontSize="small" color={permissions?.rentalManagement?.isCreate ? 'primary' : 'disabled'} />
+              </IconButton>
+            </span>
+          </HtmlTooltip>
           <HtmlTooltip title={row?.original.canDelete ? 'Delete' : deleteDisable}>
             <span>
               <IconButton
@@ -277,18 +276,8 @@ const RentalManagement = () => {
       }
       let rows = data.map((u) => {
         let finalObject: any = prepareDataForGrid(u, user);
+        finalObject['isSelected'] = selectedRecords.some((s) => s._id === u._id);
         finalObject['canDelete'] = permissions?.rentalManagement?.isDelete && finalObject?.ownerId === user?.user?._id && u?.material?.length === 0;
-        finalObject['isSelected'] = false;
-        finalObject['owerCollaboratorInitialsOrImages'] = [];
-        if (finalObject['owner']) finalObject['owerCollaboratorInitialsOrImages'].push({ initials: finalObject['owner'] });
-        finalObject['owerCollaboratorInitialsOrImages'].forEach((f) => {
-          if (f.initials) {
-            f.initials = f.initials
-              .split(' ')
-              .map((i) => i[0])
-              .join('');
-          }
-        });
         return finalObject;
       });
       dispatch({ type: 'initialize', data: rows, count: count });
@@ -543,16 +532,16 @@ const RentalManagement = () => {
                     open={Boolean(anchorEl)}
                     onClose={closeActions}
                   >
-                    <MenuItem
-                      disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
-                      onClick={() => {
-                        closeActions();
-                        showConfirmBox(null);
-                      }}
-                    >
-                      Delete
-                    </MenuItem>
-
+                    {selectedRecords?.length > 0 &&
+                      <MenuItem
+                        disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
+                        onClick={() => {
+                          closeActions();
+                          showConfirmBox(null);
+                        }}
+                      >
+                        {`Delete (${selectedRecords?.length})`}
+                      </MenuItem>}
                     <MenuItem disabled={!selectedRecords.length} onClick={() => handleAddOffline()}>
                       Add Offline
                     </MenuItem>
@@ -568,7 +557,7 @@ const RentalManagement = () => {
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => {}}
+            onSelect={() => { }}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
@@ -604,9 +593,8 @@ const RentalManagement = () => {
         {singleRentalManagementDelete.show && (
           <ConfirmationDialog
             open={singleRentalManagementDelete.show}
-            message={`Are you sure you want to delete this ${routes.rentalManagement.title.toLowerCase()} ${
-              singleRentalManagementDelete ? (singleRentalManagementDelete?.id ? singleRentalManagementDelete?.rentalJobName : '') : ''
-            }?`}
+            message={`Are you sure you want to delete this ${routes.rentalManagement.title.toLowerCase()} ${singleRentalManagementDelete ? (singleRentalManagementDelete?.id ? singleRentalManagementDelete?.rentalJobName : '') : ''
+              }?`}
             onClose={() =>
               setSingleRentalManagementDelete({
                 id: null,

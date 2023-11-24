@@ -8,8 +8,7 @@ import { Autocomplete, ToggleButton, ToggleButtonGroup } from '@material-ui/lab'
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useReducer, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
-import { MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
+import { isMobile } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -22,15 +21,14 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
 import SearchBox from 'src/components/Helpers/SearchBox';
-import HideWhenOffline from 'src/components/HideWhenOffline';
-import MobileFilterDialog, { DisplayFiltersForMobile } from 'src/components/MobileFilterDialog';
-import MobileSortDialog from 'src/components/MobileSortDialog';
-import { getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, purchaseOrder, removeLocalStorage, sidebarResource } from 'src/constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, purchaseOrder, sidebarResource } from 'src/constants/helpers';
 import styles from '../Leads/Header.module.scss';
 import ManagePurchaseOrder from './ManagePurchaseOrder';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns } from 'src/components/CustomReactTableNew';
+import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 
 const PurchaseOrder = () => {
+
   const PurchaseOrderType = [
     {
       key: `My ${routes.purchaseOrder.title}`,
@@ -43,25 +41,19 @@ const PurchaseOrder = () => {
   ];
 
   let renderedFrom = camelCase(routes.purchaseOrder?.title);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   let { type, referenceId, referenceType }: any = queryString.parse(history.location.search);
   const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
-  const [filter, setFilter] = useState(`All ${routes.purchaseOrder.title}`);
   const [showManagePurchaseOrderDialog, setShowManagePurchaseOrderDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [sortOpen, setSortOpen] = useState(false);
   const [columns, setColumns] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, page, limit, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
-    state;
-  const [isOpenDialog, setisOpenDialog] = useState(false);
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [fromSalesOrder, setFromSalesOrder] = useState(history.location?.state?.salesOrder);
-
   const [warehouseOptions, setWarehouseOptions] = useState([]);
   const [warehouse, setWarehouse] = useState(null);
 
@@ -96,7 +88,7 @@ const PurchaseOrder = () => {
       .then(({ data: { data } }) => {
         let columns = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productionOrderDetail.path, true);
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.purchaseOrderDetail.path, true);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
           }
@@ -104,7 +96,6 @@ const PurchaseOrder = () => {
         });
         columns = [...columns, ...getStaticFields(), ActionsRenderer];
         setColumns(columns);
-        console.log(columns);
       });
   };
 
@@ -119,37 +110,35 @@ const PurchaseOrder = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        {
-          permissions?.purchaseOrder?.isCreate && (
-            <HtmlTooltip title="Clone">
-              <IconButton
-                size="small"
-                aria-label="Clone"
-                onClick={() => {
-                  setShowManagePurchaseOrderDialog({ open: true, isClone: true, idToClone: row.original._id });
-                }}
-              >
-                <FileCopyIcon color="primary" />
-              </IconButton>
-            </HtmlTooltip>
-          )
-        }
-        {
-          permissions?.purchaseOrder?.isDelete && row.original.canDelete && !row.original.deleted && (
-            <HtmlTooltip title="Delete">
-              <IconButton
-                size="small"
-                aria-label="Delete"
-                onClick={() => {
-                  setDeleteRecord(row.original);
-                  setShowDeleteConfirmBox(true);
-                }}
-              >
-                <DeleteIcon color="error" />
-              </IconButton>
-            </HtmlTooltip>
-          )
-        }
+        <HtmlTooltip title={permissions?.purchaseOrder?.isCreate ? "Clone" : cloneDisable}  >
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Clone"
+              disabled={permissions?.purchaseOrder?.isCreate ? false : true}
+              onClick={() => {
+                setShowManagePurchaseOrderDialog({ open: true, isClone: true, idToClone: row.original._id });
+              }}
+            >
+              <FileCopyIcon fontSize="small" color={permissions?.purchaseOrder?.isCreate ? 'primary' : 'disabled'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+        <HtmlTooltip title={row?.original?.canDelete ? "Delete" : deleteDisable}>
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              disabled={row?.original?.canDelete ? false : true}
+              onClick={() => {
+                setDeleteRecord(row.original);
+                setShowDeleteConfirmBox(true);
+              }}
+            >
+              <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
       </>)
   };
 
@@ -160,34 +149,20 @@ const PurchaseOrder = () => {
       .get(`${purchaseOrder.api}${queryString}`)
       .then(({ data: { data, count } }) => {
         let rows = data?.map((u) => {
-          const { owner, collaborator, ...restProperties } = u;
-          const finalObject = prepareDataForGrid(u, user);
-          finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id);
+          let finalObject: any = prepareDataForGrid(u, user);
+          finalObject['isSelected'] = selectedRecords.some((s) => s._id === u._id);
+          finalObject['canDelete'] = permissions?.purchaseOrder?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete && !u?.deleted;
           return finalObject;
         });
-        if (appendRows) {
-          dispatch({
-            type: 'initialize',
-            data: [...dataRows, ...rows],
-            count: count,
-          });
-        } else {
-          dispatch({
-            type: 'initialize',
-            data: rows,
-            count: count,
-          });
-        }
-        // dispatch({ type: 'initialize', data: rows, count: count });
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
+        dispatch({ type: 'initialize', data: rows, count: count });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        dispatch({ type: 'loading', loading: false });
-      });
+      }).finally(() => {
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
+      });;
   };
 
   const getQueryString = (isExport = false) => {
@@ -229,8 +204,7 @@ const PurchaseOrder = () => {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || [])?.map((m) => m._id))}`;
     }
     return deepFilter;
   };
@@ -245,6 +219,7 @@ const PurchaseOrder = () => {
     axiosInstance()
       .put(`${purchaseOrder.api}/remove`, { ids: ids })
       .then(() => {
+        dispatch({ type: 'selection', selectedRecords: [] });
         fetchPurchaseOrder();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
@@ -267,7 +242,6 @@ const PurchaseOrder = () => {
 
   const handleFilter = (event, newFilter) => {
     if (newFilter != null) {
-      setFilter(newFilter);
       handlePurchaseOrderTypeSel(PurchaseOrderType.find((d) => d.key === newFilter).value);
     }
   };
@@ -283,34 +257,6 @@ const PurchaseOrder = () => {
   const closeActions = () => {
     setAnchorEl(null);
   };
-
-  const handleOpen = () => {
-    setisOpenDialog(true);
-  };
-
-  const handleClickOpen = () => {
-    setSortOpen(true);
-  };
-
-  const handleClickClose = () => {
-    setSortOpen(false);
-  };
-
-  const handleFilterClose = () => {
-    setisOpenDialog(false);
-  };
-
-  let toggleInner = PurchaseOrderType && (
-    <ToggleButtonGroup size="small" className=" toggle-button-layout" value={filter} exclusive onChange={handleFilter}>
-      {PurchaseOrderType.map((k, index) => {
-        return (
-          <ToggleButton value={k.key} key={index}>
-            {k.key}
-          </ToggleButton>
-        );
-      })}
-    </ToggleButtonGroup>
-  );
 
   const updateQueryParams = () => {
     const queryParams = new URLSearchParams(history.location.search);
@@ -337,14 +283,9 @@ const PurchaseOrder = () => {
           }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
-          recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-          ids={
-            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-              ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-              : []
-          }
+          recordsToExport={selectedRecords?.length}
+          ids={selectedRecords?.map((obj) => obj._id)}
           onExportToExcelSuccess={() => {
-            removeLocalStorage(`${localStorageSelectedRecords}`);
             fetchPurchaseOrder();
           }}
           additionalParams={getQueryString(true)}
@@ -354,75 +295,25 @@ const PurchaseOrder = () => {
         <div className="header-panel">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
             <div className={'d-flex flex-wrap align-items-center gap-2'}>
-              {isMobile && !isTablet ? (
-                <div className="d-flex flex-wrap items-center justify-between w-full gap-2">
-                  <div>{toggleInner}</div>
-                  <div className="flex flex-wrap items-center gap-1 justify-end ml-auto">
-                    <IconButton
-                      onClick={handleClickOpen}
-                      id="demo-customized-button"
-                      aria-controls="demo-customized-menu"
-                      aria-haspopup="true"
-                      aria-expanded={'true'}
-                      className={'mobileIconButton secondary'}
-                      size="small"
-                    >
-                      <TbArrowsSort className="rotate-90" size={16} />
-                    </IconButton>
-                    <MobileSortDialog
-                      isOpen={sortOpen}
-                      handleClose={handleClickClose}
-                      contentPart={null}
-                      secHeading={['Sort Purchase Order']}
-                      columns={columns}
-                      dispatch={dispatch}
-                    />
-                    <IconButton
-                      id="demo-customized-button"
-                      aria-controls="demo-customized-menu"
-                      aria-haspopup="true"
-                      aria-expanded={'true'}
-                      className={'mobileIconButton secondary'}
-                      size="small"
-                      onClick={handleOpen}
-                    >
-                      <MdOutlineFilterAlt size={16} />
-                    </IconButton>
-                    <MobileFilterDialog
-                      isOpen={isOpenDialog}
-                      handleClose={handleFilterClose}
-                      contentPart={null}
-                      columns={columns}
-                      dispatch={dispatch}
-                      title={routes?.purchaseOrder?.title}
-                      filters={filters}
-                      resource={sidebarResource.purchaseOrder}
-                    />
-                  </div>
-                </div>
-              ) : (
-                <HideWhenOffline>
-                  <div className={`flex flex-wrap items-center gap-2 `}>
-                    {PurchaseOrderType && (
-                      <ToggleButtonGroup
-                        size="small"
-                        className="ml-2"
-                        value={PurchaseOrderType[selectedType - 1].key}
-                        exclusive
-                        onChange={handleFilter}
-                      >
-                        {PurchaseOrderType.map((k, index) => {
-                          return (
-                            <ToggleButton value={k.key} key={index}>
-                              {k.key}
-                            </ToggleButton>
-                          );
-                        })}
-                      </ToggleButtonGroup>
-                    )}
-                  </div>
-                </HideWhenOffline>
-              )}
+              <div className={`flex flex-wrap items-center gap-2 `}>
+                {PurchaseOrderType && (
+                  <ToggleButtonGroup
+                    size="small"
+                    className="ml-2"
+                    value={PurchaseOrderType[selectedType - 1].key}
+                    exclusive
+                    onChange={handleFilter}
+                  >
+                    {PurchaseOrderType.map((k, index) => {
+                      return (
+                        <ToggleButton value={k.key} key={index}>
+                          {k.key}
+                        </ToggleButton>
+                      );
+                    })}
+                  </ToggleButtonGroup>
+                )}
+              </div>
               <Autocomplete
                 style={{ minWidth: '200px', flexGrow: 1 }}
                 className="md:max-w-[250px]"
@@ -435,6 +326,7 @@ const PurchaseOrder = () => {
                     : ''
                 }
                 onChange={(e, val) => {
+                  dispatch({ type: 'selection', selectedRecords: [] });
                   setWarehouse(val && val.optionValue ? val.optionValue : '');
                 }}
                 renderInput={(params) => <TextField {...params} margin="none" size="small" name="plant" label="Plant" variant="outlined" fullWidth />}
@@ -504,23 +396,17 @@ const PurchaseOrder = () => {
                   onClose={closeActions}
                 >
                   <MenuItem
-                    disabled={
-                      permissions?.purchaseOrder?.isDelete &&
-                        selectedRecords?.filter((e) => e.canDelete && !e.deleted)?.length === selectedRecords?.length
-                        ? false
-                        : true
-                    }
+                    disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
                     onClick={() => {
                       closeActions();
                       setShowDeleteConfirmBox(true);
                     }}
                   >
-                    Delete
+                    {`Delete (${selectedRecords.length})`}
                   </MenuItem>
                 </Menu>
               </div>
             </div>
-            <DisplayFiltersForMobile resource={sidebarResource.purchaseOrder} />
           </div>
         </div>
         {columns ? (
