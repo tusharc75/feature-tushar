@@ -755,9 +755,9 @@ export const productCategory = {
 };
 
 export const budget = {
-  budgetApi: '/budget',
-  budgetRoute: '/budget',
-  budgetPermission: 'budget',
+  api: '/budget',
+  route: '/budget',
+  permission: 'budget',
   resource: 'budget'
 };
 

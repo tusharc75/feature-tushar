@@ -268,7 +268,7 @@ export default function useColumns() {
                   title={`${row?.original?.[field?.fieldName]} • ${moment(row?.original?.createdByDate.slice(0, 10)).format(dateFormat)}`}
                 >
                   {row?.original?.[field?.fieldName]}
-                  <span className="createdAtTime badge-date">{moment(row?.original?.data.createdByDate.slice(0, 10)).format(dateFormat)}</span>
+                  <span className="createdAtTime badge-date">{moment(row?.original?.data?.createdByDate.slice(0, 10)).format(dateFormat)}</span>
                 </h5>
               ) : (
                 <NoDataCell />

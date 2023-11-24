@@ -20,7 +20,7 @@ import { fetch_sublease_product_fields } from '../../../components/Sublease/help
 import { ExpandMore } from '@material-ui/icons';
 import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { calculateRowsField } from 'src/components/RentalManagment/helper';
+import { calculateRowsField, calculateRowsFieldNew } from 'src/components/RentalManagment/helper';
 import EditIcon from '@material-ui/icons/Edit';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
@@ -263,6 +263,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
         setNextStepToolTip(null);
       }
     }
+    console.log(rows)
     setRowsData(rows);
     setSelectedProducts([]);
   };
@@ -324,17 +325,6 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
   };
 
   const handleSaveData = async (rows: any) => {
-    rows.forEach((element) => {
-      delete element.index;
-      delete element.detail;
-      delete element.qtyDisplay;
-      delete element.isValid;
-      delete element.hideSelection;
-      delete element.productDetail;
-      delete element.packageDetail;
-      delete element.subRows;
-      delete element.description;
-    });
     setUpdating(true);
     axiosInstance()
       .put(`${sublease.api}/productpackage/${subleaseData._id}`, { material: rows })
@@ -351,8 +341,9 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
 
   const handleDelete = (rows) => {
     setDeleting(true);
+    const ids = rows.map((e) => e.id);
     axiosInstance()
-      .put(`${sublease.api}/productpackage/${subleaseData?._id}/delete`, { ids: rows })
+      .put(`${sublease.api}/productpackage/${subleaseData?._id}/delete`, { ids })
       .then(() => {
         setDeleting(false);
         fetchProductInventory();
@@ -434,7 +425,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
       return;
     }
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
+    rows = await calculateRowsFieldNew(flattenArray(rowsData), inputField, allFields, updatedData);
     handleSaveData(rows);
   };
 
@@ -621,7 +612,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
             }}
             isBulkedit={isProductEdit.isBulkedit}
             handleSaveData={handleSaveData}
-            rentalManagementData={subleaseData}
+            subleaseData={subleaseData}
             rowData={recordToUpdate}
             material={material}
             selectedProducts={selectedProducts}
