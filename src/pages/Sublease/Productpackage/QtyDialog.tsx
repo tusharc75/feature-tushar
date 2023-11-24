@@ -18,7 +18,7 @@ import { uniq, map, orderBy, isEqual } from 'lodash';
 import { autoCalculateSpecificFields, handleAutoCalculation } from '../../../constants/formulaUtility';
 import moment from 'moment';
 import { fetch_sublease_product_fields } from '../../../components/Sublease/helper';
-import { calculateRowsFieldNew, resetValueZero, sumOnParent } from 'src/components/RentalManagment/helper';
+import { calculateRowsField, resetValueZero, sumOnParent } from 'src/components/RentalManagment/helper';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -242,7 +242,7 @@ const QtyDialog: FC<EditDialogProps> = ({
       if (rowData.parentId && !showConfirmationDialog) {
         setShowConfirmationDialog(true);
       } else {
-        const rows = await calculateRowsFieldNew(material, values, allFields, rowData);
+        const rows = await calculateRowsField(material, values, allFields, rowData);
         handleSaveData(rows);
         setShowConfirmationDialog(false);
       }

@@ -17,7 +17,7 @@ import MaterialQtyDialog from './MaterialQtyDialog';
 import { fetch_field_ticket_material_fields } from '../helper';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
-import { calculateRowsFieldNew } from 'src/components/RentalManagment/helper';
+import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import Consumables from './Consumables';
 import { FIELD_TICKET_STATUS, MATERIAL_TYPE, SERVICE_TYPE, fieldTicket } from 'src/constants/helpers';
 import EditIcon from '@material-ui/icons/Edit';
@@ -343,7 +343,7 @@ const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, h
       inputField['qty'] = inputField['qtyDisplay'];
     }
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsFieldNew(flattenArray(rowsData), inputField, allFields, updatedData);
+    rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
     handleSaveData(rows);
   };
 

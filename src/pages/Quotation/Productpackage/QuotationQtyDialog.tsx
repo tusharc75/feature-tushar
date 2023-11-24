@@ -17,7 +17,7 @@ import { uniq, map, orderBy, isEqual, unionBy, uniqBy } from 'lodash';
 import { autoCalculateSpecificFields, handleAutoCalculation } from '../../../constants/formulaUtility';
 import moment from 'moment';
 import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
-import { bulkUpdate, calculateRowsFieldNew } from 'src/components/RentalManagment/helper';
+import { bulkUpdate, calculateRowsField } from 'src/components/RentalManagment/helper';
 import routes from 'src/components/Helpers/Routes';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -304,17 +304,12 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
   const handleSubmit = async (values) => {
     if (isBulkedit) {
       const rows = bulkUpdate(values, selectedProducts, material, allFields, quotationData?.currency);
-      const result: any = [];
-      rows?.forEach((e) => {
-        const data = getObjKeysWithValues(e, allFields);
-        result.push({ _id: e?._id, materialId: e?.materialId, ...data });
-      });
-      handleSaveData(result);
+      handleSaveData(rows);
     } else {
       if (rowData.parentId && !showConfirmationDialog) {
         setShowConfirmationDialog(true);
       } else {
-        const rows = await calculateRowsFieldNew(material, values, allFields, rowData);
+        const rows = await calculateRowsField(material, values, allFields, rowData);
         handleSaveData(rows, saveAndNext);
         setShowConfirmationDialog(false);
       }

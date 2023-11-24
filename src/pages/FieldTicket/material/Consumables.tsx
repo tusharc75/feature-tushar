@@ -23,7 +23,7 @@ import Technicians from './Technicians';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { fetch_field_ticket_material_fields } from '../helper';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
-import { calculatePrice, calculateRowsFieldNew } from 'src/components/RentalManagment/helper';
+import { calculatePrice, calculateRowsField } from 'src/components/RentalManagment/helper';
 import MaterialQtyDialog from './MaterialQtyDialog';
 import EditIcon from '@material-ui/icons/Edit';
 import HistoryIcon from '@material-ui/icons/History';
@@ -449,7 +449,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
       inputField['qty'] = inputField['qtyDisplay'];
     }
     let rows: any = [{ ...dataRow, ...updatedData }];
-    rows = await calculateRowsFieldNew(flattenArray(dataRows), inputField, allFields, updatedData);
+    rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
     handleSaveData(rows);
   };
 

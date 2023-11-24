@@ -20,7 +20,7 @@ import { fetch_sublease_product_fields } from '../../../components/Sublease/help
 import { ExpandMore } from '@material-ui/icons';
 import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { calculateRowsField, calculateRowsFieldNew } from 'src/components/RentalManagment/helper';
+import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import EditIcon from '@material-ui/icons/Edit';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
@@ -423,7 +423,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
       return;
     }
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsFieldNew(flattenArray(rowsData), inputField, allFields, updatedData);
+    rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
     handleSaveData(rows);
   };
 

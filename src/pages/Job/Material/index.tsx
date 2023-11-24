@@ -19,7 +19,7 @@ import { flattenArray, generateCustomTableColumns } from 'src/constants/columns'
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import MaterialDialog from './MaterialDialog';
-import { calculateRowsFieldNew } from 'src/components/RentalManagment/helper';
+import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 
 const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
@@ -254,7 +254,7 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsFieldNew(flattenArray(rowsData), inputField, allFields, updatedData);
+    rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
     handleSaveData(rows);
   };
 

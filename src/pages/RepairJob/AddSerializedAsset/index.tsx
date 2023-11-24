@@ -25,7 +25,7 @@ import Tooltip from 'src/components/CustomTooltipTitle';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { calculateRowsFieldNew } from 'src/components/RentalManagment/helper';
+import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 
 const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, renderedFrom, allowedToEdit, stepFullScreen }) => {
@@ -320,7 +320,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
       inputField['qty'] = inputField['qtyDisplay'];
     }
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsFieldNew(flattenArray(rowsData), inputField, allFields, updatedData);
+    rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
 
     handleSaveData(rows);
   };

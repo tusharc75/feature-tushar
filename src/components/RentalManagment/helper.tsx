@@ -171,21 +171,6 @@ export const calculateRowsField = async (material: any[], values: any, fields: a
     }
     const child = resetValueZero(material, fields, rowData._id)
 
-
-    return [...rows, ...child];
-};
-
-export const calculateRowsFieldNew = async (material: any[], values: any, fields: any[], rowData: any) => {
-    let rows: any = []
-    const calValues = autoCalculateSpecificFields(values, { ...values, ...rowData }, fields)
-    rows.push({ ...rowData, ...calValues })
-    if (rowData.parentId) {
-        let parent: any = []
-        await calculateParentRows(material, rows, fields, rowData, parent)
-        rows = [...rows, ...parent]
-    }
-    const child = resetValueZero(material, fields, rowData._id)
-
     const result: any = [];
     [...rows, ...child]?.forEach((e: any) => {
         result.push({ _id: e._id, ...getObjKeysWithValues(e, fields) })
@@ -208,8 +193,8 @@ export const bulkUpdate = (values, selectedProducts, material, allFields, curren
     var rows: any = []
 
     for (const x in values) {
-        if (values[x] === "" || (Array.isArray(values[x]) && values[x].length === 0)) {
-            delete values[x]
+        if (values[x] === '' || values[x] === 0 || (Array.isArray(values[x]) && values[x].length === 0)) {
+            delete values[x];
         }
     }
 
@@ -247,10 +232,10 @@ export const bulkUpdate = (values, selectedProducts, material, allFields, curren
             rows = [...rows, ...packages]
         })
     }
-    
+
     let updatedRows: any = [];
-    rows = rows?.forEach((e : any) => {
-        updatedRows.push({_id: e._id, ...getObjKeysWithValues(e, allFields)});
+    rows = rows?.forEach((e: any) => {
+        updatedRows.push({ _id: e._id, ...getObjKeysWithValues(e, allFields) });
     })
     return updatedRows;
 };
