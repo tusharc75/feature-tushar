@@ -200,6 +200,7 @@ const WorkOrderTechnician = () => {
                 </React.Fragment>
               )}
               size="small"
+              limitTags={2}
               renderInput={(params) => <TextField {...params} label="Status" variant="outlined" />}
               value={selectedServiceStatus}
               renderTags={(value, getTagProps) =>
