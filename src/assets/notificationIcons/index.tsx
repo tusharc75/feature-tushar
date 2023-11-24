@@ -67,16 +67,28 @@ export const Changed: FC<svgInterfaceWithSize> = ({ size = 26, width = null, hei
         d="M2.39 15.446c0-6.065 4.918-10.982 10.983-10.982h2.28v-1.45a.622.622 0 011.037-.463l4.144 3.73a.622.622 0 010 .924l-4.144 3.73a.622.622 0 01-1.038-.462v-1.45h-2.12c-4.358 0-8.285 2.63-9.945 6.66-.259.63-1.196.444-1.196-.237zm21.22-4.893c0 6.066-4.918 10.982-10.983 10.982h-2.28v1.451a.622.622 0 01-1.037.462l-4.144-3.73a.622.622 0 010-.924l4.144-3.73a.622.622 0 011.038.463v1.45h2.12c4.358 0 8.285-2.63 9.945-6.66.26-.63 1.196-.444 1.196.236z"
       ></path>
       <defs>
-        <linearGradient
-          id="paint0_linear_5508_25583"
-          x1="5.54"
-          x2="23.609"
-          y1="2.391"
-          y2="23.609"
-          gradientUnits="userSpaceOnUse"
-        >
+        <linearGradient id="paint0_linear_5508_25583" x1="5.54" x2="23.609" y1="2.391" y2="23.609" gradientUnits="userSpaceOnUse">
           <stop stopColor="#F7B200"></stop>
           <stop offset="1" stopColor="#F90"></stop>
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+};
+
+export const Created: FC<svgInterfaceWithSize> = ({ size = 26, width = null, height = null, ...others }) => {
+  return (
+    <svg {...others} xmlns="http://www.w3.org/2000/svg" width={size ?? width} height={size ?? height} fill="none" viewBox="0 0 39 39">
+      <path
+        fill="url(#paint0_linear_5588_24656)"
+        fillRule="evenodd"
+        d="M19.694 5A14.71 14.71 0 005 19.69a14.72 14.72 0 0014.694 14.694A14.71 14.71 0 0034.38 19.689 14.704 14.704 0 0019.694 5zm-.02 7.995a1.333 1.333 0 011.35 1.36v4h4a1.335 1.335 0 110 2.67h-4v3.999a1.335 1.335 0 01-2.67 0v-3.995H14.35a1.34 1.34 0 01-.141-2.675c.046-.002.094-.002.14 0h3.995v-4a1.335 1.335 0 011.33-1.36z"
+        clipRule="evenodd"
+      ></path>
+      <defs>
+        <linearGradient id="paint0_linear_5588_24656" x1="9.361" x2="34.384" y1="5" y2="34.38" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#AD14F5"></stop>
+          <stop offset="1" stopColor="#6203AC"></stop>
         </linearGradient>
       </defs>
     </svg>

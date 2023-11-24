@@ -19,6 +19,7 @@ import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import SearchBox from '../../components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
+import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import {
   QUOTATION_TYPE,
   customerAccount,
@@ -190,8 +191,8 @@ const Quotation = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        {permissions?.quotation?.isCreate ? (
-          <HtmlTooltip title="Clone">
+        <HtmlTooltip title={permissions?.quotation?.isCreate ? 'Clone' : cloneDisable}>
+          <span>
             <IconButton
               size="small"
               aria-label="Clone"
@@ -199,18 +200,12 @@ const Quotation = () => {
                 setShowManageDialog({ open: true, isClone: true, idToClone: row.original._id });
               }}
             >
-              <FileCopyIcon fontSize="small" color="primary" />
+              <FileCopyIcon fontSize="small" color={permissions?.quotation?.isCreate ? 'primary' : 'disabled'} />
             </IconButton>
-          </HtmlTooltip>
-        ) : (
-          <HtmlTooltip className="cursor-stop" title="You do not have permission to clone/create">
-            <IconButton aria-label="Clone" size="small">
-              <FileCopyIcon fontSize="small" />
-            </IconButton>
-          </HtmlTooltip>
-        )}
-        {row?.original?.canDelete && (
-          <HtmlTooltip title="Delete">
+          </span>
+        </HtmlTooltip>
+        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
+          <span>
             <IconButton
               size="small"
               aria-label="Delete"
@@ -219,10 +214,10 @@ const Quotation = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <Delete color="error" />
+              <Delete fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
             </IconButton>
-          </HtmlTooltip>
-        )}
+          </span>
+        </HtmlTooltip>
       </>
     )
   };
@@ -287,10 +282,9 @@ const Quotation = () => {
       .get(`${quotation.api}${queryString}`)
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
-          let finalObject = prepareDataForGrid(u, user);
+          let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isChecked'] = false;
-          finalObject['allowedToEdit'] = permissions?.quotation?.isUpdate;
-          finalObject['canDelete'] = permissions?.quotation?.isDelete;
+          finalObject['canDelete'] = permissions?.quotation?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });

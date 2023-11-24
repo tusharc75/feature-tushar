@@ -51,7 +51,6 @@ const WorkOrder = () => {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState<any>({});
-  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [showManageWorkOrder, setShowManageWorkOrder] = useState({ open: false, isClone: false, idToClone: null });
   const [columns, setColumns] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -108,7 +107,7 @@ const WorkOrder = () => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isSelected'] = false;
-          finalObject['canDelete'] = permissions?.workOrder?.isDelete && u?.canDelete;
+          finalObject['canDelete'] = permissions?.workOrder?.isDelete && u?.canDelete && finalObject?.ownerId === user?.user?._id && !data?.deleted;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -314,17 +313,9 @@ const WorkOrder = () => {
                   onClose={closeActions}
                 >
                   <MenuItem
-                    disabled={
-                      permissions?.workOrder?.isDelete && selectedRecords?.filter((e) => !e.deleted)?.length === selectedRecords?.length
-                        ? false
-                        : true
-                    }
+                    disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
                     onClick={() => {
-                      if (selectedRecords.find((d) => d.canDelete === false)) {
-                        setShowDeleteWarningConfirmBox(true);
-                      } else {
-                        setIsConformDialogVisible(true);
-                      }
+                      setIsConformDialogVisible(true);
                       closeActions();
                     }}
                   >
@@ -340,7 +331,7 @@ const WorkOrder = () => {
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => {}}
+            onSelect={() => { }}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
@@ -349,22 +340,14 @@ const WorkOrder = () => {
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
             resource={sidebarResource.workOrder}
+            setWholeRowsCellColor={(rowData) => (rowData.deleted ? 'error' : '')}
           />
         ) : null}
-
-        {showDeleteWarningConfirmBox && (
-          <MessageDialog
-            open={showDeleteWarningConfirmBox}
-            message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
-            onClose={() => setShowDeleteWarningConfirmBox(false)}
-          />
-        )}
         {isConfirmDialogVisible && (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.workOrderName ? ' Work Order' : routes.workOrder.title}   ${
-              deleteRecord?.workOrderName || ''
-            }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.workOrderName ? ' Work Order' : routes.workOrder.title}   ${deleteRecord?.workOrderName || ''
+              }?`}
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);
