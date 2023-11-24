@@ -93,6 +93,7 @@ function CustomReactTableHeaderOptions({
         dispatchTable({
           type: 'showFilteredRecordsOnly'
         });
+        dispatchTable({ type: 'pageChange', page: 0 });
       }
       setDisableSelectionSwitch(true);
     }else{
