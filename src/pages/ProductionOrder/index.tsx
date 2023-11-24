@@ -8,12 +8,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import {
-  productionOrder,
-  gridLoadingTimeout,
-  prepareDataForGrid,
-  sidebarResource
-} from '../../constants/helpers';
+import { productionOrder, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import { camelCase } from 'lodash';
@@ -27,6 +22,8 @@ import { ToggleButtonGroup, ToggleButton } from '@material-ui/lab';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
 import MessageDialog from 'src/components/Helpers/MessageDialog';
+import queryString from 'query-string';
+import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 
 let searchTimeout;
 
@@ -46,6 +43,7 @@ const ProductionOrder = () => {
   ];
 
   const history = useHistory();
+  let { type }: any = queryString.parse(history.location.search);
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { getColumnData } = useColumns();
@@ -54,7 +52,7 @@ const ProductionOrder = () => {
     state: { user, permissions, selectedEntity }
   }: any = useData();
 
-  const [selectedType, setSelectedType] = useState(1);
+  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
@@ -63,6 +61,7 @@ const ProductionOrder = () => {
 
   const [columns, setColumns] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [renderCount, setRenderCount] = useState(0);
 
   useEffect(() => {
     fetchGridColumns();
@@ -79,7 +78,9 @@ const ProductionOrder = () => {
   }, [search]);
 
   useEffect(() => {
-    fetchData();
+    if (renderCount > 0) {
+      fetchData();
+    } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
@@ -109,39 +110,35 @@ const ProductionOrder = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        {permissions?.productionOrder?.isCreate ? (
-          <HtmlTooltip title="Clone">
+        <HtmlTooltip title={permissions?.productionOrder?.isCreate ? "Clone" : cloneDisable}  >
+          <span>
             <IconButton
               size="small"
               aria-label="Clone"
+              disabled={permissions?.productionOrder?.isCreate ? false : true}
               onClick={() => {
                 setShowManageDialog({ open: true, isClone: true, idToClone: row.original._id });
               }}
             >
-              <FileCopyIcon fontSize="small" color="primary" />
+              <FileCopyIcon fontSize="small" color={permissions?.productionOrder?.isCreate ? 'primary' : 'disabled'} />
             </IconButton>
-          </HtmlTooltip>
-        ) : (
-          <HtmlTooltip className="cursor-stop" title="You do not have permission to clone/create">
-            <IconButton aria-label="Clone" size="small">
-              <FileCopyIcon fontSize="small" />
-            </IconButton>
-          </HtmlTooltip>
-        )}
-        {row?.original?.canDelete && (
-          <HtmlTooltip title="Delete">
+          </span>
+        </HtmlTooltip>
+        <HtmlTooltip title={row?.original?.canDelete ? "Delete" : deleteDisable}>
+          <span>
             <IconButton
               size="small"
               aria-label="Delete"
+              disabled={row?.original?.canDelete ? false : true}
               onClick={() => {
                 setDeleteRecord(row.original);
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" />
+              <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
             </IconButton>
-          </HtmlTooltip>
-        )}
+          </span>
+        </HtmlTooltip>
       </>
     )
   };
@@ -186,7 +183,6 @@ const ProductionOrder = () => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isChecked'] = false;
-          finalObject['allowedToEdit'] = permissions?.productionOrder?.isUpdate;
           finalObject['canDelete'] = permissions?.productionOrder?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;
           return finalObject;
         });
@@ -266,7 +262,9 @@ const ProductionOrder = () => {
           permissions={permissions?.productionOrder}
           module={routes.productionOrder.title}
           api={productionOrder.api}
-          afterImportCompleted={() => {fetchData()}}
+          afterImportCompleted={() => {
+            fetchData();
+          }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}
@@ -357,7 +355,7 @@ const ProductionOrder = () => {
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => {}}
+            onSelect={() => { }}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}

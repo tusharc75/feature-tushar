@@ -1,38 +1,35 @@
-import { Box, Chip, Menu, MenuItem } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
-import IconButton from '@material-ui/core/IconButton';
-import { AddOutlined } from '@material-ui/icons';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { camelCase } from 'lodash';
-import queryString from 'query-string';
-import { useContext, useEffect, useReducer, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
-import { CiUser, MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
-import { GiStockpiles } from 'react-icons/gi';
+import { useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import HideWhenOffline from 'src/components/HideWhenOffline';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { useData } from '../../StateProvider/Provider';
-import axiosInstance from '../../axios/axiosInstance';
-import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import HtmlTooltip from '../../components/CustomTooltipTitle';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import queryString from 'query-string';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomContainer from 'src/components/CustomContainer';
+import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
+import routes from 'src/components/Helpers/Routes';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import routes from '../../components/Helpers/Routes';
-import SearchBox from '../../components/Helpers/SearchBox';
-import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
-import MobileSortDialog from '../../components/MobileSortDialog';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { getLocalStorageArrayData, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, sidebarResource, sublease } from '../../constants/helpers';
-import useColumns, { getFrameworkComponents, getStaticFields } from '../../constants/useColumns';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, sublease } from 'src/constants/helpers';
+import { useData } from 'src/StateProvider/Provider';
+import SearchBox from 'src/components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { Button, Chip, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import ManageSublease from './ManageSublease';
+import axiosInstance from 'src/axios/axiosInstance';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import DeleteIcon from '@material-ui/icons/Delete';
+import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+
+let searchTimeout;
 
 const Sublease = () => {
-  const SubleaseType = [
+  let renderedFrom = camelCase(routes.sublease?.title);
+  const toastConfig = useContext(CustomToastContext);
+
+  const types = [
     {
       key: `My ${routes.sublease.title}`,
       value: 1
@@ -42,136 +39,125 @@ const Sublease = () => {
       value: 2
     }
   ];
-  let renderedFrom = camelCase(routes.sublease?.title);
-  const toastConfig = useContext(CustomToastContext);
+
   const history = useHistory();
   let { type, referenceId, referenceType }: any = queryString.parse(history.location.search);
-  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
-  const [filter, setFilter] = useState(`All ${routes.sublease.title}`);
-  const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
-  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
-  const [deleteRecord, setDeleteRecord] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [gridApi, setGridApi] = useState(null);
-  const [sortOpen, setSortOpen] = useState(false);
-  const [columns, setColumns] = useState([]);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
-    state;
-  const [isOpenDialog, setisOpenDialog] = useState(false);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
+  const { state, dispatch } = useTableReducer();
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { getColumnData } = useColumns();
 
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
-  const { getColumnData } = useColumns();
+
+  const [columns, setColumns] = useState(null);
+  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
+  const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
+  const [deleteRecord, setDeleteRecord] = useState(null);
+  const [renderCount, setRenderCount] = useState(0);
 
   useEffect(() => {
     fetchGridColumns();
   }, []);
 
   useEffect(() => {
-    fetchData();
-  }, [page, limit, filters, sorting, search, selectedEntity, selectedType, showFilteredRecordsOnly]);
+    let millisec = Object.keys(search).length > 0 ? 600 : 5;
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+    searchTimeout = setTimeout(() => {
+      fetchData();
+    }, millisec);
+  }, [search]);
 
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get('/field?resource=Sublease')
-      .then(({ data: { data } }) => {
-        let columns = [];
-        let rendererNames = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(routes.sublease?.title, o?.fieldData, routes.subleaseDetail.path, true);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName);
-            }
-          }
-        });
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent,
-          actionsRenderer: ActionsRenderer
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
-        columns = [...columns, ...getStaticFields()];
-        setColumns([...columns]);
-      });
+  useEffect(() => {
+    if (renderCount > 0) {
+      fetchData();
+    } else setRenderCount((preCount) => preCount + 1);
+  }, [page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
+
+  const fetchGridColumns = async () => {
+    let data;
+    const response = await axiosInstance().get(`/field?resource=Sublease`);
+    data = response?.data?.data;
+    let columns = [];
+    data.forEach((o) => {
+      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.subleaseDetail.path, true);
+      if (currentColumn !== null) {
+        columns = [...columns, currentColumn?.columnData];
+      }
+      return o?.fieldData;
+    });
+    columns = [...columns, ...getStaticFields(), ActionsRenderer];
+    setColumns(columns);
   };
 
-  const fetchData = () => {
-    dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
-    const queryString = getQueryString();
-    axiosInstance()
-      .get(`${sublease.api}${queryString}`)
-      .then(({ data: { data, count } }) => {
-        let rows = data?.map((u) => {
-          let finalObject = prepareDataForGrid(u);
-          finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['canDelete'] = false;
-          finalObject['allowedToEdit'] = [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id);
-          let res = {
-            ...finalObject
-          };
-          return res;
-        });
-        if (appendRows) {
-          dispatch({
-            type: 'initialize',
-            data: [...dataRows, ...rows],
-            count: count,
-            selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
-          });
-        } else {
-          dispatch({
-            type: 'initialize',
-            data: rows,
-            count: count,
-            selectedRecords: rows.filter((f) => f.isChecked === true)
-          });
-        }
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        dispatch({ type: 'loading', loading: false });
-      });
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 100,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        <HtmlTooltip title={permissions?.sublease?.isCreate ? "Clone" : cloneDisable}  >
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Clone"
+              disabled={permissions?.sublease?.isCreate ? false : true}
+              onClick={() => {
+                setShowManageDialog({ open: true, isClone: true, idToClone: row.original._id });
+              }}
+            >
+              <FileCopyIcon fontSize="small" color={permissions?.sublease?.isCreate ? 'primary' : 'disabled'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+        <HtmlTooltip title={row?.original?.canDelete ? "Delete" : deleteDisable}>
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              disabled={row?.original?.canDelete ? false : true}
+              onClick={() => {
+                setDeleteRecord(row.original);
+                setShowDeleteConfirmBox(true);
+              }}
+            >
+              <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+      </>
+    )
   };
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-
     if (isExport) {
       deepFilter = `?`;
     }
-
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
     }
-
-    let filterById = [];
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
     if (referenceId) {
-      filterById.push({ field: 'rentalJob', term: referenceId });
+      filterByIds.push({ field: 'rentalJob', term: referenceId });
     }
-    if (filterById.length > 0) {
-      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`;
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
-    if (!isObjectEmpty(filters)) {
-      const updatedFilters = [];
-      Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
-          field: field,
-          term: filters[field].filter
-        });
-      });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
+    }
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
     }
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
@@ -180,10 +166,33 @@ const Sublease = () => {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
     }
     return deepFilter;
+  };
+
+  const fetchData = async () => {
+    dispatch({ type: 'loading', loading: true });
+    const queryString = getQueryString();
+    axiosInstance()
+      .get(`${sublease.api}${queryString}`)
+      .then(({ data: { data, count } }) => {
+        let rows = data.map((u) => {
+          let finalObject = prepareDataForGrid(u, user);
+          finalObject['isSelected'] = selectedRecords.some((s) => s._id === u._id);
+          finalObject['canDelete'] = permissions?.sublease?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;;
+          return finalObject;
+        });
+        dispatch({ type: 'initialize', data: rows, count: count });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      })
+      .finally(() => {
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
+      });
   };
 
   const handleDelete = () => {
@@ -196,6 +205,7 @@ const Sublease = () => {
     axiosInstance()
       .put(`${sublease.api}/remove`, { ids: ids })
       .then(() => {
+        dispatch({ type: 'selection', selectedRecords: [] });
         fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
@@ -205,77 +215,9 @@ const Sublease = () => {
         toastConfig.setToastConfig(error);
       });
   };
-  const handleSubleaseTypeSel = (filterValues) => {
-    dispatch({ type: 'setPage', page: 0 });
-    setSelectedType(filterValues);
-    if (referenceId && referenceType) {
-      history.push(`?type=${filterValues}&referenceType=${referenceType}&referenceId=${referenceId}`);
-    } else {
-      history.push(`?type=${filterValues}`);
-    }
-  };
-
-  const handleFilter = (event, newFilter) => {
-    if (newFilter != null) {
-      setFilter(newFilter);
-      handleSubleaseTypeSel(SubleaseType.find((d) => d.key === newFilter).value);
-    }
-  };
-
-  const ActionsRenderer = (params) => (
-    <>
-      {permissions?.sublease?.isCreate && (
-        <HtmlTooltip title="Clone">
-          <IconButton
-            size="small"
-            aria-label="Clone"
-            onClick={() => {
-              setShowManageDialog({ open: true, isClone: true, idToClone: params.data._id });
-            }}
-          >
-            <FileCopyIcon color="primary" />
-          </IconButton>
-        </HtmlTooltip>
-      )}
-      {/* {permissions?.sublease?.isDelete &&
-                <HtmlTooltip title="Delete">
-                    <IconButton size="small" aria-label="Delete" onClick={() => {
-                        setDeleteRecord(params.data);
-                        setShowDeleteConfirmBox(true)
-                    }} >
-                        <DeleteIcon color="error" />
-                    </IconButton>
-                </HtmlTooltip >
-            } */}
-    </>
-  );
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
-  };
-
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
-
-  const handleOpen = () => {
-    setisOpenDialog(true);
-  };
-
-  const handleClickOpen = () => {
-    setSortOpen(true);
-  };
-
-  const handleClickClose = () => {
-    setSortOpen(false);
-  };
-
-  const handleFilterClose = () => {
-    setisOpenDialog(false);
   };
 
   const updateQueryParams = () => {
@@ -290,108 +232,71 @@ const Sublease = () => {
     fetchData();
   };
 
+  const onTypeChange = (event, type) => {
+    dispatch({ type: 'pageChange', page: 0 });
+    const value = types.find((d) => d.key === type).value;
+    setSelectedType(value);
+    if (referenceId && referenceType) {
+      history.push(`?type=${value}&referenceType=${referenceType}&referenceId=${referenceId}`);
+    } else {
+      history.push(`?type=${value}`);
+    }
+  };
+
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[routes.sublease]} />
         <ImportExportLinks
           permissions={permissions?.sublease}
-          module="purchase order"
+          module={routes.sublease.title}
           api={sublease.api}
           afterImportCompleted={() => {
             fetchData();
           }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
-          recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-          ids={
-            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-              ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-              : []
-          }
+          recordsToExport={selectedRecords?.length}
+          ids={selectedRecords?.map((obj) => obj._id)}
           onExportToExcelSuccess={() => {
-            if (gridApi) gridApi.deselectAll();
-            else fetchData();
+            fetchData();
           }}
           additionalParams={getQueryString(true)}
         />
       </div>
-      <div className="main-container">
+      <CustomContainer>
         <div className="header-panel">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className={'d-flex align-items-center gap-1'}>
-              <div className="d-flex align-items-center">
-                <GiStockpiles size={20} style={{ paddingBottom: '3px' }} className="headerLogo" />
-                <span className="listingHeader">{routes.sublease?.title} </span>
+            <div className={'flex justify-between align-items-center gap-1 w-full'}>
+              <div>
+                <ToggleButtonGroup
+                  size="small"
+                  className="align-items-center gap-1 "
+                  value={types[selectedType - 1].key}
+                  exclusive
+                  onChange={onTypeChange}
+                >
+                  {types.map((k, index) => {
+                    return (
+                      <ToggleButton value={k.key} key={index}>
+                        {k.key}
+                      </ToggleButton>
+                    );
+                  })}
+                </ToggleButtonGroup>
+                {referenceType && <Chip className="ml-3" color="primary" label={`Rental Job : ${referenceType}`} onDelete={updateQueryParams} />}
               </div>
-              {isMobile && !isTablet ? (
-                <>
-                  <div className="flex flex-wrap items-center gap-1 ml-auto">
-                    <IconButton
-                      onClick={handleClickOpen}
-                      id="demo-customized-button"
-                      aria-controls="demo-customized-menu"
-                      aria-haspopup="true"
-                      aria-expanded={'true'}
-                      className={'mobileIconButton secondary'}
-                      size="small"
-                    >
-                      <TbArrowsSort className="rotate-90" size={16} />
-                    </IconButton>
-                    <MobileSortDialog
-                      isOpen={sortOpen}
-                      handleClose={handleClickClose}
-                      contentPart={null}
-                      secHeading={['Sort Purchase Order']}
-                      columns={columns}
-                      dispatch={dispatch}
-                    />
-
-                    <IconButton
-                      id="demo-customized-button"
-                      aria-controls="demo-customized-menu"
-                      aria-haspopup="true"
-                      aria-expanded={'true'}
-                      className={'mobileIconButton secondary'}
-                      size="small"
-                      onClick={handleOpen}
-                    >
-                      <MdOutlineFilterAlt size={16} />
-                    </IconButton>
-
-                    <MobileFilterDialog
-                      isOpen={isOpenDialog}
-                      handleClose={handleFilterClose}
-                      contentPart={null}
-                      columns={columns}
-                      dispatch={dispatch}
-                      title={routes?.sublease?.title}
-                      filters={filters}
-                      resource={sidebarResource.sublease}
-                    />
-                  </div>
-                </>
-              ) : (
-                <HideWhenOffline>
-                  <div className={`align-items-center gap-1 layout-for-mobile `}>
-                    {SubleaseType && (
-                      <ToggleButtonGroup size="small" className="ml-2" value={SubleaseType[selectedType - 1].key} exclusive onChange={handleFilter}>
-                        {SubleaseType.map((k, index) => {
-                          return (
-                            <ToggleButton value={k.key} key={index}>
-                              {k.key}
-                            </ToggleButton>
-                          );
-                        })}
-                      </ToggleButtonGroup>
-                    )}
-                  </div>
-                </HideWhenOffline>
-              )}
-              {referenceType && <Chip className="ml-3" color="primary" label={`Rental Job : ${referenceType}`} onDelete={updateQueryParams} />}
             </div>
-            <div className="flex flex-wrap gap-[8px]  justify-end">
-              <SearchBox onChange={handleSearch} className={isMobile ? styles.search_box_input : ''} size="small" value={search} />
+            <div className="flex flex-wrap gap-[8px] justify-end">
+              <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
               <div className="flex gap-[8px] flex-wrap items-center">
                 {permissions?.sublease?.isCreate && (
                   <Button
@@ -407,6 +312,18 @@ const Sublease = () => {
                     Add
                   </Button>
                 )}
+                <Button
+                  variant={'outlined'}
+                  color="default"
+                  size="small"
+                  onClick={openActions}
+                  className={`new-dropdown-v1`}
+                  aria-controls="action-menu"
+                  endIcon={<ExpandMore />}
+                  disabled={selectedRecords?.length ? false : true}
+                >
+                  Actions
+                </Button>
                 <Menu
                   anchorEl={anchorEl}
                   keepMounted
@@ -419,94 +336,36 @@ const Sublease = () => {
                   open={Boolean(anchorEl)}
                   onClose={closeActions}
                 >
-                  {permissions?.sublease?.isDelete && (
-                    <MenuItem
-                      onClick={() => {
-                        closeActions();
-                        setShowDeleteConfirmBox(true);
-                      }}
-                    >
-                      Delete
-                    </MenuItem>
-                  )}
+                  <MenuItem
+                    disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
+                    onClick={() => {
+                      closeActions();
+                      setShowDeleteConfirmBox(true);
+                    }}
+                  >
+                    {`Delete (${selectedRecords?.length})`}
+                  </MenuItem>
                 </Menu>
               </div>
             </div>
-            <DisplayFiltersForMobile resource={sidebarResource.sublease} />
           </div>
         </div>
         {columns ? (
-          Object.keys(frameWorkComponent).length > 0 ? (
-            isMobile && !isTablet ? (
-              <CustomSwipableList
-                key={selectedType}
-                allowSelection={true}
-                allowSwipe={true}
-                permissions={permissions.sublease}
-                primaryField={columns?.find((d) => d.primaryField)}
-                onClick={(data) => {
-                  history.push(`${routes.subleaseDetail.path}/${data._id}`);
-                }}
-                dataRows={dataRows}
-                selectedRecords={selectedRecords}
-                dispatch={dispatch}
-                onEdit={(data) => {
-                  history.push(`${routes.subleaseDetail.path}/${data._id}`);
-                }}
-                extraParamsToCheckDelete={true}
-                onDelete={(data) => {
-                  setDeleteRecord(data);
-                  setShowDeleteConfirmBox(true);
-                }}
-                rowCount={rowCount}
-                page={page}
-                loading={loading}
-                additionalDetails={[
-                  {
-                    icon: <CiUser size={18} />,
-                    field: 'supplierAccount'
-                  }
-                ]}
-                chips={[
-                  {
-                    label: 'Status: ',
-                    field: 'status'
-                  }
-                ]}
-                onCreate={false}
-                showClone={true}
-                onClone={(data) => {
-                  setShowManageDialog({ open: true, isClone: true, idToClone: data._id });
-                }}
-                renderedFrom={renderedFrom}
-              />
-            ) : (
-              <CustomAgGrid
-                columns={columns}
-                dataRows={dataRows}
-                frameworkComponents={frameWorkComponent}
-                setGridApi={setGridApi}
-                dispatch={dispatch}
-                rowCount={rowCount}
-                limit={limit}
-                pageSizes={pageSizes}
-                page={page}
-                actionWidth={150}
-                loading={loading}
-                renderedFrom={renderedFrom}
-                refreshGrid={fetchData}
-                showOnlyShowFilteredRecordSwitch={true}
-                showFilters={true}
-                resource={sidebarResource.sublease}
-              />
-            )
-          ) : null
-        ) : (
-          <Box p={2} height={500}>
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Box>
-        )}
-      </div>
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
+            columns={columns}
+            onSelect={() => { }}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            isClientSideGrid={false}
+            refreshGrid={fetchData}
+            showOnlyShowFilteredRecordSwitch={true}
+            showFilters={true}
+            resource={sidebarResource.sublease}
+          />
+        ) : null}
+      </CustomContainer>
       {showManageDialog.open && (
         <ManageSublease
           isClone={showManageDialog.isClone}

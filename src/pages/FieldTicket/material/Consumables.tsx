@@ -23,7 +23,7 @@ import Technicians from './Technicians';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { fetch_field_ticket_material_fields } from '../helper';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
-import { calculatePrice, calculateRowsFieldNew } from 'src/components/RentalManagment/helper';
+import { calculatePrice, calculateRowsField } from 'src/components/RentalManagment/helper';
 import MaterialQtyDialog from './MaterialQtyDialog';
 import EditIcon from '@material-ui/icons/Edit';
 import HistoryIcon from '@material-ui/icons/History';
@@ -409,17 +409,6 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
   };
 
   const handleSaveData = async (rows: any, saveAndNext = false) => {
-    rows.forEach((element) => {
-      element.pricingCondition = element.pricingCondition?.optionValue ? element.pricingCondition?.optionValue : element.pricingCondition; // temporary fix
-      element.service = element.serviceId;
-      delete element.index;
-      delete element.productDescription;
-      delete element.productName;
-      delete element.productNumber;
-      delete element.qtyDisplay;
-      delete element.productDetail;
-      delete element.serviceId;
-    });
     setUpdating(true);
     axiosInstance()
       .put(`${fieldTicket.api}/${fieldTicketData?._id}/material`, { material: rows })
@@ -460,7 +449,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
       inputField['qty'] = inputField['qtyDisplay'];
     }
     let rows: any = [{ ...dataRow, ...updatedData }];
-    rows = await calculateRowsFieldNew(flattenArray(dataRows), inputField, allFields, updatedData);
+    rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
     handleSaveData(rows);
   };
 

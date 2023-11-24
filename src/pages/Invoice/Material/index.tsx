@@ -23,7 +23,7 @@ import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageD
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import MaterialDialog from './MaterialDialog';
-import { calculateRowsFieldNew } from 'src/components/RentalManagment/helper';
+import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import EditIcon from '@material-ui/icons/Edit';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 
@@ -429,7 +429,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
       inputField['qty'] = inputField['qtyDisplay'];
     }
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsFieldNew(flattenArray(rowsData), inputField, allFields, updatedData);
+    rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
     handleSaveData(rows);
   };
 
@@ -460,7 +460,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
                   closeAddMenu();
                 }}
               >
-                {`Add Products`}
+                {`Add Existing Products`}
               </MenuItem>
             )}
 
@@ -472,7 +472,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
                   closeAddMenu();
                 }}
               >
-                {`Add Packages`}
+                {`Add Existing Packages`}
               </MenuItem>
             )}
             {permissions?.serviceMaster?.isRead && (
@@ -483,7 +483,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
                   closeAddMenu();
                 }}
               >
-                {`Add Services`}
+                {`Add Existing Services`}
               </MenuItem>
             )}
             <MenuItem
@@ -493,7 +493,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
                 closeAddMenu();
               }}
             >
-              {`Add Assets`}
+              {`Add Existing Assets`}
             </MenuItem>
           </Menu>
         </Box>

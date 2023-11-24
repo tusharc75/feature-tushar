@@ -17,7 +17,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { BiChevronDown } from 'react-icons/bi';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import { startCase } from 'lodash';
-import { calculateRowsFieldNew, getNestedSubRows } from 'src/components/RentalManagment/helper';
+import { calculateRowsField, getNestedSubRows } from 'src/components/RentalManagment/helper';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import ServiceOrderQty from './ServiceOrderQty';
 import { fetch_service_order_detail_fields } from 'src/components/ServiceOrder/helper';
@@ -364,7 +364,7 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
       inputField['qty'] = inputField['qtyDisplay'];
     }
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsFieldNew(flattenArray(rowsData), inputField, allFields, updatedData);
+    rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
     handleSaveData(rows);
   };
 

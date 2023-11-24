@@ -3,24 +3,22 @@ import { Button, Dialog, Grid, Box } from '@material-ui/core';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import axiosInstance from '../../../axios/axiosInstance';
 import { groupBy, unionBy } from 'lodash';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, arrayToDropwdownOption, CHILD_RESOURCE } from '..//../../constants/helpers';
+import { CustomDialogTransition, arrayToDropwdownOption } from '..//../../constants/helpers';
 import { Formik, Form } from 'formik';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import CustomButton from '../../../components/Helpers/CustomButton';
 import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from '../../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
-import { uniq, map, orderBy, isEqual, intersection } from 'lodash';
-import { CURReplaceByCurrencySingle } from '../../../constants/formulaUtility';
+import { uniq, map, orderBy, isEqual } from 'lodash';
 import { autoCalculateSpecificFields, handleAutoCalculation } from '../../../constants/formulaUtility';
 import moment from 'moment';
 import { fetch_sublease_product_fields } from '../../../components/Sublease/helper';
-import { calculateRowsFieldNew } from 'src/components/RentalManagment/helper';
+import { calculateRowsField, resetValueZero, sumOnParent } from 'src/components/RentalManagment/helper';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -159,85 +157,6 @@ const QtyDialog: FC<EditDialogProps> = ({
     }
   };
 
-  const resetValueZero = (rows) => {
-    const resetFields = [];
-    allFields.forEach((element) => {
-      if (element.type === 'converter' || element.type === 'currencyAmount' || element.isConverter === true) {
-        if (element.type !== 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            resetFields.push(element.fieldName + '_' + _unit.toLowerCase());
-          });
-        } else if (element.type === 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            element.displayCurrency.forEach((_currency) => {
-              resetFields.push(element.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase());
-            });
-          });
-        } else if (element.type === 'currencyAmount') {
-          element.displayCurrency.forEach((_currency) => {
-            resetFields.push(element.fieldName + '_' + _currency.toLowerCase());
-          });
-        }
-      } else if (element.type === 'percent') {
-        resetFields.push(element.fieldName);
-      }
-    });
-    rows.forEach((row) => {
-      resetFields.forEach((fieldName) => {
-        row[fieldName] = 0;
-      });
-    });
-  };
-
-  const sumOnParent = (packages, product) => {
-    const resetFields = [];
-    allFields.forEach((element) => {
-      if (element.type === 'converter' || element.type === 'currencyAmount' || element.isConverter === true) {
-        if (element.type !== 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            resetFields.push({ fieldName: element.fieldName + '_' + _unit.toLowerCase(), type: 'amount' });
-          });
-        } else if (element.type === 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            element.displayCurrency.forEach((_currency) => {
-              resetFields.push({ fieldName: element.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase(), type: 'amount' });
-            });
-          });
-        } else if (element.type === 'currencyAmount') {
-          element.displayCurrency.forEach((_currency) => {
-            resetFields.push({ fieldName: element.fieldName + '_' + _currency.toLowerCase(), type: 'amount' });
-          });
-        }
-      } else if (element.type === 'percent') {
-        resetFields.push({ fieldName: element.fieldName, type: 'percent' });
-      }
-    });
-    const sumValues: any = {};
-    resetFields.forEach((_field: any) => {
-      sumValues[_field.fieldName] = 0;
-      product.forEach((element) => {
-        sumValues[_field.fieldName] += element[_field.fieldName] ? element[_field.fieldName] : 0;
-      });
-    });
-    packages.forEach((row) => {
-      resetFields.forEach((ele) => {
-        if (ele.type === 'amount') {
-          row[ele.fieldName] = sumValues[ele.fieldName];
-        } else {
-          const cur = subleaseData?.currency?.toLowerCase();
-          if (ele.fieldName === 'discountPercentage') {
-            row[ele.fieldName] = parseFloat(((sumValues[`discount_${cur}`] / sumValues[`totalPrice_${cur}`]) * 100)?.toFixed(2));
-          }
-          if (ele.fieldName === 'taxPercentage') {
-            row[ele.fieldName] = parseFloat(
-              ((sumValues[`tax_${cur}`] / (sumValues[`totalPrice_${cur}`] - sumValues[`discount_${cur}`])) * 100)?.toFixed(2)
-            );
-          }
-        }
-      });
-    });
-  };
-
   const handleSubmit = async (values) => {
     const currency = subleaseData?.currency?.toLowerCase();
     if (isBulkedit) {
@@ -284,12 +203,12 @@ const QtyDialog: FC<EditDialogProps> = ({
           const calValues = autoCalculateSpecificFields(values, { ...element, ...values, ...tempRate }, fieldAll);
           rows.push({ ...element, ...calValues });
 
-          const child: any = resetValueZero(material);
-          rows = [...rows, ...child || []];
+          const child: any = resetValueZero(material, allFields, element._id);
+          rows = [...rows, ...child];
           if (element.parentId) {
             var parent: any = unionBy(rows, material, '_id').filter((e) => e._id === element.parentId);
             const sameParent: any = unionBy(rows, material, '_id').filter((e) => e.parentId === element.parentId && e._id !== element._id);
-            parent = sumOnParent(parent, [...sameParent, { ...element, ...calValues }]);
+            parent = sumOnParent(parent, [...sameParent, { ...element, ...calValues }], allFields, currency);
             rows = [...rows, ...parent];
           }
         });
@@ -310,7 +229,7 @@ const QtyDialog: FC<EditDialogProps> = ({
               }
             }
           });
-          packages = sumOnParent(packages, product);
+          packages = sumOnParent(packages, product, allFields, currency);
           rows = [...rows, ...packages];
         });
       }
@@ -323,7 +242,7 @@ const QtyDialog: FC<EditDialogProps> = ({
       if (rowData.parentId && !showConfirmationDialog) {
         setShowConfirmationDialog(true);
       } else {
-        const rows = await calculateRowsFieldNew(material, values, allFields, rowData);
+        const rows = await calculateRowsField(material, values, allFields, rowData);
         handleSaveData(rows);
         setShowConfirmationDialog(false);
       }

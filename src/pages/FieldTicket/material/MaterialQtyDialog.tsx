@@ -4,9 +4,9 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import axiosInstance from '../../../axios/axiosInstance';
-import { unionBy, uniqBy } from 'lodash';
+import { uniqBy } from 'lodash';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE } from '../../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, arrayToDropwdownOption } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
@@ -18,7 +18,7 @@ import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { uniq, map, orderBy, isEqual } from 'lodash';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import moment from 'moment';
-import { calculatePrice, calculateRowsFieldNew } from '../../../components/RentalManagment/helper';
+import { calculatePrice, calculateRowsField } from '../../../components/RentalManagment/helper';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { fetch_field_ticket_material_fields } from '../helper';
@@ -267,9 +267,13 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
         const calValues = autoCalculateSpecificFields(values, { ...element, ...values, ...tempRate }, allFields);
         rows.push({ _id: element._id, ...calValues });
       });
-      handleSaveData(rows);
+      let updatedRows: any = [];
+      rows = rows?.forEach((e : any) => {
+          updatedRows.push({_id: e._id, ...getObjKeysWithValues(e, allFields)});
+      })
+      handleSaveData(updatedRows);
     } else {
-      const rows = await calculateRowsFieldNew(material, values, allFields, rowData);
+      const rows = await calculateRowsField(material, values, allFields, rowData);
       handleSaveData(rows, saveAndNext);
       setShowConfirmationDialog(false);
     }

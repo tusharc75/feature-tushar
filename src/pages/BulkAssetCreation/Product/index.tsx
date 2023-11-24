@@ -307,7 +307,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
   return (
     <Fragment>
       {allowedToEdit && permissions?.bulkAssetCreation?.isUpdate && (
-        <Box className="flex flex-wrap gap-2 justify-between">
+        <Box m={1} className="flex flex-wrap gap-2 justify-between">
           <Box>
             <Button
               variant={'contained'}

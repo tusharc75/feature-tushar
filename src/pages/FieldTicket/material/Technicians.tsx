@@ -163,9 +163,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService }) => {
                 toastConfig.setToastConfig(error);
             });
     };
-
-
-
+    
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
     };

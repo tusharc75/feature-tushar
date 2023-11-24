@@ -24,7 +24,7 @@ import LeadTimeDialog from './LeadTimeDialog';
 import DateRangeIcon from '@material-ui/icons/DateRange';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
-import { calculateRowsFieldNew, getNestedSubRows } from 'src/components/RentalManagment/helper';
+import { calculateRowsField, getNestedSubRows } from 'src/components/RentalManagment/helper';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
@@ -546,7 +546,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
       inputField['qty'] = inputField['qtyDisplay'];
     }
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsFieldNew(flattenArray(rowsData), inputField, allFields, updatedData);
+    rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
     handleSaveData(rows);
   };
 
