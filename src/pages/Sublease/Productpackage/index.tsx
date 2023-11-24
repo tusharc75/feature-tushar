@@ -219,8 +219,8 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
       parent.description = parent.type === 'product' ? parent.productDetail?.productDescription : parent.packageDetail?.packageDescription;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + subleaseData?.currency?.toLowerCase()] ? true : !isRateRequired;
-      parent.hideSelection = parent.assetQty > 0 ? true : false;
       parent.assetQty = inventory?.filter((e) => e._id === parent._id).length
+      parent.hideSelection = parent.assetQty > 0 ? true : false;
       if (parent.type === 'package') {
         const subRows: any = data.material.filter((e) => e.parentId === parent._id);
         var assetQty = 0;
@@ -230,8 +230,8 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
           _subRow.description = _subRow.productDetail?.productDescription;
           _subRow.qtyDisplay = `${parent.qty * _subRow.qty}`;
           _subRow.isValid = _subRow['finalPrice_' + subleaseData?.currency?.toLowerCase()] ? true : !isRateRequired;
-          _subRow.hideSelection = _subRow.assetQty > 0 ? true : false;
           _subRow.assetQty = inventory?.filter((e) => e._id === _subRow._id).length
+          _subRow.hideSelection = _subRow.assetQty > 0 ? true : false;
           assetQty += _subRow.assetQty;
         });
         if (subRows.length === 0) {
@@ -263,7 +263,6 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
         setNextStepToolTip(null);
       }
     }
-    console.log(rows)
     setRowsData(rows);
     setSelectedProducts([]);
   };
@@ -283,7 +282,6 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
       element.actualStartDate = '';
       element.actualEndDate = '';
       element.actualJobDuration = '';
-      element.assetQty = 0;
       element.parentId = addExistingProductDialog.parentId;
       const calValues = autoCalculateSpecificFields({ estimateEndDate: element.estimateEndDate }, element, allFields);
       element.estimateJobDuration = 1;

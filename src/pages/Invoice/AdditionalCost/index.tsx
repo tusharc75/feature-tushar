@@ -159,7 +159,7 @@ const AdditionalCost = ({ invoiceData, setNextStep, renderedFrom }) => {
             onClick={() => setAddDialog({ open: true, data: null })}
             aria-controls="add-menu"
           >
-            {'Add Manual Entry'}
+            {'Add'}
           </Button>
         </Box>
         <Box display="flex">

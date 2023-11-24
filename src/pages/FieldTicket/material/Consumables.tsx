@@ -409,17 +409,6 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
   };
 
   const handleSaveData = async (rows: any, saveAndNext = false) => {
-    rows.forEach((element) => {
-      element.pricingCondition = element.pricingCondition?.optionValue ? element.pricingCondition?.optionValue : element.pricingCondition; // temporary fix
-      element.service = element.serviceId;
-      delete element.index;
-      delete element.productDescription;
-      delete element.productName;
-      delete element.productNumber;
-      delete element.qtyDisplay;
-      delete element.productDetail;
-      delete element.serviceId;
-    });
     setUpdating(true);
     axiosInstance()
       .put(`${fieldTicket.api}/${fieldTicketData?._id}/material`, { material: rows })

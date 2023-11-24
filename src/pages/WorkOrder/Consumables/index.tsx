@@ -88,14 +88,13 @@ const Consumables = ({
     try {
       const data: any = row;
       delete data.workOrder;
-      await axiosInstance().put(`${workOrder.api}/${workOrderId}/material`, { material: [data] });
-    } catch (error) {
-      setUpdating(false);
-      toastConfig.setToastConfig(error);
-    } finally {
+      await axiosInstance().put(`${workOrder.api}/${workOrderId}/material/product`, { material: [data] });
       setUpdating(false);
       fetchData();
       setUpdateDialog({ open: false, data: null });
+    } catch (error) {
+      setUpdating(false);
+      toastConfig.setToastConfig(error);
     }
   };
 
@@ -303,7 +302,7 @@ const Consumables = ({
   const fetchRepairOrderData = async () => {
     axiosInstance()
       .get(`${workOrder.api}/${workOrderId}/consumable/repair-order/quotation`).then(({ data }) => {
-        if(data?.data){
+        if (data?.data) {
           setRepairOrderData(data?.data);
         }
       }).catch((error) => {
@@ -615,12 +614,12 @@ const Consumables = ({
               setReviseQuotation(false);
               fetchData();
             }}
-            onOk={()=>{
+            onOk={() => {
               createNewVersionQuote(repairOrderData?.quotation?.quotation, repairOrderData?.quotation?._id);
               setReviseQuotation(false);
             }}
           />
-      )}
+        )}
       </Grid>
     </>
   );
