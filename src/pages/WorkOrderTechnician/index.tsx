@@ -221,7 +221,7 @@ const WorkOrderTechnician = () => {
             />
           </Box>
 
-          <IconButton size="small" onClick={() => fetchData()} style={{ display: 'flex', marginTop: '4px', marginLeft: 'auto' }}>
+          <IconButton className={`${selectedResource ? 'sm:col-span-[unset]' : 'sm:col-span-2'} md:col-span-[unset]`} size="small" onClick={() => fetchData()} style={{ display: 'flex', marginTop: '4px', marginLeft: 'auto' }}>
             <RefreshIcon />
           </IconButton>
           <Box></Box>
