@@ -18,7 +18,7 @@ import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { uniq, map, orderBy, isEqual } from 'lodash';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import moment from 'moment';
-import { calculatePrice, calculateRowsField } from '../../../components/RentalManagment/helper';
+import { calculatePrice, calculateRowsFieldNew } from '../../../components/RentalManagment/helper';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { fetch_field_ticket_material_fields } from '../helper';
@@ -265,11 +265,11 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
         }
 
         const calValues = autoCalculateSpecificFields(values, { ...element, ...values, ...tempRate }, allFields);
-        rows.push({ ...element, ...calValues });
+        rows.push({ _id: element._id, ...calValues });
       });
       handleSaveData(rows);
     } else {
-      const rows = await calculateRowsField(material, values, allFields, rowData);
+      const rows = await calculateRowsFieldNew(material, values, allFields, rowData);
       handleSaveData(rows, saveAndNext);
       setShowConfirmationDialog(false);
     }

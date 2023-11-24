@@ -17,7 +17,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isMobile, isTablet } from 'react-device-detect';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import { calculateRowsField } from 'src/components/RentalManagment/helper';
+import { calculateRowsFieldNew } from 'src/components/RentalManagment/helper';
 
 const AddCost = ({ fieldTicketData, setNextStep, renderedFrom, allowedToEdit }) => {
 
@@ -165,7 +165,7 @@ const AddCost = ({ fieldTicketData, setNextStep, renderedFrom, allowedToEdit }) 
       }
     }
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
+    rows = await calculateRowsFieldNew(flattenArray(rowsData), inputField, allFields, updatedData);
 
     rows.forEach((element) => {
       delete element.index;
