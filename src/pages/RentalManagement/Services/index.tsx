@@ -18,7 +18,7 @@ import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/Offl
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BiChevronDown } from 'react-icons/bi';
-import { calculatePrice, calculateRowsFieldNew, fetch_rental_product_fields, getNestedSubRows } from '../../../components/RentalManagment/helper';
+import { calculatePrice, calculateRowsField, fetch_rental_product_fields, getNestedSubRows } from '../../../components/RentalManagment/helper';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import { startCase } from 'lodash';
@@ -516,7 +516,7 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
       inputField['qty'] = inputField['qtyDisplay'];
     }
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsFieldNew(material, inputField, allFields, updatedData);
+    rows = await calculateRowsField(material, inputField, allFields, updatedData);
     handleSaveData(rows);
   };
 
