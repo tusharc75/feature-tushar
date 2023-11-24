@@ -251,9 +251,9 @@ const NotificationContent = ({ isLoading, handleMarkAllRead, handleClearAll, han
   };
 
   const boldMatchPattern = (title:string) => {
-    const regex = new RegExp(`([A-Z]+_[0-9]+)|([0-9]+)|(fail)(ed)?|(pass)(ed)?|(complete)(d)?|(start)(ed)?|(assign)(ed)?|(reject)(ed)?|(accept)(ed)?|(create)(d)?|(change)(s|d)?`, 'gi')
-    const data = title.replace(regex, '<strong>$&</strong>')
-    return data
+    const regex = new RegExp(`([A-Z]+_[0-9]+)|([0-9]+)|(fail)(ed|s)?|(pass)(ed)?|(complete)(d|s)?|(start)(ed|s)?|(assign)(ed)?|(reject)(ed|s)?|(accept)(ed|s)?|(create)(d|s)?|(change)(s|d)?`, 'gi')
+    const data = title.replace(regex, '<strong>$&</strong>');
+    return data;
   }
 
   return (
