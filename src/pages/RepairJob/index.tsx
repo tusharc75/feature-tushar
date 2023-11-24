@@ -1,12 +1,10 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import { Link, useHistory } from 'react-router-dom';
-import { Chip, Grid, IconButton, Tooltip, Fab, Button, Box } from '@material-ui/core';
+import { useHistory } from 'react-router-dom';
+import { Chip, IconButton, Tooltip, Button, Box } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { FaRegistered } from 'react-icons/fa';
 import queryString from 'query-string';
 import ManageRepairJob from './ManageRepairJob';
 import {
-  isObjectEmpty,
   customerAccount,
   supplierAccount,
   gridLoadingTimeout,
@@ -21,27 +19,16 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import RepairJobHeader from './RepairJobHeader';
+import { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import { isMobile, isTablet } from 'react-device-detect';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { findAll, findOne, insertUpdate, objectStore } from '../../constants/indexdbhelper';
 import { camelCase } from 'lodash';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
-import CustomReactTable, { checkStaticField, getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { checkStaticField, getStaticFields, gridFilterParser, useColumns } from 'src/components/CustomReactTableNew';
 import {
-  FaSuitcase,
-  SiStatuspage,
-  FaWarehouse,
-  GiAutoRepair,
-  GrStatusInfo,
-  BsFillPersonFill,
-  GiCargoShip,
-  FaShippingFast,
-  RiSpaceShipFill,
   MdOutlineFilterAlt,
   TbArrowsSort
 } from 'react-icons/all';
@@ -77,7 +64,6 @@ const RepairJob = () => {
   const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
   const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState<any>({});
   const [showManageRepairJobDialog, setShowManageRepairJobDialog] = useState({ open: false, isClone: false, idToClone: null });
@@ -92,7 +78,6 @@ const RepairJob = () => {
     accountName: history.location?.state?.accountName,
     resource: history.location?.state?.resource
   });
-  const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, page, limit, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
@@ -342,25 +327,6 @@ const RepairJob = () => {
       history.push(`?type=${filterValues}&referenceType=${referenceType}&referenceId=${referenceId}`);
     } else {
       history.push(`?type=${filterValues}`);
-    }
-  };
-
-  const handleTransferEntityDialog = () => {
-    setShowTransferEntityDialog(true);
-  };
-
-  const showConfirmBox = (row) => {
-    if (row) {
-      setIsConformDialogVisible(true);
-      if (row && row._id) {
-        setDeleteRecord(row);
-      }
-    } else {
-      if (selectedRecords.find((d) => d.canDelete === false)) {
-        setShowDeleteWarningConfirmBox(true);
-      } else {
-        setIsConformDialogVisible(true);
-      }
     }
   };
 

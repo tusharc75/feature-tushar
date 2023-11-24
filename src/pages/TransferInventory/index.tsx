@@ -9,12 +9,12 @@ import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CiUser, GiCargoShip, MdOutlineFilterAlt, RiFileTransferFill, RiFolderTransferFill, SiStatuspage, TbArrowsSort } from 'react-icons/all';
+import { MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
+import { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -24,11 +24,10 @@ import SearchBox from 'src/components/Helpers/SearchBox';
 import HideWhenOffline from 'src/components/HideWhenOffline';
 import MobileFilterDialog, { DisplayFiltersForMobile } from 'src/components/MobileFilterDialog';
 import MobileSortDialog from 'src/components/MobileSortDialog';
-import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
-import { TRANSFER_INVENTORY_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResource, transferInventory } from 'src/constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, transferInventory } from 'src/constants/helpers';
 import styles from '../Leads/Header.module.scss';
 import ManageTransferInventory from './ManageTransferInventory';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns } from 'src/components/CustomReactTableNew';
 
 const TransferInventory = () => {
   const TransferInventoryType = [
@@ -47,10 +46,7 @@ const TransferInventory = () => {
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [isDeleting, setDeleting] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [gridApi, setGridApi] = useState(null);
   const [columns, setColumns] = useState(null);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, appendRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } =
     state;
@@ -143,11 +139,6 @@ const TransferInventory = () => {
 
   const fetchTransferInventory = () => {
     dispatch({ type: 'loading', loading: true });
-
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
-
     const queryString = getQueryString();
     axiosInstance()
       .get(`${transferInventory.api}${queryString}`)
@@ -253,7 +244,6 @@ const TransferInventory = () => {
         fetchTransferInventory();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
-        setAnchorEl(null);
         setDeleting(false);
       })
       .catch((error) => {

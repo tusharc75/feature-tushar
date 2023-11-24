@@ -9,12 +9,12 @@ import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { MdAccountCircle, MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
+import { MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
+import { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -25,11 +25,10 @@ import SearchBox from 'src/components/Helpers/SearchBox';
 import HideWhenOffline from 'src/components/HideWhenOffline';
 import MobileFilterDialog, { DisplayFiltersForMobile } from 'src/components/MobileFilterDialog';
 import MobileSortDialog from 'src/components/MobileSortDialog';
-import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import { getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, purchaseOrder, removeLocalStorage, sidebarResource } from 'src/constants/helpers';
 import styles from '../Leads/Header.module.scss';
 import ManagePurchaseOrder from './ManagePurchaseOrder';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns } from 'src/components/CustomReactTableNew';
 
 const PurchaseOrder = () => {
   const PurchaseOrderType = [
