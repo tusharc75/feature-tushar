@@ -8,12 +8,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import {
-  productionOrder,
-  gridLoadingTimeout,
-  prepareDataForGrid,
-  sidebarResource
-} from '../../constants/helpers';
+import { productionOrder, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import { camelCase } from 'lodash';
@@ -27,6 +22,7 @@ import { ToggleButtonGroup, ToggleButton } from '@material-ui/lab';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
 import MessageDialog from 'src/components/Helpers/MessageDialog';
+import queryString from 'query-string';
 
 let searchTimeout;
 
@@ -46,6 +42,7 @@ const ProductionOrder = () => {
   ];
 
   const history = useHistory();
+  let { type }: any = queryString.parse(history.location.search);
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { getColumnData } = useColumns();
@@ -54,7 +51,7 @@ const ProductionOrder = () => {
     state: { user, permissions, selectedEntity }
   }: any = useData();
 
-  const [selectedType, setSelectedType] = useState(1);
+  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
@@ -63,6 +60,7 @@ const ProductionOrder = () => {
 
   const [columns, setColumns] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [renderCount, setRenderCount] = useState(0);
 
   useEffect(() => {
     fetchGridColumns();
@@ -79,7 +77,9 @@ const ProductionOrder = () => {
   }, [search]);
 
   useEffect(() => {
-    fetchData();
+    if (renderCount > 0) {
+      fetchData();
+    } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
@@ -266,7 +266,9 @@ const ProductionOrder = () => {
           permissions={permissions?.productionOrder}
           module={routes.productionOrder.title}
           api={productionOrder.api}
-          afterImportCompleted={() => {fetchData()}}
+          afterImportCompleted={() => {
+            fetchData();
+          }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}
