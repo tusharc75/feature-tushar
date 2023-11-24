@@ -53,7 +53,6 @@ const TransferInventory = () => {
   const [open, setOpen] = React.useState(false);
   const [isOpenDialog, setisOpenDialog] = useState(false);
   const history = useHistory();
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const { type }: any = queryString.parse(history.location.search);
   const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
   const [filter, setFilter] = useState(`All ${routes.transferInventory.title}`);
@@ -213,8 +212,7 @@ const TransferInventory = () => {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(selectedRecords.map((m) => m._id))}`;
     }
     return deepFilter;
   };
@@ -318,8 +316,8 @@ const TransferInventory = () => {
           }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
-          recordsToExport={selectedRecords.length}
-          ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+          recordsToExport={selectedRecords?.length}
+          ids={selectedRecords?.map((obj) => obj._id)}
           onExportToExcelSuccess={() => {
             fetchTransferInventory();
           }}
