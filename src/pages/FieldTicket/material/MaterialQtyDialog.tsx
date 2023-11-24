@@ -265,7 +265,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
         }
 
         const calValues = autoCalculateSpecificFields(values, { ...element, ...values, ...tempRate }, allFields);
-        rows.push({ ...element, ...calValues });
+        rows.push({ _id: element._id, ...calValues });
       });
       let updatedRows: any = [];
       rows = rows?.forEach((e : any) => {

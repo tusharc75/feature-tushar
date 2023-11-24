@@ -166,6 +166,10 @@ const AddCost = ({ fieldTicketData, setNextStep, renderedFrom, allowedToEdit }) 
     let rows: any = [{ ...rowData, ...updatedData }];
     rows = await calculateRowsFieldNew(flattenArray(rowsData), inputField, allFields, updatedData);
 
+    rows.forEach((element) => {
+      delete element.index;
+    });
+
     axiosInstance()
       .put(`${routes.fieldTicket?.path}/${fieldTicketData?._id}/cost`, rows)
       .then(({ data }) => {
