@@ -2,13 +2,14 @@ import { Badge, Box, Button, IconButton, List, ListItem, Menu, MenuItem, Popover
 import { ClearAll, DoneAllOutlined, Settings } from '@material-ui/icons';
 import { useContext, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { Accepted, Assigned, Rejected } from 'src/assets/notificationIcons';
+import { Accepted, Assigned, Rejected, Changed } from 'src/assets/notificationIcons';
 import { CustomNotificationCountContext } from '../../StateProvider/CustomNotificationCountContext/CustomNotificationCountContext';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import axiosInstance from '../../axios/axiosInstance';
 import { displayCardDate } from '../../constants/helpers';
+
 
 import styles from './Header.module.scss';
 
@@ -230,7 +231,7 @@ const NotificationContent = ({ isLoading, handleMarkAllRead, handleClearAll, han
       return nameList.some((s) => title.toLowerCase().includes(s.toLowerCase()));
     };
     switch (true) {
-      case compareTitle(['accepted', 'completed', 'finished'], title):
+      case compareTitle(['accepted', 'completed', 'finished', 'Created'], title):
         icon = Accepted;
         break;
       case compareTitle(['assigned'], title):
@@ -238,6 +239,9 @@ const NotificationContent = ({ isLoading, handleMarkAllRead, handleClearAll, han
         break;
       case compareTitle(['rejected', 'failed', 'closed'], title):
         icon = Rejected;
+        break;
+      case compareTitle(['changes', 'changed', 'change'], title):
+        icon = Changed;
         break;
       default:
         icon = Assigned;
@@ -332,7 +336,7 @@ const NotificationContent = ({ isLoading, handleMarkAllRead, handleClearAll, han
                       </div>
                       <div className="flex-grow">
                         <h4 className="text-[12px] font-medium mb-[8px] [&>strong]:font-semibold dark:[&>strong]:font-bold leading-[22px] text-[#6B6F77] dark:text-gray-300 [&>strong]:text-[var(--primary-text)]" dangerouslySetInnerHTML={{__html: boldMatchPattern(d.title)}}></h4>
-                        <h5 className="text-[var(--dark-secondary-text,_#718496)] text-[11px] font-normal mb-[6px]">{d.description}</h5>
+                        <h5 className="text-[var(--dark-secondary-text,_#718496)] text-[11px] font-normal mb-[2px]">{d.description}</h5>
                         <p className="text-[var(--dark-secondary-text,_#718496)] text-[11px] font-normal">{displayCardDate(d?.date)}</p>
                       </div>
                     </div>

@@ -58,3 +58,27 @@ export const Rejected: FC<svgInterfaceWithSize> = ({ size = 26, width = null, he
     </svg>
   );
 };
+
+export const Changed: FC<svgInterfaceWithSize> = ({ size = 26, width = null, height = null, ...others }) => {
+  return (
+    <svg {...others} xmlns="http://www.w3.org/2000/svg" width={size ?? width} height={size ?? height} fill="none" viewBox="0 0 26 26">
+      <path
+        fill="url(#paint0_linear_5508_25583)"
+        d="M2.39 15.446c0-6.065 4.918-10.982 10.983-10.982h2.28v-1.45a.622.622 0 011.037-.463l4.144 3.73a.622.622 0 010 .924l-4.144 3.73a.622.622 0 01-1.038-.462v-1.45h-2.12c-4.358 0-8.285 2.63-9.945 6.66-.259.63-1.196.444-1.196-.237zm21.22-4.893c0 6.066-4.918 10.982-10.983 10.982h-2.28v1.451a.622.622 0 01-1.037.462l-4.144-3.73a.622.622 0 010-.924l4.144-3.73a.622.622 0 011.038.463v1.45h2.12c4.358 0 8.285-2.63 9.945-6.66.26-.63 1.196-.444 1.196.236z"
+      ></path>
+      <defs>
+        <linearGradient
+          id="paint0_linear_5508_25583"
+          x1="5.54"
+          x2="23.609"
+          y1="2.391"
+          y2="23.609"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stopColor="#F7B200"></stop>
+          <stop offset="1" stopColor="#F90"></stop>
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+};
