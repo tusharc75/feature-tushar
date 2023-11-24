@@ -32,6 +32,7 @@ import { rentalJobOfflineUpdate } from './rentalOfflineHelper';
 import MessageDialog from 'src/components/Helpers/MessageDialog';
 import ManageRentalManagementDialog from './ManageRental';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 
 let searchTimeout;
 
@@ -184,7 +185,7 @@ const RentalManagement = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip title={permissions?.rentalManagement?.isCreate ? 'Clone' : ''}>
+        <HtmlTooltip title={permissions?.rentalManagement?.isCreate ? 'Clone' : cloneDisable}>
           <span>
             <IconButton
               size="small"
@@ -200,7 +201,7 @@ const RentalManagement = () => {
         </HtmlTooltip>
 
         <HideWhenOffline>
-          <HtmlTooltip title={row?.original.canDelete ? 'Delete' : ''}>
+          <HtmlTooltip title={row?.original.canDelete ? 'Delete' : deleteDisable}>
             <span>
               <IconButton
                 size="small"

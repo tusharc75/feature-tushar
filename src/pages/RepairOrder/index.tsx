@@ -22,6 +22,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ManageRepairOrder from './ManageRepairOrder';
+import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 
 let searchTimeout;
 
@@ -133,7 +134,7 @@ const RepairOrder = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip title={permissions?.repairOrder?.isCreate ? 'Clone' : ''}>
+        <HtmlTooltip title={permissions?.repairOrder?.isCreate ? 'Clone' : cloneDisable}>
           <span>
             <IconButton
               size="small"
@@ -148,7 +149,7 @@ const RepairOrder = () => {
           </span>
         </HtmlTooltip>
 
-        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : ''}>
+        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
           <span>
             <IconButton
               size="small"

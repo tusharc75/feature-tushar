@@ -21,6 +21,7 @@ import styles from '../Leads/Header.module.scss';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageWorkOrder from './ManageWorkOrder';
+import { deleteDisable } from 'src/constants/messageHelpers';
 
 let searchTimeout;
 
@@ -133,7 +134,7 @@ const WorkOrder = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip title={row?.original?.canDelete && !row?.original?.deleted ? 'Delete' : ''}>
+        <HtmlTooltip title={row?.original?.canDelete && !row?.original?.deleted ? 'Delete' : deleteDisable}>
           <span>
             <IconButton
               size="small"
