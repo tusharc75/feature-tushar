@@ -19,7 +19,7 @@ import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { calculateRowsFieldNew } from 'src/components/RentalManagment/helper';
+import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import CostDialog from './CostDialog';
 import ServiceDialog from './ServiceDialog';
 import AddIcon from '@material-ui/icons/Add';
@@ -470,6 +470,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
         setLoadingEdit(false);
       })
       .catch((error) => {
+        setLoadingEdit(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -501,6 +502,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
         setLoadingEdit(false);
       })
       .catch((error) => {
+        setLoadingEdit(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -552,6 +554,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
         setLoadingEdit(false);
       })
       .catch((error) => {
+        setLoadingEdit(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -570,18 +573,18 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
         }
       }
       let rows: any = [{ ...rowData, ...updatedData }];
-      rows = await calculateRowsFieldNew(material, inputField, productFields, updatedData);
+      rows = await calculateRowsField(material, inputField, productFields, updatedData);
       rows?.forEach(element => {
         element.productId = updatedData?.productId
       });
       handleUpdateQty(rows);
     } else if (rowData?.type === 'Service') {
       let rows: any = [{ ...rowData, ...updatedData }];
-      rows = await calculateRowsFieldNew(material, inputField, serviceFields, updatedData);
+      rows = await calculateRowsField(material, inputField, serviceFields, updatedData);
       handleUpdateService(rows);
     } else if (rowData?.type === 'Manual Entry') {
       let rows: any = [{ ...rowData, ...updatedData }];
-      rows = await calculateRowsFieldNew(material, inputField, costFields, updatedData);
+      rows = await calculateRowsField(material, inputField, costFields, updatedData);
       handleUpdateCost(rows);
     }
   };

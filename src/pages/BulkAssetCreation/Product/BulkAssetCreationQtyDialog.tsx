@@ -118,7 +118,7 @@ const BulkAssetCreationQtyDialog: FC<BulkAssetCreationQtyDialogProps> = ({
       }
       productData.forEach((element) => {
         const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
-        returnData.push({ ...element, ...calValues });
+        returnData.push({ _id: element._id, productId: element.productId, ...calValues });
       });
     } else {
       returnData = [{ ...values, _id: productData._id, productId: productData.productId }];

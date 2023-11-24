@@ -20,6 +20,8 @@ import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import ManageSublease from './ManageSublease';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import DeleteIcon from '@material-ui/icons/Delete';
+import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 
 let searchTimeout;
 
@@ -103,25 +105,35 @@ const Sublease = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        {permissions?.sublease?.isCreate ? (
-          <HtmlTooltip title="Clone">
+        <HtmlTooltip title={permissions?.sublease?.isCreate ? "Clone" : cloneDisable}  >
+          <span>
             <IconButton
               size="small"
               aria-label="Clone"
+              disabled={permissions?.sublease?.isCreate ? false : true}
               onClick={() => {
                 setShowManageDialog({ open: true, isClone: true, idToClone: row.original._id });
               }}
             >
-              <FileCopyIcon fontSize="small" color="primary" />
+              <FileCopyIcon fontSize="small" color={permissions?.sublease?.isCreate ? 'primary' : 'disabled'} />
             </IconButton>
-          </HtmlTooltip>
-        ) : (
-          <HtmlTooltip className="cursor-stop" title="You do not have permission to clone/create">
-            <IconButton aria-label="Clone" size="small">
-              <FileCopyIcon fontSize="small" />
+          </span>
+        </HtmlTooltip>
+        <HtmlTooltip title={row?.original?.canDelete ? "Delete" : deleteDisable}>
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              disabled={row?.original?.canDelete ? false : true}
+              onClick={() => {
+                setDeleteRecord(row.original);
+                setShowDeleteConfirmBox(true);
+              }}
+            >
+              <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
             </IconButton>
-          </HtmlTooltip>
-        )}
+          </span>
+        </HtmlTooltip>
       </>
     )
   };
@@ -168,8 +180,7 @@ const Sublease = () => {
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u, user);
           finalObject['isSelected'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['canDelete'] = false;
-          finalObject['allowedToEdit'] = [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id);
+          finalObject['canDelete'] = permissions?.sublease?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -194,6 +205,7 @@ const Sublease = () => {
     axiosInstance()
       .put(`${sublease.api}/remove`, { ids: ids })
       .then(() => {
+        dispatch({ type: 'selection', selectedRecords: [] });
         fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
@@ -300,45 +312,40 @@ const Sublease = () => {
                     Add
                   </Button>
                 )}
-                {permissions?.demandOrder?.isDelete && (
-                  <>
-                    <Button
-                      variant={'outlined'}
-                      color="default"
-                      size="small"
-                      onClick={openActions}
-                      className={`new-dropdown-v1`}
-                      aria-controls="action-menu"
-                      endIcon={<ExpandMore />}
-                      disabled={selectedRecords?.length ? false : true}
-                    >
-                      Actions
-                    </Button>
-                    <Menu
-                      anchorEl={anchorEl}
-                      keepMounted
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
-                      }}
-                      id="action-menu"
-                      open={Boolean(anchorEl)}
-                      onClose={closeActions}
-                    >
-                      {permissions?.sublease?.isDelete && (
-                        <MenuItem
-                          onClick={() => {
-                            closeActions();
-                            setShowDeleteConfirmBox(true);
-                          }}
-                        >
-                          {`Delete (${selectedRecords?.length})`}
-                        </MenuItem>
-                      )}
-                    </Menu>
-                  </>
-                )}
+                <Button
+                  variant={'outlined'}
+                  color="default"
+                  size="small"
+                  onClick={openActions}
+                  className={`new-dropdown-v1`}
+                  aria-controls="action-menu"
+                  endIcon={<ExpandMore />}
+                  disabled={selectedRecords?.length ? false : true}
+                >
+                  Actions
+                </Button>
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  id="action-menu"
+                  open={Boolean(anchorEl)}
+                  onClose={closeActions}
+                >
+                  <MenuItem
+                    disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
+                    onClick={() => {
+                      closeActions();
+                      setShowDeleteConfirmBox(true);
+                    }}
+                  >
+                    {`Delete (${selectedRecords?.length})`}
+                  </MenuItem>
+                </Menu>
               </div>
             </div>
           </div>
@@ -347,7 +354,7 @@ const Sublease = () => {
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => {}}
+            onSelect={() => { }}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}

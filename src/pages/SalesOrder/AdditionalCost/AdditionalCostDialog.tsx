@@ -28,6 +28,7 @@ interface AdditionalCostDialogProps {
 
 const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency, handleAddCost, handleUpdateCost, costData, loadingEdit, showSaveAndNext }) => {
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
+  const [allFields, setAllFields] = useState([]);
   const [fields, setFields] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -40,6 +41,7 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
       .get(`/field/child?resource=${CHILD_RESOURCE.salesOrderCost}`)
       .then(({ data: { data } }) => {
         const poFields = CURReplaceByCurrencySingle(data, currency);
+        setAllFields(JSON.parse(JSON.stringify(poFields)));
         if (costData) {
           setInitialData({
             fields: poFields,
@@ -68,11 +70,11 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
   const handleSubmit = (values) => {
     if (!costData) {
       let returnData = [];
-      returnData = [{ ...values }];
+      returnData = [{ ...getObjKeysWithValues(values, allFields) }];
       handleAddCost(returnData);
     } else {
       let returnData = [];
-      returnData = [{ ...values, _id: costData._id }];
+      returnData = [{ ...getObjKeysWithValues(values, allFields), _id: costData._id }];
       handleUpdateCost(returnData, saveAndNext);
     }
   };

@@ -219,8 +219,8 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
       parent.description = parent.type === 'product' ? parent.productDetail?.productDescription : parent.packageDetail?.packageDescription;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + subleaseData?.currency?.toLowerCase()] ? true : !isRateRequired;
-      parent.hideSelection = parent.assetQty > 0 ? true : false;
       parent.assetQty = inventory?.filter((e) => e._id === parent._id).length
+      parent.hideSelection = parent.assetQty > 0 ? true : false;
       if (parent.type === 'package') {
         const subRows: any = data.material.filter((e) => e.parentId === parent._id);
         var assetQty = 0;
@@ -230,8 +230,8 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
           _subRow.description = _subRow.productDetail?.productDescription;
           _subRow.qtyDisplay = `${parent.qty * _subRow.qty}`;
           _subRow.isValid = _subRow['finalPrice_' + subleaseData?.currency?.toLowerCase()] ? true : !isRateRequired;
-          _subRow.hideSelection = _subRow.assetQty > 0 ? true : false;
           _subRow.assetQty = inventory?.filter((e) => e._id === _subRow._id).length
+          _subRow.hideSelection = _subRow.assetQty > 0 ? true : false;
           assetQty += _subRow.assetQty;
         });
         if (subRows.length === 0) {
@@ -282,7 +282,6 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
       element.actualStartDate = '';
       element.actualEndDate = '';
       element.actualJobDuration = '';
-      element.assetQty = 0;
       element.parentId = addExistingProductDialog.parentId;
       const calValues = autoCalculateSpecificFields({ estimateEndDate: element.estimateEndDate }, element, allFields);
       element.estimateJobDuration = 1;
@@ -324,17 +323,6 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
   };
 
   const handleSaveData = async (rows: any) => {
-    rows.forEach((element) => {
-      delete element.index;
-      delete element.detail;
-      delete element.qtyDisplay;
-      delete element.isValid;
-      delete element.hideSelection;
-      delete element.productDetail;
-      delete element.packageDetail;
-      delete element.subRows;
-      delete element.description;
-    });
     setUpdating(true);
     axiosInstance()
       .put(`${sublease.api}/productpackage/${subleaseData._id}`, { material: rows })
@@ -351,8 +339,9 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
 
   const handleDelete = (rows) => {
     setDeleting(true);
+    const ids = rows.map((e) => e.id);
     axiosInstance()
-      .put(`${sublease.api}/productpackage/${subleaseData?._id}/delete`, { ids: rows })
+      .put(`${sublease.api}/productpackage/${subleaseData?._id}/delete`, { ids })
       .then(() => {
         setDeleting(false);
         fetchProductInventory();
@@ -621,7 +610,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
             }}
             isBulkedit={isProductEdit.isBulkedit}
             handleSaveData={handleSaveData}
-            rentalManagementData={subleaseData}
+            subleaseData={subleaseData}
             rowData={recordToUpdate}
             material={material}
             selectedProducts={selectedProducts}

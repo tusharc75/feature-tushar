@@ -20,7 +20,7 @@ import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import moment from 'moment';
 import {
   calculatePrice,
-  calculateRowsFieldNew,
+  calculateRowsField,
   fetch_rental_product_fields,
   resetValueZero,
   sumOnParent
@@ -347,7 +347,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       if (rowData.parentId && !showConfirmationDialog) {
         setShowConfirmationDialog(true);
       } else {
-        const rows = await calculateRowsFieldNew(material, values, allFields, rowData);
+        const rows = await calculateRowsField(material, values, allFields, rowData);
         handleSaveData(rows, saveAndNext);
         setShowConfirmationDialog(false);
       }

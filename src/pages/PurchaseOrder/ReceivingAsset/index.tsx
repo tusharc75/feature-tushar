@@ -296,10 +296,12 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
         const subRows = serializedAsset?.filter((e) => e?.product?.optionValue === res?.materialId);
         if (subRows?.length) {
           let actualReceived = item.actualReceived;
-          subRows?.forEach((e: any, index) => {
+          let index = 1;
+          subRows?.forEach((e: any) => {
             if (actualReceived && !e.isUsed) {
-              res.subRows.push({ index: `${res.index}.${index + 1}`, detail: e.assetNumber, type: MATERIAL_TYPE.serializedAsset, assetId: e?._id, hideSelection: true });
+              res.subRows.push({ index: `${res.index}.${index}`, detail: e.assetNumber, type: MATERIAL_TYPE.serializedAsset, assetId: e?._id, hideSelection: true });
               actualReceived = actualReceived - 1;
+              index = index + 1;
               e.isUsed = true;
             }
           });
@@ -307,7 +309,8 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
         const subRowsproductSerialNumber = productSerialNumber?.filter((e) => e?.product === res?.materialId);
         if (subRowsproductSerialNumber?.length) {
           let actualReceived = item.actualReceived;
-          subRowsproductSerialNumber?.forEach((e: any, index: any) => {
+          let index = 1;
+          subRowsproductSerialNumber?.forEach((e: any) => {
             if (actualReceived && !e.isUsed) {
               res.subRows.push({
                 index: `${res.index}.${index + 1}`,
@@ -317,6 +320,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
                 hideSelection: true
               });
               actualReceived = actualReceived - 1;
+              index = index + 1;
               e.isUsed = true;
             }
           });

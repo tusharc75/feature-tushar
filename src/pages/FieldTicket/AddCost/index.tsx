@@ -1,7 +1,6 @@
 import { Box, Button, Grid, IconButton, Menu, MenuItem } from '@material-ui/core';
 import { ExpandMore } from '@material-ui/icons';
 import AddIcon from '@material-ui/icons/Add';
-import { camelCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
@@ -14,7 +13,7 @@ import AddCostDialog from './AddCostDialog';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { isMobile, isTablet } from 'react-device-detect';
+import { isMobile } from 'react-device-detect';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';

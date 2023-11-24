@@ -102,7 +102,7 @@ const RenderTotalTime = ({ stepTimes }: any) => {
   );
 };
 
-const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWorkOrderData, resource, technicianSelectedService }) => {
+const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWorkOrderData, resource, technicianSelectedService, minHeightClass=null }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: {
@@ -849,6 +849,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
                       fetchService={fetchServiceData}
                       resource={resource}
                       stepSubmitedData={stepSubmitedData}
+                      minHeightClass={minHeightClass}
                     />
                   ) : (
                     <Quotation />
