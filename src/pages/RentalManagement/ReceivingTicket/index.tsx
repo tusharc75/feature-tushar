@@ -351,10 +351,7 @@ const ReceivingTicket = ({
           obj.productId = element?.productDetail?._id;
           obj.warehouse = rentalManagementData?.warehouse?.optionLabel;
           obj.warehouseId = rentalManagementData?.warehouse?.optionValue;
-          obj.status =
-            element?.productDetail?.hasOwnProperty('serializedProduct') && element?.productDetail?.serializedProduct === true
-              ? element?.status
-              : 'N/A';
+          obj.status = element?.productDetail?.serializedProduct === true ? element?.status : 'N/A';
           obj.parentId = element?.parentId;
           obj.parentName = element?.parentName;
           obj.rentalAssetStatus = !element?.productDetail?.serializedProduct
@@ -407,7 +404,7 @@ const ReceivingTicket = ({
           obj.warehouse = rentalManagementData?.warehouse?.optionLabel;
           obj.warehouseId = rentalManagementData?.warehouse?.optionValue;
           obj.nonSerializeAsset = nonSerializeAsset?.filter((e) => e.product === obj.productId);
-          obj.status = element?.status;
+          obj.status = element?.productDetail?.serializedProduct === true ? element?.status : 'N/A';
           obj.rentalAssetStatus = !element?.productDetail?.serializedProduct
             ? qty === consumeQty
               ? 'Consumed'

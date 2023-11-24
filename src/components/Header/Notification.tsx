@@ -2,13 +2,14 @@ import { Badge, Box, Button, IconButton, List, ListItem, Menu, MenuItem, Popover
 import { ClearAll, DoneAllOutlined, Settings } from '@material-ui/icons';
 import { useContext, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { Accepted, Assigned, Rejected } from 'src/assets/notificationIcons';
+import { Accepted, Assigned, Rejected, Changed, Created } from 'src/assets/notificationIcons';
 import { CustomNotificationCountContext } from '../../StateProvider/CustomNotificationCountContext/CustomNotificationCountContext';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import axiosInstance from '../../axios/axiosInstance';
 import { displayCardDate } from '../../constants/helpers';
+
 
 import styles from './Header.module.scss';
 
@@ -226,9 +227,11 @@ const NotificationContent = ({ isLoading, handleMarkAllRead, handleClearAll, han
 
   const getIcon = (title: string) => {
     let icon = Assigned;
+
     const compareTitle = (nameList: string[], title) => {
       return nameList.some((s) => title.toLowerCase().includes(s.toLowerCase()));
     };
+
     switch (true) {
       case compareTitle(['accepted', 'completed', 'finished'], title):
         icon = Accepted;
@@ -239,6 +242,12 @@ const NotificationContent = ({ isLoading, handleMarkAllRead, handleClearAll, han
       case compareTitle(['rejected', 'failed', 'closed'], title):
         icon = Rejected;
         break;
+      case compareTitle(['changes', 'changed', 'change'], title):
+        icon = Changed;
+        break;
+      case compareTitle(['Created', 'Creates', 'create'], title):
+        icon = Created;
+        break;
       default:
         icon = Assigned;
         break;
@@ -246,10 +255,10 @@ const NotificationContent = ({ isLoading, handleMarkAllRead, handleClearAll, han
     return icon;
   };
 
-  const boldMatchPattern = (title:string)=>{
-    const regex = new RegExp(`([A-Z]+_[0-9]+)|([0-9]+)|([F-f]+ail)(ed)?|([P-p]ass)(ed)?|([C-c]+omplete)(d)?|([S-s]+tart)(ed)?|([A-a]+ssign)(ed)?|([R-r]+eject)(ed)?|([A-a]+ccept)(ed)?|([C-c]+reate)(d)?|([C-c]+hange)(s|d)?`, 'gi')
-    const data = title.replace(regex, '<strong>$&</strong>')
-    return data
+  const boldMatchPattern = (title:string) => {
+    const regex = new RegExp(`([A-Z]+_[0-9]+)|([0-9]+)|(fail)(ed|s)?|(pass)(ed)?|(complete)(d|s)?|(start)(ed|s)?|(assign)(ed)?|(reject)(ed|s)?|(accept)(ed|s)?|(create)(d|s)?|(change)(s|d)?`, 'gi');
+    const data = title.replace(regex, '<strong>$&</strong>');
+    return data;
   }
 
   return (
@@ -332,7 +341,7 @@ const NotificationContent = ({ isLoading, handleMarkAllRead, handleClearAll, han
                       </div>
                       <div className="flex-grow">
                         <h4 className="text-[12px] font-medium mb-[8px] [&>strong]:font-semibold dark:[&>strong]:font-bold leading-[22px] text-[#6B6F77] dark:text-gray-300 [&>strong]:text-[var(--primary-text)]" dangerouslySetInnerHTML={{__html: boldMatchPattern(d.title)}}></h4>
-                        <h5 className="text-[var(--dark-secondary-text,_#718496)] text-[11px] font-normal mb-[6px]">{d.description}</h5>
+                        <h5 className="text-[var(--dark-secondary-text,_#718496)] text-[11px] font-normal mb-[2px]">{d.description}</h5>
                         <p className="text-[var(--dark-secondary-text,_#718496)] text-[11px] font-normal">{displayCardDate(d?.date)}</p>
                       </div>
                     </div>
