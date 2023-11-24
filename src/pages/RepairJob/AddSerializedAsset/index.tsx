@@ -283,10 +283,39 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
       });
   };
 
+  const handleAdd = async (rows) => {
+    setIsAdding(true);
+    axiosInstance().post(`${repairJob.api}/${repairJobData._id}/assets`, {
+      assets: rows.map((m) => {
+        return {
+          _id: m._id ?? m.id,
+          currentStatus: m?.status,
+        };
+      })
+    })
+      .then(({ data }) => {
+        setAddSerializedAssetDialog(false);
+        if (repairJobData.status === REPAIR_JOB_STATUS.new) {
+          updateJobStatus(REPAIR_JOB_STATUS.inProgress);
+        }
+        fetchRecords();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        setIsAdding(false);
+      })
+      .catch((error) => {
+        setIsAdding(false);
+        toastConfig.setToastConfig(error);
+      });
+  }
+
   const handleSaveData = async (rows: any, saveAndNext = false) => {
     setUpdating(true);
     axiosInstance()
-      .put(`${repairJob.api}/${repairJobData?._id}/assets`, rows)
+      .put(`${repairJob.api}/${repairJobData?._id}/assets`, { assets: rows })
       .then(({ data }) => {
         fetchRecords();
         toastConfig.setToastConfig({
@@ -417,34 +446,8 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
       {addSerializedAssetDialog && (
         <AddSerializedAsset
           referenceType="Repair Job"
-          addSerializedAsset={(newRecordsToAdd) => {
-            setIsAdding(true);
-            axiosInstance()
-              .post(`${repairJob.api}/${repairJobData._id}/assets`, {
-                assets: newRecordsToAdd.map((m) => {
-                  return {
-                    _id: m._id ?? m.id,
-                    currentStatus: m?.status,
-                  };
-                })
-              })
-              .then(({ data }) => {
-                setAddSerializedAssetDialog(false);
-                if (repairJobData.status === REPAIR_JOB_STATUS.new) {
-                  updateJobStatus(REPAIR_JOB_STATUS.inProgress);
-                }
-                fetchRecords();
-                toastConfig.setToastConfig({
-                  open: true,
-                  type: 'success',
-                  message: data.message
-                });
-                setIsAdding(false);
-              })
-              .catch((error) => {
-                setIsAdding(false);
-                toastConfig.setToastConfig(error);
-              });
+          addSerializedAsset={(rows) => {
+            handleAdd(rows)
           }}
           handleSerializedAssetClose={() => {
             setAddSerializedAssetDialog(false);
