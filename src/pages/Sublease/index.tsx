@@ -180,7 +180,7 @@ const Sublease = () => {
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u, user);
           finalObject['isSelected'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['canDelete'] = permissions?.sublease?.isDelete && u?.canDelete ? true : false;
+          finalObject['canDelete'] = permissions?.sublease?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
