@@ -209,6 +209,7 @@ const Quotation = () => {
             <IconButton
               size="small"
               aria-label="Delete"
+              disabled={row?.original?.canDelete ? false : true}
               onClick={() => {
                 setDeleteRecord(row.original);
                 setShowDeleteConfirmBox(true);
@@ -284,7 +285,7 @@ const Quotation = () => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isChecked'] = false;
-          finalObject['canDelete'] = permissions?.quotation?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;;
+          finalObject['canDelete'] = permissions?.quotation?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
