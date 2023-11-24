@@ -84,7 +84,7 @@ const Notification = () => {
       .put('/notification/all-read', { toggle: true })
       .then(({ data }) => {
         let updatedNotificationList = [];
-        notificationList.map((notification) => {
+        notificationList.forEach((notification) => {
           notification.read = true;
           updatedNotificationList.push(notification);
         });
@@ -138,6 +138,8 @@ const Notification = () => {
       history.push(d?.resourceId ? `${d?.resourcePath}/${d?.resourceId}` : d?.resourcePath, { data: d?.of ? d?.of : null });
     }
   };
+
+
 
   return (
     <>
@@ -244,6 +246,12 @@ const NotificationContent = ({ isLoading, handleMarkAllRead, handleClearAll, han
     return icon;
   };
 
+  const boldMatchPattern = (title:string)=>{
+    const regex = new RegExp(`([A-Z]+_[0-9]+)|([0-9]+)|([F-f]+ail)(ed)?|([P-p]ass)(ed)?|([C-c]+omplete)(d)?|([S-s]+tart)(ed)?|([A-a]+ssign)(ed)?|([R-r]+eject)(ed)?|([A-a]+ccept)(ed)?|([C-c]+reate)(d)?|([C-c]+hange)(s|d)?`, 'gi')
+    const data = title.replace(regex, '<strong>$&</strong>')
+    return data
+  }
+
   return (
     <>
       <div className={``}>
@@ -323,7 +331,7 @@ const NotificationContent = ({ isLoading, handleMarkAllRead, handleClearAll, han
                         </div>
                       </div>
                       <div className="flex-grow">
-                        <h4 className="text-[12px] text-[var(--dark-primary-text,var(--primary))] font-medium mb-[8px]">{d.title}</h4>
+                        <h4 className="text-[12px] font-medium mb-[8px] [&>strong]:font-semibold dark:[&>strong]:font-bold leading-[22px] text-[#6B6F77] dark:text-gray-300 [&>strong]:text-[var(--primary-text)]" dangerouslySetInnerHTML={{__html: boldMatchPattern(d.title)}}></h4>
                         <h5 className="text-[var(--dark-secondary-text,_#718496)] text-[11px] font-normal mb-[6px]">{d.description}</h5>
                         <p className="text-[var(--dark-secondary-text,_#718496)] text-[11px] font-normal">{displayCardDate(d?.date)}</p>
                       </div>
