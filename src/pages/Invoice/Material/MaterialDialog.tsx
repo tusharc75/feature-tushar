@@ -17,7 +17,7 @@ import { uniq, map, orderBy, isEqual } from 'lodash';
 import { autoCalculateSpecificFields, handleAutoCalculation } from '../../../constants/formulaUtility';
 import moment from 'moment';
 import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
-import { bulkUpdate, calculateRowsFieldNew } from 'src/components/RentalManagment/helper';
+import { bulkUpdate, calculateRowsField } from 'src/components/RentalManagment/helper';
 interface EditDialogProps {
   onClose: VoidFunction | any;
   handleSaveData: VoidFunction | any;
@@ -173,17 +173,12 @@ const MaterialDialog: FC<EditDialogProps> = ({
   const handleSubmit = async (values) => {
     if (isBulkedit) {
       const rows = bulkUpdate(values, selectedProducts, material, allFields, invoiceData?.currency);
-      const result: any = [];
-      rows?.forEach((e) => {
-        const data = getObjKeysWithValues(e, allFields);
-        result.push({ _id: e?._id, materialId: e?.materialId, ...data });
-      });
-      handleSaveData(result);
+      handleSaveData(rows);
     } else {
       if (rowData.parentId && !showConfirmationDialog) {
         setShowConfirmationDialog(true);
       } else {
-        const rows = await calculateRowsFieldNew(material, values, allFields, rowData);
+        const rows = await calculateRowsField(material, values, allFields, rowData);
         handleSaveData(rows, saveAndNext);
         setShowConfirmationDialog(false);
       }

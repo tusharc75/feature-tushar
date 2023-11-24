@@ -23,7 +23,7 @@ import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageD
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import MaterialDialog from './MaterialDialog';
-import { calculateRowsFieldNew } from 'src/components/RentalManagment/helper';
+import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import EditIcon from '@material-ui/icons/Edit';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 
@@ -429,7 +429,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
       inputField['qty'] = inputField['qtyDisplay'];
     }
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsFieldNew(flattenArray(rowsData), inputField, allFields, updatedData);
+    rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
     handleSaveData(rows);
   };
 
