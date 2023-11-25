@@ -155,6 +155,7 @@ const Invoice = () => {
             <IconButton
               size="small"
               aria-label="Delete"
+              disabled={row?.original?.canDelete ? false : true}
               onClick={() => {
                 setDeleteRecord(row.original);
                 setShowDeleteConfirmBox(true);
