@@ -1,41 +1,42 @@
 import { Chip, IconButton } from '@material-ui/core';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import { Delete } from '@material-ui/icons';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
-import { useContext, useEffect, useReducer, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
+import { useContext, useEffect, useState } from 'react';
+import { isMobile } from 'react-device-detect';
 import { GiAbstract055 } from 'react-icons/gi';
-import { MdOutlineFilterAlt } from 'react-icons/md';
-import { TbArrowsSort } from 'react-icons/tb';
-import { useHistory } from 'react-router-dom';
+import { useHistory, Link } from 'react-router-dom';
 import HideWhenOffline from 'src/components/HideWhenOffline';
-import MobileFilterDialog, { DisplayFiltersForMobile } from 'src/components/MobileFilterDialog';
-import MobileSortDialog from 'src/components/MobileSortDialog';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
 import CustomContainer from '../../components/CustomContainer';
-import { DeliveryToRenderer, PickupFromRenderer } from '../../components/DeliveryTicket/helper';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import SearchBox from '../../components/Helpers/SearchBox';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { deliveryTicket, getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import {
+  deliveryTicket,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  sidebarResource,
+  DELIVERY_FROM_TO_TYPE
+} from '../../constants/helpers';
 import { findAll, findOne, objectStore } from '../../constants/indexdbhelper';
-import useColumns, { getFrameworkComponents, getStaticFields, gridFilterParser } from '../../constants/useColumns';
 import styles from '../Leads/Header.module.scss';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageDeliveryTicket from './ManageDeliveryTicket';
+import { deleteDisable } from 'src/constants/messageHelpers';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 let deliveryTicketTimeout;
 
 const DeliveryTicket = () => {
-  const DeliveryTicketType = [
+  const types = [
     {
       key: `My ${routes.deliveryTicket.title}`,
       value: 1
@@ -49,37 +50,29 @@ const DeliveryTicket = () => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   let { type, referenceId, referenceType }: any = queryString.parse(history.location.search);
-  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
-  const [filter, setFilter] = useState(`All ${routes.deliveryTicket.title}`);
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
   const { getColumnData } = useColumns();
+  const [selectedType, setSelectedType] = useState(1);
   const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
-  const [deleteRecord, setDeleteRecord] = useState<any>({});
+  const [deleteRecord, setDeleteRecord] = useState(null);
   const [deliveryPermissions, setdeliveryPermissions] = useState({
     isCreate: permissions?.deliveryTicket?.isCreate,
     isUpdate: permissions?.deliveryTicket?.isUpdate,
     isRead: permissions?.deliveryTicket?.isRead,
     isDelete: permissions?.deliveryTicket?.isDelete
   });
-
+  const { state, dispatch } = useTableReducer();
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [showManageDeliveryTicket, setShowManageDeliveryTicket] = useState(false);
   const [columns, setColumns] = useState([]);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
-  const [sortOpen, setSortOpen] = useState(false);
-  const [isOpenDialog, setisOpenDialog] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
 
-  //  Grid Variables - Start
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
-    state;
   const { isOffline } = useContext(CustomOfflineContext);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   useEffect(() => {
     fetchGridColumns();
@@ -97,45 +90,62 @@ const DeliveryTicket = () => {
     }
     data = data.filter((e) => !['productInventory', 'pickupFromType', 'deliveryToType'].includes(e?.fieldData?.fieldName));
     let columns = [];
-    let rendererNames = [];
     data.forEach((o) => {
       let currentColumn = getColumnData(renderedFrom, o?.fieldData, `${routes.deliveryTicket.path}/detail`, true);
       if (currentColumn !== null) {
         columns = [...columns, currentColumn?.columnData];
-        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-          rendererNames.push(currentColumn?.rendererName);
-        }
       }
       return o?.fieldData;
     });
-    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-    tempFrameworkComponent = {
-      ...tempFrameworkComponent,
-      pickupFromRenderer: PickupFromRenderer,
-      deliveryToRenderer: DeliveryToRenderer,
-      actionsRenderer: ActionsRenderer
-    };
-    setFrameWorkComponent({ ...tempFrameworkComponent });
-    columns = [...columns, ...getStaticFields()];
+    columns = [...columns, ...getStaticFields(), ActionsRenderer];
     columns = columns.filter((e) => !['warehouse', 'customerAccount', 'supplierAccount'].includes(e.field));
-    columns.forEach((e) => {
-      if (e.field === 'pickupFrom') {
-        e.cellRenderer = 'pickupFromRenderer';
+    columns.forEach((column) => {
+      if (column.field === 'pickupFrom') {
+        column.Cell = ({ row }) => (
+          <>
+            <Link
+              className="link text-truncate"
+              title={row.original[column.accessor]}
+              to={
+                row.original?.pickupFromType === DELIVERY_FROM_TO_TYPE.plant
+                  ? `${routes.warehouseDetail.path}/${row.original.pickupFromId}`
+                  : row.original?.pickupFromType === DELIVERY_FROM_TO_TYPE.customer
+                  ? `${routes.customerAccountDetail.path}/${row.original?.pickupFromId}`
+                  : `${routes.supplierAccountDetail.path}/${row.original?.pickupFromId}`
+              }
+            >
+              {row.original[column.accessor]}
+            </Link>
+          </>
+        );
       }
-      if (e.field === 'deliveryTo') {
-        e.cellRenderer = 'deliveryToRenderer';
+      if (column.field === 'deliveryTo') {
+        column.Cell = ({ row }) => (
+          <>
+            <Link
+              className="link text-truncate"
+              title={row.original[column.accessor]}
+              to={
+                row.original?.deliveryToType === DELIVERY_FROM_TO_TYPE.plant
+                  ? `${routes.warehouseDetail.path}/${row.original.deliveryToId}`
+                  : row.original?.deliveryToType === DELIVERY_FROM_TO_TYPE.customer
+                  ? `${routes.customerAccountDetail.path}/${row.original?.deliveryToId}`
+                  : `${routes.supplierAccountDetail.path}/${row.original?.deliveryToId}`
+              }
+            >
+              {row.original[column.accessor]}
+            </Link>
+          </>
+        );
       }
     });
     setColumns([...columns]);
   };
 
-  const fetchDeliveryTicket = async () => {
+  const fetchData = async () => {
     try {
       if (selectedEntity) {
         dispatch({ type: 'loading', loading: true });
-        if (gridApi) {
-          gridApi.setRowData([]);
-        }
         let data: any = [],
           count;
         if (!isOffline) {
@@ -154,11 +164,7 @@ const DeliveryTicket = () => {
           res['isChecked'] = false;
           return res;
         });
-        if (appendRows) {
-          dispatch({ type: 'initialize', data: [...dataRows, ...rows], count: count });
-        } else {
-          dispatch({ type: 'initialize', data: rows, count: count });
-        }
+        dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
@@ -184,30 +190,45 @@ const DeliveryTicket = () => {
       clearTimeout(deliveryTicketTimeout);
     }
     deliveryTicketTimeout = setTimeout(() => {
-      fetchDeliveryTicket();
+      fetchData();
     }, millisec);
   }, [search]);
 
   useEffect(() => {
     if (renderCount > 0) {
-      fetchDeliveryTicket();
+      fetchData();
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, filters, sorting, selectedEntity, isOffline, selectedType, showFilteredRecordsOnly]);
 
-  const ActionsRenderer = (params) => (
-    <>
-      <GridDeleteIcon
-        hasDeletePermission={deliveryPermissions?.isDelete && params.data?.canDelete}
-        ownerId={params.data.ownerId}
-        userId={user?.user?._id}
-        onDelete={() => {
-          setDeleteRecord(params.data);
-          setIsConformDialogVisible(true);
-        }}
-        entity="Delivery Ticket"
-      />
-    </>
-  );
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 110,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        <HtmlTooltip title={row?.original?.canDelete && deliveryPermissions?.isDelete ? 'Delete' : deleteDisable}>
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              disabled={row?.original?.canDelete ? false : true}
+              onClick={() => {
+                setDeleteRecord(row.original);
+                setIsConformDialogVisible(true);
+              }}
+            >
+              <Delete fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+      </>
+    )
+  };
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
@@ -248,8 +269,7 @@ const DeliveryTicket = () => {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || [])?.map((m) => m._id))}`;
     }
     return deepFilter;
   };
@@ -258,39 +278,15 @@ const DeliveryTicket = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-  const handleDeliveryTicketTypeSel = (filterValues) => {
-    dispatch({ type: 'setPage', page: 0 });
-    setSelectedType(filterValues);
-    if (referenceId && referenceType) {
-      history.push(`?type=${filterValues}&referenceType=${referenceType}&referenceId=${referenceId}`);
+  const showConfirmBox = () => {
+    if (selectedRecords.find((d) => d.canDelete === false)) {
+      setShowDeleteWarningConfirmBox(true);
     } else {
-      history.push(`?type=${filterValues}`);
-    }
-  };
-
-  const handleFilter = (event, newFilter) => {
-    if (newFilter != null) {
-      setFilter(newFilter);
-      handleDeliveryTicketTypeSel(DeliveryTicketType.find((d) => d.key === newFilter).value);
-    }
-  };
-
-  const showConfirmBox = (row) => {
-    if (row) {
       setIsConformDialogVisible(true);
-      if (row && row._id) {
-        setDeleteRecord(row);
-      }
-    } else {
-      if (selectedRecords.find((d) => d.canDelete === false)) {
-        setShowDeleteWarningConfirmBox(true);
-      } else {
-        setIsConformDialogVisible(true);
-      }
     }
   };
 
-  const handleDeleteDeliveryTicket = async () => {
+  const handleDelete = async () => {
     setDeleteLoading(true);
     let recordsToDelete = [];
     if (deleteRecord?._id) {
@@ -309,10 +305,12 @@ const DeliveryTicket = () => {
             type: 'success',
             message: data.message
           });
+          dispatch({ type: 'selection', selectedRecords: [] });
+          fetchData();
           setIsConformDialogVisible(false);
+          setDeleteRecord(null);
+          setAnchorEl(null);
           setDeleteLoading(false);
-          if (deleteRecord) setDeleteRecord({});
-          fetchDeliveryTicket();
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -320,22 +318,6 @@ const DeliveryTicket = () => {
           setDeleteLoading(false);
         });
     }
-  };
-
-  const handleOpen = () => {
-    setisOpenDialog(true);
-  };
-
-  const handleClickOpen = () => {
-    setSortOpen(true);
-  };
-
-  const handleClickClose = () => {
-    setSortOpen(false);
-  };
-
-  const handleFilterClose = () => {
-    setisOpenDialog(false);
   };
 
   const updateQueryParams = () => {
@@ -347,7 +329,22 @@ const DeliveryTicket = () => {
     history.replace({
       search: queryParams.toString()
     });
-    fetchDeliveryTicket();
+    fetchData();
+  };
+
+  const onTypeChange = (event, type) => {
+    dispatch({ type: 'pageChange', page: 0 });
+    const value = types.find((d) => d.key === type).value;
+    setSelectedType(value);
+    history.push(`?type=${value}`);
+  };
+
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
   };
 
   return (
@@ -359,23 +356,13 @@ const DeliveryTicket = () => {
             permissions={deliveryPermissions}
             module="deliveryTicket"
             api={deliveryTicket.api}
-            afterImportCompleted={fetchDeliveryTicket}
+            afterImportCompleted={fetchData}
             isExportAllOrSomeFeature={true}
             onlyExport={true}
             total={rowCount}
-            recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-            ids={
-              getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-                ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-                : []
-            }
-            onExportToExcelSuccess={() => {
-              if (gridApi) {
-                gridApi.deselectAll();
-              } else {
-                fetchDeliveryTicket();
-              }
-            }}
+            recordsToExport={selectedRecords?.length}
+            ids={selectedRecords?.map((obj) => obj._id)}
+            onExportToExcelSuccess={fetchData}
             additionalParams={getQueryString(true)}
           />
         </div>
@@ -390,76 +377,21 @@ const DeliveryTicket = () => {
                   <span className="listingHeader">{routes.deliveryTicket.title} </span>
                   {referenceType && <Chip className="ml-3" color="primary" label={`Rental : ${referenceType}`} onDelete={updateQueryParams} />}
                 </div>
-                {isMobile && !isTablet ? (
-                  <>
-                    <div className="flex flex-wrap items-center gap-1 ml-auto">
-                      <IconButton
-                        onClick={handleClickOpen}
-                        id="demo-customized-button"
-                        aria-controls="demo-customized-menu"
-                        aria-haspopup="true"
-                        aria-expanded={'true'}
-                        className={'mobileIconButton secondary'}
-                        size="small"
-                      >
-                        <TbArrowsSort className="rotate-90" size={16} />
-                      </IconButton>
-                      <MobileSortDialog
-                        isOpen={sortOpen}
-                        handleClose={handleClickClose}
-                        contentPart={null}
-                        secHeading={['Sort Purchase Order']}
-                        columns={columns}
-                        dispatch={dispatch}
-                      />
-
-                      <IconButton
-                        id="demo-customized-button"
-                        aria-controls="demo-customized-menu"
-                        aria-haspopup="true"
-                        aria-expanded={'true'}
-                        className={'mobileIconButton secondary'}
-                        size="small"
-                        onClick={handleOpen}
-                      >
-                        <MdOutlineFilterAlt size={16} />
-                      </IconButton>
-
-                      <MobileFilterDialog
-                        isOpen={isOpenDialog}
-                        handleClose={handleFilterClose}
-                        contentPart={null}
-                        columns={columns}
-                        dispatch={dispatch}
-                        title={routes?.deliveryTicket?.title}
-                        filters={filters}
-                        resource={sidebarResource.deliveryTicket}
-                      />
-                    </div>
-                  </>
-                ) : (
-                  <HideWhenOffline>
-                    <div className={`align-items-center gap-1 layout-for-mobile `}>
-                      {DeliveryTicketType && (
-                        <ToggleButtonGroup
-                          size="small"
-                          className="ml-2"
-                          value={DeliveryTicketType[selectedType - 1].key}
-                          exclusive
-                          onChange={handleFilter}
-                        >
-                          {DeliveryTicketType.map((k, index) => {
-                            return (
-                              <ToggleButton value={k.key} key={index}>
-                                {k.key}
-                              </ToggleButton>
-                            );
-                          })}
-                        </ToggleButtonGroup>
-                      )}
-                    </div>
-                  </HideWhenOffline>
-                )}
+                <HideWhenOffline>
+                  <div className={`align-items-center gap-1 layout-for-mobile `}>
+                    {types && (
+                      <ToggleButtonGroup size="small" className="ml-2" value={types[selectedType - 1].key} exclusive onChange={onTypeChange}>
+                        {types.map((k, index) => {
+                          return (
+                            <ToggleButton value={k.key} key={index}>
+                              {k.key}
+                            </ToggleButton>
+                          );
+                        })}
+                      </ToggleButtonGroup>
+                    )}
+                  </div>
+                </HideWhenOffline>
               </div>
               <div className="flex flex-wrap gap-[8px]  justify-end">
                 <SearchBox onChange={handleSearch} className={isMobile ? styles.search_box_input : ''} size="small" value={search} />
@@ -499,66 +431,24 @@ const DeliveryTicket = () => {
                     }}>Delete</MenuItem>
                   </Menu> */}
               </div>
-              <DisplayFiltersForMobile resource={sidebarResource.deliveryTicket} />
             </div>
           </div>
 
-          {isMobile && !isTablet ? (
-            <CustomSwipableList
-              key={selectedType}
-              allowSelection={true}
-              allowSwipe={true}
-              permissions={permissions.deliveryTicket}
-              primaryField={columns?.find((d) => d.primaryField)}
-              onClick={(data) => {
-                history.push(`${routes.deliveryTicketDetail.path}/${data._id}`);
-              }}
-              dataRows={dataRows}
-              selectedRecords={selectedRecords}
-              dispatch={dispatch}
-              onEdit={() => {}}
-              extraParamsToCheckDelete={true}
-              onDelete={() => {}}
-              rowCount={rowCount}
-              page={page}
-              loading={loading}
-              chips={[
-                {
-                  label: 'Status: ',
-                  field: 'status'
-                },
-                {
-                  label: 'Job Name: ',
-                  field: 'ticketName'
-                }
-              ]}
-              onCreate={null}
-              showClone={false}
-              onClone={() => {}}
-              renderedFrom={renderedFrom}
-            />
-          ) : Object.keys(frameWorkComponent).length > 0 ? (
-            <CustomAgGrid
-              columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameWorkComponent}
-              setGridApi={setGridApi}
-              dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              actionWidth={100}
-              loading={loading}
-              allowSelection={true}
-              allowAction={false}
-              renderedFrom={renderedFrom}
-              refreshGrid={fetchDeliveryTicket}
-              showOnlyShowFilteredRecordSwitch={true}
-              showFilters={true}
-              resource={sidebarResource.deliveryTicket}
-            />
-          ) : null}
+          {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
+            columns={columns}
+            onSelect={() => {}}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            isClientSideGrid={false}
+            refreshGrid={fetchData}
+            showOnlyShowFilteredRecordSwitch={true}
+            showFilters={true}
+            resource={sidebarResource.deliveryTicket}
+          />
+        ) : null}
 
           {showDeleteWarningConfirmBox ? (
             <MessageDialog
@@ -578,7 +468,7 @@ const DeliveryTicket = () => {
                 setIsConformDialogVisible(false);
               }}
               okBtnLoading={deleteLoading}
-              onOk={handleDeleteDeliveryTicket}
+              onOk={handleDelete}
             />
           ) : null}
 
@@ -586,7 +476,7 @@ const DeliveryTicket = () => {
             <ManageDeliveryTicket
               onClose={() => setShowManageDeliveryTicket(false)}
               onSuccess={() => {
-                fetchDeliveryTicket();
+                fetchData();
                 setShowManageDeliveryTicket(false);
               }}
             />
