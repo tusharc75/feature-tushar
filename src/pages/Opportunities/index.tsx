@@ -103,7 +103,7 @@ const Opportunities = () => {
     });
     let staticFields = getStaticFields();
     staticFields.forEach((field) => {
-      columns.push(checkStaticField(routes.projectSales.title, field));
+      columns.push(checkStaticField(routes.opportunity.title, field));
     });
     setColumns([...columns, ActionsRenderer]);
   };
