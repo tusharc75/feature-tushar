@@ -148,18 +148,18 @@ const Leads = () => {
 
         {hasPermissionToConvertInOpportunity && generateLeadToOpportunityButton(row?.original)}
 
-        <HtmlTooltip title={row?.original?.canDelete ? "Delete" : deleteDisable}>
+        <HtmlTooltip title={row?.original?.canDelete && !row?.original?.convertedToOpportunity ? "Delete" : deleteDisable}>
           <span>
             <IconButton
               size="small"
               aria-label="Delete"
-              disabled={row?.original?.canDelete ? false : true}
+              disabled={row?.original?.canDelete && !row?.original?.convertedToOpportunity ? false : true}
               onClick={() => {
                 setDeleteRecord(row?.original);
                 setIsConformDialogVisible(true);
               }}
             >
-              <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
+              <DeleteIcon fontSize="small" color={row?.original?.canDelete && !row?.original?.convertedToOpportunity ? 'error' : 'disabled'} />
             </IconButton>
           </span>
         </HtmlTooltip>
@@ -367,6 +367,7 @@ const Leads = () => {
           type: 'success',
           message: data.message
         });
+        dispatch({ type: 'selection', selectedRecords: [] });
         setIsConformDialogVisible(false);
         setOkButtonLoading(false);
         if (deleteRecord.id) {
@@ -524,7 +525,7 @@ const Leads = () => {
                   onClose={closeActions}
                 >
                   <MenuItem
-                    disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
+                    disabled={selectedRecords.every((e) => e.canDelete && !e.convertedToOpportunity) ? false : true}
                     onClick={() => {
                       closeActions();
                       setIsConformDialogVisible(true);

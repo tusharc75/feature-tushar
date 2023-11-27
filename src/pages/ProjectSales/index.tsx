@@ -277,6 +277,7 @@ const ProjectSales: FC = () => {
           type: 'success',
           message: data.message
         });
+        dispatch({ type: 'selection', selectedRecords: [] });
         setShowDeleteConfirmBox(false);
         setDeleteLoading(false);
         setDeleteRecord(null);

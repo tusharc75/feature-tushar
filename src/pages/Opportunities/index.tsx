@@ -66,8 +66,6 @@ const Opportunities = () => {
   const [anchorEl, setAnchorEl] = useState(null);
 
 
-  const localStorageSelectedRecords = `${opportunityResource}_selected`;
-
 
   //  Grid Variables - End
   useEffect(() => {
@@ -292,7 +290,7 @@ const Opportunities = () => {
           type: 'success',
           message: data.message
         });
-        removeLocalStorage(localStorageSelectedRecords);
+        dispatch({ type: 'selection', selectedRecords: [] });
         setIsConformDialogVisible(false);
         setDeleteLoading(false);
         setDeleteRecord(null);
