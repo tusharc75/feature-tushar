@@ -82,7 +82,7 @@ const InvoiceDetails = () => {
 
   useEffect(() => {
     if (id) {
-      getRessourceFields();
+      fetchFields();
       fetchInvoiceData();
     }
   }, [id]);
@@ -102,7 +102,7 @@ const InvoiceDetails = () => {
       });
   };
 
-  const getRessourceFields = async () => {
+  const fetchFields = async () => {
     try {
       const response: any = await axiosInstance().get('/field?resource=Invoice');
       response?.data?.data.some((o) => {

@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
-import { useHistory } from 'react-router-dom';
+import { useHistory, Link } from 'react-router-dom';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -22,7 +22,7 @@ import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import { Button, IconButton, Menu, MenuItem, Box } from '@material-ui/core';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import { AddOutlined, ExpandMore, Warning } from '@material-ui/icons';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { clearAll, findAll, findOne, insertUpdate, objectStore, setUpindexDB } from 'src/constants/indexdbhelper';
@@ -147,18 +147,39 @@ const RentalManagement = () => {
     }
 
     let columns = [];
-    let rendererNames = [];
-
     data.forEach((o) => {
-      let currentColumn: any = getColumnData(renderedFrom, o?.fieldData, routes.rentalManagementDetail.path, true);
-      if (currentColumn !== null) {
-        if (isOffline) {
-          currentColumn.columnData['filter'] = false;
-          currentColumn.columnData['sortable'] = false;
-        }
-        columns = [...columns, currentColumn?.columnData];
-        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-          rendererNames.push(currentColumn?.rendererName);
+      if (o?.fieldData?.fieldName === 'rentalJobName') {
+        columns = [
+          ...columns,
+          {
+            accessor: o?.fieldData?.fieldName,
+            Header: o?.fieldData?.fieldLabel,
+            minWidth: 180,
+            width: 180,
+            Cell: ({ row }) => (
+              <>
+                <Link className="link text-truncate" title={row?.original[o?.fieldData?.fieldName]} to={`${routes.rentalManagement.path}/detail/${row?.original?._id}`}>
+                  {row?.original[o?.fieldData?.fieldName]}
+                </Link>
+                {row?.original?.assetsNotReceivedInPo && (
+                  <Box ml={1}>
+                    <HtmlTooltip title={`Assets on PO not received`}>
+                      <Warning style={{ fontSize: '14px' }} fontSize="small" color="error" />
+                    </HtmlTooltip>
+                  </Box>
+                )}
+              </>
+            )
+          }
+        ];
+      } else {
+        let currentColumn: any = getColumnData(renderedFrom, o?.fieldData, routes.rentalManagementDetail.path, true);
+        if (currentColumn !== null) {
+          if (isOffline) {
+            currentColumn.columnData['filter'] = false;
+            currentColumn.columnData['sortable'] = false;
+          }
+          columns = [...columns, currentColumn?.columnData]
         }
       }
       return o?.fieldData;
@@ -532,7 +553,7 @@ const RentalManagement = () => {
                     open={Boolean(anchorEl)}
                     onClose={closeActions}
                   >
-                    {selectedRecords?.length > 0 &&
+                    {selectedRecords?.length > 0 && (
                       <MenuItem
                         disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
                         onClick={() => {
@@ -541,7 +562,8 @@ const RentalManagement = () => {
                         }}
                       >
                         {`Delete (${selectedRecords?.length})`}
-                      </MenuItem>}
+                      </MenuItem>
+                    )}
                     <MenuItem disabled={!selectedRecords.length} onClick={() => handleAddOffline()}>
                       Add Offline
                     </MenuItem>
@@ -566,9 +588,11 @@ const RentalManagement = () => {
             showFilters={true}
             resource={sidebarResource.rentalManagement}
           />
-        ) : <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>}
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
 
         {showDeleteWarningConfirmBox && (
           <MessageDialog
@@ -594,8 +618,9 @@ const RentalManagement = () => {
         {singleRentalManagementDelete.show && (
           <ConfirmationDialog
             open={singleRentalManagementDelete.show}
-            message={`Are you sure you want to delete this ${routes.rentalManagement.title.toLowerCase()} ${singleRentalManagementDelete ? (singleRentalManagementDelete?.id ? singleRentalManagementDelete?.rentalJobName : '') : ''
-              }?`}
+            message={`Are you sure you want to delete this ${routes.rentalManagement.title.toLowerCase()} ${
+              singleRentalManagementDelete ? (singleRentalManagementDelete?.id ? singleRentalManagementDelete?.rentalJobName : '') : ''
+            }?`}
             onClose={() =>
               setSingleRentalManagementDelete({
                 id: null,

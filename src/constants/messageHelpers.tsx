@@ -1,6 +1,9 @@
 import routes from "src/components/Helpers/Routes";
 
 export const ownerAndColaborator = 'You have to be either owner or collaborator to perform this action';
+
+export const entityDisable = 'You do not have permission to update entity';
+
 export const actionSelection = 'Select at least one line item to enable this button';
 
 export const cloneDisable = 'You do not have permission to Clone/Create';
