@@ -19,10 +19,11 @@ import ManageWarehouse from './ManageWarehouse';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import { Menu, MenuItem } from '@material-ui/core';
+import { Menu, MenuItem, Box } from '@material-ui/core';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
 import MessageDialog from 'src/components/Helpers/MessageDialog';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 let searchTimeout;
 
@@ -283,7 +284,7 @@ const Warehouse = () => {
           permissions={permissions?.warehouse}
           module={routes.warehouse.title}
           api={routes?.warehouse.path}
-          afterImportCompleted={() => {fetchData()}}
+          afterImportCompleted={() => { fetchData() }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}
@@ -295,26 +296,25 @@ const Warehouse = () => {
           extraImportExportLinks={
             user?.user?.brandPolicy?.warehouseAccessByUser
               ? [
-                  {
-                    title: 'Assign Users Template',
-                    api: `warehouse/user/template`,
-                    type: 'download'
-                  },
-                  {
-                    title: 'Assign Users Export',
-                    api: `warehouse/user/template?export=true${
-                      selectedRecords.length
-                        ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}`
-                        : ''
+                {
+                  title: 'Assign Users Template',
+                  api: `warehouse/user/template`,
+                  type: 'download'
+                },
+                {
+                  title: 'Assign Users Export',
+                  api: `warehouse/user/template?export=true${selectedRecords.length
+                    ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}`
+                    : ''
                     }`,
-                    type: 'export'
-                  },
-                  {
-                    title: 'Assign Users Import',
-                    api: `warehouse/user/import`,
-                    type: 'import'
-                  }
-                ]
+                  type: 'export'
+                },
+                {
+                  title: 'Assign Users Import',
+                  api: `warehouse/user/import`,
+                  type: 'import'
+                }
+              ]
               : []
           }
         />
@@ -431,7 +431,6 @@ const Warehouse = () => {
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => {}}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
@@ -441,7 +440,9 @@ const Warehouse = () => {
             showFilters={true}
             resource={sidebarResource.warehouse}
           />
-        ) : null}
+        ) : <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>}
       </CustomContainer>
       {userAssignDialog && (
         <AssignUserDialog

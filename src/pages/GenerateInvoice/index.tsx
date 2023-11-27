@@ -10,7 +10,6 @@ import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, INVOICE_STATUS
 import NoteAddIcon from '@material-ui/icons/NoteAdd';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import CustomContainer from 'src/components/CustomContainer';
 import styles from '../Leads/Header.module.scss';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import { Autocomplete } from '@material-ui/lab';
@@ -20,6 +19,7 @@ import CreateBillingDialog from '../RentalManagement/ProgressiveBilling/CreateBi
 import ViewInvoice from '../Invoice/ViewInvoice';
 import { ExpandMore } from '@material-ui/icons';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const GENERATE_RESOURCE = [
   {
@@ -141,7 +141,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u);
-          finalObject['isSelected'] = selectedRecords?.some((s) => s._id === u._id);
+          finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -308,9 +308,9 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
         </Grid>
         <Grid item md={8} sm={1} xs={2} />
       </Grid>
-      <CustomContainer>
+      <div className="main-container">
         <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
             <div className={'flex justify-between align-items-center gap-1 w-full'}>
               <Autocomplete
                 id="generate-invoice"
@@ -319,74 +319,80 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
                 renderInput={(params) => <TextField {...params} variant="outlined" label="Resource" margin="dense" required={true} />}
                 getOptionLabel={(option) => option?.title}
                 onChange={(e, val) => {
+                  dispatch({ type: 'selection', selectedRecords: [] });
                   setSelectedResource(val);
                 }}
                 disableClearable={true}
                 value={selectedResource}
               />
             </div>
-            <div className="flex flex-wrap gap-[8px] justify-end">
-              <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
-              <div className="flex gap-[8px] flex-wrap items-center">
-                {selectedResource.resource === sidebarResource.fieldTicket && (
-                  <>
-                    <Button
-                      variant={'outlined'}
-                      color="default"
-                      size="small"
-                      onClick={openActions}
-                      disabled={selectedRecords.length ? false : true}
-                      aria-controls="action-menu"
-                      className={`new-dropdown-v1`}
-                      endIcon={<ExpandMore />}
-                    >
-                      Actions
-                    </Button>
-                    <Menu
-                      anchorEl={anchorEl}
-                      keepMounted
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
+            <div className="flex flex-wrap gap-[8px]  justify-end">
+              <SearchBox
+                onChange={handleSearch}
+                className={styles.search_box_input}
+                value={search}
+                size="small"
+              />
+              {selectedResource.resource === sidebarResource.fieldTicket && (
+                <div className="flex gap-[8px] flex-wrap items-center">
+                  <Button
+                    variant={'outlined'}
+                    color="default"
+                    size="small"
+                    onClick={openActions}
+                    disabled={selectedRecords.length ? false : true}
+                    aria-controls="action-menu"
+                    className={`new-dropdown-v1`}
+                    endIcon={<ExpandMore />}
+                  >
+                    Actions
+                  </Button>
+                  <Menu
+                    anchorEl={anchorEl}
+                    keepMounted
+                    getContentAnchorEl={null}
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'left'
+                    }}
+                    id="action-menu"
+                    open={Boolean(anchorEl)}
+                    onClose={closeActions}
+                  >
+                    <MenuItem
+                      disabled={checkUniqCreateInvoice()}
+                      onClick={() => {
+                        setCreateInvoiceDialog({ open: true, data: selectedRecords });
+                        closeActions();
                       }}
-                      id="action-menu"
-                      open={Boolean(anchorEl)}
-                      onClose={closeActions}
                     >
-                      <MenuItem
-                        disabled={checkUniqCreateInvoice()}
-                        onClick={() => {
-                          setCreateInvoiceDialog({ open: true, data: selectedRecords });
-                          closeActions();
-                        }}
-                      >
-                        Create Invoice
-                      </MenuItem>
-                    </Menu>
-                  </>
-                )}
-              </div>
+                      Create Invoice
+                    </MenuItem>
+                  </Menu>
+                </div>
+              )}
             </div>
           </div>
         </div>
-
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => {}}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             isClientSideGrid={false}
             refreshGrid={fetchData}
             showFilters={true}
-            hideSelection={true}
+            showOnlyShowFilteredRecordSwitch={true}
+            hideSelection={selectedResource.resource === sidebarResource.fieldTicket ? false : true}
             resource={selectedResource.resource}
           />
-        ) : null}
-
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
         {createInvoiceDialog.open &&
           (selectedResource.resource === sidebarResource.rentalManagement ? (
             <CreateBillingDialog
@@ -434,7 +440,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
             resource={selectedResource.resource}
           />
         )}
-      </CustomContainer>
+      </div>
     </Fragment>
   ) : null;
 };

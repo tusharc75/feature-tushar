@@ -1,4 +1,4 @@
-import { Button, IconButton } from '@material-ui/core';
+import { Button, IconButton, Box } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -24,6 +24,7 @@ import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import { Menu, MenuItem } from '@material-ui/core';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 let searchTimeout;
 
@@ -168,15 +169,15 @@ const LeadTimeMaster = () => {
           finalObject['allowedToEdit'] = permissions?.leadTimeMaster?.isUpdate;
           finalObject['canDelete'] = permissions?.leadTimeMaster?.isDelete;
           // finalObject['owerCollaboratorInitialsOrImages'] = [];
-        // if (finalObject['owner']) finalObject['owerCollaboratorInitialsOrImages'].push({ initials: finalObject['owner'] });
-        // finalObject['owerCollaboratorInitialsOrImages'].forEach((f) => {
-        //   if (f.initials) {
-        //     f.initials = f.initials
-        //       .split(' ')
-        //       .map((i) => i[0])
-        //       .join('');
-        //   }
-        // });
+          // if (finalObject['owner']) finalObject['owerCollaboratorInitialsOrImages'].push({ initials: finalObject['owner'] });
+          // finalObject['owerCollaboratorInitialsOrImages'].forEach((f) => {
+          //   if (f.initials) {
+          //     f.initials = f.initials
+          //       .split(' ')
+          //       .map((i) => i[0])
+          //       .join('');
+          //   }
+          // });
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -235,7 +236,7 @@ const LeadTimeMaster = () => {
           permissions={permissions?.leadTimeMaster}
           module={routes.leadTimeMaster.title}
           api={leadTimeMaster.api}
-          afterImportCompleted={() => {fetchData()}}
+          afterImportCompleted={() => { fetchData() }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}
@@ -254,19 +255,19 @@ const LeadTimeMaster = () => {
             <div className="flex flex-wrap gap-[8px] justify-end">
               <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
               <div className="flex gap-[8px] flex-wrap items-center">
-                {permissions?.leadTimeMaster?.isCreate &&(
-                <Button
-                  variant={'contained'}
-                  color="primary"
-                  size="small"
-                  className={`no-shadow`}
-                  onClick={() => {
-                    setShowManageDialog({ open: true, isClone: false, idToClone: null });
-                  }}
-                  startIcon={<AddOutlined />}
-                >
-                  Add
-                </Button>)}
+                {permissions?.leadTimeMaster?.isCreate && (
+                  <Button
+                    variant={'contained'}
+                    color="primary"
+                    size="small"
+                    className={`no-shadow`}
+                    onClick={() => {
+                      setShowManageDialog({ open: true, isClone: false, idToClone: null });
+                    }}
+                    startIcon={<AddOutlined />}
+                  >
+                    Add
+                  </Button>)}
                 {permissions?.leadTimeMaster?.isDelete && (
                   <>
                     <Button
@@ -294,11 +295,11 @@ const LeadTimeMaster = () => {
                       onClose={closeActions}
                     >
                       <MenuItem
-                      disabled={
-                        !(
-                          (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length
-                        )
-                      }
+                        disabled={
+                          !(
+                            (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length
+                          )
+                        }
                         onClick={() => {
                           closeActions();
                           // eslint-disable-next-line no-lone-blocks
@@ -321,7 +322,6 @@ const LeadTimeMaster = () => {
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => {}}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
@@ -331,7 +331,9 @@ const LeadTimeMaster = () => {
             showFilters={true}
             resource={sidebarResource.leadTimeMaster}
           />
-        ) : null}
+        ) : <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>}
       </CustomContainer>
       {showDeleteConfirmBox && (
         <ConfirmationDialog

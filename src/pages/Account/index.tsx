@@ -1,4 +1,4 @@
-import { Button, Chip, IconButton, Menu, MenuItem, MenuList } from '@material-ui/core';
+import { Button, Chip, IconButton, Menu, MenuItem, MenuList, Box } from '@material-ui/core';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import Grow from '@material-ui/core/Grow';
@@ -40,6 +40,7 @@ import ManageAccountDialog from './ManageAccount/index';
 import WarhouseList from './Warehouse/WarhouseList';
 import accountClass from './account.module.scss';
 import { cloneDisable } from 'src/constants/messageHelpers';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 
 
@@ -816,7 +817,6 @@ export default function Account(props) {
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => { }}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
@@ -826,7 +826,9 @@ export default function Account(props) {
             showFilters={true}
             resource={sidebarResource[accountResource]}
           />
-        ) : null}
+        ) : <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>}
 
         {showDeleteWarningConfirmBox?.show ? (
           <MessageDialog

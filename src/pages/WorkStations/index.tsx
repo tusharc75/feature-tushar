@@ -1,4 +1,4 @@
-import { Button, IconButton } from '@material-ui/core';
+import { Button, IconButton, Box } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -19,6 +19,7 @@ import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import { Menu, MenuItem } from '@material-ui/core';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 let searchTimeout;
 
@@ -219,7 +220,7 @@ const WorkStations = () => {
           permissions={permissions?.workStations}
           module={routes.workStations.title}
           api={routes?.workStations?.path}
-          afterImportCompleted={() => {fetchData()}}
+          afterImportCompleted={() => { fetchData() }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}
@@ -294,7 +295,6 @@ const WorkStations = () => {
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => {}}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
@@ -304,7 +304,9 @@ const WorkStations = () => {
             showFilters={true}
             resource={sidebarResource.workStations}
           />
-        ) : null}
+        ) : <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>}
       </CustomContainer>
       {showDeleteConfirmBox && (
         <ConfirmationDialog

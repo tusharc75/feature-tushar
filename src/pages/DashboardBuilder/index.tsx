@@ -11,10 +11,11 @@ import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../c
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTableNew';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import { Menu, MenuItem } from '@material-ui/core';
+import { Menu, MenuItem, Box } from '@material-ui/core';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { baseURL } from './builderHelpers';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 let searchTimeout;
 
@@ -249,7 +250,6 @@ const DashBoards = () => {
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => {}}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
@@ -259,7 +259,9 @@ const DashBoards = () => {
             showFilters={false}
             resource={sidebarResource.dashboardMaster}
           />
-        ) : null}
+        ) : <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>}
       </CustomContainer>
       {showDeleteConfirmBox && (
         <ConfirmationDialog
