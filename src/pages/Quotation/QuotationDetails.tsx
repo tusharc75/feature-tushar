@@ -158,7 +158,7 @@ const QuotationDetails = () => {
     return tempQuotationFields;
   }, [quotationData, quotationFields]);
 
-  const getRessourceFields = async () => {
+  const fetchFields = async () => {
     try {
       const response: any = await axiosInstance().get('/field?resource=Quotation');
       setQuotationFields(response?.data?.data);
@@ -169,7 +169,7 @@ const QuotationDetails = () => {
 
   useEffect(() => {
     if (id) {
-      getRessourceFields();
+      fetchFields();
       fetchQuotationData();
     }
   }, [id]);

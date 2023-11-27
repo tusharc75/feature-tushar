@@ -83,7 +83,7 @@ const PackageDetails = () => {
     }
   }, [id]);
 
-  const getRessourceFields = () => {
+  const fetchFields = () => {
     setPackagesLoading(true);
     axiosInstance()
       .get('/field?resource=Packages')
@@ -105,7 +105,7 @@ const PackageDetails = () => {
         setPackageData(data);
         setHeadingLabel(data.packageName);
         setCustomizedRoutes([routes.packages, { title: data.packageName }]);
-        getRessourceFields();
+        fetchFields();
       })
       .catch((err) => {
         setPackagesLoading(false);

@@ -99,7 +99,7 @@ const TransferAssetDetailPage = () => {
       });
   };
 
-  const getRessourceFields = (transferType) => {
+  const fetchFields = (transferType) => {
     axiosInstance()
       .get('/field?resource=Transfer Asset')
       .then(({ data: { data } }) => {
@@ -148,7 +148,7 @@ const TransferAssetDetailPage = () => {
     axiosInstance()
       .get(`${routes.transferAsset.path}/${id}`)
       .then(({ data: { data } }) => {
-        getRessourceFields(data?.transferType);
+        fetchFields(data?.transferType);
         setTransferAssetData(data);
         setHeadingLabel(data.transferAssetNumber);
         var steps: any = transferAssetSteps;
