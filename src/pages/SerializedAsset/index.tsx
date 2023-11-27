@@ -814,7 +814,6 @@ const SerializedAsset = () => {
 
       {openSupplierAccountDialog && (
         <AssignDynamicDialog
-          reference={routes.serializedAsset.title}
           onSuccess={(data) => {
             handleCertificationSupplier(data);
           }}
@@ -823,7 +822,7 @@ const SerializedAsset = () => {
           }}
           ids={[]}
           resource={sidebarResource?.supplierAccount}
-          path={routes?.supplierAccount?.path}
+          isSubmitting={false}
         />
       )}
 
