@@ -25,9 +25,10 @@ import { bulkAssetCreation, gridLoadingTimeout, prepareDataForGrid, sidebarResou
 import styles from '../Leads/Header.module.scss';
 import ManageBulkAssetCreation from './ManageBulkAssetCreation';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns } from 'src/components/CustomReactTableNew';
+import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 
 const BulkAssetCreation = () => {
-  const BulkAssetCreationType = [
+  const types = [
     {
       key: `My ${routes.bulkAssetCreation.title}`,
       value: 1
@@ -40,16 +41,16 @@ const BulkAssetCreation = () => {
   let renderedFrom = camelCase(routes.bulkAssetCreation?.title);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
-  const [showManageBulkAssetCreationDialog, setShowManageBulkAssetCreationDialog] = useState({ open: false, isClone: false, idToClone: null });
+  const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const [columns, setColumns] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, page, limit, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
-    state;
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+
   let { type, referenceId, referenceType }: any = queryString.parse(history.location.search);
+
   const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
 
   const {
@@ -62,7 +63,7 @@ const BulkAssetCreation = () => {
   }, []);
 
   useEffect(() => {
-    fetchBulkAssetCreation();
+    fetchData();
   }, [page, limit, filters, sorting, search, selectedEntity, selectedType, showFilteredRecordsOnly]);
 
   const fetchGridColumns = () => {
@@ -86,79 +87,58 @@ const BulkAssetCreation = () => {
     accessor: 'action',
     Header: 'Actions',
     minWidth: 100,
-    width: 150,
+    width: 100,
     sticky: 'right',
     disableFilters: true,
     disableSortBy: true,
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        {permissions?.bulkAssetCreation?.isCreate && (
-          <HtmlTooltip title="Clone">
+        <HtmlTooltip title={permissions?.bulkAssetCreation?.isCreate ? "Clone" : cloneDisable}  >
+          <span>
             <IconButton
               size="small"
               aria-label="Clone"
+              disabled={permissions?.bulkAssetCreation?.isCreate ? false : true}
               onClick={() => {
-                setShowManageBulkAssetCreationDialog({ open: true, isClone: true, idToClone: row?.original._id });
+                setShowManageDialog({ open: true, isClone: true, idToClone: row?.original._id });
               }}
             >
-              <FileCopyIcon fontSize="small" color="primary" />
+              <FileCopyIcon fontSize="small" color={permissions?.bulkAssetCreation?.isCreate ? 'primary' : 'disabled'} />
             </IconButton>
-          </HtmlTooltip>
-        )}
-        {/* {row?.original?.canDelete ? (
-          <HtmlTooltip title="Delete">
+          </span>
+        </HtmlTooltip>
+        <HtmlTooltip title={row?.original?.canDelete ? "Delete" : deleteDisable}>
+          <span>
             <IconButton
+              size="small"
               aria-label="Delete"
+              disabled={row?.original?.canDelete ? false : true}
               onClick={() => {
-                setDeleteRecord(row?.original);
+                setDeleteRecord(row.original);
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon fontSize="small" color="error" />
+              <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
             </IconButton>
-          </HtmlTooltip>
-        ) : (
-          <HtmlTooltip className="cursor-stop" title="You do not have permission to delete">
-            <IconButton aria-label="Delete">
-              <DeleteIcon fontSize="small" color="disabled" />
-            </IconButton>
-          </HtmlTooltip>
-        )} */}
+          </span>
+        </HtmlTooltip>
       </>
     )
   }
 
-  const fetchBulkAssetCreation = () => {
+  const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
-
     const queryString = getQueryString();
     axiosInstance()
       .get(`${bulkAssetCreation.api}${queryString}`)
       .then(({ data: { data, count } }) => {
         let rows = data?.map((u) => {
           let finalObject: any = prepareDataForGrid(u);
-          finalObject['canDelete'] = permissions?.fieldTicket?.isDelete && finalObject?.ownerId === user?.user?._id;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id);
-          let res = {
-            ...finalObject
-          };
-          return res;
+          finalObject['canDelete'] = permissions?.bulkAssetCreation?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;
+          return finalObject;
         });
-        if (appendRows) {
-          dispatch({
-            type: 'initialize',
-            data: [...dataRows, ...rows],
-            count: count,
-          });
-        } else {
-          dispatch({
-            type: 'initialize',
-            data: rows,
-            count: count,
-          });
-        }
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -206,23 +186,10 @@ const BulkAssetCreation = () => {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || [])?.map((m) => m._id))}`;
     }
     return deepFilter;
   };
-
-  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
-
-  if (columnState) {
-    columns?.map((item) => {
-      columnState.map((d) => {
-        if (d.colId == item.field) {
-          item.show = !d.hide;
-        }
-      });
-    });
-  }
 
   const handleDelete = () => {
     let ids = [];
@@ -234,7 +201,8 @@ const BulkAssetCreation = () => {
     axiosInstance()
       .put(`${bulkAssetCreation.api}/remove`, { ids: ids })
       .then(() => {
-        fetchBulkAssetCreation();
+        dispatch({ type: 'selection', selectedRecords: [] });
+        fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
         setAnchorEl(null);
@@ -268,7 +236,7 @@ const BulkAssetCreation = () => {
 
   const handleFilter = (event, newFilter) => {
     if (newFilter != null) {
-      handleBulkAssetCreationType(BulkAssetCreationType.find((d) => d.key === newFilter).value);
+      handleBulkAssetCreationType(types.find((d) => d.key === newFilter).value);
     }
   };
 
@@ -281,7 +249,7 @@ const BulkAssetCreation = () => {
     history.replace({
       search: queryParams.toString()
     });
-    fetchBulkAssetCreation();
+    fetchData();
   };
 
   return (
@@ -290,17 +258,17 @@ const BulkAssetCreation = () => {
         <CustomBreadCrumbs routes={[routes.bulkAssetCreation]} />
         <ImportExportLinks
           permissions={permissions?.bulkAssetCreation}
-          module="bulk assets creation "
+          module={routes.bulkAssetCreation.title}
           api={bulkAssetCreation.api}
           afterImportCompleted={() => {
-            fetchBulkAssetCreation();
+            fetchData();
           }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}
           ids={selectedRecords?.map((obj) => obj._id)}
           onExportToExcelSuccess={() => {
-            fetchBulkAssetCreation();
+            fetchData();
           }}
           additionalParams={getQueryString(true)}
         />
@@ -310,15 +278,15 @@ const BulkAssetCreation = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
             <div className={'d-flex flex-wrap align-items-center gap-2'}>
               <div className={`flex flex-wrap items-center gap-2 `}>
-                {BulkAssetCreationType && (
+                {types && (
                   <ToggleButtonGroup
                     size="small"
                     className="ml-2"
-                    value={BulkAssetCreationType[selectedType - 1].key}
+                    value={types[selectedType - 1].key}
                     exclusive
                     onChange={handleFilter}
                   >
-                    {BulkAssetCreationType.map((k, index) => {
+                    {types.map((k, index) => {
                       return (
                         <ToggleButton value={k.key} key={index}>
                           {k.key}
@@ -343,7 +311,7 @@ const BulkAssetCreation = () => {
                 {permissions?.bulkAssetCreation?.isCreate && (
                   <Button
                     onClick={() => {
-                      setShowManageBulkAssetCreationDialog({ open: true, isClone: false, idToClone: null });
+                      setShowManageDialog({ open: true, isClone: false, idToClone: null });
                     }}
                     variant={'contained'}
                     size="small"
@@ -354,22 +322,18 @@ const BulkAssetCreation = () => {
                     Add
                   </Button>
                 )}
-                {/* <HtmlTooltip title={!selectedRecords?.length ? `Please select some ${routes?.bulkAssetCreation?.title?.toLowerCase()}s` : ""}>
-                  <span>
-                    <Button
-                      variant={'outlined'}
-                      color="default"
-                      size="small"
-                      onClick={openActions}
-                      disabled={selectedRecords.length ? false : true}
-                      aria-controls="action-menu"
-                      className={`new-dropdown-v1`}
-                      endIcon={<ExpandMore />}
-                    >
-                      Actions
-                    </Button>
-                  </span>
-                </HtmlTooltip>
+                <Button
+                  variant={'outlined'}
+                  color="default"
+                  size="small"
+                  onClick={openActions}
+                  disabled={selectedRecords.length ? false : true}
+                  aria-controls="action-menu"
+                  className={`new-dropdown-v1`}
+                  endIcon={<ExpandMore />}
+                >
+                  Actions
+                </Button>
                 <Menu
                   anchorEl={anchorEl}
                   keepMounted
@@ -391,7 +355,7 @@ const BulkAssetCreation = () => {
                   >
                     {`Delete (${selectedRecords.length})`}
                   </MenuItem>
-                </Menu> */}
+                </Menu>
               </div>
             </div>
           </div>
@@ -405,7 +369,7 @@ const BulkAssetCreation = () => {
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             isClientSideGrid={false}
-            refreshGrid={fetchBulkAssetCreation}
+            refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
             resource={sidebarResource.bulkAssetCreation}
@@ -416,14 +380,14 @@ const BulkAssetCreation = () => {
           </Box>
         )}
       </div>
-      {showManageBulkAssetCreationDialog.open && (
+      {showManageDialog.open && (
         <ManageBulkAssetCreation
-          isClone={showManageBulkAssetCreationDialog.isClone}
-          bulkAssetCreationId={showManageBulkAssetCreationDialog.idToClone}
-          onClose={() => setShowManageBulkAssetCreationDialog({ open: false, isClone: false, idToClone: null })}
+          isClone={showManageDialog.isClone}
+          bulkAssetCreationId={showManageDialog.idToClone}
+          onClose={() => setShowManageDialog({ open: false, isClone: false, idToClone: null })}
           onSuccess={() => {
-            setShowManageBulkAssetCreationDialog({ open: false, isClone: false, idToClone: null });
-            fetchBulkAssetCreation();
+            setShowManageDialog({ open: false, isClone: false, idToClone: null });
+            fetchData();
           }}
         />
       )}
