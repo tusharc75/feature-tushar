@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import { Tooltip, IconButton, Box, Button, Menu, MenuItem } from '@material-ui/core';
+import { IconButton, Box, Button, Menu, MenuItem } from '@material-ui/core';
 import { Link, useHistory } from 'react-router-dom';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
@@ -296,41 +296,41 @@ const Leads = () => {
 
     return dontHavePermissions.length > 0 ? (
       <>
-        <Tooltip
+        <HtmlTooltip
           className="cursor-stop"
           title={`To convert lead to opportunity, you must need create permission of ${dontHavePermissions.join(', ')}`}
         >
           <IconButton aria-label="Convert to opportunity">
             <SiConvertio size={18} />
           </IconButton>
-        </Tooltip>
+        </HtmlTooltip>
       </>
     ) : convertedToOpportunity ? (
       <>
-        <Tooltip className="cursor-stop" title="This lead is already converted to opportunity">
+        <HtmlTooltip className="cursor-stop" title="This lead is already converted to opportunity">
           <IconButton aria-label="Convert to opportunity">
             <SiConvertio size={18} />
           </IconButton>
-        </Tooltip>
+        </HtmlTooltip>
       </>
     ) : !isAllowedToUpdate ? (
       <>
-        <Tooltip className="cursor-stop" title="You are not allowed to convert as you are neither owner nor collaborator">
+        <HtmlTooltip className="cursor-stop" title="You are not allowed to convert as you are neither owner nor collaborator">
           <IconButton aria-label="Convert to opportunity">
             <SiConvertio size={18} />
           </IconButton>
-        </Tooltip>
+        </HtmlTooltip>
       </>
     ) : !isCurrentLeadStatusQualified ? (
       <>
-        <Tooltip className="cursor-stop" title="To covert this lead to opportunity, Lead status must be qualified">
+        <HtmlTooltip className="cursor-stop" title="To covert this lead to opportunity, Lead status must be qualified">
           <IconButton aria-label="Convert to opportunity">
             <SiConvertio size={18} />
           </IconButton>
-        </Tooltip>
+        </HtmlTooltip>
       </>
     ) : (
-      <Tooltip title="Convert to opportunity">
+      <HtmlTooltip title="Convert to opportunity">
         <IconButton
           aria-label="Convert to opportunity"
           onClick={() => {
@@ -344,7 +344,7 @@ const Leads = () => {
         >
           <SiConvertio size={18} className="text-primary" />
         </IconButton>
-      </Tooltip>
+      </HtmlTooltip>
     );
   };
 
@@ -627,7 +627,8 @@ const Leads = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete the ${routes?.lead?.title?.toLowerCase()} ${deleteRecord?.name ? deleteRecord?.name : ''}?`}
+            message={`Are you sure you want to delete the ${routes?.lead?.title?.toLowerCase()} ${deleteRecord?.concatedName
+              ? deleteRecord?.concatedName : ''}?`}
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);
