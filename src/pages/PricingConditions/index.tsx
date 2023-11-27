@@ -238,7 +238,7 @@ const PricingCondition = () => {
             },
             {
               title: 'Product Export',
-              api: `${pricingCondition.api}/template?export=true${getQueryString(true) ? `${getQueryString(true)}` : ''}materialType=product`,
+              api: `${pricingCondition.api}/template?export=true&child=true&materialType=product`,
               type: 'export'
             },
             {
@@ -253,7 +253,7 @@ const PricingCondition = () => {
             },
             {
               title: 'Package Export',
-              api: `${pricingCondition.api}/template?export=true${getQueryString(true) ? `${getQueryString(true)}` : ''}materialType=package`,
+              api: `${pricingCondition.api}/template?export=true&child=true&materialType=package`,
               type: 'export'
             },
             {
@@ -268,7 +268,7 @@ const PricingCondition = () => {
             },
             {
               title: 'Service Export',
-              api: `${pricingCondition.api}/template?export=true${getQueryString(true) ? `${getQueryString(true)}` : ''}materialType=service`,
+              api: `${pricingCondition.api}/template?export=true&child=true&materialType=service`,
               type: 'export'
             },
             {
@@ -327,11 +327,11 @@ const PricingCondition = () => {
                       onClose={closeActions}
                     >
                       <MenuItem
-                      disabled={
-                        !(
-                          (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length
-                        )
-                      }
+                        disabled={
+                          !(
+                            (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length
+                          )
+                        }
                         onClick={() => {
                           closeActions();
                           // eslint-disable-next-line no-lone-blocks
@@ -354,7 +354,7 @@ const PricingCondition = () => {
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => {}}
+            onSelect={() => { }}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
