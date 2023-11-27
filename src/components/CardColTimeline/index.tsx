@@ -12,11 +12,6 @@ interface CardColInterface extends BoxProps {
   cardDataRows: datarowInterface[];
   passFailStatus?: boolean;
   passFailAccessor?: string;
-  xs?: boolean | GridSize;
-  sm?: boolean | GridSize;
-  md?: boolean | GridSize;
-  lg?: boolean | GridSize;
-  xl?: boolean | GridSize;
   cardHeight?: number;
   isCreateNew?: boolean;
   createNew?: () => void;
@@ -24,7 +19,6 @@ interface CardColInterface extends BoxProps {
 }
 
 export type datarowInterface = TDate | TDateTime | TText | TTimer | TLink | TTitle | TLinkTitle;
-  
 
 type TCommon = {
   accessor: string;
@@ -35,37 +29,36 @@ type TCommon = {
 
 type TDate = TCommon & {
   type: 'date';
-}
+};
 type TDateTime = TCommon & {
   type: 'dateTime';
-}
+};
 type TText = TCommon & {
   type: 'text';
-}
+};
 type TTimer = TCommon & {
   type: 'timer';
-}
+};
 type TLink = TCommon & {
   type: 'link';
   link: (data: any) => string;
-}
+};
 type TTitle = TCommon & {
   type: 'title';
-}
+};
 type TLinkTitle = TCommon & {
   type: 'linkTitle';
   link: (data: any) => string;
-}
-
+};
 
 const HEADER_HEIGHT = 90;
 const ROW_HEIGHT = 20;
 
 const calcCardHeight = (cardDataRows: datarowInterface[]) => {
-  const head = cardDataRows?.find(c=> c.type === 'title' || c.type === "linkTitle")
-  if(!head) return ROW_HEIGHT * cardDataRows.length
-  return HEADER_HEIGHT + (cardDataRows.length - 1) * ROW_HEIGHT
-}
+  const head = cardDataRows?.find((c) => c.type === 'title' || c.type === 'linkTitle');
+  if (!head) return ROW_HEIGHT * cardDataRows.length;
+  return HEADER_HEIGHT + (cardDataRows.length - 1) * ROW_HEIGHT;
+};
 
 const CardColTimeline: React.FC<CardColInterface> = ({
   data,
@@ -75,34 +68,27 @@ const CardColTimeline: React.FC<CardColInterface> = ({
   passFailStatus = true,
   passFailAccessor = 'passfail',
   className = '',
-  xs = 12,
-  sm = 6,
-  md = 4,
-  lg = false,
-  xl = false,
   cardHeight = calcCardHeight(cardDataRows),
   createNew,
   createNewText,
   isCreateNew,
   ...others
 }) => {
-  const containerRef = React.useRef<HTMLDivElement | null>(null)
+  const containerRef = React.useRef<HTMLDivElement | null>(null);
   const [containerHeight, setContainerHeight] = React.useState(600);
 
-  React.useLayoutEffect(()=>{
-    if(containerRef.current) setContainerHeight(containerRef.current.clientHeight - 125)
-  },[containerRef])
-
-
+  React.useLayoutEffect(() => {
+    if (containerRef.current) setContainerHeight(containerRef.current.clientHeight - 125);
+  }, [containerRef]);
 
   return (
-    <div className={`${styles.container} ${className}`} {...others} ref={containerRef} >
-      <div className='py-4 flex  gap-[10px] md:scroll-px-[24px] overflow-auto snap-mandatory snap-x'>
+    <div className={`${styles.container} ${className}`} {...others} ref={containerRef}>
+      <div className="py-4 flex  gap-[10px] md:scroll-px-[24px] overflow-auto snap-mandatory snap-x">
         {Object.keys(data).map((col) => {
           return (
             <div
-             key={col}
-              className={`${styles.singleCol} snap-start min-w-[min(100%,350px)]`}
+              key={col}
+              className={`${styles.singleCol} snap-start min-w-[min(100%,350px)] max-w-[350px]`}
               style={
                 {
                   '--bg': Boolean(data[col].color)

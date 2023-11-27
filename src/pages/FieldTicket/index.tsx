@@ -31,9 +31,11 @@ import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns } from 'src/components/CustomReactTableNew';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 
 const FieldTicket = () => {
-  const FieldTicketType = [
+
+  const types = [
     {
       key: `My ${routes.fieldTicket.title}`,
       value: 1
@@ -45,7 +47,6 @@ const FieldTicket = () => {
   ];
 
   const renderedFrom = camelCase(routes?.fieldTicket.title);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -65,6 +66,15 @@ const FieldTicket = () => {
   const [columns, setColumns] = useState(null);
   const { getColumnData } = useColumns();
   const { isOffline } = useContext(CustomOfflineContext);
+
+  useEffect(() => {
+    fetchGridColumns();
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, isOffline, selectedType]);
+
 
   const fetchGridColumns = async () => {
     let data;
@@ -90,16 +100,15 @@ const FieldTicket = () => {
     setColumns([...columns, ActionsRenderer]);
   };
 
-  const fetchFieldTicketData = async () => {
+  const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     if (isOffline) {
       const getAllData = await findAll(objectStore.fieldTicket);
       let rows = getAllData?.map((u: any) => {
         let finalObject: any = prepareDataForGrid(u);
-        finalObject['canDelete'] = permissions?.fieldTicket?.isDelete && finalObject?.ownerId === user?.user?._id;
         finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-        finalObject['allowedToEdit'] = permissions?.fieldTicket?.isUpdate;
+        finalObject['canDelete'] = permissions?.fieldTicket?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;
         return {
           ...finalObject
         };
@@ -113,30 +122,14 @@ const FieldTicket = () => {
         .get(`${routes?.fieldTicket.path}${queryString}`)
         .then(({ data: { data, count } }) => {
           let rows = data?.map((u: any) => {
-            const ownerAndColaborators = [u?.owner, ...u?.collaborator]?.map((o) => o?.optionValue);
             let finalObject: any = prepareDataForGrid(u);
-            finalObject['canDelete'] = permissions?.fieldTicket?.isDelete && ownerAndColaborators.includes(user?.user?._id) && u?.canDelete;
             finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-            finalObject['allowedToEdit'] = permissions?.fieldTicket?.isUpdate;
+            finalObject['canDelete'] = permissions?.fieldTicket?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;
             return {
               ...finalObject
             };
           });
-          if (appendRows) {
-            dispatch({
-              type: 'initialize',
-              data: [...dataRows, ...rows],
-              count: count
-              // selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
-            });
-          } else {
-            dispatch({
-              type: 'initialize',
-              data: rows,
-              count: count
-              // selectedRecords: rows.filter((f) => f.isChecked === true)
-            });
-          }
+          dispatch({ type: 'initialize', data: rows, count: count });
         })
         .finally(() => {
           setTimeout(() => {
@@ -177,8 +170,7 @@ const FieldTicket = () => {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || [])?.map((m) => m._id))}`;
     }
     return deepFilter;
   };
@@ -199,53 +191,43 @@ const FieldTicket = () => {
     accessor: 'action',
     Header: 'Actions',
     minWidth: 100,
-    width: 150,
+    width: 100,
     sticky: 'right',
     disableFilters: true,
     disableSortBy: true,
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        {permissions?.fieldTicket?.isCreate ? (
-          <HtmlTooltip title="Clone">
+        <HtmlTooltip title={permissions?.fieldTicket?.isCreate ? "Clone" : cloneDisable}  >
+          <span>
             <IconButton
               size="small"
               aria-label="Clone"
+              disabled={permissions?.fieldTicket?.isCreate ? false : true}
               onClick={() => {
                 setFieldTicketId(row?.original.id);
                 setOpen({ open: true, isClone: true });
               }}
             >
-              <FileCopyIcon fontSize="small" color="primary" />
+              <FileCopyIcon fontSize="small" color={permissions?.fieldTicket?.isCreate ? 'primary' : 'disabled'} />
             </IconButton>
-          </HtmlTooltip>
-        ) : (
-          <HtmlTooltip className="cursor-stop" title="You do not have permission to clone/create">
-            <IconButton aria-label="Clone" size="small">
-              <FileCopyIcon fontSize="small" />
-            </IconButton>
-          </HtmlTooltip>
-        )}
-
-        {row?.original?.canDelete ? (
-          <HtmlTooltip title="Delete">
+          </span>
+        </HtmlTooltip>
+        <HtmlTooltip title={row?.original?.canDelete ? "Delete" : deleteDisable}>
+          <span>
             <IconButton
+              size="small"
               aria-label="Delete"
+              disabled={row?.original?.canDelete ? false : true}
               onClick={() => {
-                setDeleteRecord(row?.original);
+                setDeleteRecord(row.original);
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon fontSize="small" color="error" />
+              <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
             </IconButton>
-          </HtmlTooltip>
-        ) : (
-          <HtmlTooltip className="cursor-stop" title="You do not have permission to delete">
-            <IconButton aria-label="Delete">
-              <DeleteIcon fontSize="small" color="disabled" />
-            </IconButton>
-          </HtmlTooltip>
-        )}
+          </span>
+        </HtmlTooltip>
       </>
     )
   }
@@ -267,8 +249,7 @@ const FieldTicket = () => {
           await insertUpdate(objectStore.offlineDataSync, ids[i], { type: 'fieldTicket', data: { ...data.data, offlineSyncStatus: 'delete' } });
         }
       }
-      removeLocalStorage(localStorageSelectedRecords);
-      fetchFieldTicketData();
+      fetchData();
       setShowDeleteConfirmBox(false);
       setDeleteRecord(null);
       toastConfig.setToastConfig({
@@ -280,8 +261,8 @@ const FieldTicket = () => {
       axiosInstance()
         .put(`${routes?.fieldTicket?.path}/remove`, { ids: ids })
         .then(({ data }) => {
-          removeLocalStorage(localStorageSelectedRecords);
-          fetchFieldTicketData();
+          dispatch({ type: 'selection', selectedRecords: [] });
+          fetchData();
           setShowDeleteConfirmBox(false);
           setDeleteRecord(null);
           toastConfig.setToastConfig({
@@ -298,18 +279,11 @@ const FieldTicket = () => {
 
   const onTypeChange = (event, type) => {
     dispatch({ type: 'setPage', page: 0 });
-    const value = FieldTicketType.find((d) => d.key === type).value;
+    const value = types.find((d) => d.key === type).value;
     setSelectedType(value);
     history.push(`?type=${value}`);
   };
 
-  useEffect(() => {
-    fetchGridColumns();
-  }, []);
-
-  useEffect(() => {
-    fetchFieldTicketData();
-  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, isOffline, selectedType]);
 
   return (
     <section className="main-container-v1">
@@ -317,17 +291,17 @@ const FieldTicket = () => {
         <CustomBreadCrumbs routes={[{ title: routes.fieldTicket.title }]} />
         <ImportExportLinks
           permissions={permissions.fieldTicket}
-          module="fieldTicket"
+          module={routes.fieldTicket.title}
           api={'field-ticket'}
           afterImportCompleted={() => {
-            fetchFieldTicketData();
+            fetchData();
           }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}
           ids={selectedRecords?.map((obj) => obj._id)}
           onExportToExcelSuccess={() => {
-            fetchFieldTicketData();
+            fetchData();
           }}
           additionalParams={getQueryString(true)}
         />
@@ -337,15 +311,15 @@ const FieldTicket = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
             <div className={'d-flex flex-wrap align-items-center gap-2'}>
               <div className={`flex flex-wrap items-center gap-2 `}>
-                {FieldTicketType && (
+                {types && (
                   <ToggleButtonGroup
                     size="small"
                     className="align-items-center gap-1 "
-                    value={FieldTicketType[selectedType - 1].key}
+                    value={types[selectedType - 1].key}
                     exclusive
                     onChange={onTypeChange}
                   >
-                    {FieldTicketType.map((k, index) => {
+                    {types.map((k, index) => {
                       return (
                         <ToggleButton value={k.key} key={index}>
                           {k.key}
@@ -381,22 +355,18 @@ const FieldTicket = () => {
                     Add
                   </Button>
                 )}
-                <HtmlTooltip title={!selectedRecords?.length ? `Please select some ${routes?.fieldTicket?.title?.toLowerCase()}s` : ""}>
-                  <span>
-                    <Button
-                      variant={'outlined'}
-                      color="default"
-                      size="small"
-                      onClick={openActions}
-                      disabled={selectedRecords.length ? false : true}
-                      aria-controls="action-menu"
-                      className={` new-dropdown-v1`}
-                      endIcon={<ExpandMore />}
-                    >
-                      Actions
-                    </Button>
-                  </span>
-                </HtmlTooltip>
+                <Button
+                  variant={'outlined'}
+                  color="default"
+                  size="small"
+                  onClick={openActions}
+                  disabled={selectedRecords.length ? false : true}
+                  aria-controls="action-menu"
+                  className={`new-dropdown-v1`}
+                  endIcon={<ExpandMore />}
+                >
+                  Actions
+                </Button>
                 <Menu
                   anchorEl={anchorEl}
                   keepMounted
@@ -410,11 +380,7 @@ const FieldTicket = () => {
                   onClose={closeActions}
                 >
                   <MenuItem
-                    disabled={
-                      !(
-                        (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length
-                      )
-                    }
+                    disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
                     onClick={() => {
                       closeActions();
                       setShowDeleteConfirmBox(true);
@@ -436,7 +402,7 @@ const FieldTicket = () => {
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             isClientSideGrid={false}
-            refreshGrid={fetchFieldTicketData}
+            refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
             resource={sidebarResource.fieldTicket}
@@ -464,7 +430,7 @@ const FieldTicket = () => {
             onClose={() => setOpen({ open: false, isClone: false })}
             onSuccess={() => {
               setOpen({ open: false, isClone: false });
-              fetchFieldTicketData();
+              fetchData();
             }}
           />
         )}

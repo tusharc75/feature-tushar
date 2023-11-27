@@ -9,6 +9,8 @@ import { leadDetailPage } from 'src/routes/Lead';
 import routes from '../Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
 import { Image } from '@material-ui/icons';
+import CopyToClipboard from '../Helpers/CopyToClipboard';
+
 
 const permissionForLinks = sidebarResourceObjectFromValues();
 
@@ -110,19 +112,7 @@ export const getSortedColumns = (columns = []) => {
 };
 export const staticColumns = ['createdBy', 'updatedBy'];
 
-// const getColumnWidth = (text) => {
-//   const textLength = text.length;
-//   const characterWidth = 8;
-//   const searchIconWidth = 30;
-//   const searchIconMargin = 10;
-//   const tempWidth = textLength * characterWidth + searchIconWidth + searchIconMargin;
-//   const width = Math.max(tempWidth, 150);
-//   const minWidth = 80;
-//   return {
-//     minWidth,
-//     width
-//   };
-// };
+
 export default function useColumns() {
   const {
     state: { permissions }
@@ -179,31 +169,32 @@ export default function useColumns() {
           }
         };
       } else if (field?.primaryField === true && detailScreenRoute) {
+        const fieldName = field?.fieldName === 'firstName' ? 'concatedName' : field.fieldName;
         return {
           columnData: {
             lockPosition: true,
             ...commonFieldData,
             disabled: true,
-            accessor: field?.fieldName === 'firstName' ? 'concatedName' : field.fieldName,
+            accessor: fieldName,
             Cell: ({ row }) =>
               permissions[permissionForLinks[field?.resource]]?.isRead || permissions[updatedTitle]?.isRead ? (
                 <span>
-                  {row?.original?.[field?.fieldName] ? (
+                  {row?.original?.[fieldName] ? (
                     <Link
                       className="link text-truncate"
-                      title={row?.original?.[field?.fieldName]}
+                      title={row?.original?.[fieldName]}
                       to={`${detailScreenRoute}/${row?.original?._id}`}
                       target={masterPage ? '_self' : '_blank'}
                       rel="noopener noreferrer"
                     >
-                      {row?.original?.[field?.fieldName]}
+                      {row?.original?.[fieldName]}
                     </Link>
                   ) : (
                     <NoDataCell />
                   )}
                 </span>
               ) : (
-                <p className="text-truncate">{row?.original?.[field?.fieldName] ? <p>{row?.original?.[field?.fieldName]}</p> : <NoDataCell />}</p>
+                <p className="text-truncate">{row?.original?.[fieldName] ? <p>{row?.original?.[fieldName]}</p> : <NoDataCell />}</p>
               )
           }
         };
@@ -217,12 +208,12 @@ export default function useColumns() {
           pathName = detailPagePath[joinedFieldName]
             ? detailPagePath[joinedFieldName]
             : field?.lookupResource && routes[`${camelCase(field?.lookupResource)}Detail`]?.path
-            ? routes[`${camelCase(field?.lookupResource)}Detail`]?.path
-            : routes[joinedFieldName]?.path
-            ? routes[joinedFieldName]?.path
-            : routes[`${joinedFieldName}Detail`]?.path
-            ? routes[`${joinedFieldName}Detail`]?.path
-            : '';
+              ? routes[`${camelCase(field?.lookupResource)}Detail`]?.path
+              : routes[joinedFieldName]?.path
+                ? routes[joinedFieldName]?.path
+                : routes[`${joinedFieldName}Detail`]?.path
+                  ? routes[`${joinedFieldName}Detail`]?.path
+                  : '';
         }
         return {
           columnData: {
@@ -264,11 +255,11 @@ export default function useColumns() {
             Cell: ({ row }) =>
               row?.original?.[field?.fieldName] ? (
                 <h5
-                  className="createBy"
-                  title={`${row?.original?.[field?.fieldName]} • ${moment(row?.original?.createdByDate.slice(0, 10)).format(dateFormat)}`}
+                  className="flex"
+                  title={`${row?.original?.[field?.fieldName]}`}
                 >
-                  {row?.original?.[field?.fieldName]}
-                  <span className="createdAtTime badge-date">{moment(row?.original?.data?.createdByDate.slice(0, 10)).format(dateFormat)}</span>
+                  <span title={row?.original?.[field?.fieldName]} className="text-truncate" >{row?.original?.[field?.fieldName]}</span>
+                  <CopyToClipboard textToCopy={row?.original?.[field?.fieldName]} size={16} />
                 </h5>
               ) : (
                 <NoDataCell />
