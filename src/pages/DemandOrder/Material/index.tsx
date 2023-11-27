@@ -12,7 +12,6 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { startCase } from 'lodash';
-import { isMobile } from 'react-device-detect';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -27,9 +26,6 @@ import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTab
 
 const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
-  const {
-    state: { user, permissions }
-  }: any = useData();
 
   const { state, dispatch } = useTableReducer();
 
@@ -65,8 +61,9 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
       {
         accessor: 'index',
         Header: 'Index',
+        primaryField: true,
         width: 70,
-        sticky: isMobile ? 'none' : 'left',
+        sticky: 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
@@ -75,7 +72,6 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
       {
         accessor: 'type',
         Header: 'Type',
-        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p>{`${startCase(row.original?.type)} `}</p>
@@ -87,7 +83,6 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
         Header: 'Detail',
         minWidth: 300,
         width: 300,
-        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row, rows }) => (
           <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'nowrap' }}>
             {allowedToEdit ? (
@@ -164,30 +159,29 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
       disableSortBy: true,
       canDrag: false,
       Cell: ({ row, rows }) =>
-        !row.original.hideSelection && (
-          <Grid container spacing={1}>
-            <IconButton
-              size="small"
-              aria-label="Details"
-              disabled={allowedToEdit ? false : true}
-              onClick={() => {
-                onMaterialEdit(row, rows);
-              }}
-            >
-              <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
-            </IconButton>
-            <IconButton
-              size="small"
-              aria-label="Details"
-              onClick={() => {
-                const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                setDeleteData(obj);
-              }}
-            >
-              <DeleteIcon fontSize="small" color="error" />
-            </IconButton>
-          </Grid>
-        )
+        <Grid container spacing={1}>
+          <IconButton
+            size="small"
+            aria-label="Details"
+            disabled={allowedToEdit ? false : true}
+            onClick={() => {
+              onMaterialEdit(row, rows);
+            }}
+          >
+            <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
+          </IconButton>
+          <IconButton
+            size="small"
+            aria-label="Details"
+            onClick={() => {
+              const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+              setDeleteData(obj);
+            }}
+          >
+            <DeleteIcon fontSize="small" color="error" />
+          </IconButton>
+        </Grid>
+
     });
     setColumns(coloum);
     fetchData();
@@ -230,14 +224,14 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
         _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'package'
-          ? _subRow.packageDetail?.packageName
-          : _subRow.serviceDetail?.serviceName;
+            ? _subRow.packageDetail?.packageName
+            : _subRow.serviceDetail?.serviceName;
       _subRow.description =
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productDescription
           : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription
-          : _subRow?.serviceDetail?.serviceDescription;
+            ? _subRow?.packageDetail?.packageDescription
+            : _subRow?.serviceDetail?.serviceDescription;
       _subRow.qty = _subRow.qty;
       _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
       _subRow.subRows = generateNestedData(material, _subRow);
@@ -386,7 +380,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
                   setAddDialog({ open: true, type: 'product', parentId: null });
                 }}
               >
-                Add Products
+                Add Existing Products
               </MenuItem>
               <MenuItem
                 onClick={() => {
@@ -394,7 +388,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
                   setAddDialog({ open: true, type: 'package', parentId: null });
                 }}
               >
-                Add Packages
+                Add Existing Packages
               </MenuItem>
             </Menu>
           </Box>
@@ -477,6 +471,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
               state={state}
               dispatch={dispatch}
               allowPagination={false}
+              refreshGrid={fetchData}
             />
           </Box>
         </>

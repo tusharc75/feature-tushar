@@ -21,7 +21,6 @@ import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/con
 import ManageDeviceTemplates from './ManageDeviceTemplates';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import EditIcon from '@material-ui/icons/Edit';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';

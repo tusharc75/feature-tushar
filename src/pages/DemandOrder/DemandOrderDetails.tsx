@@ -35,15 +35,14 @@ const DemandOrderDetails = () => {
     state: { user, permissions }
   }: any = useData();
 
-  const [headingLabel, setHeadingLabel] = useState('');
   const [loading, setLoading] = useState(false);
   const [demandOrderData, setDemandOrderData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
-  const [salesOrderFields, setSalesOrderFields] = useState([]);
-  const [customizedRoutes, setCustomizedRoutes] = useState([]);
+  const [fields, setFields] = useState([]);
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
+
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
@@ -59,40 +58,32 @@ const DemandOrderDetails = () => {
 
   useEffect(() => {
     if (id) {
-      getRessourceFields();
-      fetchSalesOrderData();
+      fetchFields();
+      fetchData();
     }
   }, [id]);
 
-  const getRessourceFields = async () => {
+  const fetchFields = async () => {
     try {
       const response: any = await axiosInstance().get('/field?resource=Demand Order');
-      response?.data?.data.some((o) => {
-        if (o?.fieldData?.fieldName === 'status') {
-          return true;
-        }
-      });
-      setSalesOrderFields(response?.data?.data);
+      setFields(response?.data?.data);
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
   };
 
-  const fetchSalesOrderData = async () => {
+  const fetchData = async () => {
     setLoading(true);
-
     try {
       let data;
       const response: any = await axiosInstance().get(`${demandOrder.api}/${id}`);
       data = response?.data?.data;
-      setHeadingLabel(data.demandOrderNumber);
-      setCustomizedRoutes([routes.demandOrder, { title: `${data.demandOrderNumber}` }]);
-      setDemandOrderData(data);
       var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
       if (user?.role?.selectedEntity?.superAdminAccess) {
         isAllowedToEdit = true;
       }
       setAllowedToEdit(isAllowedToEdit);
+      setDemandOrderData(data);
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -121,7 +112,7 @@ const DemandOrderDetails = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={customizedRoutes} />
+          <CustomBreadCrumbs routes={[routes.demandOrder, { title: `${demandOrderData?.demandOrderNumber}` }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -184,13 +175,13 @@ const DemandOrderDetails = () => {
         </Tabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
-            {loading || !salesOrderFields.length ? (
+            {loading || !fields.length ? (
               <Grid container spacing={2} style={{ padding: '8px' }}>
                 <CommonSkeleton lenArray={[...Array(7).keys()]} />
               </Grid>
             ) : (
               <>
-                <DetailsPage data={demandOrderData} fields={salesOrderFields} />
+                <DetailsPage data={demandOrderData} fields={fields} />
               </>
             )}
           </Box>
@@ -208,7 +199,7 @@ const DemandOrderDetails = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this demand order: ${headingLabel} ?`}
+          message={`Are you sure you want to delete this demand order: ${demandOrderData?.demandOrderNumber} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}
@@ -227,7 +218,7 @@ const DemandOrderDetails = () => {
             setOpenUpdateDialog(false);
           }}
           onSuccess={() => {
-            fetchSalesOrderData();
+            fetchData();
             setOpenUpdateDialog(false);
           }}
         />

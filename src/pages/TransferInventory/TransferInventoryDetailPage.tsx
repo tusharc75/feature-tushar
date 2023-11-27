@@ -85,7 +85,7 @@ const TransferInventoryDetailPage = () => {
     }
   }, [id]);
 
-  const getRessourceFields = () => {
+  const fetchFields = () => {
     axiosInstance()
       .get('/field?resource=Transfer Inventory')
       .then(({ data: { data } }) => {
@@ -128,7 +128,7 @@ const TransferInventoryDetailPage = () => {
         axiosInstance()
           .get(`${routes.transferInventory.path}/${id}/product`)
           .then(({ data: { data } }) => {
-            getRessourceFields();
+            fetchFields();
             setHeadingLabel(transferData.transferNumber);
             setCustomizedRoutes([routes.transferInventory, { title: transferData.transferNumber }]);
             setCurrentStep(stepNames.indexOf(transferData?.processStatus) !== -1 ? stepNames.indexOf(transferData?.processStatus) : 0);
