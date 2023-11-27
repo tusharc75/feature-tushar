@@ -298,7 +298,8 @@ const ReceivingTicket = ({
       }
 
       const loadingTicketProducts = [];
-      const returnTicketProducts = {};
+      const returnTicketProducts = [];
+
       deliveryTicketList?.forEach((element) => {
         if (element.ticketType === DELIVERY_TICKET_TYPE.loading && element?.products && element?.products?.length) {
           element?.products?.forEach((ele) => {
@@ -312,10 +313,17 @@ const ReceivingTicket = ({
         }
         if (element.ticketType === DELIVERY_TICKET_TYPE.return && element?.products && element?.products?.length) {
           element?.products?.forEach((ele) => {
-            returnTicketProducts[ele?.product] = ele?.qty;
+            returnTicketProducts.push({
+              ...ele,
+              returnTicketId: element._id,
+              returnTicket: element?.ticketName,
+              returnTicketStatus: element?.status
+            });
           });
         }
       });
+
+      console.log(returnTicketProducts)
 
       products = uniqueProduct(material?.filter((e) => e.consumableType !== 'Internal'));
       products?.forEach((element) => {
@@ -328,6 +336,9 @@ const ReceivingTicket = ({
           });
         const ticketProduct = loadingTicketProducts?.filter((e) => e.product === element.materialId);
         ticketProduct?.forEach((ele) => {
+
+          const returnTicket = returnTicketProducts?.find((e) => e.qty <= ele.qty && e.product === element.materialId && !e.isCount)
+
           const obj: any = {};
           obj.uniqueId = element._id;
           obj.serialized = element?.productDetail?.serializedProduct;
@@ -345,16 +356,13 @@ const ReceivingTicket = ({
                   : '';
           obj.qty = ele.qty;
           obj.consumeQty = consumeQty;
-          obj.returnQty = !element?.productDetail?.serializedProduct ? returnTicketProducts[element?.materialId] || 0 : 0;
+          obj.returnQty = !element?.productDetail?.serializedProduct ? returnTicket?.qty || 0 : 0;
           obj.assetNumber = element?.productDetail?.productName;
           obj.productName = element?.productDetail?.productName;
           obj.productId = element?.productDetail?._id;
           obj.warehouse = rentalManagementData?.warehouse?.optionLabel;
           obj.warehouseId = rentalManagementData?.warehouse?.optionValue;
-          obj.status =
-            element?.productDetail?.hasOwnProperty('serializedProduct') && element?.productDetail?.serializedProduct === true
-              ? element?.status
-              : 'N/A';
+          obj.status = element?.productDetail?.serializedProduct === true ? element?.status : 'N/A';
           obj.parentId = element?.parentId;
           obj.parentName = element?.parentName;
           obj.rentalAssetStatus = !element?.productDetail?.serializedProduct
@@ -362,7 +370,7 @@ const ReceivingTicket = ({
               ? 'Consumed'
               : consumeQty < ele.qty && consumeQty > 0
                 ? 'Partially Consumed'
-                : ele.qty === returnTicketProducts[element?.materialId]
+                : ele.qty === (returnTicket?.qty || 0)
                   ? 'Returned'
                   : ''
             : element?.status;
@@ -378,6 +386,13 @@ const ReceivingTicket = ({
             element?.currentLocation?.optionValue ||
             rentalManagementData?.shippingAddress?.optionValue ||
             rentalManagementData?.billingAddress?.optionValue;
+
+          if (returnTicket) {
+            returnTicket.isCount = true;
+            obj.returnTicket = returnTicket?.returnTicket;
+            obj.returnTicketId = returnTicket?.returnTicketId;
+            obj.returnTicketStatus = returnTicket?.returnTicketStatus;
+          }
           productAssets.push(obj);
           qty = qty - ele.qty;
         });
@@ -400,22 +415,20 @@ const ReceivingTicket = ({
           obj.parentId = element?.parentId;
           obj.parentName = element?.parentName;
           obj.consumeQty = consumeQty;
-          obj.returnQty = !element?.productDetail?.serializedProduct ? returnTicketProducts[element?.materialId] || 0 : 0;
+          obj.returnQty = 0;
           obj.assetNumber = element?.productDetail?.productName;
           obj.productName = element?.productDetail?.productName;
           obj.productId = element?.productDetail?._id;
           obj.warehouse = rentalManagementData?.warehouse?.optionLabel;
           obj.warehouseId = rentalManagementData?.warehouse?.optionValue;
           obj.nonSerializeAsset = nonSerializeAsset?.filter((e) => e.product === obj.productId);
-          obj.status = element?.status;
+          obj.status = element?.productDetail?.serializedProduct === true ? element?.status : 'N/A';
           obj.rentalAssetStatus = !element?.productDetail?.serializedProduct
             ? qty === consumeQty
               ? 'Consumed'
               : consumeQty < qty && consumeQty > 0
                 ? 'Partially Consumed'
-                : qty === returnTicketProducts[element?.materialId]
-                  ? 'Returned'
-                  : ''
+                : ''
             : element?.status;
           obj.currentLocation =
             element?.currentLocation?.optionValue ||
@@ -455,18 +468,18 @@ const ReceivingTicket = ({
               productAssets[index]['returnTicketStatus'] = obj?.status;
             }
           }
-          if (obj?.products?.some((p) => d?._id?.split('_')[0] === p?.product)) {
-            if (obj.ticketType === DELIVERY_TICKET_TYPE.receiving && productAssets[index]['loadingTicketId']) {
-              productAssets[index]['receivingTicket'] = obj?.ticketName;
-              productAssets[index]['receivingTicketId'] = obj?._id;
-              productAssets[index]['receivingTicketStatus'] = obj?.status;
-            }
-            if (obj.ticketType === DELIVERY_TICKET_TYPE.return && productAssets[index]['loadingTicketId']) {
-              productAssets[index]['returnTicket'] = obj?.ticketName;
-              productAssets[index]['returnTicketId'] = obj?._id;
-              productAssets[index]['returnTicketStatus'] = obj?.status;
-            }
-          }
+          // if (obj?.products?.some((p) => d?._id?.split('_')[0] === p?.product)) {
+          //   if (obj.ticketType === DELIVERY_TICKET_TYPE.receiving && productAssets[index]['loadingTicketId']) {
+          //     productAssets[index]['receivingTicket'] = obj?.ticketName;
+          //     productAssets[index]['receivingTicketId'] = obj?._id;
+          //     productAssets[index]['receivingTicketStatus'] = obj?.status;
+          //   }
+          //   if (obj.ticketType === DELIVERY_TICKET_TYPE.return && productAssets[index]['loadingTicketId']) {
+          //     productAssets[index]['returnTicket'] = obj?.ticketName;
+          //     productAssets[index]['returnTicketId'] = obj?._id;
+          //     productAssets[index]['returnTicketStatus'] = obj?.status;
+          //   }
+          // }
         });
       });
 

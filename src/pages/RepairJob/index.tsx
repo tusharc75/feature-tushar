@@ -1,18 +1,15 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import { Link, useHistory } from 'react-router-dom';
-import { Chip, Grid, IconButton, Tooltip, Fab } from '@material-ui/core';
+import { useHistory } from 'react-router-dom';
+import { Chip, IconButton, Tooltip, Button, Box } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { FaRegistered } from 'react-icons/fa';
 import queryString from 'query-string';
 import ManageRepairJob from './ManageRepairJob';
 import {
-  isObjectEmpty,
   customerAccount,
   supplierAccount,
   gridLoadingTimeout,
   repairJob,
   prepareDataForGrid,
-  getLocalStorageArrayData,
   sidebarResource
 } from '../../constants/helpers';
 import CustomContainer from '../../components/CustomContainer';
@@ -21,33 +18,25 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import RepairJobHeader from './RepairJobHeader';
+import { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import { isMobile, isTablet } from 'react-device-detect';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField, gridFilterParser } from '../../constants/useColumns';
 import { findAll, findOne, insertUpdate, objectStore } from '../../constants/indexdbhelper';
 import { camelCase } from 'lodash';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
-import {
-  FaSuitcase,
-  SiStatuspage,
-  FaWarehouse,
-  GiAutoRepair,
-  GrStatusInfo,
-  BsFillPersonFill,
-  GiCargoShip,
-  FaShippingFast,
-  RiSpaceShipFill
-} from 'react-icons/all';
+import CustomReactTable, { checkStaticField, getStaticFields, gridFilterParser, useColumns } from 'src/components/CustomReactTableNew';
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import { AddOutlined } from '@material-ui/icons';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import styles from '../Leads/Header.module.scss';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 let repairJobTimeout;
 
 const RepairJob = () => {
-  const RepairJobType = [
+
+  const types = [
     {
       key: `My ${routes?.repairJob.title}`,
       value: 1
@@ -59,6 +48,7 @@ const RepairJob = () => {
   ];
 
   const renderedFrom = camelCase(routes?.repairJob.title);
+
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
@@ -68,7 +58,6 @@ const RepairJob = () => {
   const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
   const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState<any>({});
   const [showManageRepairJobDialog, setShowManageRepairJobDialog] = useState({ open: false, isClone: false, idToClone: null });
@@ -83,15 +72,12 @@ const RepairJob = () => {
     accountName: history.location?.state?.accountName,
     resource: history.location?.state?.resource
   });
-  const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
-    state;
-  const [frameworkComponents, setFrameworkComponents] = useState({});
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { isOffline } = useContext(CustomOfflineContext);
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
   const pageTitle = camelCase(`${routes.repairJob.title}`);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
+
 
   const { getColumnData } = useColumns();
 
@@ -113,7 +99,6 @@ const RepairJob = () => {
       }
     }
     let columns = [];
-    let rendererNames = [];
     data.forEach((o) => {
       let currentColumn = getColumnData(pageTitle, o?.fieldData, routes.repairJobDetail.path, true);
       if (currentColumn !== null) {
@@ -122,23 +107,14 @@ const RepairJob = () => {
           currentColumn.columnData['sortable'] = false;
         }
         columns = [...columns, currentColumn?.columnData];
-        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-          rendererNames.push(currentColumn?.rendererName);
-        }
       }
       return o?.fieldData;
     });
-    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-    tempFrameworkComponent = {
-      ...tempFrameworkComponent,
-      actionsRenderer: ActionsRenderer
-    };
-    setFrameworkComponents({ ...tempFrameworkComponent });
     let staticFields = getStaticFields();
     staticFields.forEach((field) => {
       columns.push(checkStaticField(pageTitle, field));
     });
-    setColumns([...columns]);
+    setColumns([...columns, ActionsRenderer]);
   };
 
   //  Grid Variables - End
@@ -169,13 +145,13 @@ const RepairJob = () => {
       clearTimeout(repairJobTimeout);
     }
     repairJobTimeout = setTimeout(() => {
-      fetchRepairJobs();
+      fetchData();
     }, millisec);
   }, [search]);
 
   useEffect(() => {
     if (renderCount > 0) {
-      fetchRepairJobs();
+      fetchData();
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity, showFilteredRecordsOnly]);
 
@@ -191,7 +167,7 @@ const RepairJob = () => {
           type: 'success',
           message: data.message
         });
-        fetchRepairJobs();
+        fetchData();
         dispatch({ type: 'loading', loading: false });
         setSingleRepairJobDelete({ id: null, show: false, repairJobName: '' });
       })
@@ -201,29 +177,40 @@ const RepairJob = () => {
       });
   };
 
-  const ActionsRenderer = (params) => (
-    <>
-      {permissions.repairJob?.isCreate ? (
-        <Tooltip title="Clone">
-          <IconButton
-            size="small"
-            aria-label="Clone"
-            onClick={() => {
-              setShowManageRepairJobDialog({ open: true, isClone: true, idToClone: params.data._id });
-            }}
-          >
-            <FileCopyIcon fontSize="small" color="primary" />
-          </IconButton>
-        </Tooltip>
-      ) : (
-        <Tooltip className="cursor-stop" title="You do not have permission to clone/create">
-          <IconButton aria-label="Clone" size="small">
-            <FileCopyIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      )}
-    </>
-  );
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 110,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        {permissions.repairJob?.isCreate ? (
+          <Tooltip title="Clone">
+            <IconButton
+              size="small"
+              aria-label="Clone"
+              onClick={() => {
+                setShowManageRepairJobDialog({ open: true, isClone: true, idToClone: row.original._id });
+              }}
+            >
+              <FileCopyIcon fontSize="small" color="primary" />
+            </IconButton>
+          </Tooltip>
+        ) : (
+          <Tooltip className="cursor-stop" title="You do not have permission to clone/create">
+            <IconButton aria-label="Clone" size="small">
+              <FileCopyIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        )}
+      </>
+    )
+
+  }
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
@@ -270,18 +257,14 @@ const RepairJob = () => {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(selectedRecords.map((m) => m._id))}`;
     }
     return deepFilter;
   };
 
-  const fetchRepairJobs = async () => {
+  const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
     try {
       let data: any = [],
         count;
@@ -294,26 +277,12 @@ const RepairJob = () => {
         count = data?.length || 0;
       }
       let rows = data.map((u) => {
-        let finalObject = prepareDataForGrid(u, user);
+        let finalObject: any = prepareDataForGrid(u, user);
         finalObject['isChecked'] = false;
-        finalObject['allowedToEdit'] = permissions?.repairJob?.isUpdate;
-        finalObject['owerCollaboratorInitialsOrImages'] = [];
-        if (finalObject['owner']) finalObject['owerCollaboratorInitialsOrImages'].push({ initials: finalObject['owner'] });
-        finalObject['owerCollaboratorInitialsOrImages'].forEach((f) => {
-          if (f.initials) {
-            f.initials = f.initials
-              .split(' ')
-              .map((i) => i[0])
-              .join('');
-          }
-        });
+        finalObject['canDelete'] = permissions?.repairJob?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;
         return finalObject;
       });
-      if (appendRows) {
-        dispatch({ type: 'initialize', data: [...dataRows, ...rows], count: count });
-      } else {
-        dispatch({ type: 'initialize', data: rows, count: count });
-      }
+      dispatch({ type: 'initialize', data: rows, count: count });
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
       }, gridLoadingTimeout);
@@ -325,39 +294,6 @@ const RepairJob = () => {
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
-  };
-
-  const handleRepairJobTypeSel = (filterValues) => {
-    dispatch({ type: 'setPage', page: 0 });
-    setSelectedType(filterValues);
-    if (referenceId && referenceType) {
-      history.push(`?type=${filterValues}&referenceType=${referenceType}&referenceId=${referenceId}`);
-    } else {
-      history.push(`?type=${filterValues}`);
-    }
-  };
-
-  const handleTransferEntityDialog = () => {
-    setShowTransferEntityDialog(true);
-  };
-
-  const showConfirmBox = (row) => {
-    if (row) {
-      setIsConformDialogVisible(true);
-      if (row && row._id) {
-        setDeleteRecord(row);
-      }
-    } else {
-      if (selectedRecords.find((d) => d.canDelete === false)) {
-        setShowDeleteWarningConfirmBox(true);
-      } else {
-        setIsConformDialogVisible(true);
-      }
-    }
-  };
-
-  const clickCreateNew = () => {
-    setShowManageRepairJobDialog({ open: true, isClone: false, idToClone: null });
   };
 
   const handleDeleteRepairJob = async () => {
@@ -379,10 +315,11 @@ const RepairJob = () => {
             type: 'success',
             message: data.message
           });
+          dispatch({ type: 'selection', selectedRecords: [] });
           setIsConformDialogVisible(false);
           setDeleteLoading(false);
           if (deleteRecord) setDeleteRecord({});
-          fetchRepairJobs();
+          fetchData();
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -401,7 +338,14 @@ const RepairJob = () => {
     history.replace({
       search: queryParams.toString()
     });
-    fetchRepairJobs();
+    fetchData();
+  };
+
+  const onTypeChange = (event, type) => {
+    dispatch({ type: 'pageChange', page: 0 });
+    const value = types.find((d) => d.key === type).value;
+    setSelectedType(value);
+    history.push(`?type=${value}`);
   };
 
   return (
@@ -413,125 +357,97 @@ const RepairJob = () => {
           module="repairJob"
           api={repairJob.api}
           afterImportCompleted={() => {
-            fetchRepairJobs();
+            fetchData();
           }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
-          recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-          ids={
-            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-              ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-              : []
-          }
+          recordsToExport={selectedRecords?.length}
+          ids={selectedRecords?.map((obj) => obj._id)}
           onExportToExcelSuccess={() => {
-            if (gridApi) gridApi.deselectAll();
-            else fetchRepairJobs();
+            fetchData();
           }}
           additionalParams={getQueryString(true)}
         />
       </div>
       <CustomContainer>
         <div className="header-panel">
-          <RepairJobHeader
-            selectedType={selectedType}
-            selectedRecords={selectedRecords}
-            onTypeChange={handleRepairJobTypeSel}
-            options={RepairJobType}
-            onSearch={handleSearch}
-            columns={columns}
-            dispatch={dispatch}
-            searchVal={search}
-            RepairJobPermissions={permissions.repairJob}
-            onCreate={clickCreateNew}
-            showConfirmBox={showConfirmBox}
-            canDelete={selectedRecords.length === 0}
-            icon={<FaRegistered className="headerLogo" />}
-            heading={routes.repairJob.title}
-            showTransferEntityDialog={handleTransferEntityDialog}
-            filters={filters}
-            resource={sidebarResource.repairJob}
-            // showCloneRepairJobDialog={() => {
-            //   handleShowCloneRepairJobDialog()
-            // }}
-          >
-            {accountDetails.accountId && (
-              <Chip
-                className="ml-3"
-                color="primary"
-                label={`Account: ${accountDetails.accountName}`}
-                onDelete={() => {
-                  setAccountDetails({
-                    accountId: null,
-                    accountName: null,
-                    resource: null
-                  });
-                }}
-              />
-            )}
-            {referenceType && <Chip className="ml-3" color="primary" label={`Rental Job : ${referenceType}`} onDelete={updateQueryParams} />}
-          </RepairJobHeader>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+            <div className={'d-flex flex-wrap align-items-center gap-1 w-full'}>
+              <ToggleButtonGroup
+                size="small"
+                className="ml-2 align-items-center gap-1 layout-for-mobile "
+                value={types[selectedType - 1].key}
+                exclusive
+                onChange={onTypeChange}
+              >
+                {types.map((k, index) => {
+                  return (
+                    <ToggleButton value={k.key} key={index}>
+                      {k.key}
+                    </ToggleButton>
+                  );
+                })}
+              </ToggleButtonGroup>
+              {accountDetails.accountId && (
+                <Chip
+                  className="ml-3"
+                  color="primary"
+                  label={`Account: ${accountDetails.accountName}`}
+                  onDelete={() => {
+                    setAccountDetails({
+                      accountId: null,
+                      accountName: null,
+                      resource: null
+                    });
+                  }}
+                />
+              )}
+              {referenceType && <Chip className="ml-3" color="primary" label={`Rental Job : ${referenceType}`} onDelete={updateQueryParams} />}
+            </div>
+            <div className="flex flex-wrap gap-[8px]  justify-end">
+              <SearchBox
+                onChange={handleSearch}
+                className={styles.search_box_input}
+                value={search}
+                size="small" />
+              <div className="flex gap-[8px] flex-wrap items-center">
+                {permissions?.repairJob?.isCreate && (
+                  <Button
+                    variant={'contained'}
+                    color="primary"
+                    size="small"
+                    onClick={() => {
+                      setShowManageRepairJobDialog({ open: true, isClone: false, idToClone: null });
+                    }
+                    }
+                    className={`no-shadow`}
+                    startIcon={<AddOutlined />}>
+                    Add
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
-        {Object.keys(frameworkComponents).length > 0 ? (
-          isMobile && !isTablet ? (
-            <CustomSwipableList
-              key={selectedType}
-              allowSelection={true}
-              allowSwipe={true}
-              permissions={permissions.repairJob}
-              primaryField={columns?.find((d) => d.primaryField)}
-              onClick={(data) => {
-                history.push(`${routes.repairJobDetail.path}/${data._id}`);
-              }}
-              dataRows={dataRows}
-              selectedRecords={selectedRecords}
-              dispatch={dispatch}
-              onEdit={(data) => {
-                history.push(`${routes.repairJobDetail.path}/${data._id}`);
-              }}
-              extraParamsToCheckDelete={true}
-              onDelete={(data) => {
-                setDeleteRecord(data._id);
-                setIsConformDialogVisible(true);
-              }}
-              rowCount={rowCount}
-              page={page}
-              loading={loading}
-              chips={[
-                {
-                  icon: <SiStatuspage />,
-                  label: 'Status: ',
-                  field: 'status'
-                }
-              ]}
-              onCreate={false}
-              showClone={true}
-              onClone={(data) => {
-                setShowManageRepairJobDialog({ open: true, isClone: true, idToClone: data._id });
-              }}
-              renderedFrom={renderedFrom}
-            />
-          ) : (
-            <CustomAgGrid
-              columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameworkComponents}
-              setGridApi={setGridApi}
-              dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              actionWidth={100}
-              loading={loading}
-              renderedFrom={renderedFrom}
-              refreshGrid={fetchRepairJobs}
-              showOnlyShowFilteredRecordSwitch={true}
-              showFilters={true}
-              resource={sidebarResource.repairJob}
-            />
-          )
-        ) : null}
-
+        {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
+            columns={columns}
+            onSelect={() => { }}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            isClientSideGrid={false}
+            refreshGrid={fetchData}
+            showOnlyShowFilteredRecordSwitch={true}
+            showFilters={true}
+            resource={sidebarResource.repairJob}
+          />
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
             open={showDeleteWarningConfirmBox}
@@ -542,9 +458,8 @@ const RepairJob = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.repairJobName ? 'Repair Job' : 'Repair Jobs'}   ${
-              deleteRecord.repairJobName || ''
-            }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.repairJobName ? 'Repair Job' : 'Repair Jobs'}   ${deleteRecord.repairJobName || ''
+              }?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
               setIsConformDialogVisible(false);
