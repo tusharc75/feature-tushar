@@ -1,20 +1,19 @@
 import { Box, Chip, Menu, MenuItem } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
-import { AddOutlined } from '@material-ui/icons';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useReducer, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
-import { CiUser, MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
-import { GiStockpiles } from 'react-icons/gi';
+import { isMobile } from 'react-device-detect';
+import DeleteIcon from '@material-ui/icons/Delete';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
+import { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -22,14 +21,10 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
 import SearchBox from 'src/components/Helpers/SearchBox';
-import HideWhenOffline from 'src/components/HideWhenOffline';
-import MobileFilterDialog, { DisplayFiltersForMobile } from 'src/components/MobileFilterDialog';
-import MobileSortDialog from 'src/components/MobileSortDialog';
-import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
-import { bulkAssetCreation, getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
-import useColumns, { getFrameworkComponents, getStaticFields, gridFilterParser } from 'src/constants/useColumns';
+import { bulkAssetCreation, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import styles from '../Leads/Header.module.scss';
 import ManageBulkAssetCreation from './ManageBulkAssetCreation';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns } from 'src/components/CustomReactTableNew';
 
 const BulkAssetCreation = () => {
   const BulkAssetCreationType = [
@@ -49,15 +44,11 @@ const BulkAssetCreation = () => {
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [gridApi, setGridApi] = useState(null);
-  const [sortOpen, setSortOpen] = useState(false);
-  const [columns, setColumns] = useState([]);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
+  const [columns, setColumns] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
+  const { dataRows, rowCount, page, limit, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
-  const [isOpenDialog, setisOpenDialog] = useState(false);
   let { type, referenceId, referenceType }: any = queryString.parse(history.location.search);
   const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
 
@@ -76,44 +67,78 @@ const BulkAssetCreation = () => {
 
   const fetchGridColumns = () => {
     axiosInstance()
-      .get('/field?resource=Bulk Asset Creation')
+      .get(`/field?resource=${sidebarResource.bulkAssetCreation}`)
       .then(({ data: { data } }) => {
         let columns = [];
-        let rendererNames = [];
         data.forEach((o) => {
           let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.bulkAssetCreationDetail.path, true);
 
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName);
-            }
           }
         });
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent,
-          actionsRenderer: ActionsRenderer
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
         columns = [...columns, ...getStaticFields()];
-        setColumns([...columns]);
+        setColumns([...columns, ActionsRenderer]);
       });
   };
 
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 150,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        {permissions?.bulkAssetCreation?.isCreate && (
+          <HtmlTooltip title="Clone">
+            <IconButton
+              size="small"
+              aria-label="Clone"
+              onClick={() => {
+                setShowManageBulkAssetCreationDialog({ open: true, isClone: true, idToClone: row?.original._id });
+              }}
+            >
+              <FileCopyIcon fontSize="small" color="primary" />
+            </IconButton>
+          </HtmlTooltip>
+        )}
+        {/* {row?.original?.canDelete ? (
+          <HtmlTooltip title="Delete">
+            <IconButton
+              aria-label="Delete"
+              onClick={() => {
+                setDeleteRecord(row?.original);
+                setShowDeleteConfirmBox(true);
+              }}
+            >
+              <DeleteIcon fontSize="small" color="error" />
+            </IconButton>
+          </HtmlTooltip>
+        ) : (
+          <HtmlTooltip className="cursor-stop" title="You do not have permission to delete">
+            <IconButton aria-label="Delete">
+              <DeleteIcon fontSize="small" color="disabled" />
+            </IconButton>
+          </HtmlTooltip>
+        )} */}
+      </>
+    )
+  }
+
   const fetchBulkAssetCreation = () => {
     dispatch({ type: 'loading', loading: true });
-
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
 
     const queryString = getQueryString();
     axiosInstance()
       .get(`${bulkAssetCreation.api}${queryString}`)
       .then(({ data: { data, count } }) => {
         let rows = data?.map((u) => {
-          let finalObject = prepareDataForGrid(u);
+          let finalObject: any = prepareDataForGrid(u);
+          finalObject['canDelete'] = permissions?.fieldTicket?.isDelete && finalObject?.ownerId === user?.user?._id;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id);
           let res = {
@@ -126,14 +151,12 @@ const BulkAssetCreation = () => {
             type: 'initialize',
             data: [...dataRows, ...rows],
             count: count,
-            selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
           });
         } else {
           dispatch({
             type: 'initialize',
             data: rows,
             count: count,
-            selectedRecords: rows.filter((f) => f.isChecked === true)
           });
         }
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -192,7 +215,7 @@ const BulkAssetCreation = () => {
   const columnState = JSON.parse(localStorage.getItem(renderedFrom));
 
   if (columnState) {
-    columns.map((item) => {
+    columns?.map((item) => {
       columnState.map((d) => {
         if (d.colId == item.field) {
           item.show = !d.hide;
@@ -221,24 +244,6 @@ const BulkAssetCreation = () => {
       });
   };
 
-  const ActionsRenderer = (params) => (
-    <>
-      {permissions?.bulkAssetCreation?.isCreate && (
-        <HtmlTooltip title="Clone">
-          <IconButton
-            size="small"
-            aria-label="Clone"
-            onClick={() => {
-              setShowManageBulkAssetCreationDialog({ open: true, isClone: true, idToClone: params.data._id });
-            }}
-          >
-            <FileCopyIcon color="primary" />
-          </IconButton>
-        </HtmlTooltip>
-      )}
-    </>
-  );
-
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
   };
@@ -249,22 +254,6 @@ const BulkAssetCreation = () => {
 
   const closeActions = () => {
     setAnchorEl(null);
-  };
-
-  const handleOpen = () => {
-    setisOpenDialog(true);
-  };
-
-  const handleClickOpen = () => {
-    setSortOpen(true);
-  };
-
-  const handleClickClose = () => {
-    setSortOpen(false);
-  };
-
-  const handleFilterClose = () => {
-    setisOpenDialog(false);
   };
 
   const handleBulkAssetCreationType = (filterValues) => {
@@ -308,101 +297,48 @@ const BulkAssetCreation = () => {
           }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
-          recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-          ids={
-            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-              ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-              : []
-          }
+          recordsToExport={selectedRecords?.length}
+          ids={selectedRecords?.map((obj) => obj._id)}
           onExportToExcelSuccess={() => {
-            if (gridApi) gridApi.deselectAll();
-            else fetchBulkAssetCreation();
+            fetchBulkAssetCreation();
           }}
           additionalParams={getQueryString(true)}
         />
       </div>
       <div className="main-container">
         <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className={'d-flex align-items-center gap-1'}>
-              <div className="d-flex align-items-center">
-                <GiStockpiles size={20} style={{ paddingBottom: '3px' }} className="headerLogo" />
-                <span className="listingHeader">{routes.bulkAssetCreation?.title} </span>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+            <div className={'d-flex flex-wrap align-items-center gap-2'}>
+              <div className={`flex flex-wrap items-center gap-2 `}>
+                {BulkAssetCreationType && (
+                  <ToggleButtonGroup
+                    size="small"
+                    className="ml-2"
+                    value={BulkAssetCreationType[selectedType - 1].key}
+                    exclusive
+                    onChange={handleFilter}
+                  >
+                    {BulkAssetCreationType.map((k, index) => {
+                      return (
+                        <ToggleButton value={k.key} key={index}>
+                          {k.key}
+                        </ToggleButton>
+                      );
+                    })}
+                  </ToggleButtonGroup>
+                )}
               </div>
-              {isMobile && !isTablet ? (
-                <>
-                  <div className="flex flex-wrap items-center gap-1 ml-auto">
-                    <IconButton
-                      onClick={handleClickOpen}
-                      id="demo-customized-button"
-                      aria-controls="demo-customized-menu"
-                      aria-haspopup="true"
-                      aria-expanded={'true'}
-                      className={'mobileIconButton secondary'}
-                      size="small"
-                    >
-                      <TbArrowsSort className="rotate-90" size={16} />
-                    </IconButton>
-                    <MobileSortDialog
-                      isOpen={sortOpen}
-                      handleClose={handleClickClose}
-                      contentPart={null}
-                      secHeading={['Sort Purchase Order']}
-                      columns={columns}
-                      dispatch={dispatch}
-                    />
-
-                    <IconButton
-                      id="demo-customized-button"
-                      aria-controls="demo-customized-menu"
-                      aria-haspopup="true"
-                      aria-expanded={'true'}
-                      className={'mobileIconButton secondary'}
-                      size="small"
-                      onClick={handleOpen}
-                    >
-                      <MdOutlineFilterAlt size={16} />
-                    </IconButton>
-
-                    <MobileFilterDialog
-                      isOpen={isOpenDialog}
-                      handleClose={handleFilterClose}
-                      contentPart={null}
-                      columns={columns}
-                      dispatch={dispatch}
-                      title={routes?.bulkAssetCreation?.title}
-                      filters={filters}
-                      resource={sidebarResource.bulkAssetCreation}
-                    />
-                  </div>
-                </>
-              ) : (
-                <HideWhenOffline>
-                  <div className={`align-items-center gap-1 layout-for-mobile `}>
-                    {BulkAssetCreationType && (
-                      <ToggleButtonGroup
-                        size="small"
-                        className="ml-2"
-                        value={BulkAssetCreationType[selectedType - 1].key}
-                        exclusive
-                        onChange={handleFilter}
-                      >
-                        {BulkAssetCreationType.map((k, index) => {
-                          return (
-                            <ToggleButton value={k.key} key={index}>
-                              {k.key}
-                            </ToggleButton>
-                          );
-                        })}
-                      </ToggleButtonGroup>
-                    )}
-                  </div>
-                </HideWhenOffline>
-              )}
               {referenceType && <Chip className="ml-3" color="primary" label={`Rental Job : ${referenceType}`} onDelete={updateQueryParams} />}
             </div>
             <div className="flex flex-wrap gap-[8px]  justify-end">
-              <SearchBox onChange={handleSearch} className={isMobile ? styles.search_box_input : ''} size="small" value={search} />
+              <SearchBox
+                onChange={handleSearch}
+                className={isMobile ? styles.search_box_input : ''}
+                width="242px"
+                size="small"
+                value={search}
+                style={isMobile ? { flex: 1 } : {}}
+              />
               <div className="flex gap-[8px] flex-wrap items-center">
                 {permissions?.bulkAssetCreation?.isCreate && (
                   <Button
@@ -418,6 +354,22 @@ const BulkAssetCreation = () => {
                     Add
                   </Button>
                 )}
+                {/* <HtmlTooltip title={!selectedRecords?.length ? `Please select some ${routes?.bulkAssetCreation?.title?.toLowerCase()}s` : ""}>
+                  <span>
+                    <Button
+                      variant={'outlined'}
+                      color="default"
+                      size="small"
+                      onClick={openActions}
+                      disabled={selectedRecords.length ? false : true}
+                      aria-controls="action-menu"
+                      className={`new-dropdown-v1`}
+                      endIcon={<ExpandMore />}
+                    >
+                      Actions
+                    </Button>
+                  </span>
+                </HtmlTooltip>
                 <Menu
                   anchorEl={anchorEl}
                   keepMounted
@@ -430,88 +382,34 @@ const BulkAssetCreation = () => {
                   open={Boolean(anchorEl)}
                   onClose={closeActions}
                 >
-                  {permissions?.bulkAssetCreation?.isDelete && (
-                    <MenuItem
-                      onClick={() => {
-                        closeActions();
-                        setShowDeleteConfirmBox(true);
-                      }}
-                    >
-                      Delete
-                    </MenuItem>
-                  )}
-                </Menu>
+                  <MenuItem
+                    disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
+                    onClick={() => {
+                      closeActions();
+                      setShowDeleteConfirmBox(true);
+                    }}
+                  >
+                    {`Delete (${selectedRecords.length})`}
+                  </MenuItem>
+                </Menu> */}
               </div>
             </div>
-            <DisplayFiltersForMobile resource={sidebarResource.bulkAssetCreation} />
           </div>
         </div>
         {columns ? (
-          Object.keys(frameWorkComponent).length > 0 ? (
-            isMobile && !isTablet ? (
-              <CustomSwipableList
-                key={selectedType}
-                allowSelection={true}
-                allowSwipe={true}
-                permissions={permissions.bulkAssetCreation}
-                primaryField={columns?.find((d) => d.primaryField)}
-                onClick={(data) => {
-                  history.push(`${routes.bulkAssetCreationDetail.path}/${data._id}`);
-                }}
-                dataRows={dataRows}
-                selectedRecords={selectedRecords}
-                dispatch={dispatch}
-                onEdit={(data) => {
-                  history.push(`${routes.bulkAssetCreationDetail.path}/${data._id}`);
-                }}
-                extraParamsToCheckDelete={true}
-                onDelete={(data) => {
-                  setDeleteRecord(data);
-                  setShowDeleteConfirmBox(true);
-                }}
-                rowCount={rowCount}
-                page={page}
-                loading={loading}
-                additionalDetails={[
-                  {
-                    icon: <CiUser size={18} />,
-                    field: 'supplierAccount'
-                  }
-                ]}
-                chips={[
-                  {
-                    label: 'Status: ',
-                    field: 'status'
-                  }
-                ]}
-                onCreate={false}
-                showClone={true}
-                onClone={(data) => {
-                  setShowManageBulkAssetCreationDialog({ open: true, isClone: true, idToClone: data._id });
-                }}
-                renderedFrom={renderedFrom}
-              />
-            ) : (
-              <CustomAgGrid
-                columns={columns}
-                dataRows={dataRows}
-                frameworkComponents={frameWorkComponent}
-                setGridApi={setGridApi}
-                dispatch={dispatch}
-                rowCount={rowCount}
-                limit={limit}
-                pageSizes={pageSizes}
-                page={page}
-                actionWidth={150}
-                loading={loading}
-                renderedFrom={renderedFrom}
-                refreshGrid={fetchBulkAssetCreation}
-                showOnlyShowFilteredRecordSwitch={true}
-                showFilters={true}
-                resource={sidebarResource.bulkAssetCreation}
-              />
-            )
-          ) : null
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
+            columns={columns}
+            onSelect={() => { }}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            isClientSideGrid={false}
+            refreshGrid={fetchBulkAssetCreation}
+            showOnlyShowFilteredRecordSwitch={true}
+            showFilters={true}
+            resource={sidebarResource.bulkAssetCreation}
+          />
         ) : (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
@@ -532,9 +430,8 @@ const BulkAssetCreation = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.bulkAssetCreation?.title?.toLowerCase()} ${
-            deleteRecord?._id ? deleteRecord?.assetNumber : ''
-          } ? `}
+          message={`Are you sure you want to delete the ${routes?.bulkAssetCreation?.title?.toLowerCase()}${selectedRecords.length ? "s" : ""} ${deleteRecord?._id ? deleteRecord?.baNumber : ''
+            } ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
