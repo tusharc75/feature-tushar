@@ -131,7 +131,7 @@ const ProjectSales: FC = () => {
               disabled={row?.original?.canDelete ? false : true}
               onClick={() => {
                 setShowDeleteConfirmBox(true);
-                setDeleteRecord(row);
+                setDeleteRecord(row?.original);
                 // showConfirmBox(row?.original);
               }}
             >

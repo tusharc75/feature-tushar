@@ -435,7 +435,7 @@ const Opportunities = () => {
                       handleTransferEntityDialog();
                     }}
                   >
-                    Transfer Entity
+                    {`Transfer Entity (${selectedRecords.length})`}
                   </MenuItem>
                 </Menu>
               </div>
