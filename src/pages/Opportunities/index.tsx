@@ -14,7 +14,7 @@ import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
-import { customerAccount, gridLoadingTimeout, opportunity, prepareDataForGrid, supplierAccount, removeLocalStorage } from '../../constants/helpers';
+import { customerAccount, gridLoadingTimeout, opportunity, prepareDataForGrid, supplierAccount, removeLocalStorage, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageOpportunityDialog from './ManageOpportunityDialog';
@@ -30,7 +30,7 @@ import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import styles from '../Leads/Header.module.scss';
 
 const Opportunities = () => {
-  const OpportunityTypes = [
+  const types = [
     {
       key: `My ${routes.opportunity.title}`,
       value: 1
@@ -74,9 +74,7 @@ const Opportunities = () => {
 
   const fetchGridColumns = async () => {
     const response = await axiosInstance().get(`/field?resource=Opportunity&entity=${selectedEntity}&view=true`);
-
     let data = response?.data?.data;
-
     let columns = [];
     data.forEach((o) => {
       if (['firstName'].find((d) => d === o?.fieldData?.fieldName)) {
@@ -92,7 +90,7 @@ const Opportunities = () => {
           }
         ];
       } else {
-        let currentColumn = getColumnData(opportunityResource, o?.fieldData, routes.opportunityDetail.path, true);
+        let currentColumn = getColumnData(routes.opportunity.title, o?.fieldData, routes.opportunityDetail.path, true);
         if (currentColumn !== null) {
           columns = [...columns, currentColumn?.columnData];
         }
@@ -110,26 +108,24 @@ const Opportunities = () => {
     accessor: 'action',
     Header: 'Actions',
     minWidth: 100,
-    width: 150,
+    width: 100,
     sticky: 'right',
     disableFilters: true,
     disableSortBy: true,
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip
-          title={permissions[opportunityResource]?.isCreate ? 'Clone' : cloneDisable}
-        >
+        <HtmlTooltip title={permissions?.opportunity?.isCreate ? 'Clone' : cloneDisable}  >
           <span>
             <IconButton
-              disabled={permissions[opportunityResource]?.isCreate ? false : true}
+              disabled={permissions?.opportunity?.isCreate ? false : true}
               size="small"
               aria-label="Clone"
               onClick={() => {
                 setShowCreateOpportunityDialog({ open: true, isClone: true, idToClone: row?.original?._id });
               }}
             >
-              <FileCopyIcon fontSize="small" color={permissions[opportunityResource]?.isCreate ? 'primary' : 'disabled'} />
+              <FileCopyIcon fontSize="small" color={permissions?.opportunity?.isCreate ? 'primary' : 'disabled'} />
             </IconButton>
           </span>
         </HtmlTooltip>
@@ -157,7 +153,6 @@ const Opportunities = () => {
   useEffect(() => {
     fetchData()
   }, [search, page, limit, selectedType, filters, sorting, selectedEntity, accountDetails, showFilteredRecordsOnly]);
-
 
 
   const getQueryString = (isExport = false) => {
@@ -215,32 +210,15 @@ const Opportunities = () => {
     if (selectedEntity) {
       const queryString = getQueryString();
       dispatch({ type: 'loading', loading: true });
-
       axiosInstance()
         .get(`${opportunityApi}${queryString}`)
         .then(({ data: { data, count } }) => {
           let rows = data.map((u) => {
             let finalObject = prepareDataForGrid(u);
-
-            finalObject['canDelete'] = u.owner?.optionValue === user?.user._id;
+            finalObject['canDelete'] = u.owner?.optionValue === user?.user._id && permissions?.opportunity?.isDelete;
             finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-            finalObject['allowedToEdit'] = [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id);
-
-            finalObject['owerCollaboratorInitialsOrImages'] = [];
-            if (finalObject['owner']) finalObject['owerCollaboratorInitialsOrImages'].push({ initials: finalObject['owner'] });
-
-            finalObject['owerCollaboratorInitialsOrImages'].forEach((f) => {
-              if (f.initials) {
-                f.initials = f.initials
-                  .split(' ')
-                  .map((i) => i[0])
-                  .join('');
-              }
-            });
-
             let res = {
               ...finalObject,
-              canDelete: u.owner?.optionValue === user?.user._id,
               stage: u.stage,
               closeDate: u?.closeDate
             };
@@ -305,7 +283,7 @@ const Opportunities = () => {
 
   const handleFilter = (event, newFilter) => {
     if (newFilter != null) {
-      handleOpportunityTypeChange(OpportunityTypes.find((d) => d.key === newFilter).value);
+      handleOpportunityTypeChange(types.find((d) => d.key === newFilter).value);
     }
   };
 
@@ -323,7 +301,7 @@ const Opportunities = () => {
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[routes.opportunity]} />
         <ImportExportLinks
-          permissions={permissions[opportunityResource]}
+          permissions={permissions?.opportunity}
           module="opportunities"
           api={opportunityApi}
           afterImportCompleted={() => {
@@ -339,22 +317,20 @@ const Opportunities = () => {
           additionalParams={getQueryString(true)}
         />
       </div>
-
-      {/* Tables Begins Here */}
       <CustomContainer>
         <div className="header-panel">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
             <div className={'d-flex flex-wrap align-items-center gap-2'}>
               <div className={`flex flex-wrap items-center gap-2 `}>
-                {OpportunityTypes && (
+                {types && (
                   <ToggleButtonGroup
                     size="small"
                     className="ml-2"
-                    value={OpportunityTypes[selectedType - 1].key}
+                    value={types[selectedType - 1].key}
                     exclusive
                     onChange={handleFilter}
                   >
-                    {OpportunityTypes.map((k, index) => {
+                    {types.map((k, index) => {
                       return (
                         <ToggleButton value={k.key} key={index}>
                           {k.key}
@@ -375,7 +351,7 @@ const Opportunities = () => {
                 style={isMobile ? { flex: 1 } : {}}
               />
               <div className="flex gap-[8px] flex-wrap items-center">
-                {permissions[opportunityResource]?.isCreate && (
+                {permissions?.opportunity?.isCreate && (
                   <Button
                     onClick={() => {
                       setShowCreateOpportunityDialog({ open: true, isClone: false, idToClone: null });
@@ -452,7 +428,7 @@ const Opportunities = () => {
             refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
-            resource={opportunityResource}
+            resource={sidebarResource.opportunity}
           />
         ) : (
           <Box p={2} height={500}>

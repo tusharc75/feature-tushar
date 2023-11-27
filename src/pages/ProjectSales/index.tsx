@@ -9,7 +9,6 @@ import { useData } from '../../StateProvider/Provider';
 import CreateProjectSales from './CreateProjectSales';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { customerAccount, gridLoadingTimeout, supplierAccount } from '../../constants/helpers';
-import './style.scss';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import EntitySelectionsDialog from '../../components/EntitySelections';
 import { AiOutlineDeploymentUnit } from 'react-icons/ai';
@@ -132,7 +131,6 @@ const ProjectSales: FC = () => {
               onClick={() => {
                 setShowDeleteConfirmBox(true);
                 setDeleteRecord(row?.original);
-                // showConfirmBox(row?.original);
               }}
             >
               <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
@@ -234,7 +232,7 @@ const ProjectSales: FC = () => {
       .then(({ data: { data, count } }) => {
         let rows = data.map((project) => {
           let finalObject = prepareDataForGrid(project, user);
-          finalObject['canDelete'] = finalObject['projectManagerId'] === user?.user._id;
+          finalObject['canDelete'] = finalObject['projectManagerId'] === user?.user._id && permissions?.projectSales?.isDelete;
           return {
             ...finalObject,
             isManager: user.user._id === project?.projectManager?.optionValue,
@@ -294,9 +292,6 @@ const ProjectSales: FC = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-  const handleCreate = () => {
-    setIsOpen({ open: true, isClone: false, idToClone: null });
-  };
 
   const handleClose = () => {
     setIsOpen({ open: false, isClone: false, idToClone: null });
@@ -307,7 +302,6 @@ const ProjectSales: FC = () => {
       handleProjectFilter(types.find((d) => d.key === newFilter).value);
     }
   };
-
 
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
@@ -323,7 +317,7 @@ const ProjectSales: FC = () => {
         <CustomBreadCrumbs routes={[routes.projectSales]} />
         <ImportExportLinks
           permissions={permissions?.projectSales}
-          module="project-sale(s)"
+          module={routes.projectSales.title}
           api={'project-sales'}
           afterImportCompleted={() => {
             fetchData();

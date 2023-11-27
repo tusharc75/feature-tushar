@@ -19,8 +19,6 @@ import { reducer, intialState } from '../../components/AgGridComponents/CustomAg
 import './style.scss';
 import TransferEntityDialog from '../../components/AssignRolesDialog/TransferEntityDialog';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
-
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns } from 'src/components/CustomReactTableNew';
@@ -60,7 +58,6 @@ const Leads = () => {
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [messageDialog, setMessageDialog] = useState({ open: false, message: '' });
   const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
-  const { isOffline } = useContext(CustomOfflineContext);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [columns, setColumns] = useState(null);
@@ -84,16 +81,8 @@ const Leads = () => {
 
   const fetchGridColumns = async () => {
     let data;
-    if (!isOffline) {
-      if (selectedEntity) {
-        const response = await axiosInstance().get(`/field?resource=${sidebarResource.lead}&entity=${selectedEntity}&view=true`);
-
-        data = response?.data?.data;
-      } else {
-        data = [];
-      }
-    }
-
+    const response = await axiosInstance().get(`/field?resource=${sidebarResource.lead}&view=true`);
+    data = response?.data?.data;
     let columns = [];
     data?.forEach((o) => {
       let currentColumn = getColumnData(lead.leadResource, o?.fieldData, routes.leadDetail.path, true);
@@ -132,7 +121,7 @@ const Leads = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip title={permissions[lead.leadResource].isCreate ? 'Clone' : cloneDisable}>
+        <HtmlTooltip title={permissions?.lead?.isCreate ? 'Clone' : cloneDisable}>
           <span>
             <IconButton
               size="small"
@@ -141,28 +130,28 @@ const Leads = () => {
                 setIsOpen({ open: true, isClone: true, idToClone: row?.original._id });
               }}
             >
-              <FileCopyIcon fontSize="small" color={permissions[lead.leadResource]?.isCreate ? 'primary' : 'disabled'} />
+              <FileCopyIcon fontSize="small" color={permissions?.lead?.isCreate ? 'primary' : 'disabled'} />
             </IconButton>
           </span>
         </HtmlTooltip>
-
         {hasPermissionToConvertInOpportunity && generateLeadToOpportunityButton(row?.original)}
-
-        <HtmlTooltip title={row?.original?.canDelete && !row?.original?.convertedToOpportunity ? "Delete" : deleteDisable}>
-          <span>
-            <IconButton
-              size="small"
-              aria-label="Delete"
-              disabled={row?.original?.canDelete && !row?.original?.convertedToOpportunity ? false : true}
-              onClick={() => {
-                setDeleteRecord(row?.original);
-                setIsConformDialogVisible(true);
-              }}
-            >
-              <DeleteIcon fontSize="small" color={row?.original?.canDelete && !row?.original?.convertedToOpportunity ? 'error' : 'disabled'} />
-            </IconButton>
-          </span>
-        </HtmlTooltip>
+        <Box ml={1}>
+          <HtmlTooltip title={row?.original?.canDelete && !row?.original?.convertedToOpportunity ? "Delete" : deleteDisable}>
+            <span>
+              <IconButton
+                size="small"
+                aria-label="Delete"
+                disabled={row?.original?.canDelete && !row?.original?.convertedToOpportunity ? false : true}
+                onClick={() => {
+                  setDeleteRecord(row?.original);
+                  setIsConformDialogVisible(true);
+                }}
+              >
+                <DeleteIcon fontSize="small" color={row?.original?.canDelete && !row?.original?.convertedToOpportunity ? 'error' : 'disabled'} />
+              </IconButton>
+            </span>
+          </HtmlTooltip>
+        </Box>
       </>
     )
   }
@@ -214,32 +203,13 @@ const Leads = () => {
 
       try {
         let data, count;
-
-        if (!isOffline) {
-          const response: any = await axiosInstance().get(`${lead.leadApi}${queryString}`);
-
-          data = response?.data?.data;
-          count = response?.data?.count;
-        }
-
+        const response: any = await axiosInstance().get(`${lead.leadApi}${queryString}`);
+        data = response?.data?.data;
+        count = response?.data?.count;
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u);
-          finalObject['canDelete'] = u.owner?.optionValue === user?.user._id;
+          finalObject['canDelete'] = u.ownerId === user?.user._id && permissions?.lead?.isDelete;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id);
-
-          finalObject['owerCollaboratorInitialsOrImages'] = [];
-          if (finalObject['owner']) finalObject['owerCollaboratorInitialsOrImages'].push({ initials: finalObject['owner'] });
-
-          finalObject['owerCollaboratorInitialsOrImages'].forEach((f) => {
-            if (f.initials) {
-              f.initials = f.initials
-                .split(' ')
-                .map((i) => i[0])
-                .join('');
-            }
-          });
-
           let res = {
             ...finalObject,
             isAllowedToUpdate: [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id),
@@ -249,7 +219,6 @@ const Leads = () => {
           };
           return res;
         });
-
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -300,7 +269,7 @@ const Leads = () => {
           className="cursor-stop"
           title={`To convert lead to opportunity, you must need create permission of ${dontHavePermissions.join(', ')}`}
         >
-          <IconButton aria-label="Convert to opportunity">
+          <IconButton size='small' aria-label="Convert to opportunity">
             <SiConvertio size={18} />
           </IconButton>
         </HtmlTooltip>
@@ -308,7 +277,7 @@ const Leads = () => {
     ) : convertedToOpportunity ? (
       <>
         <HtmlTooltip className="cursor-stop" title="This lead is already converted to opportunity">
-          <IconButton aria-label="Convert to opportunity">
+          <IconButton size='small' aria-label="Convert to opportunity">
             <SiConvertio size={18} />
           </IconButton>
         </HtmlTooltip>
@@ -316,7 +285,7 @@ const Leads = () => {
     ) : !isAllowedToUpdate ? (
       <>
         <HtmlTooltip className="cursor-stop" title="You are not allowed to convert as you are neither owner nor collaborator">
-          <IconButton aria-label="Convert to opportunity">
+          <IconButton size='small' aria-label="Convert to opportunity">
             <SiConvertio size={18} />
           </IconButton>
         </HtmlTooltip>
@@ -324,7 +293,7 @@ const Leads = () => {
     ) : !isCurrentLeadStatusQualified ? (
       <>
         <HtmlTooltip className="cursor-stop" title="To covert this lead to opportunity, Lead status must be qualified">
-          <IconButton aria-label="Convert to opportunity">
+          <IconButton size='small' aria-label="Convert to opportunity">
             <SiConvertio size={18} />
           </IconButton>
         </HtmlTooltip>
@@ -332,6 +301,7 @@ const Leads = () => {
     ) : (
       <HtmlTooltip title="Convert to opportunity">
         <IconButton
+          size='small'
           aria-label="Convert to opportunity"
           onClick={() => {
             setConvertLeadToOpportunityConfirmationDialog({
@@ -350,7 +320,6 @@ const Leads = () => {
 
   const handleDelete = async () => {
     setOkButtonLoading(true);
-
     let ids = [];
     if (deleteRecord?._id) {
       ids.push(deleteRecord?._id);
@@ -384,7 +353,6 @@ const Leads = () => {
 
   const convertLeadToOpportunity = () => {
     const ids = convertLeadToOpportunityConfirmationDialog.id ? [convertLeadToOpportunityConfirmationDialog.id] : selectedRecords.map((m) => m._id);
-
     axiosInstance()
       .post(`${lead.leadApi}/to-opportunity`, { ids: ids })
       .then(({ data }) => {
@@ -431,7 +399,7 @@ const Leads = () => {
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[routes.lead]} />
         <ImportExportLinks
-          permissions={permissions[lead.leadResource]}
+          permissions={permissions?.lead}
           module="lead(s)"
           api={lead.leadApi}
           afterImportCompleted={() => {
@@ -447,7 +415,6 @@ const Leads = () => {
           additionalParams={getQueryString(true)}
         />
       </div>
-
       <CustomContainer>
         <div className="header-panel">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
@@ -482,7 +449,7 @@ const Leads = () => {
                 style={isMobile ? { flex: 1 } : {}}
               />
               <div className="flex gap-[8px] flex-wrap items-center">
-                {permissions[lead.leadResource]?.isCreate && (
+                {permissions?.lead?.isCreate && (
                   <Button
                     onClick={() => {
                       setIsOpen({ open: true, isClone: false, idToClone: null });
@@ -568,7 +535,7 @@ const Leads = () => {
                       {`Convert To Opportunity (${selectedRecords.length})`}
                     </MenuItem>
                   )}
-                  {permissions[lead.leadResource].isUpdate && (
+                  {permissions?.lead?.isUpdate && (
                     <MenuItem
                       onClick={() => {
                         closeActions();
@@ -596,7 +563,7 @@ const Leads = () => {
             refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
-            resource={lead.leadResource}
+            resource={sidebarResource.lead}
           />
         ) : (
           <Box p={2} height={500}>
