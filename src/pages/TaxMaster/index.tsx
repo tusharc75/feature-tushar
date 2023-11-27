@@ -1,4 +1,4 @@
-import { Button, IconButton } from '@material-ui/core';
+import { Button, IconButton, Box } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -18,9 +18,9 @@ import SearchBox from 'src/components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import { Menu, MenuItem } from '@material-ui/core';
-import { ToggleButtonGroup, ToggleButton } from '@material-ui/lab';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 let searchTimeout;
 
@@ -223,11 +223,11 @@ const TaxMaster = () => {
           permissions={permissions?.taxMaster}
           module={routes.taxMaster}
           api={routes?.taxMaster.path}
-          afterImportCompleted={() => {fetchData()}}
+          afterImportCompleted={() => { fetchData() }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}
-          ids={selectedRecords?.map((obj) => obj._id) }
+          ids={selectedRecords?.map((obj) => obj._id)}
           onExportToExcelSuccess={() => {
             fetchData();
           }}
@@ -289,9 +289,9 @@ const TaxMaster = () => {
                         }
                         onClick={() => {
                           // eslint-disable-next-line no-lone-blocks
-                            {
-                              selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
-                            }
+                          {
+                            selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
+                          }
                           closeActions();
                           setShowDeleteConfirmBox(true);
                         }}
@@ -309,7 +309,6 @@ const TaxMaster = () => {
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => {}}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
@@ -319,7 +318,9 @@ const TaxMaster = () => {
             showFilters={true}
             resource={sidebarResource.taxMaster}
           />
-        ) : null}
+        ) : <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>}
       </CustomContainer>
       {showDeleteConfirmBox && (
         <ConfirmationDialog

@@ -21,7 +21,7 @@ import CustomContainer from 'src/components/CustomContainer';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import SearchBox from 'src/components/Helpers/SearchBox';
-import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { Button, IconButton, Menu, MenuItem, Box } from '@material-ui/core';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
@@ -33,6 +33,7 @@ import MessageDialog from 'src/components/Helpers/MessageDialog';
 import ManageRentalManagementDialog from './ManageRental';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 let searchTimeout;
 
@@ -275,7 +276,7 @@ const RentalManagement = () => {
       }
       let rows = data.map((u) => {
         let finalObject: any = prepareDataForGrid(u, user);
-        finalObject['isSelected'] = selectedRecords.some((s) => s._id === u._id);
+        finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
         finalObject['canDelete'] = permissions?.rentalManagement?.isDelete && finalObject?.ownerId === user?.user?._id && u?.material?.length === 0;
         return finalObject;
       });
@@ -556,7 +557,6 @@ const RentalManagement = () => {
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => { }}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
@@ -566,7 +566,9 @@ const RentalManagement = () => {
             showFilters={true}
             resource={sidebarResource.rentalManagement}
           />
-        ) : null}
+        ) : <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>}
 
         {showDeleteWarningConfirmBox && (
           <MessageDialog

@@ -7,7 +7,7 @@ import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
-import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { Button, IconButton, Menu, MenuItem, Box } from '@material-ui/core';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import CustomReactTable, {
   getStaticFields,
@@ -24,7 +24,8 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import EditIcon from '@material-ui/icons/Edit';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { cloneDisable, deleteDisable, updateDisable } from 'src/constants/messageHelpers';
+import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 let searchTimeout;
 
@@ -69,29 +70,15 @@ export default function DeviceTemplates() {
   const ActionsRenderer = {
     accessor: 'action',
     Header: 'Actions',
-    minWidth: 100,
-    width: 110,
+    minWidth: 50,
+    maxWidth: 50,
+    width: 50,
     sticky: 'right',
     disableFilters: true,
     disableSortBy: true,
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip title={row?.original?.allowedToEdit ? 'Update' : updateDisable}>
-          <span>
-            <IconButton
-              size="small"
-              aria-label="Clone"
-              disabled={!row?.original?.allowedToEdit}
-              onClick={() => {
-                setOpen({ open: true, isClone: false, id: row?.original?._id });
-              }}
-            >
-              <EditIcon fontSize="small" color={row?.original?.allowedToEdit ? 'primary' : 'disabled'} />
-            </IconButton>
-          </span>
-        </HtmlTooltip>
-
         <HtmlTooltip title={permissions?.deviceTemplates?.isCreate ? 'Clone' : cloneDisable}>
           <span>
             <IconButton
@@ -106,7 +93,6 @@ export default function DeviceTemplates() {
             </IconButton>
           </span>
         </HtmlTooltip>
-
         <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
           <span>
             <IconButton
@@ -182,8 +168,7 @@ export default function DeviceTemplates() {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
           finalObject['canDelete'] = permissions?.deviceTemplates?.isDelete;
-          finalObject['isSelected'] = selectedRecords?.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions?.deviceTemplates?.isUpdate;
+          finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -315,7 +300,6 @@ export default function DeviceTemplates() {
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => {}}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
@@ -325,7 +309,9 @@ export default function DeviceTemplates() {
             showFilters={true}
             resource={sidebarResource.deviceTemplates}
           />
-        ) : null}
+        ) : <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>}
       </CustomContainer>
 
       {open?.open && (
@@ -344,9 +330,8 @@ export default function DeviceTemplates() {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.deviceTemplates?.title?.toLowerCase()} ${
-            deleteRecord ? (deleteRecord?._id ? deleteRecord?.templateName : '') : ''
-          }?`}
+          message={`Are you sure you want to delete ${routes?.deviceTemplates?.title?.toLowerCase()} ${deleteRecord ? (deleteRecord?._id ? deleteRecord?.templateName : '') : ''
+            }?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

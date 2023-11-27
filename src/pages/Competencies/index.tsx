@@ -16,9 +16,10 @@ import ManageCompetencies from './ManageCompetencies';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import { Menu, MenuItem } from '@material-ui/core';
+import { Menu, MenuItem, Box } from '@material-ui/core';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 let searchTimeout;
 
@@ -221,7 +222,7 @@ const Competencies = () => {
           permissions={permissions?.competencies}
           module={routes.competencies.title}
           api={routes?.competencies.path}
-          afterImportCompleted={() => {fetchData()}}
+          afterImportCompleted={() => { fetchData() }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}
@@ -307,7 +308,6 @@ const Competencies = () => {
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => {}}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
@@ -317,7 +317,9 @@ const Competencies = () => {
             showFilters={true}
             resource={sidebarResource.competencies}
           />
-        ) : null}
+        ) : <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>}
       </CustomContainer>
       {showDeleteConfirmBox && (
         <ConfirmationDialog

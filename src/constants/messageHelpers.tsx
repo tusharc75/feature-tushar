@@ -4,7 +4,6 @@ export const ownerAndColaborator = 'You have to be either owner or collaborator 
 export const actionSelection = 'Select at least one line item to enable this button';
 
 export const cloneDisable = 'You do not have permission to Clone/Create';
-export const updateDisable = 'You do not have permission to Update';
 export const deleteDisable = 'You do not have permission to Delete';
 
 export const rentalManagementActions = {

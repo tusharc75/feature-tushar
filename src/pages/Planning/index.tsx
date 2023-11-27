@@ -29,6 +29,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import AutorenewIcon from '@material-ui/icons/Autorenew';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import queryString from 'query-string';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 let searchTimeout;
 
 const Planning = () => {
@@ -316,7 +317,7 @@ const Planning = () => {
           permissions={permissions?.planning}
           module={routes.planning.title}
           api={routes?.planning?.path}
-          afterImportCompleted={() => {fetchData()}}
+          afterImportCompleted={() => { fetchData() }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}
@@ -440,7 +441,6 @@ const Planning = () => {
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => {}}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
@@ -450,7 +450,9 @@ const Planning = () => {
             showFilters={true}
             resource={sidebarResource.planning}
           />
-        ) : null}
+        ) : <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>}
       </CustomContainer>
       {showDeleteConfirmBox && (
         <ConfirmationDialog

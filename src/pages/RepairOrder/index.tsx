@@ -12,7 +12,7 @@ import { useHistory } from 'react-router-dom';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import queryString from 'query-string';
 import { useData } from 'src/StateProvider/Provider';
-import { Button, Chip, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { Button, Chip, IconButton, Menu, MenuItem, Box } from '@material-ui/core';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import styles from '../Leads/Header.module.scss';
@@ -23,6 +23,7 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ManageRepairOrder from './ManageRepairOrder';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 let searchTimeout;
 
@@ -219,7 +220,7 @@ const RepairOrder = () => {
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
-          finalObject['isSelected'] = false;
+          finalObject['isChecked'] = false;
           finalObject['canDelete'] = permissions?.repairOrder?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;
           return finalObject;
         });
@@ -443,7 +444,6 @@ const RepairOrder = () => {
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => {}}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
@@ -453,7 +453,9 @@ const RepairOrder = () => {
             showFilters={true}
             resource={sidebarResource.repairOrder}
           />
-        ) : null}
+        ) : <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>}
 
         {showDeleteWarningConfirmBox && (
           <MessageDialog
@@ -465,9 +467,8 @@ const RepairOrder = () => {
         {isConfirmDialogVisible && (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.repairOrderNumber ? 'Repair Order' : 'Repair Orders'}   ${
-              deleteRecord.repairOrderNumber || ''
-            }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.repairOrderNumber ? 'Repair Order' : 'Repair Orders'}   ${deleteRecord.repairOrderNumber || ''
+              }?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
               setIsConformDialogVisible(false);

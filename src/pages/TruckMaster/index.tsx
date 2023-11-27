@@ -1,4 +1,4 @@
-import { Button, IconButton } from '@material-ui/core';
+import { Button, IconButton, Box } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -22,6 +22,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import AppsIcon from '@material-ui/icons/Apps';
 import ViewListIcon from '@material-ui/icons/ViewList';
 import CardView from './CardView';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 let searchTimeout;
 
@@ -161,7 +162,7 @@ const TruckMaster = () => {
 
     axiosInstance()
       .get(`${routes?.truckMaster.path}${queryString}`)
-      .then(({ data: { data} }) => {
+      .then(({ data: { data } }) => {
         setCardViewData(data?.data);
         let count = data?.count;
         let rows = data?.data?.map((u) => {
@@ -227,7 +228,7 @@ const TruckMaster = () => {
           permissions={permissions?.truckMaster}
           module={routes.truckMaster.title}
           api={routes?.truckMaster.path}
-          afterImportCompleted={() => {fetchData()}}
+          afterImportCompleted={() => { fetchData() }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}
@@ -241,8 +242,8 @@ const TruckMaster = () => {
       <CustomContainer>
         <div className="header-panel">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div className={'d-flex align-items-center gap-1'}>
-            <IconButton
+            <div className={'d-flex align-items-center gap-1'}>
+              <IconButton
                 size="small"
                 aria-label="Clone"
                 onClick={() => {
@@ -305,11 +306,11 @@ const TruckMaster = () => {
                       onClose={closeActions}
                     >
                       <MenuItem
-                      disabled={
-                        !(
-                          (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length
-                        )
-                      }
+                        disabled={
+                          !(
+                            (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length
+                          )
+                        }
                         onClick={() => {
                           closeActions();
                           // eslint-disable-next-line no-lone-blocks
@@ -328,7 +329,7 @@ const TruckMaster = () => {
             </div>
           </div>
         </div>
-      {viewType === 1 && (
+        {viewType === 1 && (
           <CardView
             data={cardViewData}
             fields={columns}
@@ -339,22 +340,23 @@ const TruckMaster = () => {
         )}
         {viewType === 2 && (
           <>
-           {columns ? (
-            <CustomReactTable
-              height={'calc(100vh - 200px)'}
-              columns={columns}
-              onSelect={() => {}}
-              state={state}
-              dispatch={dispatch}
-              renderedFrom={renderedFrom}
-              isClientSideGrid={false}
-              refreshGrid={fetchData}
-              showOnlyShowFilteredRecordSwitch={true}
-              showFilters={true}
-              resource={sidebarResource.truckMaster}
-            />
-          ) : null}
-          </> 
+            {columns ? (
+              <CustomReactTable
+                height={'calc(100vh - 200px)'}
+                columns={columns}
+                state={state}
+                dispatch={dispatch}
+                renderedFrom={renderedFrom}
+                isClientSideGrid={false}
+                refreshGrid={fetchData}
+                showOnlyShowFilteredRecordSwitch={true}
+                showFilters={true}
+                resource={sidebarResource.truckMaster}
+              />
+            ) : <Box p={2} height={500}>
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Box>}
+          </>
         )}
       </CustomContainer>
       {showDeleteConfirmBox && (

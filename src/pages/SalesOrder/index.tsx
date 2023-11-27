@@ -1,4 +1,4 @@
-import { Button, IconButton, Menu, MenuItem, Tooltip } from '@material-ui/core';
+import { Button, IconButton, Menu, MenuItem, Box } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -30,6 +30,7 @@ import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 let searchTimeout;
 
@@ -248,7 +249,7 @@ const SalesOrder = () => {
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
-          finalObject['isSelected'] = false;
+          finalObject['isChecked'] = false;
           finalObject['canDelete'] = permissions?.salesOrder?.isDelete && u?.canDelete;
           return finalObject;
         });
@@ -430,7 +431,6 @@ const SalesOrder = () => {
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => {}}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
@@ -440,7 +440,9 @@ const SalesOrder = () => {
             showFilters={true}
             resource={sidebarResource.salesOrder}
           />
-        ) : null}
+        ) : <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>}
       </CustomContainer>
 
       {showDeleteWarningConfirmBox ? (

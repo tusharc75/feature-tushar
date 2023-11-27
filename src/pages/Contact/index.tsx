@@ -37,6 +37,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageContactDialog from './ManageContact';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const types = [
   {
@@ -352,7 +353,7 @@ export default function Contact(props) {
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u, user);
-          finalObject['isSelected'] = selectedRecords?.some((s) => s._id === u._id);
+          finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           return {
             ...finalObject,
             canDelete: u.owner?.optionValue === user?.user._id,
@@ -620,7 +621,6 @@ export default function Contact(props) {
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => { }}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
@@ -630,7 +630,9 @@ export default function Contact(props) {
             showFilters={true}
             resource={sidebarResource[contactResource]}
           />
-        ) : null}
+        ) : <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>}
 
         <Box component="div">
           {showDeleteWarningConfirmBox?.show ? (
