@@ -1,12 +1,10 @@
 import React, { useState, useEffect, useContext, Fragment, useReducer } from 'react';
 import { Grid, Box, Button, Paper, Tabs, Tab } from '@material-ui/core';
-import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from '../../axios/axiosInstance';
 import routes from '../../components/Helpers/Routes';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPageHeader from '../../components/DetailsPageHeader';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
@@ -49,7 +47,6 @@ const PricingConditionsDetails = () => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [open, setOpen] = useState(false);
   const [fields, setFields] = useState([]);
-  const [mainPoints, setMainPoints] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [tabValue, setTabValue] = useState(0);
 
@@ -109,85 +106,83 @@ const PricingConditionsDetails = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-              <>
-                {permissions?.pricingCondition?.isUpdate && (
-                  <Button 
+            <>
+              {permissions?.pricingCondition?.isUpdate && (
+                <Button
                   variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  className={'btn-outline-v1'} 
-                  size="small" 
+                  className={'btn-outline-v1'}
+                  size="small"
                   onClick={() => setOpen(true)}
-                  >
-                   {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                  </Button>
-                )}
-                {permissions?.pricingCondition?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-              </>
-              <ActivityButton 
-                referenceId={detailData?._id} 
-                resource={ACTIVITY_RESOURCE.pricingCondition}
-                resourceLabel={detailData?.conditionName}
-                />
+                >
+                  {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                </Button>
+              )}
+              {permissions?.pricingCondition?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+            </>
+            <ActivityButton
+              referenceId={detailData?._id}
+              resource={ACTIVITY_RESOURCE.pricingCondition}
+              resourceLabel={detailData?.conditionName}
+            />
           </Box>
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-          {!fields.length ? (
-            <Grid container spacing={2} style={{ padding: '8px' }}>
-              <CommonSkeleton lenArray={[...Array(7).keys()]} />
-            </Grid>
-          ) : (
-            <>
-              <Tabs
-               className="new-tab-container-v1"
-                value={tabValue}
-                onChange={handleMainTabChange}
-                textColor="primary"
-                TabIndicatorProps={{
-                  style: {
-                    display: 'none'
-                  }
-                }}
-              >
-                <Tab
-                  className={'tabLayout'}
-                  label={
-                    <div className="d-flex align-items-center tab-font">
-                      <FaWpforms className="mr-1" fontSize="inherit" /> Header
-                    </div>
-                  }
-          
-                />
-                <Tab
-                  className={'tabLayout'}
-                  label={
-                    <div className="d-flex align-items-center tab-font">
-                      <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-                    </div>
-                  }
-             
-                />
-              </Tabs>
-              <TabPanel value={tabValue} index={0}>
-                <DetailsPage data={detailData} fields={fields} />
-              </TabPanel>
-              <TabPanel value={tabValue} index={1}>
-                <AddConditions pricingConditionId={id} detailData={detailData} />
-              </TabPanel>
-            </>
-          )}
-        </Box>
-      {
-        showConfirmBox && (
-          <ConfirmationDialog
-            open={showConfirmBox}
-            message={`Are you sure you want to delete this : ${headingLabel} ?`}
-            onClose={() => {
-              setShowConfirmBox(false);
-            }}
-            onOk={handleDelete}
-          />
-        )
-      }
+        {!fields.length ? (
+          <Grid container spacing={2} style={{ padding: '8px' }}>
+            <CommonSkeleton lenArray={[...Array(7).keys()]} />
+          </Grid>
+        ) : (
+          <>
+            <Tabs
+              className="new-tab-container-v1"
+              value={tabValue}
+              onChange={handleMainTabChange}
+              textColor="primary"
+              TabIndicatorProps={{
+                style: {
+                  display: 'none'
+                }
+              }}
+            >
+              <Tab
+                className={'tabLayout'}
+                label={
+                  <div className="d-flex align-items-center tab-font">
+                    <FaWpforms className="mr-1" fontSize="inherit" /> Header
+                  </div>
+                }
+
+              />
+              <Tab
+                className={'tabLayout'}
+                label={
+                  <div className="d-flex align-items-center tab-font">
+                    <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+                  </div>
+                }
+
+              />
+            </Tabs>
+            <TabPanel value={tabValue} index={0}>
+              <DetailsPage data={detailData} fields={fields} />
+            </TabPanel>
+            <TabPanel value={tabValue} index={1}>
+              <AddConditions pricingConditionId={id} detailData={detailData} />
+            </TabPanel>
+          </>
+        )}
+      </Box>
+      {showConfirmBox && (
+        <ConfirmationDialog
+          open={showConfirmBox}
+          message={`Are you sure you want to delete this : ${headingLabel} ?`}
+          onClose={() => {
+            setShowConfirmBox(false);
+          }}
+          onOk={handleDelete}
+        />
+      )}
       {open && (
         <PricingConditionsDialog
           pricingConditionId={id}
@@ -200,8 +195,7 @@ const PricingConditionsDetails = () => {
             setOpen(false);
           }}
         />
-      )
-      }
+      )}
     </Box>
   );
 };
