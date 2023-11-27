@@ -41,20 +41,23 @@ import WarhouseList from './Warehouse/WarhouseList';
 import accountClass from './account.module.scss';
 import { cloneDisable } from 'src/constants/messageHelpers';
 
-const types = [
-  {
-    key: 'My Accounts',
-    value: 1
-  },
-  {
-    key: 'All Accounts',
-    value: 2
-  }
-];
+
 
 const options = ['All', 'Approved', 'Disapproved'];
 
 export default function Account(props) {
+
+  const types = [
+    {
+      key: 'My Accounts',
+      value: 1
+    },
+    {
+      key: 'All Accounts',
+      value: 2
+    }
+  ];
+
   const toastConfig = useContext(CustomToastContext);
   const { getColumnData } = useColumns();
   const {
@@ -100,6 +103,7 @@ export default function Account(props) {
     isDelete: permissions[accountResource]?.isDelete,
     approveAccount: false
   });
+
   const [open, setOpen] = React.useState(false);
   const [entities, setEntities] = useState([]);
   const anchorRef = React.useRef<HTMLDivElement>(null);
@@ -233,7 +237,6 @@ export default function Account(props) {
             </IconButton>
           </span>
         </HtmlTooltip>
-
         {accountPermissions?.isUpdate && accountPermissions?.approveAccount && row?.original?.approved ? (
           <HtmlTooltip title="Disapprove">
             <span>
@@ -273,7 +276,6 @@ export default function Account(props) {
             </span>
           </HtmlTooltip>
         )}
-
         <GridDeleteIcon
           hasDeletePermission={accountPermissions?.isDelete}
           ownerId={row?.original?.ownerId}
@@ -287,10 +289,7 @@ export default function Account(props) {
           }}
           entity="account"
         />
-
-        <HtmlTooltip
-          title={accountPermissions?.isUpdate && row?.original?.isAllowedToUpdate ? 'Entity' : 'You do not have permission to update entity'}
-        >
+        <HtmlTooltip title={accountPermissions?.isUpdate && row?.original?.isAllowedToUpdate ? 'Entity' : 'You do not have permission to update entity'}  >
           <span>
             <IconButton
               size="small"
@@ -407,7 +406,6 @@ export default function Account(props) {
             leadEntity: u.staticData && u.staticData.lead && u.staticData.lead?.entity,
             approved: u.staticData?.approved ? u.staticData?.approved : false,
             isChecked: false,
-
             masterAccount: u.parentHierarchy.length > 0 ? u.parentHierarchy.find((d) => d.parentAccount === '')?.accountName : '',
             masterAccountId: u.parentHierarchy.length > 0 ? u.parentHierarchy.find((d) => d.parentAccount === '')?._id : ''
           };
@@ -594,24 +592,23 @@ export default function Account(props) {
           extraImportExportLinks={[
             ...(accountResource === 'supplierAccount' && user?.user?.brandPolicy?.serializedAssetCertification
               ? [
-                  {
-                    title: 'Supplier View Template',
-                    api: `${accountApi}/items/unknown/template`,
-                    type: 'download'
-                  },
-                  {
-                    title: 'Supplier View Export',
-                    api: `${accountApi}/items/unknown/template?export=true${
-                      selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
+                {
+                  title: 'Supplier View Template',
+                  api: `${accountApi}/items/unknown/template`,
+                  type: 'download'
+                },
+                {
+                  title: 'Supplier View Export',
+                  api: `${accountApi}/items/unknown/template?export=true${selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
                     }`,
-                    type: 'export'
-                  },
-                  {
-                    title: 'Supplier View Import',
-                    api: `${accountApi}/items/unknown/import`,
-                    type: 'import'
-                  }
-                ]
+                  type: 'export'
+                },
+                {
+                  title: 'Supplier View Import',
+                  api: `${accountApi}/items/unknown/import`,
+                  type: 'import'
+                }
+              ]
               : [])
           ]}
         />
@@ -819,7 +816,7 @@ export default function Account(props) {
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => {}}
+            onSelect={() => { }}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
@@ -827,7 +824,7 @@ export default function Account(props) {
             refreshGrid={fetchAccounts}
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
-            resource={sidebarResource.customerAccount}
+            resource={sidebarResource[accountResource]}
           />
         ) : null}
 
@@ -870,9 +867,8 @@ export default function Account(props) {
         {singleApproveDisapproveAccount.show ? (
           <ConfirmationDialog
             open={singleApproveDisapproveAccount.show}
-            message={`Are you sure you want to ${singleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} account: ${
-              singleApproveDisapproveAccount.accountName
-            } ? `}
+            message={`Are you sure you want to ${singleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} account: ${singleApproveDisapproveAccount.accountName
+              } ? `}
             onClose={() =>
               setSingleApproveDisapproveAccount({
                 id: null,
@@ -887,9 +883,8 @@ export default function Account(props) {
         {multipleApproveDisapproveAccount.show ? (
           <ConfirmationDialog
             open={multipleApproveDisapproveAccount.show}
-            message={`Are you sure you want to ${multipleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} selected ${
-              multipleApproveDisapproveAccount.selectedRecords
-            } account(s) ? `}
+            message={`Are you sure you want to ${multipleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} selected ${multipleApproveDisapproveAccount.selectedRecords
+              } account(s) ? `}
             onClose={() =>
               setMultipleApproveDisapproveAccount({
                 show: false,

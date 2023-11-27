@@ -179,31 +179,32 @@ export default function useColumns() {
           }
         };
       } else if (field?.primaryField === true && detailScreenRoute) {
+        const fieldName = field?.fieldName === 'firstName' ? 'concatedName' : field.fieldName;
         return {
           columnData: {
             lockPosition: true,
             ...commonFieldData,
             disabled: true,
-            accessor: field?.fieldName === 'firstName' ? 'concatedName' : field.fieldName,
+            accessor: fieldName,
             Cell: ({ row }) =>
               permissions[permissionForLinks[field?.resource]]?.isRead || permissions[updatedTitle]?.isRead ? (
                 <span>
-                  {row?.original?.[field?.fieldName] ? (
+                  {row?.original?.[fieldName] ? (
                     <Link
                       className="link text-truncate"
-                      title={row?.original?.[field?.fieldName]}
+                      title={row?.original?.[fieldName]}
                       to={`${detailScreenRoute}/${row?.original?._id}`}
                       target={masterPage ? '_self' : '_blank'}
                       rel="noopener noreferrer"
                     >
-                      {row?.original?.[field?.fieldName]}
+                      {row?.original?.[fieldName]}
                     </Link>
                   ) : (
                     <NoDataCell />
                   )}
                 </span>
               ) : (
-                <p className="text-truncate">{row?.original?.[field?.fieldName] ? <p>{row?.original?.[field?.fieldName]}</p> : <NoDataCell />}</p>
+                <p className="text-truncate">{row?.original?.[fieldName] ? <p>{row?.original?.[fieldName]}</p> : <NoDataCell />}</p>
               )
           }
         };
@@ -217,12 +218,12 @@ export default function useColumns() {
           pathName = detailPagePath[joinedFieldName]
             ? detailPagePath[joinedFieldName]
             : field?.lookupResource && routes[`${camelCase(field?.lookupResource)}Detail`]?.path
-            ? routes[`${camelCase(field?.lookupResource)}Detail`]?.path
-            : routes[joinedFieldName]?.path
-            ? routes[joinedFieldName]?.path
-            : routes[`${joinedFieldName}Detail`]?.path
-            ? routes[`${joinedFieldName}Detail`]?.path
-            : '';
+              ? routes[`${camelCase(field?.lookupResource)}Detail`]?.path
+              : routes[joinedFieldName]?.path
+                ? routes[joinedFieldName]?.path
+                : routes[`${joinedFieldName}Detail`]?.path
+                  ? routes[`${joinedFieldName}Detail`]?.path
+                  : '';
         }
         return {
           columnData: {

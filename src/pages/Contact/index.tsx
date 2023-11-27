@@ -86,13 +86,12 @@ export default function Contact(props) {
   const [openAddPlantsDialog, setOpenAddPlantsDialog] = useState(false);
   const [isAddingWarehouse, setAddingWarehouse] = useState(false);
   const [entities, setEntities] = useState([]);
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
   const { getColumnData } = useColumns();
 
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
-  const columnState = JSON.parse(localStorage.getItem(contactResource));
   const [showAssignEntityDialog, setShowAssignEntityDialog] = useState(false);
   const [entityAccess, setEntityAccess] = useState([]);
   const [roleAccessOfLoggedInUser, setRoleAccessOfLoggedInUser] = useState([]);
@@ -159,21 +158,10 @@ export default function Contact(props) {
       columns.push(checkStaticField(routes.projectSales.title, field));
     });
     setColumns([...columns, ActionsRenderer]);
-    //  Grid Variables - End
-    if (columnState) {
-      columns.map((item) => {
-        columnState.map((d) => {
-          if (d.colId == item.field) {
-            item.show = !d.hide;
-          }
-        });
-      });
-    }
   };
 
   useEffect(() => {
     const data = user?.role?.sideBar;
-
     if (data) {
       const hasContactPermission = data.find((d) => d.name === contactPermission);
       if (hasContactPermission) {
@@ -232,8 +220,8 @@ export default function Contact(props) {
   const ActionsRenderer = {
     accessor: 'action',
     Header: 'Actions',
-    minWidth: 150,
-    width: 150,
+    minWidth: 120,
+    width: 120,
     sticky: 'right',
     disableFilters: true,
     disableSortBy: true,
@@ -254,7 +242,6 @@ export default function Contact(props) {
             </IconButton>
           </span>
         </HtmlTooltip>
-
         <HtmlTooltip title={contactPermissions?.isDelete && row?.original?.ownerId === user?.user?._id ? 'Delete' : deleteDisable}>
           <span>
             <IconButton
@@ -276,10 +263,7 @@ export default function Contact(props) {
             </IconButton>
           </span>
         </HtmlTooltip>
-
-        <HtmlTooltip
-          title={contactPermissions?.isUpdate && row?.original?.isAllowedToUpdate ? 'Entity' : 'You do not have permission to update entity'}
-        >
+        <HtmlTooltip title={contactPermissions?.isUpdate && row?.original?.isAllowedToUpdate ? 'Entity' : 'You do not have permission to update entity'}  >
           <span>
             <IconButton
               size="small"
@@ -368,23 +352,9 @@ export default function Contact(props) {
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u, user);
-          finalObject['canDelete'] = u.owner?.optionValue === user?.user._id;
           finalObject['isSelected'] = selectedRecords?.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id);
-          finalObject['owerCollaboratorInitialsOrImages'] = [];
-          if (finalObject['owner']) finalObject['owerCollaboratorInitialsOrImages'].push({ initials: finalObject['owner'] });
-          finalObject['owerCollaboratorInitialsOrImages'].forEach((f) => {
-            if (f.initials) {
-              f.initials = f.initials
-                .split(' ')
-                .map((i) => i[0])
-                .join('');
-            }
-          });
-
           return {
             ...finalObject,
-
             canDelete: u.owner?.optionValue === user?.user._id,
             relatedLead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
             relatedLeadId: u.staticData && u.staticData.lead && u.staticData.lead._id,
@@ -650,7 +620,7 @@ export default function Contact(props) {
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => {}}
+            onSelect={() => { }}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
@@ -693,7 +663,7 @@ export default function Contact(props) {
               onClose={() => {
                 setShowCreateContactDialog({ open: false, isClone: false, idToClone: null });
               }}
-              onSuccess={() => {}}
+              onSuccess={() => { }}
               isRedirectToDetailPage={true}
             />
           )}
