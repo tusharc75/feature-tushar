@@ -50,9 +50,9 @@ export const getStaticFields = () => {
       canFilter: false,
       Cell: ({ row }) =>
         row?.original?.createdBy ? (
-          <h5 className="createBy" title={`${row?.original?.createdBy} • ${moment(row?.original?.createdByDate.slice(0, 10)).format(dateFormat)}`}>
+          <h5 className="createBy" title={`${row?.original?.createdBy} • ${moment(row?.original?.createdByDate?.slice(0, 10)).format(dateFormat)}`}>
             {row?.original?.createdBy}
-            <span className="createdAtTime badge-date">{moment(row?.original?.createdByDate.slice(0, 10)).format(dateFormat)}</span>
+            <span className="createdAtTime badge-date">{moment(row?.original?.createdByDate?.slice(0, 10)).format(dateFormat)}</span>
           </h5>
         ) : (
           <NoDataCell />
@@ -66,9 +66,9 @@ export const getStaticFields = () => {
       canFilter: false,
       Cell: ({ row }) =>
         row?.original?.updatedBy ? (
-          <h5 className="updateBy" title={`${row?.original?.updatedBye} • ${moment(row?.original?.updatedByDate.slice(0, 10)).format(dateFormat)}`}>
+          <h5 className="updateBy" title={`${row?.original?.updatedBye} • ${moment(row?.original?.updatedByDate?.slice(0, 10)).format(dateFormat)}`}>
             {row?.original?.updatedBy}
-            <span className="updatedAtTime badge-date">{moment(row?.original?.updatedByDate.slice(0, 10)).format(dateFormat)}</span>
+            <span className="updatedAtTime badge-date">{moment(row?.original?.updatedByDate?.slice(0, 10)).format(dateFormat)}</span>
           </h5>
         ) : (
           <NoDataCell />
