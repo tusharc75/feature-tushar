@@ -323,8 +323,6 @@ const ReceivingTicket = ({
         }
       });
 
-      console.log(returnTicketProducts)
-
       products = uniqueProduct(material?.filter((e) => e.consumableType !== 'Internal'));
       products?.forEach((element) => {
         var qty = element.qty;

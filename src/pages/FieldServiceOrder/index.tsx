@@ -1,16 +1,14 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import { useHistory } from 'react-router-dom';
-import { IconButton, Tooltip, Box, Button, Menu, MenuItem } from '@material-ui/core';
+import { IconButton, Box, Button, Menu, MenuItem } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import queryString from 'query-string';
 import {
   gridLoadingTimeout,
   fieldServiceOrder,
   prepareDataForGrid,
-  getLocalStorageArrayData,
   sidebarResource
 } from '../../constants/helpers';
-import CustomContainer from '../../components/CustomContainer';
 import routes from '../../components/Helpers/Routes';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
@@ -30,11 +28,13 @@ import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
+import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 
 let serviceOrderTimeout;
 
 const ServiceOrder = () => {
-  const ServiceOrderType = [
+
+  const types = [
     {
       key: `My ${routes.fieldServiceOrder.title}`,
       value: 1
@@ -46,7 +46,6 @@ const ServiceOrder = () => {
   ];
 
   const renderedFrom = camelCase(routes?.fieldServiceOrder.title);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -57,14 +56,12 @@ const ServiceOrder = () => {
   const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
   const [renderCount, setRenderCount] = useState(0);
   const [deleteRecord, setDeleteRecord] = useState<any>({});
-  const [showManageServiceOrderDialog, setShowManageServiceOrderDialog] = useState({ open: false, isClone: false, idToClone: null });
+  const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, page, limit, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
-    state;
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [columns, setColumns] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
-
 
   const { getColumnData } = useColumns();
 
@@ -119,13 +116,13 @@ const ServiceOrder = () => {
       clearTimeout(serviceOrderTimeout);
     }
     serviceOrderTimeout = setTimeout(() => {
-      fetchServiceOrders();
+      fetchData();
     }, millisec);
   }, [search]);
 
   useEffect(() => {
     if (renderCount > 0) {
-      fetchServiceOrders();
+      fetchData();
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
@@ -147,7 +144,7 @@ const ServiceOrder = () => {
           message: data.message
         });
         dispatch({ type: 'selection', selectedRecords: [] });
-        fetchServiceOrders();
+        fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
         setAnchorEl(null);
@@ -162,52 +159,42 @@ const ServiceOrder = () => {
     accessor: 'action',
     Header: 'Actions',
     minWidth: 100,
-    width: 110,
+    width: 100,
     sticky: 'right',
     disableFilters: true,
     disableSortBy: true,
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        {permissions?.fieldServiceOrder?.isCreate ? (
-          <Tooltip title="Clone">
+        <HtmlTooltip title={permissions?.fieldServiceOrder?.isCreate ? "Clone" : cloneDisable}  >
+          <span>
             <IconButton
               size="small"
               aria-label="Clone"
+              disabled={permissions?.fieldServiceOrder?.isCreate ? false : true}
               onClick={() => {
-                setShowManageServiceOrderDialog({ open: true, isClone: true, idToClone: row?.original._id });
+                setShowManageDialog({ open: true, isClone: true, idToClone: row?.original._id });
               }}
             >
-              <FileCopyIcon fontSize="small" color="primary" />
+              <FileCopyIcon fontSize="small" color={permissions?.fieldServiceOrder?.isCreate ? 'primary' : 'disabled'} />
             </IconButton>
-          </Tooltip>
-        ) : (
-          <Tooltip className="cursor-stop" title="You do not have permission to clone/create">
-            <IconButton aria-label="Clone" size="small">
-              <FileCopyIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        )}
-        {row?.original?.canDelete ? (
-          <HtmlTooltip title="Delete">
+          </span>
+        </HtmlTooltip>
+        <HtmlTooltip title={row?.original?.canDelete ? "Delete" : deleteDisable}>
+          <span>
             <IconButton
               size="small"
               aria-label="Delete"
+              disabled={row?.original?.canDelete ? false : true}
               onClick={() => {
-                setDeleteRecord(row?.original);
+                setDeleteRecord(row.original);
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" />
+              <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
             </IconButton>
-          </HtmlTooltip>
-        ) : (
-          <HtmlTooltip className="cursor-stop" title="You do not have permission to delete">
-            <IconButton size="small" aria-label="Delete">
-              <DeleteIcon color="disabled" />
-            </IconButton>
-          </HtmlTooltip>
-        )}
+          </span>
+        </HtmlTooltip>
       </>
     )
   };
@@ -242,57 +229,43 @@ const ServiceOrder = () => {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(getLocalStorageArrayData(localStorageSelectedRecords)?.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || [])?.map((m) => m._id))}`;
     }
     return deepFilter;
   };
 
-  const fetchServiceOrders = async () => {
+  const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-    try {
-      let data: any = [],
-        count;
-      const response: any = await axiosInstance().get(`${fieldServiceOrder.api}${queryString}`);
-      data = response?.data?.data;
-      count = response?.data?.count;
-      let rows = data.map((u) => {
-        const ownerAndColaborators = [u?.owner, ...u?.collaborator]?.map((o) => o?.optionValue);
-        let finalObject: any = prepareDataForGrid(u, user);
-        finalObject['isChecked'] = false;
-        finalObject['allowedToEdit'] = permissions?.fieldServiceOrder?.isUpdate;
-        finalObject['canDelete'] = permissions?.fieldServiceOrder?.isDelete && ownerAndColaborators.includes(user?.user?._id) && u?.canDelete;
-        return finalObject;
-      });
-      if (appendRows) {
-        dispatch({ type: 'initialize', data: [...dataRows, ...rows], count: count });
-      } else {
+    axiosInstance()
+      .get(`${fieldServiceOrder.api}${queryString}`)
+      .then(({ data: { data, count } }) => {
+        let rows = data?.map((u) => {
+          let finalObject: any = prepareDataForGrid(u);
+          finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
+          finalObject['canDelete'] = permissions?.fieldServiceOrder?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;
+          return finalObject;
+        });
         dispatch({ type: 'initialize', data: rows, count: count });
-      }
-      setTimeout(() => {
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
         dispatch({ type: 'loading', loading: false });
-      }, gridLoadingTimeout);
-    } catch (error) {
-      dispatch({ type: 'loading', loading: false });
-      toastConfig.setToastConfig(error);
-    }
+      });
   };
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-  const handleServiceOrderTypeSel = (filterValues) => {
-    dispatch({ type: 'setPage', page: 0 });
-    setSelectedType(filterValues);
-    history.push(`?type=${filterValues}`);
-  };
-
-
-  const handleFilter = (event, newFilter) => {
-    if (newFilter != null) {
-      handleServiceOrderTypeSel(ServiceOrderType.find((d) => d.key === newFilter).value);
-    }
+  const onTypeChange = (event, type) => {
+    dispatch({ type: 'pageChange', page: 0 });
+    const value = types.find((d) => d.key === type).value;
+    setSelectedType(value);
+    history.push(`?type=${value}`);
   };
 
   const openActions = (event) => {
@@ -312,14 +285,14 @@ const ServiceOrder = () => {
           module="fieldServiceOrder"
           api={fieldServiceOrder.api}
           afterImportCompleted={() => {
-            fetchServiceOrders();
+            fetchData();
           }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}
           ids={selectedRecords?.map((obj) => obj._id)}
           onExportToExcelSuccess={() => {
-            fetchServiceOrders();
+            fetchData();
           }}
           additionalParams={getQueryString(true)}
         />
@@ -329,15 +302,15 @@ const ServiceOrder = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
             <div className={'d-flex flex-wrap align-items-center gap-2'}>
               <div className={`flex flex-wrap items-center gap-2 `}>
-                {ServiceOrderType && (
+                {types && (
                   <ToggleButtonGroup
                     size="small"
                     className="ml-2"
-                    value={ServiceOrderType[selectedType - 1].key}
+                    value={types[selectedType - 1].key}
                     exclusive
-                    onChange={handleFilter}
+                    onChange={onTypeChange}
                   >
-                    {ServiceOrderType.map((k, index) => {
+                    {types.map((k, index) => {
                       return (
                         <ToggleButton value={k.key} key={index}>
                           {k.key}
@@ -361,7 +334,7 @@ const ServiceOrder = () => {
                 {permissions?.fieldServiceOrder?.isCreate && (
                   <Button
                     onClick={() => {
-                      setShowManageServiceOrderDialog({ open: true, isClone: false, idToClone: null });
+                      setShowManageDialog({ open: true, isClone: false, idToClone: null });
                     }}
                     variant={'contained'}
                     size="small"
@@ -372,22 +345,18 @@ const ServiceOrder = () => {
                     Add
                   </Button>
                 )}
-                <HtmlTooltip title={!selectedRecords?.length ? `Please select some ${routes?.fieldServiceOrder?.title?.toLowerCase()}s` : ""}>
-                  <span>
-                    <Button
-                      variant={'outlined'}
-                      color="default"
-                      size="small"
-                      onClick={openActions}
-                      disabled={selectedRecords.length ? false : true}
-                      aria-controls="action-menu"
-                      className={`new-dropdown-v1`}
-                      endIcon={<ExpandMore />}
-                    >
-                      Actions
-                    </Button>
-                  </span>
-                </HtmlTooltip>
+                <Button
+                  variant={'outlined'}
+                  color="default"
+                  size="small"
+                  onClick={openActions}
+                  disabled={selectedRecords.length ? false : true}
+                  aria-controls="action-menu"
+                  className={`new-dropdown-v1`}
+                  endIcon={<ExpandMore />}
+                >
+                  Actions
+                </Button>
                 <Menu
                   anchorEl={anchorEl}
                   keepMounted
@@ -423,7 +392,7 @@ const ServiceOrder = () => {
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             isClientSideGrid={false}
-            refreshGrid={fetchServiceOrders}
+            refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
             resource={sidebarResource.fieldServiceOrder}
@@ -446,19 +415,21 @@ const ServiceOrder = () => {
           />
         )}
       </div>
-      {showManageServiceOrderDialog.open && (
-        <ManageServiceOrder
-          isClone={showManageServiceOrderDialog.isClone}
-          serviceOrderId={showManageServiceOrderDialog.idToClone}
-          onClose={() => setShowManageServiceOrderDialog({ open: false, isClone: false, idToClone: null })}
-          onSuccess={(data) => {
-            history.push(`${routes.fieldServiceOrderDetail.path}/${data._id}`);
-            setShowManageServiceOrderDialog({ open: false, isClone: false, idToClone: null });
-          }}
-          open={showManageServiceOrderDialog.open}
-        />
-      )}
-    </section>
+      {
+        showManageDialog.open && (
+          <ManageServiceOrder
+            isClone={showManageDialog.isClone}
+            serviceOrderId={showManageDialog.idToClone}
+            onClose={() => setShowManageDialog({ open: false, isClone: false, idToClone: null })}
+            onSuccess={(data) => {
+              history.push(`${routes.fieldServiceOrderDetail.path}/${data._id}`);
+              setShowManageDialog({ open: false, isClone: false, idToClone: null });
+            }}
+            open={showManageDialog.open}
+          />
+        )
+      }
+    </section >
   );
 };
 
