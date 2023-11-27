@@ -11,14 +11,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import styles from '../Leads/Header.module.scss';
-import {
-  customerAccount,
-  gridLoadingTimeout,
-  invoice,
-  prepareDataForGrid,
-  sidebarResource,
-  supplierAccount
-} from '../../constants/helpers';
+import { customerAccount, gridLoadingTimeout, invoice, prepareDataForGrid, sidebarResource, supplierAccount } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
@@ -27,6 +20,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { AddOutlined, Delete, ExpandMore } from '@material-ui/icons';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import SearchBox from 'src/components/Helpers/SearchBox';
+import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 
 let invoiceTimeout;
 
@@ -143,8 +137,8 @@ const Invoice = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        {permissions?.invoice?.isCreate ? (
-          <HtmlTooltip title="Clone">
+        <HtmlTooltip title={permissions?.invoice?.isCreate ? 'Clone' : cloneDisable}>
+          <span>
             <IconButton
               size="small"
               aria-label="Clone"
@@ -152,30 +146,25 @@ const Invoice = () => {
                 setShowManageDialog({ open: true, isClone: true, idToClone: row.original._id });
               }}
             >
-              <FileCopyIcon fontSize="small" color="primary" />
+              <FileCopyIcon fontSize="small" color={permissions?.invoice?.isCreate ? 'primary' : 'disabled'} />
             </IconButton>
-          </HtmlTooltip>
-        ) : (
-          <HtmlTooltip className="cursor-stop" title="You do not have permission to clone/create">
-            <IconButton aria-label="Clone" size="small">
-              <FileCopyIcon fontSize="small" />
-            </IconButton>
-          </HtmlTooltip>
-        )}
-        {row?.original?.canDelete && (
-          <HtmlTooltip title="Delete">
+          </span>
+        </HtmlTooltip>
+        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
+          <span>
             <IconButton
               size="small"
               aria-label="Delete"
+              disabled={row?.original?.canDelete ? false : true}
               onClick={() => {
                 setDeleteRecord(row.original);
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <Delete color="error" />
+              <Delete fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
             </IconButton>
-          </HtmlTooltip>
-        )}
+          </span>
+        </HtmlTooltip>
       </>
     )
   };
@@ -241,11 +230,9 @@ const Invoice = () => {
       .get(`${invoice.api}${queryString}`)
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
-          let finalObject = prepareDataForGrid(u, user);
+          let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isChecked'] = false;
-          finalObject['allowedToEdit'] = permissions?.invoice?.isUpdate;
-          finalObject['canDelete'] = permissions?.invoice?.isDelete && u?.canDelete;
-
+          finalObject['canDelete'] = permissions?.invoice?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -304,7 +291,7 @@ const Invoice = () => {
         />
       </div>
       <CustomContainer>
-      <div className="header-panel">
+        <div className="header-panel">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div className={'flex align-items-center gap-1 w-full'}>
               <ToggleButtonGroup

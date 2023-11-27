@@ -10,7 +10,6 @@ import {
   gridLoadingTimeout,
   repairJob,
   prepareDataForGrid,
-  getLocalStorageArrayData,
   sidebarResource
 } from '../../constants/helpers';
 import CustomContainer from '../../components/CustomContainer';
@@ -23,27 +22,21 @@ import { reducer, intialState } from '../../components/AgGridComponents/CustomAg
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import { isMobile, isTablet } from 'react-device-detect';
 import { findAll, findOne, insertUpdate, objectStore } from '../../constants/indexdbhelper';
 import { camelCase } from 'lodash';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import CustomReactTable, { checkStaticField, getStaticFields, gridFilterParser, useColumns } from 'src/components/CustomReactTableNew';
-import {
-  MdOutlineFilterAlt,
-  TbArrowsSort
-} from 'react-icons/all';
-import { DisplayFiltersForMobile } from 'src/components/MobileFilterDialog';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { AddOutlined } from '@material-ui/icons';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
-
 let repairJobTimeout;
 
 const RepairJob = () => {
-  const RepairJobType = [
+
+  const types = [
     {
       key: `My ${routes?.repairJob.title}`,
       value: 1
@@ -55,6 +48,7 @@ const RepairJob = () => {
   ];
 
   const renderedFrom = camelCase(routes?.repairJob.title);
+
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
@@ -79,13 +73,10 @@ const RepairJob = () => {
     resource: history.location?.state?.resource
   });
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, page, limit, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
-    state;
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { isOffline } = useContext(CustomOfflineContext);
   const [columns, setColumns] = useState(null);
   const pageTitle = camelCase(`${routes.repairJob.title}`);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
-  const [filter, setFilter] = useState(RepairJobType[0].key);
 
 
   const { getColumnData } = useColumns();
@@ -154,13 +145,13 @@ const RepairJob = () => {
       clearTimeout(repairJobTimeout);
     }
     repairJobTimeout = setTimeout(() => {
-      fetchRepairJobs();
+      fetchData();
     }, millisec);
   }, [search]);
 
   useEffect(() => {
     if (renderCount > 0) {
-      fetchRepairJobs();
+      fetchData();
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity, showFilteredRecordsOnly]);
 
@@ -176,7 +167,7 @@ const RepairJob = () => {
           type: 'success',
           message: data.message
         });
-        fetchRepairJobs();
+        fetchData();
         dispatch({ type: 'loading', loading: false });
         setSingleRepairJobDelete({ id: null, show: false, repairJobName: '' });
       })
@@ -266,13 +257,12 @@ const RepairJob = () => {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(selectedRecords.map((m) => m._id))}`;
     }
     return deepFilter;
   };
 
-  const fetchRepairJobs = async () => {
+  const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     try {
@@ -287,26 +277,12 @@ const RepairJob = () => {
         count = data?.length || 0;
       }
       let rows = data.map((u) => {
-        let finalObject = prepareDataForGrid(u, user);
+        let finalObject: any = prepareDataForGrid(u, user);
         finalObject['isChecked'] = false;
-        finalObject['allowedToEdit'] = permissions?.repairJob?.isUpdate;
-        finalObject['owerCollaboratorInitialsOrImages'] = [];
-        if (finalObject['owner']) finalObject['owerCollaboratorInitialsOrImages'].push({ initials: finalObject['owner'] });
-        finalObject['owerCollaboratorInitialsOrImages'].forEach((f) => {
-          if (f.initials) {
-            f.initials = f.initials
-              .split(' ')
-              .map((i) => i[0])
-              .join('');
-          }
-        });
+        finalObject['canDelete'] = permissions?.repairJob?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;
         return finalObject;
       });
-      if (appendRows) {
-        dispatch({ type: 'initialize', data: [...dataRows, ...rows], count: count });
-      } else {
-        dispatch({ type: 'initialize', data: rows, count: count });
-      }
+      dispatch({ type: 'initialize', data: rows, count: count });
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
       }, gridLoadingTimeout);
@@ -318,20 +294,6 @@ const RepairJob = () => {
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
-  };
-
-  const handleRepairJobTypeSel = (filterValues) => {
-    dispatch({ type: 'setPage', page: 0 });
-    setSelectedType(filterValues);
-    if (referenceId && referenceType) {
-      history.push(`?type=${filterValues}&referenceType=${referenceType}&referenceId=${referenceId}`);
-    } else {
-      history.push(`?type=${filterValues}`);
-    }
-  };
-
-  const clickCreateNew = () => {
-    setShowManageRepairJobDialog({ open: true, isClone: false, idToClone: null });
   };
 
   const handleDeleteRepairJob = async () => {
@@ -353,10 +315,11 @@ const RepairJob = () => {
             type: 'success',
             message: data.message
           });
+          dispatch({ type: 'selection', selectedRecords: [] });
           setIsConformDialogVisible(false);
           setDeleteLoading(false);
           if (deleteRecord) setDeleteRecord({});
-          fetchRepairJobs();
+          fetchData();
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -375,34 +338,14 @@ const RepairJob = () => {
     history.replace({
       search: queryParams.toString()
     });
-    fetchRepairJobs();
+    fetchData();
   };
 
-  const handleFilter = (event, newFilter) => {
-    if (newFilter != null) {
-      setFilter(newFilter);
-      handleRepairJobTypeSel(RepairJobType.find((d) => d.key === newFilter).value);
-    }
-  };
-
-  const [isOpenDialog, setisOpenDialog] = useState(false);
-
-  const handleOpen = () => {
-    setisOpenDialog(true);
-  };
-
-  const handleClose = () => {
-    setisOpenDialog(false);
-  };
-
-  const [open, setOpen] = useState(false);
-
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClickClose = () => {
-    setOpen(false);
+  const onTypeChange = (event, type) => {
+    dispatch({ type: 'pageChange', page: 0 });
+    const value = types.find((d) => d.key === type).value;
+    setSelectedType(value);
+    history.push(`?type=${value}`);
   };
 
   return (
@@ -414,19 +357,14 @@ const RepairJob = () => {
           module="repairJob"
           api={repairJob.api}
           afterImportCompleted={() => {
-            fetchRepairJobs();
+            fetchData();
           }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
-          recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-          ids={
-            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-              ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-              : []
-          }
+          recordsToExport={selectedRecords?.length}
+          ids={selectedRecords?.map((obj) => obj._id)}
           onExportToExcelSuccess={() => {
-
-            fetchRepairJobs();
+            fetchData();
           }}
           additionalParams={getQueryString(true)}
         />
@@ -435,87 +373,21 @@ const RepairJob = () => {
         <div className="header-panel">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
             <div className={'d-flex flex-wrap align-items-center gap-1 w-full'}>
-              {isMobile && !isTablet && (
-                <>
-                  <div className="d-flex flex-wrap items-center justify-between w-full">
-                    {
-                      RepairJobType && (
-                        <ToggleButtonGroup size="small" className=" toggle-button-layout" value={filter} exclusive onChange={handleFilter}>
-                          {RepairJobType.map((k, index) => {
-                            return (
-                              <ToggleButton value={k.key} key={index}>
-                                {k.key}
-                              </ToggleButton>
-                            );
-                          })}
-                        </ToggleButtonGroup>
-                      )}
-                    <div className="flex flex-wrap items-center gap-1 justify-end">
-                      <IconButton
-                        size="small"
-                        className={'mobileIconButton secondary'}
-                        onClick={handleClickOpen}
-                        id="demo-customized-button"
-                        aria-controls="demo-customized-menu"
-                        aria-haspopup="true"
-                        aria-expanded={open ? 'true' : undefined}
-                        style={isTablet ? { marginLeft: '50px' } : {}}
-                      >
-                        <TbArrowsSort className="rotate-90" size={16} />
-                      </IconButton>
-
-                      {/* <MobileSortDialog
-                        isOpen={open}
-                        handleClose={handleClickClose}
-                        contentPart={''}
-                        secHeading={['Sort Repair Job']}
-                        columns={columns}
-                        dispatch={dispatch}
-                      /> */}
-
-                      <IconButton
-                        size="small"
-                        onClick={handleOpen}
-                        id="demo-customized-button"
-                        aria-controls="demo-customized-menu"
-                        aria-haspopup="true"
-                        aria-expanded={open ? 'true' : undefined}
-                        className={'mobileIconButton secondary'}
-                      >
-                        <MdOutlineFilterAlt size={16} />
-                      </IconButton>
-                      {/* <MobileFilterDialog
-                        isOpen={isOpenDialog}
-                        handleClose={handleClose}
-                        contentPart={''}
-                        columns={columns}
-                        dispatch={dispatch}
-                        title={routes?.repairJob?.title}
-                        filters={filters}
-                        resource={sidebarResource.repairJob}
-                      /> */}
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {RepairJobType && (
-                <ToggleButtonGroup
-                  size="small"
-                  className="ml-2 align-items-center gap-1 layout-for-mobile "
-                  value={RepairJobType[selectedType - 1].key}
-                  exclusive
-                  onChange={handleFilter}
-                >
-                  {RepairJobType.map((k, index) => {
-                    return (
-                      <ToggleButton value={k.key} key={index}>
-                        {k.key}
-                      </ToggleButton>
-                    );
-                  })}
-                </ToggleButtonGroup>
-              )}
+              <ToggleButtonGroup
+                size="small"
+                className="ml-2 align-items-center gap-1 layout-for-mobile "
+                value={types[selectedType - 1].key}
+                exclusive
+                onChange={onTypeChange}
+              >
+                {types.map((k, index) => {
+                  return (
+                    <ToggleButton value={k.key} key={index}>
+                      {k.key}
+                    </ToggleButton>
+                  );
+                })}
+              </ToggleButtonGroup>
               {accountDetails.accountId && (
                 <Chip
                   className="ml-3"
@@ -533,17 +405,28 @@ const RepairJob = () => {
               {referenceType && <Chip className="ml-3" color="primary" label={`Rental Job : ${referenceType}`} onDelete={updateQueryParams} />}
             </div>
             <div className="flex flex-wrap gap-[8px]  justify-end">
-              <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
-
+              <SearchBox
+                onChange={handleSearch}
+                className={styles.search_box_input}
+                value={search}
+                size="small" />
               <div className="flex gap-[8px] flex-wrap items-center">
-                {permissions[sidebarResource.repairJob]?.isCreate && permissions[sidebarResource.repairJob]?.isUpdate && (
-                  <Button variant={'contained'} color="primary" size="small" onClick={clickCreateNew} className={`no-shadow`} startIcon={<AddOutlined />}>
+                {permissions?.repairJob?.isCreate && (
+                  <Button
+                    variant={'contained'}
+                    color="primary"
+                    size="small"
+                    onClick={() => {
+                      setShowManageRepairJobDialog({ open: true, isClone: false, idToClone: null });
+                    }
+                    }
+                    className={`no-shadow`}
+                    startIcon={<AddOutlined />}>
                     Add
                   </Button>
                 )}
               </div>
             </div>
-            <DisplayFiltersForMobile resource={sidebarResource.repairJob} />
           </div>
         </div>
         {columns ? (
@@ -555,17 +438,16 @@ const RepairJob = () => {
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             isClientSideGrid={false}
-            refreshGrid={fetchRepairJobs}
+            refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
-            resource={sidebarResource.productionOrder}
+            resource={sidebarResource.repairJob}
           />
         ) : (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
-
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
             open={showDeleteWarningConfirmBox}
