@@ -1,4 +1,4 @@
-import { Button, IconButton } from '@material-ui/core';
+import { Button, IconButton, Box } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -21,6 +21,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
 import MessageDialog from 'src/components/Helpers/MessageDialog';
 import ProductListDialog from './ProductListDialog';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 let searchTimeout;
 
@@ -258,11 +259,10 @@ const PackageList = () => {
             },
             {
               title: 'Sub-Package Export',
-              api: `${packages.api}/unknown/package/template?export=true${
-                selectedRecords?.length
-                  ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}`
-                  : ''
-              }`,
+              api: `${packages.api}/unknown/package/template?export=true${selectedRecords?.length
+                ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}`
+                : ''
+                }`,
               type: 'export'
             },
             {
@@ -340,7 +340,6 @@ const PackageList = () => {
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => {}}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
@@ -350,7 +349,9 @@ const PackageList = () => {
             showFilters={true}
             resource={sidebarResource.packages}
           />
-        ) : null}
+        ) : <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>}
       </CustomContainer>
       {showDeleteConfirmBox && (
         <ConfirmationDialog

@@ -1,4 +1,4 @@
-import { Chip, IconButton } from '@material-ui/core';
+import { Chip, IconButton, Box } from '@material-ui/core';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { Delete } from '@material-ui/icons';
 import { camelCase } from 'lodash';
@@ -32,6 +32,7 @@ import ManageDeliveryTicket from './ManageDeliveryTicket';
 import { deleteDisable } from 'src/constants/messageHelpers';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 let deliveryTicketTimeout;
 
@@ -110,8 +111,8 @@ const DeliveryTicket = () => {
                 row.original?.pickupFromType === DELIVERY_FROM_TO_TYPE.plant
                   ? `${routes.warehouseDetail.path}/${row.original.pickupFromId}`
                   : row.original?.pickupFromType === DELIVERY_FROM_TO_TYPE.customer
-                  ? `${routes.customerAccountDetail.path}/${row.original?.pickupFromId}`
-                  : `${routes.supplierAccountDetail.path}/${row.original?.pickupFromId}`
+                    ? `${routes.customerAccountDetail.path}/${row.original?.pickupFromId}`
+                    : `${routes.supplierAccountDetail.path}/${row.original?.pickupFromId}`
               }
             >
               {row.original[column.accessor]}
@@ -129,8 +130,8 @@ const DeliveryTicket = () => {
                 row.original?.deliveryToType === DELIVERY_FROM_TO_TYPE.plant
                   ? `${routes.warehouseDetail.path}/${row.original.deliveryToId}`
                   : row.original?.deliveryToType === DELIVERY_FROM_TO_TYPE.customer
-                  ? `${routes.customerAccountDetail.path}/${row.original?.deliveryToId}`
-                  : `${routes.supplierAccountDetail.path}/${row.original?.deliveryToId}`
+                    ? `${routes.customerAccountDetail.path}/${row.original?.deliveryToId}`
+                    : `${routes.supplierAccountDetail.path}/${row.original?.deliveryToId}`
               }
             >
               {row.original[column.accessor]}
@@ -435,21 +436,21 @@ const DeliveryTicket = () => {
           </div>
 
           {columns ? (
-          <CustomReactTable
-            height={'calc(100vh - 200px)'}
-            columns={columns}
-            onSelect={() => {}}
-            state={state}
-            dispatch={dispatch}
-            renderedFrom={renderedFrom}
-            isClientSideGrid={false}
-            refreshGrid={fetchData}
-            showOnlyShowFilteredRecordSwitch={true}
-            showFilters={true}
-            resource={sidebarResource.deliveryTicket}
-          />
-        ) : null}
-
+            <CustomReactTable
+              height={'calc(100vh - 200px)'}
+              columns={columns}
+              state={state}
+              dispatch={dispatch}
+              renderedFrom={renderedFrom}
+              isClientSideGrid={false}
+              refreshGrid={fetchData}
+              showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={sidebarResource.deliveryTicket}
+            />
+          ) : <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>}
           {showDeleteWarningConfirmBox ? (
             <MessageDialog
               open={showDeleteWarningConfirmBox}
@@ -460,9 +461,8 @@ const DeliveryTicket = () => {
           {isConfirmDialogVisible ? (
             <ConfirmationDialog
               open={isConfirmDialogVisible}
-              message={`Are you sure you want to delete ${deleteRecord?.ticketName ? 'Delivery Ticket' : routes.deliveryTicket.title}   ${
-                deleteRecord.ticketName || ''
-              } ?`}
+              message={`Are you sure you want to delete ${deleteRecord?.ticketName ? 'Delivery Ticket' : routes.deliveryTicket.title}   ${deleteRecord.ticketName || ''
+                } ?`}
               onClose={() => {
                 setDeleteRecord(null);
                 setIsConformDialogVisible(false);

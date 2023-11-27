@@ -1,4 +1,4 @@
-import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { Button, IconButton, Menu, MenuItem, Box } from '@material-ui/core';
 import { useContext, useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
@@ -23,6 +23,7 @@ import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTab
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ManageIotDataPoints from './ManageIotDataPoints';
 import MessageDialog from '../../components/Helpers/MessageDialog';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 let searchTimeout;
 
@@ -69,9 +70,8 @@ const IotDataPoints = () => {
         let count = data?.count;
         let rows = data?.data?.map((u: any) => {
           let finalObject: any = prepareDataForGrid(u);
-          finalObject['canDelete'] = permissions?.iotDataPoints?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;
+          finalObject['canDelete'] = permissions?.iotDataPoints?.isDelete;
           finalObject['isChecked'] = selectedRecords?.some((s) => s?._id === u?._id);
-
           return {
             ...finalObject
           };
@@ -320,7 +320,6 @@ const IotDataPoints = () => {
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => {}}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
@@ -330,7 +329,9 @@ const IotDataPoints = () => {
             showFilters={true}
             resource={sidebarResource.iotDataPoints}
           />
-        ) : null}
+        ) : <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>}
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
             open={showDeleteWarningConfirmBox}

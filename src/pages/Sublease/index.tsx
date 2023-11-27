@@ -15,13 +15,14 @@ import { useData } from 'src/StateProvider/Provider';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { Button, Chip, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { Button, Chip, IconButton, Menu, MenuItem, Box } from '@material-ui/core';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import ManageSublease from './ManageSublease';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 let searchTimeout;
 
@@ -178,8 +179,8 @@ const Sublease = () => {
       .get(`${sublease.api}${queryString}`)
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
-          let finalObject = prepareDataForGrid(u, user);
-          finalObject['isSelected'] = selectedRecords.some((s) => s._id === u._id);
+          let finalObject: any = prepareDataForGrid(u, user);
+          finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
           finalObject['canDelete'] = permissions?.sublease?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;;
           return finalObject;
         });
@@ -354,7 +355,6 @@ const Sublease = () => {
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => { }}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
@@ -364,7 +364,9 @@ const Sublease = () => {
             showFilters={true}
             resource={sidebarResource.sublease}
           />
-        ) : null}
+        ) : <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>}
       </CustomContainer>
       {showManageDialog.open && (
         <ManageSublease

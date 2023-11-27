@@ -1,35 +1,36 @@
-import { Chip } from '@material-ui/core';
+import { Box, Button, Menu, MenuItem } from '@material-ui/core';
 import IconButton from '@material-ui/core/IconButton';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { useContext, useEffect, useReducer, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
-import { AiFillFileMarkdown, CiUser, FaPercentage, SiMarketo } from 'react-icons/all';
-import { GiHiveMind } from 'react-icons/gi';
+import { isMobile } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
+import { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
 import TransferEntityDialog from '../../components/AssignRolesDialog/TransferEntityDialog';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { customerAccount, gridLoadingTimeout, opportunity, prepareDataForGrid, sidebarResource, supplierAccount, getLocalStorageArrayData, removeLocalStorage } from '../../constants/helpers';
-import useColumns, { checkStaticField, getFrameworkComponents, getStaticFields, gridFilterParser } from '../../constants/useColumns';
+import { customerAccount, gridLoadingTimeout, opportunity, prepareDataForGrid, supplierAccount, removeLocalStorage, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageOpportunityDialog from './ManageOpportunityDialog';
-import OpportunitiesHeader from './OpportunitiesHeader';
 import './style.scss';
-
-let opportunityTimeout;
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import CustomReactTable, { checkStaticField, getStaticFields, gridFilterParser, useColumns } from 'src/components/CustomReactTableNew';
+import { camelCase } from 'lodash';
+import DeleteIcon from '@material-ui/icons/Delete';
+import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import styles from '../Leads/Header.module.scss';
 
 const Opportunities = () => {
-  const OpportunityTypes = [
+  const types = [
     {
       key: `My ${routes.opportunity.title}`,
       value: 1
@@ -39,7 +40,7 @@ const Opportunities = () => {
       value: 2
     }
   ];
-
+  const renderedFrom = camelCase(routes?.opportunity.title);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
@@ -48,38 +49,22 @@ const Opportunities = () => {
   const { getColumnData } = useColumns();
   const { opportunityResource, opportunityApi } = opportunity;
   const [selectedType, setSelectedType] = useState(1);
-  const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState<any>({});
-  const [opportunityPermissions, setOpportunityPermissions] = useState({
-    isCreate: permissions[opportunityResource]?.isCreate,
-    isUpdate: permissions[opportunityResource]?.isUpdate,
-    isRead: permissions[opportunityResource]?.isRead,
-    isDelete: permissions[opportunityResource]?.isDelete
-  });
   const [showCreateOpportunityDialog, setShowCreateOpportunityDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
-  const [singleOpportunityDelete, setSingleOpportunityDelete] = useState({
-    id: null,
-    show: false,
-    opportunityName: ''
-  });
   const [accountDetails, setAccountDetails] = useState({
     accountId: history.location?.state?.accountId,
     accountName: history.location?.state?.accountName,
     resource: history.location?.state?.resource
   });
   const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
-  const [columns, setColumns] = useState([]);
-
-  //  Grid Variables - Start
-  const [gridApi, setGridApi] = useState(null);
+  const [columns, setColumns] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const [anchorEl, setAnchorEl] = useState(null);
 
-  const localStorageSelectedRecords = `${opportunityResource}_selected`;
 
 
   //  Grid Variables - End
@@ -89,140 +74,86 @@ const Opportunities = () => {
 
   const fetchGridColumns = async () => {
     const response = await axiosInstance().get(`/field?resource=Opportunity&entity=${selectedEntity}&view=true`);
-
     let data = response?.data?.data;
-
     let columns = [];
-    let rendererNames = [];
     data.forEach((o) => {
       if (['firstName'].find((d) => d === o?.fieldData?.fieldName)) {
         columns = [
           ...columns,
           {
             disabled: true,
-            field: 'opportunityName',
-            headerName: 'Opportunity Name',
+            accessor: 'opportunityName',
+            header: 'Opportunity Name',
             pivotIndex: 0,
             show: true,
-            cellRenderer: 'rendererName',
             primaryField: true
           }
         ];
       } else {
-        let currentColumn = getColumnData(opportunityResource, o?.fieldData, routes.opportunityDetail.path, true);
+        let currentColumn = getColumnData(routes.opportunity.title, o?.fieldData, routes.opportunityDetail.path, true);
         if (currentColumn !== null) {
           columns = [...columns, currentColumn?.columnData];
-          if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-            rendererNames.push(currentColumn?.rendererName);
-          }
         }
       }
       return o?.fieldData;
     });
-    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-    tempFrameworkComponent = {
-      ...tempFrameworkComponent,
-      actionsRenderer: ActionsRenderer
-    };
-    setFrameWorkComponent({ ...tempFrameworkComponent });
     let staticFields = getStaticFields();
     staticFields.forEach((field) => {
-      columns.push(checkStaticField(routes.projectSales.title, field));
+      columns.push(checkStaticField(routes.opportunity.title, field));
     });
-    setColumns([...columns]);
+    setColumns([...columns, ActionsRenderer]);
   };
 
-  useEffect(() => {
-    if (permissions && permissions[opportunityResource]) {
-      setOpportunityPermissions(permissions[opportunityResource]);
-    }
-
-    return () => {
-      setOpportunityPermissions(null);
-    };
-  }, [permissions]);
-
-  useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (opportunityTimeout) {
-      clearTimeout(opportunityTimeout);
-    }
-
-    opportunityTimeout = setTimeout(() => {
-      fetchOpportunities();
-    }, millisec);
-    // eslint-disable-next-line
-  }, [search]);
-
-  useEffect(() => {
-    if (renderCount > 0) {
-      fetchOpportunities();
-    } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting, selectedEntity, accountDetails, showFilteredRecordsOnly]);
-
-  const handleSingleDeleteOpportunity = async () => {
-    dispatch({ type: 'loading', loading: true });
-
-    axiosInstance()
-      .put(`${opportunityApi}/remove?entity=${selectedEntity}`, {
-        ids: [singleOpportunityDelete.id]
-      })
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-        fetchOpportunities();
-        dispatch({ type: 'loading', loading: false });
-        setSingleOpportunityDelete({ id: null, show: false, opportunityName: '' });
-      })
-      .catch((error) => {
-        dispatch({ type: 'loading', loading: false });
-        toastConfig.setToastConfig(error);
-      });
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 100,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        <HtmlTooltip title={permissions?.opportunity?.isCreate ? 'Clone' : cloneDisable}  >
+          <span>
+            <IconButton
+              disabled={permissions?.opportunity?.isCreate ? false : true}
+              size="small"
+              aria-label="Clone"
+              onClick={() => {
+                setShowCreateOpportunityDialog({ open: true, isClone: true, idToClone: row?.original?._id });
+              }}
+            >
+              <FileCopyIcon fontSize="small" color={permissions?.opportunity?.isCreate ? 'primary' : 'disabled'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+        <HtmlTooltip title={row?.original?.canDelete ? "Delete" : deleteDisable}>
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              disabled={row?.original?.canDelete ? false : true}
+              onClick={() => {
+                setDeleteRecord(row?.original);
+                setIsConformDialogVisible(true);
+              }
+              }
+            >
+              <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+      </>
+    )
   };
 
-  const ActionsRenderer = (params) => (
-    <>
-      {opportunityPermissions?.isCreate ? (
-        <HtmlTooltip
-          className={opportunityPermissions?.isCreate ? '' : 'cursor-stop'}
-          title={opportunityPermissions?.isCreate ? 'Clone' : 'You do not have permission to clone/create'}
-        >
-          <IconButton
-            size="small"
-            aria-label="Clone"
-            onClick={() => {
-              setShowCreateOpportunityDialog({ open: true, isClone: true, idToClone: params.data._id });
-            }}
-          >
-            <FileCopyIcon fontSize="small" color="primary" />
-          </IconButton>
-        </HtmlTooltip>
-      ) : (
-        <HtmlTooltip className={'cursor-stop'} title={'You do not have permission to clone/create'}>
-          <IconButton size="small" aria-label="Clone">
-            <FileCopyIcon fontSize="small" />
-          </IconButton>
-        </HtmlTooltip>
-      )}
 
-      <GridDeleteIcon
-        hasDeletePermission={opportunityPermissions.isDelete}
-        ownerId={params.data.ownerId}
-        userId={user?.user?._id}
-        onDelete={() =>
-          setSingleOpportunityDelete({
-            show: true,
-            id: params.data._id,
-            opportunityName: `${params.data.opportunityName}`
-          })
-        }
-        entity="opportunity"
-      />
-    </>
-  );
+  useEffect(() => {
+    fetchData()
+  }, [search, page, limit, selectedType, filters, sorting, selectedEntity, accountDetails, showFilteredRecordsOnly]);
+
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
@@ -236,8 +167,7 @@ const Opportunities = () => {
     }
 
     if (showFilteredRecordsOnly) {
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(selectedRecords.map((m) => m._id))}`;
     }
 
     if (selectedEntity) {
@@ -276,62 +206,24 @@ const Opportunities = () => {
     return deepFilter;
   };
 
-  const fetchOpportunities = async () => {
+  const fetchData = async () => {
     if (selectedEntity) {
       const queryString = getQueryString();
       dispatch({ type: 'loading', loading: true });
-
-      if (gridApi) {
-        gridApi.setRowData([]);
-      }
-
       axiosInstance()
         .get(`${opportunityApi}${queryString}`)
         .then(({ data: { data, count } }) => {
           let rows = data.map((u) => {
             let finalObject = prepareDataForGrid(u);
-
-            finalObject['canDelete'] = u.owner?.optionValue === user?.user._id;
+            finalObject['canDelete'] = u.owner?.optionValue === user?.user._id && permissions?.opportunity?.isDelete;
             finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-            finalObject['allowedToEdit'] = [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id);
-
-            finalObject['owerCollaboratorInitialsOrImages'] = [];
-            if (finalObject['owner']) finalObject['owerCollaboratorInitialsOrImages'].push({ initials: finalObject['owner'] });
-
-            finalObject['owerCollaboratorInitialsOrImages'].forEach((f) => {
-              if (f.initials) {
-                f.initials = f.initials
-                  .split(' ')
-                  .map((i) => i[0])
-                  .join('');
-              }
-            });
-
             let res = {
               ...finalObject,
-              canDelete: u.owner?.optionValue === user?.user._id,
               stage: u.stage,
               closeDate: u?.closeDate
             };
             return res;
           });
-         
-          if (appendRows) {
-            dispatch({
-              type: 'initialize',
-              data: [...dataRows, ...rows],
-              count: count,
-              selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
-            });
-          } else {
-            dispatch({
-              type: 'initialize',
-              data: rows,
-              count: count,
-              selectedRecords: rows.filter((f) => f.isChecked === true)
-            });
-          }
-
           dispatch({ type: 'initialize', data: rows, count: count });
           setTimeout(() => {
             dispatch({ type: 'loading', loading: false });
@@ -357,207 +249,192 @@ const Opportunities = () => {
     setShowTransferEntityDialog(true);
   };
 
-  const onSuccess = () => {
-    setShowCreateOpportunityDialog({ open: false, isClone: false, idToClone: null });
-    fetchOpportunities();
-  };
-
-  const showConfirmBox = (row) => {
-    if (row) {
-      setIsConformDialogVisible(true);
-      if (row && row._id) {
-        setDeleteRecord(row);
-      }
-    } else {
-      if (selectedRecords.find((d) => d.canDelete === false)) {
-        setShowDeleteWarningConfirmBox(true);
-      } else {
-        setIsConformDialogVisible(true);
-      }
-    }
-  };
-
-  const clickCreateNew = () => {
-    setShowCreateOpportunityDialog({ open: true, isClone: false, idToClone: null });
-  };
-
-  const handleDeleteOpportunity = async () => {
+  const handleDelete = async () => {
     setDeleteLoading(true);
-    let recordsToDelete = [];
+    let ids = [];
     if (deleteRecord?._id) {
-      recordsToDelete.push(deleteRecord?._id);
+      ids.push(deleteRecord?._id);
     } else {
-      recordsToDelete = selectedRecords.map((o) => o._id);
+      ids = selectedRecords.map((o) => o._id);
     }
-    if (recordsToDelete.length > 0) {
-      axiosInstance()
-        .put(`${opportunityApi}/remove?entity=${selectedEntity}`, {
-          ids: recordsToDelete
-        })
-        .then(({ data }) => {
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-          removeLocalStorage(localStorageSelectedRecords);
-          setIsConformDialogVisible(false);
-          setDeleteLoading(false);
-          if (deleteRecord) setDeleteRecord({});
-          fetchOpportunities();
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-          setIsConformDialogVisible(false);
-          setDeleteLoading(false);
+
+    axiosInstance()
+      .put(`${opportunityApi}/remove?entity=${selectedEntity}`, {
+        ids
+      })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
         });
+        dispatch({ type: 'selection', selectedRecords: [] });
+        setIsConformDialogVisible(false);
+        setDeleteLoading(false);
+        setDeleteRecord(null);
+        fetchData();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setIsConformDialogVisible(false);
+        setDeleteLoading(false);
+      });
+  };
+
+  const handleFilter = (event, newFilter) => {
+    if (newFilter != null) {
+      handleOpportunityTypeChange(types.find((d) => d.key === newFilter).value);
     }
   };
+
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+
 
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[routes.opportunity]} />
         <ImportExportLinks
-          permissions={opportunityPermissions}
+          permissions={permissions?.opportunity}
           module="opportunities"
           api={opportunityApi}
           afterImportCompleted={() => {
-            fetchOpportunities();
+            fetchData();
           }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
-          recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-          ids={
-            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-              ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-              : []
-          }
+          recordsToExport={selectedRecords?.length}
+          ids={selectedRecords?.map((obj) => obj._id)}
           onExportToExcelSuccess={() => {
-            if (gridApi) gridApi.deselectAll();
-            else fetchOpportunities();
+            fetchData();
           }}
           additionalParams={getQueryString(true)}
         />
       </div>
-
-      {/* Tables Begins Here */}
       <CustomContainer>
         <div className="header-panel">
-          <OpportunitiesHeader
-            selectedRecords={selectedRecords}
-            onTypeChange={handleOpportunityTypeChange}
-            options={OpportunityTypes}
-            onSearch={handleSearch}
-            search={search}
-            opportunityPermissions={opportunityPermissions}
-            onCreate={clickCreateNew}
-            showConfirmBox={showConfirmBox}
-            canDelete={selectedRecords.length === 0}
-            icon={<GiHiveMind className="headerLogo" />}
-            heading={routes.opportunity.title}
-            showTransferEntityDialog={handleTransferEntityDialog}
-            columns={columns}
-            dispatch={dispatch}
-            selectedType={selectedType}
-            filters={filters}
-            resource={sidebarResource.opportunity}
-          >
-            {accountDetails.accountId && (
-              <Chip
-                className="ml-3"
-                color="primary"
-                label={`${accountDetails.resource === customerAccount.accountResource ? 'Customer' : 'Supplier'} Account: ${
-                  accountDetails.accountName
-                }`}
-                onDelete={() => {
-                  setAccountDetails({ accountId: null, accountName: null, resource: null });
-                }}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+            <div className={'d-flex flex-wrap align-items-center gap-2'}>
+              <div className={`flex flex-wrap items-center gap-2 `}>
+                {types && (
+                  <ToggleButtonGroup
+                    size="small"
+                    className="ml-2"
+                    value={types[selectedType - 1].key}
+                    exclusive
+                    onChange={handleFilter}
+                  >
+                    {types.map((k, index) => {
+                      return (
+                        <ToggleButton value={k.key} key={index}>
+                          {k.key}
+                        </ToggleButton>
+                      );
+                    })}
+                  </ToggleButtonGroup>
+                )}
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-[8px]  justify-end">
+              <SearchBox
+                onChange={handleSearch}
+                className={isMobile ? styles.search_box_input : ''}
+                width="242px"
+                size="small"
+                value={search}
+                style={isMobile ? { flex: 1 } : {}}
               />
-            )}
-          </OpportunitiesHeader>
+              <div className="flex gap-[8px] flex-wrap items-center">
+                {permissions?.opportunity?.isCreate && (
+                  <Button
+                    onClick={() => {
+                      setShowCreateOpportunityDialog({ open: true, isClone: false, idToClone: null });
+                    }}
+                    variant={'contained'}
+                    size="small"
+                    color="primary"
+                    className={`no-shadow`}
+                    startIcon={<AddOutlined />}
+                  >
+                    Add
+                  </Button>
+                )}
+                <HtmlTooltip title={!selectedRecords.length ? "Please select some opportunities" : ""}>
+                  <span>
+                    <Button
+                      variant={'outlined'}
+                      color="default"
+                      size="small"
+                      onClick={openActions}
+                      disabled={selectedRecords.length ? false : true}
+                      aria-controls="action-menu"
+                      className={`new-dropdown-v1`}
+                      endIcon={<ExpandMore />}
+                    >
+                      Actions
+                    </Button>
+                  </span>
+                </HtmlTooltip>
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  id="action-menu"
+                  open={Boolean(anchorEl)}
+                  onClose={closeActions}
+                >
+                  <MenuItem
+                    disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
+                    onClick={() => {
+                      closeActions();
+                      setIsConformDialogVisible(true);
+                    }}
+                  >
+                    {`Delete (${selectedRecords.length})`}
+                  </MenuItem>
+                  <MenuItem
+                    disabled={selectedRecords.find((d) => d.canDelete === false)}
+                    onClick={() => {
+                      closeActions();
+                      handleTransferEntityDialog();
+                    }}
+                  >
+                    {`Transfer Entity (${selectedRecords.length})`}
+                  </MenuItem>
+                </Menu>
+              </div>
+            </div>
+          </div>
         </div>
-
-        {Object.keys(frameWorkComponent).length > 0 ? (
-          isMobile && !isTablet ? (
-            <CustomSwipableList
-              key={selectedType}
-              allowSelection={true}
-              allowSwipe={true}
-              permissions={permissions[opportunityResource]}
-              primaryField={columns?.find((d) => d.field)}
-              onClick={(data) => {
-                history.push(`${routes.opportunityDetail.path}/${data._id}`);
-              }}
-              dataRows={dataRows}
-              selectedRecords={selectedRecords}
-              dispatch={dispatch}
-              onEdit={(data) => {
-                history.push(`${routes.opportunityDetail.path}/${data._id}`);
-              }}
-              extraParamsToCheckDelete={true}
-              onDelete={(data) => {
-                setSingleOpportunityDelete({
-                  show: true,
-                  id: data._id,
-                  opportunityName: `${data.opportunityName}`
-                });
-              }}
-              rowCount={rowCount}
-              page={page}
-              loading={loading}
-              additionalDetails={[
-                {
-                  icon: <CiUser size={18} />,
-                  field: 'customerAccountName'
-                }
-              ]}
-              chips={[
-                {
-                  icon: <FaPercentage />,
-                  label: 'Probability :',
-                  field: 'probability'
-                },
-                {
-                  icon: <AiFillFileMarkdown />,
-                  label: 'Market:',
-                  field: 'marketSegment'
-                },
-                {
-                  icon: <SiMarketo />,
-                  label: 'Sub-Market:',
-                  field: 'subMarketSegment'
-                }
-              ]}
-              owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-              onCreate={false}
-              showClone={true}
-              onClone={(data) => {
-                setShowCreateOpportunityDialog({ open: true, isClone: true, idToClone: data._id });
-              }}
-              renderedFrom={opportunityResource}
-            />
-          ) : (
-            <CustomAgGrid
-              columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameWorkComponent}
-              setGridApi={setGridApi}
-              dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              actionWidth={100}
-              loading={loading}
-              renderedFrom={opportunityResource}
-              refreshGrid={fetchOpportunities}
-              showOnlyShowFilteredRecordSwitch={true}
-              showFilters={true}
-              resource={sidebarResource.opportunity}
-            />
-          )
-        ) : null}
+        {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
+            columns={columns}
+            onSelect={() => { }}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            isClientSideGrid={false}
+            refreshGrid={fetchData}
+            showOnlyShowFilteredRecordSwitch={true}
+            showFilters={true}
+            resource={sidebarResource.opportunity}
+          />
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
 
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
@@ -569,39 +446,14 @@ const Opportunities = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.opportunityName ? 'Opportunity' : 'Opportunities'}   ${
-              deleteRecord.opportunityName || ''
-            }?`}
+            message={`Are you sure you want to delete ${routes.opportunity.title}${selectedRecords.length ? "s" : ""}   ${deleteRecord.opportunityName || ''
+              }?`}
             onClose={() => {
-              if (deleteRecord) setDeleteRecord({});
+              setDeleteRecord(null);
               setIsConformDialogVisible(false);
             }}
             okBtnLoading={deleteLoading}
-            onOk={handleDeleteOpportunity}
-          />
-        ) : null}
-        {/* {
-            showCreateOpportunityDialog && <ManageOpportunityMain
-              open={showCreateOpportunityDialog}
-              onClose={() => setShowCreateOpportunityDialog(false)}
-              onSuccess={() => {
-                setShowCreateOpportunityDialog(false);
-                fetchOpportunities()
-              }}
-            />
-          } */}
-        {singleOpportunityDelete.show ? (
-          <ConfirmationDialog
-            open={singleOpportunityDelete.show}
-            message={`Are you sure you want to delete contact: ${singleOpportunityDelete.opportunityName}?`}
-            onClose={() =>
-              setSingleOpportunityDelete({
-                id: null,
-                show: false,
-                opportunityName: ''
-              })
-            }
-            onOk={handleSingleDeleteOpportunity}
+            onOk={handleDelete}
           />
         ) : null}
       </CustomContainer>
@@ -609,7 +461,10 @@ const Opportunities = () => {
       {showCreateOpportunityDialog?.open && (
         <ManageOpportunityDialog
           open={showCreateOpportunityDialog?.open}
-          onSuccess={onSuccess}
+          onSuccess={() => {
+            setShowCreateOpportunityDialog({ open: false, isClone: false, idToClone: null });
+            fetchData();
+          }}
           onClose={() => {
             setShowCreateOpportunityDialog({ open: false, isClone: false, idToClone: null });
           }}
@@ -625,7 +480,8 @@ const Opportunities = () => {
         <TransferEntityDialog
           TransferEntityDialogOpen={showTransferEntityDialog}
           onSuccess={() => {
-            onSuccess();
+            setShowCreateOpportunityDialog({ open: false, isClone: false, idToClone: null });
+            fetchData();
             setShowTransferEntityDialog(false);
           }}
           handleCloseDialog={() => {

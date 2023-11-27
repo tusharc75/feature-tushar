@@ -18,7 +18,9 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import {
   pricingCondition,
   gridLoadingTimeout,
-  PRICING_TYPE
+  PRICING_TYPE,
+  sidebarResource,
+  MATERIAL_TYPE
 } from '../../../constants/helpers';
 import EditIcon from '@material-ui/icons/Edit';
 import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridComponents/CustomAgGrid';
@@ -36,6 +38,7 @@ import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
+import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
 
 const AddConditions = ({ pricingConditionId, detailData }) => {
   const renderFrom = camelCase(`${routes?.pricingCondition.title}_condition_selected`);
@@ -74,13 +77,12 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       .then(({ data: { data } }) => {
         setCondition(JSON.parse(JSON.stringify(data)));
         data.forEach((element) => {
-          element.detail = `${
-            element.materialType === 'product'
-              ? element.productDetail?.productName
-              : element.materialType === 'service'
+          element.detail = `${element.materialType === MATERIAL_TYPE.product
+            ? element.productDetail?.productName
+            : element.materialType === MATERIAL_TYPE.service
               ? element.serviceDetail?.serviceName
               : element.packageDetail?.packageName
-          }`;
+            }`;
           element.materialType = startCase(element.materialType);
           element.conditionType = PRICING_TYPE?.filter((e) => element.conditionType?.includes(e.optionValue))
             ?.map((e) => e.optionLabel)
@@ -175,10 +177,9 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
           size="small"
           onClick={() => {
             window.open(
-              `${
-                params.data.materialType === 'Product'
-                  ? routes.productDetail.path
-                  : params.data.materialType === 'Service'
+              `${params.data.materialType === 'Product'
+                ? routes.productDetail.path
+                : params.data.materialType === 'Service'
                   ? routes.serviceMasterDetail.path
                   : routes.packagesDetail.path
               }/${params.data.materialId}`
@@ -262,76 +263,34 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
             <MenuItem
               onClick={() => {
                 closeAddActions();
-                setAddMaterialDialog({ open: true, materialType: 'product' });
+                setAddMaterialDialog({ open: true, materialType: MATERIAL_TYPE.product });
               }}
             >
-              Add Products
+              Add Existing Products
             </MenuItem>
             <MenuItem
               onClick={() => {
                 closeAddActions();
-                setAddMaterialDialog({ open: true, materialType: 'package' });
+                setAddMaterialDialog({ open: true, materialType: MATERIAL_TYPE.package });
               }}
             >
-              Add Packages
+              Add Existing Packages
             </MenuItem>
             <MenuItem
               onClick={() => {
                 closeAddActions();
-                setAddMaterialDialog({ open: true, materialType: 'service' });
+                setAddMaterialDialog({ open: true, materialType: MATERIAL_TYPE.service });
               }}
             >
-              Add Services
+              Add Existing Services
             </MenuItem>
           </Menu>
         </Box>
         <Box display="flex">
-          <Button
-            variant={isMobile && !isTablet ? 'text' : 'outlined'}
-            color="default"
-            size="small"
-            className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
-            onClick={openActions}
-            aria-controls="action-menu"
-            disabled={selectedRecords.length ? false : true}
-            endIcon={<ExpandMore />}
-          >
-            {isMobile && !isTablet ? '' : 'Actions'}
-          </Button>
-          <Menu
-            anchorEl={anchorEl}
-            keepMounted
-            getContentAnchorEl={null}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'left'
-            }}
-            id="action-menu"
-            open={Boolean(anchorEl)}
-            onClose={closeActions}
-          >
-            <MenuItem
-              disabled={!Boolean(selectedRecords && selectedRecords?.length > 1 && dataRows?.length > 1)}
-              onClick={() => {
-                setShowDialog({ open: true, isBulkedit: true });
-                setConditionData(condition.filter((data) => selectedRecords.some((rec) => rec._id === data._id)));
-              }}
-            >
-              Bulk Edit
-            </MenuItem>
-            <MenuItem
-              disabled={!Boolean(selectedRecords && selectedRecords.length && dataRows?.length)}
-              onClick={() => {
-                setShowDeleteConfirmBox(true);
-              }}
-            >
-              Delete
-            </MenuItem>
-          </Menu>
-          <Box ml={2}>
+          <Box>
             <ImportExportLinks
               permissions={permissions.pricingCondition}
-              module="pricingCondition(s)"
+              module={routes.pricingCondition.title}
               api={pricingCondition.api}
               afterImportCompleted={() => {
                 fetchCondition();
@@ -393,6 +352,50 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
               ]}
             />
           </Box>
+          <Box ml={2}>
+            <Button
+              variant={isMobile && !isTablet ? 'text' : 'outlined'}
+              color="default"
+              size="small"
+              className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
+              onClick={openActions}
+              aria-controls="action-menu"
+              disabled={selectedRecords.length ? false : true}
+              endIcon={<ExpandMore />}
+            >
+              {isMobile && !isTablet ? '' : 'Actions'}
+            </Button>
+            <Menu
+              anchorEl={anchorEl}
+              keepMounted
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left'
+              }}
+              id="action-menu"
+              open={Boolean(anchorEl)}
+              onClose={closeActions}
+            >
+              <MenuItem
+                disabled={!Boolean(selectedRecords && selectedRecords?.length > 1 && dataRows?.length > 1)}
+                onClick={() => {
+                  setShowDialog({ open: true, isBulkedit: true });
+                  setConditionData(condition.filter((data) => selectedRecords.some((rec) => rec._id === data._id)));
+                }}
+              >
+                Bulk Edit
+              </MenuItem>
+              <MenuItem
+                disabled={!Boolean(selectedRecords && selectedRecords.length && dataRows?.length)}
+                onClick={() => {
+                  setShowDeleteConfirmBox(true);
+                }}
+              >
+                Delete
+              </MenuItem>
+            </Menu>
+          </Box>
         </Box>
       </Box>
       <Grid item xs={12} md={12} sm={12} className="mt-3">
@@ -420,41 +423,43 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
           </Box>
         )}
       </Grid>
-      {addMaterialDialog.open && addMaterialDialog.materialType === 'product' && (
-        <AssignProductDialog
-          handleCloseDialog={() => setAddMaterialDialog({ open: false, materialType: '' })}
-          onSuccess={(product) => {
-            handleAdd(product);
-          }}
-          ids={condition?.filter(c => c?.materialType === addMaterialDialog.materialType)?.map((e) => e.materialId)}
-          isSubmitting={isSubmitting}
-          hideQty={true}
-        />
-      )}
-      {addMaterialDialog.open && addMaterialDialog.materialType === 'package' && (
-        <AssignPackageDialog
-          onSuccess={(rows) => {
-            handleAdd(rows);
+      {addMaterialDialog.open && addMaterialDialog.materialType === MATERIAL_TYPE.product && (
+        <AssignDynamicDialog
+          resource={sidebarResource?.product}
+          onSuccess={(data) => {
+            handleAdd(data);
           }}
           handleClose={() => {
-            setAddMaterialDialog({ open: false, materialType: '' });
+            setAddMaterialDialog({ open: false, materialType: '' })
           }}
           ids={condition?.filter(c => c?.materialType === addMaterialDialog.materialType)?.map((e) => e.materialId)}
           isSubmitting={isSubmitting}
-          hideQty={true}
         />
       )}
-      {addMaterialDialog.open && addMaterialDialog.materialType === 'service' && (
-        <AssignServiceDialog
-          onSuccess={(services) => {
-            handleAdd(services);
+      {addMaterialDialog.open && addMaterialDialog.materialType === MATERIAL_TYPE.package && (
+        <AssignDynamicDialog
+          resource={sidebarResource?.packages}
+          onSuccess={(data) => {
+            handleAdd(data);
           }}
           handleClose={() => {
-            setAddMaterialDialog({ open: false, materialType: '' });
+            setAddMaterialDialog({ open: false, materialType: '' })
           }}
           ids={condition?.filter(c => c?.materialType === addMaterialDialog.materialType)?.map((e) => e.materialId)}
           isSubmitting={isSubmitting}
-          hideQty={true}
+        />
+      )}
+      {addMaterialDialog.open && addMaterialDialog.materialType === MATERIAL_TYPE.service && (
+        <AssignDynamicDialog
+          resource={sidebarResource?.serviceMaster}
+          onSuccess={(data) => {
+            handleAdd(data);
+          }}
+          handleClose={() => {
+            setAddMaterialDialog({ open: false, materialType: '' })
+          }}
+          ids={condition?.filter(c => c?.materialType === addMaterialDialog.materialType)?.map((e) => e.materialId)}
+          isSubmitting={isSubmitting}
         />
       )}
       {showDialog.open && conditionData && (
@@ -475,9 +480,8 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete pricing setup condition  ${
-            deleteRecord?.productDetail?.productName || deleteRecord?.packageDetail?.packageName || ''
-          } ?`}
+          message={`Are you sure you want to delete pricing setup condition  ${deleteRecord?.productDetail?.productName || deleteRecord?.packageDetail?.packageName || ''
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

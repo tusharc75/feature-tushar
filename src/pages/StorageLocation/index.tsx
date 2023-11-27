@@ -22,9 +22,10 @@ import ManageStorageLocation from './ManageStorageLocation';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import { Menu, MenuItem } from '@material-ui/core';
+import { Menu, MenuItem, Box } from '@material-ui/core';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 let searchTimeout;
 
@@ -163,7 +164,7 @@ const StorageLocation = () => {
 
     axiosInstance()
       .get(`${storageLocation.api}${queryString}`)
-      .then(({ data: { data} }) => {
+      .then(({ data: { data } }) => {
         let count = data?.count;
         let rows = data?.data?.map((u) => {
           let finalObject = prepareDataForGrid(u, user);
@@ -228,7 +229,7 @@ const StorageLocation = () => {
           permissions={permissions?.storageLocation}
           module={routes.storageLocation.title}
           api={storageLocation.api}
-          afterImportCompleted={() => {fetchData()}}
+          afterImportCompleted={() => { fetchData() }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}
@@ -287,11 +288,11 @@ const StorageLocation = () => {
                       onClose={closeActions}
                     >
                       <MenuItem
-                      disabled={
-                        !(
-                          (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length
-                        )
-                      }
+                        disabled={
+                          !(
+                            (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length
+                          )
+                        }
                         onClick={() => {
                           closeActions();
                           // eslint-disable-next-line no-lone-blocks
@@ -314,7 +315,6 @@ const StorageLocation = () => {
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => {}}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
@@ -324,7 +324,9 @@ const StorageLocation = () => {
             showFilters={true}
             resource={sidebarResource.storageLocation}
           />
-        ) : null}
+        ) : <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>}
       </CustomContainer>
       {showDeleteConfirmBox && (
         <ConfirmationDialog
