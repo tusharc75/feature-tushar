@@ -255,7 +255,7 @@ export default function useColumns() {
             Cell: ({ row }) =>
               row?.original?.[field?.fieldName] ? (
                 <h5
-                  className="flex"
+                  className="[display:flex_!important] [flex-wrap:nowrap_!important] items-center"
                   title={`${row?.original?.[field?.fieldName]}`}
                 >
                   <span title={row?.original?.[field?.fieldName]} className="text-truncate" >{row?.original?.[field?.fieldName]}</span>
