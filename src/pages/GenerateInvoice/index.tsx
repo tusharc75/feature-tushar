@@ -312,19 +312,21 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
         <div className="header-panel">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
             <div className={'flex justify-between align-items-center gap-1 w-full'}>
-              <Autocomplete
-                id="generate-invoice"
-                style={{ width: '300px' }}
-                options={resourceList?.map((item) => item)}
-                renderInput={(params) => <TextField {...params} variant="outlined" label="Resource" margin="dense" required={true} />}
-                getOptionLabel={(option) => option?.title}
-                onChange={(e, val) => {
-                  dispatch({ type: 'selection', selectedRecords: [] });
-                  setSelectedResource(val);
-                }}
-                disableClearable={true}
-                value={selectedResource}
-              />
+              {!resourceRendered &&
+                <Autocomplete
+                  id="generate-invoice"
+                  style={{ width: '300px' }}
+                  options={resourceList?.map((item) => item)}
+                  renderInput={(params) => <TextField {...params} variant="outlined" label="Resource" margin="dense" required={true} />}
+                  getOptionLabel={(option) => option?.title}
+                  onChange={(e, val) => {
+                    dispatch({ type: 'selection', selectedRecords: [] });
+                    setSelectedResource(val);
+                  }}
+                  disableClearable={true}
+                  value={selectedResource}
+                />
+              }
             </div>
             <div className="flex flex-wrap gap-[8px]  justify-end">
               <SearchBox
