@@ -1,23 +1,18 @@
-import { Box, Button, Grid, IconButton, Menu, MenuItem, Tooltip } from '@material-ui/core';
-import React, { Fragment, useContext, useEffect, useReducer, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
+import { Box, Button, IconButton, Menu, MenuItem, } from '@material-ui/core';
+import React, { useContext, useEffect, useReducer, useState } from 'react';
+import { isMobile } from 'react-device-detect';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import { camelCase } from 'lodash';
-import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
 import { useData } from 'src/StateProvider/Provider';
-import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
+import { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import { MdAdd, MdOutlineFilterAlt } from 'react-icons/md';
-import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import axiosInstance from 'src/axios/axiosInstance';
 import {
-  getLocalStorageArrayData,
   gridLoadingTimeout,
-  isObjectEmpty,
   prepareDataForGrid,
   removeLocalStorage,
   sidebarResource
@@ -33,9 +28,9 @@ import ManageFieldTicket from './ManageFieldTicket';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { deleteOne, findAll, findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
-import MobileFilterDialog, { DisplayFiltersForMobile } from 'src/components/MobileFilterDialog';
-import MobileSortDialog from 'src/components/MobileSortDialog';
-import { TbArrowsSort } from 'react-icons/tb';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns } from 'src/components/CustomReactTableNew';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const FieldTicket = () => {
   const FieldTicketType = [
@@ -67,9 +62,7 @@ const FieldTicket = () => {
   const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
-  const [columns, setColumns] = useState([]);
-  const [gridApi, setGridApi] = useState(null);
+  const [columns, setColumns] = useState(null);
   const { getColumnData } = useColumns();
   const { isOffline } = useContext(CustomOfflineContext);
 
@@ -87,32 +80,19 @@ const FieldTicket = () => {
       }
     }
     let columns = [];
-    let rendererNames = [];
     data.forEach((o) => {
       let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.fieldTicketDetail.path, true);
       if (currentColumn !== null) {
         columns = [...columns, currentColumn?.columnData];
-        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-          rendererNames.push(currentColumn?.rendererName);
-        }
       }
     });
-    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-    tempFrameworkComponent = {
-      ...tempFrameworkComponent,
-      actionsRenderer: ActionsRenderer
-    };
-    setFrameWorkComponent({ ...tempFrameworkComponent });
     columns = [...columns, ...getStaticFields()];
-    setColumns([...columns]);
+    setColumns([...columns, ActionsRenderer]);
   };
 
   const fetchFieldTicketData = async () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
     if (isOffline) {
       const getAllData = await findAll(objectStore.fieldTicket);
       let rows = getAllData?.map((u: any) => {
@@ -215,50 +195,60 @@ const FieldTicket = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-  const ActionsRenderer = (params) => (
-    <Fragment>
-      {permissions?.fieldTicket?.isCreate ? (
-        <Tooltip title="Clone">
-          <IconButton
-            size="small"
-            aria-label="Clone"
-            onClick={() => {
-              setFieldTicketId(params.data.id);
-              setOpen({ open: true, isClone: true });
-            }}
-          >
-            <FileCopyIcon fontSize="small" color="primary" />
-          </IconButton>
-        </Tooltip>
-      ) : (
-        <Tooltip className="cursor-stop" title="You do not have permission to clone/create">
-          <IconButton aria-label="Clone" size="small">
-            <FileCopyIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      )}
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 150,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        {permissions?.fieldTicket?.isCreate ? (
+          <HtmlTooltip title="Clone">
+            <IconButton
+              size="small"
+              aria-label="Clone"
+              onClick={() => {
+                setFieldTicketId(row?.original.id);
+                setOpen({ open: true, isClone: true });
+              }}
+            >
+              <FileCopyIcon fontSize="small" color="primary" />
+            </IconButton>
+          </HtmlTooltip>
+        ) : (
+          <HtmlTooltip className="cursor-stop" title="You do not have permission to clone/create">
+            <IconButton aria-label="Clone" size="small">
+              <FileCopyIcon fontSize="small" />
+            </IconButton>
+          </HtmlTooltip>
+        )}
 
-      {params?.data?.canDelete ? (
-        <Tooltip title="Delete">
-          <IconButton
-            aria-label="Delete"
-            onClick={() => {
-              setDeleteRecord(params.data);
-              setShowDeleteConfirmBox(true);
-            }}
-          >
-            <DeleteIcon fontSize="small" color="error" />
-          </IconButton>
-        </Tooltip>
-      ) : (
-        <Tooltip className="cursor-stop" title="You do not have permission to delete">
-          <IconButton aria-label="Delete">
-            <DeleteIcon fontSize="small" color="disabled" />
-          </IconButton>
-        </Tooltip>
-      )}
-    </Fragment>
-  );
+        {row?.original?.canDelete ? (
+          <HtmlTooltip title="Delete">
+            <IconButton
+              aria-label="Delete"
+              onClick={() => {
+                setDeleteRecord(row?.original);
+                setShowDeleteConfirmBox(true);
+              }}
+            >
+              <DeleteIcon fontSize="small" color="error" />
+            </IconButton>
+          </HtmlTooltip>
+        ) : (
+          <HtmlTooltip className="cursor-stop" title="You do not have permission to delete">
+            <IconButton aria-label="Delete">
+              <DeleteIcon fontSize="small" color="disabled" />
+            </IconButton>
+          </HtmlTooltip>
+        )}
+      </>
+    )
+  }
 
   const handleDelete = async () => {
     let ids = [];
@@ -321,45 +311,6 @@ const FieldTicket = () => {
     fetchFieldTicketData();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, isOffline, selectedType]);
 
-  const [filter, setFilter] = useState(FieldTicketType[0].key);
-
-  const handleFilter = (event, newFilter) => {
-    if (newFilter != null) {
-      setFilter(newFilter);
-      onTypeChange(event, newFilter);
-    }
-  };
-  let toggleInner = FieldTicketType && (
-    <ToggleButtonGroup size="small" className=" toggle-button-layout" value={filter} exclusive onChange={handleFilter}>
-      {FieldTicketType.map((k, index) => {
-        return (
-          <ToggleButton value={k.key} key={index}>
-            {k.key}
-          </ToggleButton>
-        );
-      })}
-    </ToggleButtonGroup>
-  );
-
-  const [isOpenDialog, setisOpenDialog] = useState(false);
-  const [openSort, setOpenSort] = useState(false);
-
-  const handleOpen = () => {
-    setisOpenDialog(true);
-  };
-
-  const handleClose = () => {
-    setisOpenDialog(false);
-  };
-
-  const handleClickOpen = () => {
-    setOpenSort(true);
-  };
-
-  const handleClickClose = () => {
-    setOpenSort(false);
-  };
-
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -373,89 +324,47 @@ const FieldTicket = () => {
           }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
-          recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-          ids={
-            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-              ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-              : []
-          }
+          recordsToExport={selectedRecords?.length}
+          ids={selectedRecords?.map((obj) => obj._id)}
           onExportToExcelSuccess={() => {
-            if (gridApi) gridApi.deselectAll();
-            else fetchFieldTicketData();
+            fetchFieldTicketData();
           }}
           additionalParams={getQueryString(true)}
         />
       </div>
-      <CustomContainer>
+      <div className="main-container">
         <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className={'flex justify-between align-items-center gap-1 w-full'}>
-              {/* {toggleInner} */}
-              <ToggleButtonGroup
-                size="small"
-                className="align-items-center gap-1 "
-                value={FieldTicketType[selectedType - 1].key}
-                exclusive
-                onChange={onTypeChange}
-              >
-                {FieldTicketType.map((k, index) => {
-                  return (
-                    <ToggleButton value={k.key} key={index}>
-                      {k.key}
-                    </ToggleButton>
-                  );
-                })}
-              </ToggleButtonGroup>
-              {isMobile && !isTablet && (
-                <div className="flex flex-wrap items-center gap-1 justify-end">
-                  <IconButton
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+            <div className={'d-flex flex-wrap align-items-center gap-2'}>
+              <div className={`flex flex-wrap items-center gap-2 `}>
+                {FieldTicketType && (
+                  <ToggleButtonGroup
                     size="small"
-                    className={'mobileIconButton secondary'}
-                    onClick={handleClickOpen}
-                    id="demo-customized-button"
-                    aria-controls="demo-customized-menu"
-                    aria-haspopup="true"
-                    aria-expanded={open ? 'true' : undefined}
-                    style={isTablet ? { marginLeft: '50px' } : {}}
+                    className="align-items-center gap-1 "
+                    value={FieldTicketType[selectedType - 1].key}
+                    exclusive
+                    onChange={onTypeChange}
                   >
-                    <TbArrowsSort className="rotate-90" size={16} />
-                  </IconButton>
-
-                  <MobileSortDialog
-                    isOpen={openSort}
-                    handleClose={handleClickClose}
-                    contentPart={''}
-                    secHeading={['Sort Repair Job']}
-                    columns={columns}
-                    dispatch={dispatch}
-                  />
-
-                  <IconButton
-                    size="small"
-                    onClick={handleOpen}
-                    id="demo-customized-button"
-                    aria-controls="demo-customized-menu"
-                    aria-haspopup="true"
-                    aria-expanded={open ? 'true' : undefined}
-                    className={'mobileIconButton secondary'}
-                  >
-                    <MdOutlineFilterAlt size={16} />
-                  </IconButton>
-                  <MobileFilterDialog
-                    isOpen={isOpenDialog}
-                    handleClose={handleClose}
-                    contentPart={''}
-                    columns={columns}
-                    dispatch={dispatch}
-                    title={routes?.repairJob?.title}
-                    filters={filters}
-                    resource={sidebarResource.fieldTicket}
-                  />
-                </div>
-              )}
+                    {FieldTicketType.map((k, index) => {
+                      return (
+                        <ToggleButton value={k.key} key={index}>
+                          {k.key}
+                        </ToggleButton>
+                      );
+                    })}
+                  </ToggleButtonGroup>
+                )}
+              </div>
             </div>
             <div className="flex flex-wrap gap-[8px]  justify-end">
-              <SearchBox onChange={handleSearch} className={styles.search_box_input} size="small" value={search} />
+              <SearchBox
+                onChange={handleSearch}
+                className={isMobile ? styles.search_box_input : ''}
+                width="242px"
+                size="small"
+                value={search}
+                style={isMobile ? { flex: 1 } : {}}
+              />
               <div className="flex gap-[8px] flex-wrap items-center">
                 {permissions?.fieldTicket.isCreate && (
                   <Button
@@ -472,8 +381,8 @@ const FieldTicket = () => {
                     Add
                   </Button>
                 )}
-                {permissions?.fieldTicket?.isDelete && (
-                  <>
+                <HtmlTooltip title={!selectedRecords?.length ? `Please select some ${routes?.fieldTicket?.title?.toLowerCase()}s` : ""}>
+                  <span>
                     <Button
                       variant={'outlined'}
                       color="default"
@@ -486,104 +395,61 @@ const FieldTicket = () => {
                     >
                       Actions
                     </Button>
-                    <Menu
-                      anchorEl={anchorEl}
-                      keepMounted
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
-                      }}
-                      id="action-menu"
-                      open={Boolean(anchorEl)}
-                      onClose={closeActions}
-                    >
-                      <MenuItem
-                        disabled={
-                          !(
-                            (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length
-                          )
-                        }
-                        onClick={() => {
-                          closeActions();
-                          // eslint-disable-next-line no-lone-blocks
-                          {
-                            selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
-                          }
-                          setShowDeleteConfirmBox(true);
-                        }}
-                      >
-                        Delete
-                      </MenuItem>
-                    </Menu>
-                  </>
-                )}
+                  </span>
+                </HtmlTooltip>
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  id="action-menu"
+                  open={Boolean(anchorEl)}
+                  onClose={closeActions}
+                >
+                  <MenuItem
+                    disabled={
+                      !(
+                        (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length
+                      )
+                    }
+                    onClick={() => {
+                      closeActions();
+                      setShowDeleteConfirmBox(true);
+                    }}
+                  >
+                    {`Delete (${selectedRecords.length})`}
+                  </MenuItem>
+                </Menu>
               </div>
             </div>
-            <DisplayFiltersForMobile resource={sidebarResource.fieldTicket} />
           </div>
         </div>
-        {Object.keys(frameWorkComponent).length > 0 ? (
-          isMobile && !isTablet ? (
-            <CustomSwipableList
-              allowSelection={true}
-              allowSwipe={true}
-              permissions={permissions.fieldTicket}
-              primaryField={columns?.find((d) => d.primaryField)}
-              onClick={(data) => {
-                history.push(`${routes.fieldTicketDetail.path}/${data.id}`);
-              }}
-              dataRows={dataRows}
-              selectedRecords={selectedRecords}
-              dispatch={dispatch}
-              onEdit={(data) => {
-                setFieldTicketId(data.id);
-                setOpen({ open: true, isClone: false });
-              }}
-              extraParamsToCheckDelete={true}
-              onDelete={(data) => {
-                setDeleteRecord(data);
-                setShowDeleteConfirmBox(true);
-              }}
-              rowCount={rowCount}
-              page={page}
-              loading={loading}
-              additionalDetails={[]}
-              owerCollaboratorInitialsOrImages=""
-              onCreate={false}
-              showClone={true}
-              onClone={(data) => {
-                setFieldTicketId(data.id);
-                setOpen({ open: true, isClone: true });
-              }}
-              chips={[]}
-              renderedFrom={renderedFrom}
-            />
-          ) : (
-            <CustomAgGrid
-              columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameWorkComponent}
-              setGridApi={setGridApi}
-              dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              allowAction={true}
-              loading={loading}
-              renderedFrom={renderedFrom}
-              refreshGrid={fetchFieldTicketData}
-              showOnlyShowFilteredRecordSwitch={true}
-              showFilters={true}
-              resource={sidebarResource.fieldTicket}
-            />
-          )
-        ) : null}
+        {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
+            columns={columns}
+            onSelect={() => { }}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            isClientSideGrid={false}
+            refreshGrid={fetchFieldTicketData}
+            showOnlyShowFilteredRecordSwitch={true}
+            showFilters={true}
+            resource={sidebarResource.fieldTicket}
+          />
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete Field Ticket  ${deleteRecord?.fieldTicketNumber || ''} ?`}
+            message={`Are you sure you want to delete ${routes?.fieldTicket.title?.toLowerCase()}${selectedRecords.length ? "s" : ""} ${deleteRecord?.fieldTicketNumber || ''} ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
@@ -602,7 +468,7 @@ const FieldTicket = () => {
             }}
           />
         )}
-      </CustomContainer>
+      </div>
     </section>
   );
 };
