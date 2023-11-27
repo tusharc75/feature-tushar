@@ -1,39 +1,52 @@
 import { useState, FC, useReducer, useEffect, useContext, Fragment } from 'react';
-import { Chip, Grid } from '@material-ui/core';
+import { Box, Button, Chip, Menu, MenuItem } from '@material-ui/core';
 import axiosInstance from '../../axios/axiosInstance';
 import routes from '../../components/Helpers/Routes';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import ProjectHeader from './Header';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import { useData } from '../../StateProvider/Provider';
 import CreateProjectSales from './CreateProjectSales';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { customerAccount, getLocalStorageArrayData, gridLoadingTimeout, gridPageSizes, isObjectEmpty, removeLocalStorage, supplierAccount } from '../../constants/helpers';
-import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
+import { customerAccount, gridLoadingTimeout, supplierAccount } from '../../constants/helpers';
 import './style.scss';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import EntitySelectionsDialog from '../../components/EntitySelections';
 import { AiOutlineDeploymentUnit } from 'react-icons/ai';
-import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { sidebarResource, prepareDataForGrid } from '../../constants/helpers';
-import { isMobile, isTablet } from 'react-device-detect';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { useHistory } from 'react-router-dom';
-import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField, gridFilterParser } from '../../constants/useColumns';
-import { BiDollar } from 'react-icons/bi';
-import { SiMarketo, AiFillFileMarkdown, GiArrowScope, FaPercentage, FaAward, SiStatuspage, GoVersions } from 'react-icons/all';
 import { camelCase } from 'lodash';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
+import { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns } from 'src/components/CustomReactTableNew';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { cloneDisable, deleteDisable, entityDisable } from 'src/constants/messageHelpers';
+import DeleteIcon from '@material-ui/icons/Delete';
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import { isMobile } from 'react-device-detect';
+import styles from '../Leads/Header.module.scss';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
 
 
-let projectSalesTimeout;
+
 const ProjectSales: FC = () => {
 
+  const types = [
+    {
+      key: `My ${routes.projectSales.title}`,
+      value: 1
+    },
+    {
+      key: `All ${routes.projectSales.title}`,
+      value: 2
+    }
+  ];
+
+
   const renderedFrom = camelCase(routes?.projectSales.title);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -42,17 +55,15 @@ const ProjectSales: FC = () => {
   }: any = useData();
   const { getColumnData } = useColumns();
   const [isOpen, setIsOpen] = useState({ open: false, isClone: false, idToClone: null });
-  const [deleteRec, setDeleteRec] = useState<any>({});
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [selectedType, setselectedType] = useState(1);
-  const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
+  const [deleteRecord, setDeleteRecord] = useState(null);
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState({ show: false, isDelete: false });
   const [projectSalesId, setProjectSalesId] = useState(null);
   const [showEntityDialog, setShowEntityDialog] = useState(false);
-  const [gridApi, setGridApi] = useState(null);
   const [entities, setEntities] = useState([]);
-  const [columns, setColumns] = useState([]);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
+  const [columns, setColumns] = useState(null);
 
   const [referenceDetails, setReferenceDetails] = useState({
     referenceId: history.location?.state?.accountId,
@@ -60,138 +71,107 @@ const ProjectSales: FC = () => {
     resource: history.location?.state?.resource
   });
 
-  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
-  const [isAllChecked, setIsAllChecked] = useState(false);
-  const [clonedData, setClonedData] = useState([]);
-
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } =
     state;
-
-
 
   useEffect(() => {
     fetchGridColumns();
   }, []);
 
   const fetchGridColumns = async () => {
-    const response = await axiosInstance().get(`/field?resource=Project Sales&view=true`);
+    axiosInstance()
+      .get(`/field?resource=${sidebarResource.projectSales}`)
+      .then(({ data: { data } }) => {
+        let columns = [];
+        data.forEach((o) => {
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.projectSalesDetail.path, true);
 
-    let data = response?.data?.data;
-
-    let columns = [];
-    let rendererNames = [];
-    data.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.projectSalesDetail.path, true);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-          rendererNames.push(currentColumn?.rendererName);
-        }
-      }
-      return o?.fieldData;
-    });
-    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-    tempFrameworkComponent = {
-      ...tempFrameworkComponent,
-      actionsRenderer: ActionsRenderer
-    };
-    setFrameWorkComponent({ ...tempFrameworkComponent });
-    let staticFields = getStaticFields();
-    staticFields.forEach((field) => {
-      columns.push(checkStaticField(renderedFrom, field));
-    });
-    setColumns([...columns]);
+          if (currentColumn !== null) {
+            columns = [...columns, currentColumn?.columnData];
+          }
+        });
+        columns = [...columns, ...getStaticFields()];
+        setColumns([...columns, ActionsRenderer]);
+      });
   };
 
-  if (columnState) {
-    columns.map((item) => {
-      columnState.map((d) => {
-        if (d.colId === item.field) {
-          item.show = !d.hide;
-        }
-      });
-    });
-  }
-  //  Grid Variables - End
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 150,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        <HtmlTooltip title={permissions?.projectSales?.isCreate ? "Clone" : cloneDisable}>
+          <span>
+            <IconButton
+              disabled={permissions?.projectSales?.isCreate ? false : true}
+              size="small"
+              aria-label="Clone"
+              onClick={() => {
+                setIsOpen({ open: true, isClone: true, idToClone: row?.original?._id });
+              }}
+            >
+              <FileCopyIcon fontSize="small" color={permissions?.projectSales?.isCreate ? 'primary' : 'disabled'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+        <HtmlTooltip title={row?.original?.canDelete ? "Delete" : deleteDisable}>
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              disabled={row?.original?.canDelete ? false : true}
+              onClick={() => {
+                setShowDeleteConfirmBox(true);
+                setDeleteRecord(row);
+                // showConfirmBox(row?.original);
+              }}
+            >
+              <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+        <HtmlTooltip title={(permissions?.projectSales?.isUpdate && row?.original?.isTeamMember) || row?.original?.isManager ? "Entity" : entityDisable}>
+          <span>
+            <IconButton
+              disabled={(permissions?.projectSales?.isUpdate && row?.original?.isTeamMember) || row?.original?.isManager ? false : true}
+              size="small"
+              aria-label="Entity"
+              onClick={() => {
+                setProjectSalesId(row?.original._id);
+                setShowEntityDialog(true);
+                if (row?.original?.entity) {
+                  let entities = [];
+                  if (row?.original?.entityId) {
+                    entities.push(row?.original?.entityId);
+                  }
+                  if (row?.original?.restentity) {
+                    let restEntities = row?.original?.restentity.map((o) => o.optionValue);
+                    entities = [...entities, ...restEntities];
+                  }
+                  setEntities([...entities]);
+                }
+              }}
+            >
+              <AiOutlineDeploymentUnit fontSize="15" color={(permissions?.projectSales?.isUpdate && row?.original?.isTeamMember) || row?.original?.isManager ? 'primary' : 'disabled'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+      </>
+    )
+  };
 
   useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-
-    if (projectSalesTimeout) {
-      clearTimeout(projectSalesTimeout);
-    }
-
-    projectSalesTimeout = setTimeout(() => {
-      fetchProjects();
-    }, millisec);
-  }, [search]);
-
-  useEffect(() => {
-    fetchProjects();
-  }, [page, limit, selectedType, filters, sorting, selectedEntity, referenceDetails, showFilteredRecordsOnly]);
-
-  const ActionsRenderer = (params) => (
-    <>
-      {permissions?.projectSales?.isCreate ? (
-        <Tooltip title={'Clone'}>
-          <IconButton
-            size="small"
-            aria-label="Clone"
-            onClick={() => {
-              setIsOpen({ open: true, isClone: true, idToClone: params.data._id });
-            }}
-          >
-            <FileCopyIcon fontSize="small" color="primary" />
-          </IconButton>
-        </Tooltip>
-      ) : (
-        <Tooltip className="cursor-stop" title="You do not have permission to clone/create">
-          <IconButton aria-label="Clone" size="small">
-            <FileCopyIcon />
-          </IconButton>
-        </Tooltip>
-      )}
-      <GridDeleteIcon
-        hasDeletePermission={permissions?.projectSales?.isDelete}
-        ownerId={params.data.projectManagerId}
-        userId={user?.user?._id}
-        onDelete={() => showConfirmBox(params.data)}
-        entity="Project"
-      />
-      {(permissions?.projectSales?.isUpdate && params?.data?.isTeamMember) || params?.data?.isManager ? (
-        <Tooltip title="Entity">
-          <IconButton
-            size="small"
-            aria-label="Entity"
-            onClick={() => {
-              setProjectSalesId(params.data._id);
-              setShowEntityDialog(true);
-              if (params?.data?.entity) {
-                let entities = [];
-                if (params?.data?.entityId) {
-                  entities.push(params?.data?.entityId);
-                }
-                if (params?.data?.restentity) {
-                  let restEntities = params?.data?.restentity.map((o) => o.optionValue);
-                  entities = [...entities, ...restEntities];
-                }
-                setEntities([...entities]);
-              }
-            }}
-          >
-            <AiOutlineDeploymentUnit fontSize="15" color="primary" />
-          </IconButton>
-        </Tooltip>
-      ) : (
-        <Tooltip className="cursor-stop" title="You do not have permission to update entity">
-          <IconButton aria-label="Clone" size="small">
-            <AiOutlineDeploymentUnit fontSize="15" />
-          </IconButton>
-        </Tooltip>
-      )}
-    </>
-  );
+    fetchData();
+  }, [page, limit, filters, sorting, search, selectedEntity, selectedType, showFilteredRecordsOnly]);
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
@@ -240,52 +220,27 @@ const ProjectSales: FC = () => {
     }
 
     if (showFilteredRecordsOnly) {
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(selectedRecords.map((m) => m._id))}`;
     }
 
     return deepFilter;
   };
 
-  const fetchProjects = async () => {
+  const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
     axiosInstance()
       .get(`/project-sales${queryString}`)
       .then(({ data: { data, count } }) => {
         let rows = data.map((project) => {
           let finalObject = prepareDataForGrid(project, user);
           finalObject['canDelete'] = finalObject['projectManagerId'] === user?.user._id;
-          finalObject['isChecked'] = selectedRecords.some((s) => s._id === project._id);
-          finalObject['allowedToEdit'] = finalObject['projectManagerId'] === user?.user._id;
-
-          finalObject['owerCollaboratorInitialsOrImages'] = [{ initials: finalObject['projectManager'] }];
           return {
             ...finalObject,
             isManager: user.user._id === project?.projectManager?.optionValue,
             isTeamMember: Boolean(data.staticData?.user.find((u) => u._id === user.user._id))
           };
         });
-        setIsAllChecked(false);
-        setClonedData(data);
-        if (appendRows) {
-          dispatch({
-            type: 'initialize',
-            data: [...dataRows, ...rows],
-            count: count,
-            selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
-          });
-        } else {
-          dispatch({
-            type: 'initialize',
-            data: rows,
-            count: count,
-            selectedRecords: rows.filter((f) => f.isChecked === true)
-          });
-        }
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -303,56 +258,35 @@ const ProjectSales: FC = () => {
     setselectedType(filterValues);
   };
 
-  const showConfirmBox = (row) => {
-    if (row === null) {
-      if (permissions?.projectSales?.isDelete) {
-        const myData = selectedRecords.filter((s) => s.projectManagerId === user.user._id);
-
-        if (selectedRecords?.length !== myData.length) {
-          setShowDeleteWarningConfirmBox({ show: true, isDelete: true });
-        } else {
-          setIsConformDialogVisible(true);
-        }
-      }
-    }
-
-    if (row && row._id) {
-      setIsConformDialogVisible(true);
-      setDeleteRec(row);
-    }
-  };
-
-  const handleDeleteProjects = async () => {
+  const handleDelete = async () => {
     setDeleteLoading(true);
-    let recs = [];
-    if (deleteRec?._id) {
-      recs.push(deleteRec?._id);
+    let ids = [];
+    if (deleteRecord?._id) {
+      ids.push(deleteRecord?._id);
     } else {
       selectedRecords.forEach((obj) => {
-        recs.push(obj._id);
+        ids.push(obj._id);
       });
     }
-    if (recs && recs.length > 0) {
-      axiosInstance()
-        .put(`/project-sales/remove`, { ids: [...recs] })
-        .then(({ data }) => {
-          removeLocalStorage(localStorageSelectedRecords);
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-          setIsConformDialogVisible(false);
-          setDeleteLoading(false);
-          if (deleteRec) setDeleteRec({});
-          fetchProjects();
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-          setIsConformDialogVisible(false);
-          setDeleteLoading(false);
+
+    axiosInstance()
+      .put(`/project-sales/remove`, { ids })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
         });
-    }
+        setShowDeleteConfirmBox(false);
+        setDeleteLoading(false);
+        setDeleteRecord(null);
+        fetchData();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setShowDeleteConfirmBox(false);
+        setDeleteLoading(false);
+      });
   };
 
   const handleSearch = (e) => {
@@ -367,203 +301,232 @@ const ProjectSales: FC = () => {
     setIsOpen({ open: false, isClone: false, idToClone: null });
   };
 
+  const handleFilter = (event, newFilter) => {
+    if (newFilter != null) {
+      handleProjectFilter(types.find((d) => d.key === newFilter).value);
+    }
+  };
+
+
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+
   return (
-    <>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[routes.projectSales]} />
+        <ImportExportLinks
+          permissions={permissions?.projectSales}
+          module="project-sale(s)"
+          api={'project-sales'}
+          afterImportCompleted={() => {
+            fetchData();
+          }}
+          isExportAllOrSomeFeature={true}
+          total={rowCount}
+          recordsToExport={selectedRecords?.length}
+          ids={selectedRecords?.map((obj) => obj._id)}
+          onExportToExcelSuccess={() => {
+            fetchData();
+          }}
+          additionalParams={getQueryString(true)}
+        />
+      </div>
+      <div className="main-container">
+        <div className="header-panel">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+            <div className={'d-flex flex-wrap align-items-center gap-2'}>
+              <div className={`flex flex-wrap items-center gap-2 `}>
+                {types && (
+                  <ToggleButtonGroup
+                    size="small"
+                    className="ml-2"
+                    value={types[selectedType - 1].key}
+                    exclusive
+                    onChange={handleFilter}
+                  >
+                    {types.map((k, index) => {
+                      return (
+                        <ToggleButton value={k.key} key={index}>
+                          {k.key}
+                        </ToggleButton>
+                      );
+                    })}
+                  </ToggleButtonGroup>
+                )}
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-[8px]  justify-end">
+              <SearchBox
+                onChange={handleSearch}
+                className={isMobile ? styles.search_box_input : ''}
+                width="242px"
+                size="small"
+                value={search}
+                style={isMobile ? { flex: 1 } : {}}
+              />
+              <div className="flex gap-[8px] flex-wrap items-center">
+                {permissions?.projectSales?.isCreate && (
+                  <Button
+                    onClick={() => {
+                      setIsOpen({ open: true, isClone: false, idToClone: null });
+                    }}
+                    variant={'contained'}
+                    size="small"
+                    color="primary"
+                    className={`no-shadow`}
+                    startIcon={<AddOutlined />}
+                  >
+                    Add
+                  </Button>
+                )}
+                <HtmlTooltip title="Please select some project sales">
+                  <span>
+                    <Button
+                      variant={'outlined'}
+                      color="default"
+                      size="small"
+                      onClick={openActions}
+                      disabled={selectedRecords.length ? false : true}
+                      aria-controls="action-menu"
+                      className={`new-dropdown-v1`}
+                      endIcon={<ExpandMore />}
+                    >
+                      Actions
+                    </Button>
+                  </span>
+                </HtmlTooltip>
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  id="action-menu"
+                  open={Boolean(anchorEl)}
+                  onClose={closeActions}
+                >
+                  <MenuItem
+                    disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
+                    onClick={() => {
+                      closeActions();
+                      setShowDeleteConfirmBox(true);
+                    }}
+                  >
+                    {`Delete (${selectedRecords.length})`}
+                  </MenuItem>
+                  {permissions?.projectSales?.isUpdate && (
+                    <MenuItem
+                      disabled={selectedRecords.length === 0}
+                      onClick={() => {
+                        if (selectedRecords.some((d) => d.isUpdate === false)) {
+                          closeActions();
+                          setShowDeleteWarningConfirmBox({ show: true, isDelete: false });
+                        } else {
+                          closeActions();
+                          if (selectedRecords.length) {
+                            let entities = [];
+                            selectedRecords.map((current) => {
+                              if (current?.entity) {
+                                if (current?.entityId) {
+                                  entities.push(current?.entityId);
+                                }
+                                if (current?.restentity) {
+                                  let restEntities = current?.restentity.map((o) => o.optionValue);
+                                  entities = [...entities, ...restEntities];
+                                }
+                              }
+                            });
+                            setEntities([...entities]);
+                          }
+                          setShowEntityDialog(true);
+                        }
+                      }}
+                    >
+                      Assign Entity &nbsp; <Chip size="small" label={selectedRecords.length} />
+                    </MenuItem>
+                  )}
+                </Menu>
+              </div>
+            </div>
+          </div>
+        </div>
+        {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
+            columns={columns}
+            onSelect={() => { }}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            isClientSideGrid={false}
+            refreshGrid={fetchData}
+            showOnlyShowFilteredRecordSwitch={true}
+            showFilters={true}
+            resource={sidebarResource.projectSales}
+          />
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
+      </div>
+
+      {showDeleteWarningConfirmBox?.show ? (
+        <MessageDialog
+          open={showDeleteWarningConfirmBox?.show}
+          message={
+            showDeleteWarningConfirmBox?.isDelete
+              ? `You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`
+              : `You are trying to update records which you do not have permission to update, Please remove those records from selection and try again.`
+          }
+          onClose={() => setShowDeleteWarningConfirmBox({ show: false, isDelete: false })}
+        />
+      ) : null}
+
+      {showDeleteConfirmBox ? (
+        <ConfirmationDialog
+          open={showDeleteConfirmBox}
+          message={`Are you sure you want to delete the ${routes?.projectSales?.title?.toLowerCase()}${selectedRecords.length ? "s" : ""} ${deleteRecord?._id ? deleteRecord?.projectName : ''
+            } ? `}
+          onClose={() => {
+            setDeleteRecord(null);
+            setShowDeleteConfirmBox(false);
+          }}
+          okBtnLoading={deleteLoading}
+          onOk={handleDelete}
+        />
+      ) : null}
+      {showEntityDialog ? (
+        <EntitySelectionsDialog
+          open={showEntityDialog}
+          resource={sidebarResource.projectSales}
+          resourceIds={selectedRecords.length ? selectedRecords.map((o) => o._id) : [projectSalesId]}
+          onClose={() => {
+            setShowEntityDialog(false);
+            setProjectSalesId('');
+          }}
+          entities={entities}
+          onSuccess={fetchData}
+        />
+      ) : null}
       {isOpen?.open && (
         <CreateProjectSales
           open={isOpen?.open}
           isClone={isOpen?.isClone}
           projectSalesId={isOpen?.idToClone}
           close={handleClose}
-          fetchData={fetchProjects}
+          fetchData={fetchData}
         />
       )}
-      <section className="main-container-v1">
-        <div className="headerbox-v1">
-          <CustomBreadCrumbs routes={[routes.projectSales]} />
-          <ImportExportLinks
-            permissions={permissions?.projectSales}
-            module="project-sale(s)"
-            api={'project-sales'}
-            afterImportCompleted={() => {
-              fetchProjects();
-            }}
-            isExportAllOrSomeFeature={true}
-            total={rowCount}
-            recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-            ids={
-              getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-                ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-                : []
-            }
-            onExportToExcelSuccess={() => {
-              if (gridApi) gridApi.deselectAll();
-              else fetchProjects();
-            }}
-            additionalParams={getQueryString(true)}
-          />
-        </div>
-        <div className="main-container">
-          <div className="header-panel">
-            <ProjectHeader
-              userId={user?.user?._id}
-              onSearch={handleSearch}
-              searchVal={search}
-              permissions={permissions?.projectSales}
-              selectedType={selectedType}
-              handleFilterChange={handleProjectFilter}
-              onCreate={handleCreate}
-              columns={columns}
-              dispatch={dispatch}
-              showConfirmBox={showConfirmBox}
-              canDelete={selectedRecords?.length === 0}
-              selectedRecords={selectedRecords}
-              setShowDeleteWarningConfirmBox={setShowDeleteWarningConfirmBox}
-              setShowEntityDialog={setShowEntityDialog}
-              setEntities={setEntities}
-              filters={filters}
-              resource={sidebarResource.projectSales}
-            >
-              {referenceDetails.referenceId && (
-                <Chip
-                  className="ml-3"
-                  color="primary"
-                  label={`${referenceDetails.resource === customerAccount.accountResource
-                    ? routes.customerAccount.title
-                    : referenceDetails.resource === supplierAccount.accountResource
-                      ? routes.supplierAccount.title
-                      : routes.opportunity.title
-                    } : ${referenceDetails.referenceName}`}
-                  onDelete={() => {
-                    setReferenceDetails({ referenceId: null, referenceName: null, resource: null });
-                  }}
-                />
-              )}
-            </ProjectHeader>
-          </div>
-
-          {Object.keys(frameWorkComponent).length > 0 ? (
-            isMobile && !isTablet ? (
-              <CustomSwipableList
-                key={selectedType}
-                allowSelection={true}
-                allowSwipe={true}
-                permissions={permissions?.projectSales}
-                primaryField={columns?.find((d) => d.primaryField)}
-                onClick={(data) => {
-                  history.push(`${routes.projectSalesDetail.path}/${data._id}`);
-                }}
-                dataRows={dataRows}
-                selectedRecords={selectedRecords}
-                dispatch={dispatch}
-                onEdit={(data) => {
-                  history.push(`${routes.projectSalesDetail.path}/${data._id}`);
-                }}
-                extraParamsToCheckDelete={true}
-                onDelete={(data) => {
-                  showConfirmBox(data);
-                }}
-                rowCount={rowCount}
-                page={page}
-                loading={loading}
-                additionalDetails={[
-                  {
-                    icon: <BiDollar size={18} />,
-                    field: 'amount'
-                  }
-                ]}
-                chips={[
-                  {
-                    icon: <FaAward />,
-                    label: 'Award Date : ',
-                    field: 'awardDate'
-                  },
-                  {
-                    icon: <AiFillFileMarkdown />,
-                    label: 'Market:',
-                    field: 'marketSegment'
-                  },
-                  {
-                    icon: <SiMarketo />,
-                    label: 'Sub-Market:',
-                    field: 'subMarketSegment'
-                  },
-                  {
-                    icon: <GiArrowScope />,
-                    label: 'Scope:',
-                    field: 'scope'
-                  }
-                ]}
-                onCreate={false}
-                showClone={true}
-                onClone={(data) => {
-                  setIsOpen({ open: true, isClone: true, idToClone: data._id });
-                }}
-                renderedFrom={renderedFrom}
-              />
-            ) : (
-              <CustomAgGrid
-                columns={columns}
-                dataRows={dataRows}
-                frameworkComponents={frameWorkComponent}
-                setGridApi={setGridApi}
-                dispatch={dispatch}
-                rowCount={rowCount}
-                limit={limit}
-                pageSizes={pageSizes}
-                actionWidth={150}
-                page={page}
-                loading={loading}
-                renderedFrom={renderedFrom}
-                refreshGrid={fetchProjects}
-                showOnlyShowFilteredRecordSwitch={true}
-                showFilters={true}
-                resource={sidebarResource.projectSales}
-              />
-
-            )
-          ) : null}
-        </div>
-
-        {showDeleteWarningConfirmBox?.show ? (
-          <MessageDialog
-            open={showDeleteWarningConfirmBox?.show}
-            message={
-              showDeleteWarningConfirmBox?.isDelete
-                ? `You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`
-                : `You are trying to update records which you do not have permission to update, Please remove those records from selection and try again.`
-            }
-            onClose={() => setShowDeleteWarningConfirmBox({ show: false, isDelete: false })}
-          />
-        ) : null}
-
-        {isConfirmDialogVisible ? (
-          <ConfirmationDialog
-            open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete this record ${deleteRec.name || ''}?`}
-            onClose={() => {
-              if (deleteRec) setDeleteRec({});
-              setIsConformDialogVisible(false);
-            }}
-            okBtnLoading={deleteLoading}
-            onOk={handleDeleteProjects}
-          />
-        ) : null}
-        {showEntityDialog ? (
-          <EntitySelectionsDialog
-            open={showEntityDialog}
-            resource={sidebarResource.projectSales}
-            resourceIds={selectedRecords.length ? selectedRecords.map((o) => o._id) : [projectSalesId]}
-            onClose={() => {
-              setShowEntityDialog(false);
-              setProjectSalesId('');
-            }}
-            entities={entities}
-            onSuccess={fetchProjects}
-          />
-        ) : null}
-      </section>
-    </>
+    </section>
   );
 };
 
