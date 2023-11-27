@@ -10,106 +10,111 @@ import WarningIcon from '@material-ui/icons/Warning';
 import { Autocomplete } from '@material-ui/lab';
 import { camelCase } from 'lodash';
 import moment from 'moment';
-import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { GiStockpiles } from 'react-icons/gi';
 import { Link, useHistory } from 'react-router-dom';
 import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import routes from '../../components/Helpers/Routes';
 import SearchBox from '../../components/Helpers/SearchBox';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import {
   ASSET_STATUS,
   COLOUR_MASTER,
   INVENTORY_HISTORY_TYPE,
-  getLocalStorageArrayData,
   gridLoadingTimeout,
   prepareDataForGrid,
   product,
-  removeLocalStorage,
   serializedAsset,
   sidebarResource
 } from '../../constants/helpers';
-import useColumns, { getFrameworkComponents, getStaticFields, gridFilterParser } from '../../constants/useColumns';
 import styles from '../Leads/Header.module.scss';
 import ManageSerializedAsset from './ManageSerializedAsset';
 import ReasonDialog from './ReasonDialog';
+import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import CustomContainer from 'src/components/CustomContainer';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+
+let searchTimeout;
 
 const SerializedAsset = () => {
   const renderedFrom = camelCase(routes?.serializedAsset.title);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
-
   const toastConfig = useContext(CustomToastContext);
-  const [showManageProductInventoryDialog, setShowManageProductInventoryDialog] = useState({ open: false, isClone: false, idToClone: null });
-  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
-  const [deleteRecord, setDeleteRecord] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [gridApi, setGridApi] = useState(null);
-  const [columns, setColumns] = useState(null);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
-    state;
-  const [productCategoryList, setProductCategoryList] = useState([]);
-  const [productFilterList, setProductFilterList] = useState([]);
-  const [productCategory, setProductCategory] = useState(null);
-  const [productFilter, setProductFilter] = useState(null);
 
-  const [warehouseOptions, setWarehouseOptions] = useState([]);
-  const [selectedWarehouse, setSelectedWarehouse] = useState(null);
-  const [subleaseAsset, setSubleaseAsset] = useState(false);
-  const [openSupplierAccountDialog, setOpenSupplierAccountDialog] = useState(false);
+  const history = useHistory();
+  const { state, dispatch } = useTableReducer();
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { getColumnData } = useColumns();
 
   const {
     state: { permissions, selectedEntity }
   }: any = useData();
-  const { getColumnData } = useColumns();
-  const history = useHistory();
 
+  const [showManageProductInventoryDialog, setShowManageProductInventoryDialog] = useState({ open: false, isClone: false, idToClone: null });
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
+  const [deleteRecord, setDeleteRecord] = useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [columns, setColumns] = useState(null);
+  const [productCategoryList, setProductCategoryList] = useState([]);
+  const [productFilterList, setProductFilterList] = useState([]);
+  const [productCategory, setProductCategory] = useState(null);
+  const [productFilter, setProductFilter] = useState(null);
+  const [warehouseOptions, setWarehouseOptions] = useState([]);
+  const [selectedWarehouse, setSelectedWarehouse] = useState(null);
+  const [subleaseAsset, setSubleaseAsset] = useState(false);
+  const [openSupplierAccountDialog, setOpenSupplierAccountDialog] = useState(false);
   const [warehouse, setWarehouse] = useState(history.location?.state?.warehouse);
-
   const [fromPurchaseOrder, setFromPurchaseOrder] = useState({
     productId: history.location?.state?.productId,
     productName: history.location?.state?.productName,
     pOId: history.location?.state?.pOId,
     pOName: history.location?.state?.pOName
   });
-
   const [redirectProduct, setRedirectProduct] = useState(history.location?.state?.product);
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
   const [showReasonDialog, setShowReasonDialog] = useState(false);
   const [status, setStatus] = useState('');
+  const [renderCount, setRenderCount] = useState(0);
 
   useEffect(() => {
     fetchGridColumns();
   }, []);
 
   useEffect(() => {
-    fetchProductInventory();
+    let millisec = Object.keys(search).length > 0 ? 600 : 5;
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+
+    searchTimeout = setTimeout(() => {
+      fetchData();
+    }, millisec);
+  }, [search]);
+
+  useEffect(() => {
+    if (renderCount > 0) {
+      fetchData();
+    } else setRenderCount((preCount) => preCount + 1);
   }, [
     page,
     limit,
     filters,
     sorting,
-    search,
     warehouse,
     selectedWarehouse,
+    selectedEntity,
     redirectProduct,
     fromPurchaseOrder,
     productCategory,
-    productFilter,
     subleaseAsset,
-    showFilteredRecordsOnly,
-    selectedEntity
+    showFilteredRecordsOnly
   ]);
 
   useEffect(() => {
@@ -155,56 +160,148 @@ const SerializedAsset = () => {
           }
         });
         let columns = [];
-        let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path, true);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName);
+          if (o?.fieldData?.fieldName === 'assetNumber') {
+            columns = [
+              ...columns,
+              {
+                accessor: o?.fieldData?.fieldName,
+                Header: o?.fieldData?.fieldLabel,
+                minWidth: 180,
+                width: 180,
+                Cell: ({ row }) => (
+                  <div
+                    style={{
+                      backgroundColor: [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(
+                        row?.original?.status
+                      )
+                        ? COLOUR_MASTER.lostAssets.background
+                        : ''
+                    }}
+                  >
+                    <Link
+                      className="link text-truncate"
+                      title={row?.original[o?.fieldData?.fieldName]}
+                      to={`${routes.serializedAssetDetail.path}/${row?.original?._id}`}
+                    >
+                      {row?.original[o?.fieldData?.fieldName]}
+                    </Link>
+                    {(row?.original?.recertDate && new Date(row?.original?.recertDate)?.getTime() <= new Date()?.getTime()) ||
+                      (row?.original?.certificateExpiryDate && new Date(row?.original?.certificateExpiryDate)?.getTime() <= new Date()?.getTime() && (
+                        <Box ml={1}>
+                          <HtmlTooltip title="Asset needs to be recert">
+                            <WarningIcon style={{ fontSize: '14px' }} fontSize="small" color="error" />
+                          </HtmlTooltip>
+                        </Box>
+                      ))}
+                  </div>
+                )
+              }
+            ];
+          } else {
+            let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path, true);
+            if (currentColumn !== null) {
+              columns = [...columns, currentColumn?.columnData];
             }
           }
         });
-        columns?.forEach((e) => {
-          if (e.field === 'assetNumber') {
-            e.cellRenderer = 'assetNumberRenderer';
-            e.cellStyle = (params) => {
-              if ([ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(params?.data?.status)) {
-                return { backgroundColor: COLOUR_MASTER.lostAssets.background };
-              }
-              return null;
-            };
-          }
+
+        columns.push({
+          accessor: 'ownerType',
+          Header: 'Actual Owner Type',
+          minWidth: 150,
+          width: 150,
+          Cell: ({ row }) => (
+            <>
+              {row?.original?.ownerType ? (
+                <h5 className="text-truncate" title={row?.original?.ownerType}>
+                  {row?.original?.ownerType}
+                </h5>
+              ) : (
+                <NoDataCell />
+              )}
+            </>
+          )
         });
 
-        columns.push({ field: 'ownerType', headerName: 'Actual Owner Type', show: true, disabled: true, cellRenderer: 'commonRenderer' });
-        columns.push({ field: 'owner', headerName: 'Actual Owner', show: true, disabled: true, cellRenderer: 'commonRenderer' });
+        columns.push({
+          accessor: 'owner',
+          Header: 'Actual Owner',
+          minWidth: 150,
+          width: 150,
+          Cell: ({ row }) => (
+            <>
+              {row?.original?.owner ? (
+                <h5 className="text-truncate" title={row?.original?.owner}>
+                  {row?.original?.owner}
+                </h5>
+              ) : (
+                <NoDataCell />
+              )}
+            </>
+          )
+        });
 
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent,
-          assetNumberRenderer: AssetNumberRenderer,
-          actionsRenderer: ActionsRenderer
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
-        columns = [...columns, ...getStaticFields()];
-        setColumns([...columns]);
+        columns = [...columns, ...getStaticFields(), ActionsRenderer];
+        setColumns(columns);
       });
   };
 
-  const fetchProductInventory = () => {
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 110,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        <HtmlTooltip title={permissions?.serializedAsset?.isCreate ? 'Clone' : cloneDisable}>
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Clone"
+              disabled={!permissions?.serializedAsset?.isCreate}
+              onClick={() => {
+                setShowManageProductInventoryDialog({ open: true, isClone: true, idToClone: row?.original?._id });
+              }}
+            >
+              <FileCopyIcon fontSize="small" color={permissions?.serializedAsset?.isCreate ? 'primary' : 'disabled'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+
+        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              disabled={row?.original?.canDelete ? false : true}
+              onClick={() => {
+                setDeleteRecord(row?.original);
+                setShowDeleteConfirmBox(true);
+              }}
+            >
+              <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+      </>
+    )
+  };
+
+  const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
     const queryString = getQueryString();
+
     axiosInstance()
       .get(`${serializedAsset.api}${queryString}`)
-      .then(({ data }) => {
-        let rows = data.data?.map((u, user) => {
-          let finalObject = prepareDataForGrid(u);
-          finalObject['isChecked'] = [...getLocalStorageArrayData(localStorageSelectedRecords)].some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions?.serializedAsset.isUpdate;
+      .then(({ data: { data, count } }) => {
+        let rows = data.map((u) => {
+          let finalObject: any = prepareDataForGrid(u);
+          finalObject['isSelected'] = selectedRecords?.some((s) => s._id === u._id);
           finalObject['canDelete'] =
             permissions?.serializedAsset?.isDelete &&
             ![
@@ -217,32 +314,17 @@ const SerializedAsset = () => {
             ]?.includes(u?.status)
               ? false
               : true;
-          return {
-            ...finalObject
-          };
+          return finalObject;
         });
-        if (appendRows) {
-          dispatch({
-            type: 'initialize',
-            data: [...dataRows, ...rows],
-            count: data.data.count,
-            selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
-          });
-        } else {
-          dispatch({
-            type: 'initialize',
-            data: rows,
-            count: data.count,
-            selectedRecords: rows.filter((f) => f.isChecked === true)
-          });
-        }
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
+        dispatch({ type: 'initialize', data: rows, count: count });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        dispatch({ type: 'loading', loading: false });
+      })
+      .finally(() => {
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
       });
   };
 
@@ -296,8 +378,7 @@ const SerializedAsset = () => {
       deepFilter = `${deepFilter}&subleaseAsset=0`;
     }
     if (showFilteredRecordsOnly) {
-      const savedRecords = [...getLocalStorageArrayData(localStorageSelectedRecords)];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
     }
     return `${deepFilter}&filterType=and&filterByIdType=and`;
   };
@@ -307,13 +388,13 @@ const SerializedAsset = () => {
     if (deleteRecord) {
       ids.push(deleteRecord._id);
     } else {
-      ids = [...getLocalStorageArrayData(localStorageSelectedRecords)].map((d) => d._id);
+      ids = selectedRecords?.map((d) => d._id);
     }
     axiosInstance()
       .put(`${serializedAsset.api}/remove`, { ids: ids })
       .then(() => {
-        removeLocalStorage(localStorageSelectedRecords);
-        fetchProductInventory();
+        dispatch({ type: 'selection', selectedRecords: [] });
+        fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
         setAnchorEl(null);
@@ -333,7 +414,7 @@ const SerializedAsset = () => {
   };
 
   const handleStatusUpdate = (obj) => {
-    const ids = [...getLocalStorageArrayData(localStorageSelectedRecords)].map((d) => ({
+    const ids = selectedRecords?.map((d) => ({
       _id: d._id,
       currentStatus: d.status
     }));
@@ -345,11 +426,8 @@ const SerializedAsset = () => {
         reference: { _id: '', type: INVENTORY_HISTORY_TYPE.serializedAssets }
       })
       .then(() => {
-        if (gridApi) {
-          gridApi.deselectAll();
-        }
-        localStorage.removeItem(localStorageSelectedRecords);
-        fetchProductInventory();
+        dispatch({ type: 'selection', selectedRecords: [] });
+        fetchData();
         setAnchorEl(null);
         toastConfig.setToastConfig({
           open: true,
@@ -361,70 +439,6 @@ const SerializedAsset = () => {
         toastConfig.setToastConfig(error);
       });
   };
-
-  const AssetNumberRenderer = (params) => (
-    <Fragment>
-      <Link className="link text-truncate" title={params.value} to={`${routes.serializedAssetDetail.path}/${params.data?._id}`}>
-        {params.value}
-      </Link>
-      {(params.data?.recertDate && new Date(params.data?.recertDate)?.getTime() <= new Date()?.getTime()) ||
-        (params.data?.certificateExpiryDate && new Date(params.data?.certificateExpiryDate)?.getTime() <= new Date()?.getTime() && (
-          <Box ml={1}>
-            <HtmlTooltip title="Asset needs to be recert">
-              <WarningIcon style={{ fontSize: '14px' }} fontSize="small" color="error" />
-            </HtmlTooltip>
-          </Box>
-        ))}
-    </Fragment>
-  );
-
-  const ActionsRenderer = (params) => (
-    <>
-      {permissions?.serializedAsset?.isCreate ? (
-        <HtmlTooltip title="Clone">
-          <IconButton
-            size="small"
-            aria-label="Clone"
-            onClick={() => {
-              setShowManageProductInventoryDialog({ open: true, isClone: true, idToClone: params.data._id });
-            }}
-          >
-            <FileCopyIcon color="primary" />
-          </IconButton>
-        </HtmlTooltip>
-      ) : (
-        <HtmlTooltip title="You do not have permission to clone">
-          <span>
-            <IconButton size="small" disabled aria-label="Clone">
-              <FileCopyIcon />
-            </IconButton>
-          </span>
-        </HtmlTooltip>
-      )}
-      {permissions?.serializedAsset?.isDelete && params.data.canDelete ? (
-        <HtmlTooltip title="Delete">
-          <IconButton
-            size="small"
-            aria-label="Delete"
-            onClick={() => {
-              setDeleteRecord(params.data);
-              setShowDeleteConfirmBox(true);
-            }}
-          >
-            <DeleteIcon color="error" />
-          </IconButton>
-        </HtmlTooltip>
-      ) : (
-        <HtmlTooltip title="You do not have permission to delete">
-          <span>
-            <IconButton size="small" disabled aria-label="Clone">
-              <DeleteIcon />
-            </IconButton>
-          </span>
-        </HtmlTooltip>
-      )}
-    </>
-  );
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
@@ -439,7 +453,7 @@ const SerializedAsset = () => {
   };
 
   const handleCertificationSupplier = async (data) => {
-    const ids = [...getLocalStorageArrayData(localStorageSelectedRecords)]?.map((item) => item?._id);
+    const ids = selectedRecords?.map((item) => item?._id);
     const certificationSupplier = data?.map((item) => item?._id);
     const body = {
       _ids: ids,
@@ -447,87 +461,18 @@ const SerializedAsset = () => {
     };
     try {
       let response = await axiosInstance().put(`${routes?.serializedAsset?.path}/update-bulk-data`, body);
-      removeLocalStorage(localStorageSelectedRecords);
+      dispatch({ type: 'selection', selectedRecords: [] });
       toastConfig.setToastConfig({
         open: true,
         type: 'success',
         message: response?.data?.message
       });
       setOpenSupplierAccountDialog(false);
-      fetchProductInventory();
+      fetchData();
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
   };
-
-  const backgroundColorClass = (data) => {
-    let className = '';
-    if (data?.recertDate || data?.certificateExpiryDate) {
-      var a = moment(data?.recertDate || data?.certificateExpiryDate);
-      var b = moment();
-      const days = a.diff(b, 'days');
-
-      switch (true) {
-        case days < 15:
-          className = 'light-red-data-row';
-          break;
-        case days < 30 && days >= 15:
-          className = 'light-yellow-data-row';
-          break;
-        case days <= 60 && days >= 30:
-          className = 'light-green-data-row';
-          break;
-        default:
-          break;
-      }
-    }
-    if (data.status === 'Scrap') {
-      className = 'light-yellow-data-row';
-    }
-
-    return className;
-  };
-
-  const additionalDetails = [
-    {
-      renderer: (d) => {
-        const plant = columns.find((c) => c.field === 'warehouse');
-        if (!plant || !plant.show) return null;
-        return (
-          <span className="line-clamp-1 flex">
-            {plant.headerName}:&nbsp;
-            <Link
-              className="link"
-              title={d[plant.field] || ''}
-              to={`${plant.cellRendererParams?.pathName}/${d[plant.cellRendererParams?.property]}`}
-              target="_blank"
-            >
-              {d[plant.field] || ''}
-            </Link>
-          </span>
-        );
-      }
-    },
-    {
-      renderer: (d) => {
-        const product = columns.find((c) => c.field === 'product');
-        if (!product || !product.show) return null;
-        return (
-          <span className="line-clamp-1 flex">
-            {product.headerName}:&nbsp;
-            <Link
-              className="link"
-              title={d[product.field] || ''}
-              to={`${product.cellRendererParams?.pathName}/${d[product.cellRendererParams?.property]}`}
-              target="_blank"
-            >
-              {d[product.field] || ''}
-            </Link>
-          </span>
-        );
-      }
-    }
-  ];
 
   return (
     <section className="main-container-v1">
@@ -535,27 +480,23 @@ const SerializedAsset = () => {
         <CustomBreadCrumbs routes={[routes.serializedAsset]} />
         <ImportExportLinks
           permissions={permissions?.serializedAsset}
-          module="product inventory"
+          module={routes?.serializedAsset.title}
           api={serializedAsset.api}
           afterImportCompleted={() => {
-            fetchProductInventory();
+            fetchData();
           }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
-          recordsToExport={[...getLocalStorageArrayData(localStorageSelectedRecords)].length}
-          ids={
-            [...getLocalStorageArrayData(localStorageSelectedRecords)].length
-              ? [...getLocalStorageArrayData(localStorageSelectedRecords)].map((obj) => obj._id)
-              : []
-          }
+          recordsToExport={selectedRecords?.length}
+          ids={selectedRecords?.map((obj) => obj._id)}
           onExportToExcelSuccess={() => {
-            if (gridApi) gridApi.deselectAll();
-            else fetchProductInventory();
+            fetchData();
           }}
           additionalParams={getQueryString(true)}
         />
       </div>
-      <div className="main-container">
+
+      <CustomContainer>
         <div className="header-panel">
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-[4fr_3fr] gap-4 items-start">
             <div className={'flex flex-wrap align-items-center gap-[8px]'}>
@@ -689,37 +630,34 @@ const SerializedAsset = () => {
                 </Fragment>
               )}
             </div>
-            <div className="flex flex-wrap gap-[8px]  justify-end">
-              <SearchBox onChange={handleSearch} className={styles.search_box_input} size="small" value={search} />
+            <div className="flex flex-wrap gap-[8px] justify-end">
+              <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
               <div className="flex gap-[8px] flex-wrap items-center">
-                {permissions?.serializedAsset?.isCreate && (
-                  <Button
-                    onClick={() => {
-                      setShowManageProductInventoryDialog({ open: true, isClone: false, idToClone: null });
-                    }}
-                    variant={'contained'}
-                    size="small"
-                    color="primary"
-                    className={`no-shadow`}
-                    startIcon={<AddOutlined />}
-                  >
-                    Add
-                  </Button>
-                )}
-                {(permissions?.serializedAsset?.isDelete || permissions?.serializedAsset?.isUpdate) && (
-                  <Button
-                    className={`new-dropdown-v1`}
-                    variant={'outlined'}
-                    color="default"
-                    size="small"
-                    onClick={openActions}
-                    disabled={[...getLocalStorageArrayData(localStorageSelectedRecords)].length ? false : true}
-                    aria-controls="action-menu"
-                    endIcon={<ExpandMore />}
-                  >
-                    Actions
-                  </Button>
-                )}
+                <Button
+                  disabled={!permissions?.serializedAsset?.isCreate}
+                  variant={'contained'}
+                  color="primary"
+                  size="small"
+                  className={`no-shadow`}
+                  onClick={() => {
+                    setShowManageProductInventoryDialog({ open: true, isClone: false, idToClone: null });
+                  }}
+                  startIcon={<AddOutlined />}
+                >
+                  Add
+                </Button>
+                <Button
+                  variant={'outlined'}
+                  color="default"
+                  size="small"
+                  onClick={openActions}
+                  className={`new-dropdown-v1`}
+                  aria-controls="action-menu"
+                  endIcon={<ExpandMore />}
+                  disabled={selectedRecords?.length ? false : true}
+                >
+                  Actions
+                </Button>
                 <Menu
                   anchorEl={anchorEl}
                   keepMounted
@@ -733,16 +671,13 @@ const SerializedAsset = () => {
                   onClose={closeActions}
                 >
                   <MenuItem
-                    disabled={
-                      !permissions?.serializedAsset?.isDelete ||
-                      getLocalStorageArrayData(localStorageSelectedRecords)?.filter((e) => !e.canDelete)?.length > 0
-                    }
+                    disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
                     onClick={() => {
                       closeActions();
                       setShowDeleteConfirmBox(true);
                     }}
                   >
-                    Delete
+                    {`Delete (${selectedRecords?.length})`}
                   </MenuItem>
                   {permissions?.serializedAsset?.isUpdate &&
                     allowUpdateStatus &&
@@ -753,9 +688,8 @@ const SerializedAsset = () => {
                           handleStatusChange(status);
                         }}
                         disabled={
-                          [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) =>
-                            [ASSET_STATUS.available, ASSET_STATUS.underReview, ASSET_STATUS.lost].includes(o.status)
-                          ).length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length
+                          selectedRecords?.filter((o) => [ASSET_STATUS.available, ASSET_STATUS.underReview, ASSET_STATUS.lost].includes(o.status))
+                            .length === selectedRecords?.length
                             ? false
                             : true
                         }
@@ -763,219 +697,95 @@ const SerializedAsset = () => {
                         {`Status Change - ${status}`}
                       </MenuItem>
                     ))}
-                  {permissions?.serializedAsset?.isUpdate &&
-                    allowUpdateStatus &&
-                    [...getLocalStorageArrayData(localStorageSelectedRecords)]?.length && (
-                      <>
+                  {permissions?.serializedAsset?.isUpdate && allowUpdateStatus && selectedRecords?.length && (
+                    <>
+                      <MenuItem
+                        onClick={() => {
+                          closeActions();
+                          handleStatusChange(ASSET_STATUS.needRepair);
+                        }}
+                        disabled={
+                          selectedRecords?.filter((o) => ![ASSET_STATUS.needRepair].includes(o.status)).length === selectedRecords?.length
+                            ? false
+                            : true
+                        }
+                      >
+                        {`Status Change - ${ASSET_STATUS.needRepair}`}
+                      </MenuItem>
+                      <MenuItem
+                        onClick={() => {
+                          closeActions();
+                          handleStatusChange(ASSET_STATUS.needRecert);
+                        }}
+                        disabled={
+                          selectedRecords?.filter((o) => ![ASSET_STATUS.needRecert].includes(o.status)).length === selectedRecords?.length
+                            ? false
+                            : true
+                        }
+                      >
+                        {`Status Change - ${ASSET_STATUS.needRecert}`}
+                      </MenuItem>
+                      <MenuItem
+                        onClick={() => {
+                          closeActions();
+                          handleStatusChange(ASSET_STATUS.scrap);
+                        }}
+                        disabled={
+                          selectedRecords?.filter((o) => ![ASSET_STATUS.scrap].includes(o.status)).length === selectedRecords?.length ? false : true
+                        }
+                      >
+                        {`Status Change - ${ASSET_STATUS.scrap}`}
+                      </MenuItem>
+                      <MenuItem
+                        onClick={() => {
+                          closeActions();
+                          handleStatusChange(ASSET_STATUS.lost);
+                        }}
+                        disabled={
+                          selectedRecords?.filter((o) => ![ASSET_STATUS.lost].includes(o.status)).length === selectedRecords?.length ? false : true
+                        }
+                      >
+                        {`Status Change - ${ASSET_STATUS.lost}`}
+                      </MenuItem>
+                      {columns?.some((e) => e.field === 'certificationSupplier') && (
                         <MenuItem
+                          disabled={!permissions?.serializedAsset?.isUpdate}
                           onClick={() => {
                             closeActions();
-                            handleStatusChange(ASSET_STATUS.needRepair);
-                          }}
-                          disabled={
-                            [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) => ![ASSET_STATUS.needRepair].includes(o.status))
-                              .length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length
-                              ? false
-                              : true
-                          }
-                        >
-                          {`Status Change - ${ASSET_STATUS.needRepair}`}
-                        </MenuItem>
-                        <MenuItem
-                          onClick={() => {
-                            closeActions();
-                            handleStatusChange(ASSET_STATUS.needRecert);
-                          }}
-                          disabled={
-                            [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) => ![ASSET_STATUS.needRecert].includes(o.status))
-                              .length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length
-                              ? false
-                              : true
-                          }
-                        >
-                          {`Status Change - ${ASSET_STATUS.needRecert}`}
-                        </MenuItem>
-                        <MenuItem
-                          onClick={() => {
-                            closeActions();
-                            handleStatusChange(ASSET_STATUS.scrap);
-                          }}
-                          disabled={
-                            [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) => ![ASSET_STATUS.scrap].includes(o.status))
-                              .length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length
-                              ? false
-                              : true
-                          }
-                        >
-                          {`Status Change - ${ASSET_STATUS.scrap}`}
-                        </MenuItem>
-                        <MenuItem
-                          onClick={() => {
-                            closeActions();
-                            handleStatusChange(ASSET_STATUS.lost);
-                          }}
-                          disabled={
-                            [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) => ![ASSET_STATUS.lost].includes(o.status))
-                              .length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length
-                              ? false
-                              : true
-                          }
-                        >
-                          {`Status Change - ${ASSET_STATUS.lost}`}
-                        </MenuItem>
-                        {columns?.some((e) => e.field === 'certificationSupplier') && (
-                          <MenuItem
-                            disabled={!permissions?.serializedAsset?.isUpdate}
-                            onClick={() => {
-                              closeActions();
-                              setOpenSupplierAccountDialog(true);
-                            }}
-                          >
-                            {`Assign Certification Supplier`}
-                          </MenuItem>
-                        )}
-                      </>
-                    )}
-                  {/* {columns?.some(e => e.field === "mtrAttached") &&
-                      <>
-                        <MenuItem
-                          onClick={() => {
-                            closeActions();
-                            handleMTRAttached(true)
+                            setOpenSupplierAccountDialog(true);
                           }}
                         >
-                          MTR Attach - Yes
+                          {`Assign Certification Supplier`}
                         </MenuItem>
-                        <MenuItem
-                          onClick={() => {
-                            closeActions();
-                            handleMTRAttached(false)
-                          }}
-                        >
-                          MTR Attach - No
-                        </MenuItem>
-                      </>
-                    } */}
+                      )}
+                    </>
+                  )}
                 </Menu>
               </div>
             </div>
           </div>
         </div>
+
         {columns ? (
-          isMobile && !isTablet ? (
-            <CustomSwipableList
-              allowSelection={true}
-              allowSwipe={true}
-              permissions={permissions?.serializedAsset}
-              primaryField={columns?.find((d) => d.field === 'assetNumber')}
-              onClick={(d) => {
-                history.push(`${routes.serializedAssetDetail.path}/${d._id}`);
-              }}
-              dataRows={dataRows}
-              selectedRecords={selectedRecords}
-              dispatch={dispatch}
-              // onEdit={(d) => {
-              //   history.push(`${routes.serializedAssetDetail.path}/${d._id}`);
-              // }}
-              additionalDetails={additionalDetails}
-              extraParamsToCheckDelete={false}
-              // onDelete={(d) => {
-              //   setDeleteRecord(d);
-              //   setShowDeleteConfirmBox(true);
-              // }}
-              actionCol={(data) => {
-                const params = { data };
-                return <ActionsRenderer {...params} />;
-              }}
-              rowCount={rowCount}
-              page={page}
-              loading={loading}
-              chips={[
-                {
-                  label: 'Serial Number : ',
-                  field: 'serialNumber'
-                },
-                {
-                  label: 'Status : ',
-                  field: 'status'
-                },
-                {
-                  label: 'Cost : ',
-                  field: 'cost'
-                }
-              ]}
-              owerCollaboratorInitialsOrImages=""
-              onCreate={false}
-              showClone={false}
-              // onClone={(data) => {
-              //   setShowManageProductInventoryDialog({ open: true, isClone: true, idToClone: data._id });
-              // }}
-              backgroundColorClass={(data) => backgroundColorClass(data)}
-              renderedFrom={renderedFrom}
-            />
-          ) : Object.keys(frameWorkComponent).length > 0 && columns ? (
-            <CustomAgGrid
-              columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameWorkComponent}
-              setGridApi={setGridApi}
-              dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              actionWidth={150}
-              loading={loading}
-              renderedFrom={renderedFrom}
-              refreshGrid={fetchProductInventory}
-              showOnlyShowFilteredRecordSwitch={true}
-              rowClassRules={{
-                'light-red-data-row': function (params) {
-                  if (params.data?.recertDate || params.data?.certificateExpiryDate) {
-                    var a = moment(params.data?.recertDate || params.data?.certificateExpiryDate);
-                    var b = moment();
-                    const days = a.diff(b, 'days');
-                    if (days < 15 && days >= 0) {
-                      return true;
-                    } else if (days < 0) {
-                      return true;
-                    }
-                  }
-                  return false;
-                },
-                'light-yellow-data-row': function (params) {
-                  if (params.data?.recertDate || params.data?.certificateExpiryDate) {
-                    var a = moment(params.data?.recertDate || params.data?.certificateExpiryDate);
-                    var b = moment();
-                    const days = a.diff(b, 'days');
-                    if (days < 30 && days >= 15) {
-                      return true;
-                    }
-                  }
-                  return false;
-                },
-                'light-green-data-row': function (params) {
-                  if (params.data?.recertDate || params.data?.certificateExpiryDate) {
-                    var a = moment(params.data?.recertDate || params.data?.certificateExpiryDate);
-                    var b = moment();
-                    const days = a.diff(b, 'days');
-                    if (days <= 60 && days >= 30) {
-                      return true;
-                    }
-                  }
-                  return false;
-                }
-              }}
-              showFilters={true}
-              resource={sidebarResource.serializedAsset}
-            />
-          ) : null
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            isClientSideGrid={false}
+            refreshGrid={fetchData}
+            showOnlyShowFilteredRecordSwitch={true}
+            showFilters={true}
+            resource={sidebarResource.serializedAsset}
+          />
         ) : (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
-      </div>
+      </CustomContainer>
+
       {showManageProductInventoryDialog.open && (
         <ManageSerializedAsset
           isClone={showManageProductInventoryDialog.isClone}
@@ -983,10 +793,11 @@ const SerializedAsset = () => {
           onClose={() => setShowManageProductInventoryDialog({ open: false, isClone: false, idToClone: null })}
           onSuccess={() => {
             setShowManageProductInventoryDialog({ open: false, isClone: false, idToClone: null });
-            fetchProductInventory();
+            fetchData();
           }}
         />
       )}
+
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
@@ -1000,6 +811,7 @@ const SerializedAsset = () => {
           onOk={handleDelete}
         />
       )}
+
       {openSupplierAccountDialog && (
         <AssignDynamicDialog
           reference={routes.serializedAsset.title}
@@ -1014,6 +826,7 @@ const SerializedAsset = () => {
           path={routes?.supplierAccount?.path}
         />
       )}
+
       {showReasonDialog && (
         <ReasonDialog
           onClose={() => setShowReasonDialog(false)}
