@@ -264,11 +264,13 @@ export default function useColumns() {
             Cell: ({ row }) =>
               row?.original?.[field?.fieldName] ? (
                 <h5
-                  className="createBy"
-                  title={`${row?.original?.[field?.fieldName]} • ${moment(row?.original?.createdByDate.slice(0, 10)).format(dateFormat)}`}
+                  className="flex"
+                  title={`${row?.original?.[field?.fieldName]} • ${moment(row?.original?.createdByDate?.slice(0, 10))?.format(dateFormat)}`}
                 >
+                  <span className="line-clamp-1">
                   {row?.original?.[field?.fieldName]}
-                  <span className="createdAtTime badge-date">{moment(row?.original?.data?.createdByDate.slice(0, 10)).format(dateFormat)}</span>
+                  </span>
+                  <span className="createdAtTime badge-date">{moment(row?.original?.data?.createdByDate?.slice(0, 10))?.format(dateFormat)}</span>
                 </h5>
               ) : (
                 <NoDataCell />
