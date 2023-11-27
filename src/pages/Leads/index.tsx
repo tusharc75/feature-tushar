@@ -1,41 +1,39 @@
 import React, { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import { Grid, Tooltip, IconButton } from '@material-ui/core';
+import { IconButton, Box, Button, Menu, MenuItem } from '@material-ui/core';
 import { Link, useHistory } from 'react-router-dom';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
-import LeadsHeader from './LeadsHeader';
 import axiosInstance from '../../axios/axiosInstance';
 import { useData } from '../../StateProvider/Provider';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import MessageDialog from '../../components/Helpers/MessageDialog';
-import { leadDetailPage } from '../../routes/Lead';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { gridLoadingTimeout, isObjectEmpty, processFieldName, sidebarResource, removeLocalStorage, getLocalStorageArrayData } from '../../constants/helpers';
+import { gridLoadingTimeout, processFieldName, sidebarResource } from '../../constants/helpers';
 import ManageLeadDialog from './ManageLeadDialog/ManageLeadDialog';
-import { HiUserGroup } from 'react-icons/hi';
 import { lead, prepareDataForGrid } from '../../constants/helpers';
 import NoDataCell from '../../components/Helpers/NoDataCell';
-import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import { SiConvertio } from 'react-icons/si';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import CustomContainer from '../../components/CustomContainer';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
+import { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import './style.scss';
 import TransferEntityDialog from '../../components/AssignRolesDialog/TransferEntityDialog';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
-import { FcProcess } from 'react-icons/fc';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { isMobile, isTablet } from 'react-device-detect';
-import { BsBuilding, AiFillMail } from 'react-icons/all';
+
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { SEARCH, useStore } from 'src/StateProvider/fastContext';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns } from 'src/components/CustomReactTableNew';
+import { camelCase } from 'lodash';
+import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import DeleteIcon from '@material-ui/icons/Delete';
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import { isMobile } from 'react-device-detect';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import styles from '../Leads/Header.module.scss';
 
-let leadTimeout;
 const Leads = () => {
-  const [searchQuery] = useStore((store) => store[SEARCH]);
-
   const LeadTypes = [
     {
       key: `My ${routes.lead.title}`,
@@ -49,40 +47,24 @@ const Leads = () => {
 
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
+  const renderedFrom = camelCase(routes?.lead.title);
 
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
   const { getColumnData } = useColumns();
-  const { leadResource, leadApi } = lead;
   const [selectedType, setSelectedType] = useState(1);
   const [isOpen, setIsOpen] = useState({ open: false, isClone: false, idToClone: null });
-  const [renderCount, setRenderCount] = useState(0);
   const [okButtonLoading, setOkButtonLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
-  const [deleteRecord, setDeleteRecord] = useState({ id: null, name: null });
-  const [leadsPermissions, setLeadsPermissions] = useState({
-    isCreate: permissions[leadResource]?.isCreate,
-    isUpdate: permissions[leadResource]?.isUpdate,
-    isRead: permissions[leadResource]?.isRead,
-    isDelete: permissions[leadResource]?.isDelete
-  });
-  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
+  const [deleteRecord, setDeleteRecord] = useState(null);
+  const [messageDialog, setMessageDialog] = useState({ open: false, message: '' });
   const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
   const { isOffline } = useContext(CustomOfflineContext);
-
-  //  Grid Variables - Start
-  const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
-
-  const [columns, setColumns] = useState([]);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
-
-  const localStorageSelectedRecords = `${leadResource}_selected`;
-
-  //  Grid Variables - End
-
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const [columns, setColumns] = useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
   const [convertLeadToOpportunityConfirmationDialog, setConvertLeadToOpportunityConfirmationDialog] = useState({
     open: false,
     id: null,
@@ -92,37 +74,19 @@ const Leads = () => {
   const hasPermissionToConvertInOpportunity = user?.user?.permissions?.convertLeadToOpportunity;
 
   useEffect(() => {
-    if (permissions && permissions[leadResource]) {
-      setLeadsPermissions(permissions[leadResource]);
-    }
-  }, [permissions]);
-
-  useEffect(() => {
     fetchGridColumns();
   }, []);
 
-  useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (leadTimeout) {
-      clearTimeout(leadTimeout);
-    }
-
-    leadTimeout = setTimeout(() => {
-      fetchLeads();
-    }, millisec);
-  }, [search]);
 
   useEffect(() => {
-    if (renderCount > 0) {
-      fetchLeads();
-    } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
+    fetchData();
+  }, [search, page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
     let data;
     if (!isOffline) {
       if (selectedEntity) {
-        const response = await axiosInstance().get(`/field?resource=Lead&entity=${selectedEntity}&view=true`);
+        const response = await axiosInstance().get(`/field?resource=${sidebarResource.lead}&entity=${selectedEntity}&view=true`);
 
         data = response?.data?.data;
       } else {
@@ -131,75 +95,77 @@ const Leads = () => {
     }
 
     let columns = [];
-    let rendererNames = [];
     data?.forEach((o) => {
-      let currentColumn = getColumnData(leadResource, o?.fieldData, routes.leadDetail.path, true);
+      let currentColumn = getColumnData(lead.leadResource, o?.fieldData, routes.leadDetail.path, true);
       if (currentColumn !== null) {
         columns = [...columns, currentColumn?.columnData];
-        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-          rendererNames.push(currentColumn?.rendererName);
-        }
       }
     });
-    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-    tempFrameworkComponent = {
-      ...tempFrameworkComponent,
-      relatedOpportunityRenderer: RelatedOpportunityRenderer,
-      actionsRenderer: ActionsRenderer
-    };
-    setFrameWorkComponent({ ...tempFrameworkComponent });
     columns = [
       ...columns,
-      { field: 'relatedOpportunity', headerName: 'Related Opportunity', show: true, cellRenderer: 'relatedOpportunityRenderer' },
+      {
+        accessor: 'relatedOpportunity', Header: 'Related Opportunity', show: true,
+        Cell: ({ row }) => (
+          <>
+            {row.original?.relatedOpportunity ? (
+              <Link className="link" to={`${routes.opportunityDetail.path}/${row.original?.relatedOpportunityId}`} title={row.original?.relatedOpportunity}>
+                {row.original?.relatedOpportunity}
+              </Link>
+            ) : (
+              <NoDataCell />
+            )}</>
+        )
+      },
       ...getStaticFields()
     ];
-    setColumns([...columns]);
+    setColumns([...columns, ActionsRenderer]);
   };
 
-  const RelatedOpportunityRenderer = (params) => (
-    <>
-      {params.value ? (
-        <Link className="link" to={`${routes.opportunityDetail.path}/${params.data.relatedOpportunityId}`} title={params.value}>
-          {params.value}
-        </Link>
-      ) : (
-        <NoDataCell />
-      )}
-    </>
-  );
-
-  const ActionsRenderer = (params) => (
-    <>
-      {leadsPermissions.isCreate ? (
-        <HtmlTooltip title={'Clone'}>
-          <IconButton
-            size="small"
-            aria-label="Clone"
-            onClick={() => {
-              setIsOpen({ open: true, isClone: true, idToClone: params.data._id });
-            }}
-          >
-            <FileCopyIcon fontSize="small" color="primary" />
-          </IconButton>
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 150,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        <HtmlTooltip title={permissions[lead.leadResource].isCreate ? 'Clone' : cloneDisable}>
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Clone"
+              onClick={() => {
+                setIsOpen({ open: true, isClone: true, idToClone: row?.original._id });
+              }}
+            >
+              <FileCopyIcon fontSize="small" color={permissions[lead.leadResource]?.isCreate ? 'primary' : 'disabled'} />
+            </IconButton>
+          </span>
         </HtmlTooltip>
-      ) : (
-        <HtmlTooltip className={'cursor-stop'} title={'You do not have permission to clone/create'}>
-          <IconButton size="small" aria-label="Clone">
-            <FileCopyIcon fontSize="small" />
-          </IconButton>
-        </HtmlTooltip>
-      )}
-      {hasPermissionToConvertInOpportunity && generateLeadToOpportunityButton(params.data)}
 
-      <GridDeleteIcon
-        hasDeletePermission={leadsPermissions.isDelete}
-        ownerId={params.data.ownerId}
-        userId={user?.user?._id}
-        onDelete={() => showConfirmBox(params.data)}
-        entity="lead"
-      />
-    </>
-  );
+        {hasPermissionToConvertInOpportunity && generateLeadToOpportunityButton(row?.original)}
+
+        <HtmlTooltip title={row?.original?.canDelete && !row?.original?.convertedToOpportunity ? "Delete" : deleteDisable}>
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              disabled={row?.original?.canDelete && !row?.original?.convertedToOpportunity ? false : true}
+              onClick={() => {
+                setDeleteRecord(row?.original);
+                setIsConformDialogVisible(true);
+              }}
+            >
+              <DeleteIcon fontSize="small" color={row?.original?.canDelete && !row?.original?.convertedToOpportunity ? 'error' : 'disabled'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+      </>
+    )
+  }
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
@@ -214,8 +180,7 @@ const Leads = () => {
     }
 
     if (showFilteredRecordsOnly) {
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(selectedRecords.map((m) => m._id))}`;
     }
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
@@ -242,29 +207,23 @@ const Leads = () => {
     return deepFilter;
   };
 
-  const fetchLeads = async () => {
+  const fetchData = async () => {
     if (selectedEntity) {
       const queryString = getQueryString();
       dispatch({ type: 'loading', loading: true });
 
-      if (gridApi) {
-        gridApi.setRowData([]);
-      }
       try {
         let data, count;
 
         if (!isOffline) {
-          const response: any = await axiosInstance().get(`${leadApi}${queryString}`);
+          const response: any = await axiosInstance().get(`${lead.leadApi}${queryString}`);
 
           data = response?.data?.data;
           count = response?.data?.count;
         }
 
         let rows = data.map((u) => {
-          const { owner, collaborator, createdBy, updatedBy, subMarketSegment, staticData, marketSegment, ...restProperties } = u;
-
           let finalObject = prepareDataForGrid(u);
-
           finalObject['canDelete'] = u.owner?.optionValue === user?.user._id;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id);
@@ -290,21 +249,6 @@ const Leads = () => {
           };
           return res;
         });
-        if (appendRows) {
-          dispatch({
-            type: 'initialize',
-            data: [...dataRows, ...rows],
-            count: count,
-            selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
-          });
-        } else {
-          dispatch({
-            type: 'initialize',
-            data: rows,
-            count: count,
-            selectedRecords: rows.filter((f) => f.isChecked === true)
-          });
-        }
 
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
@@ -330,13 +274,9 @@ const Leads = () => {
     setShowTransferEntityDialog(true);
   };
 
-  const handleCreate = () => {
-    setIsOpen({ open: true, isClone: false, idToClone: null });
-  };
-
   const handleClose = () => {
     setIsOpen({ open: false, isClone: false, idToClone: null });
-    fetchLeads();
+    fetchData();
   };
 
   const generateLeadToOpportunityButton = ({ _id, concatedName, convertedToOpportunity, [processFieldName]: leadProcess, isAllowedToUpdate }) => {
@@ -356,41 +296,41 @@ const Leads = () => {
 
     return dontHavePermissions.length > 0 ? (
       <>
-        <Tooltip
+        <HtmlTooltip
           className="cursor-stop"
           title={`To convert lead to opportunity, you must need create permission of ${dontHavePermissions.join(', ')}`}
         >
           <IconButton aria-label="Convert to opportunity">
             <SiConvertio size={18} />
           </IconButton>
-        </Tooltip>
+        </HtmlTooltip>
       </>
     ) : convertedToOpportunity ? (
       <>
-        <Tooltip className="cursor-stop" title="This lead is already converted to opportunity">
+        <HtmlTooltip className="cursor-stop" title="This lead is already converted to opportunity">
           <IconButton aria-label="Convert to opportunity">
             <SiConvertio size={18} />
           </IconButton>
-        </Tooltip>
+        </HtmlTooltip>
       </>
     ) : !isAllowedToUpdate ? (
       <>
-        <Tooltip className="cursor-stop" title="You are not allowed to convert as you are neither owner nor collaborator">
+        <HtmlTooltip className="cursor-stop" title="You are not allowed to convert as you are neither owner nor collaborator">
           <IconButton aria-label="Convert to opportunity">
             <SiConvertio size={18} />
           </IconButton>
-        </Tooltip>
+        </HtmlTooltip>
       </>
     ) : !isCurrentLeadStatusQualified ? (
       <>
-        <Tooltip className="cursor-stop" title="To covert this lead to opportunity, Lead status must be qualified">
+        <HtmlTooltip className="cursor-stop" title="To covert this lead to opportunity, Lead status must be qualified">
           <IconButton aria-label="Convert to opportunity">
             <SiConvertio size={18} />
           </IconButton>
-        </Tooltip>
+        </HtmlTooltip>
       </>
     ) : (
-      <Tooltip title="Convert to opportunity">
+      <HtmlTooltip title="Convert to opportunity">
         <IconButton
           aria-label="Convert to opportunity"
           onClick={() => {
@@ -404,58 +344,49 @@ const Leads = () => {
         >
           <SiConvertio size={18} className="text-primary" />
         </IconButton>
-      </Tooltip>
+      </HtmlTooltip>
     );
   };
 
-  const showConfirmBox = (row) => {
-    if (row) {
-      setIsConformDialogVisible(true);
-      if (row) {
-        setDeleteRecord({ id: row._id, name: row.concatedName });
-      }
+  const handleDelete = async () => {
+    setOkButtonLoading(true);
+
+    let ids = [];
+    if (deleteRecord?._id) {
+      ids.push(deleteRecord?._id);
     } else {
-      if (selectedRecords.find((d) => d.ownerId !== user.user._id)) {
-        setShowDeleteWarningConfirmBox(true);
-      } else {
-        setIsConformDialogVisible(true);
-      }
+      selectedRecords.forEach((obj) => {
+        ids.push(obj._id);
+      });
     }
-  };
-
-  const handleDeleteLeads = async () => {
-    if (deleteRecord.id || selectedRecords.length > 0) {
-      setOkButtonLoading(true);
-
-      axiosInstance()
-        .put(`${leadApi}/remove?entity=${selectedEntity}`, { ids: deleteRecord.id ? [deleteRecord.id] : selectedRecords.map((d) => d._id) })
-        .then(({ data }) => {
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-          removeLocalStorage(localStorageSelectedRecords);
-          setIsConformDialogVisible(false);
-          setOkButtonLoading(false);
-          if (deleteRecord.id) {
-            setDeleteRecord({ id: null, name: null });
-          }
-          fetchLeads();
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-          setIsConformDialogVisible(false);
-          setOkButtonLoading(false);
+    axiosInstance()
+      .put(`${lead.leadApi}/remove?entity=${selectedEntity}`, { ids })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
         });
-    }
+        dispatch({ type: 'selection', selectedRecords: [] });
+        setIsConformDialogVisible(false);
+        setOkButtonLoading(false);
+        if (deleteRecord.id) {
+          setDeleteRecord({ id: null, name: null });
+        }
+        fetchData();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setIsConformDialogVisible(false);
+        setOkButtonLoading(false);
+      });
   };
 
   const convertLeadToOpportunity = () => {
     const ids = convertLeadToOpportunityConfirmationDialog.id ? [convertLeadToOpportunityConfirmationDialog.id] : selectedRecords.map((m) => m._id);
 
     axiosInstance()
-      .post(`${leadApi}/to-opportunity`, { ids: ids })
+      .post(`${lead.leadApi}/to-opportunity`, { ids: ids })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -471,7 +402,7 @@ const Leads = () => {
         if (convertLeadToOpportunityConfirmationDialog.id) {
           history.push(`${routes.opportunityDetail.path}/${data.data[0]}`);
         } else {
-          fetchLeads();
+          fetchData();
         }
       })
       .catch((error) => {
@@ -480,28 +411,38 @@ const Leads = () => {
       });
   };
 
+  const handleFilter = (event, newFilter) => {
+    if (newFilter !== null) {
+      handleLeadTypeSel(LeadTypes.find((d) => d.key === newFilter).value);
+    }
+  };
+
+
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[routes.lead]} />
         <ImportExportLinks
-          permissions={leadsPermissions}
+          permissions={permissions[lead.leadResource]}
           module="lead(s)"
-          api={leadApi}
+          api={lead.leadApi}
           afterImportCompleted={() => {
-            fetchLeads();
+            fetchData();
           }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
-          recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-          ids={
-            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-              ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-              : []
-          }
+          recordsToExport={selectedRecords?.length}
+          ids={selectedRecords?.map((obj) => obj._id)}
           onExportToExcelSuccess={() => {
-            if (gridApi) gridApi.deselectAll();
-            else fetchLeads();
+            fetchData();
           }}
           additionalParams={getQueryString(true)}
         />
@@ -509,109 +450,159 @@ const Leads = () => {
 
       <CustomContainer>
         <div className="header-panel">
-          <LeadsHeader
-            filters={filters}
-            userId={user?.user?._id}
-            selectedType={selectedType}
-            onTypeChange={handleLeadTypeSel}
-            options={LeadTypes}
-            columns={columns}
-            dispatch={dispatch}
-            onSearch={handleSearch}
-            searchVal={search}
-            leadPermissions={leadsPermissions}
-            onCreate={handleCreate}
-            showConfirmBox={showConfirmBox}
-            icon={<HiUserGroup className="headerLogo" />}
-            heading={routes.lead.title}
-            resource={sidebarResource.lead}
-            allowToConvertLeadToOpportunity={
-              permissions['customerAccount'].isCreate && permissions['customerContact'].isCreate && permissions['opportunity'].isCreate
-            }
-            selectedLeads={selectedRecords}
-            showLeadToOpportunityConfirmationDialog={() => {
-              setConvertLeadToOpportunityConfirmationDialog({
-                open: true,
-                id: null,
-                leadName: null,
-                message: `Are you sure you want to convert selected leads to opportunity?`
-              });
-            }}
-            showTransferEntityDialog={handleTransferEntityDialog}
-          />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+            <div className={'d-flex flex-wrap align-items-center gap-2'}>
+              <div className={`flex flex-wrap items-center gap-2 `}>
+                {LeadTypes && (
+                  <ToggleButtonGroup
+                    size="small"
+                    className="ml-2"
+                    value={LeadTypes[selectedType - 1].key}
+                    exclusive
+                    onChange={handleFilter}
+                  >
+                    {LeadTypes.map((k, index) => {
+                      return (
+                        <ToggleButton value={k.key} key={index}>
+                          {k.key}
+                        </ToggleButton>
+                      );
+                    })}
+                  </ToggleButtonGroup>
+                )}
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-[8px]  justify-end">
+              <SearchBox
+                onChange={handleSearch}
+                className={isMobile ? styles.search_box_input : ''}
+                width="242px"
+                size="small"
+                value={search}
+                style={isMobile ? { flex: 1 } : {}}
+              />
+              <div className="flex gap-[8px] flex-wrap items-center">
+                {permissions[lead.leadResource]?.isCreate && (
+                  <Button
+                    onClick={() => {
+                      setIsOpen({ open: true, isClone: false, idToClone: null });
+                    }}
+                    variant={'contained'}
+                    size="small"
+                    color="primary"
+                    className={`no-shadow`}
+                    startIcon={<AddOutlined />}
+                  >
+                    Add
+                  </Button>
+                )}
+                <HtmlTooltip title={!selectedRecords.length ? "Please select some leads" : ""}>
+                  <span>
+                    <Button
+                      variant={'outlined'}
+                      color="default"
+                      size="small"
+                      onClick={openActions}
+                      disabled={selectedRecords.length ? false : true}
+                      aria-controls="action-menu"
+                      className={`new-dropdown-v1`}
+                      endIcon={<ExpandMore />}
+                    >
+                      Actions
+                    </Button>
+                  </span>
+                </HtmlTooltip>
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  id="action-menu"
+                  open={Boolean(anchorEl)}
+                  onClose={closeActions}
+                >
+                  <MenuItem
+                    disabled={selectedRecords.every((e) => e.canDelete && !e.convertedToOpportunity) ? false : true}
+                    onClick={() => {
+                      closeActions();
+                      setIsConformDialogVisible(true);
+                    }}
+                  >
+                    {`Delete (${selectedRecords.length})`}
+                  </MenuItem>
+                  {permissions['customerAccount'].isCreate && permissions['customerContact'].isCreate && permissions['opportunity'].isCreate && (
+                    <MenuItem
+                      disabled={selectedRecords.length === 0}
+                      onClick={() => {
+                        closeActions();
+                        if (selectedRecords.some((d) => d.convertedToOpportunity)) {
+                          setMessageDialog({
+                            open: true,
+                            message: `You are trying to convert already converted lead, Please unselect those records and try again.`
+                          });
+                        } else if (selectedRecords.some((d) => !d[processFieldName] || d[processFieldName].toLowerCase() !== 'qualified')) {
+                          setMessageDialog({
+                            open: true,
+                            message: `You have selected lead(s) which are not qualified yet to be converted into opportunity`
+                          });
+                        } else {
+                          if (selectedRecords.some((d) => d.isAllowedToUpdate === false)) {
+                            setMessageDialog({
+                              open: true,
+                              message: `You are trying to convert lead which you do not have permission, Please unselect those records and try again.`
+                            });
+                          } else {
+                            setConvertLeadToOpportunityConfirmationDialog({
+                              open: true,
+                              id: null,
+                              leadName: null,
+                              message: `Are you sure you want to convert selected leads to opportunity?`
+                            });
+                          }
+                        }
+                      }}
+                    >
+                      {`Convert To Opportunity (${selectedRecords.length})`}
+                    </MenuItem>
+                  )}
+                  {permissions[lead.leadResource].isUpdate && (
+                    <MenuItem
+                      onClick={() => {
+                        closeActions();
+                        handleTransferEntityDialog();
+                      }}
+                      disabled={selectedRecords.length === 0 || selectedRecords.some((d) => d.ownerId !== user?.user?._id)}
+                    >
+                      {`Transfer Entity (${selectedRecords.length})`}
+                    </MenuItem>
+                  )}
+                </Menu>
+              </div>
+            </div>
+          </div>
         </div>
-
-        {Object.keys(frameWorkComponent).length > 0 ? (
-          isMobile && !isTablet ? (
-            <CustomSwipableList
-              key={selectedType}
-              allowSelection={true}
-              allowSwipe={true}
-              permissions={permissions[leadResource]}
-              primaryField={columns?.find((d) => d.primaryField)}
-              onClick={(data) => {
-                history.push(`${routes.leadDetail.path}/${data._id}`);
-              }}
-              dataRows={dataRows}
-              selectedRecords={selectedRecords}
-              dispatch={dispatch}
-              onEdit={(data) => {
-                history.push(`${routes.leadDetail.path}/${data._id}`);
-              }}
-              extraParamsToCheckDelete={true}
-              onDelete={(data) => {
-                showConfirmBox(data);
-              }}
-              rowCount={rowCount}
-              page={page}
-              loading={loading}
-              additionalDetails={[
-                {
-                  icon: <FcProcess size={18} />,
-                  field: 'process'
-                }
-              ]}
-              chips={[
-                {
-                  icon: <BsBuilding />,
-                  label: 'Company: ',
-                  field: 'company'
-                },
-                {
-                  icon: <AiFillMail />,
-                  label: 'Email',
-                  field: 'email'
-                }
-              ]}
-              owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-              onCreate={false}
-              showClone={true}
-              onClone={(data) => {
-                setIsOpen({ open: true, isClone: true, idToClone: data._id });
-              }}
-              renderedFrom={leadResource}
-            />
-          ) : (
-            <CustomAgGrid
-              columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameWorkComponent}
-              setGridApi={setGridApi}
-              dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              actionWidth={150}
-              loading={loading}
-              renderedFrom={leadResource}
-              refreshGrid={fetchLeads}
-              showOnlyShowFilteredRecordSwitch={true}
-              showFilters={true}
-              resource={sidebarResource.lead}
-            />
-          )
-        ) : null}
+        {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
+            columns={columns}
+            onSelect={() => { }}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            isClientSideGrid={false}
+            refreshGrid={fetchData}
+            showOnlyShowFilteredRecordSwitch={true}
+            showFilters={true}
+            resource={lead.leadResource}
+          />
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
 
         {isOpen?.open && (
           <ManageLeadDialog
@@ -627,23 +618,24 @@ const Leads = () => {
           />
         )}
 
-        {showDeleteWarningConfirmBox ? (
+        {messageDialog.open ? (
           <MessageDialog
-            open={showDeleteWarningConfirmBox}
-            message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
-            onClose={() => setShowDeleteWarningConfirmBox(false)}
+            open={messageDialog.open}
+            message={messageDialog.message}
+            onClose={() => setMessageDialog({ open: false, message: null })}
           />
         ) : null}
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete Lead ${deleteRecord.name || ''}?`}
+            message={`Are you sure you want to delete the ${routes?.lead?.title?.toLowerCase()} ${deleteRecord?.concatedName
+              ? deleteRecord?.concatedName : ''}?`}
             onClose={() => {
-              if (deleteRecord.id) setDeleteRecord({ id: null, name: null });
+              setDeleteRecord(null);
               setIsConformDialogVisible(false);
             }}
             okBtnLoading={okButtonLoading}
-            onOk={handleDeleteLeads}
+            onOk={handleDelete}
           />
         ) : null}
 
@@ -667,7 +659,7 @@ const Leads = () => {
           <TransferEntityDialog
             TransferEntityDialogOpen={showTransferEntityDialog}
             onSuccess={() => {
-              fetchLeads();
+              fetchData();
               setShowTransferEntityDialog(false);
             }}
             handleCloseDialog={() => {
