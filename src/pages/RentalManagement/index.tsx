@@ -107,7 +107,6 @@ const RentalManagement = () => {
       width: 100,
       disableFilters: true,
       disableSortBy: true,
-      cellRenderer: 'checkboxRenderer',
       Cell: ({ row }) => (row?.original?.['subleaseAssets'] ? 'Yes' : 'No')
     }
   ];
