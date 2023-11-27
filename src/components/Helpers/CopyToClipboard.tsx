@@ -6,12 +6,14 @@ import { MdOutlineDone } from 'react-icons/md';
 export default function CopyToClipboard({ size = 12, textToCopy, ...rest }) {
   const [show, setShow] = useState(false);
   const handleCopyToClipBoard = () => {
-    //@ts-ignore
     navigator.clipboard.writeText(textToCopy);
     setShow(true);
-    setTimeout(() => {
+
+    const timeOut = setTimeout(() => {
       setShow(false);
-    }, 600);
+    }, 2000);
+
+    return () => clearTimeout(timeOut);
   };
   return (
     <>
