@@ -9,6 +9,8 @@ import { leadDetailPage } from 'src/routes/Lead';
 import routes from '../Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
 import { Image } from '@material-ui/icons';
+import CopyToClipboard from '../Helpers/CopyToClipboard';
+
 
 const permissionForLinks = sidebarResourceObjectFromValues();
 
@@ -110,19 +112,7 @@ export const getSortedColumns = (columns = []) => {
 };
 export const staticColumns = ['createdBy', 'updatedBy'];
 
-// const getColumnWidth = (text) => {
-//   const textLength = text.length;
-//   const characterWidth = 8;
-//   const searchIconWidth = 30;
-//   const searchIconMargin = 10;
-//   const tempWidth = textLength * characterWidth + searchIconWidth + searchIconMargin;
-//   const width = Math.max(tempWidth, 150);
-//   const minWidth = 80;
-//   return {
-//     minWidth,
-//     width
-//   };
-// };
+
 export default function useColumns() {
   const {
     state: { permissions }
@@ -265,11 +255,11 @@ export default function useColumns() {
             Cell: ({ row }) =>
               row?.original?.[field?.fieldName] ? (
                 <h5
-                  className="createBy"
-                  title={`${row?.original?.[field?.fieldName]} • ${moment(row?.original?.createdByDate.slice(0, 10)).format(dateFormat)}`}
+                  className="flex"
+                  title={`${row?.original?.[field?.fieldName]}`}
                 >
-                  {row?.original?.[field?.fieldName]}
-                  <span className="createdAtTime badge-date">{moment(row?.original?.data?.createdByDate.slice(0, 10)).format(dateFormat)}</span>
+                  <span title={row?.original?.[field?.fieldName]} className="text-truncate" >{row?.original?.[field?.fieldName]}</span>
+                  <CopyToClipboard textToCopy={row?.original?.[field?.fieldName]} size={16} />
                 </h5>
               ) : (
                 <NoDataCell />
