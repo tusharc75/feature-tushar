@@ -810,10 +810,6 @@ export default function AccountDetailPage(props) {
               {(accountResource === 'supplierAccount' && user?.user?.brandPolicy?.serializedAssetCertification) &&
                 <Tab label={<div className="tab-font">Supplier View</div>}
                   aria-controls="a11y-tabpanel-3" id="a11y-tab-3" className="tabLayout" />}
-
-                <Tab label={<div className="tab-font">Supplier View</div>}
-                  aria-controls="a11y-tabpanel-3" id="a11y-tab-3" className="tabLayout" />
-
               {accountResource === 'customerAccount' && permissions?.productInventory && (
                 <Tab
                   label={<div className="tab-font">{routes.warehouse.title}</div>}
@@ -1023,7 +1019,7 @@ export default function AccountDetailPage(props) {
                 />
               </Box>
             </TabPanel>
-            {/* {accountResource === 'supplierAccount' && tabValue === 3 && (
+            {accountResource === 'supplierAccount' && tabValue === 3 && (
               <TabPanel value={tabValue} index={3}>
                 <SupplierItems
                   api={accountApi}
@@ -1031,14 +1027,7 @@ export default function AccountDetailPage(props) {
                   allowedToEdit={permissions[accountResource].isUpdate}
                   permission={permissions[accountResource]} />
               </TabPanel>
-            )} */}
-              <TabPanel value={tabValue} index={3}>
-                <SupplierItems
-                  api={accountApi}
-                  id={id}
-                  allowedToEdit={permissions[accountResource].isUpdate}
-                  permission={permissions[accountResource]} />
-              </TabPanel>
+            )}
             {accountResource === 'customerAccount' && permissions?.productInventory && tabValue === 3 && (
               <TabPanel value={tabValue} index={3}>
                 <Warehouse reference={accountResource} api={accountApi} id={id} />

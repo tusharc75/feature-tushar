@@ -330,7 +330,7 @@ function CustomReactTable({
                 <div
                   {...row.getToggleRowExpandedProps?.({
                     style: {
-                      marginLeft: isMobileView ? 0 : `${row.depth * 10}px`
+                      marginLeft: isMobileView ? 0 : `${row.depth * 15}px`
                     }
                   })}
                 >
@@ -368,7 +368,7 @@ function CustomReactTable({
                 />
               ),
               Cell: ({ row }) => (
-                <div className="mx-auto text-center">
+                <div className="mx-auto text-center  justify-center">
                   <IndeterminateCheckbox onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps()} />
                 </div>
               )
@@ -392,7 +392,7 @@ function CustomReactTable({
                 />
               ),
               Cell: ({ row }) => (
-                <div className="mx-auto text-center">
+                <div className="mx-auto text-center justify-center">
                   <IndeterminateCheckbox onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps()} />
                 </div>
               )
@@ -838,10 +838,6 @@ function CustomReactTable({
                     {rows.map((row, index1) => {
                       prepareRow(row);
                       const rowProps = row.getRowProps();
-                      rowProps.style = {
-                        ...rowProps.style,
-                        paddingLeft: `${row.depth * 10}px`
-                      };
                       return (
                         <TableRow key={index1} {...rowProps} className={`tr`}>
                           {row.cells.map((cell, index2) => {
@@ -849,9 +845,9 @@ function CustomReactTable({
                               <TableCell
                                 key={index2}
                                 {...cell.getCellProps()}
-                                className={`td   ${cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''}    ${
-                                  setWholeRowsCellColor ? setWholeRowsCellColor(row.original) : ''
-                                }`}
+                                className={`td p-0 [&>*]:h-[45px] [&>*]:flex [&>*]:items-center [&>*]:p-[5px_8px] h-[45px]  ${
+                                  cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''
+                                }    ${setWholeRowsCellColor ? setWholeRowsCellColor(row.original) : ''}`}
                                 onClick={() => {
                                   handleCellClick(cell, row);
                                 }}
@@ -942,6 +938,8 @@ function CustomReactTable({
             setCellValue={setCellValue}
             handleCellClick={handleCellClick}
             handleKeyDown={handleKeyDown}
+            footerGroups={footerGroups}
+            allowPagination={allowPagination}
           />
         ) : null}
         {allowPagination && (

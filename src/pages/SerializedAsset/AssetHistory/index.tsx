@@ -1,23 +1,21 @@
-import { useState, useEffect, useContext, useReducer } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { Box } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridComponents/CustomAgGrid';
-import { CommonRenderer, DateTimeRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
 import { Link } from 'react-router-dom';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import { camelCase } from 'lodash';
-import { isObjectEmpty, sidebarResource } from 'src/constants/helpers';
+import { dateTimeFormat, isObjectEmpty, sidebarResource } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import DurationFilter from 'src/components/DurationFilter';
 import moment from 'moment';
+import TruckMaster from 'src/pages/TruckMaster';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
 
 const AssetHistory = ({ id }) => {
   const toastConfig = useContext(CustomToastContext);
-
-  const [gridApi, setGridApi] = useState(null);
+  const { state, dispatch } = useTableReducer();
   const [duration, setDuration] = useState({
     from: new Date(moment().subtract('1', 'year').calendar()),
     to: new Date()
@@ -27,203 +25,208 @@ const AssetHistory = ({ id }) => {
     state: { permissions }
   }: any = useData();
 
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, filters, sorting } = state;
-
-  const NameRenderer = (params: { value: any; data: { type: string; referenceId: any } }) => (
-    <>
-      {params.value ? (
-        params.data.type === 'Loading Ticket' ||
-        params.data.type === 'Receiving Ticket' ||
-        params.data.type === 'Return Ticket' ||
-        params.data.type === 'Delivery Ticket' ? (
-          <Link
-            className="link"
-            title={params.value}
-            to={`${routes.deliveryTicketDetail.path}/${params.data.referenceId}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {params.value}
-          </Link>
-        ) : params.data.type?.toLowerCase() === 'repair' ? (
-          <Link
-            className="link"
-            title={params.value}
-            to={`${routes.repairJobDetail.path}/${params.data.referenceId}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {params.value}
-          </Link>
-        ) : params.data.type === 'Work Order' ? (
-          <Link
-            className="link"
-            title={params.value}
-            to={`${routes.workOrderDetail.path}/${params.data.referenceId}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {params.value}
-          </Link>
-        ) : params.data.type === 'Repair Order' ? (
-          <Link
-            className="link"
-            title={params.value}
-            to={`${routes.repairOrderDetail.path}/${params.data.referenceId}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {params.value}
-          </Link>
-        ) : params.data.type?.toLowerCase() === 'rental' ? (
-          <Link
-            className="link"
-            title={params.value}
-            to={`${routes.rentalManagementDetail.path}/${params.data.referenceId}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {params.value}
-          </Link>
-        ) : params.data.type === 'Transfer Assets' ? (
-          <Link
-            className="link"
-            title={params.value}
-            to={`${routes.transferAssetDetail.path}/${params.data.referenceId}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {params.value}
-          </Link>
-        ) : params.data.type?.toLowerCase().includes('purchase') ? (
-          <Link
-            className="link"
-            title={params.value}
-            to={`${routes.purchaseOrderDetail.path}/${params.data.referenceId}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {params.value}
-          </Link>
-        ) : params.data.type?.toLowerCase().includes('sublease') ? (
-          <Link
-            className="link"
-            title={params.value}
-            to={`${routes.subleaseDetail.path}/${params.data.referenceId}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {params.value}
-          </Link>
-        ) : params.data?.type === 'Bulk Asset Creation' ? (
-          <Link
-            className="link"
-            title={params.value}
-            to={`${routes.bulkAssetCreationDetail.path}/${params.data.referenceId}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {params.value}
-          </Link>
-        ) : params.data?.type === 'Transfer Inventory' ? (
-          <Link
-            className="link"
-            title={params.value}
-            to={`${routes.transferInventoryDetail.path}/${params.data.referenceId}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {params.value}
-          </Link>
-        ) : params.data?.type === 'Job' ? (
-          <Link
-            className="link"
-            title={params.value}
-            to={`${routes.jobDetail.path}/${params.data.referenceId}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {params.value}
-          </Link>
-        ) : params.data?.type === 'Quotation' ? (
-          <Link
-            className="link"
-            title={params.value}
-            to={`${routes.quotationDetail.path}/${params.data.referenceId}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {params.value}
-          </Link>
-        ) : params.data?.type === sidebarResource.planning ? (
-          <Link
-            className="link"
-            title={params.value}
-            to={`${routes.planningDetail.path}/${params.data.referenceId}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {params.value}
-          </Link>
-        ) : (
-          params.value
-        )
-      ) : (
-        <NoDataCell />
-      )}
-    </>
-  );
-
-  const DaysRenderer = (params: any) => (
-    <>
-      {params.value ? (
-        <span>{params.value}</span>
-      ) : (
-        <span>Less than a day</span>
-      )}
-    </>
-  );
-
-  const WarehouseRenderer = (params: any) => (
-    <>
-      {params.value ? (
-        permissions?.warehouse?.isRead ?
-          <Link
-            className="link"
-            title={params.value}
-            to={`${routes.warehouseDetail.path}/${params.data.warehouseId}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {params.value}
-          </Link> :
-          <span>{params.value}</span>
-      ) : (
-        <NoDataCell />
-      )}
-    </>
-  );
-
-  const frameworkComponents = {
-    nameRenderer: NameRenderer,
-    warehouseRenderer: WarehouseRenderer,
-    commonRenderer: CommonRenderer,
-    daysRenderer: DaysRenderer,
-    dateTimeRenderer: DateTimeRenderer
-  };
+  const { page, limit, filters, sorting } = state;
 
   const columns = [
-    { field: 'reference', headerName: 'Reference', show: true, filter: false, cellRenderer: 'nameRenderer' },
-    { field: 'type', headerName: 'Type', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    { field: 'date', headerName: 'Date & Time', show: true, disabled: true, filter: false, cellRenderer: 'dateTimeRenderer' },
-    { field: 'days', headerName: 'Days', show: true, disabled: true, filter: false, cellRenderer: 'daysRenderer' },
-    { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'comments', headerName: 'Comment', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'warehouse', headerName: routes.warehouse.title, show: true, cellRenderer: 'warehouseRenderer' },
-    { field: 'location', headerName: 'Location', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'ownerType', headerName: 'Owner Type', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'owner', headerName: 'Owner', show: true, cellRenderer: 'commonRenderer' }
+    {
+      accessor: 'reference', Header: 'Reference', show: true, filter: false,
+      Cell: ({ row }) => (
+        <>
+          {row.original.reference ? (
+            row.original.type === 'Loading Ticket' ||
+              row.original.type === 'Receiving Ticket' ||
+              row.original.type === 'Return Ticket' ||
+              row.original.type === 'Delivery Ticket' ? (
+              <Link
+                className="link"
+                title={row.original.reference}
+                to={`${routes.deliveryTicketDetail.path}/${row.original.referenceId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {row.original.reference}
+              </Link>
+            ) : row.original.type?.toLowerCase() === 'repair' ? (
+              <Link
+                className="link"
+                title={row.original.reference}
+                to={`${routes.repairJobDetail.path}/${row.original.referenceId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {row.original.reference}
+              </Link>
+            ) : row.original.type === 'Work Order' ? (
+              <Link
+                className="link"
+                title={row.original.reference}
+                to={`${routes.workOrderDetail.path}/${row.original.referenceId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {row.original.reference}
+              </Link>
+            ) : row.original.type === 'Repair Order' ? (
+              <Link
+                className="link"
+                title={row.original.reference}
+                to={`${routes.repairOrderDetail.path}/${row.original.referenceId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {row.original.reference}
+              </Link>
+            ) : row.original.type?.toLowerCase() === 'rental' ? (
+              <Link
+                className="link"
+                title={row.original.reference}
+                to={`${routes.rentalManagementDetail.path}/${row.original.referenceId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {row.original.reference}
+              </Link>
+            ) : row.original.type === 'Transfer Assets' ? (
+              <Link
+                className="link"
+                title={row.original.reference}
+                to={`${routes.transferAssetDetail.path}/${row.original.referenceId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {row.original.reference}
+              </Link>
+            ) : row.original.type?.toLowerCase().includes('purchase') ? (
+              <Link
+                className="link"
+                title={row.original.reference}
+                to={`${routes.purchaseOrderDetail.path}/${row.original.referenceId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {row.original.reference}
+              </Link>
+            ) : row.original.type?.toLowerCase().includes('sublease') ? (
+              <Link
+                className="link"
+                title={row.original.reference}
+                to={`${routes.subleaseDetail.path}/${row.original.referenceId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {row.original.reference}
+              </Link>
+            ) : row.original?.type === 'Bulk Asset Creation' ? (
+              <Link
+                className="link"
+                title={row.original.reference}
+                to={`${routes.bulkAssetCreationDetail.path}/${row.original.referenceId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {row.original.reference}
+              </Link>
+            ) : row.original?.type === 'Transfer Inventory' ? (
+              <Link
+                className="link"
+                title={row.original.reference}
+                to={`${routes.transferInventoryDetail.path}/${row.original.referenceId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {row.original.reference}
+              </Link>
+            ) : row.original?.type === 'Job' ? (
+              <Link
+                className="link"
+                title={row.original.reference}
+                to={`${routes.jobDetail.path}/${row.original.referenceId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {row.original.reference}
+              </Link>
+            ) : row.original?.type === 'Quotation' ? (
+              <Link
+                className="link"
+                title={row.original.reference}
+                to={`${routes.quotationDetail.path}/${row.original.referenceId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {row.original.reference}
+              </Link>
+            ) : row.original?.type === sidebarResource.planning ? (
+              <Link
+                className="link"
+                title={row.original.reference}
+                to={`${routes.planningDetail.path}/${row.original.referenceId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {row.original.reference}
+              </Link>
+            ) : (
+              row.original.reference
+            )
+          ) : (
+            <NoDataCell />
+          )}
+        </>
+      )
+    },
+    { accessor: 'type', Header: 'Type', show: true, disabled: TruckMaster },
+    {
+      accessor: 'date', Header: 'Date & Time', show: true, disabled: true, filter: false,
+      Cell: ({ row }) => (
+        row.original?.date ? (
+          <h5 className="createBy" title={`${moment(row.original?.date)?.format(dateTimeFormat)}`}>
+            {moment(row.original?.date)?.format(dateTimeFormat)}
+          </h5>
+        ) : (
+          <NoDataCell />
+        )
+      )
+    },
+    {
+      accessor: 'days', Header: 'Days', show: true, disabled: true, filter: false,
+      Cell: ({ row }) => (
+        <>
+          {row.original?.days ? (
+            <span>{row.original?.days}</span>
+          ) : (
+            <span>Less than a day</span>
+          )}
+        </>
+      )
+    },
+    { accessor: 'status', Header: 'Status', show: true },
+    { accessor: 'comments', Header: 'Comment', show: true },
+    {
+      accessor: 'warehouse', Header: routes.warehouse.title, show: true,
+      Cell: ({ row }) => (
+        <>
+          {row.original?.warehouse ? (
+            permissions?.warehouse?.isRead ?
+              <Link
+                className="link"
+                title={row.original?.warehouse}
+                to={`${routes.warehouseDetail.path}/${row.original?.warehouseId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {row.original?.warehouse}
+              </Link> :
+              <span>{row.original?.warehouse}</span>
+          ) : (
+            <NoDataCell />
+          )}
+        </>
+      )
+    },
+    { accessor: 'location', Header: 'Location', show: true },
+    { accessor: 'ownerType', Header: 'Owner Type', show: true },
+    { accessor: 'owner', Header: 'Owner', show: true }
   ];
 
   useEffect(() => {
@@ -264,9 +267,6 @@ const AssetHistory = ({ id }) => {
 
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
     const queryString = getQueryString();
     axiosInstance()
       .get(`/history/inventory/${id}${queryString}`)
@@ -295,21 +295,16 @@ const AssetHistory = ({ id }) => {
         <DurationFilter label={''} defaultTimeFrame="1-year" duration={duration} setDuration={setDuration} />
       </Box>
       {columns ? (
-        <CustomAgGrid
+        <CustomReactTable
+          height={'calc(100vh - 200px)'}
           columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameworkComponents}
-          setGridApi={setGridApi}
+          state={state}
           dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          allowAction={false}
-          allowSelection={false}
-          loading={loading}
-          renderedFrom={`${camelCase(routes?.serializedAsset.title)}_assetHistory`}
+          renderedFrom={`${routes.serializedAssetDetail.title}_assetHistory`}
+          isClientSideGrid={false}
           refreshGrid={fetchData}
+          showOnlyShowFilteredRecordSwitch={true}
+          showFilters={false}
         />
       ) : (
         <Box p={2} height={500}>
