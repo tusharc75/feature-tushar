@@ -18,8 +18,7 @@ import {
 import { useData } from 'src/StateProvider/Provider';
 import routes from '../Helpers/Routes';
 import styles from 'src/pages/Leads/Header.module.scss';
-import CustomAgGridEditable, { reducer, intialState } from '../AgGridComponents/CustomAgGridEditable';
-import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
 import { Autocomplete } from '@material-ui/lab';
 
@@ -27,33 +26,29 @@ let searchTimeout;
 
 const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handleClose, ids, defaultCompetency = [], extraStaticFilter = [] }) => {
   const renderedFrom = `${routes.employeeMaster.title}_${reference}_selected`;
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
+  const toastConfig = useContext(CustomToastContext);
+
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { getColumnData } = useColumns();
 
   const {
     state: { permissions, selectedEntity }
   }: any = useData();
 
-  const toastConfig = useContext(CustomToastContext);
   const [isAssigning, setAssigning] = useState(false);
   const [disableSaveButton, setDisableSaveButton] = useState(false);
-
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const [frameWorkComponent, setFrameWorkComponent] = useState(null);
-  const [columns, setColumns] = useState([]);
-  const { getColumnData } = useColumns();
+  const [columns, setColumns] = useState(null);
   const [competencyOptions, setCompetencyOptions] = useState(null);
   const [selectedCompetency, setSelectedCompetency] = useState(defaultCompetency);
 
   useEffect(() => {
-    localStorage.removeItem(localStorageSelectedRecords);
     fetchGridColumns();
     fetchCompetencyMaster();
   }, []);
 
   useEffect(() => {
-    setDisableSaveButton([...getLocalStorageArrayData(localStorageSelectedRecords)].some((d) => d.qty === 0));
+    setDisableSaveButton(selectedRecords?.some((d) => d.qty === 0));
   }, [selectedRecords]);
 
   useEffect(() => {
@@ -87,16 +82,8 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
           let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.employeeMasterDetail.path);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName);
-            }
           }
         });
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
         columns = [...columns, ...getStaticFields()];
         setColumns(columns);
       });
@@ -104,9 +91,6 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
 
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
     const queryString = getQueryString();
     axiosInstance()
       .get(`${employeeMaster.api}${queryString}`)
@@ -119,10 +103,9 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
             ...finalObject
           };
         });
-        const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
         dispatch({
           type: 'selection',
-          selectedRecords: savedRecords
+          selectedRecords: selectedRecords || []
         });
         dispatch({ type: 'initialize', data: rows, count: data?.data?.count });
         setTimeout(() => {
@@ -141,8 +124,7 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
     if (showFilteredRecordsOnly) {
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
     }
 
     const updatedFilters = [];
@@ -175,26 +157,35 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
   };
 
   const handleSubmit = async () => {
-    onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]);
+    onSuccess(selectedRecords);
   };
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-  const onCellValueChanged = (row) => {
-    if (!row || !row?.data) return;
-    const { data } = row;
-    const selectedFromStorage = [...getLocalStorageArrayData(localStorageSelectedRecords)];
+  const onSaveEdit = (data, row) => {
+    if (!data || !data?.qty) return;
+    const selectedFromStorage = selectedRecords;
     if (!selectedFromStorage || selectedFromStorage.length === 0) return;
     const updatedRecords = selectedFromStorage.map((d) => {
-      if (data._id === d._id) {
-        d.qty = data.qty;
+      if (row?._id === d._id) {
+        d.qty = parseInt(data.qty);
       }
       return d;
     });
-    localStorage.setItem(localStorageSelectedRecords, JSON.stringify(updatedRecords));
-    setDisableSaveButton([...getLocalStorageArrayData(localStorageSelectedRecords)]?.some((d) => d.qty === 0));
+
+    const rows = dataRows;
+
+    rows?.forEach((d) => {
+      if (row?._id === d._id) {
+        d.qty = parseInt(data.qty);
+      }
+    });
+
+    dispatch({ type: 'initialize', data: rows, count: rowCount });
+    dispatch({ type: 'selection', selectedRecords: updatedRecords });
+    setDisableSaveButton(selectedRecords?.some((d) => d.qty === 0));
   };
 
   return (
@@ -206,7 +197,7 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
         onClose={handleClose}
       />
       <CustomDialogContent>
-        {competencyOptions && frameWorkComponent && Object.keys(frameWorkComponent).length > 0 ? (
+        {competencyOptions && columns ? (
           <>
             <div className="header-panel">
               <Grid container className={styles.filter_side_container}>
@@ -230,39 +221,32 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
                   <Box className={styles.filter_side_header} component="div">
                     <SearchBox onChange={handleSearch} className={styles.search_box_input} width="242px" size="small" value={search} />
                     <Button
-                      disabled={isAssigning || disableSaveButton || [...getLocalStorageArrayData(localStorageSelectedRecords)].length === 0}
+                      disabled={isAssigning || disableSaveButton || selectedRecords?.length === 0}
                       onClick={handleSubmit}
                       color="primary"
                       size="small"
                       variant="contained"
                       endIcon={isAssigning && <CircularProgress color="inherit" size={18} />}
                     >
-                      Add{' '}
-                      {[...getLocalStorageArrayData(localStorageSelectedRecords)].length > 0
-                        ? '(' + [...getLocalStorageArrayData(localStorageSelectedRecords)].length + ')'
-                        : ''}
+                      Add {selectedRecords?.length > 0 ? '(' + selectedRecords?.length + ')' : ''}
                     </Button>
                   </Box>
                 </Grid>
               </Grid>
             </div>
-            <CustomAgGridEditable
+
+            <CustomReactTable
+              height={'calc(100vh - 200px)'}
               columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameWorkComponent}
-              setGridApi={setGridApi}
+              state={state}
               dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              allowAction={false}
-              loading={loading}
-              allowSelection={true}
-              onCellValueChanged={onCellValueChanged}
-              showOnlyShowFilteredRecordSwitch={true}
-              refreshGrid={fetchData}
               renderedFrom={renderedFrom}
+              onSaveEdit={onSaveEdit}
+              isClientSideGrid={false}
+              refreshGrid={fetchData}
+              showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={sidebarResource.employeeMaster}
             />
           </>
         ) : (
