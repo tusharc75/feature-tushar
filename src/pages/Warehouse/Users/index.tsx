@@ -7,13 +7,14 @@ import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../.
 import routes from './../../../components/Helpers/Routes';
 import { camelCase } from 'lodash';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
-import AssignUserDialog from 'src/components/AssignRolesDialog/NewAssignUserDialog';
 import { ExpandMore } from '@material-ui/icons';
 import { Menu, MenuItem, Box } from '@material-ui/core';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import ConfirmationDialogRaw from '../../../components/Helpers/ConfirmationDialog';
+import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
+import AssignUserDialog from 'src/components/AssignRolesDialog/NewAssignUserDialog';
+import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
 
 const Users = ({ warehouse }) => {
   let renderedFrom = `${camelCase(routes.user.title)}_warehouse_master`;
@@ -239,16 +240,28 @@ const Users = ({ warehouse }) => {
         </Box>
       )}
       {openDialog && (
-        <AssignUserDialog
-          handleClose={() => {
-            setOpenDialog(false);
-          }}
+        // <AssignUserDialog
+        //   handleClose={() => {
+        //     setOpenDialog(false);
+        //   }}
+        //   onSuccess={(data) => {
+        //     handleAssignUser(data);
+        //   }}
+        //   reference={'warehouse'}
+        //   isAssigning={isAssigning}
+        //   ignoreUsers={dataRows?.map((e) => e?._id) || []}
+        // />
+        <AssignDynamicDialog
           onSuccess={(data) => {
             handleAssignUser(data);
           }}
+          handleClose={() => {
+            setOpenDialog(false);
+          }}
+          ids={dataRows?.map((e) => e?._id) || []}
+          resource={sidebarResource?.user}
           reference={'warehouse'}
-          isAssigning={isAssigning}
-          ignoreUsers={dataRows?.map((e) => e?._id) || []}
+          isSubmitting={isAssigning}
         />
       )}
       {showDeleteConfirmBox && (

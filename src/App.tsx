@@ -132,7 +132,6 @@ import RepairTypeDetailsPage from './pages/RepairType/RepairTypeDetailsPage';
 import ResourceCalendar from './pages/ResourceCalender';
 import ResourceCalendarData from './pages/ResourceCalender/ResourceCalendar';
 import CageManagement from './pages/CageManagement';
-import SerializedAssetTest from './pages/SerializedAsset-test';
 import ProductAuction from './pages/productAuction';
 import ProductAuctionDetailsPage from './pages/productAuction/ProductAuctionDetailsPage';
 import ConvertInventory from './pages/ConvertInventory';
@@ -544,9 +543,6 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.serializedAssetsCertification.path}>
               <SerializedAssetsCertification />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.serializedAsset.path + '-new'}>
-              <SerializedAssetTest />
             </PrivateRoute>
             <PrivateRoute exact path={routes.serializedAssetDetail.path + '/:id'}>
               <SerializedAssetDetailsPage />
