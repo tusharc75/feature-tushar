@@ -233,14 +233,14 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                     </div>
                   </div>
                 )}
-                
+
             {dataRows?.length > 0 && footerGroups?.length > 0 && !allowPagination && (
               <>
                 {footerGroups.map((group, index) => (
                   <div key={index} className="flex justify-between [border-top:1px_solid_var(--common-border-color)] pt-1 items-center mt-4 px-2">
                     <h6 className="text-[14px]">{group?.headers?.find((g) => g.id === 'index')?.render('Footer')}</h6>
                     {group.headers.map((column) => {
-                      if (column.Footer.name === 'emptyRenderer2' || column.Footer.name !== 'Footer' || column.Header === 'Index') return null;
+                      if (column.Footer.name === 'emptyRenderer2' || column.Footer.name !== 'Footer' || column.id === 'index') return null;
                       return (
                         <div key={column.id} className="text-truncate font-weight-bold text-black flex flex-col items-center">
                           <span>{column.render('Header')}</span>
