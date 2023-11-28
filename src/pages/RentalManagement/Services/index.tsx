@@ -32,9 +32,9 @@ import Technicians from './Technicians';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { Autocomplete } from '@material-ui/lab';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
-import { ownerAndColaborator, rentalManagementMessage } from 'src/constants/messageHelpers';
+import { ownerAndColaborator, quotationApprovedMessage, rentalManagementMessage } from 'src/constants/messageHelpers';
 
-const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, renderedFrom, stepFullScreen, allowedToEdit }: any) => {
+const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, renderedFrom, stepFullScreen, allowedToEdit, quotationApproved }: any) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -62,26 +62,30 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
   const [serviceOption, setServiceOption] = useState(null);
   const [selectedServiceOption, setSelectedServiceOption] = useState({ optionLabel: 'All', optionValue: 'All' });
 
-
   const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
     fetchFields();
-  }, [allowedToEdit]);
+    fetchData();
+  }, []);
 
   useEffect(() => {
-    fetchProductInventory();
-  }, [columns]);
+    generateColumns();
+  }, [allFields, allowedToEdit, quotationApproved]);
 
   const fetchFields = async () => {
-    setColumns(null);
     var data = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
-    if (!allowedToEdit) {
+    setAllFields(JSON.parse(JSON.stringify(data)));
+  };
+
+  const generateColumns = () => {
+    setColumns(null);
+    const data = [...allFields]
+    if (!allowedToEdit || quotationApproved) {
       data?.forEach((e) => {
         e.isColumnEditable = false;
       });
     }
-    setAllFields(JSON.parse(JSON.stringify(data)));
     const newColumns = generateCustomTableColumns(data, rentalManagementData?.currency, renderedFrom);
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
@@ -132,7 +136,7 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row, rows }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {isOffline || !allowedToEdit ? (
+            {isOffline || !allowedToEdit || quotationApproved ? (
               <p> {row.original.detail}</p>
             ) : (
               <p
@@ -150,7 +154,7 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
                 <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
                   {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
                 </span>
-                {!isOffline && allowedToEdit && (
+                {!isOffline && allowedToEdit && !quotationApproved && (
                   <HtmlTooltip title="Add Existing Service">
                     <IconButton
                       onClick={() => setAddExistingProductDialog({ open: true, type: 'service', parentId: row.original?._id })}
@@ -208,19 +212,19 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
       Cell: ({ row, rows }) => {
         return (
           <>
-            <HtmlTooltip title={isOffline || !allowedToEdit ? '' : 'Edit'}>
+            <HtmlTooltip title={isOffline || !allowedToEdit || quotationApproved ? '' : 'Edit'}>
               <IconButton
                 size="small"
                 aria-label="Details"
-                disabled={isOffline || !allowedToEdit ? true : false}
+                disabled={isOffline || !allowedToEdit || quotationApproved ? true : false}
                 onClick={() => {
                   openMaterial(row, rows);
                 }}
               >
-                <EditIcon fontSize="small" color={isOffline || !allowedToEdit ? 'disabled' : 'primary'} />
+                <EditIcon fontSize="small" color={isOffline || !allowedToEdit || quotationApproved ? 'disabled' : 'primary'} />
               </IconButton>
             </HtmlTooltip>
-            {allowedToEdit ? (
+            {allowedToEdit || !quotationApproved ? (
               row.original.hideSelection ? (
                 <HtmlTooltip title={row.original.assetQty ? 'Asset is already assigned' :
                   row.original?.status ? rentalManagementMessage.loadingAlreadyCreated : ''}>
@@ -255,9 +259,9 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
       }
     });
     setColumns(column);
-  };
+  }
 
-  const fetchProductInventory = async () => {
+  const fetchData = async () => {
     setNextStep(false);
     setNextStepToolTip(null)
     try {
@@ -432,7 +436,7 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
       .post(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`, { material: tempMaterial })
       .then(() => {
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
-        fetchProductInventory();
+        fetchData();
         setSubmitting(false);
       })
       .catch((error) => {
@@ -448,7 +452,7 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
       .put(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`, { material: rows })
       .then(() => {
         setUpdating(false);
-        fetchProductInventory();
+        fetchData();
         if (saveAndNext) {
           const rowIndex = rowsData?.findIndex((d) => d._id === rows[0]?._id);
           setIsProductEdit({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false });
@@ -468,7 +472,7 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
       .put(`${rentalManagement.api}/productpackage/${rentalManagementData?._id}/delete`, { ids: rows })
       .then(() => {
         setDeleting(false);
-        fetchProductInventory();
+        fetchData();
         setDeleteData(null);
       })
       .catch((error) => {
@@ -539,7 +543,7 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
     <Fragment>
       <Box display="flex" justifyContent="space-between" m={1}>
         <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
-          <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : ``}>
+          <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : quotationApproved ? quotationApprovedMessage : ``}>
             <span>
               <Button
                 variant={'outlined'}
@@ -547,7 +551,7 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
                 size="small"
                 startIcon={<Add />}
                 onClick={openAddActions}
-                disabled={!allowedToEdit}
+                disabled={!allowedToEdit || quotationApproved}
                 aria-controls="add-menu">
                 {'Add'}
                 <ExpandMore fontSize="small" />
@@ -660,8 +664,8 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
           onSelect={setSelectedProducts}
           childrenProperty="subRows"
           uniqueKey="_id"
-          hideSelection={isOffline || !allowedToEdit}
-          hideAction={isOffline || !allowedToEdit}
+          hideSelection={isOffline || !allowedToEdit || quotationApproved}
+          hideAction={isOffline || !allowedToEdit || quotationApproved}
           renderedFrom="rental_management_sevices_1"
           onSaveEdit={onSaveInlineEdit}
           isClientSideGrid={true}
@@ -699,7 +703,11 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
               <CustomTab index={0} label={'Technicians'} value={0} primaryColor={true} />
             </CustomTabs>
             <TabPanel value={tabValue} index={0}>
-              <Technicians allowedToEdit={allowedToEdit} rentalManagementData={rentalManagementData} selectedService={selectedServiceOption} services={serviceOption} />
+              <Technicians
+                allowedToEdit={allowedToEdit}
+                rentalManagementData={rentalManagementData}
+                selectedService={selectedServiceOption}
+                services={serviceOption} />
             </TabPanel>
           </Box>
         </div>
