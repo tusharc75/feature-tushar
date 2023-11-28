@@ -307,16 +307,14 @@ function CustomReactTable({
               >
                 {isAllRowsExpanded ? (
                   <FaAngleDown
-                    style={{ color: 'white' }}
-                    className="cursor-pointer"
+                    className="cursor-pointer text-[var(--primary-text)]"
                     onClick={() => {
                       toggleAllRowsExpanded(false);
                     }}
                   />
                 ) : (
                   <FaAngleRight
-                    style={{ color: 'white' }}
-                    className="cursor-pointer"
+                    className="cursor-pointer text-[var(--primary-text)]"
                     onClick={() => {
                       toggleAllRowsExpanded(true);
                     }}
