@@ -2444,7 +2444,7 @@ export const COLOUR_MASTER = {
     borderColor: '#f5c431'
   },
   lostAssets: {
-    background: '#ff9980',
+    background: 'var(--error-bg)',
     borderColor: '#db765c'
   },
   scrapAssets: {
