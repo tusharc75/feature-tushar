@@ -938,6 +938,8 @@ function CustomReactTable({
             setCellValue={setCellValue}
             handleCellClick={handleCellClick}
             handleKeyDown={handleKeyDown}
+            footerGroups={footerGroups}
+            allowPagination={allowPagination}
           />
         ) : null}
         {allowPagination && (
