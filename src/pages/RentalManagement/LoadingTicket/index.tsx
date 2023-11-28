@@ -877,9 +877,9 @@ const LoadingTicket = ({
         else if (e?.status !== ASSET_STATUS.inUse) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.onlyReplaceInUse });
         }
-        else if (!e?.isReplaceable) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.canNotReplaceInvoiceCreated });
-        }
+        // else if (!e?.isReplaceable) {
+        //   errorMessages.push({ index: e.index, message: rentalManagementMessage.canNotReplaceInvoiceCreated });
+        // }
       }
       else if (action === rentalManagementActions.cancelInTransitLoadingTicket) {
         if (!e.hasOwnProperty('loadingTicketId')) {
