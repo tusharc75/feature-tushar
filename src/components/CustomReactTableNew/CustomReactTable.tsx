@@ -34,7 +34,7 @@ import ArrangeViewButton from './ArrangeViewButton';
 import { GrFormClose } from 'react-icons/gr';
 import { CgSearch } from 'react-icons/cg';
 import GridHeader from './GridHeader';
-import SwipableListForMobile from 'src/components/SwipableListForMobile';
+import SwipableListForMobile from 'src/components/CustomReactTableNew/SwipableListForMobile';
 import Pagination from './Pagination';
 import { BiFilterAlt } from 'react-icons/bi';
 import GridFilter from './Filters';
