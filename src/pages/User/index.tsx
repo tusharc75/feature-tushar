@@ -1,14 +1,13 @@
-import { Dialog, IconButton, Tooltip, Typography } from '@material-ui/core';
-import { Delete as DeleteIcon } from '@material-ui/icons';
+import { Box, Button, Chip, Dialog, IconButton, Menu, MenuItem, Tooltip, Typography } from '@material-ui/core';
+import { AddOutlined, Delete as DeleteIcon, ExpandMore } from '@material-ui/icons';
 import { camelCase, uniqBy } from 'lodash';
-import { FC, useContext, useEffect, useReducer, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
-import { CiUser, FaUserAltSlash, FaUserCheck, IoCreateSharp, MdEmail } from 'react-icons/all';
+import { FC, useContext, useEffect, useState } from 'react';
+import { FaUserAltSlash, FaUserCheck } from 'react-icons/all';
 import { Link, useHistory } from 'react-router-dom';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
 import AssignRolesDialog from '../../components/AssignRolesDialog/AssignRolesDialog';
 import CustomContainer from '../../components/CustomContainer';
@@ -17,32 +16,33 @@ import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import ResourceTransferDialog from '../../components/ResourceTransferDialog';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import useColumns, { getFrameworkComponents, getStaticFields, gridFilterParser } from '../../constants/useColumns';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
-import {
-  getLocalStorageArrayData,
-  gridLoadingTimeout,
-  prepareDataForGrid,
-  removeLocalStorage,
-  sidebarResource,
-  userType
-} from './../../constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, userType } from './../../constants/helpers';
 import ApprovalProcessDialog from './ApprovalProcessDialog';
-import Header from './Header';
 import ManageUserDialog from './ManageUserDialog';
 import UserSetupDialog from './UserSetupDialog';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { deleteDisable } from 'src/constants/messageHelpers';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import styles from '../Leads/Header.module.scss';
+import SearchBox from 'src/components/Helpers/SearchBox';
 
-let userTimeout: ReturnType<typeof setTimeout>;
+let searchTimeout: ReturnType<typeof setTimeout>;
 
 const User: FC = () => {
   const renderedFrom = camelCase(routes?.user.title);
   const toastConfig = useContext(CustomToastContext);
+  const history = useHistory();
+
+  const { state, dispatch } = useTableReducer();
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { getColumnData } = useColumns();
+
   const {
     state: { user, permissions }
   }: any = useData();
-  const history = useHistory();
+
   const [openUserSetupDialog, setOpenUserSetupDialog] = useState(false);
   const [showApprovalProcessDialog, setShowApprovalProcessDialog] = useState(false);
   const [globalRolesDialogOpen, setGlobalRolesDialogOpen] = useState(false);
@@ -65,25 +65,63 @@ const User: FC = () => {
     text: history.location?.state?.text
   });
   const [userList, setUserList] = useState<any[]>([]);
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
-    state;
-  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleteUser, setDeleteUser] = useState<any>([]);
   const [allUsers, setAllUsers] = useState([]);
   const [entityAccess, setEntityAccess] = useState([]);
   const [roleAccessOfLoggedInUser, setRoleAccessOfLoggedInUser] = useState([]);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
-
-  const { getColumnData } = useColumns();
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
 
   const extraColumns = [
-    { field: 'regionalWideRole', headerName: 'Assigned Roles', filter: false, sortable: false, show: true, cellRenderer: 'regionalWideRoleRenderer' },
-    { field: 'status', headerName: 'Status', show: true, filter: false, sortable: false, cellRenderer: 'statusRenderer' }
+    {
+      accessor: 'regionalWideRole',
+      Header: 'Assigned Roles',
+      minWidth: 180,
+      width: 180,
+      disableFilters: true,
+      disableSortBy: true,
+      Cell: ({ row }) =>
+        row?.original?.regionalWideRole ? (
+          <>
+            <h5 className="createBy d-flex">
+              <Link className="link" title={row?.original?.regionalWideRole} to={`${routes.roleDetail.path}/${row?.original?.regionalWideRoleId}`}>
+                {row?.original?.regionalWideRole}
+              </Link>
+              {row?.original?.restRegionalWideRoles.length > 0 && (
+                <span className="createdAtTime badge-date">{`+${row?.original?.restRegionalWideRoles.length} more..`}</span>
+              )}
+            </h5>
+          </>
+        ) : (
+          <NoDataCell />
+        )
+    },
+    {
+      accessor: 'status',
+      Header: 'Status',
+      minWidth: 150,
+      width: 150,
+      disableFilters: true,
+      disableSortBy: true,
+      Cell: ({ row }) => (
+        <div style={{ width: 150 }}>
+          {row?.original?.status ? (
+            <Tooltip title="Inactive">
+              <Typography>
+                <FaUserAltSlash className="text-error ml-2" />
+              </Typography>
+            </Tooltip>
+          ) : (
+            <Tooltip title="Active">
+              <Typography>
+                <FaUserCheck className="text-success ml-2" />
+              </Typography>
+            </Tooltip>
+          )}{' '}
+        </div>
+      )
+    }
   ];
 
   useEffect(() => {
@@ -97,128 +135,55 @@ const User: FC = () => {
       .get(`/field?resource=User&view=true`)
       .then(({ data: { data } }) => {
         let columns = [];
-        let rendererNames = [];
         data.forEach((o) => {
           let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.userDetail.path, true);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName);
-            }
           }
         });
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent,
-          statusRenderer: StatusRenderer,
-          regionalWideRoleRenderer: RegionalWideRoleRenderer,
-          actionsRenderer: ActionsRenderer
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
-        columns = [...columns, ...extraColumns, ...getStaticFields()];
-        setColumns([...columns]);
+        columns = [...columns, ...extraColumns, ...getStaticFields(), ActionsRenderer];
+        setColumns(columns);
       });
   };
 
-  if (columnState) {
-    columns.forEach((item) => {
-      columnState.forEach((d) => {
-        if (d.colId === item.field) {
-          item.show = !d.hide;
-        }
-      });
-    });
-  }
-
-  const StatusRenderer = (params) => (
-    <div style={{ width: 150 }}>
-      {params.value ? (
-        <Tooltip title="Inactive">
-          <Typography>
-            <FaUserAltSlash className="text-error ml-2" />
-          </Typography>
-        </Tooltip>
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 110,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) =>
+      user?.user._id === row?.original?.id ? (
+        <p title="There is no action for currently logged in user">No Actions</p>
       ) : (
-        <Tooltip title="Active">
-          <Typography>
-            <FaUserCheck className="text-success ml-2" />
-          </Typography>
-        </Tooltip>
-      )}{' '}
-    </div>
-  );
-
-  const RegionalWideRoleRenderer = (params) =>
-    params.value ? (
-      <>
-        <h5 className="createBy d-flex">
-          <Link className="link" title={params.value} to={`${routes.roleDetail.path}/${params.data.regionalWideRoleId}`}>
-            {params.value}
-          </Link>
-          {params.data.restRegionalWideRoles.length > 0 && (
-            <span className="createdAtTime badge-date">{`+${params.data.restRegionalWideRoles.length} more..`}</span>
-          )}
-        </h5>
-      </>
-    ) : (
-      <NoDataCell />
-    );
-
-  const ActionsRenderer = (params) =>
-    user?.user._id === params.data.id ? (
-      <p title="There is no action for currently logged in user">No Actions</p>
-    ) : (
-      <>
-        {/* <Tooltip
-          className={permissions.user.isCreate ? "" : "cursor-stop"}
-          title={permissions.user.isCreate ? "Clone" : "You do not have permission to clone/create"} >
-          <IconButton
-            size="small"
-            aria-label="Clone"
-            onClick={() => {
-              setIsOpen({ open: true, isClone: true, idToClone: params.data._id })
-            }}
-          >
-            <FileCopyIcon fontSize="small" color="primary" />
-          </IconButton>
-        </Tooltip> */}
-        {permissions?.user?.isDelete ? (
-          params.data.isBrandAdmin ? (
-            <Tooltip className="cursor-stop" title="Brand Admin Can not be Deleted">
-              <IconButton aria-label="Delete" size={'small'}>
-                <DeleteIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          ) : (
-            <Tooltip title="Delete">
+        <>
+          <HtmlTooltip title={!row?.original?.canDelete ? deleteDisable : row?.original?.isBrandAdmin ? 'Brand Admin Can not be Deleted' : 'Delete'}>
+            <span>
               <IconButton
-                size={'small'}
+                size="small"
                 aria-label="Delete"
+                disabled={row?.original?.canDelete && !row?.original?.isBrandAdmin ? false : true}
                 onClick={() => {
-                  setDeleteUser([params?.data]);
+                  setDeleteUser([row?.original]);
                   setShowDeleteDialog(true);
                 }}
               >
-                <DeleteIcon fontSize="small" color="error" />
+                <DeleteIcon fontSize="small" color={row?.original?.canDelete && !row?.original?.isBrandAdmin ? 'error' : 'disabled'} />
               </IconButton>
-            </Tooltip>
-          )
-        ) : (
-          <Tooltip className="cursor-stop" title="You do not have permission to delete user">
-            <IconButton aria-label="Delete" size={'small'}>
-              <DeleteIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        )}
-      </>
-    );
+            </span>
+          </HtmlTooltip>
+        </>
+      )
+  };
 
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}&withoutRoleLookup=true`;
 
     if (showFilteredRecordsOnly) {
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
     }
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
@@ -262,14 +227,13 @@ const User: FC = () => {
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (userTimeout) {
-      clearTimeout(userTimeout);
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
     }
 
-    userTimeout = setTimeout(() => {
+    searchTimeout = setTimeout(() => {
       fetchUsers();
     }, millisec);
-    // eslint-disable-next-line
   }, [search]);
 
   useEffect(() => {
@@ -313,12 +277,8 @@ const User: FC = () => {
   };
 
   const fetchUsers = () => {
-    const queryString = getQueryString();
     dispatch({ type: 'loading', loading: true });
-
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
+    const queryString = getQueryString();
 
     axiosInstance()
       .get(`/user${queryString}`)
@@ -334,7 +294,6 @@ const User: FC = () => {
           let finalObject = prepareDataForGrid(u);
           finalObject['canDelete'] = permissions?.user?.isDelete;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions?.user?.isUpdate;
           finalObject['email'] = u.hideEmail ? null : u?.email;
           let res = {
             ...finalObject,
@@ -361,23 +320,10 @@ const User: FC = () => {
 
           setUserList(tempUsers);
         }
-        if (appendRows) {
-          dispatch({
-            type: 'initialize',
-            data: [...dataRows, ...rows],
-            count: count
-          });
-        } else {
-          dispatch({
-            type: 'initialize',
-            data: rows,
-            count: count
-          });
-        }
-        // dispatch({ type: 'initialize', data: rows, count: count });
+
+        dispatch({ type: 'initialize', data: rows, count: count });
       })
       .catch((error) => {
-        dispatch({ type: 'loading', loading: false });
         toastConfig.setToastConfig(error);
       })
       .finally(() => {
@@ -385,31 +331,12 @@ const User: FC = () => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
       });
-    fetchAllUsers();
-    // eslint-disable-next-line
-  };
 
-  const showConfirmBox = (row) => {
-    if (row) {
-      setIsConformDialogVisible(true);
-      if (row && row.id) {
-        setDeleteRec(row);
-      }
-    } else {
-      if (selectedRecords.some((d) => d.id === user?.user._id || d.isBrandAdmin)) {
-        setShowDeleteWarningConfirmBox(true);
-      } else {
-        setIsConformDialogVisible(true);
-      }
-    }
+    fetchAllUsers();
   };
 
   const handleAssignBrandAdmin = () => {
     setShowBrandAssignConfirmation(true);
-  };
-
-  const handleUnAssignBrandAdmin = () => {
-    setShowBrandUnAssignConfirmation(true);
   };
 
   const assignBrandAdmin = async () => {
@@ -469,7 +396,7 @@ const User: FC = () => {
       axiosInstance()
         .put(`/user/remove`, { ids: [...recs] })
         .then(({ data }) => {
-          removeLocalStorage(localStorageSelectedRecords);
+          dispatch({ type: 'selection', selectedRecords: [] });
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
@@ -493,21 +420,14 @@ const User: FC = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-  const handleCreate = () => {
-    setIsOpen({ open: true, isClone: false, idToClone: null });
-  };
-
   const handleClose = () => {
     setIsOpen({ open: false, isClone: false, idToClone: null });
-  };
-
-  const handleGlobalRolesOpenDialog = () => {
-    setGlobalRolesDialogOpen(true);
   };
 
   const handleGlobalRolesCloseDialog = () => {
     setGlobalRolesDialogOpen(false);
   };
+
   const handleRegionalRolesOpenDialog = () => {
     setRegionalRolesDialogOpen(true);
   };
@@ -582,6 +502,14 @@ const User: FC = () => {
     }
   };
 
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+
   const isLoggedInUserBrandAdmin = 'userType' in user?.user && user?.user?.userType === userType.brandAdmin;
   const isRoleSetUpPermission = permissions?.role?.isUpdate && permissions?.entity?.isUpdate && permissions?.user?.isUpdate;
   const isUserSetupPermission = isLoggedInUserBrandAdmin || isRoleSetUpPermission;
@@ -603,6 +531,7 @@ const User: FC = () => {
           isUserSetupPermission={isUserSetupPermission}
         />
       )}
+
       {openUserSetupDialog && (
         <UserSetupDialog
           open={openUserSetupDialog}
@@ -621,6 +550,7 @@ const User: FC = () => {
           entityAccessIds={entityAccess}
         />
       )}
+
       {globalRolesDialogOpen && (
         <Dialog fullWidth maxWidth="xs" open={globalRolesDialogOpen} onClose={handleGlobalRolesCloseDialog} aria-labelledby="assign-roles-dialog">
           <AssignRolesDialog
@@ -635,6 +565,7 @@ const User: FC = () => {
           />
         </Dialog>
       )}
+
       {showApprovalProcessDialog && (
         <Dialog
           fullWidth
@@ -652,6 +583,7 @@ const User: FC = () => {
           />
         </Dialog>
       )}
+
       {regionalRolesDialogOpen && (
         <Dialog fullWidth maxWidth="xs" open={regionalRolesDialogOpen} onClose={handleRegionalRolesCloseDialog} aria-labelledby="assign-roles-dialog">
           <AssignEntityDialog
@@ -684,145 +616,181 @@ const User: FC = () => {
             }}
             isExportAllOrSomeFeature={true}
             total={rowCount}
-            recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-            ids={
-              getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-                ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-                : []
-            }
+            recordsToExport={selectedRecords?.length}
+            ids={selectedRecords?.map((obj) => obj._id)}
             onExportToExcelSuccess={() => {
-              if (gridApi) gridApi.deselectAll();
-              else fetchUsers();
+              fetchUsers();
             }}
           />
         </div>
         <CustomContainer>
           <div className="header-panel">
-            <Header
-              onSearch={handleSearch}
-              searchVal={search}
-              userPermissions={permissions?.user}
-              superAdminAccess={user?.role?.selectedEntity?.superAdminAccess}
-              onCreate={handleCreate}
-              showConfirmBox={showConfirmBox}
-              openApprovalProcessDialog={() => setShowApprovalProcessDialog(true)}
-              openGlobalRolesDialog={handleGlobalRolesOpenDialog}
-              openRegionalRolesDialog={handleRegionalRolesOpenDialog}
-              rolesActionDisabled={selectedRecords.length === 0}
-              approvalProcessActionDisabled={selectedRecords.length === 0 || !(user?.user?.userType === userType.brandAdmin)}
-              selectedRecordsLength={selectedRecords.length}
-              entityRoleRedirectDetails={entityRoleRedirectDetails}
-              onEntityRoleRedirectDetailRemove={() => {
-                setEntityRoleRedirectDetails({ id: null, name: null, type: null, text: null });
-              }}
-              unAssignUsersFromEntity={() => {
-                setIsConformDialogVisible(true);
-                setUnAssignLoading(true);
-              }}
-              openUserSetupDialog={() => {
-                setOpenUserSetupDialog(true);
-              }}
-              userSetupDisabled={selectedRecords.length === 0}
-              manageDeleteUser={() => {
-                if (selectedRecords) {
-                  setDeleteUser(selectedRecords);
-                  setShowDeleteDialog(true);
-                }
-              }}
-              isAssignBrandAdmin={
-                user?.user?.userType === userType.brandAdmin &&
-                selectedRecords.some((records) => 'userType' in records && records.userType === userType.brandAdmin)
-              }
-              handleAssignBrandAdmin={handleAssignBrandAdmin}
-              isUserSetupPermission={isUserSetupPermission}
-              isUnAssignBrandAdmin={
-                selectedRecords.length > 0 && selectedRecords.filter((records) => 'userType' in records).length === selectedRecords.length
-              }
-              handleUnAssignBrandAdmin={handleUnAssignBrandAdmin}
-              columns={columns}
-              dispatch={dispatch}
-              filters={filters}
-              handleResetPassword={handleResetPassword}
-              handleEmailVisibility={handleEmailVisibility}
-            />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className={'flex justify-between align-items-center gap-1 w-full'}>
+                {entityRoleRedirectDetails.id && (
+                  <Chip
+                    className="ml-3"
+                    color="primary"
+                    label={`${entityRoleRedirectDetails.text} : ${entityRoleRedirectDetails.name}`}
+                    onDelete={() => {
+                      setEntityRoleRedirectDetails({ id: null, name: null, type: null, text: null });
+                    }}
+                  />
+                )}
+              </div>
+              <div className="flex flex-wrap gap-[8px] justify-end">
+                <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
+                <div className="flex gap-[8px] flex-wrap items-center">
+                  <Button
+                    variant={'contained'}
+                    color="primary"
+                    size="small"
+                    className={`no-shadow`}
+                    disabled={!permissions?.user?.isCreate}
+                    onClick={() => {
+                      setIsOpen({ open: true, isClone: false, idToClone: null });
+                    }}
+                    startIcon={<AddOutlined />}
+                  >
+                    Add
+                  </Button>
+                  <Button
+                    variant={'outlined'}
+                    color="default"
+                    size="small"
+                    onClick={openActions}
+                    className={`new-dropdown-v1`}
+                    aria-controls="action-menu"
+                    endIcon={<ExpandMore />}
+                    disabled={selectedRecords?.length === 0}
+                  >
+                    Actions
+                  </Button>
+                  <Menu
+                    anchorEl={anchorEl}
+                    keepMounted
+                    getContentAnchorEl={null}
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'left'
+                    }}
+                    id="action-menu"
+                    open={Boolean(anchorEl)}
+                    onClose={closeActions}
+                  >
+                    <MenuItem
+                      disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
+                      onClick={() => {
+                        closeActions();
+                        if (selectedRecords) {
+                          setDeleteUser(selectedRecords);
+                          setShowDeleteDialog(true);
+                        }
+                      }}
+                    >
+                      {`Delete (${selectedRecords?.length})`}
+                    </MenuItem>
+                    <MenuItem
+                      disabled={
+                        !(
+                          user?.user?.userType === userType.brandAdmin &&
+                          selectedRecords?.length &&
+                          selectedRecords.some((records) => 'userType' in records && records.userType === userType.brandAdmin)
+                        )
+                      }
+                      onClick={handleAssignBrandAdmin}
+                    >
+                      Assign Brand Admin
+                    </MenuItem>
+                    <MenuItem
+                      disabled={!(permissions?.user?.isUpdate && user?.user?.userType === userType.brandAdmin && selectedRecords?.length)}
+                      onClick={() => {
+                        setShowApprovalProcessDialog(true);
+                        closeActions();
+                      }}
+                    >
+                      Set Approval Process
+                    </MenuItem>
+                    <MenuItem
+                      disabled={!(permissions?.user?.isUpdate && selectedRecords?.length)}
+                      onClick={() => {
+                        handleRegionalRolesOpenDialog();
+                        closeActions();
+                      }}
+                    >
+                      Assign Entities - Roles
+                    </MenuItem>
+                    <MenuItem
+                      disabled={!(permissions?.user?.isUpdate && entityRoleRedirectDetails.id && selectedRecords?.length)}
+                      onClick={() => {
+                        unAssignUsersFromEntity();
+                        closeActions();
+                      }}
+                    >
+                      Un-assign Entity
+                    </MenuItem>
+                    <MenuItem
+                      disabled={!(isUserSetupPermission && selectedRecords?.length)}
+                      onClick={() => {
+                        setOpenUserSetupDialog(true);
+                        closeActions();
+                      }}
+                    >
+                      User Setup
+                    </MenuItem>
+                    <MenuItem
+                      disabled={!permissions?.user?.isUpdate}
+                      onClick={() => {
+                        handleResetPassword();
+                        closeActions();
+                      }}
+                    >
+                      Reset Password
+                    </MenuItem>
+                    <MenuItem
+                      disabled={!user?.role?.selectedEntity?.superAdminAccess}
+                      onClick={() => {
+                        handleEmailVisibility(true);
+                        closeActions();
+                      }}
+                    >
+                      Hide Email
+                    </MenuItem>
+                    <MenuItem
+                      disabled={!user?.role?.selectedEntity?.superAdminAccess}
+                      onClick={() => {
+                        handleEmailVisibility(false);
+                        closeActions();
+                      }}
+                    >
+                      Unhide Email
+                    </MenuItem>
+                  </Menu>
+                </div>
+              </div>
+            </div>
           </div>
 
-          {isMobile && !isTablet ? (
-            <CustomSwipableList
-              allowSelection={true}
-              allowSwipe={true}
-              permissions={permissions?.user}
-              primaryField={columns?.find((d) => d.field === 'concatedName')}
-              onClick={(d) => {
-                history.push(`${routes.userDetail.path}/${d._id}`);
-              }}
-              dataRows={dataRows}
-              selectedRecords={selectedRecords}
-              dispatch={dispatch}
-              actionCol={(data) => {
-                const params = { data };
-                return <ActionsRenderer {...params} />;
-              }}
-              // onEdit={(d) => {
-              //   history.push(`${routes.userDetail.path}/${d._id}`);
-              // }}
-              extraParamsToCheckDelete={true}
-              // onDelete={(d) => {
-              //   setDeleteUser([d]);
-              //   setShowDeleteDialog(true);
-              // }}
-              rowCount={rowCount}
-              page={page}
-              loading={loading}
-              additionalDetails={[
-                {
-                  icon: <CiUser size={18} />,
-                  field: 'regionalWideRole'
-                }
-              ]}
-              chips={[
-                {
-                  icon: <MdEmail />,
-                  label: 'Email: ',
-                  field: 'email'
-                },
-                {
-                  label: 'Status',
-                  field: 'status'
-                },
-                {
-                  icon: <IoCreateSharp />,
-                  label: 'Created By: ',
-                  field: 'createdBy'
-                }
-              ]}
-              owerCollaboratorInitialsOrImages=""
-              onCreate={false}
-              showClone={false}
-              onClone={() => {}}
-              renderedFrom={renderedFrom}
-            />
-          ) : Object.keys(frameWorkComponent).length > 0 ? (
-            <CustomAgGrid
+          {columns ? (
+            <CustomReactTable
+              height={'calc(100vh - 200px)'}
               columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameWorkComponent}
-              setGridApi={setGridApi}
+              state={state}
               dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              actionWidth={110}
-              loading={loading}
               renderedFrom={renderedFrom}
+              isClientSideGrid={false}
               refreshGrid={fetchUsers}
               showOnlyShowFilteredRecordSwitch={true}
               showFilters={true}
               resource={sidebarResource.user}
             />
-          ) : null}
+          ) : (
+            <Box p={2} height={500}>
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Box>
+          )}
         </CustomContainer>
+
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
             open={showDeleteWarningConfirmBox}
@@ -830,6 +798,7 @@ const User: FC = () => {
             onClose={() => setShowDeleteWarningConfirmBox(false)}
           />
         ) : null}
+
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
@@ -846,6 +815,7 @@ const User: FC = () => {
             onOk={unAssignLoading ? unAssignUsersFromEntity : handleDeleteUser}
           />
         ) : null}
+
         {showBrandAssignConfirmation && (
           <ConfirmationDialog
             open={showBrandAssignConfirmation}
@@ -858,6 +828,7 @@ const User: FC = () => {
             onOk={assignBrandAdmin}
           />
         )}
+
         {showBrandUnAssignConfirmation && (
           <ConfirmationDialog
             open={showBrandUnAssignConfirmation}
@@ -870,6 +841,7 @@ const User: FC = () => {
             onOk={unAssignBrandAdmin}
           />
         )}
+
         {showDeleteDialog ? (
           <ResourceTransferDialog
             open={true}
@@ -880,7 +852,7 @@ const User: FC = () => {
               setShowDeleteDialog(false);
             }}
             handleDelete={() => {
-              removeLocalStorage(localStorageSelectedRecords);
+              dispatch({ type: 'selection', selectedRecords: [] });
               setDeleteUser([]);
               setShowDeleteDialog(false);
               fetchUsers();
