@@ -17,9 +17,10 @@ import { calculateRowsField, fetch_rental_cost_fields } from '../../../component
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import { BiChevronDown } from 'react-icons/bi';
 import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
-import { ownerAndColaborator } from 'src/constants/messageHelpers';
+import { ownerAndColaborator, quotationApprovedMessage } from 'src/constants/messageHelpers';
+import Add from '@material-ui/icons/Add';
 
-const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }) => {
+const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, quotationApproved }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -35,14 +36,21 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
   const [isDeleting, setDeleting] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [isRateRequired, setIsRateRequired] = useState(false);
-  const [allFields, setAllFields] = useState([]);
+  const [allFields, setAllFields] = useState(null);
 
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
 
   useEffect(() => {
     fetchFields();
+    fetchData();
   }, []);
+
+  useEffect(() => {
+    if (allFields) {
+      generateColumns()
+    }
+  }, [allFields, allowedToEdit, quotationApproved]);
 
   const handleOpen = (row, rows) => {
     setShowCostDialog({
@@ -53,15 +61,19 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
   };
 
   const fetchFields = async () => {
-    setNextStep(false);
     const fields = await fetch_rental_cost_fields(rentalManagementData.currency, isOffline);
-    if (!allowedToEdit) {
-      fields?.forEach((e) => {
+    setAllFields(fields);
+  };
+
+  const generateColumns = () => {
+    setColumns(null)
+    const data = [...allFields];
+    if (!allowedToEdit || quotationApproved) {
+      data?.forEach((e) => {
         e.isColumnEditable = false;
       });
     }
-    setAllFields(fields);
-    const newColumns = generateCustomTableColumns(fields, rentalManagementData?.currency, renderedFrom);
+    const newColumns = generateCustomTableColumns(data, rentalManagementData?.currency, renderedFrom);
     let column: any = [
       {
         accessor: 'index',
@@ -75,9 +87,8 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
       }
     ];
     column = [...column, ...newColumns];
-    const isPriceRequired = fields.filter((el) => el.fieldName === 'price' && el.required).length > 0;
+    const isPriceRequired = data.filter((el) => el.fieldName === 'price' && el.required).length > 0;
     setIsRateRequired(isPriceRequired);
-
     column.push({
       accessor: 'action',
       Header: 'Actions',
@@ -101,7 +112,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
                 <EditIcon color="primary" fontSize="small" />
               </IconButton>
             </HtmlTooltip>
-            {permissions?.rentalManagement?.isUpdate && allowedToEdit ? (
+            {permissions?.rentalManagement?.isUpdate && allowedToEdit && !quotationApproved ? (
               <HtmlTooltip title="Delete">
                 <IconButton
                   size="small"
@@ -123,13 +134,10 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
           </Fragment>
         )
     });
+    setColumns(column)
+  }
 
-    setColumns(column);
-    fetchAdditionalCost();
-    setNextStep(false);
-  };
-
-  const fetchAdditionalCost = async () => {
+  const fetchData = async () => {
     setNextStep(false);
     try {
       var data: any = [];
@@ -158,7 +166,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
     axiosInstance()
       .post(`${rentalManagement.api}/additionalcost/${rentalManagementData._id}/add`, { additionalCost: rows })
       .then(() => {
-        fetchAdditionalCost();
+        fetchData();
         setShowCostDialog({ open: false, showSaveAndNext: false });
         setUpdating(false);
       })
@@ -189,7 +197,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
         } else {
           setShowCostDialog({ open: false, showSaveAndNext: false });
         }
-        fetchAdditionalCost();
+        fetchData();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -201,7 +209,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
     axiosInstance()
       .post(`${rentalManagement.api}/additionalcost/${rentalManagementData._id}/delete`, { ids })
       .then(() => {
-        fetchAdditionalCost();
+        fetchData();
         setDeleting(false);
         setDeleteData(null);
       })
@@ -230,13 +238,14 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
     <Fragment>
       <Box display="flex" justifyContent="space-between" m={1}>
         <Box display="flex">
-          <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : ``}>
+          <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : quotationApproved ? quotationApprovedMessage : ``}>
             <span>
               <Button
                 color="primary"
-                variant="contained"
+                variant="outlined"
                 size="small"
-                disabled={allowedToEdit && !isOffline ? false : true}
+                startIcon={<Add />}
+                disabled={allowedToEdit && !isOffline && !quotationApproved ? false : true}
                 onClick={() => {
                   setShowCostDialog({ open: true, showSaveAndNext: false });
                   setSelectedCostData(null);
@@ -293,8 +302,8 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
             onSelect={setSelectedProducts}
             childrenProperty="subRows"
             uniqueKey="_id"
-            hideSelection={isOffline || !allowedToEdit}
-            hideAction={isOffline || !allowedToEdit}
+            hideSelection={isOffline || !allowedToEdit || quotationApproved}
+            hideAction={isOffline || !allowedToEdit || quotationApproved}
             renderedFrom="rental_management_sevices_1"
             onSaveEdit={onSaveInlineEdit}
             isClientSideGrid={true}
