@@ -1,147 +1,140 @@
-import { Fragment, useState, useEffect, useReducer, useContext } from 'react';
-import { Box, Grid, Button, Menu, MenuItem, IconButton } from '@material-ui/core';
-import { ExpandMore } from '@material-ui/icons';
-import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
-import axiosInstance from 'src/axios/axiosInstance';
-import { getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
-import useColumns, { getFrameworkComponents, getStaticFields } from 'src/constants/useColumns';
-import routes from 'src/components/Helpers/Routes';
-import { useData } from 'src/StateProvider/Provider';
+import { Button, Grid, IconButton } from '@material-ui/core';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../../StateProvider/Provider';
+import axiosInstance from '../../../axios/axiosInstance';
+import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../../constants/helpers';
+import routes from './../../../components/Helpers/Routes';
 import { camelCase } from 'lodash';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import AssignUserDialog from 'src/components/AssignRolesDialog/NewAssignUserDialog';
+import { ExpandMore } from '@material-ui/icons';
+import { Menu, MenuItem, Box } from '@material-ui/core';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
-import AssignUserDialog from 'src/components/AssignRolesDialog/NewAssignUserDialog';
+import ConfirmationDialogRaw from '../../../components/Helpers/ConfirmationDialog';
 
 const Users = ({ warehouse }) => {
   let renderedFrom = `${camelCase(routes.user.title)}_warehouse_master`;
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
-
   const toastConfig = useContext(CustomToastContext);
-
-  const [openDialog, setOpenDialog] = useState(false);
-  const [anchorActionEl, setAnchorActionEl] = useState(null);
-  const [deleteRecord, setDeleteRecord] = useState(null);
-  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, page, limit, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { getColumnData } = useColumns();
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const [gridApi, setGridApi] = useState(null);
-  const [columns, setColumns] = useState([]);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
-  const { getColumnData } = useColumns();
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
+  const [deleteRecord, setDeleteRecord] = useState(null);
   const [isAssigning, setIsAssigning] = useState(false);
+  const [columns, setColumns] = useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
 
   useEffect(() => {
-    localStorage.removeItem(localStorageSelectedRecords);
     fetchGridColumns();
   }, []);
 
   useEffect(() => {
     fetchData();
-  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
+  }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource.user}`)
-      .then(({ data: { data } }) => {
-        let columns = [];
-        let rendererNames = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(routes.user?.title, o?.fieldData, routes.userDetail.path);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName);
-            }
-          }
-        });
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent,
-          actionsRenderer: ActionsRenderer
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
-        columns = [...columns, ...getStaticFields()];
-        setColumns([...columns]);
-      });
+  const fetchGridColumns = async () => {
+    let data;
+    const response = await axiosInstance().get(`/field?resource=${sidebarResource.user}`);
+    data = response?.data?.data;
+    let columns = [];
+    data.forEach((o) => {
+      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.userDetail.path, true);
+      if (currentColumn !== null) {
+        columns = [...columns, currentColumn?.columnData];
+      }
+      return o?.fieldData;
+    });
+    columns = [...columns, ...getStaticFields(), ActionsRenderer];
+    setColumns(columns);
   };
 
-  const fetchData = () => {
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 110,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+          <HtmlTooltip title="Delete">
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              onClick={() => {
+                setDeleteRecord(row.original);
+                setShowDeleteConfirmBox(true);
+              }}
+            >
+              <DeleteIcon color="error" />
+            </IconButton>
+          </HtmlTooltip>
+      </>
+    )
+  };
+
+  const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
     axiosInstance()
       .get(`${routes.warehouse.path}/user/${warehouse}`)
       .then(({ data: { data } }) => {
         let rows = data?.map((u) => {
-          let finalObject = prepareDataForGrid(u);
-          finalObject['isChecked'] = getLocalStorageArrayData(localStorageSelectedRecords)?.some((s) => s._id === u._id);
+          let finalObject = prepareDataForGrid(u, user);
+          finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions?.warehouse?.isUpdate;
-          finalObject['canDelete'] = permissions?.warehouse?.isUpdate;
-          let res = {
-            ...finalObject
-          };
-          return res;
+          finalObject['canDelete'] = permissions?.warehouse?.isDelete;
+          return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: rows?.length });
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        dispatch({ type: 'loading', loading: false });
+      })
+      .finally(() => {
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
       });
   };
 
   const handleDelete = () => {
+    setIsSubmitting(true);
+    let ids = [];
+    if (deleteRecord) {
+      ids.push(deleteRecord._id);
+    } else {
+      ids = selectedRecords?.map((d) => d._id);
+    }
     axiosInstance()
-      .put(`${routes.warehouse.path}/user/remove`, { warehouse, user: deleteRecord })
+      .put(`${routes.warehouse.path}/user/remove`, { warehouse, user: ids })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
           message: data.message
         });
-        localStorage.removeItem(localStorageSelectedRecords);
+        dispatch({ type: 'selection', selectedRecords: [] });
         fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
-        setAnchorActionEl(null);
+        setAnchorEl(null);
+        setIsSubmitting(false);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
+        setIsSubmitting(false);
       });
-  };
-
-  const ActionsRenderer = (params) => (
-    <HtmlTooltip title="Delete">
-      <IconButton
-        size="small"
-        aria-label="Delete"
-        onClick={() => {
-          setDeleteRecord([params.data._id]);
-          setShowDeleteConfirmBox(true);
-        }}
-      >
-        <DeleteIcon color="error" />
-      </IconButton>
-    </HtmlTooltip>
-  );
-
-  const openActions = (event) => {
-    setAnchorActionEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorActionEl(null);
   };
 
   const handleAssignUser = (data) => {
@@ -155,7 +148,7 @@ const Users = ({ warehouse }) => {
           type: 'success',
           message: data.message
         });
-        localStorage.removeItem(localStorageSelectedRecords);
+        dispatch({ type: 'selection', selectedRecords: [] });
         fetchData();
         setOpenDialog(false);
         setIsAssigning(false);
@@ -164,6 +157,14 @@ const Users = ({ warehouse }) => {
         toastConfig.setToastConfig(error);
         setIsAssigning(false);
       });
+  };
+
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
   };
 
   return (
@@ -183,62 +184,53 @@ const Users = ({ warehouse }) => {
             </Button>
           </Grid>
           <Grid item xs={9} md={9} sm={9}>
-            <Box display={'flex'} justifyContent={'flex-end'} alignItems="center">
-              <Button
-                variant="outlined"
-                color="default"
-                size="small"
-                onClick={openActions}
-                aria-controls="action-menu"
-                disabled={selectedRecords.length === 0}
-                endIcon={<ExpandMore />}
-                className="new-dropdown-v1"
-              >
-                Actions
-              </Button>
-              <Menu
-                anchorEl={anchorActionEl}
-                keepMounted
-                getContentAnchorEl={null}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'left'
-                }}
-                id="action-menu"
-                open={Boolean(anchorActionEl)}
-                onClose={closeActions}
-              >
-                <MenuItem
-                  onClick={() => {
-                    closeActions();
-                    setShowDeleteConfirmBox(true);
-                    setDeleteRecord(selectedRecords.map((d) => d._id));
-                  }}
+              <Box display={'flex'} justifyContent={'flex-end'} alignItems="center">
+                <Button
+                  variant="outlined"
+                  color="default"
+                  size="small"
+                  onClick={openActions}
+                  aria-controls="action-menu"
+                  disabled={selectedRecords.length === 0}
+                  endIcon={<ExpandMore />}
+                  className="new-dropdown-v1"
                 >
-                  Delete
-                </MenuItem>
-              </Menu>
-            </Box>
+                  Actions
+                </Button>
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  id="action-menu"
+                  open={Boolean(anchorEl)}
+                  onClose={closeActions}
+                >
+                  <MenuItem
+                    onClick={() => {
+                      closeActions();
+                      setShowDeleteConfirmBox(true);
+                    }}
+                  >
+                    {`Delete (${selectedRecords?.length})`}
+                  </MenuItem>
+                </Menu>
+              </Box>
           </Grid>
         </Grid>
       </Box>
-      {columns && Object.keys(frameWorkComponent).length > 0 ? (
-        <CustomAgGrid
+      {columns ? (
+        <CustomReactTable
+          height={'calc(100vh - 200px)'}
           columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameWorkComponent}
-          setGridApi={setGridApi}
+          state={state}
           dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          actionWidth={150}
-          loading={loading}
           renderedFrom={renderedFrom}
           refreshGrid={fetchData}
-          allowAction={permissions?.warehouse?.isUpdate}
-          isClientSideGrid={true}
+          isClientSideGrid={false}
           showOnlyShowFilteredRecordSwitch={false}
         />
       ) : (
@@ -262,11 +254,12 @@ const Users = ({ warehouse }) => {
       {showDeleteConfirmBox && (
         <ConfirmationDialogRaw
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to remove the ${routes.user?.title?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete the ${routes?.user?.title?.toLowerCase()} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
           }}
+          okBtnLoading={isSubmitting}
           onOk={handleDelete}
         />
       )}
