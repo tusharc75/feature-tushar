@@ -1,36 +1,30 @@
-import { useState, useEffect, useContext, useReducer } from 'react';
-import { Box, Button, Dialog, Grid, IconButton, Tooltip } from '@material-ui/core';
+import { useState, useEffect, useContext } from 'react';
+import { Box, Button, Dialog, Grid, IconButton } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { CHILD_RESOURCE, CustomDialogTransition, prepareDataForGrid, serializedAsset } from '../../../constants/helpers';
-import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridComponents/CustomAgGrid';
-import { CommonRenderer, DateRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
+import { CHILD_RESOURCE, CustomDialogTransition, dateFormat, prepareDataForGrid, serializedAsset } from '../../../constants/helpers';
 import { camelCase } from 'lodash';
-import { staticFrameworkRender } from 'src/constants/useColumns';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { Link } from 'react-router-dom';
 import { isMobile, isTablet } from 'react-device-detect';
-import styles from '../../Leads/Header.module.scss';
 import IssueCertificateDialog from '../../SerializedAssetsCertification/IssueCertificateDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import AttachFileIcon from '@material-ui/icons/AttachFile';
 import ManageAttachment from 'src/components/Activity/Attachments/ManageAttachment';
-import useColumns, { getFrameworkComponents } from '../../../constants/useColumns';
 import { useData } from 'src/StateProvider/Provider';
+import moment from 'moment';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 
 const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetDetails = null }) => {
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = `${camelCase(routes?.serializedAsset.title)}_certificationHistory`;
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
-  const [columns, setColumns] = useState([]);
+  const { state, dispatch } = useTableReducer();
+  const [columns, setColumns] = useState(null);
   const [openDialog, setOpenDialog] = useState({ open: false });
   const [openAttachment, setOpenAttachment] = useState({ open: false, attachmentId: null });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
 
   const { getColumnData } = useColumns();
 
@@ -50,9 +44,6 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
 
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
     var api = `${serializedAsset.api}/${id}/certificate`;
     if (supplierAccount) {
       api = api + `?supplierAccount=${supplierAccount}`;
@@ -81,7 +72,6 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
       .get(`/field/child?resource=${CHILD_RESOURCE.serializedAssetsCertification}`)
       .then(({ data: { data } }) => {
         let columns = [];
-        let rendererNames = [];
         data?.forEach((o) => {
           if (o.fieldName === 'attachments') {
             return;
@@ -89,59 +79,71 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
           let currentColumn = getColumnData(renderedFrom, o, routes.serializedAssetDetail.path, true);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName);
-            }
           }
         });
-        columns.push({ field: 'supplierAccount', headerName: 'Certification Supplier', show: true, cellRenderer: 'supplierAccountRenderer' });
-        columns.push({ field: 'createdBy', headerName: 'Created By', show: true, filter: false, sortable: false, cellRenderer: 'createdByRenderer' });
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent,
-          supplierAccountRenderer: SupplierAccountRenderer,
-          actionsRenderer: ActionsRenderer
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
+        columns.push({
+          accessor: 'supplierAccount', Header: 'Certification Supplier', show: true, Cell: ({ row }) => (
+            <>
+              {row.original?.supplierAccount ? (
+                permissions?.supplierAccount?.isRead ?
+                  <Link className="link" target="_blanck" title={row.original?.supplierAccount} to={`${routes.supplierAccountDetail.path}/${row.original?.supplierAccountId}`}>
+                    {row.original?.supplierAccount}
+                  </Link> : <span>{row.original?.supplierAccount}</span>
+              ) : (
+                <NoDataCell />
+              )}
+            </>
+          )
+        });
+        columns.push({
+          accessor: 'createdBy', Header: 'Created By', show: true, filter: false, sortable: false, Cell: ({ row }) => (
+            row.original?.createdBy ? (
+              <h5 className="createBy" title={`${row.original?.createdBy} • ${moment(row.original?.createdByDate).format(dateFormat)}`}>
+                {row.original?.createdBy}
+                <span className="createdAtTime badge-date">{moment(row.original?.createdByDate)?.format(dateFormat)}</span>
+              </h5>
+            ) : (
+              <NoDataCell />
+            )
+          )
+        });
         columns?.forEach((e) => {
-          if (["issueDate", "expiryDate"].includes(e.field)) {
+          if (["issueDate", "expiryDate"].includes(e.accessor)) {
             e.disabled = true;
           }
         })
-        setColumns([...columns]);
+        console.log(columns)
+        setColumns([...columns, ActionsRenderer]);
       });
   };
 
-  const ActionsRenderer = (params) => (
-    <>
-      {params.data.attachmentId && (
-        <HtmlTooltip title="View Attachment">
-          <IconButton
-            size="small"
-            aria-label="Issue"
-            onClick={() => {
-              setOpenAttachment({ open: true, attachmentId: params.data.attachmentId });
-            }}
-          >
-            <AttachFileIcon color="primary" />
-          </IconButton>
-        </HtmlTooltip>
-      )}
-    </>
-  );
-
-  const SupplierAccountRenderer = (params: { value: any; data: any }) => (
-    <>
-      {params.value ? (
-        permissions?.supplierAccount?.isRead ?
-          <Link className="link" target="_blanck" title={params.value} to={`${routes.supplierAccountDetail.path}/${params.data.supplierAccountId}`}>
-            {params.value}
-          </Link> : <span>{params.value}</span>
-      ) : (
-        <NoDataCell />
-      )}
-    </>
-  );
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 150,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        {row.original?.attachmentId && (
+          <HtmlTooltip title="View Attachment">
+            <IconButton
+              size="small"
+              aria-label="Issue"
+              onClick={() => {
+                setOpenAttachment({ open: true, attachmentId: row.original?.attachmentId });
+              }}
+            >
+              <AttachFileIcon color="primary" />
+            </IconButton>
+          </HtmlTooltip>
+        )}
+      </>
+    )
+  }
 
   return (
     <>
@@ -160,24 +162,17 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
         </Grid>
       )}
       <Box>
-        {Object.keys(frameWorkComponent).length > 0 ? (
-          <CustomAgGrid
+        {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
             columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameWorkComponent}
-            setGridApi={setGridApi}
+            state={state}
             dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            allowAction={true}
-            actionWidth={100}
-            allowSelection={false}
-            isClientSideGrid={true}
-            loading={loading}
             renderedFrom={renderedFrom}
+            isClientSideGrid={false}
             refreshGrid={fetchData}
+            showOnlyShowFilteredRecordSwitch={true}
+            showFilters={false}
           />
         ) : (
           <Box p={2} height={500}>
