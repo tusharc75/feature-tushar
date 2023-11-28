@@ -212,6 +212,11 @@ const Product = () => {
         data.productTemplate?.forEach((ele) => {
           GenrateColoum(ele.fields, columns);
         });
+        console.log(columns);
+        // make columns unique
+        columns = columns.filter(
+          (item, index, self) => index === self.findIndex((t) => t.accessor === item.accessor)
+        );
         columns = [...columns, ...getStaticFields()];
         setColumns([...columns, ActionsRenderer]);
         dispatch({ type: 'initialize', data: rows, count: data?.count });
@@ -241,6 +246,7 @@ const Product = () => {
               col.show = true;
               col.filter = false;
               col.sortable = false;
+              col.editable = false;
               col.leval = 'product-template';
               column.push(col);
             }
@@ -258,6 +264,7 @@ const Product = () => {
                 col.show = true;
                 col.filter = false;
                 col.sortable = false;
+                col.editable = false;
                 col.leval = 'product-template';
                 column.push(col);
               }
@@ -272,6 +279,7 @@ const Product = () => {
               col.accessor = fieldName;
               col.Header = fieldLabel;
               col.width = 180;
+              col.editable = false;
               col.show = true;
               col.filter = false;
               col.sortable = false;
