@@ -1,10 +1,15 @@
 import routes from "src/components/Helpers/Routes";
 
 export const ownerAndColaborator = 'You have to be either owner or collaborator to perform this action';
+
+export const entityDisable = 'You do not have permission to update entity';
+
 export const actionSelection = 'Select at least one line item to enable this button';
 
 export const cloneDisable = 'You do not have permission to Clone/Create';
 export const deleteDisable = 'You do not have permission to Delete';
+
+export const quotationApprovedMessage = 'Quotation Approved you can not perform this action';
 
 export const rentalManagementActions = {
     createLoadingTicket: 'Create Loading Ticket',

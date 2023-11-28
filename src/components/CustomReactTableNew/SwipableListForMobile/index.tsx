@@ -2,8 +2,8 @@ import { CircularProgress, Collapse, IconButton } from '@material-ui/core';
 import { Check, Edit, Error } from '@material-ui/icons';
 import React, { FC, useState } from 'react';
 import { BsChevronContract, BsChevronExpand } from 'react-icons/bs';
-import { TInitialState } from '../CustomReactTableNew/useTableReducer';
-import HtmlTooltip from '../CustomTooltipTitle';
+import { TInitialState } from '../useTableReducer';
+import HtmlTooltip from '../../CustomTooltipTitle';
 import type { TSwipableListInputProps } from './types';
 
 const DEFAULT_DATA_ROWS_VISIBLE = 3; // This number will change how many rows will be visible by default
@@ -404,7 +404,7 @@ const RenderCellWithHeader = ({ field, row, submitInput, handleCellClick, handle
   };
 
   return (
-    <h6 className=" text-[12px] grid grid-cols-2 justify-between gap-2 max-w-full">
+    <h6 className=" text-[12px] grid grid-cols-[5fr_6fr] justify-between gap-2 max-w-full">
       <span className="">{field.Header}: </span>
       <span
         onKeyDown={(e) => {
@@ -413,7 +413,7 @@ const RenderCellWithHeader = ({ field, row, submitInput, handleCellClick, handle
         onClick={() => {
           handleCellClick(cell, row);
         }}
-        className="text-[12px_!important] text-right [&>*]:text-right [&>*]:justify-end line-clamp-1 break-all [&>*]:[flex-wrap:wrap] [&>*]:[font-weight:500_!important] [&>*]:[font-size:12px_!important] [&>*]:line-clamp-1 [&>*]:[white-space:unset_!important] "
+        className="text-[12px_!important] text-right [&>*]:text-right [&>*]:justify-end line-clamp-1 break-all [&>*]:[flex-wrap:wrap] [&>*]:[font-weight:500_!important] [&>*]:[font-size:12px_!important] [&>*]:line-clamp-1 [&>*]:[white-space:unset_!important] [&>div]:[flex-wrap:wrap_!important] "
       >
         {!['selection'].includes(cell?.column.id) &&
         currentEditingCellPosition?.rowId === row.original._id &&
