@@ -270,8 +270,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
       }
     });
 
-    data?.material
-      ?.filter((d) => d?.actualStartDate && d?.parentId === null && d?.type === 'product' && d?.productDetail?.serializedProduct)
+    data?.material?.filter((d) => d?.actualStartDate && d?.parentId === null && d?.type === 'product' && d?.productDetail?.serializedProduct)
       ?.forEach((element) => {
         data?.inventory
           ?.filter((d) => d._id === element?._id && !d.isReplaced && d?.manualStartDate)
