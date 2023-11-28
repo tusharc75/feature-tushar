@@ -17,9 +17,8 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { sidebarResource, prepareDataForGrid } from '../../constants/helpers';
 import { useHistory } from 'react-router-dom';
 import { camelCase } from 'lodash';
-import { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { cloneDisable, deleteDisable, entityDisable } from 'src/constants/messageHelpers';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -46,7 +45,7 @@ const ProjectSales: FC = () => {
 
 
   const renderedFrom = camelCase(routes?.projectSales.title);
-
+  const { state, dispatch } = useTableReducer();
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
@@ -69,10 +68,7 @@ const ProjectSales: FC = () => {
     referenceName: history.location?.state?.accountName,
     resource: history.location?.state?.resource
   });
-
-  const [state, dispatch] = useReducer(reducer, intialState);
   const [anchorEl, setAnchorEl] = useState(null);
-
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } =
     state;
 
@@ -252,7 +248,7 @@ const ProjectSales: FC = () => {
   };
 
   const handleProjectFilter = (filterValues) => {
-    dispatch({ type: 'setPage', page: 0 });
+    dispatch({ type: 'pageChange', page: 0 });
     setselectedType(filterValues);
   };
 

@@ -8,19 +8,18 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
 import TransferEntityDialog from '../../components/AssignRolesDialog/TransferEntityDialog';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
-import { customerAccount, gridLoadingTimeout, opportunity, prepareDataForGrid, supplierAccount, removeLocalStorage, sidebarResource } from '../../constants/helpers';
+import { customerAccount, gridLoadingTimeout, opportunity, prepareDataForGrid, sidebarResource, supplierAccount } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageOpportunityDialog from './ManageOpportunityDialog';
 import './style.scss';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import CustomReactTable, { checkStaticField, getStaticFields, gridFilterParser, useColumns } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { checkStaticField, getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 import { camelCase } from 'lodash';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
@@ -40,6 +39,7 @@ const Opportunities = () => {
       value: 2
     }
   ];
+  const { state, dispatch } = useTableReducer();
   const renderedFrom = camelCase(routes?.opportunity.title);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -61,7 +61,6 @@ const Opportunities = () => {
   });
   const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
   const [columns, setColumns] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -241,7 +240,7 @@ const Opportunities = () => {
   };
 
   const handleOpportunityTypeChange = (filterValues) => {
-    dispatch({ type: 'setPage', page: 0 });
+    dispatch({ type: 'pageChange', page: 0 });
     setSelectedType(filterValues);
   };
 
