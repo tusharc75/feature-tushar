@@ -212,7 +212,6 @@ const Product = () => {
         data.productTemplate?.forEach((ele) => {
           GenrateColoum(ele.fields, columns);
         });
-        console.log(columns);
         // make columns unique
         columns = columns.filter(
           (item, index, self) => index === self.findIndex((t) => t.accessor === item.accessor)
