@@ -34,7 +34,7 @@ import ArrangeViewButton from './ArrangeViewButton';
 import { GrFormClose } from 'react-icons/gr';
 import { CgSearch } from 'react-icons/cg';
 import GridHeader from './GridHeader';
-import SwipableListForMobile from 'src/components/SwipableListForMobile';
+import SwipableListForMobile from 'src/components/CustomReactTableNew/SwipableListForMobile';
 import Pagination from './Pagination';
 import { BiFilterAlt } from 'react-icons/bi';
 import GridFilter from './Filters';
@@ -264,13 +264,13 @@ function CustomReactTable({
     const obj = {};
     for (let i = 0; i < len; i++) {
       const id = selectedRecords[i]?.id;
-      const index = data.findIndex(row => row?.id === id)
+      const index = data.findIndex((row) => row?.id === id);
       if (index >= 0) {
         obj[index] = true;
       }
     }
     return obj;
-  }
+  };
 
   const handleFilterOpen = () => {
     setIsFilterOpen(true);
@@ -290,133 +290,117 @@ function CustomReactTable({
     }
   };
 
-  const handleCellSelection = (row) => { };
+  const handleCellSelection = (row) => {};
 
   const newColumns = React.useMemo(
     () =>
       expander
         ? [
-          {
-            id: 'expander',
-            Header: ({ isAllRowsExpanded }) => (
-              <span
-                style={{
-                  paddingLeft: '0.3rem',
-                  color: 'black'
-                }}
-              >
-                {isAllRowsExpanded ? (
-                  <FaAngleDown
-                    style={{ color: 'white' }}
-                    className="cursor-pointer"
-                    onClick={() => {
-                      toggleAllRowsExpanded(false);
-                    }}
-                  />
-                ) : (
-                  <FaAngleRight
-                    style={{ color: 'white' }}
-                    className="cursor-pointer"
-                    onClick={() => {
-                      toggleAllRowsExpanded(true);
-                    }}
-                  />
-                )}
-              </span>
-            ),
-            sticky: 'left',
-            width: isMobile && !isTablet ? 40 : 70,
-            minWidth: isMobile && !isTablet ? 40 : 70,
-            canDrag: false,
-            Cell: ({ row }) => (
-              <div
-                {...row.getToggleRowExpandedProps?.({
-                  style: {
-                    marginLeft: isMobileView ? 0 : `${row.depth * 10}px`
-                  }
-                })}
-              >
-                {row.original.type === 'folder' || row.canExpand ? (
-                  <IconButton size="small" style={{ fontSize: 13 }}>
-                    {row.isExpanded ? (
-                      <FaAngleDown />
-                    ) : (
-                      <FaAngleRight
-                        onClick={async () => {
-                          if (!fetchChildAttachment || row.original[childrenProperty]?.length > 0) return;
-                          const subRows = await fetchChildAttachment(row.original.id);
-                          row.original.subRows = subRows;
-                          row.canExpand = true;
-                          row.isExpanded = true;
-                        }}
-                      />
-                    )}
-                  </IconButton>
-                ) : null}
-              </div>
-            )
-          },
-          {
-            id: 'selection',
-            minWidth: 50,
-            width: 50,
-            sticky: isMobileView ? 'none' : 'left',
-            maxWidth: 50,
-            Header: ({ getToggleAllRowsSelectedProps }) => (
-              <IndeterminateCheckbox
-                onClick={(e) => handleAllSelect(getToggleAllRowsSelectedProps()?.checked)}
-                {...getToggleAllRowsSelectedProps()}
-                className="mx-auto text-center"
-              />
-            ),
-            Cell: ({ row }) => (
-              <div
-                {...{
-                  style: {
-                    paddingLeft: isMobileView ? 0 : `${row.depth * 15}px`
-                  }
-                }}
-                className="mx-auto text-center"
-              >
-                <IndeterminateCheckbox onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps()} />
-              </div>
-            )
-          },
-          ...baseColumns.map((m) => {
-            return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' };
-          })
-        ]
+            {
+              id: 'expander',
+              Header: ({ isAllRowsExpanded }) => (
+                <span
+                  style={{
+                    paddingLeft: '0.3rem',
+                    color: 'black'
+                  }}
+                >
+                  {isAllRowsExpanded ? (
+                    <FaAngleDown
+                      className="cursor-pointer text-[var(--primary-text)]"
+                      onClick={() => {
+                        toggleAllRowsExpanded(false);
+                      }}
+                    />
+                  ) : (
+                    <FaAngleRight
+                      className="cursor-pointer text-[var(--primary-text)]"
+                      onClick={() => {
+                        toggleAllRowsExpanded(true);
+                      }}
+                    />
+                  )}
+                </span>
+              ),
+              sticky: 'left',
+              width: isMobile && !isTablet ? 40 : 70,
+              minWidth: isMobile && !isTablet ? 40 : 70,
+              canDrag: false,
+              Cell: ({ row }) => (
+                <div
+                  {...row.getToggleRowExpandedProps?.({
+                    style: {
+                      marginLeft: isMobileView ? 0 : `${row.depth * 10}px`
+                    }
+                  })}
+                >
+                  {row.original.type === 'folder' || row.canExpand ? (
+                    <IconButton size="small" style={{ fontSize: 13 }}>
+                      {row.isExpanded ? (
+                        <FaAngleDown />
+                      ) : (
+                        <FaAngleRight
+                          onClick={async () => {
+                            if (!fetchChildAttachment || row.original[childrenProperty]?.length > 0) return;
+                            const subRows = await fetchChildAttachment(row.original.id);
+                            row.original.subRows = subRows;
+                            row.canExpand = true;
+                            row.isExpanded = true;
+                          }}
+                        />
+                      )}
+                    </IconButton>
+                  ) : null}
+                </div>
+              )
+            },
+            {
+              id: 'selection',
+              minWidth: 50,
+              width: 50,
+              sticky: isMobileView ? 'none' : 'left',
+              maxWidth: 50,
+              Header: ({ getToggleAllRowsSelectedProps }) => (
+                <IndeterminateCheckbox
+                  onClick={(e) => handleAllSelect(getToggleAllRowsSelectedProps()?.checked)}
+                  {...getToggleAllRowsSelectedProps()}
+                  className="mx-auto text-center"
+                />
+              ),
+              Cell: ({ row }) => (
+                <div className="mx-auto text-center">
+                  <IndeterminateCheckbox onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps()} />
+                </div>
+              )
+            },
+            ...baseColumns.map((m) => {
+              return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' };
+            })
+          ]
         : [
-          {
-            id: 'selection',
-            sticky: isMobileView ? 'none' : 'left',
-            minWidth: 50,
-            width: 50,
-            maxWidth: 50,
-            Header: ({ getToggleAllRowsSelectedProps }) => (
-              <IndeterminateCheckbox
-                onClick={(e) => handleAllSelect(getToggleAllRowsSelectedProps()?.checked)}
-                {...getToggleAllRowsSelectedProps()}
-                className="mx-auto text-center"
-              />
-            ),
-            Cell: ({ row }) => (
-              <div
-                {...{
-                  style: {
-                    paddingLeft: isMobileView ? 0 : `${row.depth * 15}px`
-                  }
-                }}
-                className="mx-auto text-center"
-              >
-                <IndeterminateCheckbox onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps()} />
-              </div>
-            )
-          },
-          ...baseColumns.map((m) => {
-            return m.canFilter === false ? { ...m, columnFilterable: false, filter: 'filterRowsWithSubrows' } : { ...m, columnFilterable: true };
-          })
-        ],
+            {
+              id: 'selection',
+              sticky: isMobileView ? 'none' : 'left',
+              minWidth: 50,
+              width: 50,
+              maxWidth: 50,
+              Header: ({ getToggleAllRowsSelectedProps }) => (
+                <IndeterminateCheckbox
+                  onClick={(e) => handleAllSelect(getToggleAllRowsSelectedProps()?.checked)}
+                  {...getToggleAllRowsSelectedProps()}
+                  className="mx-auto text-center"
+                />
+              ),
+              Cell: ({ row }) => (
+                <div className="mx-auto text-center">
+                  <IndeterminateCheckbox onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps()} />
+                </div>
+              )
+            },
+            ...baseColumns.map((m) => {
+              return m.canFilter === false ? { ...m, columnFilterable: false, filter: 'filterRowsWithSubrows' } : { ...m, columnFilterable: true };
+            })
+          ],
     [baseColumns]
   );
 
@@ -454,7 +438,7 @@ function CustomReactTable({
     }),
     []
   );
-  const updateData = () => { };
+  const updateData = () => {};
 
   const returnHiddenCols = () => {
     const storedColumns = JSON.parse(localStorage.getItem(renderedFrom));
@@ -568,7 +552,6 @@ function CustomReactTable({
     }
   }, [sortBy]);
 
-
   useEffect(() => {
     let flatSelectedData = [];
     Object.keys(selectedRowIds).forEach((key) => {
@@ -590,26 +573,24 @@ function CustomReactTable({
       }
     });
 
-    const includedRow: any = []
-    const notIncludedRow: any = []
+    const includedRow: any = [];
+    const notIncludedRow: any = [];
 
-    selectedRecords.forEach(row => {
-      if (data.find(d => d.id === row.id)) {
-        includedRow.push(row)
+    selectedRecords.forEach((row) => {
+      if (data.find((d) => d.id === row.id)) {
+        includedRow.push(row);
       } else {
-        notIncludedRow.push(row)
+        notIncludedRow.push(row);
       }
     });
 
-    if (onSelect) onSelect([...notIncludedRow, ...flatSelectedData]);;
+    if (onSelect) onSelect([...notIncludedRow, ...flatSelectedData]);
     dispatch({
       type: 'selection',
       selectedRecords: [...notIncludedRow, ...flatSelectedData]
     });
     // setSelectedRow([...notIncludedRow, ...flatSelectedData]);
-
   }, [selectedRowIds, renderedFrom]);
-
 
   const reorder = (item: any, newIndex: number) => {
     const { index: currentIndex } = item;
@@ -856,15 +837,21 @@ function CustomReactTable({
                   >
                     {rows.map((row, index1) => {
                       prepareRow(row);
+                      const rowProps = row.getRowProps();
+                      rowProps.style = {
+                        ...rowProps.style,
+                        paddingLeft: `${row.depth * 10}px`
+                      };
                       return (
-                        <TableRow key={index1} {...row.getRowProps()} className="tr">
+                        <TableRow key={index1} {...rowProps} className={`tr`}>
                           {row.cells.map((cell, index2) => {
                             return (
                               <TableCell
                                 key={index2}
                                 {...cell.getCellProps()}
-                                className={`td   ${cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''}    ${setWholeRowsCellColor ? setWholeRowsCellColor(row.original) : ''
-                                  }`}
+                                className={`td   ${cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''}    ${
+                                  setWholeRowsCellColor ? setWholeRowsCellColor(row.original) : ''
+                                }`}
                                 onClick={() => {
                                   handleCellClick(cell, row);
                                 }}
@@ -873,8 +860,8 @@ function CustomReactTable({
                                 }}
                               >
                                 {!['selection'].includes(cell?.column.id) &&
-                                  currentEditingCellPosition?.rowId === row.original._id &&
-                                  currentEditingCellPosition?.columnName === cell?.column.id ? (
+                                currentEditingCellPosition?.rowId === row.original._id &&
+                                currentEditingCellPosition?.columnName === cell?.column.id ? (
                                   <input
                                     title={`Edit-${cell.id}`}
                                     autoFocus

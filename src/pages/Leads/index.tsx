@@ -15,13 +15,12 @@ import NoDataCell from '../../components/Helpers/NoDataCell';
 import { SiConvertio } from 'react-icons/si';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import CustomContainer from '../../components/CustomContainer';
-import { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import './style.scss';
 import TransferEntityDialog from '../../components/AssignRolesDialog/TransferEntityDialog';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 import { camelCase } from 'lodash';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -42,7 +41,7 @@ const Leads = () => {
       value: 2
     }
   ];
-
+  const { state, dispatch } = useTableReducer();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = camelCase(routes?.lead.title);
@@ -58,7 +57,6 @@ const Leads = () => {
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [messageDialog, setMessageDialog] = useState({ open: false, message: '' });
   const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
-  const [state, dispatch] = useReducer(reducer, intialState);
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [columns, setColumns] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -235,7 +233,7 @@ const Leads = () => {
   };
 
   const handleLeadTypeSel = (filteredValue) => {
-    dispatch({ type: 'setPage', page: 0 });
+    dispatch({ type: 'pageChange', page: 0 });
     setSelectedType(filteredValue);
   };
 
