@@ -22,4 +22,6 @@ export type TSwipableListInputProps = {
   handleCellClick: any;
   handleKeyDown: any;
   state: TInitialState;
+  allowPagination: boolean;
+  footerGroups: any;
 };
