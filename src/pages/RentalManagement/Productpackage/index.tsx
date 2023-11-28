@@ -30,9 +30,9 @@ import { AssetAvailabilityIcon } from 'src/assets/svg/svgIcons';
 import { ExpandMore } from '@material-ui/icons';
 import ManagePackageDialog from 'src/pages/Packages/ManagePackageDialog';
 import EditIcon from '@material-ui/icons/Edit';
-import { ownerAndColaborator, rentalManagementMessage } from 'src/constants/messageHelpers';
+import { ownerAndColaborator, quotationApprovedMessage, rentalManagementMessage } from 'src/constants/messageHelpers';
 
-const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip, renderedFrom, stepFullScreen, allowedToEdit }) => {
+const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip, renderedFrom, stepFullScreen, allowedToEdit, quotationApproved }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -65,21 +65,26 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
 
   useEffect(() => {
     fetchFields();
-  }, [allowedToEdit]);
+    fetchData();
+  }, []);
 
   useEffect(() => {
-    fetchData();
-  }, [columns]);
+    generateColumns();
+  }, [allFields, allowedToEdit, quotationApproved]);
 
   const fetchFields = async () => {
-    setColumns(null);
     var data = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
-    if (!allowedToEdit) {
+    setAllFields(JSON.parse(JSON.stringify(data)));
+  };
+
+  const generateColumns = () => {
+    setColumns(null);
+    const data = [...allFields]
+    if (!allowedToEdit || quotationApproved) {
       data?.forEach((e) => {
         e.isColumnEditable = false;
       });
     }
-    setAllFields(JSON.parse(JSON.stringify(data)));
     const newColumns = generateCustomTableColumns(data, rentalManagementData?.currency, renderedFrom);
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
@@ -130,7 +135,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row, rows }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {isOffline || !allowedToEdit ? (
+            {isOffline || !allowedToEdit || quotationApproved ? (
               <p> {row.original.detail}</p>
             ) : (
               <p
@@ -143,23 +148,21 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
                 {row.original.detail}
               </p>
             )}
-            {
-              <Box ml={1} className="d-flex align-items-center">
-                <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
-                  {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
-                </span>
-                {!isOffline && allowedToEdit && (
-                  <HtmlTooltip title="Add ">
-                    <IconButton
-                      onClick={(event) => setAddchildDialog({ open: true, parentId: row.original?._id, top: event.clientY, bottom: event.clientX })}
-                      size="small"
-                    >
-                      <Add color="disabled" fontSize="small" />
-                    </IconButton>
-                  </HtmlTooltip>
-                )}
-              </Box>
-            }
+            {<Box ml={1} className="d-flex align-items-center">
+              <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
+                {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
+              </span>
+              {!isOffline && allowedToEdit && !quotationApproved && (
+                <HtmlTooltip title="Add ">
+                  <IconButton
+                    onClick={(event) => setAddchildDialog({ open: true, parentId: row.original?._id, top: event.clientY, bottom: event.clientX })}
+                    size="small"
+                  >
+                    <Add color="disabled" fontSize="small" />
+                  </IconButton>
+                </HtmlTooltip>
+              )}
+            </Box>}
             {!isOffline && (
               <IconButton
                 size="small"
@@ -205,19 +208,19 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
       Cell: ({ row, rows }) => {
         return (
           <>
-            <HtmlTooltip title={isOffline || !allowedToEdit ? '' : 'Edit'}>
+            <HtmlTooltip title={isOffline || !allowedToEdit || quotationApproved ? '' : 'Edit'}>
               <IconButton
                 size="small"
                 aria-label="Details"
-                disabled={isOffline || !allowedToEdit ? true : false}
+                disabled={isOffline || !allowedToEdit || quotationApproved ? true : false}
                 onClick={() => {
                   openMaterial(row, rows);
                 }}
               >
-                <EditIcon fontSize="small" color={isOffline || !allowedToEdit ? 'disabled' : 'primary'} />
+                <EditIcon fontSize="small" color={isOffline || !allowedToEdit || quotationApproved ? 'disabled' : 'primary'} />
               </IconButton>
             </HtmlTooltip>
-            {allowedToEdit ? (
+            {allowedToEdit || !quotationApproved ? (
               row.original.hideSelection ? (
                 <HtmlTooltip title={row.original.assetQty ? 'Asset is already assigned' :
                   row.original?.status ? rentalManagementMessage.loadingAlreadyCreated : ''}>
@@ -252,7 +255,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
       }
     });
     setColumns(column);
-  };
+  }
 
   const fetchData = async () => {
     setNextStep(false);
@@ -572,7 +575,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
     <Fragment>
       <Box display="flex" justifyContent="space-between" m={1}>
         <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
-          <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : ``}>
+          <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : quotationApproved ? quotationApprovedMessage : ``}>
             <span>
               <Button
                 variant={'outlined'}
@@ -580,7 +583,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
                 size="small"
                 startIcon={<Add />}
                 onClick={openAddActions}
-                disabled={!allowedToEdit}
+                disabled={!allowedToEdit || quotationApproved}
                 aria-controls="add-menu">
                 {'Add'}
                 <ExpandMore fontSize="small" />
@@ -716,8 +719,8 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
             onSelect={setSelectedProducts}
             childrenProperty="subRows"
             uniqueKey="_id"
-            hideSelection={isOffline || !allowedToEdit}
-            hideAction={isOffline || !allowedToEdit}
+            hideSelection={isOffline || !allowedToEdit || quotationApproved}
+            hideAction={isOffline || !allowedToEdit || quotationApproved}
             renderedFrom="rental_management_product_package"
             isClientSideGrid={true}
             onSaveEdit={onSaveInlineEdit}
