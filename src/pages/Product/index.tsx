@@ -639,7 +639,7 @@ const Product = () => {
             refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
-            resource={sidebarResource.bulkAssetCreation}
+            resource={sidebarResource.product}
           />
         ) : (
           <Box p={2} height={500}>
