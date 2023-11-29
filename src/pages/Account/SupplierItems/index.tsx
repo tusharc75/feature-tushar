@@ -23,10 +23,9 @@ import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicD
 import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
 
 const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
-      const history = useHistory();
+  const history = useHistory();
   const parsed = queryString.parse(history.location.search);
   const { itemTab }: any = parsed;
-  const renderedFrom = camelCase(routes?.supplierAccount?.title + '_supplierItems');
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer();
   const { dataRows, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
@@ -42,6 +41,8 @@ const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [columns, setColumns] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
+  
+  const renderedFrom = camelCase(routes?.supplierAccount?.title + '_supplierItems' + tabValue);
 
   useEffect(() => {
     setColumns(null);
