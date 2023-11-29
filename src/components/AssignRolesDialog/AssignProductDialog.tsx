@@ -257,7 +257,7 @@ const AssignProductDialog = ({
           </div>
           {columns ? (
             <CustomReactTable
-              height={'calc(100vh - 200px)'}
+              height={'calc(100vh - 250px)'}
               columns={columns}
               state={state}
               dispatch={dispatch}
