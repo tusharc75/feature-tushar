@@ -90,7 +90,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
         column.push({
           accessor: 'serializedProductShow',
           Header: e?.fieldLabel,
-          show: true,
+          show: false,
           Cell: ({ row }) => (row.original?.serializedProductShow ? <div>{row.original?.serializedProductShow}</div> : <NoDataCell />)
         });
       } else {

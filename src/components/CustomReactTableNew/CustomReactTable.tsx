@@ -421,6 +421,7 @@ function CustomReactTable({
     }
     return hiddenCols;
   };
+
   const {
     getTableProps,
     rows,
