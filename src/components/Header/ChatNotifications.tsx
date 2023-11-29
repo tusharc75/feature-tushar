@@ -141,7 +141,6 @@ const ChatNotification = () => {
           toastConfig.setToastConfig(error);
         });
     }
-    // console.log({ chatList, d });
 
     setChatOpen(true);
     setAnchorEl(null);

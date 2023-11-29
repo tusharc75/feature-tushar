@@ -18,7 +18,7 @@ let searchTimeout;
 const AssignPackageDialog = ({ onSuccess, handleClose, packageType = null, ids = [], isSubmitting = false, hideQty = false }) => {
   const renderedFrom = `${camelCase(routes.packages?.title)}_assign`;
   const toastConfig = useContext(CustomToastContext);
-  
+
   const { state, dispatch } = useTableReducer();
   const { dataRows, rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { getColumnData } = useColumns();
@@ -203,7 +203,7 @@ const AssignPackageDialog = ({ onSuccess, handleClose, packageType = null, ids =
 
         {columns ? (
           <CustomReactTable
-            height={'calc(100vh - 200px)'}
+            height={'calc(100vh - 250px)'}
             columns={columns}
             state={state}
             dispatch={dispatch}

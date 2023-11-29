@@ -17,10 +17,9 @@ const permissionForLinks = sidebarResourceObjectFromValues();
 export const headerName = {
   firstName: 'Name'
 };
-export const isRenderWithCopy = (name) => {
-  return ['mobileNumber', 'phone', 'email'].indexOf(name) >= 0;
-};
+
 const hideColumns = ['salutation', 'middleName', 'lastName', 'suffix'];
+
 export const detailPagePath = {
   leads: leadDetailPage.path,
   owner: routes?.userDetail?.path,
@@ -97,6 +96,7 @@ export const checkStaticField = (renderedFrom, fieldData) => {
   }
   return fieldData;
 };
+
 export const getSortedColumns = (columns = []) => {
   return columns.sort(function (a, b) {
     let columnNameA = a?.headerName?.toUpperCase(); // ignore upper and lowercase
@@ -110,15 +110,15 @@ export const getSortedColumns = (columns = []) => {
     return 0;
   });
 };
+
 export const staticColumns = ['createdBy', 'updatedBy'];
 
-
 export default function useColumns() {
-  const {
-    state: { permissions }
-  }: any = useData();
+
+  const { state: { permissions } }: any = useData();
 
   const getColumnData = (title, field, detailScreenRoute = null, masterPage = false) => {
+
     let data = localStorage.getItem('gridMetaData');
 
     let gridMetaData = data == 'undefined' ? {} : JSON.parse(data);
@@ -200,21 +200,9 @@ export default function useColumns() {
         };
       } else if (field?.lookup) {
         let joinedFieldName = field?.fieldName.indexOf(' ') > 0 ? camelCase(field?.fieldName) : field?.fieldName;
-        let pathName = '';
-
-        if (field?.lookupResource) {
-          pathName = routes[`${camelCase(field?.lookupResource)}Detail`]?.path ?? '';
-        } else {
-          pathName = detailPagePath[joinedFieldName]
-            ? detailPagePath[joinedFieldName]
-            : field?.lookupResource && routes[`${camelCase(field?.lookupResource)}Detail`]?.path
-              ? routes[`${camelCase(field?.lookupResource)}Detail`]?.path
-              : routes[joinedFieldName]?.path
-                ? routes[joinedFieldName]?.path
-                : routes[`${joinedFieldName}Detail`]?.path
-                  ? routes[`${joinedFieldName}Detail`]?.path
-                  : '';
-        }
+        let pathName = routes[`${camelCase(field?.lookupResource)}Detail`]?.path
+          ? routes[`${camelCase(field?.lookupResource)}Detail`]?.path
+          : `${camelCase(field?.lookupResource)}/detail`;
         return {
           columnData: {
             ...commonFieldData,
@@ -248,7 +236,7 @@ export default function useColumns() {
               )
           }
         };
-      } else if (isRenderWithCopy(field?.type)) {
+      } else if (['mobileNumber', 'phone', 'email']?.includes(field?.type)) {
         return {
           columnData: {
             ...commonFieldData,

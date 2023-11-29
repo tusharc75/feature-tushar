@@ -1,9 +1,6 @@
 import Box from '@material-ui/core/Box/Box';
 import { useState, useEffect, useReducer, useContext, Fragment } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridComponents/CustomAgGrid';
-import { CommonRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
-import { Link } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
@@ -16,7 +13,6 @@ import {
     DELIVERY_TICKET_TYPE,
     DELIVERY_TICKET_REFERENCE_TYPE,
     DELIVERY_FROM_TO_TYPE,
-    ASSET_STATUS,
     sublease
 } from '../../../constants/helpers';
 import { isMobile } from 'react-device-detect';
@@ -24,7 +20,6 @@ import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import { uniq, map, startCase } from 'lodash';
 import { ExpandMore } from '@material-ui/icons';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import { subleaseActions, subleaseMessage } from 'src/constants/messageHelpers';
 import CustomMessageDialog from 'src/components/MessageDialog';

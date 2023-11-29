@@ -95,7 +95,7 @@ const NewChat = (props) => {
             disabled={!newUsers.length || (newUsers.length > 1 && !groupName)}
             fullWidth
             color="primary"
-            variant="outlined"
+            variant="contained"
             onClick={createRoom}
           >
             Start Chatting

@@ -53,7 +53,7 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
   const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: '', parentId: null });
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
-  const [allFields, setAllFields] = useState([]);
+  const [allFields, setAllFields] = useState(null);
   const [isRateRequired, setIsRateRequired] = useState(false);
   const [isBulkEdit, setIsBulkEdit] = useState(false);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
@@ -70,7 +70,9 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
   }, []);
 
   useEffect(() => {
-    generateColumns();
+    if (allFields) {
+      generateColumns();
+    }
   }, [allFields, allowedToEdit, quotationApproved]);
 
   const fetchFields = async () => {
