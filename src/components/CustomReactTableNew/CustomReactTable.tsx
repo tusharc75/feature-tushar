@@ -815,10 +815,14 @@ function CustomReactTable({
                       return (
                         <TableRow key={index1} {...rowProps} className={`tr`}>
                           {row.cells.map((cell, index2) => {
+                            const cellProps = cell.getCellProps();
+                            if (cell.column.maxWidth) {
+                              cellProps.style = { ...cellProps.style, maxWidth: cell.column.maxWidth };
+                            }
                             return (
                               <TableCell
                                 key={index2}
-                                {...cell.getCellProps()}
+                                {...cellProps}
                                 className={`td p-0 [&>*]:h-[45px] [&>*]:flex [&>*]:items-center [&>*]:p-[5px_8px] h-[45px]  ${
                                   cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''
                                 }    ${setWholeRowsCellColor ? setWholeRowsCellColor(row.original) : ''}`}
@@ -1026,8 +1030,13 @@ const DraggableHeader: React.FC<DraggableHeaderProps> = ({ column, index, reorde
 
   drag(drop(ref));
 
+  const headerProps = column.getHeaderProps();
+  if (column.maxWidth) {
+    headerProps.style = { ...headerProps.style, maxWidth: column.maxWidth };
+  }
+
   return (
-    <TableCell {...column.getHeaderProps()} className="th text-truncate table-header">
+    <TableCell {...headerProps} className="th text-truncate table-header">
       <div
         ref={ref}
         className={`d-flex items-center ${column.id === 'selection' ? 'justify-center' : 'justify-between'} pos-rel`}
