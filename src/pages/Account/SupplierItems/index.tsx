@@ -42,7 +42,7 @@ const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
   const [columns, setColumns] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   
-  const renderedFrom = camelCase(routes?.supplierAccount?.title + '_supplierItems' + tabValue);
+  const renderedFrom = camelCase(tabValue === 0 ? routes?.productCategory.title : tabValue === 1 ? routes?.product.title : routes?.serializedAsset.title);
 
   useEffect(() => {
     setColumns(null);
