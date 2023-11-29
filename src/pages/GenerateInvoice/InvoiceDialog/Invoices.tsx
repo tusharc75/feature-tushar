@@ -137,8 +137,8 @@ const Invoices = ({ resourceId, resource, invoiceFieldName }) => {
   }
 
   useEffect(() => {
-    fetchBilling();
-  }, [page, limit, filters, sorting]);
+    fetchData();
+  }, [page, limit, filters, sorting, showFilteredRecordsOnly]);
 
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}&${invoiceFieldName}=${resourceId}`;
@@ -165,7 +165,7 @@ const Invoices = ({ resourceId, resource, invoiceFieldName }) => {
     return deepFilter;
   };
 
-  const fetchBilling = async () => {
+  const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     await axiosInstance()
@@ -210,7 +210,7 @@ const Invoices = ({ resourceId, resource, invoiceFieldName }) => {
           setIsConformDialogVisible(false);
           setDeleteLoading(false);
           if (deleteRecord) setDeleteRecord({});
-          fetchBilling();
+          fetchData();
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -231,8 +231,7 @@ const Invoices = ({ resourceId, resource, invoiceFieldName }) => {
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             isClientSideGrid={false}
-            refreshGrid={fetchBilling}
-            showOnlyShowFilteredRecordSwitch={true}
+            refreshGrid={fetchData}
           />
         ) : (
           <Box p={2} height={500}>
