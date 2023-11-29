@@ -1,147 +1,155 @@
-import { Box, Button, IconButton, Menu, MenuItem, Tooltip } from '@material-ui/core';
+import { Button, IconButton } from '@material-ui/core';
+import { useContext, useEffect, useState } from 'react';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../../StateProvider/Provider';
+import axiosInstance from '../../../axios/axiosInstance';
+import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../../constants/helpers';
+import routes from './../../../components/Helpers/Routes';
 import { camelCase } from 'lodash';
-import React, { useContext, useEffect, useReducer, useState } from 'react';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import axiosInstance from 'src/axios/axiosInstance';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
-import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import routes from 'src/components/Helpers/Routes';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import AssignProductCategoryDialog from 'src/components/AssignRolesDialog/AssignProductCategoryDialog';
-import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
-import useColumns, { getFrameworkComponents, getStaticFields } from 'src/constants/useColumns';
-import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
-import { useData } from 'src/StateProvider/Provider';
-import DeleteIcon from '@material-ui/icons/Delete';
-import { isMobile, isTablet } from 'react-device-detect';
 import { ExpandMore } from '@material-ui/icons';
+import { Menu, MenuItem, Box } from '@material-ui/core';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import DeleteIcon from '@material-ui/icons/Delete';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ConfirmationDialogRaw from '../../../components/Helpers/ConfirmationDialog';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import { useHistory } from 'react-router-dom';
 import queryString from 'query-string';
 import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
+import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
 
-function SupplierItems({ api, id, allowedToEdit, permission }) {
-  const history = useHistory();
+const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
+      const history = useHistory();
   const parsed = queryString.parse(history.location.search);
   const { itemTab }: any = parsed;
+  const renderedFrom = camelCase(routes?.supplierAccount?.title + '_supplierItems');
   const toastConfig = useContext(CustomToastContext);
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { getColumnData } = useColumns();
-  const renderForm = camelCase(routes?.supplierAccount?.title + '_supplierItems');
-  const [tabValue, setTabValue] = useState(itemTab ? parseInt(itemTab) : 0);
-  const [columns, setColumns] = useState(null);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const [gridApi, setGridApi] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
-
-  const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords, filters, sorting, appendRows } = state;
-
-  const [assignDialog, setAssignDialog] = useState({ open: false, type: null, data: null });
-  const [isSubmitting, setSubmitting] = useState(false);
 
   const {
-    state: { user }
+    state: { user, permissions, selectedEntity }
   }: any = useData();
+  const [tabValue, setTabValue] = useState(itemTab ? parseInt(itemTab) : 0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [assignDialog, setAssignDialog] = useState({ open: false, type: null, data: null });
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
+  const [deleteRecord, setDeleteRecord] = useState(null);
+  const [columns, setColumns] = useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
 
   useEffect(() => {
     setColumns(null);
     fetchFields();
-    fetchData();
   }, [tabValue]);
+
+  useEffect(() => {
+    fetchData();
+  }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
+
+  const fetchFields = async () => {
+    let data;
+    const selectedResourceData: any =
+      tabValue === 0 ? sidebarResource.productCategory : tabValue === 1 ? sidebarResource.product : sidebarResource.serializedAsset;
+    const path = tabValue === 0 ? routes.productCategoryDetail.path : tabValue === 1 ? routes.productDetail.path : routes.serializedAssetDetail.path;
+    const response = await axiosInstance().get(`/field?resource=${selectedResourceData}`);
+    data = response?.data?.data;
+    let columns = [];
+    data.forEach((o) => {
+      let currentColumn = getColumnData(renderedFrom, o?.fieldData, path, true);
+      if (currentColumn !== null) {
+        columns = [...columns, currentColumn?.columnData];
+      }
+      return o?.fieldData;
+    });
+    columns = [...columns, ...getStaticFields(), ActionsRenderer];
+    setColumns(columns);
+  };
+
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 110,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+          <HtmlTooltip title="Delete">
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              onClick={() => {
+                setDeleteRecord(row.original);
+                setShowDeleteConfirmBox(true);
+              }}
+            >
+              <DeleteIcon color="error" />
+            </IconButton>
+          </HtmlTooltip>
+      </>
+    )
+  };
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     axiosInstance()
       .get(`${api}/items/${id}/${tabValue === 0 ? 'productCategory' : tabValue === 1 ? 'product' : 'serializedAsset'}`)
-      .then((res) => {
-        let rows = res?.data?.data?.map((u) => {
-          let finalObject: any = prepareDataForGrid(u, user);
+      .then(({ data: { data } }) => {
+        let rows = data?.map((u) => {
+          let finalObject = prepareDataForGrid(u, user);
           return finalObject;
         });
-        dispatch({ type: 'initialize', data: [...rows], count: rows?.length });
+        dispatch({ type: 'initialize', data: rows, count: rows?.length });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      })
+      .finally(() => {
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
-      })
-      .catch((err) => {
-        dispatch({ type: 'loading', loading: false });
       });
   };
 
-  const fetchFields = async () => {
-    const selectedResourceData: any =
-      tabValue === 0 ? sidebarResource.productCategory : tabValue === 1 ? sidebarResource.product : sidebarResource.serializedAsset;
-    const path = tabValue === 0 ? routes.productCategoryDetail.path : tabValue === 1 ? routes.productDetail.path : routes.serializedAssetDetail.path;
-    axiosInstance()
-      .get(`/field?resource=${selectedResourceData}`)
-      .then(({ data: { data } }) => {
-        let columns = [];
-        let rendererNames = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderForm, o?.fieldData, path, true);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName);
-            }
-          }
-        });
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent,
-          actionsRenderer: ActionsRenderer
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
-        columns = [...columns, ...getStaticFields()];
-        setColumns([...columns]);
-      });
-  };
-
-  const ActionsRenderer = (params) => (
-    <>
-      <Tooltip title="Delete">
-        <IconButton
-          size="small"
-          aria-label="Delete"
-          onClick={() => {
-            deleteItems([params.data]);
-          }}
-        >
-          <DeleteIcon color="error" />
-        </IconButton>
-      </Tooltip>
-    </>
-  );
-
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
-
-  const deleteItems = async (values) => {
-    const ids = values?.map((item) => item._id);
+  const handleDelete = () => {
+    setIsSubmitting(true);
+    let ids = [];
+    if (deleteRecord) {
+      ids.push(deleteRecord._id);
+    } else {
+      ids = selectedRecords?.map((d) => d._id);
+    }
     axiosInstance()
       .put(`${api}/items/${id}/delete`, { ids: ids })
-      .then(({ data }) => {
-        fetchData();
-        closeActions();
+      .then(({data}) => {
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
           message: data.message
         });
+        dispatch({ type: 'selection', selectedRecords: [] });
+        fetchData();
+        setShowDeleteConfirmBox(false);
+        setDeleteRecord(null);
+        setAnchorEl(null);
+        setIsSubmitting(false);
       })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setIsSubmitting(false);
       });
   };
 
-  const assignItems = async (values) => {
-    setSubmitting(true);
+    const assignItems = async (values) => {
+    setIsSubmitting(true);
     axiosInstance()
       .put(`${api}/items/${id}/assign`, values)
       .then(({ data }) => {
@@ -151,11 +159,11 @@ function SupplierItems({ api, id, allowedToEdit, permission }) {
           type: 'success',
           message: data.message
         });
-        setSubmitting(false);
+        setIsSubmitting(false);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
-        setSubmitting(false);
+        setIsSubmitting(false);
       });
   };
 
@@ -164,11 +172,19 @@ function SupplierItems({ api, id, allowedToEdit, permission }) {
     setTabValue(newValue);
   };
 
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+
   return (
     <>
-      <Box display="flex" justifyContent={'space-between'}>
-        <Box />
-        <ImportExportMenu
+       <Box display="flex" justifyContent={'space-between'}>
+         <Box />
+       <ImportExportMenu
           permissions={permission}
           module="supplier-account-items"
           api={`${api}/items/${id}`}
@@ -205,16 +221,16 @@ function SupplierItems({ api, id, allowedToEdit, permission }) {
               Add {tabValue === 0 ? 'Product Category' : tabValue === 1 ? 'Product' : 'Asset'}
             </Button>
             <Button
-              variant={isMobile && !isTablet ? 'text' : 'outlined'}
-              color="default"
-              size="small"
-              onClick={openActions}
-              disabled={selectedRecords.length ? false : true}
-              aria-controls="action-menu"
-              className={`${isMobile && !isTablet ? 'mobile_button' : 'new-dropdown-v1'}`}
-              endIcon={<ExpandMore />}
+               variant="outlined"
+               color="default"
+               size="small"
+               onClick={openActions}
+               aria-controls="action-menu"
+               disabled={selectedRecords.length === 0}
+               endIcon={<ExpandMore />}
+               className="new-dropdown-v1"
             >
-              {isMobile && !isTablet ? '' : 'Actions'}
+              Actions
             </Button>
             <Menu
               anchorEl={anchorEl}
@@ -229,38 +245,27 @@ function SupplierItems({ api, id, allowedToEdit, permission }) {
               onClose={closeActions}
             >
               <MenuItem
-                disabled={selectedRecords.length ? false : true}
                 onClick={() => {
-                  deleteItems(selectedRecords);
+                    closeActions();
+                    setShowDeleteConfirmBox(true);
                 }}
               >
-                Delete
+                {`Delete (${selectedRecords?.length})`}
               </MenuItem>
             </Menu>
           </>
         )}
       </Box>
-      {Object.keys(frameWorkComponent).length > 0 && columns?.length ? (
-        <CustomAgGrid
+      {columns ? (
+        <CustomReactTable
+          height={'calc(100vh - 200px)'}
           columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameWorkComponent}
-          setGridApi={setGridApi}
+          state={state}
           dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          allowAction={allowedToEdit}
-          loading={loading}
-          renderedFrom={renderForm}
-          refreshGrid={fetchData}
-          selectedRecords={selectedRecords}
-          showFilters={false}
-          allowSelection={allowedToEdit}
-          actionWidth={100}
-          showOnlyShowFilteredRecordSwitch={false}
+          renderedFrom={renderedFrom}
           isClientSideGrid={true}
+          refreshGrid={fetchData}
+          showOnlyShowFilteredRecordSwitch={false}
         />
       ) : (
         <Box p={2} height={500}>
@@ -319,8 +324,20 @@ function SupplierItems({ api, id, allowedToEdit, permission }) {
           isSubmitting={false}
         />
       )}
+      {showDeleteConfirmBox && (
+        <ConfirmationDialogRaw
+          open={showDeleteConfirmBox}
+          message={`Are you sure you want to delete the ${tabValue === 0 ? 'Product Category' : tabValue === 1 ? 'Product' : 'Asset'} ?`}
+          onClose={() => {
+            setDeleteRecord(null);
+            setShowDeleteConfirmBox(false);
+          }}
+          okBtnLoading={isSubmitting}
+          onOk={handleDelete}
+        />
+      )}
     </>
   );
-}
+};
 
 export default SupplierItems;
