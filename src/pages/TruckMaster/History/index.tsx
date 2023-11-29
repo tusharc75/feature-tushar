@@ -23,6 +23,7 @@ const History = ({ id, status }) => {
       minWidth: 150,
       width: 150,
       primaryField: true,
+      disabled: true,
       Cell: ({ row }) => (
         <>
           {row?.original?.reference ? (
@@ -61,7 +62,7 @@ const History = ({ id, status }) => {
       Header: 'Date & Time',
       minWidth: 150,
       width: 150,
-      disabledFilters: true,
+      canFilter: false,
       Cell: ({ row }) => (
         <>
           {row?.original?.date ? (
@@ -140,7 +141,7 @@ const History = ({ id, status }) => {
             state={state}
             dispatch={dispatch}
             renderedFrom={`${camelCase(routes?.truckMaster.title)}_History`}
-            isClientSideGrid={false}
+            isClientSideGrid={true}
             refreshGrid={fetchData}
             hideSelection={true}
           />
