@@ -11,13 +11,14 @@ import { useHistory } from 'react-router-dom';
 import { isMobile, isTablet } from 'react-device-detect';
 import { prepareDataForGrid } from '../../constants/helpers';
 import { useData } from '../../StateProvider/Provider';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer, } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 import routes from '../Helpers/Routes';
 
 const TypewiseTickets = ({ referenceType, referenceId, renderedFrom }) => {
+  
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer();
-  const history = useHistory();
+  
   const { dataRows, selectedRecords } = state;
   const { getColumnData } = useColumns();
   const [columns, setColumns] = useState(null);
@@ -114,14 +115,14 @@ const TypewiseTickets = ({ referenceType, referenceId, renderedFrom }) => {
       <Grid item xs={12} md={12} sm={12} className="mt-3">
         {columns ? (
           <CustomReactTable
-            height={'calc(100vh - 200px)'}
+            height={'calc(100vh - 300px)'}
             columns={columns}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
-            isClientSideGrid={false}
+            isClientSideGrid={true}
             refreshGrid={fetchRecords}
-            showOnlyShowFilteredRecordSwitch={true}
+            allowPagination={false}
           />
         ) : (
           <Box p={2} height={500}>

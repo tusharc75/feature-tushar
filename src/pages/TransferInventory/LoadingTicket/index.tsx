@@ -21,11 +21,10 @@ import ReceiveDialog from './ReceiveDialog';
 import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import PreviewDownload from 'src/components/PreviewDownload';
-import CustomReactTable, { useTableReducer, } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
 
 const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, updateStatus, canLoad, canReceive }) => {
   const toastConfig = useContext(CustomToastContext);
-  const history = useHistory();
 
   const {
     state: { user }
@@ -327,14 +326,14 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
       <Box>
         {columns ? (
           <CustomReactTable
-            height={'calc(100vh - 200px)'}
+            height={'calc(100vh - 393px)'}
             columns={columns}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             isClientSideGrid={false}
             refreshGrid={fetchProducts}
-            showOnlyShowFilteredRecordSwitch={true}
+            allowPagination={false}
           />
         ) : (
           <Box p={2} height={500}>

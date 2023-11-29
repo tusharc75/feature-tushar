@@ -115,7 +115,6 @@ const DriverMaster = () => {
             data: { data, count }
           }
         }) => {
-          console.log('dddddddddd', data, count);
           let rows = data?.map((u) => {
             let finalObject: any = prepareDataForGrid(u);
             finalObject['canDelete'] = permissions?.driverMaster?.isDelete;

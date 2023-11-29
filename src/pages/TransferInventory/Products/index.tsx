@@ -436,15 +436,15 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
       <Box mt={1}>
         {columns ? (
           <CustomReactTable
-            height={'calc(100vh - 200px)'}
+            height={'calc(100vh - 393px)'}
             columns={columns}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             isClientSideGrid={false}
             refreshGrid={fetchProducts}
-            showOnlyShowFilteredRecordSwitch={true}
             onSaveEdit={onSaveEdit}
+            allowPagination={false}
           />
         ) : (
           <Box p={2} height={500}>
