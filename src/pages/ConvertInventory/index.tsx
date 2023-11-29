@@ -1,5 +1,4 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect, useContext, Fragment } from 'react';
 import { Grid, IconButton, Tooltip, Button, Menu, MenuItem } from '@material-ui/core';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -8,43 +7,30 @@ import { Box, TextField } from '@material-ui/core';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import routes from 'src/components/Helpers/Routes';
-import CustomAgGrid, { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
-import {
-  isObjectEmpty,
-  gridLoadingTimeout,
-  getLocalStorageArrayData,
-  removeLocalStorage,
-  convertInventory,
-  sidebarResource
-} from 'src/constants/helpers';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import { isObjectEmpty, gridLoadingTimeout, convertInventory, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { useData } from 'src/StateProvider/Provider';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Autocomplete } from '@material-ui/lab';
 import { camelCase } from 'lodash';
-import useColumns, { getFrameworkComponents, getStaticFields } from 'src/constants/useColumns';
 import InventoryToAsset from './InventoryToAsset';
 import { ExpandMore } from '@material-ui/icons';
 import { SiConvertio } from 'react-icons/si';
 import CachedIcon from '@material-ui/icons/Cached';
 
+let searchTimeout;
 const ConvertInventory = () => {
   const renderedFrom = camelCase(routes?.inventoryToAsset.title);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const toastConfig = useContext(CustomToastContext);
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
-    state;
-
+  const { state, dispatch } = useTableReducer();
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [warehouseId, setWarehouseId] = useState(null);
   const [storageLocationId, setStorageLocationId] = useState(null);
   const [warehouseOptions, setWarehouseOptions] = useState([]);
   const [storageLocationOptions, setStorageLocationOptions] = useState([]);
-
-  const [frameworkComponents, setFrameworkComponents] = useState({});
   const [columns, setColumns] = useState([]);
   const [inventory, setInventory] = useState({ open: false, product: [] });
 
@@ -53,8 +39,19 @@ const ConvertInventory = () => {
   }: any = useData();
 
   const { getColumnData } = useColumns();
-
   const [anchorEl, setAnchorEl] = useState(null);
+
+  useEffect(() => {
+    let millisec = Object.keys(search).length > 0 ? 600 : 5;
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+    searchTimeout = setTimeout(() => {
+      if (warehouseId) {
+        fetchProductInventory();
+      }
+    }, millisec);
+  }, [search]);
 
   useEffect(() => {
     getWarehouse();
@@ -92,33 +89,35 @@ const ConvertInventory = () => {
     if (warehouseId) {
       fetchProductInventory();
     }
-  }, [warehouseId, page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, storageLocationId]);
+  }, [warehouseId, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly, storageLocationId]);
 
   const fetchGridColumns = async () => {
-    setColumns(null);
-    const productFields = await axiosInstance().get('/field?resource=Product&view=true');
+    let data;
+    const response = await axiosInstance().get(`/field?resource=Product&view=true`);
+    data = response?.data?.data;
     let columns = [];
-    let rendererNames = [];
-    productFields?.data?.data?.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path);
+    data.forEach((o) => {
+      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path, true);
       if (currentColumn !== null) {
         columns = [...columns, currentColumn?.columnData];
-        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-          rendererNames.push(currentColumn?.rendererName);
-        }
       }
+      return o?.fieldData;
     });
+
     columns?.forEach((e) => {
-      if (!['productName', 'serializedProduct'].includes(e.field)) {
+      if (!['productName', 'serializedProduct'].includes(e.accessor)) {
         e.show = false;
       }
     });
-    columns.push({ field: 'availableInventory', headerName: 'Available Inventory', show: true, cellRenderer: 'commonRenderer' });
-    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-    setFrameworkComponents({
-      ...tempFrameworkComponent,
-      actionsRenderer: ActionsRenderer
+    columns.push({
+      accessor: 'availableInventory',
+      Header: 'Available Inventory',
+      width: 120,
+      show: true,
+      sticky: isMobile ? 'none' : 'left',
+      Cell: ({ row }) => <p className="text-truncate">{row.original.availableInventory}</p>
     });
+    columns = [...columns, ...getStaticFields(), ActionsRenderer];
     setColumns(columns);
   };
 
@@ -128,16 +127,13 @@ const ConvertInventory = () => {
       return;
     }
     dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
     if (warehouseId) {
       const queryString = getQueryString();
       axiosInstance()
         .get(`${convertInventory.api}${queryString}`)
         .then(({ data }) => {
           let rows = data.data?.map((u) => {
-            let finalObject = prepareDataForGrid(u);
+            let finalObject = prepareDataForGrid(u, user);
             finalObject['productId'] = u._id;
             finalObject['warehouseId'] = warehouseId;
             finalObject['availableInventory'] = (u?.inventory || 0) - (u?.softHold || 0);
@@ -187,34 +183,42 @@ const ConvertInventory = () => {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
     }
     return `${deepFilter}&filterType=and`;
   };
-
-  const ActionsRenderer = (params) => (
-    <>
-      {permissions?.inventoryToAsset?.isUpdate && (
-        <Fragment>
-          <Box pl={1}>
-            <Tooltip title="Convert Inventory">
-              <IconButton
-                size="small"
-                aria-label="Clone"
-                disabled={params?.data?.availableInventory ? false : true}
-                onClick={() => {
-                  setInventory({ open: true, product: [params?.data] });
-                }}
-              >
-                <CachedIcon fontSize="small" color="primary" />
-              </IconButton>
-            </Tooltip>
-          </Box>
-        </Fragment>
-      )}
-    </>
-  );
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 100,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        {permissions?.inventoryToAsset?.isUpdate && (
+          <Fragment>
+            <Box pl={1}>
+              <Tooltip title="Convert Inventory">
+                <IconButton
+                  size="small"
+                  aria-label="Clone"
+                  disabled={row?.original?.availableInventory ? false : true}
+                  onClick={() => {
+                    setInventory({ open: true, product: [row?.original] });
+                  }}
+                >
+                  <CachedIcon fontSize="small" color="primary" />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          </Fragment>
+        )}
+      </>
+    )
+  };
 
   return (
     <Fragment>
@@ -283,11 +287,11 @@ const ConvertInventory = () => {
                       variant={'outlined'}
                       color="default"
                       size="small"
-                      disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length ? false : true}
-                      className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
                       onClick={openActions}
+                      className={`new-dropdown-v1`}
                       aria-controls="action-menu"
                       endIcon={<ExpandMore />}
+                      disabled={selectedRecords?.length ? false : true}
                     >
                       Actions
                     </Button>
@@ -308,7 +312,7 @@ const ConvertInventory = () => {
                           closeActions();
                           setInventory({
                             open: true,
-                            product: getLocalStorageArrayData(`${localStorageSelectedRecords}`)
+                            product: selectedRecords
                           });
                         }}
                       >
@@ -321,27 +325,19 @@ const ConvertInventory = () => {
             </div>
           </div>
         </div>
-        {columns && warehouseId ? (
-          Object.keys(frameworkComponents).length > 0 ? (
-            <CustomAgGrid
-              allowSelection={true}
-              allowAction={true}
-              columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameworkComponents}
-              setGridApi={setGridApi}
-              dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              actionWidth={150}
-              loading={loading}
-              renderedFrom={renderedFrom}
-              refreshGrid={fetchProductInventory}
-              showOnlyShowFilteredRecordSwitch={true}
-            />
-          ) : null
+        {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            isClientSideGrid={false}
+            refreshGrid={fetchProductInventory}
+            showOnlyShowFilteredRecordSwitch={true}
+            showFilters={false}
+            resource={sidebarResource.inventoryToAsset}
+          />
         ) : (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
@@ -351,7 +347,7 @@ const ConvertInventory = () => {
           <InventoryToAsset
             handleClose={() => setInventory({ open: false, product: [] })}
             handleSuccess={() => {
-              removeLocalStorage(localStorageSelectedRecords);
+              dispatch({ type: 'selection', selectedRecords: [] });
               fetchProductInventory();
               setInventory({ open: false, product: [] });
             }}
