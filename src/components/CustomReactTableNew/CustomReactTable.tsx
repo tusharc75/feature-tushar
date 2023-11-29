@@ -404,34 +404,6 @@ function CustomReactTable({
     [baseColumns]
   );
 
-  const getDataFromLocalStorage = () => {
-    try {
-      const data = localStorage.getItem('gridMetaData');
-      return data && data !== 'undefined' ? JSON.parse(data) : {};
-    } catch (ex) {
-      console.error(`Error while getting data from local storage: ${ex.message}`);
-      return {};
-    }
-  };
-
-  const returnSavedColOrder = () => {
-    const gridMetaData = getDataFromLocalStorage();
-    const colOrder = gridMetaData[renderedFrom]?.order || [];
-    const orderIndices = {};
-
-    for (let i = 0; i < colOrder.length; i++) {
-      orderIndices[colOrder[i]] = i;
-    }
-
-    const orderedCols = newColumns.slice().sort((a, b) => {
-      const aIndex = orderIndices[a?.id || a?.accessor];
-      const bIndex = orderIndices[b?.id || b?.accessor];
-      return aIndex - bIndex;
-    });
-
-    return orderedCols.length ? orderedCols : newColumns.map((m) => m?.id || m?.accessor);
-  };
-
   const filterTypes = React.useMemo(
     () => ({
       filterRowsWithSubrows: (rows, id, filterValue) => columnFilter(rows, id, filterValue)
@@ -474,7 +446,6 @@ function CustomReactTable({
       defaultColumn,
       filterTypes,
       initialState: {
-        columnOrder: returnSavedColOrder(),
         sortBy: sorting.map((d) => {
           return { id: d.colId, desc: d.sort === 'asc' ? false : true };
         }),
@@ -524,12 +495,15 @@ function CustomReactTable({
     try {
       const storedColumns = localStorage.getItem(renderedFrom);
       if (storedColumns) {
-        setColumnOrder(JSON.parse(storedColumns).map((m) => m.id));
-        setHiddenColumns(
-          JSON.parse(storedColumns)
-            .filter((f) => f.isVisible === false)
-            .map((m) => m.id)
-        );
+        const columnOrder = [];
+        const hiddenColumns = [];
+        for (const column of JSON.parse(storedColumns)) {
+          if (column.id === 'action') continue;
+          columnOrder.push(column.id);
+          if (column.isVisible === false) hiddenColumns.push(column.id);
+        }
+        setColumnOrder(columnOrder);
+        setHiddenColumns(hiddenColumns);
       }
     } catch (ex) {
       console.error(`Error while getting stored data from local storage - ${renderedFrom}`);

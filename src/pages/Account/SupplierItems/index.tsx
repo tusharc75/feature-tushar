@@ -23,7 +23,7 @@ import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicD
 import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
 
 const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
-      const history = useHistory();
+  const history = useHistory();
   const parsed = queryString.parse(history.location.search);
   const { itemTab }: any = parsed;
   const renderedFrom = camelCase(routes?.supplierAccount?.title + '_supplierItems');
@@ -82,18 +82,18 @@ const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-          <HtmlTooltip title="Delete">
-            <IconButton
-              size="small"
-              aria-label="Delete"
-              onClick={() => {
-                setDeleteRecord(row.original);
-                setShowDeleteConfirmBox(true);
-              }}
-            >
-              <DeleteIcon color="error" />
-            </IconButton>
-          </HtmlTooltip>
+        <HtmlTooltip title="Delete">
+          <IconButton
+            size="small"
+            aria-label="Delete"
+            onClick={() => {
+              setDeleteRecord(row.original);
+              setShowDeleteConfirmBox(true);
+            }}
+          >
+            <DeleteIcon color="error" />
+          </IconButton>
+        </HtmlTooltip>
       </>
     )
   };
@@ -129,7 +129,7 @@ const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
     }
     axiosInstance()
       .put(`${api}/items/${id}/delete`, { ids: ids })
-      .then(({data}) => {
+      .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -148,7 +148,7 @@ const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
       });
   };
 
-    const assignItems = async (values) => {
+  const assignItems = async (values) => {
     setIsSubmitting(true);
     axiosInstance()
       .put(`${api}/items/${id}/assign`, values)
@@ -182,9 +182,9 @@ const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
 
   return (
     <>
-       <Box display="flex" justifyContent={'space-between'}>
-         <Box />
-       <ImportExportMenu
+      <Box display="flex" justifyContent={'space-between'}>
+        <Box />
+        <ImportExportMenu
           permissions={permission}
           module="supplier-account-items"
           api={`${api}/items/${id}`}
@@ -221,14 +221,14 @@ const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
               Add {tabValue === 0 ? 'Product Category' : tabValue === 1 ? 'Product' : 'Asset'}
             </Button>
             <Button
-               variant="outlined"
-               color="default"
-               size="small"
-               onClick={openActions}
-               aria-controls="action-menu"
-               disabled={selectedRecords.length === 0}
-               endIcon={<ExpandMore />}
-               className="new-dropdown-v1"
+              variant="outlined"
+              color="default"
+              size="small"
+              onClick={openActions}
+              aria-controls="action-menu"
+              disabled={selectedRecords.length === 0}
+              endIcon={<ExpandMore />}
+              className="new-dropdown-v1"
             >
               Actions
             </Button>
@@ -246,8 +246,8 @@ const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
             >
               <MenuItem
                 onClick={() => {
-                    closeActions();
-                    setShowDeleteConfirmBox(true);
+                  closeActions();
+                  setShowDeleteConfirmBox(true);
                 }}
               >
                 {`Delete (${selectedRecords?.length})`}
@@ -316,7 +316,7 @@ const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
             assignItems({ productCategories: assignData || [] });
           }}
           handleClose={() => {
-            setAssignDialog({ open: false, type: null, data: null })
+            setAssignDialog({ open: false, type: null, data: null });
           }}
           ids={assignDialog?.data?.map((item) => item._id) || []}
           resource={sidebarResource?.productCategory}
