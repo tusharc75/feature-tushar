@@ -1,7 +1,7 @@
 import { Box, Button, Grid, IconButton, Menu, MenuItem } from '@material-ui/core';
 import { Delete, ExpandMore } from '@material-ui/icons';
 import { startCase, uniqBy } from 'lodash';
-import React, { Fragment, useContext, useEffect, useState } from 'react'
+import { Fragment, useContext, useEffect, useState } from 'react'
 import { isMobile } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
