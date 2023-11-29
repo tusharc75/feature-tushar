@@ -102,8 +102,10 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
         Cell: ({ row }) => (row.original?.serialNumber?.length ? <div>{row.original?.serialNumber?.map((e) => e.serialNumber)?.toString()}</div> : <NoDataCell />)
       },
       {
-        accessor: 'loadingTicket', Header: 'Loading Ticket', show: true,
-        Cell: ({ row }) => (
+        accessor: 'loadingTicket',
+        Header: 'Loading Ticket',
+        show: true,
+        Cell: ({ row }) =>
           row.original?.loadingTicket ? (
             <p
               className="link text-truncate"
@@ -115,7 +117,6 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
           ) : (
             <NoDataCell />
           )
-        )
       },
       {
         accessor: 'status', Header: 'Status', show: true,
