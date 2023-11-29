@@ -1,23 +1,15 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import { Box, Button, ButtonGroup, CircularProgress, Dialog, Grid, IconButton } from '@material-ui/core';
+import { useState, useEffect, useContext } from 'react';
+import { Box, Button, CircularProgress, Dialog, Grid } from '@material-ui/core';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import SearchBox from '../Helpers/SearchBox';
-import {
-  gridLoadingTimeout,
-  isObjectEmpty,
-  prepareDataForGrid,
-  getLocalStorageArrayData,
-  serializedAsset,
-  SUBLEASE_TYPE
-} from 'src/constants/helpers';
+import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, serializedAsset, sidebarResource } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import routes from '../Helpers/Routes';
 import styles from 'src/pages/Leads/Header.module.scss';
-import CustomAgGridEditable, { reducer, intialState } from '../AgGridComponents/CustomAgGridEditable';
-import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
 
 let searchTimeout;
@@ -33,26 +25,22 @@ const AssignSerializedAssetDialog = ({
   selectedProducts = []
 }) => {
   const renderedFrom = `${routes.serializedAsset.title}_${reference}_selected`;
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
+  const toastConfig = useContext(CustomToastContext);
+
+  const { state, dispatch } = useTableReducer();
+  const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { getColumnData } = useColumns();
 
   const {
     state: { permissions, selectedEntity }
   }: any = useData();
-  const toastConfig = useContext(CustomToastContext);
+
   const [disableSaveButton, setDisableSaveButton] = useState(false);
-
-  const [gridApi, setGridApi] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const [frameWorkComponent, setFrameWorkComponent] = useState(null);
-  const [columns, setColumns] = useState([]);
-  const { getColumnData } = useColumns();
-
+  const [columns, setColumns] = useState(null);
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    localStorage.removeItem(localStorageSelectedRecords);
     fetchGridColumns();
   }, []);
 
@@ -71,21 +59,12 @@ const AssignSerializedAssetDialog = ({
       .get(`/field?resource=${serializedAsset.resource}&view=true`)
       .then(({ data: { data } }) => {
         let columns = [];
-        let rendererNames = [];
         data.forEach((o) => {
           let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName);
-            }
           }
         });
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
         columns = [...columns, ...getStaticFields()];
         setColumns([...columns]);
       });
@@ -93,9 +72,6 @@ const AssignSerializedAssetDialog = ({
 
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
     let queryString = getQueryString();
     if (selectedProducts.length > 0) {
       var updatedFilters = [];
@@ -119,10 +95,9 @@ const AssignSerializedAssetDialog = ({
             ...finalObject
           };
         });
-        const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
         dispatch({
           type: 'selection',
-          selectedRecords: savedRecords
+          selectedRecords: selectedRecords || []
         });
         dispatch({ type: 'initialize', data: rows, count: data.count });
         setTimeout(() => {
@@ -171,8 +146,7 @@ const AssignSerializedAssetDialog = ({
       }
     }
     if (showFilteredRecordsOnly) {
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
     }
     const updatedFilters = [];
     if (extraStaticFilter?.length) {
@@ -215,7 +189,7 @@ const AssignSerializedAssetDialog = ({
       }
     });
     tempProducts?.forEach((e) => {
-      e.qty = e?.qty - [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((obj) => obj.productId === e.id).length;
+      e.qty = e?.qty - selectedRecords?.filter((obj) => obj.productId === e.id).length;
     });
     setProducts(tempProducts);
   }, [selectedRecords]);
@@ -268,20 +242,14 @@ const AssignSerializedAssetDialog = ({
               <Box className={styles.filter_side_header} component="div">
                 <SearchBox onChange={handleSearch} className={styles.search_box_input} width="242px" size="small" value={search} />
                 <Button
-                  disabled={
-                    isAssigning ||
-                    disableSaveButton ||
-                    [...getLocalStorageArrayData(localStorageSelectedRecords)].length === 0 ||
-                    products?.some((d) => d?.qty < 0)
-                  }
+                  disabled={isAssigning || disableSaveButton || selectedRecords?.length === 0 || products?.some((d) => d?.qty < 0)}
                   onClick={() => {
                     if (selectedProducts?.length) {
                       const data = [];
-                      const selectedAssets = [...getLocalStorageArrayData(localStorageSelectedRecords)];
                       selectedProducts?.forEach((ele) => {
                         let qty = ele.qty;
                         while (qty) {
-                          const result = selectedAssets.filter((f) => f.productId === ele.product && !f.isCounted);
+                          const result = selectedRecords?.filter((f) => f.productId === ele.product && !f.isCounted);
                           if (result.length) {
                             data.push({ ...ele, asset: result[0]._id });
                             result[0].isCounted = true;
@@ -291,7 +259,7 @@ const AssignSerializedAssetDialog = ({
                       });
                       handleSucess(data);
                     } else {
-                      handleSucess([...getLocalStorageArrayData(localStorageSelectedRecords)]);
+                      handleSucess(selectedRecords);
                     }
                   }}
                   color="primary"
@@ -299,10 +267,7 @@ const AssignSerializedAssetDialog = ({
                   variant="contained"
                   endIcon={isAssigning && <CircularProgress color="inherit" size={18} />}
                 >
-                  Add{' '}
-                  {[...getLocalStorageArrayData(localStorageSelectedRecords)].length > 0
-                    ? '(' + [...getLocalStorageArrayData(localStorageSelectedRecords)].length + ')'
-                    : ''}
+                  Add {selectedRecords?.length > 0 ? '(' + selectedRecords?.length + ')' : ''}
                 </Button>
               </Box>
             </Grid>
@@ -313,24 +278,18 @@ const AssignSerializedAssetDialog = ({
             )}
           </Grid>
         </div>
-        {frameWorkComponent && Object.keys(frameWorkComponent).length > 0 ? (
-          <CustomAgGridEditable
+        {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
             columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameWorkComponent}
-            setGridApi={setGridApi}
+            state={state}
             dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            allowAction={false}
-            loading={loading}
-            allowSelection={true}
-            onCellValueChanged={() => {}}
-            showOnlyShowFilteredRecordSwitch={true}
-            refreshGrid={fetchData}
             renderedFrom={renderedFrom}
+            isClientSideGrid={false}
+            refreshGrid={fetchData}
+            showOnlyShowFilteredRecordSwitch={true}
+            showFilters={true}
+            resource={sidebarResource.serializedAsset}
           />
         ) : (
           <Box p={2} height={500}>

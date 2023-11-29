@@ -4,16 +4,17 @@ import React from 'react';
 import { read, utils, writeFile } from 'xlsx';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
-import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridComponents/CustomAgGrid';
+import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTableNew';
 import CarouselDialog from '../../../components/CarouselDialog';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import DeleteButton from '../../../components/Helpers/DeleteButton';
 import routes from '../../../components/Helpers/Routes';
 import { gridLoadingTimeout, prepareDataForGrid } from '../../../constants/helpers';
-import { getFrameworkComponents, getStaticFields } from '../../../constants/useColumns';
 import CreateZip from '../CreateZip';
 import { MobileImportIcon, MobileExportIcon } from 'src/assets/svg/svgIcons';
 import { isMobile, isTablet } from 'react-device-detect';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 interface ConfigProps {
   id: string;
@@ -29,65 +30,73 @@ const Zipcode = (props: ConfigProps) => {
     zips: []
   });
   const [columns, setColumns] = React.useState([]);
-  const [frameWorkComponent, setFrameWorkComponent] = React.useState({});
-  const localStorageSelectedRecords = `zip_selected`;
   const [carouselDialog, setCarouselDialog] = React.useState({
     open: false,
     images: [],
     index: 0
   });
   const [section, setSection] = React.useState(null);
-  const [gridApi, setGridApi] = React.useState(null);
-  const [state, dispatch] = React.useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading: gridLoading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
+  const { state, dispatch } = useTableReducer();
+  const { rowCount, page, limit, selectedRecords } = state;
 
   React.useEffect(() => {
     fetchGridColumns();
     getZipData();
   }, []);
 
-  const ActionRenderer = (params) => (
-    <>
-      <IconButton
-        size="small"
-        color="inherit"
-        onClick={() => {
-          setShowConfirmBox({
-            open: true,
-            zips: [params.data.zipCode]
-          });
-        }}
-      >
-        <Delete color="error" fontSize="small" />
-      </IconButton>
-    </>
-  );
-
-  const ZipNameRenderer = (params) => <>{params.value}</>;
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 100,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+          <HtmlTooltip title="Delete">
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              onClick={() => {
+                setShowConfirmBox({
+                  open: true,
+                  zips: [row?.original?.zipCode]
+                });
+              }}
+            >
+              <Delete color="error" />
+            </IconButton>
+          </HtmlTooltip>
+        
+      </>
+    )
+  };
 
   const fetchGridColumns = () => {
-    axiosInstance()
-      .get('/field?resource=Zone')
-      .then(({ data: { data } }) => {
-        let columns = [];
-        let rendererNames = [];
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent,
-          zipNameRenderer: ZipNameRenderer,
-          actionsRenderer: ActionRenderer
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
-        columns = [...columns, ...getStaticFields()];
-        setColumns([{ field: 'zipCode', headerName: 'Zip Code', show: true, cellRenderer: 'zipNameRenderer' }]);
-      });
+    const columns = [
+      {
+        accessor: 'zipCode',
+        Header: 'Zip Code',
+        width: 120,
+        order: 1,
+        Cell: ({ row }) => (
+          <>
+            <p className="text-truncate">
+              {row?.original?.zipCode}
+            </p>
+          </>
+        )
+      },
+      ...getStaticFields(),
+      ActionsRenderer
+    ];
+    setColumns(columns);
   };
 
   const getZipData = () => {
     dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
     axiosInstance()
       .get(`${routes.zone.path}/${id}/zip`)
       .then(({ data: { data, count } }) => {
@@ -99,35 +108,6 @@ const Zipcode = (props: ConfigProps) => {
 
           return { ...finalObject };
         });
-        if (appendRows) {
-          dispatch({
-            type: 'initialize',
-            data: [...dataRows, ...rows],
-            count: rows.length,
-            selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
-          });
-        } else {
-          dispatch({
-            type: 'initialize',
-            data: rows,
-            count: rows.length,
-            selectedRecords: rows.filter((f) => f.isChecked === true)
-          });
-        }
-        if (gridApi) {
-          try {
-            let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords)
-              ? JSON.parse(localStorage.getItem(localStorageSelectedRecords))
-              : [];
-            if (oldSelectedRecords === null) {
-              gridApi.forEachNode(function (node) {
-                node.setSelected(oldSelectedRecords.some((o) => o === node.data.id));
-              });
-            }
-          } catch (ex) {
-            console.error('Error in getting selected records from local storage');
-          }
-        }
         dispatch({ type: 'initialize', data: rows, count: rows?.length });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -163,6 +143,7 @@ const Zipcode = (props: ConfigProps) => {
         zips: showConfirmBox.zips
       })
       .then(() => {
+        dispatch({ type: 'selection', selectedRecords: [] });
         setShowConfirmBox({
           open: false,
           zips: []
@@ -255,24 +236,21 @@ const Zipcode = (props: ConfigProps) => {
         </Box>
       </Box>
       <Box>
-        {Object.keys(frameWorkComponent).length > 0 && (
-          <CustomAgGrid
+      {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
             columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameWorkComponent}
-            setGridApi={setGridApi}
+            state={state}
             dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            actionWidth={150}
-            loading={gridLoading}
-            isClientSideGrid
-            renderedFrom="zone"
+            renderedFrom={"zone"}
+            isClientSideGrid={false}
             refreshGrid={getZipData}
+            showOnlyShowFilteredRecordSwitch={false}
+            showFilters={false}
           />
-        )}
+        ) : <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>}
       </Box>
       {openDialog && (
         <CreateZip

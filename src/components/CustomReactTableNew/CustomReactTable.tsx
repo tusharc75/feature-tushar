@@ -404,34 +404,6 @@ function CustomReactTable({
     [baseColumns]
   );
 
-  const getDataFromLocalStorage = () => {
-    try {
-      const data = localStorage.getItem('gridMetaData');
-      return data && data !== 'undefined' ? JSON.parse(data) : {};
-    } catch (ex) {
-      console.error(`Error while getting data from local storage: ${ex.message}`);
-      return {};
-    }
-  };
-
-  const returnSavedColOrder = () => {
-    const gridMetaData = getDataFromLocalStorage();
-    const colOrder = gridMetaData[renderedFrom]?.order || [];
-    const orderIndices = {};
-
-    for (let i = 0; i < colOrder.length; i++) {
-      orderIndices[colOrder[i]] = i;
-    }
-
-    const orderedCols = newColumns.slice().sort((a, b) => {
-      const aIndex = orderIndices[a?.id || a?.accessor];
-      const bIndex = orderIndices[b?.id || b?.accessor];
-      return aIndex - bIndex;
-    });
-
-    return orderedCols.length ? orderedCols : newColumns.map((m) => m?.id || m?.accessor);
-  };
-
   const filterTypes = React.useMemo(
     () => ({
       filterRowsWithSubrows: (rows, id, filterValue) => columnFilter(rows, id, filterValue)
@@ -474,7 +446,6 @@ function CustomReactTable({
       defaultColumn,
       filterTypes,
       initialState: {
-        columnOrder: returnSavedColOrder(),
         sortBy: sorting.map((d) => {
           return { id: d.colId, desc: d.sort === 'asc' ? false : true };
         }),
@@ -524,12 +495,15 @@ function CustomReactTable({
     try {
       const storedColumns = localStorage.getItem(renderedFrom);
       if (storedColumns) {
-        setColumnOrder(JSON.parse(storedColumns).map((m) => m.id));
-        setHiddenColumns(
-          JSON.parse(storedColumns)
-            .filter((f) => f.isVisible === false)
-            .map((m) => m.id)
-        );
+        const columnOrder = [];
+        const hiddenColumns = [];
+        for (const column of JSON.parse(storedColumns)) {
+          if (column.id === 'action') continue;
+          columnOrder.push(column.id);
+          if (column.isVisible === false) hiddenColumns.push(column.id);
+        }
+        setColumnOrder(columnOrder);
+        setHiddenColumns(hiddenColumns);
       }
     } catch (ex) {
       console.error(`Error while getting stored data from local storage - ${renderedFrom}`);
@@ -841,10 +815,15 @@ function CustomReactTable({
                       return (
                         <TableRow key={index1} {...rowProps} className={`tr`}>
                           {row.cells.map((cell, index2) => {
+                            const cellProps = cell.getCellProps();
+
+                            if (cell.column.maxWidth) {
+                              cellProps.style = { ...cellProps.style, maxWidth: cell.column.maxWidth };
+                            }
                             return (
                               <TableCell
                                 key={index2}
-                                {...cell.getCellProps()}
+                                {...cellProps}
                                 className={`td p-0 [&>*]:h-[45px] [&>*]:flex [&>*]:items-center [&>*]:p-[5px_8px] h-[45px]  ${
                                   cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''
                                 }    ${setWholeRowsCellColor ? setWholeRowsCellColor(row.original) : ''}`}
@@ -858,14 +837,16 @@ function CustomReactTable({
                                 {!['selection'].includes(cell?.column.id) &&
                                 currentEditingCellPosition?.rowId === row.original._id &&
                                 currentEditingCellPosition?.columnName === cell?.column.id ? (
-                                  <input
-                                    title={`Edit-${cell.id}`}
-                                    autoFocus
-                                    onBlur={() => (cell.value !== cellValue ? submitInput() : resetField())}
-                                    value={cellValue}
-                                    className="dark:text-[white]  appearance-none w-full focus-within:outline-[var(--new-theme-color)] bg-[transparent] outline-[transparent] shadow-0 border-[0] px-[2px] py-[4px] [border-bottom:1px_solid_var(--common-border-color)_!important]"
-                                    onChange={(e) => setCellValue(e.target.value)}
-                                  />
+                                  <div className="w-full">
+                                    <input
+                                      title={`Edit-${cell.id}`}
+                                      autoFocus
+                                      onBlur={() => (cell.value !== cellValue ? submitInput() : resetField())}
+                                      value={cellValue}
+                                      className="dark:text-[white]  appearance-none w-full focus-within:outline-[var(--new-theme-color)] bg-[transparent] outline-[transparent] shadow-0 border-[0] px-[2px] py-[4px] [border-bottom:1px_solid_var(--common-border-color)_!important]"
+                                      onChange={(e) => setCellValue(e.target.value)}
+                                    />
+                                  </div>
                                 ) : currentEditingCellPosition?.rowId === row.original._id && cell?.column.id === 'action' ? (
                                   <HtmlTooltip title="Save">
                                     <IconButton size="small" aria-label="Save" onClick={submitInput}>
@@ -873,19 +854,16 @@ function CustomReactTable({
                                     </IconButton>
                                   </HtmlTooltip>
                                 ) : cell.column?.editable && cell?.value ? (
-                                  <div
-                                    style={{
-                                      borderBottom: '1px dashed #8a8a8a',
-                                      cursor: 'pointer',
-                                      display: 'flex',
-                                      justifyContent: 'space-between'
-                                    }}
-                                  >
-                                    <p>{cell?.value}</p>
-                                    <span>
-                                      <Edit className="text-[rgba(0,0,0,0.3)] dark:text-[rgba(255,255,255,0.9)]" fontSize="small" />
-                                    </span>
+                                  <div className="w-full">
+                                    <div className="[border-bottom:1px_dashed_#8a8a8a] cursor-pointer flex w-full justify-between">
+                                      <p>{cell?.value}</p>
+                                      <span>
+                                        <Edit className="text-[rgba(0,0,0,0.3)] dark:text-[rgba(255,255,255,0.9)]" fontSize="small" />
+                                      </span>
+                                    </div>
                                   </div>
+                                ) : cell.column.id === 'action' ? (
+                                  <div className="action-cell">{cell.render('Cell')}</div>
                                 ) : (
                                   cell.render('Cell')
                                 )}
@@ -938,6 +916,8 @@ function CustomReactTable({
             setCellValue={setCellValue}
             handleCellClick={handleCellClick}
             handleKeyDown={handleKeyDown}
+            footerGroups={footerGroups}
+            allowPagination={allowPagination}
           />
         ) : null}
         {allowPagination && (
@@ -1050,8 +1030,13 @@ const DraggableHeader: React.FC<DraggableHeaderProps> = ({ column, index, reorde
 
   drag(drop(ref));
 
+  const headerProps = column.getHeaderProps();
+  if (column.maxWidth) {
+    headerProps.style = { ...headerProps.style, maxWidth: column.maxWidth };
+  }
+
   return (
-    <TableCell {...column.getHeaderProps()} className="th text-truncate table-header">
+    <TableCell {...headerProps} className="th text-truncate table-header">
       <div
         ref={ref}
         className={`d-flex items-center ${column.id === 'selection' ? 'justify-center' : 'justify-between'} pos-rel`}

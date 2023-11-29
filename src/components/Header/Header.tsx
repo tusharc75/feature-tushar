@@ -1,101 +1,34 @@
 import { useAccount, useMsal } from '@azure/msal-react';
-import {
-  AppBar,
-  Badge,
-  Box,
-  ButtonBase,
-  Chip,
-  IconButton,
-  Menu,
-  MenuItem,
-  Popover,
-  Toolbar,
-  Tooltip,
-  Typography,
-  useMediaQuery
-} from '@material-ui/core';
-import Avatar from '@material-ui/core/Avatar';
-import Grid from '@material-ui/core/Grid';
-import { makeStyles } from '@material-ui/core/styles';
-import { Brightness1, Close, ExpandMore, Image, MoreVert as MoreIcon } from '@material-ui/icons';
+import { AppBar, Box, ButtonBase, Chip, IconButton, Menu, MenuItem, Toolbar, Tooltip, Typography, useMediaQuery } from '@material-ui/core';
+import { Brightness1, Close, ExpandMore, MoreVert as MoreIcon } from '@material-ui/icons';
 import SyncIcon from '@material-ui/icons/Sync';
 import { isEmpty } from 'lodash';
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { AiOutlineClear } from 'react-icons/ai';
-import { FiCheckCircle } from 'react-icons/fi';
 import { useHistory, useLocation } from 'react-router-dom';
 import io, { Socket } from 'socket.io-client';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { CustomChatNotificationCountContext } from '../../StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext';
-import { CustomNotificationCountContext } from '../../StateProvider/CustomNotificationCountContext/CustomNotificationCountContext';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import { useData } from '../../StateProvider/Provider';
 import { SET_CHATTER, SET_SELECTED_ENTITY, SET_USER } from '../../StateProvider/actionTypes';
 import axiosInstance from '../../axios/axiosInstance';
 import { backendApi } from '../../config';
-import { displayCardDate } from '../../constants/helpers';
 import routes from '../Helpers/Routes';
 import UserProfile from './../UserProfile';
-
 import { useScrollDirection } from 'src/hooks/useScroll';
-
 import { HiOutlineMenuAlt1 } from 'react-icons/hi';
 import styles from './Header.module.scss';
-
 import { FiExternalLink } from 'react-icons/fi';
 import { SVG } from 'src/assets';
 import { userManual } from 'src/pages/Home';
 import DashboardModal, { ModalHead } from '../DashboardModal';
 import { SearchBar } from './SearchBar';
-
-import ChatBubbleOutlineOutlinedIcon from '@material-ui/icons/ChatBubbleOutlineOutlined';
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 import { SIDEBAR_OPEN, SIDEBAR_OPENED_BY_BUTTON, useStore } from 'src/StateProvider/fastContext';
 import { MoonIcon, SunIcon } from 'src/assets/svg/svgIcons';
+import ChatNotification from './ChatNotifications';
 import Notification from './Notification';
-
-const useStyles = makeStyles((theme) => ({
-  grow: {
-    flexGrow: 1
-  },
-  appBar: {
-    zIndex: theme.zIndex.drawer
-  },
-
-  entityName: {
-    maxWidth: '200px',
-    textOverflow: 'ellipsis',
-    overflow: 'hidden',
-    whiteSpace: 'nowrap'
-  },
-  notificationHeight: {
-    minWidth: 300,
-    minHeight: 200,
-    maxHeight: `calc(100vh - 200px)`
-  },
-  notificationHeightWithData: {
-    minWidth: 300
-  },
-  notificationContent: {
-    maxHeight: '640px',
-    overflow: 'auto',
-    border: '1px solid var(--common-border-color)',
-    margin: '2px'
-  },
-  markAll: {
-    textAlign: 'center',
-    color: '#a59e9e',
-    padding: '5px',
-    display: 'flex !important',
-    alignItems: 'center !important',
-    justifyContent: 'flex-end',
-    paddingRight: '10px',
-    '&:hover': {
-      textDecoration: 'underline'
-    }
-  }
-}));
 
 const Header = () => {
   const [themeColor, toggleThemeColor] = useAppTheme();
@@ -123,11 +56,8 @@ const Header = () => {
     dispatch
   }: any = useData();
 
-  const classes = useStyles();
   const history = useHistory();
   const { pathname } = useLocation();
-
-  const [isSearch, setIsSearch] = useState(false);
   const [socket, setSocket] = useState<Socket>(null);
   const [supportAnchorEl, setSupportAnchorEl] = useState(null);
   const [servicesAnchorEl, setServicesAnchorEl] = useState(null);
@@ -202,7 +132,7 @@ const Header = () => {
     setSocket(s);
   }, [user]);
 
-  // Socket listening for data
+  // Socket listening for chat data
   useEffect(() => {
     if (socket && user) {
       socket.on('connect', () => {
@@ -226,57 +156,6 @@ const Header = () => {
     };
   }, [socket, user]);
 
-  const handleFullScreenChatNotificationClick = (event) => {
-    setFullScreenChatNotificationAnchorEl(event.currentTarget);
-    setLoadingChatNotifications(true);
-
-    axiosInstance()
-      .get('/user/user-notification')
-      .then(({ data: { data } }) => {
-        setChatNotificationList(data);
-        setLoadingChatNotifications(false);
-        chatNotification.setCount(0);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  };
-
-  const handleFullScreenChatNotificationClose = () => {
-    setFullScreenChatNotificationAnchorEl(null);
-  };
-
-  const fullScreenChatNotificationOpen = Boolean(fullScreenChatNotificationAnchorEl);
-  const fullScreenChatNotificationId = fullScreenChatNotificationOpen ? 'full-screen-chat-notification' : undefined;
-  // For FullScreen Notification - End
-
-  // For MobileScreen Notification - Start
-  const [mobileScreenChatNotificationAnchorEl, setMobileScreenChatNotificationAnchorEl] = React.useState(null);
-
-  const handleMobileScreenChatNotificationClick = async (event) => {
-    setMobileScreenChatNotificationAnchorEl(event.currentTarget);
-    setLoadingChatNotifications(true);
-
-    await axiosInstance()
-      .get('/user/user-notification')
-      .then(({ data: { data } }) => {
-        setChatNotificationList(data);
-        setLoadingChatNotifications(false);
-        chatNotification.setCount(0);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  };
-
-  const handleMobileScreenChatNotificationClose = () => {
-    setMobileScreenChatNotificationAnchorEl(null);
-  };
-
-  const mobileScreenChatNotificationOpen = Boolean(mobileScreenChatNotificationAnchorEl);
-  const mobileScreenChatNotificationId = mobileScreenChatNotificationOpen ? 'mobile-screen-chat-notification' : undefined;
-  // For MobileScreen Notification - End
-
   const handleMobileMenuClose = () => {
     setMobileMoreAnchorEl(null);
   };
@@ -285,17 +164,9 @@ const Header = () => {
     setMobileMoreAnchorEl(event.currentTarget);
   };
 
-  // const openSupportMenu = (event) => {
-  //   setSupportAnchorEl(event.currentTarget);
-  // };
-
   const supportMenuClose = () => {
     setSupportAnchorEl(null);
   };
-
-  // const openServicesMenu = (event) => {
-  //   setServicesAnchorEl(event.currentTarget);
-  // };
 
   const closeServicesMenu = () => {
     setServicesAnchorEl(null);
@@ -374,24 +245,6 @@ const Header = () => {
     }
   };
 
-  const hasAccessToEntity = async (id) => {
-    const entityList = user.entity?.map((entity) => entity._id);
-    return entityList.includes(id);
-  };
-
-  const handleEntityChange = async (id) => {
-    if (!Array.isArray(id)) {
-      dispatch({ type: SET_SELECTED_ENTITY, payload: id });
-    }
-  };
-
-  const handleRedirect = (id, resourceId, resourcePath) =>
-    id === selectedEntity
-      ? history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
-      : hasAccessToEntity(id)
-      ? handleEntityChange(id) && history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
-      : '';
-
   function handleListKeyDown(event) {
     if (event.key === 'Tab') {
       event.preventDefault();
@@ -433,128 +286,6 @@ const Header = () => {
     </Menu>
   );
 
-  const ChatNotificationContent = ({ data }) => {
-    return (
-      <div className={`${data.length === 0 ? classes.notificationHeight : classes.notificationHeightWithData}`} style={{ position: 'relative' }}>
-        <div className={`d-flex align-items-center gap-1`} style={{ position: 'sticky', top: 0 }}>
-          <div className={classes.markAll}>
-            <Typography
-              onClick={() => {
-                axiosInstance()
-                  .put('/user/user-notification/all-read', { toggle: true })
-                  .then(({ data }) => {
-                    let updatedNotificationList = [];
-                    chatNotificationList.map((notification) => {
-                      notification.read = true;
-                      updatedNotificationList.push(notification);
-                    });
-
-                    setChatNotificationList(updatedNotificationList);
-                    toastConfig.setToastConfig({
-                      open: true,
-                      message: data.message,
-                      type: 'success'
-                    });
-
-                    setFullScreenChatNotificationAnchorEl(null);
-                    setMobileScreenChatNotificationAnchorEl(null);
-                  })
-                  .catch((error) => {
-                    toastConfig.setToastConfig(error);
-                  });
-              }}
-              className="cursor-pointer"
-            >
-              <FiCheckCircle className="mr-2 pt-1" size={16} />
-              <span>Mark all as read</span>
-            </Typography>
-          </div>
-          <div className={classes.markAll}>
-            <Typography
-              onClick={() => {
-                axiosInstance()
-                  .put('/user/user-notification/clear-all', { toggle: true })
-                  .then(({ data }) => {
-                    toastConfig.setToastConfig({
-                      open: true,
-                      message: data.message,
-                      type: 'success'
-                    });
-
-                    setFullScreenChatNotificationAnchorEl(null);
-                    setMobileScreenChatNotificationAnchorEl(null);
-                  })
-                  .catch((error) => {
-                    toastConfig.setToastConfig(error);
-                  });
-              }}
-              className="cursor-pointer"
-            >
-              <AiOutlineClear className="mr-2 pt-1" size={16} />
-              <span>Clear All</span>
-            </Typography>
-          </div>
-        </div>
-
-        <div className={classes.notificationContent}>
-          {data.map((d, index) => {
-            return (
-              <div
-                style={{
-                  borderBottom: d.read ? '1px solid lightgrey' : '1px solid white'
-                }}
-                className={`${d.read === true ? '' : 'light-grey-bg'} p-3 cursor-pointer`}
-                key={index}
-                onClick={() => {
-                  if (d.read === false) {
-                    axiosInstance()
-                      .put('/user/user-notification/read', {
-                        toggle: true,
-                        notificationId: d.notificationId
-                      })
-                      .then(() => {})
-                      .catch((error) => {
-                        toastConfig.setToastConfig(error);
-                      });
-                  }
-
-                  handleFullScreenChatNotificationClose();
-                  handleMobileScreenChatNotificationClose();
-
-                  if (d?.entity) {
-                    handleRedirect(d?.entity, d?.resourceId, d?.resourcePath);
-                  } else {
-                    history.push(d?.resourceId ? `${d?.resourcePath}/${d?.resourceId}` : d?.resourcePath);
-                  }
-                }}
-              >
-                {
-                  <>
-                    <Grid container>
-                      <Grid item xs={2} md={2}>
-                        <Avatar style={{ height: 30, width: 30 }} src={d?.avatar}>
-                          <Image style={{ fontSize: 24 }} />
-                        </Avatar>
-                      </Grid>
-                      <Grid item xs={10} md={10}>
-                        <h6>{displayCardDate(d?.date)}</h6>
-                        <h4>{d.title}</h4>
-                        <h5>{d.description}</h5>
-                      </Grid>
-                    </Grid>
-                  </>
-                }
-              </div>
-            );
-          })}
-        </div>
-        {/* <Button style={{ position: "sticky", bottom: 0 }} fullWidth variant="contained" color="primary" onClick={() => { }}>
-        View All &#8599;
-      </Button> */}
-      </div>
-    );
-  };
-
   const entitiesMenuId = 'entities-menu';
 
   const entitiesMenu = (
@@ -585,7 +316,7 @@ const Header = () => {
                 closeEntitiesMenu();
               }}
             >
-              <Typography className={classes.entityName}>{curEntity.entityName}</Typography>
+              <Typography className={`max-w-[200px] line-clamp-1`}>{curEntity.entityName}</Typography>
               <Box component="span" marginX={1} />
               {selectedEntity === curEntity._id && <Chip size="small" label="Current" color="primary" />}
             </MenuItem>
@@ -613,49 +344,14 @@ const Header = () => {
       </MenuItem> */}
       {selectedEntity && (
         <MenuItem disabled={!selectedEntity} onClick={openEntitiesMenu} className="d-flex justify-content-space-between">
-          <span className={classes.entityName}>{curEntity && curEntity.entityName}</span>
+          <span className={'max-w-[200px] line-clamp-1'}>{curEntity && curEntity.entityName}</span>
           <ExpandMore />
         </MenuItem>
       )}
 
       {/* Remove below false to show chat notification icon */}
 
-      <MenuItem onClick={mobileScreenChatNotificationAnchorEl === null ? handleMobileScreenChatNotificationClick : () => {}}>
-        <Badge
-          variant="dot"
-          overlap="circular"
-          badgeContent={chatNotification ? chatNotification.count : 0}
-          color="secondary"
-          aria-describedby={mobileScreenChatNotificationId}
-        >
-          <ChatBubbleOutlineOutlinedIcon style={{ maxWidth: 22 }} />
-        </Badge>
-        <Box component="span" mx={1} />
-        <p>Chat Notifications</p>
-
-        <Popover
-          id={mobileScreenChatNotificationId}
-          open={mobileScreenChatNotificationOpen}
-          anchorEl={mobileScreenChatNotificationAnchorEl}
-          onClose={handleMobileScreenChatNotificationClose}
-          anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'center'
-          }}
-          transformOrigin={{
-            vertical: 'top',
-            horizontal: 'center'
-          }}
-        >
-          {loadingChatNotifications ? (
-            <Typography className="m-3">Loading Chat Notifications...</Typography>
-          ) : chatNotificationList.length === 0 ? (
-            <Typography className="m-3">No Chat Notifications found</Typography>
-          ) : (
-            <ChatNotificationContent data={chatNotificationList} />
-          )}
-        </Popover>
-      </MenuItem>
+      <ChatNotification />
       <Notification />
       <MenuItem onClick={openHelperModal}>
         <HelpOutlineIcon />
@@ -838,7 +534,7 @@ const Header = () => {
               {/* Remove below false to show chat notification icon */}
 
               <div>
-                <IconButton
+                {/* <IconButton
                   id="chatNotificationButton"
                   aria-describedby={fullScreenChatNotificationId}
                   aria-label="settings"
@@ -874,7 +570,8 @@ const Header = () => {
                   ) : (
                     <ChatNotificationContent data={chatNotificationList} />
                   )}
-                </Popover>
+                </Popover> */}
+                <ChatNotification />
               </div>
 
               <IconButton id="helpButton" aria-label="help" color="inherit" onClick={openHelperModal} className={styles.showIconLayout} title="Help">

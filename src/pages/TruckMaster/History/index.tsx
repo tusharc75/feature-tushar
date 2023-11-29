@@ -1,46 +1,114 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import { CommonRenderer, DateTimeRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
+import { useState, useEffect, useContext, Fragment } from 'react';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { Link } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 import axiosInstance from 'src/axios/axiosInstance';
 import { Box } from '@material-ui/core';
 import { camelCase } from 'lodash';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import moment from 'moment';
+import { dateTimeFormat } from 'src/constants/helpers';
 
 const History = ({ id, status }) => {
   const toastConfig = useContext(CustomToastContext);
 
-  const [gridApi, setGridApi] = useState(null);
-
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
-
-  const NameRenderer = (params) => (
-    <>
-      {params?.value ? (
-        <p className="link text-truncate" title={params.value?.optionLabel} onClick={ () => window.open(`${routes.truckMasterDetail.path}/${params.value?.optionValue}`)}>
-          {params?.value?.optionLabel}
-        </p>
-      ) : (
-        <NoDataCell />
-      )}
-    </>
-  );
-  const frameworkComponents = {
-    nameRenderer: NameRenderer,
-    commonRenderer: CommonRenderer,
-    dateTimeRenderer: DateTimeRenderer
-  };
+  const { state, dispatch } = useTableReducer();
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords } = state;
 
   const columns = [
-    { field: 'reference', headerName: 'Reference', show: true, cellRenderer: 'nameRenderer' },
-    { field: 'referenceType', headerName: 'Type', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    { field: 'date', headerName: 'Date & Time', show: true, disabled: true, filter: false, cellRenderer: 'dateTimeRenderer' },
-    { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'comments', headerName: 'Comment', show: true, cellRenderer: 'commonRenderer' }
+    {
+      accessor: 'reference',
+      Header: 'Reference',
+      minWidth: 150,
+      width: 150,
+      primaryField: true,
+      disabled: true,
+      Cell: ({ row }) => (
+        <>
+          {row?.original?.reference ? (
+            <p
+              className="link text-truncate"
+              title={row?.original?.reference?.optionLabel}
+              onClick={() => window.open(`${routes.truckMasterDetail.path}/${row?.original?.reference?.optionValue}`)}
+            >
+              {row?.original?.reference?.optionLabel}
+            </p>
+          ) : (
+            <NoDataCell />
+          )}
+        </>
+      )
+    },
+    {
+      accessor: 'referenceType',
+      Header: 'Type',
+      minWidth: 150,
+      width: 150,
+      Cell: ({ row }) => (
+        <>
+          {row?.original?.referenceType ? (
+            <h5 className="text-truncate" title={row?.original?.referenceType}>
+              {row?.original?.referenceType}
+            </h5>
+          ) : (
+            <NoDataCell />
+          )}
+        </>
+      )
+    },
+    {
+      accessor: 'date',
+      Header: 'Date & Time',
+      minWidth: 150,
+      width: 150,
+      canFilter: false,
+      Cell: ({ row }) => (
+        <>
+          {row?.original?.date ? (
+            <h5 className="text-truncate" title={moment(row?.original?.date)?.format(dateTimeFormat)}>
+              {moment(row?.original?.date)?.format(dateTimeFormat)}
+            </h5>
+          ) : (
+            <NoDataCell />
+          )}
+        </>
+      )
+    },
+    {
+      accessor: 'status',
+      Header: 'Status',
+      minWidth: 150,
+      width: 150,
+      Cell: ({ row }) => (
+        <>
+          {row?.original?.status ? (
+            <h5 className="text-truncate" title={row?.original?.status}>
+              {row?.original?.status}
+            </h5>
+          ) : (
+            <NoDataCell />
+          )}
+        </>
+      )
+    },
+    {
+      accessor: 'comments',
+      Header: 'Comment',
+      minWidth: 150,
+      width: 150,
+      Cell: ({ row }) => (
+        <>
+          {row?.original?.comments ? (
+            <h5 className="text-truncate" title={row?.original?.comments}>
+              {row?.original?.comments}
+            </h5>
+          ) : (
+            <NoDataCell />
+          )}
+        </>
+      )
+    }
   ];
 
   useEffect(() => {
@@ -51,9 +119,6 @@ const History = ({ id, status }) => {
 
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
     axiosInstance()
       .get(`${routes.truckMaster?.path}/history/${id}`)
       .then(({ data: { data } }) => {
@@ -70,22 +135,15 @@ const History = ({ id, status }) => {
     <Fragment>
       <Box>
         {columns ? (
-          <CustomAgGrid
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
             columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameworkComponents}
-            setGridApi={setGridApi}
+            state={state}
             dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            allowAction={false}
-            allowSelection={false}
-            isClientSideGrid={true}
-            loading={loading}
             renderedFrom={`${camelCase(routes?.truckMaster.title)}_History`}
+            isClientSideGrid={true}
             refreshGrid={fetchData}
+            hideSelection={true}
           />
         ) : (
           <Box p={2} height={500}>

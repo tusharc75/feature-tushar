@@ -15,11 +15,21 @@ import { camelCase } from 'lodash';
 
 let searchTimeout;
 
-const AssignDynamicDialog = ({ onSuccess, handleClose, resource, isSubmitting, ids = [], extraDeepFilter = [], extraFilterById = [] }) => {
+const AssignDynamicDialog = ({
+  onSuccess,
+  handleClose,
+  resource,
+  reference = '',
+  isSubmitting,
+  ids = [],
+  extraDeepFilter = [],
+  extraFilterById = []
+}) => {
+  const renderedFrom = camelCase(`${routes[resource]?.title || resource}_${reference}`);
 
-  const renderedFrom = camelCase(routes[resource]?.title || resource);
-
-  const { state: { selectedEntity } }: any = useData();
+  const {
+    state: { selectedEntity }
+  }: any = useData();
 
   const toastConfig = useContext(CustomToastContext);
 
@@ -62,33 +72,34 @@ const AssignDynamicDialog = ({ onSuccess, handleClose, resource, isSubmitting, i
 
   const fetchData = () => {
     if (ids?.length > 25) {
-      fetchDataPost()
+      fetchDataPost();
+    } else {
+      fetchDataGet();
     }
-    else {
-      fetchDataGet()
-    }
-  }
+  };
 
   const fetchDataGet = () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-    axiosInstance().get(`dynamic-form/${queryString}`, {
-      headers: {
-        Resource: resource
-      }
-    }).then(({ data: { data, count } }) => {
-      let rows = data.map((u) => {
-        let finalObject = prepareDataForGrid(u);
-        finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);;
-        return {
-          ...finalObject
-        };
-      });
-      dispatch({ type: 'initialize', data: rows, count: count });
-      setTimeout(() => {
-        dispatch({ type: 'loading', loading: false });
-      }, gridLoadingTimeout);
-    })
+    axiosInstance()
+      .get(`dynamic-form/${queryString}`, {
+        headers: {
+          Resource: resource
+        }
+      })
+      .then(({ data: { data, count } }) => {
+        let rows = data.map((u) => {
+          let finalObject = prepareDataForGrid(u);
+          finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
+          return {
+            ...finalObject
+          };
+        });
+        dispatch({ type: 'initialize', data: rows, count: count });
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
+      })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -97,23 +108,25 @@ const AssignDynamicDialog = ({ onSuccess, handleClose, resource, isSubmitting, i
   const fetchDataPost = () => {
     dispatch({ type: 'loading', loading: true });
     const postData = getPostData();
-    axiosInstance().post(`dynamic-form/findAll`, postData, {
-      headers: {
-        Resource: resource
-      }
-    }).then(({ data: { data, count } }) => {
-      let rows = data.map((u) => {
-        let finalObject = prepareDataForGrid(u);
-        finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);;
-        return {
-          ...finalObject
-        };
-      });
-      dispatch({ type: 'initialize', data: rows, count: count });
-      setTimeout(() => {
-        dispatch({ type: 'loading', loading: false });
-      }, gridLoadingTimeout);
-    })
+    axiosInstance()
+      .post(`dynamic-form/findAll`, postData, {
+        headers: {
+          Resource: resource
+        }
+      })
+      .then(({ data: { data, count } }) => {
+        let rows = data.map((u) => {
+          let finalObject = prepareDataForGrid(u);
+          finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
+          return {
+            ...finalObject
+          };
+        });
+        dispatch({ type: 'initialize', data: rows, count: count });
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
+      })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -168,7 +181,7 @@ const AssignDynamicDialog = ({ onSuccess, handleClose, resource, isSubmitting, i
   };
 
   const getPostData = () => {
-    const data: any = {}
+    const data: any = {};
     data.page = page;
     data.limit = limit;
     if (ids?.length) {
@@ -216,7 +229,12 @@ const AssignDynamicDialog = ({ onSuccess, handleClose, resource, isSubmitting, i
 
   return (
     <Dialog fullWidth maxWidth="md" fullScreen={true} open={true} onClose={handleClose} aria-labelledby="assign-roles-dialog">
-      <CustomDialogHeader title={`Assign ${routes[camelCase(resource)]?.title || resource}`} showManimizeMaximize={false} showRequiredLabel={false} onClose={handleClose} />
+      <CustomDialogHeader
+        title={`Assign ${routes[camelCase(resource)]?.title || resource}`}
+        showManimizeMaximize={false}
+        showRequiredLabel={false}
+        onClose={handleClose}
+      />
       <CustomDialogContent>
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
@@ -226,7 +244,7 @@ const AssignDynamicDialog = ({ onSuccess, handleClose, resource, isSubmitting, i
                 <Button
                   disabled={isSubmitting || selectedRecords?.length === 0}
                   onClick={() => {
-                    onSuccess(selectedRecords)
+                    onSuccess(selectedRecords);
                   }}
                   color="primary"
                   size="small"
@@ -252,9 +270,11 @@ const AssignDynamicDialog = ({ onSuccess, handleClose, resource, isSubmitting, i
             showFilters={true}
             resource={resource}
           />
-        ) : <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>}
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
       </CustomDialogContent>
     </Dialog>
   );
