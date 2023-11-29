@@ -112,7 +112,6 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
             e.disabled = true;
           }
         })
-        console.log(columns)
         setColumns([...columns, ActionsRenderer]);
       });
   };
