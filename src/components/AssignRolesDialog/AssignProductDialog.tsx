@@ -224,7 +224,7 @@ const AssignProductDialog = ({
       }
     });
 
-    dispatch({ type: 'initialize', data: rows, count: rowCount });
+    dispatch({ type: 'update', data: rows });
     dispatch({ type: 'selection', selectedRecords: updatedRecords });
     setDisableSaveButton(selectedRecords?.some((d) => d.qty === 0));
   };
@@ -257,7 +257,7 @@ const AssignProductDialog = ({
           </div>
           {columns ? (
             <CustomReactTable
-              height={'calc(100vh - 200px)'}
+              height={'calc(100vh - 250px)'}
               columns={columns}
               state={state}
               dispatch={dispatch}
