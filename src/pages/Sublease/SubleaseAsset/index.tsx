@@ -1,17 +1,12 @@
 import Box from '@material-ui/core/Box/Box';
-import { useState, useEffect, useReducer, useContext, Fragment } from 'react';
+import { useState, useEffect, useContext, Fragment } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridComponents/CustomAgGrid';
-import CustomAgGridEditable from '../../../components/AgGridComponents/CustomAgGridEditable';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { gridLoadingTimeout, ASSET_STATUS, serializedAsset, sidebarResource } from '../../../constants/helpers';
 import { useHistory } from 'react-router-dom';
-import { isMobile, isTablet } from 'react-device-detect';
-import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
-import useColumns, { getStaticFields, getFrameworkComponents } from '../../../constants/useColumns';
 import {
   prepareDataForGrid,
   DELIVERY_TICKET_REFERENCE_TYPE,
@@ -23,7 +18,6 @@ import {
 } from '../../../constants/helpers';
 import { useData } from '../../../StateProvider/Provider';
 import { Button, Tooltip } from '@material-ui/core';
-import { AiFillFilePdf } from 'react-icons/ai';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import { uniq, map } from 'lodash';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
@@ -33,19 +27,17 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { subleaseMessage } from 'src/constants/messageHelpers';
 import { fetch_sublease_product_fields } from 'src/components/Sublease/helper';
 import { generateCustomTableColumns } from 'src/constants/columns';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer, } from 'src/components/CustomReactTableNew';
 
 const SerializedAsset = ({ subleaseData, fetchData, setNextStep, setNextStepToolTip, currentStep, renderedFrom, allowedToEdit, isProcessor }) => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
-
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, rowCount, selectedRecords } = state;
   const { getColumnData } = useColumns();
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [columns, setColumns] = useState(null);
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions }
   }: any = useData();
 
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
@@ -93,7 +85,6 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, setNextStepTool
       .get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
         let columns = [];
-        let rendererNames = [];
         data.forEach((o) => {
           let currentColumn: any = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path);
           if (currentColumn !== null) {
@@ -101,23 +92,40 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, setNextStepTool
               currentColumn.columnData.editable = true;
             }
             columns = [...columns, currentColumn?.columnData];
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName);
-            }
           }
         });
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          rentalJobRenderer: RentalJobRenderer,
-          wellNameRenderer: WellNameRenderer,
-          ...tempFrameworkComponent
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
 
         const extraColoums = [
-          { field: 'rentalJob', headerName: 'Rental Job', show: true, cellRenderer: 'rentalJobRenderer' },
-          { field: 'wellName', headerName: 'Well Name', show: true, cellRenderer: 'wellNameRenderer' },
-          { field: 'remainingJobDays', headerName: 'Remaining Job Days', show: true, cellRenderer: 'commonRenderer' }
+          {
+            accessor: 'rentalJob', Header: 'Rental Job', show: true,
+            Cell: ({ row }) => (
+              row.original?.rentalJob ? (
+                <Link
+                  className="link text-truncate"
+                  target="_blank"
+                  title={row.original?.rentalJob}
+                  to={`${routes.rentalManagementDetail.path}/${row.original?.rentalJobId}`}
+                >
+                  {row.original?.rentalJob}
+                </Link>
+              ) : (
+                <NoDataCell />
+              )
+            )
+          },
+          {
+            accessor: 'wellName', Header: 'Well Name', show: true,
+            Cell: ({ row }) => (
+              row.original?.wellName ? (
+                <Link className="link text-truncate" target="_blank" title={row.original?.wellName} to={`${routes.wellMasterDetail.path}/${row.original?.wellNameId}`}>
+                  {row.original?.wellName}
+                </Link>
+              ) : (
+                <NoDataCell />
+              )
+            )
+          },
+          { accessor: 'remainingJobDays', Header: 'Remaining Job Days', show: true, Cell: ({ row }) => (row.original?.remainingJobDays ? row.original?.wellName : <NoDataCell />) }
         ];
 
         columns = [...columns.slice(0, 1), ...extraColoums, ...columns.slice(1), ...getStaticFields()];
@@ -126,34 +134,8 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, setNextStepTool
       });
   };
 
-  const RentalJobRenderer = (params) =>
-    params?.value ? (
-      <Link
-        className="link text-truncate"
-        target="_blank"
-        title={params?.value}
-        to={`${routes.rentalManagementDetail.path}/${params?.data?.rentalJobId}`}
-      >
-        {params?.value}
-      </Link>
-    ) : (
-      <NoDataCell />
-    );
-
-  const WellNameRenderer = (params) =>
-    params?.value ? (
-      <Link className="link text-truncate" target="_blank" title={params?.value} to={`${routes.wellMasterDetail.path}/${params?.data?.wellNameId}`}>
-        {params?.value}
-      </Link>
-    ) : (
-      <NoDataCell />
-    );
-
   const fetchRecords = async () => {
     dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
     const response = await axiosInstance().get(`${sublease.api}/${subleaseData._id}/serialized-asset`);
     var isComplate = true;
     let rows = response?.data?.data.map((u) => {
@@ -366,57 +348,16 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, setNextStepTool
       </Box>
       <Grid item xs={12} md={12} sm={12}>
         {columns ? (
-          isMobile && !isTablet ? (
-            <CustomSwipableList
-              allowSelection={allowedToEdit || isProcessor}
-              allowSwipe={true}
-              permissions={true}
-              primaryField={columns?.find((d) => d.field)}
-              onClick={(data) => {
-                history.push(`${routes.serializedAssetDetail.path}/${data._id}`);
-              }}
-              dataRows={dataRows}
-              selectedRecords={selectedRecords}
-              dispatch={dispatch}
-              onEdit={false}
-              extraParamsToCheckDelete={true}
-              onDelete={false}
-              rowCount={rowCount}
-              page={page}
-              loading={loading}
-              additionalDetails={[]}
-              chips={[
-                {
-                  label: 'Status : ',
-                  field: 'status'
-                }
-              ]}
-              owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-              onCreate={false}
-              showClone={false}
-              onClone={() => { }}
-              renderedFrom={renderedFrom}
-            />
-          ) : (
-            <CustomAgGridEditable
-              columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameWorkComponent}
-              setGridApi={setGridApi}
-              dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              allowAction={false}
-              loading={loading}
-              isClientSideGrid={true}
-              allowSelection={allowedToEdit || isProcessor}
-              renderedFrom={renderedFrom}
-              refreshGrid={fetchRecords}
-              onCellValueChanged={handleValueUpdate}
-            />
-          )
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            isClientSideGrid={false}
+            refreshGrid={fetchData}
+            showOnlyShowFilteredRecordSwitch={true}
+          />
         ) : (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
