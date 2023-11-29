@@ -444,7 +444,8 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
             isClientSideGrid={false}
             refreshGrid={fetchProducts}
             onSaveEdit={onSaveEdit}
-            allowPagination={false}
+            hideAction={!allowedToEdit}
+            hideSelection={!allowedToEdit}
           />
         ) : (
           <Box p={2} height={500}>
