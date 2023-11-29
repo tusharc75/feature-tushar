@@ -863,7 +863,7 @@ function CustomReactTable({
                                     </div>
                                   </div>
                                 ) : cell.column.id === 'action' ? (
-                                  <div>{cell.render('Cell')}</div>
+                                  <div className="action-cell">{cell.render('Cell')}</div>
                                 ) : (
                                   cell.render('Cell')
                                 )}

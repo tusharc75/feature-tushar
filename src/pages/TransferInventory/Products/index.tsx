@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Button, Box, IconButton } from '@material-ui/core';
-import { useHistory, } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -24,7 +24,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import ProductQtyDialog from './ProductQtyDialog';
 import { deleteDisable } from 'src/constants/messageHelpers';
-import CustomReactTable, { useTableReducer, } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
 
 const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToEdit, fetchTransferInventoryData, updateStatus }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -72,8 +72,8 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
           show: true,
           disabled: true,
           Cell: ({ row }) => (
-            <>
-              {row.original?.canDelete ?
+            <div>
+              {row.original?.canDelete ? (
                 <p
                   className="link text-truncate"
                   title={row.original?.productName}
@@ -82,7 +82,10 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
                   }}
                 >
                   {row.original?.productName}
-                </p> : <p className="text-truncate">{row.original?.productName}</p>}
+                </p>
+              ) : (
+                <p className="text-truncate">{row.original?.productName}</p>
+              )}
               <Box ml={1}>
                 <IconButton
                   size="small"
@@ -93,17 +96,21 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
                   <OpenInNewIcon fontSize="small" color="primary" />
                 </IconButton>
               </Box>
-            </>
+            </div>
           )
         });
       } else if (e?.fieldName === 'serializedProduct') {
         column.push({
-          accessor: 'serializedProductShow', Header: e?.fieldLabel, show: true,
+          accessor: 'serializedProductShow',
+          Header: e?.fieldLabel,
+          show: true,
           Cell: ({ row }) => (row.original?.serializedProductShow ? row.original?.serializedProductShow : <NoDataCell />)
         });
       } else {
         column.push({
-          accessor: e?.fieldName, Header: e?.fieldLabel, show: true,
+          accessor: e?.fieldName,
+          Header: e?.fieldLabel,
+          show: true,
           Cell: ({ row }) => (row.original[e?.fieldName] ? row.original[e?.fieldName] : <NoDataCell />)
         });
       }
@@ -125,7 +132,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
       show: true,
       filter: false,
       sortable: false,
-      Cell: ({ row }) => (row.original?.inventory ? row.original?.inventory : <NoDataCell />),
+      Cell: ({ row }) => (row.original?.inventory ? <div>{row.original?.inventory}</div> : <NoDataCell />)
     });
     column.push({
       accessor: 'serialNumber',
@@ -145,8 +152,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
     disableFilters: true,
     disableSortBy: true,
     canDrag: false,
-    Cell: ({ row }) =>
-    (
+    Cell: ({ row }) => (
       <>
         {row.original?.serializedProduct && (
           <HtmlTooltip title={`Assign Serial Number`}>
@@ -168,7 +174,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
             </span>
           </HtmlTooltip>
         )}
-        <HtmlTooltip title={row.original?.canDelete ? "Delete" : deleteDisable}>
+        <HtmlTooltip title={row.original?.canDelete ? 'Delete' : deleteDisable}>
           <IconButton
             disabled={!row.original?.canDelete}
             onClick={() => {
@@ -178,12 +184,12 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
             size="small"
             color="primary"
           >
-            <DeleteIcon fontSize="small" color={row.original?.canDelete ? "error" : "disabled"} />
+            <DeleteIcon fontSize="small" color={row.original?.canDelete ? 'error' : 'disabled'} />
           </IconButton>
         </HtmlTooltip>
       </>
     )
-  }
+  };
 
   useEffect(() => {
     fetchProducts();
@@ -332,7 +338,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
         d.qty = parseInt(data.qty);
       }
     });
-    updateQty(row._id, row.qty)
+    updateQty(row._id, row.qty);
     fetchProducts();
   };
 
@@ -388,7 +394,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
         qty: Number(qty)
       })
       .then(() => {
-        setProductEditDialog({ open: false, productData: null })
+        setProductEditDialog({ open: false, productData: null });
         fetchProducts();
       })
       .catch((err) => {
