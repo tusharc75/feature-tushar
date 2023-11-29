@@ -4,7 +4,6 @@ import CustomReactTable from './CustomReactTable';
 import Pagination from './Pagination';
 import useColumns, {
   headerName,
-  isRenderWithCopy,
   detailPagePath,
   disabledColumns,
   getStaticFields,
@@ -20,7 +19,6 @@ export {
   Pagination,
   useColumns,
   headerName,
-  isRenderWithCopy,
   detailPagePath,
   disabledColumns,
   getStaticFields,

@@ -290,9 +290,11 @@ export const generateCustomTableColumns = (fields: any[], currency: string, rend
 };
 
 const columnData = (ele, row) => {
-  // make lookup resource string first letter capital and remove every space using lodash
-  const lookupResource = camelCase(ele.lookupResource).replace(/\s/g, '');
-  const path = routes[`${lookupResource}Detail`].path;
+
+  const path = routes[`${camelCase(ele?.lookupResource)}Detail`]?.path
+  ? routes[`${camelCase(ele?.lookupResource)}Detail`]?.path
+  : `${camelCase(ele?.lookupResource)}/detail`;
+
   if (ele.type === 'multiSelect' && ele.lookup) {
     return (
       <p>
