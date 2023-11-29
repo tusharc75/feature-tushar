@@ -304,6 +304,7 @@ const SubleaseDetailsPage = () => {
                       renderedFrom={`${renderedFrom}_grid-2`}
                       allowedToEdit={allowedToEdit}
                       isProcessor={isProcessor}
+                      stepFullScreen={stepFullScreen}
                     />
                   )}
                   {['Serialized Asset'].includes(subleaseStepsNames[currentStep]) && subleaseData && (

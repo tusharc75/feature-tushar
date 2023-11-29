@@ -29,9 +29,9 @@ import { fetch_sublease_product_fields } from 'src/components/Sublease/helper';
 import { generateCustomTableColumns } from 'src/constants/columns';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer, } from 'src/components/CustomReactTableNew';
 
-const SerializedAsset = ({ subleaseData, fetchData, setNextStep, setNextStepToolTip, currentStep, renderedFrom, allowedToEdit, isProcessor }) => {
+const SerializedAsset = ({ subleaseData, fetchData, setNextStep, setNextStepToolTip, currentStep, renderedFrom, allowedToEdit, isProcessor, stepFullScreen }) => {
   const toastConfig = useContext(CustomToastContext);
-  const history = useHistory();
+
   const { state, dispatch } = useTableReducer();
   const { dataRows, rowCount, selectedRecords } = state;
   const { getColumnData } = useColumns();
@@ -171,6 +171,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, setNextStepTool
       .put(`${sublease.api}/${subleaseData._id}/complete-sublease`)
       .then(() => {
         setIsCompleteing(false);
+        dispatch({ type: 'selection', selectedRecords: [] });
         fetchData();
         fetchRecords();
       })
@@ -349,14 +350,14 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, setNextStepTool
       <Grid item xs={12} md={12} sm={12}>
         {columns ? (
           <CustomReactTable
-            height={'calc(100vh - 200px)'}
+            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
             columns={columns}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             isClientSideGrid={false}
             refreshGrid={fetchData}
-            showOnlyShowFilteredRecordSwitch={true}
+            allowPagination={false}
           />
         ) : (
           <Box p={2} height={500}>
@@ -373,6 +374,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, setNextStepTool
           onClose={() => setShowTicketDialog({ open: false, data: {} })}
           onSuccess={() => {
             setShowTicketDialog({ open: false, data: {} });
+            dispatch({ type: 'selection', selectedRecords: [] });
             fetchRecords();
           }}
         />

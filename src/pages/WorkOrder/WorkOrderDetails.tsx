@@ -56,8 +56,6 @@ const WorkOrderDetails = () => {
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [locationKeys, setLocationKeys] = useState([]);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [statusOptions, setStatusOptions] = useState([]);
   const [completed, setCompleted] = useState(false);
 
   const [showConfirmBoxScrap, setShowConfirmBoxScrap] = useState(false);
@@ -121,12 +119,6 @@ const WorkOrderDetails = () => {
           }
         ];
         setWorkOrderFields(adjustedData);
-        adjustedData?.some((o) => {
-          if (o?.fieldData?.fieldName === 'status') {
-            setStatusOptions([...o.fieldData.option?.filter((e) => e.optionValue !== 'Deleted')]);
-            return true;
-          }
-        });
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -191,19 +183,6 @@ const WorkOrderDetails = () => {
       });
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
-
-  const handleStatusChange = (o) => {
-    if (o.optionValue && workOrderData?.status !== o.optionValue) {
-      updateJobStatus(o.optionValue);
-    }
-  };
 
   function a11yProps(index: any) {
     return {
@@ -305,7 +284,7 @@ const WorkOrderDetails = () => {
               <BiFoodMenu className="mr-1" fontSize="inherit" /> Products/Consumables
             </CustomTab>
           )}
-          {workOrderData?.type === WORK_ORDER_TYPE.productionOrder && (
+          {user?.user?.brandPolicy?.workOrderBom && (
             <CustomTab index={3} value={3} className={'tabLayout'} {...a11yProps(3)}>
               <BiFoodMenu className="mr-1" fontSize="inherit" /> BOM
             </CustomTab>
