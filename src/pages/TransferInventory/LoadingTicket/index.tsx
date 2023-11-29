@@ -1,12 +1,9 @@
-import { useState, useContext, useEffect, useReducer, Fragment } from 'react';
-import { useHistory, Link } from 'react-router-dom';
-import { Grid, Box, IconButton, Button } from '@material-ui/core';
-import { isMobile, isTablet } from 'react-device-detect';
+import { useState, useContext, useEffect, Fragment } from 'react';
+import { useHistory } from 'react-router-dom';
+import { Box, Button } from '@material-ui/core';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
-import { CommonRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import {
@@ -19,12 +16,12 @@ import {
   TRANSFER_INVENTORY_STATUS,
   sidebarResource
 } from 'src/constants/helpers';
-import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket';
 import ReceiveDialog from './ReceiveDialog';
 import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import PreviewDownload from 'src/components/PreviewDownload';
+import CustomReactTable, { useTableReducer, } from 'src/components/CustomReactTableNew';
 
 const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, updateStatus, canLoad, canReceive }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -33,10 +30,8 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
   const {
     state: { user }
   }: any = useData();
-
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, selectedRecords } = state;
 
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
   const [showConfirmBoxReceive, setShowConfirmBoxReceive] = useState(false);
@@ -75,80 +70,61 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
     productFields?.forEach((e) => {
       if (e?.fieldName === 'productName') {
         column.push({
-          field: 'productName',
+          accessor: 'productName',
           primaryField: true,
-          headerName: e?.fieldLabel,
+          Header: e?.fieldLabel,
           show: true,
           disabled: true,
-          cellRenderer: 'productNameRenderer'
+          Cell: ({ row }) => (<p className="link text-truncate" title={row.original?.productName} onClick={() => window.open(`${routes.productDetail.path}/${row.original?.productId}`)}>
+            {row.original?.productName}
+          </p>)
         });
       } else if (e?.fieldName === 'serializedProduct') {
-        column.push({ field: 'serializedProductShow', headerName: e?.fieldLabel, show: true, cellRenderer: 'commonRenderer' });
+        column.push({
+          accessor: 'serializedProductShow', Header: e?.fieldLabel, show: true,
+          Cell: ({ row }) => (row.original?.serializedProductShow ? row.original?.serializedProductShow : <NoDataCell />)
+        });
       } else {
-        column.push({ field: e?.fieldName, headerName: e?.fieldLabel, show: true, cellRenderer: 'commonRenderer' });
+        column.push({
+          accessor: e?.fieldName, Header: e?.fieldLabel, show: true,
+          Cell: ({ row }) => (row.original[e?.fieldName] ? row.original[e?.fieldName] : <NoDataCell />)
+        });
       }
     });
     const extracolumns = [
-      { field: 'qty', headerName: 'Qty', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-      { field: 'serialNumber', headerName: 'Serial Number', show: true, cellRenderer: 'serialNumberRenderer' },
-      { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'ticketRenderer' },
-      { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' }
+      {
+        accessor: 'qty', Header: 'Qty', show: true, disabled: true,
+        Cell: ({ row }) => (row.original?.qty ? row.original?.qty : <NoDataCell />)
+      },
+      {
+        accessor: 'serialNumber', Header: 'Serial Number', show: true,
+        Cell: ({ row }) => (row.original?.serialNumber?.length ? row.original?.serialNumber?.map((e) => e.serialNumber)?.toString() : <NoDataCell />)
+      },
+      {
+        accessor: 'loadingTicket', Header: 'Loading Ticket', show: true,
+        Cell: ({ row }) => (
+          row.original?.loadingTicket ? (
+            <p
+              className="link text-truncate"
+              title={row.original?.loadingTicket}
+              onClick={() => window.open(`${routes.deliveryTicketDetail.path}/${row.original?.loadingTicketId}`)}
+            >
+              {row.original?.loadingTicket}
+            </p>
+          ) : (
+            <NoDataCell />
+          )
+        )
+      },
+      {
+        accessor: 'status', Header: 'Status', show: true,
+        Cell: ({ row }) => (row.original?.status ? row.original?.status : <NoDataCell />)
+      }
     ];
     setColumns([...column, ...extracolumns]);
   };
 
-  const TicketRenderer = (params) =>
-    params?.value ? (
-      <p
-        className="link text-truncate"
-        title={params.value}
-        onClick={() => window.open(`${routes.deliveryTicketDetail.path}/${params.data.loadingTicketId}`)}
-      >
-        {params.value}
-      </p>
-    ) : (
-      <NoDataCell />
-    );
-
-  const WarehouseRenderer = (params) =>
-    params?.value ? (
-      <p
-        className="link text-truncate"
-        title={params.value}
-        onClick={() => window.open(`${routes.warehouseDetail.path}/${params.data?.warehouse?.optionValue}`)}
-      >
-        {params.value}
-      </p>
-    ) : (
-      <NoDataCell />
-    );
-
-  const InventoryRenderer = (params) => (
-    <Fragment>
-      <p
-        className="link text-truncate"
-        title={params.value}
-        onClick={() =>
-          window.open(
-            `${params.data.type === 'Asset' ? routes.serializedAssetDetail.path : routes.productDetail.path}/${params?.data?._id?.split('_')[0]}`
-          )
-        }
-      >
-        {params.value}
-      </p>
-    </Fragment>
-  );
-
-  const ProductNameRenderer = (params) => (
-    <p className="link text-truncate" title={params.value} onClick={() => window.open(`${routes.productDetail.path}/${params.data?.productId}`)}>
-      {params.value}
-    </p>
-  );
-
   const fetchProducts = async () => {
-    if (gridApi) {
-      gridApi.deselectAll();
-    }
     dispatch({ type: 'loading', loading: true });
     try {
       const {
@@ -225,18 +201,6 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
         dispatch({ type: 'loading', loading: false });
       }, gridLoadingTimeout);
     }
-  };
-
-  const SerialNumberRenderer = (params) =>
-    params?.data?.serialNumber?.length ? params?.data?.serialNumber?.map((e) => e.serialNumber)?.toString() : <NoDataCell />;
-
-  const frameworkComponents = {
-    serialNumberRenderer: SerialNumberRenderer,
-    ticketRenderer: TicketRenderer,
-    productNameRenderer: ProductNameRenderer,
-    inventoryRenderer: InventoryRenderer,
-    warehouseRenderer: WarehouseRenderer,
-    commonRenderer: CommonRenderer
   };
 
   const handleLoadingTicketDialog = () => {
@@ -362,22 +326,15 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
       </Box>
       <Box>
         {columns ? (
-          <CustomAgGrid
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
             columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameworkComponents}
-            setGridApi={setGridApi}
+            state={state}
             dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            allowAction={false}
-            loading={loading}
-            isClientSideGrid={true}
-            allowSelection={allowedToEdit || canReceive}
             renderedFrom={renderedFrom}
+            isClientSideGrid={false}
             refreshGrid={fetchProducts}
+            showOnlyShowFilteredRecordSwitch={true}
           />
         ) : (
           <Box p={2} height={500}>

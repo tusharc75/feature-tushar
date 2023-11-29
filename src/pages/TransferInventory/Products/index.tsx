@@ -1,14 +1,10 @@
-import React, { useReducer, useState, useEffect, useContext, Fragment } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Button, Box, IconButton } from '@material-ui/core';
-import { useHistory, Link } from 'react-router-dom';
+import { useHistory, } from 'react-router-dom';
 import routes from 'src/components/Helpers/Routes';
-import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import { CommonRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
-import CustomAgGrid, { reducer as gridReducer, intialState as gridState } from 'src/components/AgGridComponents/CustomAgGrid';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import { useData } from 'src/StateProvider/Provider';
 import AddInventory from './AddInventory';
 import AssignSerialNumber from './AssignSerialNumber';
@@ -20,7 +16,6 @@ import {
   DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_TYPE
 } from 'src/constants/helpers';
-import CustomAgGridEditable from 'src/components/AgGridComponents/CustomAgGridEditable';
 import DeleteIcon from '@material-ui/icons/Delete';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import AddBoxOutlinedIcon from '@material-ui/icons/AddBoxOutlined';
@@ -28,9 +23,12 @@ import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import ProductQtyDialog from './ProductQtyDialog';
+import { deleteDisable } from 'src/constants/messageHelpers';
+import CustomReactTable, { useTableReducer, } from 'src/components/CustomReactTableNew';
 
 const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToEdit, fetchTransferInventoryData, updateStatus }) => {
   const toastConfig = useContext(CustomToastContext);
+  const { state, dispatch } = useTableReducer();
   const {
     state: {
       user: { user },
@@ -41,9 +39,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [removeData, setRemoveData] = useState([]);
   const [openAddNewInventory, setAddInventoryDialog] = useState(false);
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(gridReducer, gridState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const { dataRows, selectedRecords } = state;
   const [isAdding, setIsAdding] = useState(false);
   const [columns, setColumns] = useState(null);
   const [viewProductEditDialog, setProductEditDialog] = useState({ open: false, productData: null });
@@ -51,10 +47,10 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
 
   const [assignNumber, setAssignNumber] = useState({ open: false, serialNumber: [], qty: 0, product: '' });
   useEffect(() => {
-    fetchFields();
+    fetchGridColumns();
   }, []);
 
-  const fetchFields = async () => {
+  const fetchGridColumns = async () => {
     const column = [];
     const {
       data: { data }
@@ -70,46 +66,124 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
     productFields?.forEach((e) => {
       if (e?.fieldName === 'productName') {
         column.push({
-          field: 'productName',
+          accessor: 'productName',
           primaryField: true,
-          headerName: e?.fieldLabel,
+          Header: e?.fieldLabel,
           show: true,
           disabled: true,
-          cellRenderer: 'productNameRenderer'
+          Cell: ({ row }) => (
+            <>
+              {row.original?.canDelete ?
+                <p
+                  className="link text-truncate"
+                  title={row.original?.productName}
+                  onClick={() => {
+                    setProductEditDialog({ open: true, productData: row.original });
+                  }}
+                >
+                  {row.original?.productName}
+                </p> : <p className="text-truncate">{row.original?.productName}</p>}
+              <Box ml={1}>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    window.open(`/product/detail/${row.original.product}`);
+                  }}
+                >
+                  <OpenInNewIcon fontSize="small" color="primary" />
+                </IconButton>
+              </Box>
+            </>
+          )
         });
       } else if (e?.fieldName === 'serializedProduct') {
-        column.push({ field: 'serializedProductShow', headerName: e?.fieldLabel, show: true, cellRenderer: 'commonRenderer' });
+        column.push({
+          accessor: 'serializedProductShow', Header: e?.fieldLabel, show: true,
+          Cell: ({ row }) => (row.original?.serializedProductShow ? row.original?.serializedProductShow : <NoDataCell />)
+        });
       } else {
-        column.push({ field: e?.fieldName, headerName: e?.fieldLabel, show: true, cellRenderer: 'commonRenderer' });
+        column.push({
+          accessor: e?.fieldName, Header: e?.fieldLabel, show: true,
+          Cell: ({ row }) => (row.original[e?.fieldName] ? row.original[e?.fieldName] : <NoDataCell />)
+        });
       }
     });
     column.push({
-      field: 'qty',
-      headerName: 'Quantity',
+      accessor: 'qty',
+      Header: 'Quantity',
       show: true,
       disabled: false,
-      cellRenderer: 'commonRenderer',
+      Cell: ({ row }) => (row.original?.qty ? row.original?.qty : <NoDataCell />),
       cellEditor: 'numericCellEditor',
       filter: false,
       sortable: false,
       editable: permissions?.transferInventory?.isUpdate
     });
     column.push({
-      field: 'inventory',
-      headerName: 'Inventory',
+      accessor: 'inventory',
+      Header: 'Inventory',
       show: true,
       filter: false,
       sortable: false,
-      cellRenderer: 'commonRenderer'
+      Cell: ({ row }) => (row.original?.inventory ? row.original?.inventory : <NoDataCell />),
     });
     column.push({
-      field: 'serialNumber',
-      headerName: 'Serial Number',
+      accessor: 'serialNumber',
+      Header: 'Serial Number',
       show: true,
-      cellRenderer: 'serialNumberRenderer'
+      Cell: ({ row }) => (row.original?.serialNumber?.length ? row.original?.serialNumber?.map((e) => e.serialNumber)?.toString() : <NoDataCell />)
     });
-    setColumns([...column]);
+    setColumns([...column, ActionRenderer]);
   };
+
+  const ActionRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 100,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) =>
+    (
+      <>
+        {row.original?.serializedProduct && (
+          <HtmlTooltip title={`Assign Serial Number`}>
+            <span>
+              <IconButton
+                onClick={() => {
+                  setAssignNumber({
+                    open: true,
+                    serialNumber: row.original?.serialNumber,
+                    qty: parseInt(row.original?.qty),
+                    product: row.original?.productId
+                  });
+                }}
+                size="small"
+                color="primary"
+              >
+                <AddBoxOutlinedIcon color="primary" fontSize="small" />
+              </IconButton>
+            </span>
+          </HtmlTooltip>
+        )}
+        <HtmlTooltip title={row.original?.canDelete ? "Delete" : deleteDisable}>
+          <IconButton
+            disabled={!row.original?.canDelete}
+            onClick={() => {
+              setShowConfirmBox(true);
+              setRemoveData([row.original?.productId]);
+            }}
+            size="small"
+            color="primary"
+          >
+            <DeleteIcon fontSize="small" color={row.original?.canDelete ? "error" : "disabled"} />
+          </IconButton>
+        </HtmlTooltip>
+      </>
+    )
+  }
 
   useEffect(() => {
     fetchProducts();
@@ -118,10 +192,6 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
   const fetchProducts = async () => {
     setNextStep(false);
     dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
-
     const {
       data: { data: deliveryTicketList }
     } = await axiosInstance().get(
@@ -217,78 +287,56 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
     }
   };
 
-  const ProductNameRenderer = (params) => (
-    <>
-      {params?.data?.canDelete ?
-        <p
-          className="link text-truncate"
-          title={params.value}
-          onClick={() => {
-            setProductEditDialog({ open: true, productData: params?.data });
-          }}
-        >
-          {params.value}
-        </p> : <p className="text-truncate">{params.value}</p>}
-      <Box ml={1}>
-        <IconButton
-          size="small"
-          onClick={() => {
-            window.open(`/product/detail/${params.data.product}`);
-          }}
-        >
-          <OpenInNewIcon fontSize="small" color="primary" />
-        </IconButton>
-      </Box>
-    </>
-  );
+  const onSaveEdit = (data, row) => {
+    if (!data || !data?.qty) return;
+    if (row.canDelete === false) {
+      toastConfig.setToastConfig({
+        type: 'error',
+        message: "Qty can't be updated",
+        open: true
+      });
+      fetchProducts();
+      return;
+    }
 
-  const SerialNumberRenderer = (params) =>
-    params?.data?.serialNumber?.length ? params?.data?.serialNumber?.map((e) => e.serialNumber)?.toString() : <NoDataCell />;
-
-  const ActionRenderer = (params) =>
-    params?.data?.canDelete ? (
-      <Fragment>
-        {params?.data?.serializedProduct && (
-          <Box pr={1}>
-            <HtmlTooltip title={`Assign Serial Number`}>
-              <IconButton
-                onClick={() => {
-                  setAssignNumber({
-                    open: true,
-                    serialNumber: params?.data?.serialNumber,
-                    qty: parseInt(params?.data?.qty),
-                    product: params?.data?.productId
-                  });
-                }}
-                size="small"
-                color="primary"
-              >
-                <AddBoxOutlinedIcon color="primary" fontSize="small" />
-              </IconButton>
-            </HtmlTooltip>
-          </Box>
-        )}
-        <IconButton
-          onClick={() => {
-            setShowConfirmBox(true);
-            setRemoveData([params.data.productId]);
-          }}
-          size="small"
-          color="primary"
-        >
-          <DeleteIcon color="error" fontSize="small" />
-        </IconButton>
-      </Fragment>
-    ) : null;
-
-  const frameworkComponents = {
-    serialNumberRenderer: SerialNumberRenderer,
-    commonRenderer: CommonRenderer,
-    productNameRenderer: ProductNameRenderer,
-    actionsRenderer: ActionRenderer
+    if (!Number(row?.qty) || Number(row?.qty) <= 0) {
+      toastConfig.setToastConfig({
+        type: 'error',
+        message: 'Please enter valid Qty.',
+        open: true
+      });
+      fetchProducts();
+      return;
+    }
+    if (Number(row.qty) > Number(row.inventory)) {
+      toastConfig.setToastConfig({
+        type: 'error',
+        message: "Qty can't be greater then inventory",
+        open: true
+      });
+      fetchProducts();
+      return;
+    }
+    if (row?.serialNumber?.length && Number(row.qty) < row?.serialNumber?.length) {
+      toastConfig.setToastConfig({
+        type: 'error',
+        message: "Qty can't be less then serial number assigned",
+        open: true
+      });
+      fetchProducts();
+      return;
+    }
+    const rows = dataRows;
+    rows?.forEach((d) => {
+      if (row?._id === d._id) {
+        d.qty = parseInt(data.qty);
+      }
+    });
+    updateQty(row._id, row.qty)
+    fetchProducts();
   };
 
-  const onCellValueChanged = ({ data }) => {
+  const qtyUpdate = ({ data }) => {
     if (!Number(data?.qty) || Number(data?.qty) <= 0) {
       toastConfig.setToastConfig({
         type: 'error',
@@ -379,25 +427,18 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
         </Box>
       )}
       <Box mt={1}>
-        {columns ? (<CustomAgGridEditable
-          columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameworkComponents}
-          setGridApi={setGridApi}
-          dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          allowAction={allowedToEdit}
-          actionWidth={120}
-          allowSelection={allowedToEdit}
-          isClientSideGrid={true}
-          loading={loading}
-          onCellValueChanged={onCellValueChanged}
-          renderedFrom={renderedFrom}
-          refreshGrid={fetchProducts}
-        />
+        {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            isClientSideGrid={false}
+            refreshGrid={fetchProducts}
+            showOnlyShowFilteredRecordSwitch={true}
+            onSaveEdit={onSaveEdit}
+          />
         ) : (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
@@ -411,7 +452,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
           onClose={() => {
             setProductEditDialog({ open: false, productData: null });
           }}
-          handleSave={onCellValueChanged}
+          handleSave={qtyUpdate}
         />
       )}
       {openAddNewInventory && transferInventoryData?.transferFromPlant?.optionValue && (
