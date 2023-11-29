@@ -7,12 +7,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import {
-  leadTimeMaster,
-  gridLoadingTimeout,
-  prepareDataForGrid,
-  sidebarResource
-} from '../../constants/helpers';
+import { leadTimeMaster, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import { camelCase } from 'lodash';
@@ -86,6 +81,7 @@ const LeadTimeMaster = () => {
     Header: 'Actions',
     minWidth: 100,
     width: 110,
+    maxWidth: 110,
     sticky: 'right',
     disableFilters: true,
     disableSortBy: true,
@@ -236,7 +232,9 @@ const LeadTimeMaster = () => {
           permissions={permissions?.leadTimeMaster}
           module={routes.leadTimeMaster.title}
           api={leadTimeMaster.api}
-          afterImportCompleted={() => { fetchData() }}
+          afterImportCompleted={() => {
+            fetchData();
+          }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}
@@ -250,8 +248,7 @@ const LeadTimeMaster = () => {
       <CustomContainer>
         <div className="header-panel">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className={'flex justify-between align-items-center gap-1 w-full'}>
-            </div>
+            <div className={'flex justify-between align-items-center gap-1 w-full'}></div>
             <div className="flex flex-wrap gap-[8px] justify-end">
               <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
               <div className="flex gap-[8px] flex-wrap items-center">
@@ -267,7 +264,8 @@ const LeadTimeMaster = () => {
                     startIcon={<AddOutlined />}
                   >
                     Add
-                  </Button>)}
+                  </Button>
+                )}
                 {permissions?.leadTimeMaster?.isDelete && (
                   <>
                     <Button
@@ -331,9 +329,11 @@ const LeadTimeMaster = () => {
             showFilters={true}
             resource={sidebarResource.leadTimeMaster}
           />
-        ) : <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>}
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
       </CustomContainer>
       {showDeleteConfirmBox && (
         <ConfirmationDialog
