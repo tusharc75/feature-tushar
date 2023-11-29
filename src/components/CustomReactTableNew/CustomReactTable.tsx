@@ -417,7 +417,7 @@ function CustomReactTable({
 
     let hiddenCols = [];
     if (storedColumns) {
-      hiddenCols = storedColumns.filter((f) => f.isVisible === false).map((m) => m.id);
+      hiddenCols = storedColumns.filter((f) => f.isVisible === false || f.show === false).map((m) => m.id);
     }
     return hiddenCols;
   };

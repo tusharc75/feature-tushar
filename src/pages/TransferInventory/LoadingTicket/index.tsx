@@ -74,34 +74,53 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
           Header: e?.fieldLabel,
           show: true,
           disabled: true,
-          Cell: ({ row }) => (<p className="link text-truncate" title={row.original?.productName} onClick={() => window.open(`${routes.productDetail.path}/${row.original?.productId}`)}>
-            {row.original?.productName}
-          </p>)
+          Cell: ({ row }) => (
+            <div>
+              <p
+                className="link text-truncate"
+                title={row.original?.productName}
+                onClick={() => window.open(`${routes.productDetail.path}/${row.original?.productId}`)}
+              >
+                {row.original?.productName}
+              </p>
+            </div>
+          )
         });
       } else if (e?.fieldName === 'serializedProduct') {
         column.push({
-          accessor: 'serializedProductShow', Header: e?.fieldLabel, show: true,
-          Cell: ({ row }) => (row.original?.serializedProductShow ? row.original?.serializedProductShow : <NoDataCell />)
+          accessor: 'serializedProductShow',
+          Header: e?.fieldLabel,
+          show: true,
+          Cell: ({ row }) => (row.original?.serializedProductShow ? <div>{row.original?.serializedProductShow}</div> : <NoDataCell />)
         });
       } else {
         column.push({
-          accessor: e?.fieldName, Header: e?.fieldLabel, show: true,
+          accessor: e?.fieldName,
+          Header: e?.fieldLabel,
+          show: true,
           Cell: ({ row }) => (row.original[e?.fieldName] ? row.original[e?.fieldName] : <NoDataCell />)
         });
       }
     });
     const extracolumns = [
       {
-        accessor: 'qty', Header: 'Qty', show: true, disabled: true,
+        accessor: 'qty',
+        Header: 'Qty',
+        show: true,
+        disabled: true,
         Cell: ({ row }) => (row.original?.qty ? row.original?.qty : <NoDataCell />)
       },
       {
-        accessor: 'serialNumber', Header: 'Serial Number', show: true,
+        accessor: 'serialNumber',
+        Header: 'Serial Number',
+        show: true,
         Cell: ({ row }) => (row.original?.serialNumber?.length ? row.original?.serialNumber?.map((e) => e.serialNumber)?.toString() : <NoDataCell />)
       },
       {
-        accessor: 'loadingTicket', Header: 'Loading Ticket', show: true,
-        Cell: ({ row }) => (
+        accessor: 'loadingTicket',
+        Header: 'Loading Ticket',
+        show: true,
+        Cell: ({ row }) =>
           row.original?.loadingTicket ? (
             <p
               className="link text-truncate"
@@ -113,10 +132,11 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
           ) : (
             <NoDataCell />
           )
-        )
       },
       {
-        accessor: 'status', Header: 'Status', show: true,
+        accessor: 'status',
+        Header: 'Status',
+        show: true,
         Cell: ({ row }) => (row.original?.status ? row.original?.status : <NoDataCell />)
       }
     ];
