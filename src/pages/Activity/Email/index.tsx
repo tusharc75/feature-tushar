@@ -1,37 +1,41 @@
 import { useState, useEffect, useContext, useReducer } from 'react';
-import { SearchFilter } from '../../../components/Activity/Report/SearchFilter';
 import { useHistory } from 'react-router-dom';
 import queryString from 'query-string';
 import { GetReferenceName, GetEmails } from '../../../axios/activity';
 import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
 import { useData } from '../../../StateProvider/Provider';
 import CustomContainer from '../../../components/CustomContainer';
-import { Button, MenuItem, Menu, Typography, Tooltip, IconButton, TextField, Chip, Link } from '@material-ui/core';
+import { Button, MenuItem, Menu, IconButton, TextField, Chip, Box } from '@material-ui/core';
 import { ExpandMore } from '@material-ui/icons';
 import axiosInstance from '../../../axios/axiosInstance';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import MessageDialog from '../../../components/Helpers/MessageDialog';
 import { Delete as DeleteIcon } from '@material-ui/icons';
-import reactHtmlparser, { convertNodeToElement } from 'react-html-parser';
-import { HiOutlineMail } from 'react-icons/hi';
+import { convertNodeToElement } from 'react-html-parser';
 import Dialog from '@material-ui/core/Dialog';
 import { CreateEmail } from '../../../components/Activity/Email/CreateEmail';
 import { isObjectEmpty, sidebarResource } from '../../../constants/helpers';
-import emailStyles from './email.module.scss';
+
 import './email.scss';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from '../../../constants/helpers';
-import CustomAgGrid, { reducer, intialState } from '../../../components/AgGridComponents/CustomAgGrid';
 import { AddOutlined } from '@material-ui/icons';
 import { displayDate } from '../../../constants/helpers';
 import routes from '../../../components/Helpers/Routes';
-import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
 import { Autocomplete } from '@material-ui/lab';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { get_activity_resource } from '../../../components/Activity/Helpers/utils';
 import { ViewEmail } from 'src/components/Activity/Email/ViewEmail';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { deleteDisable } from 'src/constants/messageHelpers';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import { camelCase } from 'lodash';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import styles from '../../Leads/Header.module.scss';
+
 
 const tabs = {
   Inbox: 1,
@@ -39,6 +43,8 @@ const tabs = {
 };
 
 const Email = () => {
+  const renderedFrom = camelCase(routes?.activityEmail.title);
+  const { state, dispatch } = useTableReducer();
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
@@ -48,8 +54,6 @@ const Email = () => {
   const { referenceType, referenceId } = parsed;
 
   const [filter, setFilter] = useState(null);
-  const [inboxEmails, setInboxEmails] = useState([]);
-  const [sentEmails, setSentEmails] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
@@ -60,52 +64,14 @@ const Email = () => {
   const [emailId, setEmailId] = useState(null);
   const [currentTab, setCurrentTab] = useState(1);
   const [emailUsersOptions, setEmailUsersOptions] = useState([]);
-
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
-
+  const { page, limit, search, filters, sorting, selectedRecords } = state;
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [fullScreenViewEmail, setFullScreenViewEmail] = useState(true);
-  const localStorageSelectedRecords = 'emailPage_selected';
   const [resource, setResource] = useState(null);
   const [resourceData, setResourceData] = useState(null);
   const [loadingResources, setLoadingResources] = useState(false);
   const [selectedResourceData, setSelectedResourceData] = useState(null);
-
-  const [columns] = useState([
-    {
-      field: 'subject',
-      headerName: 'Subject',
-      show: true,
-      primaryField: true,
-      cellRenderer: 'subjectRenderer'
-    },
-    {
-      field: 'to',
-      headerName: 'Recipient',
-      show: true,
-      disabled: true,
-      cellRenderer: 'recipentRenderer'
-    },
-    {
-      field: 'relatedTo',
-      headerName: 'Related To',
-      show: true,
-      disabled: true,
-      filter: false,
-      sortable: false,
-      cellRenderer: 'referenceRenderer'
-    },
-    {
-      field: 'createdBy',
-      headerName: 'Created By',
-      show: true,
-      filter: false,
-      sortable: false,
-      cellRenderer: 'createdByRenderer'
-    }
-  ]);
+  const [columns, setColumns] = useState(null);
 
   const [resourceOptions, setResourceOptions] = useState([]);
 
@@ -114,6 +80,7 @@ const Email = () => {
   }, []);
 
   useEffect(() => {
+    fetchGridColumns();
     fetchUsersEmails();
   }, []);
 
@@ -133,9 +100,113 @@ const Email = () => {
 
   useEffect(() => {
     if (filter) {
-      fetchEmails();
+      fetchData();
     }
   }, [page, limit, filters, filter, sorting]);
+
+  const fetchGridColumns = () => {
+    const column = [
+      {
+        accessor: 'subject',
+        Header: 'Subject',
+        show: true,
+        primaryField: true,
+        Cell: ({ row }) => (
+          <span
+            className="link cursor-pointer"
+            onClick={(e) => {
+              if (permissions?.email?.isUpdate) {
+                setOpenViewEmail(true);
+                setEmailId(row.original.id);
+              }
+            }}
+          >
+            <p> {row.original?.subject ?? '(no subject) '} </p>
+          </span>
+        )
+      },
+      {
+        accessor: 'to',
+        Header: 'Recipient',
+        show: true,
+        disabled: true,
+        Cell: ({ row }) => (
+          <span>
+            {typeof row.original?.to === 'string' ? (
+              <span> {row.original?.to}</span>
+            ) : (
+              <span>{getToEmailList(row.original?.to)}</span>
+            )}
+          </span>
+        )
+      },
+      {
+        accessor: 'relatedTo',
+        Header: 'Related To',
+        show: true,
+        disabled: true,
+        filter: false,
+        sortable: false,
+        Cell: ({ row }) => (
+          <>
+            {row.original?.relatedTo && row.original?.relatedTo?.length > 0 ? (
+              row.original?.relatedTo.map((d) => {
+                return (
+                  <div style={{ display: 'flex', alignItems: 'center' }} key={d.name}>
+                    <p>
+                      {d?.name}
+                    </p>
+                    <IconButton className="ml-3" size="small" onClick={() => redirectToResource(d?.type, d?.referenceId)}>
+                      <OpenInNewIcon fontSize="small" color="primary" />
+                    </IconButton>
+                    <Chip className="ml-3" color="primary" label={`${routes[d?.type]?.title}`} />
+                  </div>
+                );
+              })
+            ) : (
+              <NoDataCell />
+            )}
+          </>
+        )
+      },
+      {
+        accessor: 'createdBy',
+        Header: 'Created By',
+        show: true,
+        filter: false,
+        sortable: false,
+        Cell: ({ row }) => (
+          <p>
+            {row.original?.createdByUser?.concatedName}
+            <span className="createdAtTime badge-date">{displayDate(row.original?.createdByDate)}</span>
+          </p>
+        )
+      }
+    ];
+    setColumns([...column, ActionsRenderer]);
+  }
+
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 110,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <HtmlTooltip title={permissions.email.isDelete ? "Delete" : deleteDisable}>
+        <span>
+          <IconButton
+            disabled={!permissions.email.isDelete}
+            size="small" aria-label="Delete" onClick={() => showConfirmBox(row.original)}>
+            <DeleteIcon fontSize="small" color={permissions.email.isDelete ? "error" : "disabled"} />
+          </IconButton>
+        </span>
+      </HtmlTooltip>
+    )
+  };
 
   useEffect(() => {
     if (resource && resource?.optionValue) {
@@ -162,13 +233,9 @@ const Email = () => {
     window.open(type === 'quote' ? `${routes['quoteBuilder'].path}/detail/${id}` : `${routes[type].path}/detail/${id}`);
   };
 
-  const fetchEmails = async () => {
+  const fetchData = async () => {
     const queryString = getQueryString();
     dispatch({ type: 'loading', loading: true });
-
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
     await GetEmails(JSON.stringify(filter), queryString)
       .then(({ data, count }) => {
         let inboxEmailsData = [],
@@ -191,9 +258,6 @@ const Email = () => {
           data: currentTab === tabs.Inbox ? inboxEmailsData : sentEmails,
           count: currentTab === tabs.Inbox ? inboxEmailsData.length : sentEmails.length
         });
-        setSentEmails(sentEmails);
-        setInboxEmails(inboxEmailsData);
-
         dispatch({ type: 'loading', loading: false });
       })
       .catch((error) => {
@@ -217,87 +281,6 @@ const Email = () => {
       return convertNodeToElement(node, index, transform);
     }
   };
-
-  const ActionsRenderer = (params) => (
-    <>
-      {permissions.email.isDelete ? (
-        <Tooltip title="Delete">
-          <IconButton size="small" aria-label="Delete" onClick={() => showConfirmBox(params.data)}>
-            <DeleteIcon fontSize="small" color="error" />
-          </IconButton>
-        </Tooltip>
-      ) : (
-        <Tooltip className="cursor-stop" title="You don't have the permissions to delete">
-          <IconButton size="small" aria-label="Delete">
-            <DeleteIcon fontSize="small" color="disabled" />
-          </IconButton>
-        </Tooltip>
-      )}
-    </>
-  );
-
-  const RecipentRenderer = (params) => (
-    <span>
-      {typeof params.data.to === 'string' ? (
-        <span> {params.data.to}</span>
-      ) : (
-        <span>{getToEmailList(params.data.to)}</span>
-      )}
-    </span>
-  );
-
-  const SubjectRenderer = (params) => (
-    <span
-      className="link cursor-pointer"
-      onClick={(e) => {
-        if (permissions?.email?.isUpdate) {
-          setOpenViewEmail(true);
-          setEmailId(params.data.id);
-        }
-      }}
-    >
-      <p> {params.data?.subject ?? '(no subject) '} </p>
-    </span>
-  );
-
-
-  const ReferenceRenderer = (params) => (
-    <>
-      {params.value && params.value?.length > 0 ? (
-        params.value.map((d) => {
-          return (
-            <div style={{ display: 'flex', alignItems: 'center' }} key={d.name}>
-              <p>
-                {d?.name}
-              </p>
-              <IconButton className="ml-3" size="small" onClick={() => redirectToResource(d?.type, d?.referenceId)}>
-                <OpenInNewIcon fontSize="small" color="primary" />
-              </IconButton>
-              <Chip className="ml-3" color="primary" label={`${routes[d?.type]?.title}`} />
-            </div>
-          );
-        })
-      ) : (
-        <NoDataCell />
-      )}
-    </>
-  );
-
-  const CreatedByRenderer = (params) => (
-    <p>
-      {params?.data?.createdByUser?.concatedName}
-      <span className="createdAtTime badge-date">{displayDate(params?.data?.createdByDate)}</span>
-    </p>
-  )
-
-  const frameworkComponents = {
-    recipentRenderer: RecipentRenderer,
-    referenceRenderer: ReferenceRenderer,
-    subjectRenderer: SubjectRenderer,
-    createdByRenderer: CreatedByRenderer,
-    actionsRenderer: ActionsRenderer
-  };
-
   const getQueryString = () => {
     let deepFilter = `&page=${page}&limit=${limit}`;
 
@@ -371,12 +354,13 @@ const Email = () => {
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
-            message: 'Email deleted successfully'
+            message: data.message
           });
+          dispatch({ type: 'selection', selectedRecords: [] });
           setIsConformDialogVisible(false);
           setDeleteLoading(false);
-          if (deleteRecord) setDeleteRecord({});
-          fetchEmails();
+          setDeleteRecord(null);
+          fetchData();
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -396,15 +380,6 @@ const Email = () => {
     setOpenViewEmail(false);
   };
 
-  const handleTab = (e, currentTab) => {
-    dispatch({
-      type: 'initialize',
-      data: currentTab === tabs.Sent ? sentEmails : inboxEmails,
-      count: currentTab === tabs.Sent ? sentEmails.length : inboxEmails.length
-    });
-    setCurrentTab(currentTab);
-  };
-
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -414,9 +389,8 @@ const Email = () => {
       <CustomContainer>
         {filter && (
           <div className="header-panel">
-            <div className="grid grid-cols-1 lg:grid-cols-[4fr_3fr] gap-4">
-              <div className={'d-flex flex-wrap items-start gap-2 content-start'}>
-                <HiOutlineMail className="headerLogo" /> <span className="listingHeader">{routes.activityEmail.title}</span>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className={'flex justify-between align-items-center gap-1 w-full'}>
                 <Autocomplete
                   fullWidth
                   options={resourceOptions}
@@ -477,109 +451,79 @@ const Email = () => {
                   />
                 )}
               </div>
-              <div className="flex flex-wrap gap-[8px]  justify-end items-start">
-                <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'large' }} activityName="email" />
+              <div className="flex flex-wrap gap-[8px] justify-end">
+                <SearchBox onChange={handleChangeFilter} className={styles.search_box_input} value={search} size="small" />
                 <div className="flex gap-[8px] flex-wrap items-center">
-                  {
-                    <Button
-                      variant={'contained'}
-                      color="primary"
-                      size="small"
-                      onClick={() => {
-                        setOpen(true);
-                      }}
-                      className={`no-shadow`}
-                      startIcon={<AddOutlined />}
-                    >
-                      Add
-                    </Button>
-                  }
-                  {/* </Box> */}
                   <Button
-                    variant={'outlined'}
-                    color="default"
+                    variant={'contained'}
+                    color="primary"
                     size="small"
-                    onClick={openActions}
-                    aria-controls="action-menu"
-                    disabled={selectedRecords.length > 0 ? false : true}
-                    className={`new-dropdown-v1`}
-                    endIcon={<ExpandMore />}
-                  >
-                    Actions
-                  </Button>
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
+                    className={`no-shadow`}
+                    onClick={() => {
+                      setOpen(true);
                     }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
+                    startIcon={<AddOutlined />}
                   >
-                    <MenuItem
-                      onClick={() => {
-                        showConfirmBox(null);
-                        closeActions();
-                      }}
-                      disabled={!permissions?.email?.isDelete}
-                    >
-                      Delete
-                    </MenuItem>
-                  </Menu>
+                    Add
+                  </Button>
+                  {permissions.email?.isDelete && (
+                    <>
+                      <Button
+                        variant={'outlined'}
+                        color="default"
+                        size="small"
+                        onClick={openActions}
+                        className={`new-dropdown-v1`}
+                        aria-controls="action-menu"
+                        endIcon={<ExpandMore />}
+                        disabled={selectedRecords?.length ? false : true}
+                      >
+                        Actions
+                      </Button>
+                      <Menu
+                        anchorEl={anchorEl}
+                        keepMounted
+                        getContentAnchorEl={null}
+                        anchorOrigin={{
+                          vertical: 'bottom',
+                          horizontal: 'left'
+                        }}
+                        id="action-menu"
+                        open={Boolean(anchorEl)}
+                        onClose={closeActions}
+                      >
+                        <MenuItem
+                          onClick={() => {
+                            showConfirmBox(null);
+                            closeActions();
+                          }}
+                        >
+                          {`Delete (${selectedRecords?.length})`}
+                        </MenuItem>
+                      </Menu>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
           </div>
+
         )}
-        {isMobile && !isTablet ? (
-          <CustomSwipableList
-            allowSelection={true}
-            allowSwipe={true}
-            permissions={permissions.note}
-            primaryField={columns?.find((d) => d.primaryField)}
-            onClick={(data) => {
-              if (permissions?.email?.isUpdate) {
-                setOpen(true);
-                setEmailId(data.id);
-              }
-            }}
-            dataRows={dataRows}
-            selectedRecords={selectedRecords}
-            dispatch={dispatch}
-            onEdit={false}
-            extraParamsToCheckDelete={true}
-            onDelete={(data) => {
-              showConfirmBox(data);
-            }}
-            rowCount={rowCount}
-            page={page}
-            loading={loading}
-            onCreate={false}
-            showClone={false}
-            onClone={false}
-            renderedFrom={'emailPage'}
-            chips={false}
-          />
-        ) : (
-          <CustomAgGrid
+        {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
             columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameworkComponents}
-            setGridApi={setGridApi}
+            state={state}
             dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            actionWidth={150}
-            loading={loading}
-            renderedFrom="emailPage"
-            refreshGrid={fetchEmails}
+            renderedFrom={renderedFrom}
+            isClientSideGrid={false}
+            refreshGrid={fetchData}
+            showOnlyShowFilteredRecordSwitch={true}
+            showFilters={false}
           />
-        )}
+        ) : <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>}
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
             open={showDeleteWarningConfirmBox}
@@ -620,7 +564,7 @@ const Email = () => {
                 handleClose();
                 setFullScreen(false);
               }}
-              fetchData={fetchEmails}
+              fetchData={fetchData}
               relatedTo={[
                 {
                   type: resource && selectedResourceData ? resource.optionValue : 'user',
@@ -657,7 +601,7 @@ const Email = () => {
               handleClose={() => {
                 handleCloseViewEmail();
               }}
-              fetchData={fetchEmails}
+              fetchData={fetchData}
               relatedTo={[
                 {
                   type: resource && selectedResourceData ? resource.optionValue : 'user',
