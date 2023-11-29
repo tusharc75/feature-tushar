@@ -91,7 +91,6 @@ const AssignProductDialog = ({
         if (hideQty) {
           setColumns([...columns]);
         } else {
-          console.log('ccccccccccc', columns)
           setColumns([...defaultColumns, ...columns]);
         }
       });
