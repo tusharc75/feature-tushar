@@ -52,7 +52,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
   const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: '', parentId: null });
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
-  const [allFields, setAllFields] = useState([]);
+  const [allFields, setAllFields] = useState(null);
   const [isRateRequired, setIsRateRequired] = useState(false);
   const [addchildDialog, setAddchildDialog] = useState({ open: false, parentId: null, top: null, bottom: null });
   const [showConfirmationDialog, setShowConfirmationDialog] = useState({ open: false, data: null });
@@ -69,7 +69,9 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
   }, []);
 
   useEffect(() => {
-    generateColumns();
+    if (allFields) {
+      generateColumns();
+    }
   }, [allFields, allowedToEdit, quotationApproved]);
 
   const fetchFields = async () => {
