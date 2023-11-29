@@ -1,31 +1,28 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
+import { useState, useEffect, useContext, Fragment } from 'react';
 import Grid from '@material-ui/core/Grid';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
-import { Box, CircularProgress, IconButton, TextField } from '@material-ui/core';
+import { Box, IconButton, TextField } from '@material-ui/core';
 import routes from '../../components/Helpers/Routes';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 import {
   serializedAssetsCertification,
   serializedAsset,
   gridLoadingTimeout,
   ASSET_STATUS,
   COLOUR_MASTER,
-  getLocalStorageArrayData,
   sidebarResource,
   dateFormatForInputControl
 } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { useData } from '../../StateProvider/Provider';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
-import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
 import { prepareDataForGrid } from '../../constants/helpers';
 import { camelCase } from 'lodash';
 import moment from 'moment';
 import IssueCertificateDialog from './IssueCertificateDialog';
 import CertificateHistoryDialog from './CertificateHistoryDialog';
-import { isMobile, isTablet } from 'react-device-detect';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import NoteAddIcon from '@material-ui/icons/NoteAdd';
@@ -34,19 +31,16 @@ import { Autocomplete } from '@material-ui/lab';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
 
+let searchTimeout;
 const SerializedAssetsCertification = () => {
   const renderedFrom = camelCase(routes?.serializedAssetsCertification.title);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
-
   const toastConfig = useContext(CustomToastContext);
   const [issueCertificateDialog, setIssueCertificateDialog] = useState({ open: false, id: null, certificateExpiryDate: null });
   const [certificateHistoryDialog, setCertificateHistoryDialog] = useState({ open: false, id: null });
-  const [gridApi, setGridApi] = useState(null);
   const [columns, setColumns] = useState(null);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
-    state;
+  const { state, dispatch } = useTableReducer();
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { getColumnData } = useColumns();
 
   const [assetOptions, setAssetOptions] = useState([]);
   const [selectedAsset, setSelectedAsset] = useState(null);
@@ -64,11 +58,20 @@ const SerializedAssetsCertification = () => {
   const {
     state: { permissions, user, selectedEntity }
   }: any = useData();
-  const { getColumnData } = useColumns();
 
   useEffect(() => {
     fetchGridColumns();
   }, []);
+
+  useEffect(() => {
+    let millisec = Object.keys(search).length > 0 ? 600 : 5;
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+    searchTimeout = setTimeout(() => {
+      fetchData();
+    }, millisec);
+  }, [search]);
 
   const fetchAssetsOption = () => {
     axiosInstance()
@@ -88,86 +91,56 @@ const SerializedAssetsCertification = () => {
 
   useEffect(() => {
     fetchData();
-  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, issueDuration, expireDuration, selectedEntity, selectedAsset]);
+  }, [page, limit, filters, sorting, showFilteredRecordsOnly, issueDuration, expireDuration, selectedEntity, selectedAsset]);
 
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get(`/field?resource=${serializedAsset.resource}`)
-      .then(({ data: { data } }) => {
-        let columns = [];
-        let rendererNames = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName);
-            }
-          }
-        });
-        columns?.forEach((e) => {
-          if (e.field === 'assetNumber') {
-            e.cellRenderer = 'assetNumberRenderer';
-          }
-        });
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent,
-          assetNumberRenderer: AssetNumberRenderer,
-          actionsRenderer: ActionsRenderer
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
-        columns = [...columns, ...getStaticFields()];
-        setColumns([...columns]);
-      });
+  const fetchGridColumns = async () => {
+    let data;
+    const response = await axiosInstance().get(`/field?resource=${serializedAsset.resource}`);
+    data = response?.data?.data;
+    let columns = [];
+    data.forEach((o) => {
+      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path, true);
+      if (currentColumn !== null) {
+        columns = [...columns, currentColumn?.columnData];
+      }
+      return o?.fieldData;
+    });
+    columns = [...columns, ...getStaticFields(), ActionsRenderer];
+    setColumns(columns);
   };
 
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
     const queryString = getQueryString();
     axiosInstance()
       .get(`${serializedAssetsCertification.api}${queryString}`)
       .then(({ data }) => {
-        let rows = data.data?.map((u, user) => {
-          let finalObject = prepareDataForGrid(u);
+        let rows = data?.data?.map((u, user) => {
+          let finalObject = prepareDataForGrid(u,user);
           const dateToQuery = moment().add(30, 'days').toDate();
           const certificateExpiryDate = u.certificateExpiryDate ? moment(u.certificateExpiryDate).toDate() : null;
           finalObject['canIssueCertificate'] = !certificateExpiryDate || certificateExpiryDate <= dateToQuery;
-          finalObject['isChecked'] = [...getLocalStorageArrayData(localStorageSelectedRecords)].some((s) => s._id === u._id);
-          return {
-            ...finalObject
-          };
+          finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
+          return finalObject;
         });
-        if (appendRows) {
-          dispatch({
-            type: 'initialize',
-            data: [...dataRows, ...rows],
-            count: data.data.count,
-            selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
-          });
-        } else {
-          dispatch({
-            type: 'initialize',
-            data: rows,
-            count: data.count,
-            selectedRecords: rows.filter((f) => f.isChecked === true)
-          });
-        }
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
+        dispatch({ type: 'initialize', data: rows, count: rows?.length });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
         dispatch({ type: 'loading', loading: false });
+      })
+      .finally(() => {
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
       });
   };
 
-  const getQueryString = () => {
+  const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
+    if (isExport) {
+      deepFilter = `?`;
+    }
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
@@ -216,22 +189,24 @@ const SerializedAssetsCertification = () => {
     }
 
     if (showFilteredRecordsOnly) {
-      const savedRecords = [...getLocalStorageArrayData(localStorageSelectedRecords)];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
     }
 
     return deepFilter;
   };
 
-  const AssetNumberRenderer = (params) => (
-    <Fragment>
-      <p className="text-truncate">{params.value}</p>
-    </Fragment>
-  );
-
-  const ActionsRenderer = (params) => (
-    <>
-      {params?.data?.canIssueCertificate && (
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 100,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        {row?.original?.canIssueCertificate && (
         <HtmlTooltip title="Attach Certificate">
           <IconButton
             size="small"
@@ -239,8 +214,8 @@ const SerializedAssetsCertification = () => {
             onClick={() => {
               setIssueCertificateDialog({
                 open: true,
-                id: params?.data?._id,
-                certificateExpiryDate: params?.data?.certificateExpiryDate || null
+                id: row?.original?._id,
+                certificateExpiryDate: row?.original?.certificateExpiryDate || null
               });
             }}
           >
@@ -253,14 +228,15 @@ const SerializedAssetsCertification = () => {
           size="small"
           aria-label="View"
           onClick={() => {
-            setCertificateHistoryDialog({ open: true, id: params?.data?._id });
+            setCertificateHistoryDialog({ open: true, id: row?.original?._id });
           }}
         >
           <HistoryIcon color="primary" />
         </IconButton>
       </HtmlTooltip>
-    </>
-  );
+      </>
+    )
+  };
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
@@ -385,32 +361,21 @@ const SerializedAssetsCertification = () => {
           </div>
         </div>
         {columns ? (
-          Object.keys(frameWorkComponent).length > 0 && columns ? (
-            <CustomAgGrid
-              columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameWorkComponent}
-              setGridApi={setGridApi}
-              dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              actionWidth={150}
-              loading={loading}
-              renderedFrom={renderedFrom}
-              refreshGrid={fetchData}
-              showOnlyShowFilteredRecordSwitch={false}
-              showFilters={true}
-              resource={sidebarResource.serializedAsset}
-              allowSelection={false}
-            />
-          ) : null
-        ) : (
-          <Box p={2} height={500}>
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Box>
-        )}
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            isClientSideGrid={false}
+            refreshGrid={fetchData}
+            showOnlyShowFilteredRecordSwitch={false}
+            showFilters={true}
+            resource={sidebarResource.serializedAsset}
+          />
+        ) : <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>}
       </div>
       {issueCertificateDialog?.open && (
         <IssueCertificateDialog
