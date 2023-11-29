@@ -7,7 +7,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import { Image } from '@material-ui/icons';
 
 const NewChat = (props) => {
-  const { setNewChat, setSelectedChat, users, userId } = props;
+  const { setNewChat, setSelectedChat, users, userId, setChatOpen } = props;
   const { setToastConfig } = useContext(CustomToastContext);
 
   const [newUsers, setNewUsers] = useState([]);
@@ -34,7 +34,9 @@ const NewChat = (props) => {
                 .map((_d) => `${_d.firstName} ${_d.lastName}`)
                 .join(', ')
         };
-
+        if (setChatOpen) {
+          setChatOpen(true);
+        }
         setSelectedChat(chatData);
       })
       .catch((err) => {

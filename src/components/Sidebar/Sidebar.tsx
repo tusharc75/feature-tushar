@@ -16,6 +16,7 @@ import useStyles from './style';
 import { TResource, TSidebarItem, TSidebarSection } from './type';
 import { isSectionActive, isSectionVisible, staticSidebarData } from './utils';
 import { useStore, SIDEBAR_OPEN, SIDEBAR_OPENED_BY_BUTTON } from 'src/StateProvider/fastContext';
+import { BsChatLeftTextFill } from 'react-icons/bs';
 
 function SideBar({ location }) {
   const [itemToAddActiveClass, setItemToAddActiveClass] = useState(NaN);
@@ -71,7 +72,14 @@ function SideBar({ location }) {
         entitySidebarData = user.entity.find((curEntity) => curEntity._id === selectedEntity)?.resource || [];
       }
 
-      for (const item of [...entitySidebarData, ...userSidebarData]) {
+      let dataList = [];
+      if (entitySidebarData) {
+        dataList = [...dataList, ...entitySidebarData];
+      }
+      if (userSidebarData) {
+        dataList = [...dataList, ...userSidebarData];
+      }
+      for (const item of dataList) {
         if (!isSectionVisible(item)) continue;
         const isSectionExist = sections.map((s) => s.sectionName).includes(item.sectionName);
         const itemWithLink: TSidebarItem = { ...item, link: handleRoutes(item) };
