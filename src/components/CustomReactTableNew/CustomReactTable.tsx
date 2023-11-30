@@ -368,7 +368,7 @@ function CustomReactTable({
               ),
               Cell: ({ row }) => (
                 <div className="mx-auto text-center  justify-center">
-                  <IndeterminateCheckbox onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps()} />
+                  {row.original.hideSelection ? <></> : <IndeterminateCheckbox onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps()} />}
                 </div>
               )
             },
@@ -392,7 +392,7 @@ function CustomReactTable({
               ),
               Cell: ({ row }) => (
                 <div className="mx-auto text-center justify-center">
-                  <IndeterminateCheckbox onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps()} />
+                  {row.original.hideSelection ? <></> : <IndeterminateCheckbox onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps()} />}
                 </div>
               )
             },

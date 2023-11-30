@@ -81,6 +81,7 @@ const AddExistingProduct = (props) => {
     }
   }, [page, limit, filters, sorting, search, productColoums, productCategory, productTemplate, showFilteredRecordsOnly]);
 
+
   useEffect(() => {
     axiosInstance()
       .get('/field?resource=Product&view=true')
