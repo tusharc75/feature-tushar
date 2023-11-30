@@ -140,7 +140,7 @@ function TempFilter({ filterValue, id, setFilters, customFilters }) {
   );
 }
 
-function DefaultColumnFilter({ column: { filterValue, setFilter } }) {
+function DefaultColumnFilter({ column: { filterValue, setFilter, filter } }) {
   const [isOpen, setIsOpen] = useState(false);
   const ref = React.useRef(null);
   const inputRef = React.useRef(null);
@@ -176,7 +176,7 @@ function DefaultColumnFilter({ column: { filterValue, setFilter } }) {
             setFilter(e.target.value || undefined); // Set undefined to remove the filter entirely
           }}
           autoComplete="off"
-          placeholder="Search..."
+          placeholder={`Search ${filter ? filter : ''}...`}
           type="text"
           id="search"
           aria-hidden={!isOpen}
@@ -261,18 +261,20 @@ function CustomReactTable({
 
   useEffect(() => {
     let timer;
-    if (searchQuery) {
-      timer = setTimeout(() => {
-        let query = searchQuery?.trim();
-        if (query !== '') {
-          dispatch({ type: 'search', search: query });
-        }
-      }, 300);
-    } else {
-      timer = setTimeout(() => {
-        dispatch({ type: 'search', search: '' });
-        dispatch({ type: 'loading', loading: false });
-      }, 300);
+    if (!isClientSideGrid) {
+      if (searchQuery) {
+        timer = setTimeout(() => {
+          let query = searchQuery?.trim();
+          if (query !== '') {
+            dispatch({ type: 'search', search: query });
+          }
+        }, 300);
+      } else {
+        timer = setTimeout(() => {
+          dispatch({ type: 'search', search: '' });
+          dispatch({ type: 'loading', loading: false });
+        }, 300);
+      }
     }
     return () => clearTimeout(timer);
   }, [searchQuery]);
@@ -386,8 +388,8 @@ function CustomReactTable({
               id: 'selection',
               minWidth: 50,
               width: 50,
-              sticky: 'left',
               maxWidth: 50,
+              sticky: 'left',
               disableFilters: true,
               disableSortBy: true,
               canDrag: false,
@@ -403,7 +405,9 @@ function CustomReactTable({
           ]
         : []),
       ...baseColumns.map((m) => {
-        return m.canFilter === false ? { ...m, columnFilterable: false, filter: 'filterRowsWithSubrows' } : { ...m, columnFilterable: true };
+        return m.canFilter === false
+          ? { ...m, columnFilterable: false, filter: 'filterRowsWithSubrows' }
+          : { ...m, columnFilterable: true, filter: 'text' };
       })
     ],
     [baseColumns]
@@ -411,7 +415,13 @@ function CustomReactTable({
 
   const filterTypes = React.useMemo(
     () => ({
-      filterRowsWithSubrows: (rows, id, filterValue) => columnFilter(rows, id, filterValue)
+      filterRowsWithSubrows: (rows, id, filterValue) => columnFilter(rows, id, filterValue),
+      text: (rows, id, filterValue) => {
+        return rows.filter((row) => {
+          const rowValue = row.values[id];
+          return rowValue !== undefined ? String(rowValue).toLowerCase().startsWith(String(filterValue).toLowerCase()) : true;
+        });
+      }
     }),
     []
   );
@@ -468,7 +478,6 @@ function CustomReactTable({
         expanded: false,
         autoResetExpanded: false,
         hiddenColumns: returnHiddenCols(),
-        // selectedRowIds: selectedRecords
         selectedRowIds: getPreviouslySelectedRowIndex()
       },
       getSubRows: (row: any) => row[childrenProperty],
@@ -953,6 +962,8 @@ const DraggableHeader: React.FC<DraggableHeaderProps> = ({ column, index, reorde
   const { id, Header } = column;
   const [filters, setFilters] = useState([]);
 
+  const { render, canFilter } = column;
+
   // Use a useEffect to update filters when customFilters changes
   useEffect(() => {
     setFilters(
@@ -992,32 +1003,30 @@ const DraggableHeader: React.FC<DraggableHeaderProps> = ({ column, index, reorde
     canDrag: !column?.lockPosition || column?.id !== 'selection' || column?.id !== 'action' || column?.id !== 'expand'
   });
   useEffect(() => {
-    if (!isClientSideGrid) {
-      // Add a timer to delay the dispatch
-      const searchTimer = setTimeout(() => {
-        let tempArray = Object.keys(customFilters).map((key, i) => {
-          return { id: key, value: customFilters[key].filter };
-        });
+    // Add a timer to delay the dispatch
+    const searchTimer = setTimeout(() => {
+      let tempArray = Object.keys(customFilters).map((key, i) => {
+        return { id: key, value: customFilters[key].filter };
+      });
 
-        if (JSON.stringify(filters) !== JSON.stringify(tempArray)) {
-          var tempResult = {};
-          filters?.forEach((v) => {
-            if (v.value && v.value !== '') {
-              tempResult[v.id] = { filter: v.value };
-            } else {
-              //this is for handling condition where the customFilters has a multiselect type field and we type something in some other filter
-              if (customFilters[v.id] && customFilters[v.id].operator && customFilters[v.id].condition1) {
-                tempResult[v.id] = customFilters[v.id];
-              }
+      if (JSON.stringify(filters) !== JSON.stringify(tempArray)) {
+        var tempResult = {};
+        filters?.forEach((v) => {
+          if (v.value && v.value !== '') {
+            tempResult[v.id] = { filter: v.value };
+          } else {
+            //this is for handling condition where the customFilters has a multiselect type field and we type something in some other filter
+            if (customFilters[v.id] && customFilters[v.id].operator && customFilters[v.id].condition1) {
+              tempResult[v.id] = customFilters[v.id];
             }
-          });
-          debouncedFilterDispatch(tempResult);
-        }
-      }, MINIMUM_SEARCH_DELAY);
+          }
+        });
+        if (!isClientSideGrid) debouncedFilterDispatch(tempResult);
+      }
+    }, MINIMUM_SEARCH_DELAY);
 
-      // Clear the timer when the component unmounts or when filters change
-      return () => clearTimeout(searchTimer);
-    }
+    // Clear the timer when the component unmounts or when filters change
+    return () => clearTimeout(searchTimer);
   }, [filters]);
 
   drag(drop(ref));
@@ -1046,12 +1055,18 @@ const DraggableHeader: React.FC<DraggableHeaderProps> = ({ column, index, reorde
         </div>
         {column?.columnFilterable && column?.id !== 'action' ? (
           <div>
-            <TempFilter
-              filterValue={filters.find((filter) => filter.id === column.id)?.value || ''}
-              id={column?.id}
-              setFilters={setFilters}
-              customFilters={customFilters}
-            />
+            {canFilter ? (
+              !isClientSideGrid ? (
+                <TempFilter
+                  filterValue={filters.find((filter) => filter.id === column.id)?.value || ''}
+                  id={column?.id}
+                  setFilters={setFilters}
+                  customFilters={customFilters}
+                />
+              ) : (
+                render('Filter')
+              )
+            ) : null}
           </div>
         ) : null}
       </div>
