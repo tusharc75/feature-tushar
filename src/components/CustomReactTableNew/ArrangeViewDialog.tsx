@@ -21,9 +21,7 @@ import { DragHandle } from '@material-ui/icons';
 import { XYCoord } from 'dnd-core';
 import { DndProvider, useDrag, useDrop, DropTargetMonitor } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-
 import update from 'immutability-helper';
-
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
@@ -47,17 +45,12 @@ const useStyles = makeStyles((theme: Theme) =>
 interface ArrangeColumnsProps {
   onClose: VoidFunction;
   columns: any[];
-  setColumns?: any;
-  columnApi: any;
-  isClientSideGrid: boolean;
-  saveColumnOptions: boolean;
   updateGridHiddenColumns: any;
   renderedFrom: string;
   setHiddenColumns?: any;
   getToggleHideAllColumnsProps?: any;
   setColumnOrder?: any;
   defaultColumns: any[];
-  refColsOrder: any[];
 }
 
 const ItemTypes = {
@@ -68,67 +61,60 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
   const {
     onClose,
     columns,
-    setColumns,
-    columnApi,
-    isClientSideGrid,
     updateGridHiddenColumns,
     renderedFrom,
-    saveColumnOptions,
     setHiddenColumns,
     getToggleHideAllColumnsProps,
     setColumnOrder,
     defaultColumns,
-    refColsOrder
   } = props;
 
   const classes = useStyles();
   const [sortedColumns, setSortedColumns] = React.useState([]);
   const [searchedColumns, setSearchedColumns] = React.useState([]);
   const [searchVal, setSearchVal] = React.useState('');
-  const [oldData, setOldData] = React.useState('');
-  const [newData, setNewData] = React.useState('');
+
   const [allChecked, setAllChecked] = React.useState(true);
-  const [hasChanged, setHasChanged] = React.useState(false);
   const [isMinimized, setMinimized] = React.useState(true);
 
   React.useEffect(() => {
     try {
-      let storedColumns = localStorage.getItem(renderedFrom);
-      if (storedColumns) {
-        let latestColumns = [...JSON.parse(storedColumns)];
-
-        setSortedColumns(latestColumns);
-        if (latestColumns.filter((f) => f.sticky === undefined).some((s) => s.isVisible === false)) {
-          setAllChecked(false);
-        }
-        setOldData(JSON.stringify(latestColumns));
-        setNewData(JSON.stringify(latestColumns));
-      } else {
-        setSortedColumns([...columns]);
+      const data = localStorage.getItem('gridMetaData');
+      const gridMetaData = JSON.parse(data || '{}');
+      const hiddenCols = gridMetaData[renderedFrom]?.hide || [];
+      var updatedCols = columns.map((col) => ({
+        ...col,
+        isVisible: !hiddenCols.includes(col.accessor)
+      }));
+      if (gridMetaData && gridMetaData[renderedFrom]?.order && gridMetaData[renderedFrom]?.order?.length) {
+        const colOrder = gridMetaData[renderedFrom]?.order;
+        const actionCol = updatedCols.find((d) => d.accessor === 'action');
+        const expanderCol = updatedCols.find((d) => d.accessor === 'expander');
+        const selectionCol = updatedCols.find((d) => d.accessor === 'selection');
+        updatedCols = [
+          ...(expanderCol ? [expanderCol] : []),
+          ...(selectionCol ? [selectionCol] : []),
+          ...updatedCols.filter((d) => !['expander', 'selection', 'action']?.includes(d.accessor)).sort((a, b) => colOrder.findIndex((d) => d === a.accessor) - colOrder.findIndex((d) => d === b.accessor)),
+          ...(actionCol ? [actionCol] : [])
+        ];
       }
+      setSortedColumns(updatedCols);
     } catch (ex) {
       setSortedColumns([...columns]);
       console.error(`Error while getting stored data from local storage - ${renderedFrom}`);
     }
-  }, [columns]);
+  }, []);
 
   useEffect(() => {
-    if (oldData === newData) {
-      setHasChanged(false);
-    } else {
-      setHasChanged(true);
-    }
     const allShow = sortedColumns.filter((f) => f.sticky === undefined).some((s) => s.isVisible === false);
     setAllChecked(!allShow);
-  }, [oldData, newData, sortedColumns]);
+  }, [sortedColumns]);
 
   const handleToggle = (column: any, event: React.ChangeEvent<HTMLInputElement>) => {
     const newColumns = [...sortedColumns];
-    const getFieldIndex = sortedColumns.findIndex((d) => d.id === column.id);
+    const getFieldIndex = sortedColumns.findIndex((d) => d.accessor === column.accessor);
     newColumns[getFieldIndex].isVisible = event.target.checked;
-
     setSortedColumns(newColumns);
-    setNewData(JSON.stringify(newColumns));
   };
 
   const handleToggleAll = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -138,23 +124,15 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
         e.isVisible = event.target.checked;
       }
     });
-    setNewData(JSON.stringify(newColumns));
     setAllChecked(event.target.checked);
   };
 
   const handleReset = () => {
-    delete localStorage[renderedFrom];
-
-    const freshColumns = [...defaultColumns];
-
-    freshColumns?.forEach((e: any) => {
-      if (!e.disabled) {
-        e.isVisible = true;
-      }
-    });
-    setSortedColumns(freshColumns);
+    if (renderedFrom && renderedFrom !== '') {
+      updateGridHiddenColumns([], []);
+    }
+    setColumnOrder(defaultColumns?.map((col) => col?.accessor));
     setHiddenColumns([]);
-    setColumnOrder(refColsOrder?.map((col) => col?.id || col?.accessor));
     onClose();
   };
 
@@ -162,22 +140,20 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
     let dataToStore = [];
     sortedColumns.forEach((f) => {
       let object = {};
-
       Object.keys(f).forEach((ff) => {
         if (typeof f[ff] !== 'function' && typeof f[ff] !== 'object') {
           object[ff] = f[ff];
         }
       });
-
       dataToStore.push(object);
     });
-    const columnState = JSON.stringify([...dataToStore]);
-
-    localStorage.setItem(renderedFrom, columnState);
-
-    setColumnOrder([...sortedColumns.map((m) => m.id)]);
-    setHiddenColumns([...sortedColumns].filter((f) => f.sticky === undefined && f.isVisible === false).map((m) => m.id));
-
+    if (renderedFrom && renderedFrom !== '') {
+      const hidedColumns = dataToStore?.filter((o) => !o?.isVisible && !['expander', 'selection', 'action']?.includes(o?.accessor)).map((o) => o?.accessor);
+      const columnOrder = dataToStore?.filter((o) => o?.sticky === undefined && !['expander', 'selection', 'action']?.includes(o?.accessor))?.map((o) => o?.accessor);
+      updateGridHiddenColumns(hidedColumns, columnOrder);
+    }
+    setColumnOrder([...sortedColumns.map((m) => m.accessor)]);
+    setHiddenColumns([...sortedColumns].filter((f) => f.sticky === undefined && f.isVisible === false).map((m) => m.accessor));
     onClose();
   };
 
@@ -186,8 +162,8 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
       const dragCard = sortedColumns[dragIndex];
       const hoverCard = sortedColumns[hoverIndex];
 
-      if (dragCard?.id === 'action' || dragCard?.id === 'selection' || dragCard?.lockPosition) return;
-      if (hoverCard?.id === 'action' || hoverCard?.id === 'selection' || hoverCard?.lockPosition) return;
+      if (dragCard?.accessor === 'action' || dragCard?.accessor === 'selection' || dragCard?.lockPosition) return;
+      if (hoverCard?.accessor === 'action' || hoverCard?.accessor === 'selection' || hoverCard?.lockPosition) return;
 
       const columnsForGrid = update(sortedColumns, {
         $splice: [
@@ -196,19 +172,16 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
         ]
       });
       setSortedColumns([...columnsForGrid]);
-      setNewData(JSON.stringify(columnsForGrid));
     },
     [sortedColumns]
   );
 
   useEffect(() => {
     if (!searchVal) return;
-
     const matchedColumns = sortedColumns.filter((col) => {
       const fieldName = typeof col.Header === 'string' ? col.Header.toLowerCase() : '';
       return fieldName.includes(searchVal.toLowerCase());
     });
-
     setSearchedColumns(matchedColumns);
   }, [searchVal]);
 
@@ -272,15 +245,15 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
             <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
               {sortedColumns.map(
                 (column, index) =>
-                  column?.id !== 'selection' &&
-                  column?.id !== 'expander' && (
+                  column?.accessor !== 'selection' &&
+                  column?.accessor !== 'expander' && (
                     <RenderListItem
-                      key={column.id}
+                      key={column.accessor}
                       column={column}
                       handleToggle={handleToggle}
                       moveItem={moveItem}
                       index={index}
-                      id={column.id}
+                      accessor={column.accessor}
                       columns={sortedColumns}
                     />
                   )
@@ -289,9 +262,9 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
           ) : searchedColumns.length > 0 ? (
             searchedColumns.map(
               (column, index) =>
-                column?.id !== 'selection' &&
-                column?.id !== 'expander' && (
-                  <ListItem key={`${column.id}-${index}`} divider disableGutters disabled={column.disabled} className={column.sticky ? 'd-none' : ''}>
+                column?.accessor !== 'selection' &&
+                column?.accessor !== 'expander' && (
+                  <ListItem key={`${column.accessor}-${index}`} divider disableGutters disabled={column.disabled} className={column.sticky ? 'd-none' : ''}>
                     <ListItemText id="switch-list-column" primary={column.Header} />
                     <ListItemSecondaryAction>
                       {column.sticky ? (
@@ -323,7 +296,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
         <Button variant="outlined" color="primary" onClick={handleReset}>
           Reset
         </Button>
-        <Button variant="contained" color="primary" disableElevation disabled={!hasChanged} onClick={handleSaveChange}>
+        <Button variant="contained" color="primary" disableElevation disabled={false} onClick={handleSaveChange}>
           Save changes
         </Button>
       </CustomDialogFooter>
@@ -335,19 +308,19 @@ interface ItemProps {
   column: any;
   moveItem: CallableFunction;
   handleToggle: any;
-  id: string;
+  accessor: string;
   index: number;
   columns: any[];
 }
 
 interface DragItem {
   index: number;
-  id: string;
+  accessor: string;
   type: string;
 }
 
 const RenderListItem = (props: ItemProps) => {
-  const { column, handleToggle, moveItem, id, index, columns } = props;
+  const { column, handleToggle, moveItem, accessor, index, columns } = props;
   const classes = useStyles();
 
   const ref = React.useRef<HTMLDivElement>(null);
@@ -393,7 +366,7 @@ const RenderListItem = (props: ItemProps) => {
   const [{ isDragging }, drag] = useDrag({
     type: ItemTypes.CARD,
     item: () => {
-      return { id, index };
+      return { accessor, index };
     },
     collect: (monitor: any) => ({
       isDragging: monitor.isDragging()
@@ -406,12 +379,12 @@ const RenderListItem = (props: ItemProps) => {
   return column.sticky ? (
     <div className="d-none"></div>
   ) : (
-    <div ref={ref} style={{ opacity }} data-handler-id={handlerId}>
+    <div ref={ref} style={{ opacity }} data-handler-accessor={handlerId}>
       <ListItem divider disableGutters disabled={column.disabled}>
         <ListItemIcon className={`${classes.cursor} pl-2`}>
           <DragHandle />
         </ListItemIcon>
-        <ListItemText id={column.id} primary={column.Header || startCase(column?.id)} />
+        <ListItemText id={column.accessor} primary={column.Header || startCase(column?.accessor)} />
         <ListItemSecondaryAction>
           <Switch
             size="small"

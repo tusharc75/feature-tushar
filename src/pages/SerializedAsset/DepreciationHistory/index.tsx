@@ -11,6 +11,7 @@ import moment from 'moment';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
 
 const DepreciationHistory = ({ id }) => {
+
     const toastConfig = useContext(CustomToastContext);
     const renderedFrom = `${camelCase(routes?.serializedAsset.title)}_depreciationHistory`;
     const { state, dispatch } = useTableReducer();
@@ -50,19 +51,46 @@ const DepreciationHistory = ({ id }) => {
     const fetchGridColumns = () => {
         const column = [
             {
-                accessor: 'date', Header: 'Date', show: true,
+                accessor: 'date',
+                Header: 'Date',
+                disableFilters: true,
+                disableSortBy: false,
                 Cell: ({ row }) => (
                     row.original?.date ? (
-                        <h5 className="createBy" title={`${moment(row.original?.date).format(dateFormat)}`}>
+                        <div>
                             {moment(row.original?.date)?.format(dateFormat)}
-                        </h5>
+                        </div>
                     ) : (
                         <NoDataCell />
                     )
                 )
             },
-            { accessor: 'amount', Header: 'Depreciation Amount', show: true },
-            { accessor: 'netBookValue', Header: 'Net Book Value', show: true }
+            {
+                accessor: 'amount',
+                Header: 'Depreciation Amount',
+                Cell: ({ row }) => (
+                    row.original?.amount ? (
+                        <div>
+                            {row.original?.amount}
+                        </div>
+                    ) : (
+                        <NoDataCell />
+                    )
+                )
+            },
+            {
+                accessor: 'netBookValue',
+                Header: 'Net Book Value',
+                Cell: ({ row }) => (
+                    row.original?.netBookValue ? (
+                        <div>
+                            {row.original?.netBookValue}
+                        </div>
+                    ) : (
+                        <NoDataCell />
+                    )
+                )
+            }
         ]
         setColumns([...column]);
     };
@@ -72,15 +100,15 @@ const DepreciationHistory = ({ id }) => {
             <Box>
                 {columns ? (
                     <CustomReactTable
-                        height={'calc(100vh - 200px)'}
+                        height={'calc(100vh - 250px)'}
                         columns={columns}
                         state={state}
                         dispatch={dispatch}
                         renderedFrom={renderedFrom}
-                        isClientSideGrid={false}
+                        isClientSideGrid={true}
                         refreshGrid={fetchData}
-                        showOnlyShowFilteredRecordSwitch={true}
                         showFilters={false}
+                        hideSelection={true}
                     />
                 ) : (
                     <Box p={2} height={500}>

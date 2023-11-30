@@ -40,7 +40,9 @@ import { BiFilterAlt } from 'react-icons/bi';
 import GridFilter from './Filters';
 import type { TInitialState } from './useTableReducer';
 import { TouchBackend } from 'react-dnd-touch-backend';
+import { useStore, SEARCH } from 'src/StateProvider/fastContext';
 
+const childrenProperty = 'subRows';
 interface CustomCheckBoxProps extends CheckboxProps {
   indeterminate: any;
   from?: string;
@@ -138,7 +140,7 @@ function TempFilter({ filterValue, id, setFilters, customFilters }) {
   );
 }
 
-function DefaultColumnFilter({ column: { filterValue, setFilter } }) {
+function DefaultColumnFilter({ column: { filterValue, setFilter, filter } }) {
   const [isOpen, setIsOpen] = useState(false);
   const ref = React.useRef(null);
   const inputRef = React.useRef(null);
@@ -174,7 +176,7 @@ function DefaultColumnFilter({ column: { filterValue, setFilter } }) {
             setFilter(e.target.value || undefined); // Set undefined to remove the filter entirely
           }}
           autoComplete="off"
-          placeholder="Search..."
+          placeholder={`Search ${filter ? filter : ''}...`}
           type="text"
           id="search"
           aria-hidden={!isOpen}
@@ -211,7 +213,6 @@ const EditableCell = ({ value: initialValue, row: { index }, column: { id }, upd
 
 function CustomReactTable({
   columns,
-  childrenProperty = 'subRows',
   onSelect = null,
   setWholeRowsCellColor = null,
   height = '100%',
@@ -219,7 +220,6 @@ function CustomReactTable({
   renderedFrom,
   isClientSideGrid = true,
   expander = false,
-  allowPagination = true,
   refreshGrid = null,
   dispatch,
   state,
@@ -252,12 +252,32 @@ function CustomReactTable({
     width: 200,
     Filter: DefaultColumnFilter
   };
-
+  const [searchQuery] = useStore((store) => store[SEARCH]);
   const [cellValue, setCellValue] = React.useState('');
   const [baseColumns, setBaseColumns] = React.useState([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState(null);
   const [currentFomValue, setCurrentFomValue] = useState({});
+
+  useEffect(() => {
+    let timer;
+    if (!isClientSideGrid) {
+      if (searchQuery) {
+        timer = setTimeout(() => {
+          let query = searchQuery?.trim();
+          if (query !== '') {
+            dispatch({ type: 'search', search: query });
+          }
+        }, 300);
+      } else {
+        timer = setTimeout(() => {
+          dispatch({ type: 'search', search: '' });
+          dispatch({ type: 'loading', loading: false });
+        }, 300);
+      }
+    }
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   const getPreviouslySelectedRowIndex = () => {
     const len = selectedRecords.length;
@@ -281,22 +301,25 @@ function CustomReactTable({
   };
 
   useEffect(() => {
+    columns?.forEach((e) => {
+      if (e.accessor === 'action') {
+        e.disableFilters = true;
+        e.disableSortBy = true;
+        e.canDrag = false;
+        if (!e.maxWidth) {
+          e.maxWidth = 120;
+        }
+      }
+    });
     setBaseColumns(columns);
   }, [columns]);
 
-  const handleAllSelect = (checked) => {
-    if (checked) {
-      localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
-    }
-  };
-
-  const handleCellSelection = (row) => {};
-
   const newColumns = React.useMemo(
-    () =>
-      expander
+    () => [
+      ...(expander
         ? [
             {
+              accessor: 'expander',
               id: 'expander',
               Header: ({ isAllRowsExpanded }) => (
                 <span
@@ -325,6 +348,8 @@ function CustomReactTable({
               sticky: 'left',
               width: isMobile && !isTablet ? 40 : 70,
               minWidth: isMobile && !isTablet ? 40 : 70,
+              disableFilters: true,
+              disableSortBy: true,
               canDrag: false,
               Cell: ({ row }) => (
                 <div
@@ -353,71 +378,70 @@ function CustomReactTable({
                   ) : null}
                 </div>
               )
-            },
-            {
-              id: 'selection',
-              minWidth: 50,
-              width: 50,
-              sticky: isMobileView ? 'none' : 'left',
-              maxWidth: 50,
-              Header: ({ getToggleAllRowsSelectedProps }) => (
-                <IndeterminateCheckbox
-                  onClick={(e) => handleAllSelect(getToggleAllRowsSelectedProps()?.checked)}
-                  {...getToggleAllRowsSelectedProps()}
-                  className="mx-auto text-center"
-                />
-              ),
-              Cell: ({ row }) => (
-                <div className="mx-auto text-center  justify-center">
-                  <IndeterminateCheckbox onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps()} />
-                </div>
-              )
-            },
-            ...baseColumns.map((m) => {
-              return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' };
-            })
+            }
           ]
-        : [
+        : []),
+      ...(!hideSelection
+        ? [
             {
+              accessor: 'selection',
               id: 'selection',
-              sticky: isMobileView ? 'none' : 'left',
               minWidth: 50,
               width: 50,
+              sticky: 'left',
               maxWidth: 50,
+              disableFilters: true,
+              disableSortBy: true,
+              canDrag: false,
               Header: ({ getToggleAllRowsSelectedProps }) => (
-                <IndeterminateCheckbox
-                  onClick={(e) => handleAllSelect(getToggleAllRowsSelectedProps()?.checked)}
-                  {...getToggleAllRowsSelectedProps()}
-                  className="mx-auto text-center"
-                />
+                <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} className="mx-auto text-center" />
               ),
               Cell: ({ row }) => (
                 <div className="mx-auto text-center justify-center">
-                  <IndeterminateCheckbox onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps()} />
+                  {row.original.hideSelection ? <></> : <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />}
                 </div>
               )
-            },
-            ...baseColumns.map((m) => {
-              return m.canFilter === false ? { ...m, columnFilterable: false, filter: 'filterRowsWithSubrows' } : { ...m, columnFilterable: true };
-            })
-          ],
+            }
+          ]
+        : []),
+      ...baseColumns.map((m) => {
+        return m.canFilter === false || m.disableFilters === true
+          ? { ...m, columnFilterable: false, filter: 'text' }
+          : { ...m, columnFilterable: true, filter: 'filterRowsWithSubrows' };
+      })
+    ],
     [baseColumns]
   );
 
   const filterTypes = React.useMemo(
     () => ({
-      filterRowsWithSubrows: (rows, id, filterValue) => columnFilter(rows, id, filterValue)
+      filterRowsWithSubrows: (rows, id, filterValue) => columnFilter(rows, id, filterValue),
+      text: (rows, id, filterValue) => {
+        return rows.filter((row) => {
+          const rowValue = row.values[id];
+          return rowValue !== undefined ? String(rowValue).toLowerCase().startsWith(String(filterValue).toLowerCase()) : true;
+        });
+      }
     }),
     []
   );
+
   const updateData = () => {};
 
-  const returnHiddenCols = () => {
-    const storedColumns = JSON.parse(localStorage.getItem(renderedFrom));
+  const getDataFromLocalStorage = () => {
+    try {
+      const data = localStorage.getItem('gridMetaData');
+      return data && data !== 'undefined' ? JSON.parse(data) : {};
+    } catch (ex) {
+      return {};
+    }
+  };
 
-    let hiddenCols = [];
-    if (storedColumns) {
-      hiddenCols = storedColumns.filter((f) => f.isVisible === false || f.show === false).map((m) => m.id);
+  const returnHiddenCols = () => {
+    const gridMetaData = getDataFromLocalStorage();
+    const hiddenCols = gridMetaData[renderedFrom]?.hide || [];
+    if (hideAction) {
+      hiddenCols.push('action');
     }
     return hiddenCols;
   };
@@ -448,14 +472,12 @@ function CustomReactTable({
       filterTypes,
       initialState: {
         sortBy: sorting.map((d) => {
-          return { id: d.colId, desc: d.sort === 'asc' ? false : true };
+          return { desc: d.sort === 'asc' ? false : true };
         }),
         pageIndex: page,
         expanded: false,
         autoResetExpanded: false,
-        hiddenColumns:
-          hideSelection && hideAction ? ['selection', 'action'] : hideSelection ? ['selection'] : hideAction ? ['action'] : returnHiddenCols(),
-        // selectedRowIds: selectedRecords
+        hiddenColumns: returnHiddenCols(),
         selectedRowIds: getPreviouslySelectedRowIndex()
       },
       getSubRows: (row: any) => row[childrenProperty],
@@ -486,25 +508,16 @@ function CustomReactTable({
   );
 
   useEffect(() => {
-    rows.forEach((d) => {
-      if (d[childrenProperty] && d[childrenProperty].length < 20) {
-        toggleAllRowsExpanded(true);
-        toggleRowExpanded(d.id, true);
-      }
-    });
-
     try {
-      const storedColumns = localStorage.getItem(renderedFrom);
-      if (storedColumns) {
-        const columnOrder = [];
-        const hiddenColumns = [];
-        for (const column of JSON.parse(storedColumns)) {
-          if (column.id === 'action') continue;
-          columnOrder.push(column.id);
-          if (column.isVisible === false) hiddenColumns.push(column.id);
-        }
-        setColumnOrder(columnOrder);
-        setHiddenColumns(hiddenColumns);
+      let gridMetaData = getDataFromLocalStorage();
+      if (gridMetaData && gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide?.length) {
+        setHiddenColumns(gridMetaData[renderedFrom]?.hide || []);
+      }
+      if (gridMetaData && gridMetaData[renderedFrom]?.order && gridMetaData[renderedFrom]?.order?.length) {
+        const colOrder = [...(expander ? ['expander'] : []), ...(!hideSelection ? ['selection'] : []), ...gridMetaData[renderedFrom]?.order];
+        setColumnOrder(colOrder);
+      } else {
+        setColumnOrder(newColumns.map((m) => m?.id));
       }
     } catch (ex) {
       console.error(`Error while getting stored data from local storage - ${renderedFrom}`);
@@ -512,9 +525,18 @@ function CustomReactTable({
   }, []);
 
   useEffect(() => {
+    rows.forEach((d) => {
+      if (d[childrenProperty] && d[childrenProperty].length < 20) {
+        toggleAllRowsExpanded(true);
+        toggleRowExpanded(d.id, true);
+      }
+    });
+  }, []);
+
+  useEffect(() => {
     if (!isClientSideGrid) {
       let tempArray = sorting.map((d) => {
-        return { id: d.colId, desc: d.sort === 'asc' ? false : true };
+        return { desc: d.sort === 'asc' ? false : true };
       });
       if (JSON.stringify(sortBy) !== JSON.stringify(tempArray)) {
         sortBy?.forEach((v) => {
@@ -573,8 +595,8 @@ function CustomReactTable({
     const hoverColumn = columnOrder[newIndex];
     const firstElement = columnOrder[0];
 
-    const dragItem = allColumns.find((col) => col?.id === dragColumn || col?.accessor === dragColumn);
-    const hoverItem = allColumns.find((col) => col?.id === hoverColumn || col?.accessor === hoverColumn);
+    const dragItem = allColumns.find((col) => col?.id === dragColumn || col?.id === dragColumn);
+    const hoverItem = allColumns.find((col) => col?.id === hoverColumn || col?.id === hoverColumn);
 
     if (dragItem?.id === 'action' || dragItem?.id === 'selection' || dragItem?.lockPosition) return;
     if (hoverItem?.id === 'action' || hoverItem?.id === 'selection' || hoverItem?.lockPosition) return;
@@ -589,32 +611,13 @@ function CustomReactTable({
     let newBaseColumns = new Array();
     baseColumns.forEach((item) => {
       let filteredOrder = newOrderedColumns.filter((el) => el !== firstElement);
-      const index = filteredOrder.indexOf(item.accessor);
+      const index = filteredOrder.indexOf(item.id);
       newBaseColumns[index] = item;
     });
 
     setColumnOrder(newOrderedColumns);
     setBaseColumns(newBaseColumns);
   };
-
-  useEffect(() => {
-    if (!allColumns || !Array.isArray(allColumns)) {
-      return;
-    }
-    const timeout = setTimeout(() => {
-      const newColumnState = allColumns.map((column) => {
-        const object = {};
-        Object.keys(column).forEach((key) => {
-          if (typeof column[key] !== 'function' && typeof column[key] !== 'object') {
-            object[key] = column[key];
-          }
-        });
-        return object;
-      });
-      localStorage.setItem(renderedFrom, JSON.stringify(newColumnState));
-    }, 500);
-    return () => clearTimeout(timeout);
-  }, [allColumns]);
 
   const submitInput = () => {
     if (!currentEditingCellPosition) return;
@@ -685,15 +688,13 @@ function CustomReactTable({
                   </HtmlTooltip>
                 )}
                 <ArrangeViewButton
-                  defaultColumns={allColumns}
+                  columns={newColumns}
                   loading={loading}
-                  columns={baseColumns}
                   renderedFrom={renderedFrom}
-                  isClientSideGrid={isClientSideGrid}
                   setHiddenColumns={setHiddenColumns}
                   getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
+                  defaultColumns={allColumns}
                   setColumnOrder={setColumnOrder}
-                  refColsOrder={newColumns}
                 />
               </>
             }
@@ -875,7 +876,7 @@ function CustomReactTable({
                       );
                     })}
                   </TableBody>
-                  {rows?.length > 0 && footerGroups?.length > 0 && !allowPagination && (
+                  {rows?.length > 0 && footerGroups?.length > 0 && isClientSideGrid && (
                     <TableFooter style={{ overflowY: 'auto', overflowX: 'hidden' }} className="footer ">
                       {footerGroups.map((group) => (
                         <TableRow {...group.getFooterGroupProps()} className="tr">
@@ -908,7 +909,6 @@ function CustomReactTable({
             expander={expander}
             backgroundColorClass={setWholeRowsCellColor}
             renderedFrom={renderedFrom}
-            handleCellSelection={handleCellSelection}
             IndeterminateCheckbox={IndeterminateCheckbox}
             toggleAllRowsSelected={toggleAllRowsSelected}
             state={state}
@@ -918,10 +918,10 @@ function CustomReactTable({
             handleCellClick={handleCellClick}
             handleKeyDown={handleKeyDown}
             footerGroups={footerGroups}
-            allowPagination={allowPagination}
+            isClientSideGrid={isClientSideGrid}
           />
         ) : null}
-        {allowPagination && (
+        {!isClientSideGrid && (
           <Pagination
             count={rowCount}
             page={pageIndex}
@@ -959,8 +959,9 @@ interface DraggableHeaderProps {
 
 const DraggableHeader: React.FC<DraggableHeaderProps> = ({ column, index, reorder, customFilters, dispatch, isClientSideGrid }) => {
   const ref = React.useRef();
-  const { id, Header } = column;
+  const { id, Header, render, canFilter } = column;
   const [filters, setFilters] = useState([]);
+
 
   // Use a useEffect to update filters when customFilters changes
   useEffect(() => {
@@ -1001,32 +1002,30 @@ const DraggableHeader: React.FC<DraggableHeaderProps> = ({ column, index, reorde
     canDrag: !column?.lockPosition || column?.id !== 'selection' || column?.id !== 'action' || column?.id !== 'expand'
   });
   useEffect(() => {
-    if (!isClientSideGrid) {
-      // Add a timer to delay the dispatch
-      const searchTimer = setTimeout(() => {
-        let tempArray = Object.keys(customFilters).map((key, i) => {
-          return { id: key, value: customFilters[key].filter };
-        });
+    // Add a timer to delay the dispatch
+    const searchTimer = setTimeout(() => {
+      let tempArray = Object.keys(customFilters).map((key, i) => {
+        return { id: key, value: customFilters[key].filter };
+      });
 
-        if (JSON.stringify(filters) !== JSON.stringify(tempArray)) {
-          var tempResult = {};
-          filters?.forEach((v) => {
-            if (v.value && v.value !== '') {
-              tempResult[v.id] = { filter: v.value };
-            } else {
-              //this is for handling condition where the customFilters has a multiselect type field and we type something in some other filter
-              if (customFilters[v.id] && customFilters[v.id].operator && customFilters[v.id].condition1) {
-                tempResult[v.id] = customFilters[v.id];
-              }
+      if (JSON.stringify(filters) !== JSON.stringify(tempArray)) {
+        var tempResult = {};
+        filters?.forEach((v) => {
+          if (v.value && v.value !== '') {
+            tempResult[v.id] = { filter: v.value };
+          } else {
+            //this is for handling condition where the customFilters has a multiselect type field and we type something in some other filter
+            if (customFilters[v.id] && customFilters[v.id].operator && customFilters[v.id].condition1) {
+              tempResult[v.id] = customFilters[v.id];
             }
-          });
-          debouncedFilterDispatch(tempResult);
-        }
-      }, MINIMUM_SEARCH_DELAY);
+          }
+        });
+        if (!isClientSideGrid) debouncedFilterDispatch(tempResult);
+      }
+    }, MINIMUM_SEARCH_DELAY);
 
-      // Clear the timer when the component unmounts or when filters change
-      return () => clearTimeout(searchTimer);
-    }
+    // Clear the timer when the component unmounts or when filters change
+    return () => clearTimeout(searchTimer);
   }, [filters]);
 
   drag(drop(ref));
@@ -1055,12 +1054,18 @@ const DraggableHeader: React.FC<DraggableHeaderProps> = ({ column, index, reorde
         </div>
         {column?.columnFilterable && column?.id !== 'action' ? (
           <div>
-            <TempFilter
-              filterValue={filters.find((filter) => filter.id === column.id)?.value || ''}
-              id={column?.id}
-              setFilters={setFilters}
-              customFilters={customFilters}
-            />
+            {canFilter ? (
+              !isClientSideGrid ? (
+                <TempFilter
+                  filterValue={filters.find((filter) => filter.id === column.id)?.value || ''}
+                  id={column?.id}
+                  setFilters={setFilters}
+                  customFilters={customFilters}
+                />
+              ) : (
+                render('Filter')
+              )
+            ) : null}
           </div>
         ) : null}
       </div>

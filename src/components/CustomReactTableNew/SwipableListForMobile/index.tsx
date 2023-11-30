@@ -30,7 +30,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
   handleCellClick,
   handleKeyDown,
   footerGroups,
-  allowPagination
+  isClientSideGrid
 }) => {
   const { error } = state;
   const [isAllChecked, setIsAllChecked] = useState(false);
@@ -53,6 +53,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
     () => allColumns?.filter((item) => !item.primaryField && !['selection', 'action', 'expander'].includes(item.id) && item.isVisible) || null,
     [allColumns]
   );
+
   const expanderCol: any | null = React.useMemo(() => allColumns?.find((item) => item.id === 'expander') || allColumns[2], [allColumns]);
   const otherFieldsLength = React.useMemo(() => otherFields.length, [otherFields]);
 
@@ -114,7 +115,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                         {expander && expanderCol && expanderCol.Cell({ row })}
                         {allowSelection && !row.original.hideSelection && (
                           <div>
-                            <IndeterminateCheckbox onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps?.()} />
+                            <IndeterminateCheckbox {...row.getToggleRowSelectedProps?.()} />
                           </div>
                         )}
                         <div className="flex-grow">
@@ -234,7 +235,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                   </div>
                 )}
 
-            {dataRows?.length > 0 && footerGroups?.length > 0 && !allowPagination && (
+            {dataRows?.length > 0 && footerGroups?.length > 0 && isClientSideGrid && (
               <>
                 {footerGroups.map((group, index) => (
                   <div key={index} className="flex justify-between [border-top:1px_solid_var(--common-border-color)] pt-1 items-center mt-4 px-2">
@@ -276,7 +277,6 @@ const RenderSubCard = ({
   defaultDisplay,
   collapsibleFields,
   IndeterminateCheckbox,
-  handleCellSelection,
   row,
   depth = 1,
   submitInput,
@@ -289,9 +289,8 @@ const RenderSubCard = ({
   if (row.depth !== depth) return null;
   return (
     <div
-      className={`shadow-[0px_3px_26px_0px_rgba(0,0,0,0.06)] rounded-md my-2 px-3 py-2 [--left-gutter:20px] dark:bg-[var(--dark-secondary)] ${
-        backgroundColorClass && backgroundColorClass(row.original) + ' td-color'
-      }`}
+      className={`shadow-[0px_3px_26px_0px_rgba(0,0,0,0.06)] rounded-md my-2 px-3 py-2 [--left-gutter:20px] dark:bg-[var(--dark-secondary)] ${backgroundColorClass && backgroundColorClass(row.original) + ' td-color'
+        }`}
       key={row.original._id}
       style={{
         border: '1px solid var(--common-border-color)',
@@ -302,7 +301,7 @@ const RenderSubCard = ({
         {expander && expanderCol && expanderCol.Cell({ row })}
         {allowSelection && !row.original.hideSelection && (
           <div>
-            <IndeterminateCheckbox onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps?.()} />
+            <IndeterminateCheckbox {...row.getToggleRowSelectedProps?.()} />
           </div>
         )}
         <div className="flex-grow">
@@ -395,7 +394,6 @@ const RenderSubCard = ({
                     defaultDisplay,
                     collapsibleFields,
                     IndeterminateCheckbox,
-                    handleCellSelection,
                     row,
                     submitInput,
                     cellValue,
@@ -437,8 +435,8 @@ const RenderCellWithHeader = ({ field, row, submitInput, handleCellClick, handle
         className="text-[12px_!important] text-right [&>*]:text-right [&>*]:justify-end line-clamp-1 break-all [&>*]:[flex-wrap:wrap] [&>*]:[font-weight:500_!important] [&>*]:[font-size:12px_!important] [&>*]:line-clamp-1 [&>*]:[white-space:unset_!important] [&>div]:[flex-wrap:wrap_!important] "
       >
         {!['selection'].includes(cell?.column.id) &&
-        currentEditingCellPosition?.rowId === row.original._id &&
-        currentEditingCellPosition?.columnName === cell?.column.id ? (
+          currentEditingCellPosition?.rowId === row.original._id &&
+          currentEditingCellPosition?.columnName === cell?.column.id ? (
           <input
             title={`Edit-${cell.id}`}
             autoFocus

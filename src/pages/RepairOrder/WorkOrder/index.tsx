@@ -1000,6 +1000,7 @@ const WorkOrder = ({
               }}
               extraStaticFilter={!isPostWorkService ? [] : [{ field: 'preWork', term: false }]}
               isSubmitting={isSubmitting}
+              hideQty={true}
             />
           )}
           {addServicesDialog.open && addServicesDialog.new && (

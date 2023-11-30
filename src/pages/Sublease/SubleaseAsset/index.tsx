@@ -357,7 +357,6 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, setNextStepTool
             renderedFrom={renderedFrom}
             isClientSideGrid={false}
             refreshGrid={fetchData}
-            allowPagination={false}
           />
         ) : (
           <Box p={2} height={500}>

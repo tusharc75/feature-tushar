@@ -26,18 +26,18 @@ const AssignProductDialog = ({
   isSubmitting = false,
   hideQty = false
 }) => {
-  const renderedFrom = `${camelCase(routes.product?.title)}_assign`;
+
+  const renderedFrom = `${camelCase(routes.product?.title)}_Assign`;
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer();
-  const { dataRows, rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { dataRows, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { getColumnData } = useColumns();
 
   const {
     state: { user, selectedEntity }
   }: any = useData();
 
-  const [disableSaveButton, setDisableSaveButton] = useState(false);
   const [columns, setColumns] = useState(null);
   const [isProductType, setIsProductType] = useState(false);
 
@@ -45,9 +45,11 @@ const AssignProductDialog = ({
     {
       accessor: 'qty',
       Header: 'Qty',
-      minWidth: 180,
-      width: 180,
+      minWidth: 150,
+      width: 150,
       editable: true,
+      disableFilters: true,
+      disableSortBy: true,
       Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.qty}</h5>
     }
   ];
@@ -55,10 +57,6 @@ const AssignProductDialog = ({
   useEffect(() => {
     fetchGridColumns();
   }, []);
-
-  useEffect(() => {
-    setDisableSaveButton(selectedRecords?.some((d) => d.qty === 0));
-  }, [selectedRecords]);
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
@@ -98,15 +96,13 @@ const AssignProductDialog = ({
 
   const fetchProduct = () => {
     dispatch({ type: 'loading', loading: true });
-
     const queryString = getQueryString();
     axiosInstance()
       .get(`${product.api}${queryString}`)
-      .then(({ data }) => {
-        let rows = data.data.map((u) => {
+      .then(({ data: { data, count } }) => {
+        let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u);
-          finalObject['isChecked'] = false;
-          finalObject['id'] = u._id;
+          finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
           finalObject['qty'] = 1;
           finalObject['unitMain'] = u?.unit;
           finalObject['pricingMethodMain'] = u?.pricingMethod;
@@ -118,11 +114,7 @@ const AssignProductDialog = ({
             ...finalObject
           };
         });
-        dispatch({
-          type: 'selection',
-          selectedRecords: selectedRecords || []
-        });
-        dispatch({ type: 'initialize', data: rows, count: data.count });
+        dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
@@ -207,26 +199,20 @@ const AssignProductDialog = ({
 
   const onSaveEdit = (data, row) => {
     if (!data || !data?.qty) return;
-    const selectedFromStorage = selectedRecords;
-    if (!selectedFromStorage || selectedFromStorage.length === 0) return;
-    const updatedRecords = selectedFromStorage.map((d) => {
-      if (row?._id === d._id) {
-        d.qty = parseInt(data.qty);
-      }
-      return d;
-    });
-
-    const rows = dataRows;
-
+    const rows = [...dataRows];
     rows?.forEach((d) => {
       if (row?._id === d._id) {
         d.qty = parseInt(data.qty);
+        d.isChecked = true;
       }
     });
-
+    if (!selectedRecords?.find((e) => e._id === row?._id)) {
+      const editRow = rows?.find((e) => e._id === row?._id);
+      if (editRow) {
+        dispatch({ type: 'selection', selectedRecords: [...selectedRecords, editRow] });
+      }
+    }
     dispatch({ type: 'update', data: rows });
-    dispatch({ type: 'selection', selectedRecords: updatedRecords });
-    setDisableSaveButton(selectedRecords?.some((d) => d.qty === 0));
   };
 
   return (
@@ -240,7 +226,7 @@ const AssignProductDialog = ({
                 <Box className={styles.filter_side_header} component="div">
                   <SearchBox onChange={handleSearch} className={styles.search_box_input} width="242px" size="small" value={search} />
                   <Button
-                    disabled={isSubmitting || disableSaveButton || selectedRecords?.length === 0}
+                    disabled={isSubmitting || selectedRecords?.length === 0}
                     onClick={() => {
                       onSuccess(selectedRecords);
                     }}
