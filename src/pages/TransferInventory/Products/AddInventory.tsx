@@ -18,7 +18,6 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
   const { state, dispatch } = useTableReducer();
   const { page, dataRows, limit, selectedRecords, search, filters, sorting, showFilteredRecordsOnly } = state;
   const [columns, setColumns] = useState(null);
-  const [inventories, setInventories] = useState([]);
   const { getColumnData } = useColumns();
 
   const {
