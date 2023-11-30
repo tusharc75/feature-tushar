@@ -66,7 +66,6 @@ const AssignServiceDialog = ({ onSuccess, handleClose, ids = [], extraStaticFilt
       .get('/field?resource=Service Master&view=true')
       .then(({ data: { data } }) => {
         let columns = [];
-        let rendererNames = [];
         data.forEach((o) => {
           let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serviceMasterDetail.path);
           if (currentColumn !== null) {
@@ -183,7 +182,7 @@ const AssignServiceDialog = ({ onSuccess, handleClose, ids = [], extraStaticFilt
       }
     });
 
-    dispatch({ type: 'initialize', data: rows, count: rowCount });
+    dispatch({ type: 'update', data: rows });
     dispatch({ type: 'selection', selectedRecords: updatedRecords });
     setDisableSaveButton(selectedRecords?.some((d) => d.qty === 0));
   };

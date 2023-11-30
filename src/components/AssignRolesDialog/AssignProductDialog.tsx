@@ -224,7 +224,7 @@ const AssignProductDialog = ({
       }
     });
 
-    dispatch({ type: 'initialize', data: rows, count: rowCount });
+    dispatch({ type: 'update', data: rows });
     dispatch({ type: 'selection', selectedRecords: updatedRecords });
     setDisableSaveButton(selectedRecords?.some((d) => d.qty === 0));
   };
