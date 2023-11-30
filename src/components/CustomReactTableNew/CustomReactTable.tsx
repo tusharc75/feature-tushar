@@ -24,7 +24,7 @@ import { useSticky } from 'react-table-sticky';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import CustomReactTableHeaderOptions from './CustomReactTableHeaderOptions';
-import { isMobile, isTablet } from 'react-device-detect';
+import { ConsoleView, isMobile, isTablet } from 'react-device-detect';
 import Checkbox from '@material-ui/core/Checkbox';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -368,7 +368,7 @@ function CustomReactTable({
               ),
               Cell: ({ row }) => (
                 <div className="mx-auto text-center  justify-center">
-                  <IndeterminateCheckbox onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps()} />
+                  {row.original.hideSelection ? <></> : <IndeterminateCheckbox onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps()} />}
                 </div>
               )
             },
@@ -392,7 +392,7 @@ function CustomReactTable({
               ),
               Cell: ({ row }) => (
                 <div className="mx-auto text-center justify-center">
-                  <IndeterminateCheckbox onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps()} />
+                  {row.original.hideSelection ? <></> : <IndeterminateCheckbox onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps()} />}
                 </div>
               )
             },
