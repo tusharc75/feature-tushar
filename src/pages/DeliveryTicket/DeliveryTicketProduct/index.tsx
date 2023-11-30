@@ -1,27 +1,14 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
+import { useState, useEffect, useContext, useReducer } from 'react';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
-import { Box, CircularProgress, TextField } from '@material-ui/core';
-import SearchBox from '../../../components/Helpers/SearchBox';
+import { Box } from '@material-ui/core';
 import CustomAgGrid, { reducer, intialState } from '../../../components/AgGridComponents/CustomAgGrid';
 import {
   gridLoadingTimeout,
-  CustomDialogTransition,
-  packages,
-  isObjectEmpty,
   prepareDataForGrid,
-  getLocalStorageArrayData,
   deliveryTicket
 } from '../../../constants/helpers';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import Dialog from '@material-ui/core/Dialog/Dialog';
-import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
-import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
-import CustomAgGridEditable from '../../../components/AgGridComponents/CustomAgGridEditable';
-import { startCase } from 'lodash';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../../constants/useColumns';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
@@ -127,13 +114,13 @@ const DeliveryTicketProduct = ({ renderedFrom, deliveryTicketId }) => {
           allowSwipe={false}
           permissions={permissions}
           primaryField={columns?.find((d) => d.field === 'productName')}
-          onClick={(data) => {}}
+          onClick={(data) => { }}
           selectedRecords={[]}
           dataRows={dataRows}
           dispatch={dispatch}
-          onEdit={() => {}}
+          onEdit={() => { }}
           extraParamsToCheckDelete={true}
-          onDelete={() => {}}
+          onDelete={() => { }}
           rowCount={rowCount}
           page={page}
           loading={loading}
@@ -141,7 +128,7 @@ const DeliveryTicketProduct = ({ renderedFrom, deliveryTicketId }) => {
           showClone={false}
           fullHeight={true}
           renderedFrom={renderedFrom}
-          onClone={() => {}}
+          onClone={() => { }}
           chips={[
             {
               label: 'Qty: ',

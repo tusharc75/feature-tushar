@@ -16,7 +16,7 @@ import CustomReactTable, { getStaticFields, useColumns, useTableReducer, } from 
 const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, renderedFrom, ignoreIds }) => {
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer();
-  const { page, limit, selectedRecords, search, filters, sorting, showFilteredRecordsOnly } = state;
+  const { page, dataRows, limit, selectedRecords, search, filters, sorting, showFilteredRecordsOnly } = state;
   const [columns, setColumns] = useState(null);
   const [inventories, setInventories] = useState([]);
   const { getColumnData } = useColumns();
@@ -30,7 +30,7 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
   }, []);
 
   useEffect(() => {
-    fetchProductInventory();
+    fetchData();
   }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
 
   const fetchFields = async () => {
@@ -49,9 +49,7 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
         Header: 'Quantity',
         show: true,
         disabled: false,
-        Cell: ({ row }) => (row.original.qty),
-        cellRenderer: 'commonRenderer',
-        cellEditor: 'numericCellEditor',
+        Cell: ({ row }) => <div>{row.original.qty}</div>,
         editable: true,
         filter: false
       },
@@ -60,8 +58,7 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
         Header: 'Inventory',
         show: true,
         disabled: false,
-        Cell: ({ row }) => (row.original.inventory),
-        cellEditor: 'numericCellEditor',
+        Cell: ({ row }) => <div>{row.original.inventory}</div>,
         editable: false,
         filter: false
       }
@@ -69,7 +66,7 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
     setColumns([...columns, ...getStaticFields()]);
   };
 
-  const fetchProductInventory = () => {
+  const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     axiosInstance()
@@ -78,7 +75,7 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
         let rows = data?.map((u: any) => {
           const selectedData = selectedRecords.find((d: any) => d._id === u._id);
           let finalObject = prepareDataForGrid(u);
-          finalObject['productId'] = u._id;
+          finalObject['_id'] = u._id;
           finalObject['inventory'] = u?.inventory ? u?.inventory - (u?.softHold || 0) : 0;
           finalObject['qty'] = selectedData ? selectedData.qty : finalObject['inventory'] ? 1 : 0;
           finalObject['hideSelection'] = finalObject['inventory'] ? false : true;
@@ -86,11 +83,7 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
             ...finalObject
           };
         });
-        if (selectedRecords.length > 0 && showFilteredRecordsOnly) {
-          rows = selectedRecords;
-        }
         dispatch({ type: 'initialize', data: rows, count: count });
-        setInventories(rows);
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
@@ -151,13 +144,14 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
 
   const handleClickSave = () => {
     const _data = selectedRecords?.map((d) => ({
-      product: d.productId,
+      product: d._id,
       qty: Number(d.qty)
     }));
     submit(_data);
   };
 
   const onCellValueChanged = (data, row) => {
+    if (!data || !data?.qty) return;
     if (Number(data.qty) > Number(row.inventory)) {
       toastConfig.setToastConfig({
         type: 'warning',
@@ -166,13 +160,20 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
       });
       return;
     }
-    const newRecords = inventories.map((d) => {
-      if (d.productId === row.productId) {
-        d.qty = Number(data.qty);
+    const rows = [...dataRows];
+    rows?.forEach((d) => {
+      if (row?._id === d._id) {
+        d.qty = parseInt(data.qty);
+        d.isChecked = true;
       }
-      return d;
     });
-    dispatch({ type: 'update', data: newRecords });
+    if (!selectedRecords?.find((e) => e._id === row?._id)) {
+      const editRow = rows?.find((e) => e._id === row?._id);
+      if (editRow) {
+        dispatch({ type: 'selection', selectedRecords: [...selectedRecords, editRow] });
+      }
+    }
+    dispatch({ type: 'update', data: rows });
   };
 
   let disableSave =
@@ -233,13 +234,13 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
         </Box>
         {columns ? (
           <CustomReactTable
-            height={'calc(100vh - 200px)'}
+            height={'calc(100vh - 250px)'}
             columns={columns}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             isClientSideGrid={false}
-            refreshGrid={fetchProductInventory}
+            refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={true}
             onSaveEdit={onCellValueChanged}
           />
