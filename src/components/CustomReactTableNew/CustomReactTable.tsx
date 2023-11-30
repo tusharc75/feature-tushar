@@ -959,10 +959,9 @@ interface DraggableHeaderProps {
 
 const DraggableHeader: React.FC<DraggableHeaderProps> = ({ column, index, reorder, customFilters, dispatch, isClientSideGrid }) => {
   const ref = React.useRef();
-  const { id, Header } = column;
+  const { id, Header, render, canFilter } = column;
   const [filters, setFilters] = useState([]);
 
-  const { render, canFilter } = column;
 
   // Use a useEffect to update filters when customFilters changes
   useEffect(() => {
