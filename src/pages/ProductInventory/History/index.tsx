@@ -9,43 +9,38 @@ import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DurationFilter from 'src/components/DurationFilter';
 import { useAppTheme } from 'src/constants/AppConfig';
-import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, productInventory, sidebarResource } from 'src/constants/helpers';
-import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridComponents/CustomAgGrid';
-import { CommonRenderer, DateTimeRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
+import { dateTimeFormat, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, productInventory, sidebarResource } from 'src/constants/helpers';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import RevertQtyDialog from './RevertQtyDialog';
 import moment from 'moment';
-import React, { useContext, useEffect, useReducer, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Autocomplete } from '@material-ui/lab';
 import { Autorenew } from '@material-ui/icons';
 
 const History = ({ product, warehouse, storageLocation }) => {
   const renderedFrom = `${camelCase(routes.productInventory.title)}_history`;
-
+  const toastConfig = useContext(CustomToastContext);
   const [themeColor] = useAppTheme();
   const isDarkTheme = themeColor === 'dark';
-  const toastConfig = useContext(CustomToastContext);
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, filters, sorting } = state;
+
+  const { state, dispatch } = useTableReducer();
+  const { page, limit, filters, sorting } = state;
+
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
 
   const [isRevertConfirmation, setIsRevertConfirmation] = useState({ open: false, _id: '', product: '' });
   const [revertLoading, setRevertLoading] = useState(false);
-
   const [warehouseOptions, setWarehouseOptions] = useState(null);
   const [storageLocationOptions, setStorageLocationOptions] = useState([]);
-
   const [selectedWarehouse, setSelectedWarehouse] = useState(warehouse && warehouse?.split(',')?.length === 1 ? warehouse : 'All');
   const [selectedStorageLocation, setSelectedStorageLocation] = useState(storageLocation);
-
   const [revertQtyDialog, setRevertQtyDialog] = useState({ open: false, productName: '', product: '', qty: 0, revertedQty: 0, ledgerId: '' });
-
   const [duration, setDuration] = useState({
     from: new Date(moment().subtract('1', 'year').calendar()),
     to: new Date()
@@ -63,9 +58,7 @@ const History = ({ product, warehouse, storageLocation }) => {
 
   const fetchRecords = async () => {
     dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
+
     const queryString = getQueryString();
 
     const response = await axiosInstance().get(`/history/product-ledger/${product}${queryString}`);
@@ -143,173 +136,429 @@ const History = ({ product, warehouse, storageLocation }) => {
   const curr = user?.user?.brandCurrency || '';
 
   const columns = [
-    { field: 'date', headerName: 'Date', show: true, cellRenderer: 'dateTimeRenderer', filter: false, sortable: false, disabled: true },
     {
-      field: 'referenceType',
-      headerName: 'Reference Type',
-      show: true,
-      filter: true,
-      sortable: false,
-      cellRenderer: 'commonRenderer'
-    },
-    { field: 'reference', headerName: 'Reference', show: true, filter: false, sortable: false, cellRenderer: 'referenceRenderer' },
-    {
-      field: 'type',
-      headerName: 'Type',
-      show: true,
-      filter: true,
-      sortable: false,
-      cellRenderer: 'commonRenderer'
-    },
-    {
-      field: 'qty',
-      headerName: 'Credit/Debit',
-      show: true,
-      cellRenderer: 'creditDebitRenderer',
-      filter: false,
-      sortable: false,
+      accessor: 'date',
+      Header: 'Date',
+      canFilter: false,
       disabled: true,
-      cellStyle: (params) => {
-        if (params?.data?.type === 'Credit') {
-          return { backgroundColor: isDarkTheme ? 'hsl(120 73% 40% / 1)' : '#90ee90' };
-        }
-        if (params?.data?.type === 'Debit') {
-          return { backgroundColor: isDarkTheme ? 'hsl(1 100% 65% / 1)' : '#FFCCCB' };
-        }
-      }
+      isSorted: false,
+      Cell: ({ row }) => (
+        <>
+          {row?.original?.date ? (
+            <h5 className="text-truncate" title={moment(row?.original?.date)?.format(dateTimeFormat)}>
+              {moment(row?.original?.date)?.format(dateTimeFormat)}
+            </h5>
+          ) : (
+            <NoDataCell />
+          )}
+        </>
+      )
+    },
+    {
+      accessor: 'referenceType',
+      Header: 'Reference Type',
+      isSorted: false,
+      Cell: ({ row }) => (
+        <>
+          {row?.original?.referenceType ? (
+            <h5 className="text-truncate" title={row?.original?.referenceType}>
+              {row?.original?.referenceType}
+            </h5>
+          ) : (
+            <NoDataCell />
+          )}
+        </>
+      )
+    },
+    {
+      accessor: 'reference',
+      Header: 'Reference',
+      canFilter: false,
+      isSorted: false,
+      Cell: ({ row }) =>
+        row?.original?.reference ? (
+          row?.original?.referenceType === 'Purchase Order' ? (
+            <Link
+              className="link"
+              target="_blank"
+              title={row?.original?.reference}
+              to={`${routes.purchaseOrderDetail.path}/${row?.original?.referenceId}`}
+            >
+              {row?.original?.reference}
+            </Link>
+          ) : row?.original?.referenceType === 'Transfer Inventory' ? (
+            <Link
+              className="link"
+              target="_blank"
+              title={row?.original?.reference}
+              to={`${routes.transferInventoryDetail.path}/${row?.original?.referenceId}`}
+            >
+              {row?.original?.reference}
+            </Link>
+          ) : row?.original?.referenceType === 'Transfer Asset' ? (
+            <Link
+              className="link"
+              target="_blank"
+              title={row?.original?.reference}
+              to={`${routes.transferAssetDetail.path}/${row?.original?.referenceId}`}
+            >
+              {row?.original?.reference}
+            </Link>
+          ) : row?.original?.referenceType === 'Sales Order' ? (
+            <Link
+              className="link"
+              target="_blank"
+              title={row?.original?.reference}
+              to={`${routes.salesOrderDetail.path}/${row?.original?.referenceId}`}
+            >
+              {row?.original?.reference}
+            </Link>
+          ) : row?.original?.referenceType === 'Bulk Asset Creation' ? (
+            <Link
+              className="link"
+              target="_blank"
+              title={row?.original?.reference}
+              to={`${routes.bulkAssetCreationDetail.path}/${row?.original?.referenceId}`}
+            >
+              {row?.original?.reference}
+            </Link>
+          ) : row?.original?.referenceType === 'Serialized Asset' ? (
+            <Link
+              className="link"
+              target="_blank"
+              title={row?.original?.reference}
+              to={`${routes.serializedAssetDetail.path}/${row?.original?.referenceId}`}
+            >
+              {row?.original?.reference}
+            </Link>
+          ) : row?.original?.referenceType === 'Rental Job' ? (
+            <Link
+              className="link"
+              target="_blank"
+              title={row?.original?.reference}
+              to={`${routes.rentalManagementDetail.path}/${row?.original?.referenceId}`}
+            >
+              {row?.original?.reference}
+            </Link>
+          ) : row?.original?.referenceType === 'Work Order' ? (
+            <Link
+              className="link"
+              target="_blank"
+              title={row?.original?.reference}
+              to={`${routes.workOrderDetail.path}/${row?.original?.referenceId}`}
+            >
+              {row?.original?.reference}
+            </Link>
+          ) : row?.original?.referenceType === sidebarResource.fieldTicket ? (
+            <Link
+              className="link"
+              target="_blank"
+              title={row?.original?.reference}
+              to={`${routes.fieldTicketDetail.path}/${row?.original?.referenceId}`}
+            >
+              {row?.original?.reference}
+            </Link>
+          ) : (
+            row?.original?.reference
+          )
+        ) : row?.original?.referenceType === 'Product Inventory' ? (
+          <h5 className="text-truncate">Manual Entry</h5>
+        ) : (
+          <NoDataCell />
+        )
+    },
+    {
+      accessor: 'type',
+      Header: 'Type',
+      isSorted: false,
+      Cell: ({ row }) => (
+        <>
+          {row?.original?.type ? (
+            <h5 className="text-truncate" title={row?.original?.type}>
+              {row?.original?.type}
+            </h5>
+          ) : (
+            <NoDataCell />
+          )}
+        </>
+      )
+    },
+    {
+      accessor: 'qty',
+      Header: 'Credit/Debit',
+      canFilter: false,
+      isSorted: false,
+      disabled: true,
+      // cellStyle: (params) => {
+      //   if (params?.data?.type === 'Credit') {
+      //     return { backgroundColor: isDarkTheme ? 'hsl(120 73% 40% / 1)' : '#90ee90' };
+      //   }
+      //   if (params?.data?.type === 'Debit') {
+      //     return { backgroundColor: isDarkTheme ? 'hsl(1 100% 65% / 1)' : '#FFCCCB' };
+      //   }
+      // }
+      Cell: ({ row }) => (
+        <>
+          {row?.original?.qty ? (
+            <h5 className="text-truncate" title={row?.original?.qty}>
+              {row?.original?.type === 'Debit' ? `-${row?.original?.qty}` : row?.original?.qty}
+            </h5>
+          ) : (
+            <NoDataCell />
+          )}
+        </>
+      )
     },
     ...(!user?.user?.brandPolicy?.hideInventoryCount
-      ? [{ field: 'finalInventory', headerName: 'Final Quantity', show: true, cellRenderer: 'commonRenderer', filter: false, sortable: false }]
-      : []),
-    { field: 'price', headerName: `Cost ${curr}`, show: true, filter: false, cellRenderer: 'commonRenderer' },
-    { field: 'totalPrice', headerName: `Amount ${curr}`, show: true, filter: false, cellRenderer: 'commonRenderer' },
-    ...(selectedWarehouse && selectedWarehouse !== 'All'
       ? [
           {
-            field: 'finalAvgPrice',
-            headerName: `Final Average Cost ${curr}`,
-            show: true,
-            cellRenderer: 'commonRenderer',
-            filter: false,
-            sortable: false
+            accessor: 'finalInventory',
+            Header: 'Final Quantity',
+            canFilter: false,
+            isSorted: false,
+            Cell: ({ row }) => (
+              <>
+                {row?.original?.finalInventory ? (
+                  <h5 className="text-truncate" title={row?.original?.finalInventory}>
+                    {row?.original?.finalInventory}
+                  </h5>
+                ) : (
+                  <NoDataCell />
+                )}
+              </>
+            )
           }
         ]
       : []),
     {
-      field: 'warehouse',
-      headerName: routes.warehouse.title,
-      show: true,
-      filter: false,
-      sortable: false,
-      cellRenderer: 'warehouseRenderer'
+      accessor: 'price',
+      Header: `Cost ${curr}`,
+      canFilter: false,
+      Cell: ({ row }) => (
+        <>
+          {row?.original?.price ? (
+            <h5 className="text-truncate" title={row?.original?.price}>
+              {row?.original?.price}
+            </h5>
+          ) : (
+            <NoDataCell />
+          )}
+        </>
+      )
+    },
+    {
+      accessor: 'totalPrice',
+      Header: `Amount ${curr}`,
+      canFilter: false,
+      Cell: ({ row }) => (
+        <>
+          {row?.original?.totalPrice ? (
+            <h5 className="text-truncate" title={row?.original?.totalPrice}>
+              {row?.original?.totalPrice}
+            </h5>
+          ) : (
+            <NoDataCell />
+          )}
+        </>
+      )
+    },
+    ...(selectedWarehouse && selectedWarehouse !== 'All'
+      ? [
+          {
+            accessor: 'finalAvgPrice',
+            Header: `Final Average Cost ${curr}`,
+            canFilter: false,
+            isSorted: false,
+            Cell: ({ row }) => (
+              <>
+                {row?.original?.finalAvgPrice ? (
+                  <h5 className="text-truncate" title={row?.original?.finalAvgPrice}>
+                    {row?.original?.finalAvgPrice}
+                  </h5>
+                ) : (
+                  <NoDataCell />
+                )}
+              </>
+            )
+          }
+        ]
+      : []),
+    {
+      accessor: 'warehouse',
+      Header: routes.warehouse.title,
+      canFilter: false,
+      isSorted: false,
+      Cell: ({ row }) => (
+        <>
+          {row?.original?.warehouse ? (
+            <Link
+              className="link"
+              target="_blank"
+              title={row?.original?.warehouse}
+              to={`${routes.warehouseDetail.path}/${row?.original?.warehouseId}`}
+            >
+              {row?.original?.warehouse}
+            </Link>
+          ) : (
+            <NoDataCell />
+          )}
+        </>
+      )
     },
     ...(user?.user?.brandPolicy?.storageLocation
       ? [
           {
-            field: 'storageLocation',
-            headerName: 'Storage Location',
-            show: true,
-            filter: false,
-            sortable: false,
-            cellRenderer: 'storageLocationRenderer'
+            accessor: 'storageLocation',
+            Header: 'Storage Location',
+            canFilter: false,
+            isSorted: false,
+            Cell: ({ row }) => (
+              <>
+                {row?.original?.storageLocation ? (
+                  <Link
+                    className="link"
+                    target="_blank"
+                    title={row?.original?.storageLocation}
+                    to={`${routes.storageLocationDetail.path}/${row?.original?.storageLocationId}`}
+                  >
+                    {row?.original?.storageLocation}
+                  </Link>
+                ) : (
+                  <NoDataCell />
+                )}
+              </>
+            )
           }
         ]
       : []),
-    { field: 'supplierPartNumber', headerName: 'Supplier Part Number', show: true, cellRenderer: 'commonRenderer', filter: true, sortable: false },
-    { field: 'comment', headerName: 'Comment', show: true, cellRenderer: 'commonRenderer', filter: true, sortable: false },
-    { field: 'serialNumber', headerName: 'Serial Number', show: true, cellRenderer: 'commonRenderer', filter: false, sortable: false },
-    { field: 'user', headerName: 'Transacted By', show: true, cellRenderer: 'userRenderer', filter: true, sortable: false },
-    { field: 'transactionDate', headerName: 'Actual Transaction Date', show: false, filter: false, sortable: false, cellRenderer: 'dateTimeRenderer' }
-  ];
-
-  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
-  if (columnState && columns) {
-    columns?.forEach((item) => {
-      columnState.forEach((d) => {
-        if (d.colId === item.field) {
-          item.show = !d.hide;
-        }
-      });
-    });
-  }
-
-  const CreditDebitRenderer = (params: any) => (
-    <span>{params?.value ? params?.data?.type === 'Debit' ? `-${params?.value}` : params?.value : <NoDataCell />}</span>
-  );
-
-  const WarehouseRenderer = (params) =>
-    params?.value ? (
-      <Link className="link" target="_blank" title={params.value} to={`${routes.warehouseDetail.path}/${params.data.warehouseId}`}>
-        {params.value}
-      </Link>
-    ) : (
-      <NoDataCell />
-    );
-
-  const StorageLocationRenderer = (params) =>
-    params?.value ? (
-      <Link className="link" target="_blank" title={params.value} to={`${routes.storageLocationDetail.path}/${params.data.storageLocationId}`}>
-        {params.value}
-      </Link>
-    ) : (
-      <NoDataCell />
-    );
-
-  const UserRenderer = (params) =>
-    params?.value ? (
-      <Link className="link" target="_blank" title={params.value} to={`${routes.userDetail.path}/${params.data.userId}`}>
-        {params.value}
-      </Link>
-    ) : (
-      <NoDataCell />
-    );
-
-  const ReferenceRenderer = (params) =>
-    params?.value ? (
-      params.data.referenceType === 'Purchase Order' ? (
-        <Link className="link" target="_blank" title={params.value} to={`${routes.purchaseOrderDetail.path}/${params.data.referenceId}`}>
-          {params.value}
-        </Link>
-      ) : params.data.referenceType === 'Transfer Inventory' ? (
-        <Link className="link" target="_blank" title={params.value} to={`${routes.transferInventoryDetail.path}/${params.data.referenceId}`}>
-          {params.value}
-        </Link>
-      ) : params.data.referenceType === 'Transfer Asset' ? (
-        <Link className="link" target="_blank" title={params.value} to={`${routes.transferAssetDetail.path}/${params.data.referenceId}`}>
-          {params.value}
-        </Link>
-      ) : params.data.referenceType === 'Sales Order' ? (
-        <Link className="link" target="_blank" title={params.value} to={`${routes.salesOrderDetail.path}/${params.data.referenceId}`}>
-          {params.value}
-        </Link>
-      ) : params.data.referenceType === 'Bulk Asset Creation' ? (
-        <Link className="link" target="_blank" title={params.value} to={`${routes.bulkAssetCreationDetail.path}/${params.data.referenceId}`}>
-          {params.value}
-        </Link>
-      ) : params.data.referenceType === 'Serialized Asset' ? (
-        <Link className="link" target="_blank" title={params.value} to={`${routes.serializedAssetDetail.path}/${params.data.referenceId}`}>
-          {params.value}
-        </Link>
-      ) : params.data.referenceType === 'Rental Job' ? (
-        <Link className="link" target="_blank" title={params.value} to={`${routes.rentalManagementDetail.path}/${params.data.referenceId}`}>
-          {params.value}
-        </Link>
-      ) : params.data.referenceType === 'Work Order' ? (
-        <Link className="link" target="_blank" title={params.value} to={`${routes.workOrderDetail.path}/${params.data.referenceId}`}>
-          {params.value}
-        </Link>
-      ) : params.data.referenceType === sidebarResource.fieldTicket ? (
-        <Link className="link" target="_blank" title={params.value} to={`${routes.fieldTicketDetail.path}/${params.data.referenceId}`}>
-          {params.value}
-        </Link>
-      ) : (
-        params.value
+    {
+      accessor: 'supplierPartNumber',
+      Header: 'Supplier Part Number',
+      isSorted: false,
+      Cell: ({ row }) => (
+        <>
+          {row?.original?.supplierPartNumber ? (
+            <h5 className="text-truncate" title={row?.original?.supplierPartNumber}>
+              {row?.original?.supplierPartNumber}
+            </h5>
+          ) : (
+            <NoDataCell />
+          )}
+        </>
       )
-    ) : params.data.referenceType === 'Product Inventory' ? (
-      <p>Manual Entry</p>
-    ) : (
-      <NoDataCell />
-    );
+    },
+    {
+      accessor: 'comment',
+      Header: 'Comment',
+      isSorted: false,
+      Cell: ({ row }) => (
+        <>
+          {row?.original?.comment ? (
+            <h5 className="text-truncate" title={row?.original?.comment}>
+              {row?.original?.comment}
+            </h5>
+          ) : (
+            <NoDataCell />
+          )}
+        </>
+      )
+    },
+    {
+      accessor: 'serialNumber',
+      Header: 'Serial Number',
+      canFilter: false,
+      isSorted: false,
+      Cell: ({ row }) => (
+        <>
+          {row?.original?.serialNumber ? (
+            <h5 className="text-truncate" title={row?.original?.serialNumber}>
+              {row?.original?.serialNumber}
+            </h5>
+          ) : (
+            <NoDataCell />
+          )}
+        </>
+      )
+    },
+    {
+      accessor: 'user',
+      Header: 'Transacted By',
+      isSorted: false,
+      Cell: ({ row }) => (
+        <>
+          {row?.original?.user ? (
+            <Link className="link" target="_blank" title={row?.original?.user} to={`${routes.userDetail.path}/${row?.original?.userId}`}>
+              {row?.original?.user}
+            </Link>
+          ) : (
+            <NoDataCell />
+          )}
+        </>
+      )
+    },
+    {
+      accessor: 'transactionDate',
+      Header: 'Actual Transaction Date',
+      canFilter: false,
+      isSorted: false,
+      Cell: ({ row }) => (
+        <>
+          {row?.original?.transactionDate ? (
+            <h5 className="text-truncate" title={moment(row?.original?.transactionDate)?.format(dateTimeFormat)}>
+              {moment(row?.original?.transactionDate)?.format(dateTimeFormat)}
+            </h5>
+          ) : (
+            <NoDataCell />
+          )}
+        </>
+      )
+    },
+    {
+      accessor: 'action',
+      Header: 'Actions',
+      minWidth: 100,
+      width: 110,
+      sticky: 'right',
+      disableFilters: true,
+      disableSortBy: true,
+      canDrag: false,
+      Cell: ({ row }) => (
+        <>
+          {(['Product Inventory', 'Reverted'].includes(row?.original?.referenceType) && !row?.original?.reverted) ||
+          ([sidebarResource.workOrder, sidebarResource.fieldTicket].includes(row?.original?.referenceType) &&
+            row?.original?.type?.toLowerCase() === 'debit' &&
+            row?.original?.qty - (row?.original?.revertedQty || 0) > 0) ? (
+            <Box pl={1}>
+              <HtmlTooltip title="Revert">
+                <span>
+                  <IconButton
+                    size="small"
+                    aria-label="revert"
+                    onClick={() => {
+                      if ([sidebarResource.workOrder, sidebarResource.fieldTicket].includes(row?.original?.referenceType)) {
+                        setRevertQtyDialog({
+                          open: true,
+                          productName: '',
+                          product: row?.original?.product,
+                          qty: row?.original?.qty,
+                          revertedQty: row?.original?.revertedQty || 0,
+                          ledgerId: row?.original?._id
+                        });
+                      } else {
+                        setIsRevertConfirmation({ open: true, _id: row?.original?._id, product: row?.original?.product });
+                      }
+                    }}
+                  >
+                    <Autorenew fontSize="small" color="primary" />
+                  </IconButton>
+                </span>
+              </HtmlTooltip>
+            </Box>
+          ) : null}
+        </>
+      )
+    }
+  ];
 
   const handleRevert = () => {
     setRevertLoading(true);
@@ -326,51 +575,6 @@ const History = ({ product, warehouse, storageLocation }) => {
         setRevertLoading(false);
         toastConfig.setToastConfig(error);
       });
-  };
-
-  const ActionsRenderer = (params) => (
-    <>
-      {(['Product Inventory', 'Reverted'].includes(params.data.referenceType) && !params?.data?.reverted) ||
-      ([sidebarResource.workOrder, sidebarResource.fieldTicket].includes(params.data.referenceType) &&
-        params.data.type?.toLowerCase() === 'debit' &&
-        params.data.qty - (params.data?.revertedQty || 0) > 0) ? (
-        <Box pl={1}>
-          <HtmlTooltip title="Revert">
-            <IconButton
-              size="small"
-              aria-label="revert"
-              onClick={() => {
-                if ([sidebarResource.workOrder, sidebarResource.fieldTicket].includes(params.data.referenceType)) {
-                  setRevertQtyDialog({
-                    open: true,
-                    productName: '',
-                    product: params.data.product,
-                    qty: params.data.qty,
-                    revertedQty: params?.data?.revertedQty || 0,
-                    ledgerId: params.data._id
-                  });
-                } else {
-                  setIsRevertConfirmation({ open: true, _id: params?.data?._id, product: params?.data?.product });
-                }
-              }}
-            >
-              <Autorenew fontSize="small" color="primary" />
-            </IconButton>
-          </HtmlTooltip>
-        </Box>
-      ) : null}
-    </>
-  );
-
-  const frameworkComponents = {
-    referenceRenderer: ReferenceRenderer,
-    warehouseRenderer: WarehouseRenderer,
-    storageLocationRenderer: StorageLocationRenderer,
-    userRenderer: UserRenderer,
-    creditDebitRenderer: CreditDebitRenderer,
-    commonRenderer: CommonRenderer,
-    dateTimeRenderer: DateTimeRenderer,
-    actionsRenderer: ActionsRenderer
   };
 
   return (
@@ -432,21 +636,15 @@ const History = ({ product, warehouse, storageLocation }) => {
       )}
       <Grid item xs={12} md={12} sm={12}>
         {columns ? (
-          <CustomAgGrid
+          <CustomReactTable
+            height={'calc(100vh - 300px)'}
             columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameworkComponents}
-            setGridApi={setGridApi}
+            state={state}
             dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            allowAction={true}
-            loading={loading}
-            allowSelection={false}
             renderedFrom={renderedFrom}
+            isClientSideGrid={false}
             refreshGrid={fetchRecords}
+            hideSelection={true}
           />
         ) : (
           <Box p={2} height={500}>
