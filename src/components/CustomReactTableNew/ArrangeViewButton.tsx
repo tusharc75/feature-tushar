@@ -3,7 +3,6 @@ import { IconButton } from '@material-ui/core';
 import SwapHorizIcon from '@material-ui/icons/SwapHoriz';
 import axiosInstance from '../../axios/axiosInstance';
 import { useData } from '../../StateProvider/Provider';
-import { disabledColumns } from '../../constants/useColumns';
 import { SET_GRID_METADATA } from '../../StateProvider/actionTypes';
 import ArrangeViewDialog from './ArrangeViewDialog';
 import HtmlTooltip from '../CustomTooltipTitle';
@@ -14,14 +13,12 @@ const ArrangeViewButton = ({
   columns,
   loading = false,
   renderedFrom = null,
-  isClientSideGrid = false,
-  saveColumnOptions = false,
   setHiddenColumns = null,
   getToggleHideAllColumnsProps = null,
   setColumnOrder = null,
   defaultColumns = null,
-  refColsOrder = null
 }) => {
+
   const [openColumnSelection, setOpenColumnSelection] = useState(false);
 
   const {
@@ -29,21 +26,19 @@ const ArrangeViewButton = ({
   }: any = useData();
   const { dispatch }: any = useData();
 
-  const updateGridHiddenColumns = (hiddenColumns = []) => {
+
+  const updateGridHiddenColumns = (hiddenColumns = [], columnOrder = []) => {
     if (timeout) clearTimeout(timeout);
     timeout = setTimeout(function () {
       let data = localStorage.getItem('gridMetaData');
-      let request = data == 'undefined' ? {} : { ...JSON.parse(data) };
+      let request = data === 'undefined' ? {} : { ...JSON.parse(data) };
       if (request[renderedFrom]) {
-        request[renderedFrom].hide = [...hiddenColumns];
+        request[renderedFrom].order = columnOrder;
+        request[renderedFrom].hide = hiddenColumns;
       } else {
         request[renderedFrom] = {
-          hide: [...hiddenColumns],
-          staticColumns: {
-            createdBy: false,
-            updatedBy: false
-          },
-          disable: disabledColumns[renderedFrom] ?? []
+          order: columnOrder,
+          hide: hiddenColumns,
         };
       }
       updateGridMetaData(request);
@@ -51,15 +46,15 @@ const ArrangeViewButton = ({
   };
 
   const updateGridMetaData = (request) => {
-    axiosInstance()
-      .post(`user/meta-grid`, {
-        _id: user?.user?._id,
-        gridMetaData: { ...request }
-      })
+    axiosInstance().post(`user/meta-grid`, {
+      _id: user?.user?._id,
+      gridMetaData: { ...request }
+    })
       .then((data) => {
         fetchGridMetaData();
       });
   };
+
   const fetchGridMetaData = () => {
     axiosInstance()
       .get(`user/meta-grid/${user?.user?._id}`)
@@ -95,15 +90,11 @@ const ArrangeViewButton = ({
             columns={columns}
             onClose={() => setOpenColumnSelection(false)}
             updateGridHiddenColumns={updateGridHiddenColumns}
-            saveColumnOptions={saveColumnOptions}
-            columnApi={null}
-            isClientSideGrid={isClientSideGrid}
             renderedFrom={renderedFrom}
             defaultColumns={defaultColumns}
             setHiddenColumns={setHiddenColumns}
             getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
             setColumnOrder={setColumnOrder}
-            refColsOrder={refColsOrder}
           />
         </>
       )}
