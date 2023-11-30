@@ -13,7 +13,6 @@ export type TSwipableListInputProps = {
   allColumns: any;
   expander: boolean;
   prepareRow: any;
-  handleCellSelection: any;
   IndeterminateCheckbox: any;
   backgroundColorClass?: (data: any) => string | null;
   submitInput: any;
