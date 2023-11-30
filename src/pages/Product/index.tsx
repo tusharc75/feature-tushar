@@ -179,20 +179,22 @@ const Product = () => {
             </IconButton>
           </span>
         </HtmlTooltip>
-        <HtmlTooltip title={permissions.product.isRead && permissions?.serializedAsset ? "Child Product" : childDisable}>
-          <span>
-            <IconButton
-              disabled={permissions.product.isRead && permissions?.serializedAsset ? false : true}
-              size="small"
-              aria-label="View Child Product"
-              onClick={() => {
-                history.push(`${routes.productDetail.path}/${row?.original._id}/bom`, { productName: row?.original.productName });
-              }}
-            >
-              <RiBillLine color={permissions.product.isRead && permissions?.serializedAsset ? "primary" : "disabled"} />
-            </IconButton>
-          </span>
-        </HtmlTooltip>
+        {permissions?.serializedAsset || permissions?.productionOrder &&
+          <HtmlTooltip title={permissions.product.isUpdate ? "Child Product" : childDisable}>
+            <span>
+              <IconButton
+                disabled={permissions.product.isUpdate ? false : true}
+                size="small"
+                aria-label="View Child Product"
+                onClick={() => {
+                  history.push(`${routes.productDetail.path}/${row?.original._id}/bom`, { productName: row?.original.productName });
+                }}
+              >
+                <RiBillLine color={permissions.product.isUpdate ? "primary" : "disabled"} />
+              </IconButton>
+            </span>
+          </HtmlTooltip>
+        }
       </>
     )
   }
@@ -561,7 +563,7 @@ const Product = () => {
                 style={isMobile ? { flex: 1 } : {}}
               />
               <div className="flex gap-[8px] flex-wrap items-center">
-                {permissions?.purchaseOrder?.isCreate && (
+                {permissions?.product?.isCreate && (
                   <Button
                     onClick={() => {
                       setOpen(true);
