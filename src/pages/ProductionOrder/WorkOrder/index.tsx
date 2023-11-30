@@ -4,7 +4,7 @@ import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
+import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTableNew';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import {
   CHILD_RESOURCE,
@@ -35,12 +35,14 @@ import AttachmentDialog from 'src/pages/WorkOrder/Service/AttachmentDialog';
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
 const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, setCurrentStep }) => {
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, page, limit, filters, sorting, selectedRecords } = state;
+
   const {
     state: { user, permissions }
   }: any = useData();
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState(null);
-  const [rowsData, setRowsData] = useState(null);
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [addServicesDialog, setAddServicesDialog] = useState({ open: false, new: false });
   const [userAssignDialog, setUserAssignDialog] = useState({ open: false, assignedUsers: [] });
@@ -55,8 +57,6 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   const [isSubmitting, setSubmitting] = useState(false);
   const [consumablesDialog, setConsumablesDialog] = useState({ open: false, ids: [], data: null });
   const [attachmentsDialog, setAttachmentsDialog] = useState({ open: false, workOrderId: null, uniqueServiceId: null, serviceName: null });
-
-  const [selectedRecords, setSelectedRecords] = useState([]);
 
   useEffect(() => {
     fetchFields();
@@ -81,7 +81,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         Header: 'Index',
         width: 70,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+        Cell: ({ row }) => <h5 className="text-truncate">{row.original.index}</h5>,
         Footer: () => {
           return <>Total</>;
         }
@@ -89,10 +89,9 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       {
         accessor: 'type',
         Header: 'Type',
-        disableFilters: true,
         sticky: isMobile ? 'none' : 'left',
-        width: 100,
-        Cell: ({ row }) => (row.original['type'] ? <p>{`${startCase(row.original?.type)} `}</p> : <NoDataCell />)
+        canFilter: true,
+        Cell: ({ row }) => (row.original['type'] ? <h5>{`${startCase(row.original?.type)} `}</h5> : <NoDataCell />)
       },
       {
         accessor: 'detail',
@@ -102,7 +101,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row, rows }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <p className="text-truncate">{row.original?.detail}</p>
+            <h5 className="text-truncate">{row.original?.detail}</h5>
             <Box ml={1}>
               <IconButton
                 size="small"
@@ -125,19 +124,17 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       {
         accessor: 'description',
         Header: 'Description',
-        width: 200,
         Cell: ({ row }) => {
-          return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
+          return row.original['description'] ? <h5 className="text-truncate">{row.original.description}</h5> : <NoDataCell />;
         }
       },
       {
         accessor: 'workOrder',
         Header: 'Work Order',
-        width: 200,
         Cell: ({ row }) =>
           row.original.workOrder ? (
             <div className="d-flex gap-2 align-items-center">
-              <p className="text-truncate">{row.original.workOrderNumber}</p>
+              <h5 className="text-truncate">{row.original.workOrderNumber}</h5>
               <IconButton
                 size="small"
                 onClick={() => {
@@ -154,8 +151,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       {
         accessor: 'workOrderStatus',
         Header: 'Result',
-        width: 200,
-        Cell: ({ row }) => (row?.original['workOrderStatus'] ? <p> {row?.original?.workOrderStatus}</p> : <NoDataCell />)
+        Cell: ({ row }) => (row?.original['workOrderStatus'] ? <h5> {row?.original?.workOrderStatus}</h5> : <NoDataCell />)
       },
       {
         accessor: 'assignedUsers',
@@ -197,8 +193,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       coloum.push({
         accessor: 'assignedWorkStations',
         Header: 'Assigned Work Station',
-        disableFilters: true,
-        width: 200,
+        canFilter: true,
         Cell: ({ row }) =>
           row?.original['assignedWorkStations'] && row?.original['assignedWorkStations']?.length ? (
             row?.original['assignedWorkStations']?.map((e, i) => {
@@ -237,9 +232,6 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       minWidth: 70,
       width: 70,
       sticky: 'right',
-      disableFilters: true,
-      disableSortBy: true,
-      canDrag: false,
       Cell: ({ row }) => {
         return (
           <>
@@ -282,14 +274,42 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       }
     });
     setColumns(coloum);
+  };
+
+  useEffect(() => {
     fetchData();
+  }, [page, limit, filters, sorting]);
+
+  const getQueryString = (isExport = false) => {
+    let deepFilter = `?page=${page}&limit=${limit}`;
+    if (isExport) {
+      deepFilter = `?`;
+    }
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
+
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    }
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
+    }
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
+    }
+    if (sorting.length > 0) {
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+    }
+    return deepFilter;
   };
 
   const fetchData = async () => {
+    dispatch({ type: 'loading', loading: true });
+    const queryString = getQueryString();
     setNextStep(false);
-    var data: any = [];
-    const response = await axiosInstance().get(`${productionOrder.api}/${productionOrderData._id}/work-order/service`);
-    data = response?.data?.data;
+
+    const {
+      data: { data, count }
+    } = await axiosInstance().get(`${productionOrder.api}/${productionOrderData._id}/work-order/service${queryString}`);
     let rows = data.material.filter((e) => e.type === MATERIAL_TYPE.product && e?.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
@@ -324,7 +344,9 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     if (rows.filter((e) => e?.workOrderStatus === WORK_ORDER_STATUS.completed)?.length === rows?.length) {
       setNextStep(true);
     }
-    setRowsData(rows);
+    dispatch({ type: 'initialize', data: rows, count: count });
+    dispatch({ type: 'selection', selectedRecords: [] });
+    dispatch({ type: 'loading', loading: false });
   };
 
   const generateNestedData = (material, parent) => {
@@ -668,12 +690,12 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                     var ids = [];
                     if (selectedRecords?.find((e) => e.type === MATERIAL_TYPE.product)) {
                       const product = selectedRecords?.find((e) => e.type === MATERIAL_TYPE.product);
-                      ids = flattenArray(rowsData)
+                      ids = flattenArray(dataRows)
                         ?.filter((e) => e?.workOrder?._id === product?.workOrder?._id)
                         ?.map((e) => e.materialId);
                     } else {
                       const serviceIds = selectedRecords?.filter((d) => d?.type === MATERIAL_TYPE.service)?.map((e) => e._id);
-                      ids = flattenArray(rowsData)
+                      ids = flattenArray(dataRows)
                         ?.filter((e) => serviceIds?.includes(e?.parentId))
                         ?.map((e) => e.materialId);
                     }
@@ -750,22 +772,20 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
           </Box>
         )}
       </Box>
-      {columns && rowsData ? (
+      {columns && dataRows ? (
         <>
           <Box zIndex={5} width={'100%'}>
             <CustomReactTable
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
               columns={columns}
-              data={rowsData}
-              onSelect={(data) => {
-                setSelectedRecords(data?.filter((d) => !d.hideSelection) || []);
-              }}
+              state={state}
               setWholeRowsCellColor={(rowData) => (rowData.type === 'service' ? 'isService' : '')}
-              childrenProperty="subRows"
-              uniqueKey="_id"
+              dispatch={dispatch}
               renderedFrom={renderedFrom}
-              isClientSideGrid={true}
+              isClientSideGrid={false}
+              refreshGrid={fetchData}
               hideSelection={!allowedToEdit}
+              expander={true}
             />
           </Box>
         </>
