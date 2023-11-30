@@ -11,18 +11,13 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { purchaseOrder, purchaseOrderSteps, PURCHASE_ORDER_STATUS, ACTIVITY_RESOURCE, displayDateTime } from '../../constants/helpers';
 import ManagePurchaseOrder from './ManagePurchaseOrder';
-import ExpandMore from '@material-ui/icons/ExpandMore';
-import MenuItem from '@material-ui/core/MenuItem';
-import Menu from '@material-ui/core/Menu';
 import { FaWpforms } from 'react-icons/fa';
 import { BiFoodMenu } from 'react-icons/bi';
 import queryString from 'query-string';
 import { isMobile, isTablet } from 'react-device-detect';
 import Product from './Product';
-import HideWhenOffline from '../../components/HideWhenOffline';
-import IssuePo from './IssuePo';
 import ReceivingAsset from './ReceivingAsset';
-import { GrStatusGood, GrStatusInfo, RiFlowChart } from 'react-icons/all';
+import {  RiFlowChart } from 'react-icons/all';
 import Steps, { getIndex } from 'src/components/Steps';
 import { camelCase } from 'lodash';
 import ContentFullScreen from '../../components/ContentFullScreen';
@@ -365,17 +360,6 @@ const PurchaseOrderDetailsPage = () => {
                       checkReceivedProduct={checkReceivedProduct}
                     />
                   )}
-                  {/* {currentStep === 2 && (
-                            <IssuePo
-                              purchaseOrderData={purchaseOrderData}
-                              handleViewPdf={handleViewPdf}
-                              updateStatus={updateStatus}
-                              setCurrentStep={setCurrentStep}
-                              currentStep={currentStep}
-                              statusOptions={statusOptions}
-                              renderedFrom={`${renderedFrom}_grid-3`}
-                            />
-                          )} */}
                   {currentStep === 1 && (
                     <ReceivingAsset
                       purchaseOrderData={purchaseOrderData}

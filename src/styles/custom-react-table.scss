@@ -323,6 +323,18 @@ $isAppliedBillDark: #234623;
         td.error {
           background: var(--error-bg);
         }
+
+        td.dark-gray {
+          background: var(--dark-gray, #FAEAE9);
+        }
+        
+        td.dark-green {
+          background: var(--dark-green, #DBF8DB);
+        }
+        
+        td.dark-yellow {
+          background: var(--dark-yellow, #FFD580);
+        }
       }
 
       [data-sticky-td] {

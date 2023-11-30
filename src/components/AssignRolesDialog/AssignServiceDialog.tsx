@@ -16,26 +16,25 @@ import { camelCase } from 'lodash';
 let searchTimeout;
 
 const AssignServiceDialog = ({ onSuccess, handleClose, ids = [], extraStaticFilter = [], isSubmitting = false, hideQty = false }) => {
-  const renderedFrom = `${camelCase(routes.serviceMaster?.title)}_assign`;
+  const renderedFrom = `${camelCase(routes.serviceMaster?.title)}_Assign`;
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer();
-  const { dataRows, rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { dataRows, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { getColumnData } = useColumns();
 
   const {
     state: { permissions, selectedEntity, user }
   }: any = useData();
 
-  const [disableSaveButton, setDisableSaveButton] = useState(false);
   const [columns, setColumns] = useState(null);
 
   const defaultColumns = [
     {
       accessor: 'qty',
       Header: 'Qty',
-      minWidth: 180,
-      width: 180,
+      minWidth: 150,
+      width: 150,
       editable: true,
       disableFilters: true,
       disableSortBy: true,
@@ -47,9 +46,6 @@ const AssignServiceDialog = ({ onSuccess, handleClose, ids = [], extraStaticFilt
     fetchGridColumns();
   }, []);
 
-  useEffect(() => {
-    setDisableSaveButton(selectedRecords?.some((d) => d.qty === 0));
-  }, [selectedRecords]);
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
@@ -66,7 +62,6 @@ const AssignServiceDialog = ({ onSuccess, handleClose, ids = [], extraStaticFilt
       .get('/field?resource=Service Master&view=true')
       .then(({ data: { data } }) => {
         let columns = [];
-        let rendererNames = [];
         data.forEach((o) => {
           let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serviceMasterDetail.path);
           if (currentColumn !== null) {
@@ -91,8 +86,7 @@ const AssignServiceDialog = ({ onSuccess, handleClose, ids = [], extraStaticFilt
       .then(({ data }) => {
         let rows = data.data.map((u) => {
           let finalObject = prepareDataForGrid(u);
-          finalObject['isChecked'] = false;
-          finalObject['id'] = u._id;
+          finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
           finalObject['qty'] = 1;
           finalObject['unitMain'] = u?.unit;
           finalObject['pricingMethodMain'] = u?.pricingMethod;
@@ -103,10 +97,6 @@ const AssignServiceDialog = ({ onSuccess, handleClose, ids = [], extraStaticFilt
           return {
             ...finalObject
           };
-        });
-        dispatch({
-          type: 'selection',
-          selectedRecords: selectedRecords || []
         });
         dispatch({ type: 'initialize', data: rows, count: data.count });
         setTimeout(() => {
@@ -166,26 +156,20 @@ const AssignServiceDialog = ({ onSuccess, handleClose, ids = [], extraStaticFilt
 
   const onSaveEdit = (data, row) => {
     if (!data || !data?.qty) return;
-    const selectedFromStorage = selectedRecords;
-    if (!selectedFromStorage || selectedFromStorage.length === 0) return;
-    const updatedRecords = selectedFromStorage.map((d) => {
-      if (row?._id === d._id) {
-        d.qty = parseInt(data.qty);
-      }
-      return d;
-    });
-
-    const rows = dataRows;
-
+    const rows = [...dataRows];
     rows?.forEach((d) => {
       if (row?._id === d._id) {
         d.qty = parseInt(data.qty);
+        d.isChecked = true;
       }
     });
-
-    dispatch({ type: 'initialize', data: rows, count: rowCount });
-    dispatch({ type: 'selection', selectedRecords: updatedRecords });
-    setDisableSaveButton(selectedRecords?.some((d) => d.qty === 0));
+    if (!selectedRecords?.find((e) => e._id === row?._id)) {
+      const editRow = rows?.find((e) => e._id === row?._id);
+      if (editRow) {
+        dispatch({ type: 'selection', selectedRecords: [...selectedRecords, editRow] });
+      }
+    }
+    dispatch({ type: 'update', data: rows });
   };
 
   return (
@@ -203,7 +187,7 @@ const AssignServiceDialog = ({ onSuccess, handleClose, ids = [], extraStaticFilt
               <Box className={styles.filter_side_header} component="div">
                 <SearchBox onChange={handleSearch} className={styles.search_box_input} width="242px" size="small" value={search} />
                 <Button
-                  disabled={isSubmitting || disableSaveButton || selectedRecords?.length === 0}
+                  disabled={isSubmitting || selectedRecords?.length === 0}
                   onClick={() => {
                     onSuccess(selectedRecords);
                   }}
