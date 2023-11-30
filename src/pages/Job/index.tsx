@@ -155,12 +155,12 @@ const Job = () => {
             <IconButton
               size="small"
               aria-label="Clone"
-              disabled={permissions?.productionOrder?.isCreate ? false : true}
+              disabled={permissions?.job?.isCreate ? false : true}
               onClick={() => {
                 setShowManageJobDialog({ open: true, isClone: true, idToClone: row.original._id });
               }}
             >
-              <FileCopyIcon fontSize="small" color={permissions?.productionOrder?.isCreate ? 'primary' : 'disabled'} />
+              <FileCopyIcon fontSize="small" color={permissions?.job?.isCreate ? 'primary' : 'disabled'} />
             </IconButton>
           </span>
         </HtmlTooltip>
@@ -484,7 +484,7 @@ const Job = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${routes?.productionOrder?.title} ${deleteRecord?.productionOrderNumber || ''} ?`}
+            message={`Are you sure you want to delete ${deleteRecord?.jobNumber ? 'Job' : 'Jobs'} ${deleteRecord.jobNumber || ''}?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
