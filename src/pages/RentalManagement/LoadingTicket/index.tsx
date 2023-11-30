@@ -1,5 +1,5 @@
 import Box from '@material-ui/core/Box/Box';
-import { useState, useEffect, useReducer, useContext, Fragment } from 'react';
+import { useState, useEffect, useContext, Fragment } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
 import { Link } from 'react-router-dom';
@@ -80,7 +80,6 @@ const LoadingTicket = ({
   checkProgressiveBilling
 }) => {
   const toastConfig = useContext(CustomToastContext);
-  const history = useHistory();
   const classes = useStyles();
 
   const {
@@ -88,7 +87,7 @@ const LoadingTicket = ({
   }: any = useData();
 
   const { state, dispatch } = useTableReducer();
-  const { dataRows, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { selectedRecords } = state;
 
   const [downlodingFile, setDownlodingFile] = useState(false);
   const [okBtnLoading, setOkBtnLoading] = useState(false);
@@ -355,7 +354,7 @@ const LoadingTicket = ({
     return field?.fieldLabel || '';
   };
 
-  const columns = [
+  const columns: any = [
     {
       accessor: 'index',
       Header: 'Index',
@@ -369,7 +368,18 @@ const LoadingTicket = ({
       Header: 'Details',
       disabled: true,
       Cell: ({ row }) => (
-        <div style={{ display: 'flex', alignItems: 'center' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            backgroundColor:
+              row?.original?.warehouseId && row?.original?.warehouseId !== rentalManagementData?.warehouse?.optionValue
+                ? COLOUR_MASTER.transferAsset.background
+                : [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert]?.includes(row?.original?.status)
+                ? COLOUR_MASTER.lostAssets.background
+                : ''
+          }}
+        >
           <h5 className="text-truncate" title={row?.original?.assetNumber}>
             {row?.original?.assetNumber}
           </h5>
@@ -424,22 +434,6 @@ const LoadingTicket = ({
         </div>
       )
     },
-    // {
-    //   field: 'assetNumber',
-    //   headerName: 'Details',
-    //   show: true,
-    //   disabled: true,
-    //   cellRenderer: 'inventoryRenderer',
-    //   cellStyle: (params) => {
-    //     if ([ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(params?.data?.status)) {
-    //       return { backgroundColor: COLOUR_MASTER.lostAssets.background };
-    //     }
-    //     if (params?.data?.warehouseId && params?.data?.warehouseId !== rentalManagementData?.warehouse?.optionValue) {
-    //       return { backgroundColor: COLOUR_MASTER.transferAsset.background };
-    //     }
-    //     return null;
-    //   }
-    // },
     {
       accessor: 'displayType',
       Header: 'Type',
@@ -538,44 +532,6 @@ const LoadingTicket = ({
       accessor: 'status',
       Header: 'Asset Status',
       Cell: ({ row }) => (row?.original?.status ? <h5 className="text-truncate">{row?.original?.status}</h5> : <NoDataCell />)
-    },
-    {
-      accessor: 'action',
-      Header: 'Actions',
-      minWidth: 100,
-      width: 100,
-      sticky: 'right',
-      disableFilters: true,
-      disableSortBy: true,
-      canDrag: false,
-      Cell: ({ row }) =>
-        user?.user?.brandPolicy?.assetDeliveredStatus &&
-        [RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy, RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable]?.includes(
-          row?.original?.rentalAssetStatus
-        ) &&
-        row?.original?.type === 'Asset' ? (
-          <HtmlTooltip title={'Change Date'}>
-            <span>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  setOpenDateDialog({
-                    open: true,
-                    type: 'changeDate',
-                    status: row?.original?.assetNumber,
-                    prevStatus: '',
-                    assets: [row?.original?._id],
-                    loading: false
-                  });
-                }}
-              >
-                <Edit fontSize="small" />
-              </IconButton>
-            </span>
-          </HtmlTooltip>
-        ) : (
-          ''
-        )
     }
   ];
 
@@ -586,6 +542,45 @@ const LoadingTicket = ({
       Cell: ({ row }) => (row?.original?.mtrAttachedView ? <h5 className="text-truncate">{row?.original?.mtrAttachedView}</h5> : <NoDataCell />)
     });
   }
+
+  columns.push({
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 100,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) =>
+      user?.user?.brandPolicy?.assetDeliveredStatus &&
+      [RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy, RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable]?.includes(
+        row?.original?.rentalAssetStatus
+      ) &&
+      row?.original?.type === 'Asset' ? (
+        <HtmlTooltip title={'Change Date'}>
+          <span>
+            <IconButton
+              size="small"
+              onClick={() => {
+                setOpenDateDialog({
+                  open: true,
+                  type: 'changeDate',
+                  status: row?.original?.assetNumber,
+                  prevStatus: '',
+                  assets: [row?.original?._id],
+                  loading: false
+                });
+              }}
+            >
+              <Edit fontSize="small" />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+      ) : (
+        ''
+      )
+  });
 
   const handleDeliveryTicketDialog = () => {
     if (selectedRecords.length) {

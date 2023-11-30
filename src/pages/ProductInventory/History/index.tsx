@@ -141,7 +141,7 @@ const History = ({ product, warehouse, storageLocation }) => {
       Header: 'Date',
       canFilter: false,
       disabled: true,
-      isSorted: false,
+      disableSortBy: true,
       Cell: ({ row }) => (
         <>
           {row?.original?.date ? (
@@ -157,7 +157,7 @@ const History = ({ product, warehouse, storageLocation }) => {
     {
       accessor: 'referenceType',
       Header: 'Reference Type',
-      isSorted: false,
+      disableSortBy: true,
       Cell: ({ row }) => (
         <>
           {row?.original?.referenceType ? (
@@ -174,7 +174,7 @@ const History = ({ product, warehouse, storageLocation }) => {
       accessor: 'reference',
       Header: 'Reference',
       canFilter: false,
-      isSorted: false,
+      disableSortBy: true,
       Cell: ({ row }) =>
         row?.original?.reference ? (
           row?.original?.referenceType === 'Purchase Order' ? (
@@ -270,7 +270,7 @@ const History = ({ product, warehouse, storageLocation }) => {
     {
       accessor: 'type',
       Header: 'Type',
-      isSorted: false,
+      disableSortBy: true,
       Cell: ({ row }) => (
         <>
           {row?.original?.type ? (
@@ -287,18 +287,23 @@ const History = ({ product, warehouse, storageLocation }) => {
       accessor: 'qty',
       Header: 'Credit/Debit',
       canFilter: false,
-      isSorted: false,
+      disableSortBy: true,
       disabled: true,
-      // cellStyle: (params) => {
-      //   if (params?.data?.type === 'Credit') {
-      //     return { backgroundColor: isDarkTheme ? 'hsl(120 73% 40% / 1)' : '#90ee90' };
-      //   }
-      //   if (params?.data?.type === 'Debit') {
-      //     return { backgroundColor: isDarkTheme ? 'hsl(1 100% 65% / 1)' : '#FFCCCB' };
-      //   }
-      // }
       Cell: ({ row }) => (
-        <>
+        <div
+          style={{
+            backgroundColor:
+              row?.original?.type === 'Credit'
+                ? isDarkTheme
+                  ? 'hsl(120 73% 40% / 1)'
+                  : '#90ee90'
+                : row?.original?.type === 'Debit'
+                ? isDarkTheme
+                  ? 'hsl(1 100% 65% / 1)'
+                  : '#FFCCCB'
+                : ''
+          }}
+        >
           {row?.original?.qty ? (
             <h5 className="text-truncate" title={row?.original?.qty}>
               {row?.original?.type === 'Debit' ? `-${row?.original?.qty}` : row?.original?.qty}
@@ -306,7 +311,7 @@ const History = ({ product, warehouse, storageLocation }) => {
           ) : (
             <NoDataCell />
           )}
-        </>
+        </div>
       )
     },
     ...(!user?.user?.brandPolicy?.hideInventoryCount
@@ -315,7 +320,7 @@ const History = ({ product, warehouse, storageLocation }) => {
             accessor: 'finalInventory',
             Header: 'Final Quantity',
             canFilter: false,
-            isSorted: false,
+            disableSortBy: true,
             Cell: ({ row }) => (
               <>
                 {row?.original?.finalInventory ? (
@@ -368,7 +373,7 @@ const History = ({ product, warehouse, storageLocation }) => {
             accessor: 'finalAvgPrice',
             Header: `Final Average Cost ${curr}`,
             canFilter: false,
-            isSorted: false,
+            disableSortBy: true,
             Cell: ({ row }) => (
               <>
                 {row?.original?.finalAvgPrice ? (
@@ -387,7 +392,7 @@ const History = ({ product, warehouse, storageLocation }) => {
       accessor: 'warehouse',
       Header: routes.warehouse.title,
       canFilter: false,
-      isSorted: false,
+      disableSortBy: true,
       Cell: ({ row }) => (
         <>
           {row?.original?.warehouse ? (
@@ -411,7 +416,7 @@ const History = ({ product, warehouse, storageLocation }) => {
             accessor: 'storageLocation',
             Header: 'Storage Location',
             canFilter: false,
-            isSorted: false,
+            disableSortBy: true,
             Cell: ({ row }) => (
               <>
                 {row?.original?.storageLocation ? (
@@ -434,7 +439,7 @@ const History = ({ product, warehouse, storageLocation }) => {
     {
       accessor: 'supplierPartNumber',
       Header: 'Supplier Part Number',
-      isSorted: false,
+      disableSortBy: true,
       Cell: ({ row }) => (
         <>
           {row?.original?.supplierPartNumber ? (
@@ -450,7 +455,7 @@ const History = ({ product, warehouse, storageLocation }) => {
     {
       accessor: 'comment',
       Header: 'Comment',
-      isSorted: false,
+      disableSortBy: true,
       Cell: ({ row }) => (
         <>
           {row?.original?.comment ? (
@@ -467,7 +472,7 @@ const History = ({ product, warehouse, storageLocation }) => {
       accessor: 'serialNumber',
       Header: 'Serial Number',
       canFilter: false,
-      isSorted: false,
+      disableSortBy: true,
       Cell: ({ row }) => (
         <>
           {row?.original?.serialNumber ? (
@@ -483,7 +488,7 @@ const History = ({ product, warehouse, storageLocation }) => {
     {
       accessor: 'user',
       Header: 'Transacted By',
-      isSorted: false,
+      disableSortBy: true,
       Cell: ({ row }) => (
         <>
           {row?.original?.user ? (
@@ -500,7 +505,7 @@ const History = ({ product, warehouse, storageLocation }) => {
       accessor: 'transactionDate',
       Header: 'Actual Transaction Date',
       canFilter: false,
-      isSorted: false,
+      disableSortBy: true,
       Cell: ({ row }) => (
         <>
           {row?.original?.transactionDate ? (
@@ -519,9 +524,6 @@ const History = ({ product, warehouse, storageLocation }) => {
       minWidth: 100,
       width: 110,
       sticky: 'right',
-      disableFilters: true,
-      disableSortBy: true,
-      canDrag: false,
       Cell: ({ row }) => (
         <>
           {(['Product Inventory', 'Reverted'].includes(row?.original?.referenceType) && !row?.original?.reverted) ||
