@@ -122,7 +122,6 @@ const TypewiseTickets = ({ referenceType, referenceId, renderedFrom }) => {
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
             refreshGrid={fetchRecords}
-            allowPagination={false}
           />
         ) : (
           <Box p={2} height={500}>
