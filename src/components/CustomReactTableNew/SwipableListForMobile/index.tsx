@@ -113,7 +113,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                       {expander && expanderCol && expanderCol.Cell({ row })}
                       {allowSelection && !row.original.hideSelection && (
                         <div>
-                          <IndeterminateCheckbox onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps?.()} />
+                          <IndeterminateCheckbox {...row.getToggleRowSelectedProps?.()} />
                         </div>
                       )}
                       <div className="flex-grow">
@@ -275,7 +275,6 @@ const RenderSubCard = ({
   defaultDisplay,
   collapsibleFields,
   IndeterminateCheckbox,
-  handleCellSelection,
   row,
   depth = 1,
   submitInput,
@@ -300,7 +299,7 @@ const RenderSubCard = ({
         {expander && expanderCol && expanderCol.Cell({ row })}
         {allowSelection && !row.original.hideSelection && (
           <div>
-            <IndeterminateCheckbox onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps?.()} />
+            <IndeterminateCheckbox {...row.getToggleRowSelectedProps?.()} />
           </div>
         )}
         <div className="flex-grow">
@@ -393,7 +392,6 @@ const RenderSubCard = ({
                     defaultDisplay,
                     collapsibleFields,
                     IndeterminateCheckbox,
-                    handleCellSelection,
                     row,
                     submitInput,
                     cellValue,
