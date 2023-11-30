@@ -289,92 +289,103 @@ function CustomReactTable({
     }
   };
 
-  const handleCellSelection = (row) => { };
+  const handleCellSelection = (row) => {};
 
   const newColumns = React.useMemo(
-    () =>
-      [
-        ...(expander ? [{
-          accessor: 'expander',
-          Header: ({ isAllRowsExpanded }) => (
-            <span
-              style={{
-                paddingLeft: '0.3rem',
-                color: 'black'
-              }}
-            >
-              {isAllRowsExpanded ? (
-                <FaAngleDown
-                  className="cursor-pointer text-[var(--primary-text)]"
-                  onClick={() => {
-                    toggleAllRowsExpanded(false);
+    () => [
+      ...(expander
+        ? [
+            {
+              accessor: 'expander',
+              Header: ({ isAllRowsExpanded }) => (
+                <span
+                  style={{
+                    paddingLeft: '0.3rem',
+                    color: 'black'
                   }}
-                />
-              ) : (
-                <FaAngleRight
-                  className="cursor-pointer text-[var(--primary-text)]"
-                  onClick={() => {
-                    toggleAllRowsExpanded(true);
-                  }}
-                />
-              )}
-            </span>
-          ),
-          sticky: 'left',
-          width: isMobile && !isTablet ? 40 : 70,
-          minWidth: isMobile && !isTablet ? 40 : 70,
-          canDrag: false,
-          Cell: ({ row }) => (
-            <div
-              {...row.getToggleRowExpandedProps?.({
-                style: {
-                  marginLeft: isMobileView ? 0 : `${row.depth * 15}px`
-                }
-              })}
-            >
-              {row.original.type === 'folder' || row.canExpand ? (
-                <IconButton size="small" style={{ fontSize: 13 }}>
-                  {row.isExpanded ? (
-                    <FaAngleDown />
+                >
+                  {isAllRowsExpanded ? (
+                    <FaAngleDown
+                      className="cursor-pointer text-[var(--primary-text)]"
+                      onClick={() => {
+                        toggleAllRowsExpanded(false);
+                      }}
+                    />
                   ) : (
                     <FaAngleRight
-                      onClick={async () => {
-                        if (!fetchChildAttachment || row.original[childrenProperty]?.length > 0) return;
-                        const subRows = await fetchChildAttachment(row.original.accessor);
-                        row.original.subRows = subRows;
-                        row.canExpand = true;
-                        row.isExpanded = true;
+                      className="cursor-pointer text-[var(--primary-text)]"
+                      onClick={() => {
+                        toggleAllRowsExpanded(true);
                       }}
                     />
                   )}
-                </IconButton>
-              ) : null}
-            </div>
-          )
-        }] : []),
-        ...(!hideSelection ? [{
-          accessor: 'selection',
-          minWidth: 50,
-          width: 50,
-          sticky: isMobileView ? 'none' : 'left',
-          maxWidth: 50,
-          Header: ({ getToggleAllRowsSelectedProps }) => (
-            <IndeterminateCheckbox
-              onClick={(e) => handleAllSelect(getToggleAllRowsSelectedProps()?.checked)}
-              {...getToggleAllRowsSelectedProps()}
-              className="mx-auto text-center"
-            />
-          ),
-          Cell: ({ row }) => (
-            <div className="mx-auto text-center  justify-center">
-              {row.original.hideSelection ? <></> : <IndeterminateCheckbox onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps()} />}
-            </div>
-          )
-        }] : []),
-        ...baseColumns.map((m) => {
-          return m.canFilter === false ? { ...m, columnFilterable: false, filter: 'filterRowsWithSubrows' } : { ...m, columnFilterable: true };
-        })
-      ],
+                </span>
+              ),
+              sticky: 'left',
+              width: isMobile && !isTablet ? 40 : 70,
+              minWidth: isMobile && !isTablet ? 40 : 70,
+              canDrag: false,
+              Cell: ({ row }) => (
+                <div
+                  {...row.getToggleRowExpandedProps?.({
+                    style: {
+                      marginLeft: isMobileView ? 0 : `${row.depth * 15}px`
+                    }
+                  })}
+                >
+                  {row.original.type === 'folder' || row.canExpand ? (
+                    <IconButton size="small" style={{ fontSize: 13 }}>
+                      {row.isExpanded ? (
+                        <FaAngleDown />
+                      ) : (
+                        <FaAngleRight
+                          onClick={async () => {
+                            if (!fetchChildAttachment || row.original[childrenProperty]?.length > 0) return;
+                            const subRows = await fetchChildAttachment(row.original.accessor);
+                            row.original.subRows = subRows;
+                            row.canExpand = true;
+                            row.isExpanded = true;
+                          }}
+                        />
+                      )}
+                    </IconButton>
+                  ) : null}
+                </div>
+              )
+            }
+          ]
+        : []),
+      ...(!hideSelection
+        ? [
+            {
+              accessor: 'selection',
+              minWidth: 50,
+              width: 50,
+              sticky: isMobileView ? 'none' : 'left',
+              maxWidth: 50,
+              Header: ({ getToggleAllRowsSelectedProps }) => (
+                <IndeterminateCheckbox
+                  onClick={(e) => handleAllSelect(getToggleAllRowsSelectedProps()?.checked)}
+                  {...getToggleAllRowsSelectedProps()}
+                  className="mx-auto text-center"
+                />
+              ),
+              Cell: ({ row }) => (
+                <div className="mx-auto text-center  justify-center">
+                  {row.original.hideSelection ? (
+                    <></>
+                  ) : (
+                    <IndeterminateCheckbox onClick={() => handleCellSelection(row)} {...row.getToggleRowSelectedProps()} />
+                  )}
+                </div>
+              )
+            }
+          ]
+        : []),
+      ...baseColumns.map((m) => {
+        return m.canFilter === false ? { ...m, columnFilterable: false, filter: 'filterRowsWithSubrows' } : { ...m, columnFilterable: true };
+      })
+    ],
     [baseColumns]
   );
 
@@ -385,8 +396,7 @@ function CustomReactTable({
     []
   );
 
-  const updateData = () => { };
-
+  const updateData = () => {};
 
   const getDataFromLocalStorage = () => {
     try {
@@ -401,7 +411,7 @@ function CustomReactTable({
     const gridMetaData = getDataFromLocalStorage();
     const hiddenCols = gridMetaData[renderedFrom]?.hide || [];
     if (hideAction) {
-      hiddenCols.push('action')
+      hiddenCols.push('action');
     }
     return hiddenCols;
   };
@@ -491,13 +501,8 @@ function CustomReactTable({
         setHiddenColumns(gridMetaData[renderedFrom]?.hide || []);
       }
       if (gridMetaData && gridMetaData[renderedFrom]?.order && gridMetaData[renderedFrom]?.order?.length) {
-        const colOrder = gridMetaData[renderedFrom]?.order || [];
-        let orderIndices = {};
-        for (let i = 0; i < colOrder.length; i++) {
-          orderIndices[colOrder[i]] = i;
-        }
-        let orderedArr = [...newColumns].sort((a, b) => orderIndices[a?.accessor] - orderIndices[b?.accessor]);
-        setColumnOrder(orderedArr.map((m) => m?.accessor));
+        const colOrder = [...(expander ? ['expander'] : []), ...(!hideSelection ? ['selection'] : []), ...gridMetaData[renderedFrom]?.order];
+        setColumnOrder(colOrder);
       } else {
         setColumnOrder(newColumns.map((m) => m?.accessor));
       }
@@ -670,7 +675,7 @@ function CustomReactTable({
                   </HtmlTooltip>
                 )}
                 <ArrangeViewButton
-                  columns={baseColumns}
+                  columns={newColumns}
                   loading={loading}
                   renderedFrom={renderedFrom}
                   setHiddenColumns={setHiddenColumns}
@@ -808,8 +813,9 @@ function CustomReactTable({
                               <TableCell
                                 key={index2}
                                 {...cellProps}
-                                className={`td p-0 [&>*]:h-[45px] [&>*]:flex [&>*]:items-center [&>*]:p-[5px_8px] h-[45px]  ${cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''
-                                  }    ${setWholeRowsCellColor ? setWholeRowsCellColor(row.original) : ''}`}
+                                className={`td p-0 [&>*]:h-[45px] [&>*]:flex [&>*]:items-center [&>*]:p-[5px_8px] h-[45px]  ${
+                                  cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''
+                                }    ${setWholeRowsCellColor ? setWholeRowsCellColor(row.original) : ''}`}
                                 onClick={() => {
                                   handleCellClick(cell, row);
                                 }}
@@ -818,8 +824,8 @@ function CustomReactTable({
                                 }}
                               >
                                 {!['selection'].includes(cell?.column.accessor) &&
-                                  currentEditingCellPosition?.rowId === row.original._id &&
-                                  currentEditingCellPosition?.columnName === cell?.column.accessor ? (
+                                currentEditingCellPosition?.rowId === row.original._id &&
+                                currentEditingCellPosition?.columnName === cell?.column.accessor ? (
                                   <div className="w-full">
                                     <input
                                       title={`Edit-${cell.accessor}`}
