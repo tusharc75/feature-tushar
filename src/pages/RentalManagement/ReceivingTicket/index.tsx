@@ -554,25 +554,21 @@ const ReceivingTicket = ({
       disabled: true,
       Cell: ({ row }) => (row?.original?.index ? <h5 className="text-truncate">{row?.original?.index}</h5> : <NoDataCell />)
     },
-    // {
-    //   field: 'assetNumber',
-    //   headerName: 'Details',
-    //   show: true,
-    //   disabled: true,
-    //   cellRenderer: 'inventoryRenderer',
-    //   cellStyle: (params) => {
-    //     if ([ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(params?.data?.status)) {
-    //       return { backgroundColor: COLOUR_MASTER.lostAssets.background };
-    //     }
-    //     return null;
-    //   }
-    // },
     {
       accessor: 'assetNumber',
       Header: 'Details',
       disabled: true,
       Cell: ({ row }) => (
-        <div className="d-flex gap-2 align-items-center">
+        <div
+          className="d-flex gap-2 align-items-center"
+          style={{
+            backgroundColor: [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert]?.includes(
+              row?.original?.status
+            )
+              ? COLOUR_MASTER.lostAssets.background
+              : ''
+          }}
+        >
           <p className="text-truncate">{row?.original?.assetNumber}</p>
           <IconButton
             size="small"
