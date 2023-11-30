@@ -140,7 +140,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
 
   useEffect(() => {
     fetchServiceData();
-  }, [workOrderId]);
+  }, [workOrderId, workOrderData]);
 
   const fetchServiceData = async () => {
     var quotation: any = null;
