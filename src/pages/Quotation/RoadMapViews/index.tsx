@@ -3,11 +3,6 @@ import React, { useContext, useState, useEffect, Fragment } from 'react';
 import ReactFlow, { Controls, ControlButton, ReactFlowProvider } from 'react-flow-renderer';
 import axiosInstance from '../../../axios/axiosInstance';
 import {
-  DELIVERY_TICKET_TYPE,
-  ASSET_STATUS,
-  rentalManagement,
-  RENTAL_STATUS,
-  COLOUR_MASTER,
   quotation,
   QUOTATION_STATUS
 } from '../../../constants/helpers';
@@ -45,6 +40,11 @@ const QuotationViews = (props) => {
       name: 'Product',
       background: themeColor === 'dark' ? 'rgb(161,237,220)' : '#E2F8FF',
       borderColor: '#8BCBDF'
+    },
+    asset: {
+      name: 'Serialized Asset',
+      background: '#ffd65b',
+      borderColor: 'green',
     },
     package: {
       name: 'Package',
@@ -137,7 +137,14 @@ const QuotationViews = (props) => {
       });
 
       if (child?.length) xPosition += 300;
+      let maxXPosition = xPosition;
+      let maxYAssetPosition = 1;
       child?.map((item: any, cIdx) => {
+        const xPositionView = item.type === 'serializedAsset' ? xPosition + 300 : xPosition;
+        if (xPositionView > maxXPosition) maxXPosition = xPositionView;
+        const yPositionView = item.type === 'serializedAsset' ? maxYAssetPosition : cIdx;
+        if (item.type === 'serializedAsset') maxYAssetPosition += 1;
+
         flow.push({
           id: `${item._id}`,
           sourcePosition: 'right',
@@ -151,17 +158,18 @@ const QuotationViews = (props) => {
                 <div>
                   <Typography variant="body2">{_.startCase(_.camelCase(item.type))}</Typography>
                   <Typography variant="subtitle2">
-                    {item.productDetail?.productName || item.packageDetail?.packageName || item.serviceDetail?.serviceName}
+                    {item.productDetail?.productName || item.packageDetail?.packageName || item.serviceDetail?.serviceName || item.serializedAssetDetail?.assetNumber}
                   </Typography>
                 </div>
               </HtmlTooltip>
             )
           },
+
           position: {
-            x: xPosition,
-            y: cIdx * 80
+            x: xPositionView,
+            y: yPositionView * 80
           },
-          style: item.type == 'service' ? customNodeStyles.service : item.type === 'package' ? customNodeStyles.package : customNodeStyles.product
+          style: item.type === 'service' ? customNodeStyles.service : item.type === 'package' ? customNodeStyles.package : item.type === 'serializedAsset' ? customNodeStyles.asset : customNodeStyles.product
         });
         flowEdge.push({
           id: `parent-child-${item._id}-${item.parentId}`,
@@ -170,7 +178,7 @@ const QuotationViews = (props) => {
           target: `${item._id}`
         });
       });
-
+      xPosition = maxXPosition;
       if (
         [QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.converted, QUOTATION_STATUS.rejectByCustomer].includes(
           status
@@ -236,6 +244,9 @@ const QuotationViews = (props) => {
         break;
       case 'package':
         history.push(`${routes.packagesDetail.path}/${element.data.ref_id}`);
+        break;
+      case 'serializedAsset':
+        history.push(`${routes.serializedAssetDetail.path}/${element.data.ref_id}`);
         break;
     }
   };
