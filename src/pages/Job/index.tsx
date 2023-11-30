@@ -164,24 +164,21 @@ const Job = () => {
             </IconButton>
           </span>
         </HtmlTooltip>
-        <HtmlTooltip title={row?.original?.canDelete ? "Delete" : deleteDisable}>
-          <span>
-            <IconButton
-              size="small"
-              aria-label="Delete"
-              disabled={row?.original?.canDelete ? false : true}
-              onClick={() => {
-                setSingleJobDelete({
-                  show: true,
-                  id: row.original._id,
-                  jobNumber: `${row.original.jobNumber}`
-                });
-                setShowDeleteWarningConfirmBox(true);
-              }}
-            >
-              <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
-            </IconButton>
-          </span>
+        <HtmlTooltip title="Delete">
+          <IconButton
+            size="small"
+            aria-label="Delete"
+            disabled = {row?.original?.canDelete ? false : true}
+            onClick={() => {
+              setSingleJobDelete({
+                show: true,
+                id: row.original._id,
+                jobNumber: `${row.original.jobNumber}`
+              });
+            }}
+          >
+          <DeleteIcon color={row?.original?.canDelete ? 'error' : 'disabled'}/>
+          </IconButton>
         </HtmlTooltip>
       </>
     )
