@@ -1041,7 +1041,7 @@ const DraggableHeader: React.FC<DraggableHeaderProps> = ({ column, index, reorde
           </div>
           {column.isSorted ? column.isSortedDesc ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" /> : ''}
         </div>
-        {column?.columnFilterable && column?.accessor !== 'action' ? (
+        {column?.columnFilterable && column?.accessor !== 'action' && column?.id !== 'action' ? (
           <div>
             <TempFilter
               filterValue={filters.find((filter) => filter.accessor === column.accessor)?.value || ''}
