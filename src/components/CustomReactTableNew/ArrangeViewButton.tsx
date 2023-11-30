@@ -84,6 +84,8 @@ const ArrangeViewButton = ({
         </IconButton>
       </HtmlTooltip>
 
+      
+
       {openColumnSelection && (
         <>
           <ArrangeViewDialog
