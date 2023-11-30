@@ -62,7 +62,6 @@ const ProductBuilder = (props) => {
     setNextStep
   } = props;
 
-
   const renderedFrom = `${camelCase(`${routes?.quote.title}_Product`)}`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -104,7 +103,7 @@ const ProductBuilder = (props) => {
 
   const fetchProduct = (id) => {
     if (setNextStep) {
-      setNextStep(false)
+      setNextStep(false);
     }
     dispatch({ type: 'loading', loading: true });
     if (gridApi) {
@@ -195,23 +194,18 @@ const ProductBuilder = (props) => {
 
         if (processStatus === QUOTE_PROCESS_STATUS.new) {
           if (rows?.length) {
-            setNextStep(true)
-          }
-        }
-        else if (processStatus === QUOTE_PROCESS_STATUS.priceBuilder) {
-          if (rows?.find((ele) => (ele[`totalSalesPrice_${currency?.toLowerCase()}`] || 0) === 0 || (ele[`qty`] || 0) === 0)) {
-            setNextStep(false);
-          }
-          else {
             setNextStep(true);
           }
-        }
-        else if (processStatus === QUOTE_PROCESS_STATUS.quoteBuilder) {
-          setNextStep(true)
-        }
-        else if (processStatus === QUOTE_PROCESS_STATUS.doaProcess) {
-        }
-        else {
+        } else if (processStatus === QUOTE_PROCESS_STATUS.priceBuilder) {
+          if (rows?.find((ele) => (ele[`totalSalesPrice_${currency?.toLowerCase()}`] || 0) === 0 || (ele[`qty`] || 0) === 0)) {
+            setNextStep(false);
+          } else {
+            setNextStep(true);
+          }
+        } else if (processStatus === QUOTE_PROCESS_STATUS.quoteBuilder) {
+          setNextStep(true);
+        } else if (processStatus === QUOTE_PROCESS_STATUS.doaProcess) {
+        } else {
         }
         refreshProducts(data);
       })
@@ -429,8 +423,8 @@ const ProductBuilder = (props) => {
     gridMetaData = gridMetaData == 'undefined' ? {} : JSON.parse(gridMetaData);
     if (gridMetaData && gridMetaData[renderedFrom] && gridMetaData[renderedFrom]?.hide) {
       column?.forEach((ele) => {
-        ele.show = gridMetaData[renderedFrom]?.hide?.indexOf(ele?.field) >= 0 ? false : true
-      })
+        ele.show = gridMetaData[renderedFrom]?.hide?.indexOf(ele?.field) >= 0 ? false : true;
+      });
     }
   };
 
@@ -664,6 +658,7 @@ const ProductBuilder = (props) => {
       });
   };
 
+
   return (
     <Box pt={0}>
       {Editable && (
@@ -749,8 +744,8 @@ const ProductBuilder = (props) => {
                 isPriceBuilder && fromQuote && permissions?.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice
                   ? false
                   : selectedRecords.length
-                    ? false
-                    : true
+                  ? false
+                  : true
               }
               onClick={openActions}
               endIcon={<ExpandMore />}
@@ -826,26 +821,26 @@ const ProductBuilder = (props) => {
               dataToShowForMobile
                 ? dataToShowForMobile.some((f) => f.editable === true)
                   ? [
-                    ...dataToShowForMobile
-                      .filter((f) => f.editable === true)
-                      .map((m) => {
-                        return {
-                          label: `${m.headerName}: `,
-                          field: m.field,
-                          forceShow: true
-                          // onClick: (data, index) => {
-                          //   setShowProductNumberOrProductNameUpdate({ open: true, title: m.headerName, property: m.field, value: data[m.field], indexOfRecord: index, record: data })
-                          // }
-                        };
-                      })
-                  ]
+                      ...dataToShowForMobile
+                        .filter((f) => f.editable === true)
+                        .map((m) => {
+                          return {
+                            label: `${m.headerName}: `,
+                            field: m.field,
+                            forceShow: true
+                            // onClick: (data, index) => {
+                            //   setShowProductNumberOrProductNameUpdate({ open: true, title: m.headerName, property: m.field, value: data[m.field], indexOfRecord: index, record: data })
+                            // }
+                          };
+                        })
+                    ]
                   : [
-                    {
-                      label: `Product description: `,
-                      field: 'productName',
-                      forceShow: true
-                    }
-                  ]
+                      {
+                        label: `Product description: `,
+                        field: 'productName',
+                        forceShow: true
+                      }
+                    ]
                 : []
             }
             onCreate={null}
