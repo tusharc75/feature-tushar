@@ -58,8 +58,16 @@ const ItemTypes = {
 };
 
 const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
-  const { onClose, columns, updateGridHiddenColumns, renderedFrom, setHiddenColumns, getToggleHideAllColumnsProps, setColumnOrder, defaultColumns } =
-    props;
+  const {
+    onClose,
+    columns,
+    updateGridHiddenColumns,
+    renderedFrom,
+    setHiddenColumns,
+    getToggleHideAllColumnsProps,
+    setColumnOrder,
+    defaultColumns,
+  } = props;
 
   const classes = useStyles();
   const [sortedColumns, setSortedColumns] = React.useState([]);
@@ -72,26 +80,21 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
   React.useEffect(() => {
     try {
       const data = localStorage.getItem('gridMetaData');
-
       const gridMetaData = JSON.parse(data || '{}');
       const hiddenCols = gridMetaData[renderedFrom]?.hide || [];
-      let updatedCols = columns.map((col) => ({
+      var updatedCols = columns.map((col) => ({
         ...col,
         isVisible: !hiddenCols.includes(col.accessor)
       }));
-
       if (gridMetaData && gridMetaData[renderedFrom]?.order && gridMetaData[renderedFrom]?.order?.length) {
         const colOrder = gridMetaData[renderedFrom]?.order;
         const actionCol = updatedCols.find((d) => d.accessor === 'action');
         const expanderCol = updatedCols.find((d) => d.accessor === 'expander');
         const selectionCol = updatedCols.find((d) => d.accessor === 'selection');
-
         updatedCols = [
           ...(expanderCol ? [expanderCol] : []),
           ...(selectionCol ? [selectionCol] : []),
-          ...updatedCols
-            .filter((d) => d.accessor !== 'action' && d.accessor !== 'expander' && d.accessor !== 'selection')
-            .sort((a, b) => colOrder.findIndex((d) => d === a.accessor) - colOrder.findIndex((d) => d === b.accessor)),
+          ...updatedCols.filter((d) => !['expander', 'selection', 'action']?.includes(d.accessor)).sort((a, b) => colOrder.findIndex((d) => d === a.accessor) - colOrder.findIndex((d) => d === b.accessor)),
           ...(actionCol ? [actionCol] : [])
         ];
       }
@@ -145,12 +148,8 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
       dataToStore.push(object);
     });
     if (renderedFrom && renderedFrom !== '') {
-      const hidedColumns = dataToStore
-        ?.filter((o) => !o?.isVisible && !['expander', 'selection', 'action']?.includes(o?.accessor))
-        .map((o) => o?.accessor);
-      const columnOrder = dataToStore
-        ?.filter((o) => o?.sticky === undefined && !['expander', 'selection', 'action']?.includes(o?.accessor))
-        ?.map((o) => o?.accessor);
+      const hidedColumns = dataToStore?.filter((o) => !o?.isVisible && !['expander', 'selection', 'action']?.includes(o?.accessor)).map((o) => o?.accessor);
+      const columnOrder = dataToStore?.filter((o) => o?.sticky === undefined && !['expander', 'selection', 'action']?.includes(o?.accessor))?.map((o) => o?.accessor);
       updateGridHiddenColumns(hidedColumns, columnOrder);
     }
     setColumnOrder([...sortedColumns.map((m) => m.accessor)]);
@@ -265,13 +264,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
               (column, index) =>
                 column?.accessor !== 'selection' &&
                 column?.accessor !== 'expander' && (
-                  <ListItem
-                    key={`${column.accessor}-${index}`}
-                    divider
-                    disableGutters
-                    disabled={column.disabled}
-                    className={column.sticky ? 'd-none' : ''}
-                  >
+                  <ListItem key={`${column.accessor}-${index}`} divider disableGutters disabled={column.disabled} className={column.sticky ? 'd-none' : ''}>
                     <ListItemText id="switch-list-column" primary={column.Header} />
                     <ListItemSecondaryAction>
                       {column.sticky ? (
