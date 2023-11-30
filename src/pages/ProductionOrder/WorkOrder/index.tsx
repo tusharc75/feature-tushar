@@ -786,6 +786,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
             );
           }}
           isSubmitting={isSubmitting}
+          hideQty={true}
         />
       )}
       {addServicesDialog.open && addServicesDialog.new && (
