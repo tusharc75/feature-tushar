@@ -219,7 +219,6 @@ function CustomReactTable({
   renderedFrom,
   isClientSideGrid = true,
   expander = false,
-  allowPagination = true,
   refreshGrid = null,
   dispatch,
   state,
@@ -875,7 +874,7 @@ function CustomReactTable({
                       );
                     })}
                   </TableBody>
-                  {rows?.length > 0 && footerGroups?.length > 0 && !allowPagination && (
+                  {rows?.length > 0 && footerGroups?.length > 0 && isClientSideGrid && (
                     <TableFooter style={{ overflowY: 'auto', overflowX: 'hidden' }} className="footer ">
                       {footerGroups.map((group) => (
                         <TableRow {...group.getFooterGroupProps()} className="tr">
@@ -918,10 +917,10 @@ function CustomReactTable({
             handleCellClick={handleCellClick}
             handleKeyDown={handleKeyDown}
             footerGroups={footerGroups}
-            allowPagination={allowPagination}
+            isClientSideGrid={isClientSideGrid}
           />
         ) : null}
-        {allowPagination && (
+        {!isClientSideGrid && (
           <Pagination
             count={rowCount}
             page={pageIndex}

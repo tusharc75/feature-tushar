@@ -30,7 +30,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
   handleCellClick,
   handleKeyDown,
   footerGroups,
-  allowPagination
+  isClientSideGrid
 }) => {
   const { error } = state;
   const [isAllChecked, setIsAllChecked] = useState(false);
@@ -234,7 +234,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                   </div>
                 )}
 
-            {dataRows?.length > 0 && footerGroups?.length > 0 && !allowPagination && (
+            {dataRows?.length > 0 && footerGroups?.length > 0 && isClientSideGrid && (
               <>
                 {footerGroups.map((group, index) => (
                   <div key={index} className="flex justify-between [border-top:1px_solid_var(--common-border-color)] pt-1 items-center mt-4 px-2">
