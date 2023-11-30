@@ -470,7 +470,6 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
               expander={true}
               state={state}
               dispatch={dispatch}
-              allowPagination={false}
               refreshGrid={fetchData}
             />
           </Box>

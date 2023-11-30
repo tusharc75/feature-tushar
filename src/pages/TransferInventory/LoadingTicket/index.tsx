@@ -334,9 +334,8 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
-            isClientSideGrid={false}
+            isClientSideGrid={true}
             refreshGrid={fetchProducts}
-            allowPagination={false}
           />
         ) : (
           <Box p={2} height={500}>

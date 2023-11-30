@@ -3,14 +3,12 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
-import { Box, CircularProgress, TextField } from '@material-ui/core';
+import { Box, CircularProgress } from '@material-ui/core';
 import SearchBox from '../../../components/Helpers/SearchBox';
 import { gridLoadingTimeout, CustomDialogTransition, packages, isObjectEmpty, prepareDataForGrid } from '../../../constants/helpers';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import Dialog from '@material-ui/core/Dialog/Dialog';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
-import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 import { startCase } from 'lodash';
 import routes from '../../../components/Helpers/Routes';
@@ -26,7 +24,6 @@ const AddExistingProductInventory = ({
   isAddingProducts,
   rentalManagementData,
   renderedFrom,
-  fromConsumable = false
 }) => {
   const toastConfig = useContext(CustomToastContext);
 
@@ -38,21 +35,17 @@ const AddExistingProductInventory = ({
     state: { user, selectedEntity }
   }: any = useData();
 
-  const [packageDialog, setPackageDialog] = useState(false);
-  const [productData, setProductData] = useState([]);
-  const [packageProductData, setPackageProductData] = useState([]);
-  const [selectedProduct, setSelectedProduct] = useState({ name: '', id: '', quantity: 0 });
   const [columns, setColumns] = useState(null);
-  const [materialList, setMaterialList] = useState([]);
 
   const qtyColumn = [
     {
       accessor: 'qty',
       Header: 'Qty',
-      minWidth: 180,
-      width: 180,
+      minWidth: 150,
+      width: 150,
       editable: true,
-      disabled: true,
+      disableFilters: true,
+      disableSortBy: true,
       Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.qty || <NoDataCell />}</h5>
     }
   ];
@@ -60,16 +53,16 @@ const AddExistingProductInventory = ({
   const defaultColumns =
     type === 'product'
       ? [
-          ...qtyColumn,
-          {
-            accessor: 'availableAssetCount',
-            Header: 'Available Asset',
-            minWidth: 180,
-            width: 180,
-            disabled: true,
-            Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.availableAssetCount || <NoDataCell />}</h5>
-          }
-        ]
+        ...qtyColumn,
+        {
+          accessor: 'availableAssetCount',
+          Header: 'Available Asset',
+          minWidth: 180,
+          width: 180,
+          disabled: true,
+          Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.availableAssetCount || <NoDataCell />}</h5>
+        }
+      ]
       : qtyColumn;
 
   useEffect(() => {
@@ -92,11 +85,9 @@ const AddExistingProductInventory = ({
     axiosInstance()
       .get(`${type === 'product' ? `/rental-management/product-with-inventory` : packages.api}${queryString}`)
       .then(({ data: { data, count } }) => {
-        setMaterialList(JSON.parse(JSON.stringify(data)));
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u);
-          finalObject['isChecked'] = false;
-          finalObject['id'] = u._id;
+          finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);;
           finalObject['type'] = type;
           finalObject['qty'] = 0;
           const qtyAdded = selectedRecords?.filter((e) => e._id === u._id);
@@ -111,9 +102,6 @@ const AddExistingProductInventory = ({
             ...finalObject
           };
         });
-        if (fromConsumable) {
-          rows = rows.filter((d: any) => !d?.serializedProduct);
-        }
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -162,7 +150,6 @@ const AddExistingProductInventory = ({
       .get(type === 'product' ? '/field?resource=Product&view=true' : `/field?resource=Packages&entity=${selectedEntity}&view=true`)
       .then(({ data: { data } }) => {
         let columns = [];
-        let rendererNames = [];
         data.forEach((o) => {
           let currentColumn = getColumnData(renderedFrom, o?.fieldData, type === 'product' ? routes.productDetail.path : routes.packagesDetail.path);
           if (currentColumn !== null) {
@@ -174,57 +161,26 @@ const AddExistingProductInventory = ({
       });
   };
 
-  const fetchPackageProduct = (packageId) => {
-    if (type === 'package') {
-      axiosInstance()
-        .get(`${packages.api}/get-products/${packageId}`)
-        .then(({ data: { data } }) => {
-          const newArr = data.length > 0 ? data.map((product: any) => ({ product: product.productName, qty: product.qty })) : [];
-          setPackageProductData(newArr);
-        })
-        .catch((err) => {
-          toastConfig.setToastConfig(err);
-        });
-    }
-  };
-
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
   const onSaveEdit = (data, row) => {
     if (!data || !data?.qty) return;
-    const selectedFromStorage = selectedRecords;
-    if (!selectedFromStorage || selectedFromStorage.length === 0) return;
-    const updatedRecords = selectedFromStorage.map((d) => {
-      if (row?._id === d._id) {
-        d.qty = parseInt(data.qty);
-      }
-      return d;
-    });
-
-    const rows = dataRows;
-
+    const rows = [...dataRows];
     rows?.forEach((d) => {
       if (row?._id === d._id) {
         d.qty = parseInt(data.qty);
+        d.isChecked = true;
       }
     });
-
+    if (!selectedRecords?.find((e) => e._id === row?._id)) {
+      const editRow = rows?.find((e) => e._id === row?._id);
+      if (editRow) {
+        dispatch({ type: 'selection', selectedRecords: [...selectedRecords, editRow] });
+      }
+    }
     dispatch({ type: 'update', data: rows });
-    dispatch({ type: 'selection', selectedRecords: updatedRecords });
-  };
-
-  const handleSubmit = () => {
-    dispatch({ type: 'loading', loading: true });
-    let tempProduct = productData;
-    tempProduct.find((d) => d.id === selectedProduct.id).quantity = selectedProduct.quantity;
-    setProductData(tempProduct);
-    setPackageDialog(false);
-    // dispatch({ type: 'update', data: productData });
-    setTimeout(() => {
-      dispatch({ type: 'loading', loading: false });
-    }, gridLoadingTimeout);
   };
 
   return (
@@ -275,52 +231,6 @@ const AddExistingProductInventory = ({
           )}
         </div>
       </Dialog>
-      {packageDialog && (
-        <Dialog open fullWidth maxWidth="md" onClose={() => setPackageDialog(false)}>
-          <CustomDialogHeader title={'Package Details'} onClose={() => setPackageDialog(false)} />
-          <CustomDialogContent>
-            <Box p={2}>
-              <Grid container spacing={2}>
-                {packageProductData?.length > 0 &&
-                  packageProductData?.map((obj) => (
-                    <Fragment key={obj.id}>
-                      <Grid item xs={5} sm={5}>
-                        <TextField size="small" fullWidth value={obj?.product} type="text" disabled variant="outlined" label="Product" />
-                      </Grid>
-                      <Grid item xs={5} sm={5}>
-                        <TextField
-                          size="small"
-                          fullWidth
-                          value={obj?.qty}
-                          disabled
-                          type="number"
-                          onChange={(e) => {
-                            const val = parseInt(e.target.value);
-                          }}
-                          variant="outlined"
-                          required
-                          label="Quantity"
-                        />
-                      </Grid>
-                    </Fragment>
-                  ))}
-              </Grid>
-            </Box>
-          </CustomDialogContent>
-          <CustomDialogFooter>
-            <Button variant="outlined" color="primary" onClick={() => setPackageDialog(false)}>
-              Cancel
-            </Button>
-            {/* <Button
-                        onClick={handleSubmit}
-                        variant="contained"
-                        color="primary"
-                    >
-                        Save
-                    </Button> */}
-          </CustomDialogFooter>
-        </Dialog>
-      )}
     </Fragment>
   );
 };
