@@ -24,7 +24,7 @@ import { useSticky } from 'react-table-sticky';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import CustomReactTableHeaderOptions from './CustomReactTableHeaderOptions';
-import { ConsoleView, isMobile, isTablet } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import Checkbox from '@material-ui/core/Checkbox';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
