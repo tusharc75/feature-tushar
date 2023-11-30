@@ -461,7 +461,6 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
               columns={columns}
               setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
               onSelect={setSelectedRecords}
-              childrenProperty="subRows"
               renderedFrom={renderedFrom}
               isClientSideGrid={true}
               onSaveEdit={onSaveInlineEdit}
