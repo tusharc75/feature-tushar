@@ -82,8 +82,10 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
           }
         });
         columns.push({
-          accessor: 'supplierAccount', Header: 'Certification Supplier', show: true, Cell: ({ row }) => (
-            <>
+          accessor: 'supplierAccount',
+          Header: 'Certification Supplier',
+          Cell: ({ row }) => (
+            <div>
               {row.original?.supplierAccount ? (
                 permissions?.supplierAccount?.isRead ?
                   <Link className="link" target="_blanck" title={row.original?.supplierAccount} to={`${routes.supplierAccountDetail.path}/${row.original?.supplierAccountId}`}>
@@ -92,11 +94,15 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
               ) : (
                 <NoDataCell />
               )}
-            </>
+            </div>
           )
         });
         columns.push({
-          accessor: 'createdBy', Header: 'Created By', show: true, filter: false, sortable: false, Cell: ({ row }) => (
+          accessor: 'createdBy',
+          Header: 'Created By',
+          disableFilters: true,
+          disableSortBy: false,
+          Cell: ({ row }) => (
             row.original?.createdBy ? (
               <h5 className="createBy" title={`${row.original?.createdBy} • ${moment(row.original?.createdByDate).format(dateFormat)}`}>
                 {row.original?.createdBy}
@@ -163,15 +169,15 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
       <Box>
         {columns ? (
           <CustomReactTable
-            height={'calc(100vh - 200px)'}
+            height={'calc(100vh - 250px)'}
             columns={columns}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
-            isClientSideGrid={false}
+            isClientSideGrid={true}
             refreshGrid={fetchData}
-            showOnlyShowFilteredRecordSwitch={true}
             showFilters={false}
+            hideSelection={true}
           />
         ) : (
           <Box p={2} height={500}>

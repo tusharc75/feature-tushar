@@ -10,10 +10,13 @@ import { dateTimeFormat, isObjectEmpty, sidebarResource } from 'src/constants/he
 import { useData } from 'src/StateProvider/Provider';
 import DurationFilter from 'src/components/DurationFilter';
 import moment from 'moment';
-import TruckMaster from 'src/pages/TruckMaster';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import { camelCase } from 'lodash';
 
 const AssetHistory = ({ id }) => {
+
+  const renderedFrom = `${camelCase(routes?.serializedAsset.title)}_assetHistory`;
+
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer();
   const [duration, setDuration] = useState({
@@ -29,9 +32,12 @@ const AssetHistory = ({ id }) => {
 
   const columns = [
     {
-      accessor: 'reference', Header: 'Reference', show: true, filter: false,
+      accessor: 'reference',
+      Header: 'Reference',
+      disableFilters: true,
+      disableSortBy: false,
       Cell: ({ row }) => (
-        <>
+        <div>
           {row.original.reference ? (
             row.original.type === 'Loading Ticket' ||
               row.original.type === 'Receiving Ticket' ||
@@ -172,40 +178,83 @@ const AssetHistory = ({ id }) => {
           ) : (
             <NoDataCell />
           )}
-        </>
+        </div>
       )
     },
-    { accessor: 'type', Header: 'Type', show: true, disabled: TruckMaster },
     {
-      accessor: 'date', Header: 'Date & Time', show: true, disabled: true, filter: false,
+      accessor: 'type',
+      Header: 'Type',
       Cell: ({ row }) => (
-        row.original?.date ? (
-          <h5 className="createBy" title={`${moment(row.original?.date)?.format(dateTimeFormat)}`}>
-            {moment(row.original?.date)?.format(dateTimeFormat)}
-          </h5>
+        row.original?.type ? (
+          <div>
+            {row.original?.type}
+          </div>
         ) : (
           <NoDataCell />
         )
       )
     },
     {
-      accessor: 'days', Header: 'Days', show: true, disabled: true, filter: false,
+      accessor: 'date',
+      Header: 'Date & Time',
+      disableFilters: true,
+      disableSortBy: false,
       Cell: ({ row }) => (
-        <>
+        row.original?.date ? (
+          <div className="createBy" title={`${moment(row.original?.date)?.format(dateTimeFormat)}`}>
+            {moment(row.original?.date)?.format(dateTimeFormat)}
+          </div>
+        ) : (
+          <NoDataCell />
+        )
+      )
+    },
+    {
+      accessor: 'days',
+      Header: 'Days',
+      disableFilters: true,
+      disableSortBy: false,
+      Cell: ({ row }) => (
+        <div>
           {row.original?.days ? (
             <span>{row.original?.days}</span>
           ) : (
             <span>Less than a day</span>
           )}
-        </>
+        </div>
       )
     },
-    { accessor: 'status', Header: 'Status', show: true },
-    { accessor: 'comments', Header: 'Comment', show: true },
     {
-      accessor: 'warehouse', Header: routes.warehouse.title, show: true,
+      accessor: 'status',
+      Header: 'Status',
       Cell: ({ row }) => (
-        <>
+        row.original?.status ? (
+          <div>
+            {row.original?.status}
+          </div>
+        ) : (
+          <NoDataCell />
+        )
+      )
+    },
+    {
+      accessor: 'comments',
+      Header: 'Comment',
+      Cell: ({ row }) => (
+        row.original?.comments ? (
+          <div>
+            {row.original?.comments}
+          </div>
+        ) : (
+          <NoDataCell />
+        )
+      )
+    },
+    {
+      accessor: 'warehouse',
+      Header: routes.warehouse.title,
+      Cell: ({ row }) => (
+        <div>
           {row.original?.warehouse ? (
             permissions?.warehouse?.isRead ?
               <Link
@@ -221,12 +270,48 @@ const AssetHistory = ({ id }) => {
           ) : (
             <NoDataCell />
           )}
-        </>
+        </div>
       )
     },
-    { accessor: 'location', Header: 'Location', show: true },
-    { accessor: 'ownerType', Header: 'Owner Type', show: true },
-    { accessor: 'owner', Header: 'Owner', show: true }
+    {
+      accessor: 'location',
+      Header: 'Location',
+      Cell: ({ row }) => (
+        row.original?.location ? (
+          <div>
+            {row.original?.location}
+          </div>
+        ) : (
+          <NoDataCell />
+        )
+      )
+    },
+    {
+      accessor: 'ownerType',
+      Header: 'Owner Type',
+      Cell: ({ row }) => (
+        row.original?.ownerType ? (
+          <div>
+            {row.original?.ownerType}
+          </div>
+        ) : (
+          <NoDataCell />
+        )
+      )
+    },
+    {
+      accessor: 'owner',
+      Header: 'Owner',
+      Cell: ({ row }) => (
+        row.original?.owner ? (
+          <div>
+            {row.original?.owner}
+          </div>
+        ) : (
+          <NoDataCell />
+        )
+      )
+    }
   ];
 
   useEffect(() => {
@@ -296,15 +381,15 @@ const AssetHistory = ({ id }) => {
       </Box>
       {columns ? (
         <CustomReactTable
-          height={'calc(100vh - 200px)'}
+          height={'calc(100vh - 250px)'}
           columns={columns}
           state={state}
           dispatch={dispatch}
-          renderedFrom={`${routes.serializedAssetDetail.title}_assetHistory`}
+          renderedFrom={renderedFrom}
           isClientSideGrid={false}
           refreshGrid={fetchData}
-          showOnlyShowFilteredRecordSwitch={true}
           showFilters={false}
+          hideSelection={true}
         />
       ) : (
         <Box p={2} height={500}>

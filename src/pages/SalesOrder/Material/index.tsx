@@ -669,6 +669,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen, f
           }}
           isSubmitting={isSubmitting}
           extraDeepFilter={[{ field: 'expenseItem', term: 'No' }]}
+          serialized={false}
         />
       )}
       {addDialog.open && addDialog.type === MATERIAL_TYPE.service && (

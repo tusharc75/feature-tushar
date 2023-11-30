@@ -235,11 +235,9 @@ const InventoryProduct = () => {
     accessor: 'action',
     Header: 'Actions',
     minWidth: 150,
+    maxWidth: 180,
     width: 150,
     sticky: 'right',
-    disableFilters: true,
-    disableSortBy: true,
-    canDrag: false,
     Cell: ({ row }) => (
       <div style={{ display: 'flex', alignItems: 'center' }}>
         <HtmlTooltip
