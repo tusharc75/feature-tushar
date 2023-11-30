@@ -102,7 +102,7 @@ const RenderTotalTime = ({ stepTimes }: any) => {
   );
 };
 
-const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWorkOrderData, resource, technicianSelectedService, minHeightClass=null }) => {
+const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWorkOrderData, resource, technicianSelectedService, minHeightClass = null }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: {
@@ -1295,6 +1295,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWo
           }}
           isSubmitting={isSubmitting}
           extraStaticFilter={serviceDialog.preWork === null ? [] : [{ field: 'preWork', term: serviceDialog.preWork }]}
+          hideQty={true}
         />
       )}
       {serviceDialog.open && serviceDialog.type === 'newService' && (
