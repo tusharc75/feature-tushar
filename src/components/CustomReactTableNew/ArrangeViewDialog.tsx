@@ -82,10 +82,22 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
       const data = localStorage.getItem('gridMetaData');
       const gridMetaData = JSON.parse(data || '{}');
       const hiddenCols = gridMetaData[renderedFrom]?.hide || [];
-      const updatedCols = columns.map((col) => ({
+      var updatedCols = columns.map((col) => ({
         ...col,
         isVisible: !hiddenCols.includes(col.accessor)
       }));
+      if (gridMetaData && gridMetaData[renderedFrom]?.order && gridMetaData[renderedFrom]?.order?.length) {
+        const colOrder = gridMetaData[renderedFrom]?.order;
+        const actionCol = updatedCols.find((d) => d.accessor === 'action');
+        const expanderCol = updatedCols.find((d) => d.accessor === 'expander');
+        const selectionCol = updatedCols.find((d) => d.accessor === 'selection');
+        updatedCols = [
+          ...(expanderCol ? [expanderCol] : []),
+          ...(selectionCol ? [selectionCol] : []),
+          ...updatedCols.filter((d) => !['expander', 'selection', 'action']?.includes(d.accessor)).sort((a, b) => colOrder.findIndex((d) => d === a.accessor) - colOrder.findIndex((d) => d === b.accessor)),
+          ...(actionCol ? [actionCol] : [])
+        ];
+      }
       setSortedColumns(updatedCols);
     } catch (ex) {
       setSortedColumns([...columns]);
