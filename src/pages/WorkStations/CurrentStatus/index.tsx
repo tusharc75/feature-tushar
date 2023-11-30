@@ -26,14 +26,14 @@ const CurrentStatus = ({ id }) => {
 
     useEffect(() => {
         fetchColumns();
-        fetchData();
-    }, [id, page, limit]);
+    }, []);
 
-    const getQueryString = (isExport = false) => {
+    useEffect(() => {
+        fetchData();
+    }, [id, page, limit, filters]);
+
+    const getQueryString = () => {
         let deepFilter = `?page=${page}&limit=${limit}`;
-        if (isExport) {
-            deepFilter = `?`;
-        }
         const { filterByIds, deepFilters } = gridFilterParser(filters);
         if (filterByIds?.length) {
             deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
@@ -81,15 +81,17 @@ const CurrentStatus = ({ id }) => {
             accessor: 'workorder',
             Header: 'Work Order',
             Cell: ({ row }) => (row?.original?.workOrderNumber ? (
-                <Link
-                    className="link text-truncate"
-                    title={row?.original?.workOrderNumber}
-                    to={`${routes?.workOrderDetail?.path}/${row?.original?.workOrderId}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    {row?.original?.workOrderNumber}
-                </Link>
+                <div>
+                    <Link
+                        className="link text-truncate"
+                        title={row?.original?.workOrderNumber}
+                        to={`${routes?.workOrderDetail?.path}/${row?.original?.workOrderId}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        {row?.original?.workOrderNumber}
+                    </Link>
+                </div>
             ) : (
                 <NoDataCell />
             ))
@@ -99,14 +101,16 @@ const CurrentStatus = ({ id }) => {
             Header: 'Service',
             Cell: ({ row }) => (
                 row?.original?.service ? (
-                    <Link className="link text-truncate"
-                        title={row?.original?.service}
-                        to={`${routes?.serviceMasterDetail?.path}/${row?.original?.serviceId}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        {row?.original?.service}
-                    </Link>
+                    <div>
+                        <Link className="link text-truncate"
+                            title={row?.original?.service}
+                            to={`${routes?.serviceMasterDetail?.path}/${row?.original?.serviceId}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            {row?.original?.service}
+                        </Link>
+                    </div>
                 ) : (
                     <NoDataCell />
                 )
@@ -118,25 +122,31 @@ const CurrentStatus = ({ id }) => {
             filter: false,
             width: 200,
             Cell: ({ row }) =>
-                row?.original['assignedUsers'] && row?.original['assignedUsers']?.length ? (
-                    row?.original['assignedUsers']?.map((e, i) => {
-                        return i === row?.original['assignedUsers'].length - 1 ? (
-                            <a className="link text-truncate" target="_blank" href={`${routes.userDetail.path}/${e.optionValue}`} rel="noreferrer">
-                                {e?.optionLabel}
-                            </a>
-                        ) : (
-                            <a className="link text-truncate" target="_blank" href={`${routes.userDetail.path}/${e.optionValue}`} rel="noreferrer">
-                                {e?.optionLabel},{' '}
-                            </a>
-                        );
-                    })
-                ) : (
-                    <NoDataCell />
-                )
+                row?.original['assignedUsers'] && row?.original['assignedUsers']?.length ?
+                    <div>
+                        {(
+                            row?.original['assignedUsers']?.map((e, i) => {
+                                return i === row?.original['assignedUsers'].length - 1 ? (
+                                    <a className="link text-truncate" target="_blank" href={`${routes.userDetail.path}/${e.optionValue}`} rel="noreferrer">
+                                        {e?.optionLabel}
+                                    </a>
+                                ) : (
+                                    <a className="link text-truncate" target="_blank" href={`${routes.userDetail.path}/${e.optionValue}`} rel="noreferrer">
+                                        {e?.optionLabel},{' '}
+                                    </a>
+                                );
+                            })
+                        )}
+                    </div>
+                    : (
+                        <NoDataCell />
+                    )
         },
         {
             accessor: 'createDate',
             Header: 'Create Date',
+            disableFilters: true,
+            disableSortBy: true,
             Cell: ({ row }) => (row?.original?.createDate ? (
                 <div> {moment(row?.original?.createDate).format(dateFormat)} </div>
             ) : (
@@ -146,6 +156,8 @@ const CurrentStatus = ({ id }) => {
         {
             accessor: 'estimateCompleteDate',
             Header: 'Estimate Complete Date',
+            disableFilters: true,
+            disableSortBy: true,
             Cell: ({ row }) => (row?.original?.estimateCompleteDate ? (
                 <div> {moment(row?.original?.estimateCompleteDate).format(dateFormat)} </div>
             ) : (
