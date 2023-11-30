@@ -35,12 +35,14 @@ import AttachmentDialog from 'src/pages/WorkOrder/Service/AttachmentDialog';
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
 const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, setCurrentStep }) => {
-  const { state, dispatch } = useTableReducer();
-  const { dataRows, page, limit, filters, sorting, selectedRecords } = state;
 
   const {
     state: { user, permissions }
   }: any = useData();
+
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, page, limit, filters, sorting, selectedRecords } = state;
+ 
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState(null);
   const [anchorActionEl, setAnchorActionEl] = useState(null);
@@ -58,16 +60,28 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   const [consumablesDialog, setConsumablesDialog] = useState({ open: false, ids: [], data: null });
   const [attachmentsDialog, setAttachmentsDialog] = useState({ open: false, workOrderId: null, uniqueServiceId: null, serviceName: null });
 
+
+  const [isAutoCreating, setIsAutoCreating] = useState(true);
+
+  useEffect(() => {
+    autoCreateWorkOrder();
+  }, []);
+
+  const autoCreateWorkOrder = async () => {
+    try {
+      await axiosInstance().post(`${productionOrder.api}/${productionOrderData._id}/work-order`);
+      setIsAutoCreating(false)
+    } catch (error) {
+      setIsAutoCreating(false)
+      toastConfig.setToastConfig(error);
+    }
+  }
+
   useEffect(() => {
     fetchFields();
   }, [productionOrderData]);
 
   const fetchFields = async () => {
-    try {
-      await axiosInstance().post(`${productionOrder.api}/${productionOrderData._id}/work-order`);
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.productionOrderDetail}`);
     var data = response?.data?.data?.filter((e) => !['detail', 'description', 'workOrderNumber']?.includes(e?.fieldName));
     data = CURReplaceByCurrencySingle(data, productionOrderData?.currency || 'USD');
@@ -277,8 +291,10 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   };
 
   useEffect(() => {
-    fetchData();
-  }, [page, limit, filters, sorting]);
+    if (isAutoCreating) {
+      fetchData();
+    }
+  }, [page, limit, filters, sorting, isAutoCreating]);
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
@@ -306,7 +322,6 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     setNextStep(false);
-
     const {
       data: { data, count }
     } = await axiosInstance().get(`${productionOrder.api}/${productionOrderData._id}/work-order/service${queryString}`);
@@ -316,15 +331,15 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       parent.detail = parent.detail
         ? parent.detail
         : parent.type === MATERIAL_TYPE.service
-        ? parent?.serviceDetail?.serviceName
-        : parent.type === MATERIAL_TYPE.product
-        ? parent.productDetail?.productName
-        : parent.packageDetail?.packageName;
+          ? parent?.serviceDetail?.serviceName
+          : parent.type === MATERIAL_TYPE.product
+            ? parent.productDetail?.productName
+            : parent.packageDetail?.packageName;
       parent.description = parent.description
         ? parent.description
         : parent.type === MATERIAL_TYPE.product
-        ? parent?.productDetail?.productDescription
-        : parent?.packageDetail?.packageDescription;
+          ? parent?.productDetail?.productDescription
+          : parent?.packageDetail?.packageDescription;
       parent.qty = parent.qty;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
       parent.hideSelection = false;
@@ -359,17 +374,17 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       _subRow.detail = _subRow.detail
         ? _subRow.detail
         : _subRow.type === MATERIAL_TYPE.service
-        ? _subRow?.serviceDetail?.serviceName
-        : _subRow.type === MATERIAL_TYPE.product
-        ? _subRow.productDetail?.productName
-        : _subRow.packageDetail?.packageName;
+          ? _subRow?.serviceDetail?.serviceName
+          : _subRow.type === MATERIAL_TYPE.product
+            ? _subRow.productDetail?.productName
+            : _subRow.packageDetail?.packageName;
       _subRow.description = _subRow.description
         ? _subRow.description
         : _subRow.type === MATERIAL_TYPE.service
-        ? _subRow?.serviceDetail?.serviceDescription
-        : _subRow.type === MATERIAL_TYPE.product
-        ? _subRow?.productDetail?.productDescription
-        : _subRow?.packageDetail?.packageDescription;
+          ? _subRow?.serviceDetail?.serviceDescription
+          : _subRow.type === MATERIAL_TYPE.product
+            ? _subRow?.productDetail?.productDescription
+            : _subRow?.packageDetail?.packageDescription;
       _subRow.qty = _subRow.qty;
       _subRow.workOrder = parent?.workOrder;
       _subRow.workOrderNumber = parent?.workOrder?.workOrderNumber;
@@ -525,7 +540,6 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
             type: 'success',
             message: data?.message
           });
-          fetchData();
         })
         .catch((err) => {
           setCompleteConfirmBox(false);
@@ -682,7 +696,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                 <MenuItem
                   disabled={
                     selectedRecords?.filter((d) => [MATERIAL_TYPE.product, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0 &&
-                    checkUniqWorkOrder()
+                      checkUniqWorkOrder()
                       ? false
                       : true
                   }
@@ -730,8 +744,8 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
               <MenuItem
                 disabled={
                   checkUniqWorkOrder() &&
-                  (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
-                    selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.length === 1)
+                    (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
+                      selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.length === 1)
                     ? false
                     : true
                 }
@@ -772,7 +786,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
           </Box>
         )}
       </Box>
-      {columns && dataRows ? (
+      {columns && !isAutoCreating ? (
         <>
           <Box zIndex={5} width={'100%'}>
             <CustomReactTable
@@ -794,7 +808,6 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
-
       {addServicesDialog.open && !addServicesDialog.new && (
         <AssignServiceDialog
           handleClose={() => setAddServicesDialog({ open: false, new: false })}
