@@ -5,11 +5,12 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { useData } from 'src/StateProvider/Provider';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTableNew';
 import { camelCase } from 'lodash';
 import { Link } from 'react-router-dom';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../../constants/helpers';
+import { dateFormat, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../../constants/helpers';
+import moment from 'moment';
 
 const CurrentStatus = ({ id }) => {
 
@@ -17,26 +18,51 @@ const CurrentStatus = ({ id }) => {
     const toastConfig = useContext(CustomToastContext);
     const { state, dispatch } = useTableReducer();
     const [columns, setColumns] = useState(null);
+    const { page, limit, search, filters } = state;
 
     const {
-        state: { user, permissions }
+        state: { user }
     }: any = useData();
 
     useEffect(() => {
         fetchColumns();
         fetchData();
-    }, [id]);
+    }, [id, page, limit]);
+
+    const getQueryString = (isExport = false) => {
+        let deepFilter = `?page=${page}&limit=${limit}`;
+        if (isExport) {
+            deepFilter = `?`;
+        }
+        const { filterByIds, deepFilters } = gridFilterParser(filters);
+        if (filterByIds?.length) {
+            deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+        }
+        if (deepFilters?.length) {
+            deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
+        }
+        if (filterByIds?.length || deepFilters?.length) {
+            deepFilter = `${deepFilter}&filterType=and`;
+        }
+        if (search) {
+            deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
+        }
+        return deepFilter;
+    };
 
     const fetchData = () => {
         dispatch({ type: 'loading', loading: true });
+        const queryString = getQueryString();
         axiosInstance()
-            .get(`${routes.workStations.path}/current-status/${id}`)
+            .get(`${routes.workStations.path}/current-status/${id}${queryString}`)
             .then(({ data: { data } }) => {
                 let count = data?.count
                 let rows = data?.data?.map((u) => {
                     let finalObject = prepareDataForGrid(u, user);
-                    finalObject = { ...finalObject };
-                    return finalObject;
+                    return {
+                        ...finalObject,
+                        assignedUsers: u.assignedUsers
+                    };
                 });
                 dispatch({ type: 'initialize', data: rows, count: count });
             })
@@ -87,17 +113,57 @@ const CurrentStatus = ({ id }) => {
             )
         },
         {
+            accessor: 'assignedUsers',
+            Header: 'Assigned Technician',
+            filter: false,
+            width: 200,
+            Cell: ({ row }) =>
+                row?.original['assignedUsers'] && row?.original['assignedUsers']?.length ? (
+                    row?.original['assignedUsers']?.map((e, i) => {
+                        return i === row?.original['assignedUsers'].length - 1 ? (
+                            <a className="link text-truncate" target="_blank" href={`${routes.userDetail.path}/${e.optionValue}`} rel="noreferrer">
+                                {e?.optionLabel}
+                            </a>
+                        ) : (
+                            <a className="link text-truncate" target="_blank" href={`${routes.userDetail.path}/${e.optionValue}`} rel="noreferrer">
+                                {e?.optionLabel},{' '}
+                            </a>
+                        );
+                    })
+                ) : (
+                    <NoDataCell />
+                )
+        },
+        {
+            accessor: 'createDate',
+            Header: 'Create Date',
+            Cell: ({ row }) => (row?.original?.createDate ? (
+                <div> {moment(row?.original?.createDate).format(dateFormat)} </div>
+            ) : (
+                <NoDataCell />
+            ))
+        },
+        {
+            accessor: 'estimateCompleteDate',
+            Header: 'Estimate Complete Date',
+            Cell: ({ row }) => (row?.original?.estimateCompleteDate ? (
+                <div> {moment(row?.original?.estimateCompleteDate).format(dateFormat)} </div>
+            ) : (
+                <NoDataCell />
+            ))
+        },
+        {
             accessor: 'status',
             Header: 'Status',
             Cell: ({ row }) => (row?.original?.status ? (
-                <p> {row?.original?.status} </p>
+                <div> {row?.original?.status} </div>
             ) : (
                 <NoDataCell />
             )
             )
         }
         ];
-        setColumns(column);
+        setColumns([...column]);
     };
 
     return (<Box>
