@@ -142,7 +142,7 @@ function TempFilter({ filterValue, id, setFilters, customFilters }) {
 }
 
 // for client side filter
-function DefaultColumnFilter({ column: { filterValue, setFilter, filter } }) {
+function DefaultColumnFilter({ column: { filterValue, setFilter } }) {
   const [isOpen, setIsOpen] = useState(false);
   const ref = React.useRef(null);
   const inputRef = React.useRef(null);
@@ -178,7 +178,7 @@ function DefaultColumnFilter({ column: { filterValue, setFilter, filter } }) {
             setFilter(e.target.value || undefined); // Set undefined to remove the filter entirely
           }}
           autoComplete="off"
-          placeholder={`Search ${filter ? filter : ''}...`}
+          placeholder={`Search...`}
           type="text"
           id="search"
           aria-hidden={!isOpen}
@@ -718,7 +718,7 @@ function CustomReactTable({
               customFilters={customFilters}
               renderedFrom={renderedFrom}
               dispatchTable={dispatch}
-              showOnlyShowFilteredRecordSwitch={showOnlyShowFilteredRecordSwitch}
+              showOnlyShowFilteredRecordSwitch={showOnlyShowFilteredRecordSwitch && !hideSelection}
               selectedRecords={selectedRecords?.length}
               showFilters={showFilters}
               handleFilterOpen={handleFilterOpen}
