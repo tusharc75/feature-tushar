@@ -523,7 +523,7 @@ function CustomReactTable({
         const colOrder = [...(expander ? ['expander'] : []), ...(!hideSelection ? ['selection'] : []), ...gridMetaData[renderedFrom]?.order];
         setColumnOrder(colOrder);
       } else {
-        setColumnOrder(newColumns.map((m) => m?.id));
+        setColumnOrder(newColumns.map((m) => m?.accessor));
       }
     } catch (ex) {
       console.error(`Error while getting stored data from local storage - ${renderedFrom}`);
@@ -597,9 +597,9 @@ function CustomReactTable({
 
   const reorder = (item: any, newIndex: number) => {
     const { index: currentIndex } = item;
+
     const dragColumn = columnOrder[currentIndex];
     const hoverColumn = columnOrder[newIndex];
-    const firstElement = columnOrder[0];
 
     const dragItem = allColumns.find((col) => col?.id === dragColumn || col?.id === dragColumn);
     const hoverItem = allColumns.find((col) => col?.id === hoverColumn || col?.id === hoverColumn);
@@ -614,12 +614,9 @@ function CustomReactTable({
       ]
     });
 
-    let newBaseColumns = new Array();
-    baseColumns.forEach((item) => {
-      let filteredOrder = newOrderedColumns.filter((el) => el !== firstElement);
-      const index = filteredOrder.indexOf(item.id);
-      newBaseColumns[index] = item;
-    });
+    const newBaseColumns = [...baseColumns].sort(
+      (a, b) => newOrderedColumns.findIndex((d) => d === a.accessor) - newOrderedColumns.findIndex((d) => d === b.accessor)
+    );
 
     setColumnOrder(newOrderedColumns);
     setBaseColumns(newBaseColumns);
