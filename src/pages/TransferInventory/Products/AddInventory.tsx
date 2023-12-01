@@ -127,7 +127,7 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
     }
 
     if (showFilteredRecordsOnly) {
-      deepFilter = `${deepFilter}&getById=${selectedRecords?.map((m) => m._id)}`;
+      deepFilter = `${deepFilter}&getById=${selectedRecords?.filter((e) => !e?.hideSelection)?.map((m) => m._id)}`;
     }
 
     if (sorting.length > 0) {
@@ -142,7 +142,7 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
   };
 
   const handleClickSave = () => {
-    const _data = selectedRecords?.map((d) => ({
+    const _data = selectedRecords?.filter((e) => !e?.hideSelection)?.map((d) => ({
       product: d._id,
       qty: Number(d.qty)
     }));
@@ -176,9 +176,9 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
   };
 
   let disableSave =
-    selectedRecords?.length === 0 ||
-    selectedRecords?.filter((d: any) => Number(d.qty) === 0).length > 0 ||
-    selectedRecords?.filter((d: any) => Number(d.qty) > Number(d.inventory)).length > 0 ||
+    selectedRecords?.filter((e) => !e?.hideSelection)?.length === 0 ||
+    selectedRecords?.filter((d: any) => Number(d.qty) === 0 && !d?.hideSelection).length > 0 ||
+    selectedRecords?.filter((d: any) => Number(d.qty) > Number(d.inventory) && !d?.hideSelection).length > 0 ||
     isAdding;
 
   return (
@@ -193,12 +193,12 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
           alignItems={isMobile ? 'flex-start' : 'center'}
         >
           <div style={{ order: isMobile ? 2 : 1 }}>
-            {selectedRecords?.filter((d: any) => d.qty === 0).length > 0 && (
+            {selectedRecords?.filter((d: any) => d.qty === 0 && !d?.hideSelection).length > 0 && (
               <Typography variant="body2" color="error">
                 Enter quantity before you save
               </Typography>
             )}
-            {selectedRecords?.filter((d: any) => Number(d.qty) > Number(d.inventory)).length > 0 && (
+            {selectedRecords?.filter((d: any) => Number(d.qty) > Number(d.inventory) && !d?.hideSelection).length > 0 && (
               <Typography variant="body2" color="error">
                 Quantity should be less then inventory
               </Typography>
@@ -224,8 +224,8 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
                 size="small"
               >
                 Add{' '}
-                {selectedRecords.length > 0
-                  ? '(' + selectedRecords.length + ')'
+                {selectedRecords?.filter((e) => !e?.hideSelection).length > 0
+                  ? '(' + selectedRecords?.filter((e) => !e?.hideSelection).length + ')'
                   : ''}
               </Button>
             </Box>

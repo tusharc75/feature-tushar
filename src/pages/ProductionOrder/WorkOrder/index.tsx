@@ -42,7 +42,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
 
   const { state, dispatch } = useTableReducer();
   const { dataRows, page, limit, filters, sorting, selectedRecords } = state;
- 
+
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState(null);
   const [anchorActionEl, setAnchorActionEl] = useState(null);
@@ -291,9 +291,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   };
 
   useEffect(() => {
-    if (isAutoCreating) {
-      fetchData();
-    }
+    fetchData();
   }, [page, limit, filters, sorting, isAutoCreating]);
 
   const getQueryString = (isExport = false) => {
@@ -786,7 +784,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
           </Box>
         )}
       </Box>
-      {columns && !isAutoCreating ? (
+      {columns ? (
         <>
           <Box zIndex={5} width={'100%'}>
             <CustomReactTable
