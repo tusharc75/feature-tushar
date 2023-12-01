@@ -142,7 +142,7 @@ function TempFilter({ filterValue, id, setFilters, customFilters }) {
 }
 
 // for client side filter
-function DefaultColumnFilter({ column: { filterValue, setFilter, filter } }) {
+function DefaultColumnFilter({ column: { filterValue, setFilter } }) {
   const [isOpen, setIsOpen] = useState(false);
   const ref = React.useRef(null);
   const inputRef = React.useRef(null);
@@ -178,7 +178,7 @@ function DefaultColumnFilter({ column: { filterValue, setFilter, filter } }) {
             setFilter(e.target.value || undefined); // Set undefined to remove the filter entirely
           }}
           autoComplete="off"
-          placeholder={`Search ${filter ? filter : ''}...`}
+          placeholder={`Search...`}
           type="text"
           id="search"
           aria-hidden={!isOpen}
@@ -304,13 +304,17 @@ function CustomReactTable({
 
   useEffect(() => {
     columns?.forEach((e) => {
-      if (e.accessor === 'action') {
-        e.disableFilters = true;
-        e.disableSortBy = true;
-        e.canDrag = false;
-        if (!e.maxWidth) {
-          e.maxWidth = 120;
-        }
+      switch (true) {
+        case e.accessor === 'action':
+          e.disableFilters = true;
+          e.disableSortBy = true;
+          e.canDrag = false;
+          e.maxWidth = e.maxWidth ?? 120;
+          break;
+        case e.accessor === 'index':
+          e.disableFilters = e.disableFilters ?? true;
+          e.disableSortBy = e.disableSortBy ?? true;
+          break;
       }
     });
     setBaseColumns(columns);
@@ -519,7 +523,7 @@ function CustomReactTable({
         const colOrder = [...(expander ? ['expander'] : []), ...(!hideSelection ? ['selection'] : []), ...gridMetaData[renderedFrom]?.order];
         setColumnOrder(colOrder);
       } else {
-        setColumnOrder(newColumns.map((m) => m?.id));
+        setColumnOrder(newColumns.map((m) => m?.accessor));
       }
     } catch (ex) {
       console.error(`Error while getting stored data from local storage - ${renderedFrom}`);
@@ -593,9 +597,9 @@ function CustomReactTable({
 
   const reorder = (item: any, newIndex: number) => {
     const { index: currentIndex } = item;
+
     const dragColumn = columnOrder[currentIndex];
     const hoverColumn = columnOrder[newIndex];
-    const firstElement = columnOrder[0];
 
     const dragItem = allColumns.find((col) => col?.id === dragColumn || col?.id === dragColumn);
     const hoverItem = allColumns.find((col) => col?.id === hoverColumn || col?.id === hoverColumn);
@@ -610,12 +614,9 @@ function CustomReactTable({
       ]
     });
 
-    let newBaseColumns = new Array();
-    baseColumns.forEach((item) => {
-      let filteredOrder = newOrderedColumns.filter((el) => el !== firstElement);
-      const index = filteredOrder.indexOf(item.id);
-      newBaseColumns[index] = item;
-    });
+    const newBaseColumns = [...baseColumns].sort(
+      (a, b) => newOrderedColumns.findIndex((d) => d === a.accessor) - newOrderedColumns.findIndex((d) => d === b.accessor)
+    );
 
     setColumnOrder(newOrderedColumns);
     setBaseColumns(newBaseColumns);
@@ -717,7 +718,7 @@ function CustomReactTable({
               customFilters={customFilters}
               renderedFrom={renderedFrom}
               dispatchTable={dispatch}
-              showOnlyShowFilteredRecordSwitch={showOnlyShowFilteredRecordSwitch}
+              showOnlyShowFilteredRecordSwitch={showOnlyShowFilteredRecordSwitch && !hideSelection}
               selectedRecords={selectedRecords?.length}
               showFilters={showFilters}
               handleFilterOpen={handleFilterOpen}
@@ -1054,7 +1055,7 @@ const DraggableHeader: React.FC<DraggableHeaderProps> = ({ column, index, reorde
           </div>
           {column.isSorted ? column.isSortedDesc ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" /> : ''}
         </div>
-        {column?.columnFilterable && column?.id !== 'action' ? (
+        {column?.columnFilterable && column?.id !== 'action'  ? (
           <div>
             {canFilter ? (
               !isClientSideGrid ? (

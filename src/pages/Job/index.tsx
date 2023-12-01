@@ -1,40 +1,44 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { useHistory } from 'react-router-dom';
-import { Grid, IconButton, Tooltip } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import queryString from 'query-string';
 import {
-  isObjectEmpty,
   gridLoadingTimeout,
   prepareDataForGrid,
-  getLocalStorageArrayData,
-  removeLocalStorage,
+  // getLocalStorageArrayData,
   sidebarResource
 } from '../../constants/helpers';
+import { Button, Box, IconButton, Menu, MenuItem } from '@material-ui/core';
 import CustomContainer from '../../components/CustomContainer';
 import routes from './../../components/Helpers/Routes';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import { isMobile, isTablet } from 'react-device-detect';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField, gridFilterParser } from '../../constants/useColumns';
+import AppsIcon from '@material-ui/icons/Apps';
+import ViewListIcon from '@material-ui/icons/ViewList';
 import { camelCase } from 'lodash';
-import { SiStatuspage } from 'react-icons/all';
-import JobHeader from './JobHeader';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ManageJobDialog from './ManageJobDialog';
 import CardView from './CardView';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import styles from '../Leads/Header.module.scss';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import { ToggleButtonGroup, ToggleButton } from '@material-ui/lab';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import { vi } from 'date-fns/locale';
 
 let jobTimeout;
 
 const Job = () => {
+  const renderedFrom = camelCase(routes?.job.title);
+  const toastConfig = useContext(CustomToastContext);
   const JobType = [
     {
       key: `My ${routes?.job.title}`,
@@ -46,34 +50,32 @@ const Job = () => {
     }
   ];
 
-  const renderedFrom = camelCase(routes?.job.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
-  const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
+  let { type }: any = queryString.parse(history.location.search);
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, rowCount, page, loading, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
-  const { type }: any = queryString.parse(history.location.search);
+
   const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
-  const [renderCount, setRenderCount] = useState(0);
-  const [deleteLoading, setDeleteLoading] = useState(false);
-  const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
-  const [deleteRecord, setDeleteRecord] = useState<any>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showManageJobDialog, setShowManageJobDialog] = useState({ open: false, isClone: false, idToClone: null });
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
+  const [deleteRecord, setDeleteRecord] = useState(null);
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
+
+  const [columns, setColumns] = useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
   const [singleJobDelete, setSingleJobDelete] = useState({
     id: null,
     show: false,
     jobNumber: ''
   });
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
-    state;
-  const [frameworkComponents, setFrameworkComponents] = useState({});
-  const [columns, setColumns] = useState([]);
-  const [locationKeys, setLocationKeys] = useState([]);
+  const [renderCount, setRenderCount] = useState(0);
   const [viewType, setViewType] = useState(1);
 
   const { getColumnData } = useColumns();
@@ -87,51 +89,16 @@ const Job = () => {
     const response = await axiosInstance().get(`/field?resource=Job`);
     data = response?.data?.data;
     let columns = [];
-    let rendererNames = [];
     data.forEach((o) => {
       let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.jobDetail.path, true);
       if (currentColumn !== null) {
         columns = [...columns, currentColumn?.columnData];
-        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-          rendererNames.push(currentColumn?.rendererName);
-        }
       }
       return o?.fieldData;
     });
-    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-    tempFrameworkComponent = {
-      ...tempFrameworkComponent,
-      actionsRenderer: ActionsRenderer
-    };
-    setFrameworkComponents({ ...tempFrameworkComponent });
-    let staticFields = getStaticFields();
-    staticFields.forEach((field) => {
-      columns.push(checkStaticField(renderedFrom, field));
-    });
+    columns = [...columns, ...getStaticFields(), ActionsRenderer];
     setColumns([...columns]);
   };
-
-  //  Grid Variables - End
-
-  useEffect(() => {
-    return history.listen((location) => {
-      const { type }: any = queryString.parse(history.location.search);
-      if (history.action === 'PUSH') {
-        setLocationKeys([location.key]);
-      }
-      if (history.action === 'POP') {
-        if (locationKeys[1] === location.key) {
-          setLocationKeys(([_, ...keys]) => keys);
-          // Handle forward event
-          setSelectedType(type ? parseInt(type) : 1);
-        } else {
-          setLocationKeys((keys) => [location.key, ...keys]);
-          // Handle back event
-          setSelectedType(type ? parseInt(type) : 1);
-        }
-      }
-    });
-  }, [locationKeys]);
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
@@ -161,6 +128,7 @@ const Job = () => {
           type: 'success',
           message: data.message
         });
+        dispatch({ type: 'selection', selectedRecords: [] });
         fetchJob();
         dispatch({ type: 'loading', loading: false });
         setSingleJobDelete({ id: null, show: false, jobNumber: '' });
@@ -171,60 +139,60 @@ const Job = () => {
       });
   };
 
-  const ActionsRenderer = (params) => (
-    <>
-      {permissions?.job?.isCreate ? (
-        <Tooltip title="Clone">
-          <IconButton
-            size="small"
-            aria-label="Clone"
-            onClick={() => {
-              setShowManageJobDialog({ open: true, isClone: true, idToClone: params.data._id });
-            }}
-          >
-            <FileCopyIcon fontSize="small" color="primary" />
-          </IconButton>
-        </Tooltip>
-      ) : (
-        <Tooltip className="cursor-stop" title="You do not have permission to clone/create">
-          <IconButton aria-label="Clone" size="small">
-            <FileCopyIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      )}
-      {params?.data?.canDelete && (
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 110,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        <HtmlTooltip title={permissions?.job?.isCreate ? "Clone" : cloneDisable}  >
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Clone"
+              disabled={permissions?.job?.isCreate ? false : true}
+              onClick={() => {
+                setShowManageJobDialog({ open: true, isClone: true, idToClone: row.original._id });
+              }}
+            >
+              <FileCopyIcon fontSize="small" color={permissions?.job?.isCreate ? 'primary' : 'disabled'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
         <HtmlTooltip title="Delete">
           <IconButton
             size="small"
             aria-label="Delete"
+            disabled = {row?.original?.canDelete ? false : true}
             onClick={() => {
               setSingleJobDelete({
                 show: true,
-                id: params.data._id,
-                jobNumber: `${params.data.jobNumber}`
+                id: row.original._id,
+                jobNumber: `${row.original.jobNumber}`
               });
             }}
           >
-            <DeleteIcon color="error" />
+          <DeleteIcon color={row?.original?.canDelete ? 'error' : 'disabled'}/>
           </IconButton>
         </HtmlTooltip>
-      )}
-    </>
-  );
+      </>
+    )
+  };
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-
     if (isExport) {
       deepFilter = `?`;
     }
-
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
     }
-
     const { filterByIds, deepFilters } = gridFilterParser(filters);
-
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
@@ -234,7 +202,6 @@ const Job = () => {
     if (filterByIds?.length || deepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
     }
-
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
@@ -242,7 +209,7 @@ const Job = () => {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(getLocalStorageArrayData(localStorageSelectedRecords)?.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || [])?.map((m) => m._id))}`;
     }
     return deepFilter;
   };
@@ -250,9 +217,6 @@ const Job = () => {
   const fetchJob = async () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
     try {
       let data: any = [],
         count;
@@ -266,11 +230,7 @@ const Job = () => {
         finalObject['canDelete'] = permissions?.job?.isDelete && finalObject?.ownerId === user?.user?._id;
         return finalObject;
       });
-      if (appendRows) {
-        dispatch({ type: 'initialize', data: [...dataRows, ...rows], count: count });
-      } else {
-        dispatch({ type: 'initialize', data: rows, count: count });
-      }
+      dispatch({ type: 'initialize', data: rows, count: count });
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
       }, gridLoadingTimeout);
@@ -284,63 +244,62 @@ const Job = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-  const handleJobTypeSel = (filterValues) => {
-    dispatch({ type: 'setPage', page: 0 });
-    setSelectedType(filterValues);
-    history.push(`?type=${filterValues}`);
+  const onTypeChange = (event, type) => {
+    dispatch({ type: 'pageChange', page: 0 });
+    const values = JobType.find((d) => d.key === type).value;
+    setSelectedType(values);
+    history.push(`?type=${values}`);
   };
 
-  const showConfirmBox = (row) => {
-    if (row) {
-      setIsConformDialogVisible(true);
-      if (row && row._id) {
-        setDeleteRecord(row);
-      }
+
+  const showConfirmBox = () => {
+    if (selectedRecords?.find((d) => d.canDelete === false)) {
+      setShowDeleteWarningConfirmBox(true);
     } else {
-      if (getLocalStorageArrayData(localStorageSelectedRecords)?.find((d) => d.canDelete === false)) {
-        setShowDeleteWarningConfirmBox(true);
-      } else {
-        setIsConformDialogVisible(true);
-      }
+      setShowDeleteConfirmBox(true);
     }
   };
 
-  const clickCreateNew = () => {
-    setShowManageJobDialog({ open: true, isClone: false, idToClone: null });
-  };
-
-  const handleDeleteJob = async () => {
-    setDeleteLoading(true);
-    let recordsToDelete = [];
-    if (deleteRecord?._id) {
-      recordsToDelete.push(deleteRecord?._id);
+  const handleDeleteJob = () => {
+    setIsSubmitting(true);
+    let ids = [];
+    if (deleteRecord) {
+      ids.push(deleteRecord._id);
     } else {
-      recordsToDelete = getLocalStorageArrayData(localStorageSelectedRecords)?.map((o) => o._id);
+      ids = selectedRecords?.map((d) => d._id);
     }
-    if (recordsToDelete.length > 0) {
-      axiosInstance()
-        .put(`${routes.job.path}/remove`, {
-          ids: recordsToDelete
-        })
-        .then(({ data }) => {
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-          removeLocalStorage(localStorageSelectedRecords);
-          setIsConformDialogVisible(false);
-          setDeleteLoading(false);
-          if (deleteRecord) setDeleteRecord({});
-          fetchJob();
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-          setIsConformDialogVisible(false);
-          setDeleteLoading(false);
+    axiosInstance()
+      .put(`${routes.job.path}/remove`, {
+        ids: ids
+      })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
         });
-    }
+        dispatch({ type: 'selection', selectedRecords: [] });
+        fetchJob();
+        setShowDeleteConfirmBox(false);
+        setDeleteRecord(null);
+        setAnchorEl(null);
+        setIsSubmitting(false);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setIsSubmitting(false);
+      });
   };
+
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+
+
 
   return (
     <section className="main-container-v1">
@@ -355,40 +314,138 @@ const Job = () => {
           }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
-          recordsToExport={getLocalStorageArrayData(localStorageSelectedRecords)?.length}
-          ids={
-            getLocalStorageArrayData(localStorageSelectedRecords)?.length
-              ? getLocalStorageArrayData(localStorageSelectedRecords)?.map((obj) => obj._id)
-              : []
-          }
+          recordsToExport={selectedRecords?.length}
+          ids={selectedRecords?.map((obj) => obj._id)}
           onExportToExcelSuccess={() => {
-            if (gridApi) gridApi.deselectAll();
-            else fetchJob();
+            fetchJob();
           }}
           additionalParams={getQueryString(true)}
         />
       </div>
       <CustomContainer>
         <div className="header-panel">
-          <JobHeader
-            selectedType={selectedType}
-            onTypeChange={handleJobTypeSel}
-            options={JobType}
-            onSearch={handleSearch}
-            columns={columns}
-            dispatch={dispatch}
-            searchVal={search}
-            permissions={permissions}
-            onCreate={clickCreateNew}
-            showConfirmBox={showConfirmBox}
-            canDelete={getLocalStorageArrayData(localStorageSelectedRecords)?.length === 0}
-            filters={filters}
-            viewType={viewType}
-            setViewType={setViewType}
-            resource={sidebarResource.job}
-          />
-        </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className={'flex justify-between align-items-center gap-1 w-full'}>
+              <ToggleButtonGroup
+                size="small"
+                className="align-items-center gap-1 "
+                value={JobType[selectedType - 1].key}
+                exclusive
+                onChange={onTypeChange}
+              >
+                {JobType.map((k, index) => {
+                  return (
+                    <ToggleButton value={k.key} key={index}>
+                      {k.key}
+                    </ToggleButton>
+                  );
+                })}
+                {permissions?.fleetDispatch?.isRead && (
+                  <Box>
+                    <ToggleButtonGroup size="small">
+                      <ToggleButton
+                        onClick={() => {
+                          history.push(`${routes.fleetDispatch.path}`);
+                        }}
+                      >
+                        <span>{routes.fleetDispatch.title}</span>
+                      </ToggleButton>
+                    </ToggleButtonGroup>
+                  </Box>
+                )}
+                {permissions?.fleetReceiver?.isRead && (
+                  <Box>
+                    <ToggleButtonGroup size="small">
+                      <ToggleButton
+                        onClick={() => {
+                          history.push(`${routes.fleetReceiver.path}`);
+                        }}
+                      >
+                        <span>{routes.fleetReceiver.title}</span>
+                      </ToggleButton>
+                    </ToggleButtonGroup>
+                  </Box>
+                )}
 
+                <Box>
+                  <IconButton
+                    size="small"
+                    aria-label="Clone"
+                    onClick={() => {
+                      setViewType(1);
+                    }}
+                  >
+                    <AppsIcon color={viewType === 1 ? 'primary' : 'disabled'} />
+                  </IconButton>
+                  <IconButton
+                    size="small"
+                    aria-label="Clone"
+                    onClick={() => {
+                      setViewType(2);
+                    }}
+                  >
+                    <ViewListIcon color={viewType === 2 ? 'primary' : 'disabled'} />
+                  </IconButton>
+                </Box>
+              </ToggleButtonGroup>
+            </div>
+
+            <div className="flex flex-wrap gap-[8px] justify-end">
+              <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
+              <div className="flex gap-[8px] flex-wrap items-center">
+                <Button
+                  variant={'contained'}
+                  color="primary"
+                  size="small"
+                  className={`no-shadow`}
+                  onClick={() => {
+                    setShowManageJobDialog({ open: true, isClone: false, idToClone: null });
+                  }}
+                  startIcon={<AddOutlined />}
+                >
+                  Add
+                </Button>
+                {permissions?.job?.isDelete && (
+                  <>
+                    <Button
+                      variant={'outlined'}
+                      color="default"
+                      size="small"
+                      onClick={openActions}
+                      className={`new-dropdown-v1`}
+                      aria-controls="action-menu"
+                      endIcon={<ExpandMore />}
+                      disabled={selectedRecords?.length ? false : true}
+                    >
+                      Actions
+                    </Button>
+                    <Menu
+                      anchorEl={anchorEl}
+                      keepMounted
+                      getContentAnchorEl={null}
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left'
+                      }}
+                      id="action-menu"
+                      open={Boolean(anchorEl)}
+                      onClose={closeActions}
+                    >
+                      <MenuItem
+                        onClick={() => {
+                          closeActions();
+                          showConfirmBox();
+                        }}
+                      >
+                        {`Delete (${selectedRecords?.length})`}
+                      </MenuItem>
+                    </Menu>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
         {viewType === 1 && (
           <CardView
             jobs={dataRows}
@@ -398,87 +455,46 @@ const Job = () => {
             loading={loading}
           />
         )}
-        {viewType === 2 && (
-          <>
-            {Object.keys(frameworkComponents).length > 0 ? (
-              isMobile && !isTablet ? (
-                <CustomSwipableList
-                  key={selectedType}
-                  allowSelection={true}
-                  allowSwipe={true}
-                  permissions={permissions?.job}
-                  primaryField={columns?.find((d) => d.primaryField)}
-                  onClick={(data) => {
-                    history.push(`${routes.jobDetail.path}/${data._id}`);
-                  }}
-                  dataRows={dataRows}
-                  selectedRecords={getLocalStorageArrayData(localStorageSelectedRecords)}
-                  dispatch={dispatch}
-                  onEdit={(data) => {
-                    history.push(`${routes.jobDetail.path}/${data._id}`);
-                  }}
-                  extraParamsToCheckDelete={true}
-                  onDelete={(data) => {
-                    setDeleteRecord(data._id);
-                    setIsConformDialogVisible(true);
-                  }}
-                  rowCount={rowCount}
-                  page={page}
-                  loading={loading}
-                  chips={[
-                    {
-                      icon: <SiStatuspage />,
-                      label: 'Status: ',
-                      field: 'status'
-                    }
-                  ]}
-                  onCreate={false}
-                  showClone={true}
-                  onClone={(data) => {
-                    setShowManageJobDialog({ open: true, isClone: true, idToClone: data._id });
-                  }}
-                  renderedFrom={renderedFrom}
-                />
-              ) : (
-                <CustomAgGrid
+
+        {viewType === 2 &&
+          (
+            <>
+              {columns ? (
+                <CustomReactTable
+                  height={'calc(100vh - 200px)'}
                   columns={columns}
-                  dataRows={dataRows}
-                  frameworkComponents={frameworkComponents}
-                  setGridApi={setGridApi}
+                  state={state}
                   dispatch={dispatch}
-                  rowCount={rowCount}
-                  limit={limit}
-                  pageSizes={pageSizes}
-                  page={page}
-                  actionWidth={100}
-                  loading={loading}
                   renderedFrom={renderedFrom}
+                  isClientSideGrid={false}
                   refreshGrid={fetchJob}
-                  showOnlyShowFilteredRecordSwitch={true}
+                  showOnlyShowFilteredRecordSwitch={false}
                   showFilters={true}
                   resource={sidebarResource.job}
                 />
-              )
-            ) : null}
-          </>
+              ) : <Box p={2} height={500}>
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
+              </Box>}
+            </>
+          )}
+
+        {showDeleteConfirmBox && (
+          <ConfirmationDialog
+            open={showDeleteConfirmBox}
+            message={`Are you sure you want to delete ${deleteRecord?.jobNumber ? 'Job' : 'Jobs'} ${deleteRecord.jobNumber || ''}?`}
+            onClose={() => {
+              setDeleteRecord(null);
+              setShowDeleteConfirmBox(false);
+            }}
+            okBtnLoading={isSubmitting}
+            onOk={handleDeleteJob}
+          />
         )}
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
             open={showDeleteWarningConfirmBox}
             message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
             onClose={() => setShowDeleteWarningConfirmBox(false)}
-          />
-        ) : null}
-        {isConfirmDialogVisible ? (
-          <ConfirmationDialog
-            open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.jobNumber ? 'Job' : 'Jobs'}   ${deleteRecord.jobNumber || ''}?`}
-            onClose={() => {
-              if (deleteRecord) setDeleteRecord({});
-              setIsConformDialogVisible(false);
-            }}
-            okBtnLoading={deleteLoading}
-            onOk={handleDeleteJob}
           />
         ) : null}
 

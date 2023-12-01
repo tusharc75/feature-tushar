@@ -1,7 +1,6 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { Box, Button, capitalize, Chip, Divider, Grid, makeStyles, Tooltip, Typography } from '@material-ui/core';
-import { reducer, intialState } from '../../../components/AgGridComponents/CustomAgGrid';
 import { dateFormat, downloadExcel, formatAmountWithCurrency, getUniqueCurrencies, prepareDataForGrid, quotation } from '../../../constants/helpers';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { FaDiceOne } from 'react-icons/fa';
@@ -58,12 +57,12 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                ? row.original?.packageDetail.packageType === 'Product'
-                  ? '(Product)'
-                  : '(Service)'
-                : row.original.type === 'service'
-                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                : ''}
+                  ? row.original?.packageDetail.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === 'service'
+                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                    : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -215,23 +214,22 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === 'serializedAsset'
+      parent.detail = `${parent.type === 'serializedAsset'
           ? parent.serializedAssetDetail?.assetNumber
           : parent.type === 'product'
-          ? parent.productDetail?.productName
-          : parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
-      }`;
+            ? parent.productDetail?.productName
+            : parent.type === 'service'
+              ? parent.serviceDetail?.serviceName
+              : parent.packageDetail?.packageName
+        }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDescription || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : '';
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : '';
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       // parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       // parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
@@ -253,23 +251,22 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
 
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${
-        _subRow.type === 'serializedAsset'
+      _subRow.detail = `${_subRow.type === 'serializedAsset'
           ? _subRow.serializedAssetDetail?.assetNumber
           : _subRow.type === 'product'
-          ? _subRow.productDetail?.productName
-          : _subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.packageDetail?.packageName
-      }`;
+            ? _subRow.productDetail?.productName
+            : _subRow.type === 'service'
+              ? _subRow.serviceDetail?.serviceName
+              : _subRow.packageDetail?.packageName
+        }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       // _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       // _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
@@ -402,7 +399,7 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
                     columns={columns}
                     data={rowsData}
                     setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-                    onSelect={() => {}}
+                    onSelect={() => { }}
                     hideSelection={true}
                     hideAction={true}
                     childrenProperty="subRows"

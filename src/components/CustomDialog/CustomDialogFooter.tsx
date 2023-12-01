@@ -1,7 +1,9 @@
 import React from 'react';
 import { withStyles } from '@material-ui/core';
 import MuiDialogActions from '@material-ui/core/DialogActions';
-import PropTypes from 'prop-types';
+import type { DialogActionsProps } from '@material-ui/core/DialogActions';
+
+interface CustomDialogFooterProps extends DialogActionsProps {}
 
 const DialogActions = withStyles((theme) => ({
   root: {
@@ -10,16 +12,12 @@ const DialogActions = withStyles((theme) => ({
   }
 }))(MuiDialogActions);
 
-function CustomDialogFooter({ children }) {
+function CustomDialogFooter({ children, ...others }: CustomDialogFooterProps) {
   return (
     <React.Fragment>
-      <DialogActions>{children}</DialogActions>
+      <DialogActions {...others}>{children}</DialogActions>
     </React.Fragment>
   );
 }
-
-CustomDialogFooter.propTypes = {
-  children: PropTypes.any
-};
 
 export default CustomDialogFooter;

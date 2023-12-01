@@ -25,8 +25,12 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import ProductQtyDialog from './ProductQtyDialog';
 import { deleteDisable } from 'src/constants/messageHelpers';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import { ExpandMore } from '@material-ui/icons';
+import { Menu, MenuItem } from '@material-ui/core';
 
-const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToEdit, fetchTransferInventoryData, updateStatus }) => {
+
+const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToEdit, fetchTransferInventoryData, updateStatus, stepFullScreen }) => {
+
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer();
   const {
@@ -43,7 +47,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
   const [isAdding, setIsAdding] = useState(false);
   const [columns, setColumns] = useState(null);
   const [viewProductEditDialog, setProductEditDialog] = useState({ open: false, productData: null });
-  const history = useHistory();
+  const [anchorEl, setAnchorEl] = useState(null);
 
   const [assignNumber, setAssignNumber] = useState({ open: false, serialNumber: [], qty: 0, product: '' });
   useEffect(() => {
@@ -193,11 +197,12 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
   };
 
   useEffect(() => {
-    fetchProducts();
+    fetchData();
   }, [transferInventoryData]);
 
-  const fetchProducts = async () => {
+  const fetchData = async () => {
     setNextStep(false);
+    dispatch({ type: 'selection', selectedRecords: [] });
     dispatch({ type: 'loading', loading: true });
     const {
       data: { data: deliveryTicketList }
@@ -254,7 +259,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
         products
       })
       .then(() => {
-        fetchProducts();
+        fetchData();
         fetchTransferInventoryData();
         toastConfig.setToastConfig({
           open: true,
@@ -283,7 +288,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
         setRemoveData([]);
         setShowConfirmBox(false);
         setRemovingInventory(false);
-        fetchProducts();
+        fetchData();
         fetchTransferInventoryData();
       } catch (error) {
         setShowConfirmBox(false);
@@ -302,7 +307,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
         message: "Qty can't be updated",
         open: true
       });
-      fetchProducts();
+      fetchData();
       return;
     }
 
@@ -312,7 +317,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
         message: 'Please enter valid Qty.',
         open: true
       });
-      fetchProducts();
+      fetchData();
       return;
     }
     if (Number(row.qty) > Number(row.inventory)) {
@@ -321,7 +326,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
         message: "Qty can't be greater then inventory",
         open: true
       });
-      fetchProducts();
+      fetchData();
       return;
     }
     if (row?.serialNumber?.length && Number(row.qty) < row?.serialNumber?.length) {
@@ -330,7 +335,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
         message: "Qty can't be less then serial number assigned",
         open: true
       });
-      fetchProducts();
+      fetchData();
       return;
     }
     const rows = dataRows;
@@ -340,7 +345,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
       }
     });
     updateQty(row._id, row.qty);
-    fetchProducts();
+    fetchData();
   };
 
   const qtyUpdate = ({ data }) => {
@@ -350,7 +355,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
         message: 'Please enter valid Qty.',
         open: true
       });
-      fetchProducts();
+      fetchData();
       return;
     }
     if (data.canDelete === false) {
@@ -359,7 +364,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
         message: "Qty can't be updated",
         open: true
       });
-      fetchProducts();
+      fetchData();
       return;
     }
     if (Number(data.qty) > Number(data.inventory)) {
@@ -368,7 +373,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
         message: "Qty can't be greater then inventory",
         open: true
       });
-      fetchProducts();
+      fetchData();
       return;
     }
     if (data?.serialNumber?.length && Number(data.qty) < data?.serialNumber?.length) {
@@ -377,7 +382,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
         message: "Qty can't be less then serial number assigned",
         open: true
       });
-      fetchProducts();
+      fetchData();
       return;
     }
 
@@ -396,19 +401,28 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
       })
       .then(() => {
         setProductEditDialog({ open: false, productData: null });
-        fetchProducts();
+        fetchData();
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
   };
 
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+
+
   return (
     <React.Fragment>
       {allowedToEdit && [TRANSFER_INVENTORY_STATUS.new, TRANSFER_INVENTORY_STATUS.inProgress]?.includes(transferInventoryData?.status) && (
         <Box display="flex" justifyContent="space-between" m={1}>
           <Button
-            variant={'contained'}
+            variant={'outlined'}
             color="primary"
             size="small"
             onClick={() => {
@@ -419,32 +433,55 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
           </Button>
           <Box display="flex">
             <Button
-              variant="outlined"
+              variant={'outlined'}
+              color="default"
               size="small"
-              color="primary"
-              disabled={selectedRecords.length === 0}
-              onClick={() => {
-                setShowConfirmBox(true);
-                setRemoveData(selectedRecords.map((inv: any) => inv?.productId));
-              }}
+              onClick={openActions}
+              className={`new-dropdown-v1`}
+              aria-controls="action-menu"
+              endIcon={<ExpandMore />}
+              disabled={selectedRecords?.filter((e) => !e?.hideSelection)?.length ? false : true}
             >
-              {'Remove'}
+              Actions
             </Button>
+            <Menu
+              anchorEl={anchorEl}
+              keepMounted
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left'
+              }}
+              id="action-menu"
+              open={Boolean(anchorEl)}
+              onClose={closeActions}
+            >
+              <MenuItem
+                onClick={() => {
+                  closeActions()
+                  setShowConfirmBox(true);
+                  setRemoveData(selectedRecords?.filter((e) => !e?.hideSelection)?.map((inv: any) => inv?.productId));
+                }}
+              >
+                {`Delete`}
+              </MenuItem>
+            </Menu>
           </Box>
         </Box>
       )}
       <Box mt={1}>
         {columns ? (
           <CustomReactTable
-            height={'calc(100vh - 393px)'}
+            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
             columns={columns}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
-            refreshGrid={fetchProducts}
+            refreshGrid={fetchData}
             onSaveEdit={onSaveEdit}
             hideAction={!allowedToEdit}
             hideSelection={!allowedToEdit}
+            isClientSideGrid={true}
           />
         ) : (
           <Box p={2} height={500}>
@@ -491,7 +528,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
           }}
           handleSuccess={() => {
             setAssignNumber({ open: false, serialNumber: [], qty: 0, product: '' });
-            fetchProducts();
+            fetchData();
           }}
           product={assignNumber.product}
           serialNumber={assignNumber.serialNumber}

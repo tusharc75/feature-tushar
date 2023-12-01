@@ -3493,10 +3493,6 @@ body {
 }
 
 .custom-react-table {
-  background-color: white;
-  [data-mode='dark'] & {
-    background-color: var(--dark-primary);
-  }
   * {
     font-family: 'Inter', sans-serif;
   }
