@@ -820,7 +820,6 @@ export default function Account(props) {
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
-            isClientSideGrid={false}
             refreshGrid={fetchAccounts}
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}

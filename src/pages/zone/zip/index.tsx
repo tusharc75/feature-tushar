@@ -243,7 +243,6 @@ const Zipcode = (props: ConfigProps) => {
             state={state}
             dispatch={dispatch}
             renderedFrom={"zone"}
-            isClientSideGrid={false}
             refreshGrid={getZipData}
             showOnlyShowFilteredRecordSwitch={false}
             showFilters={false}

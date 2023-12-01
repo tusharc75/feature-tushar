@@ -21,10 +21,11 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const CustomReport = () => {
+  
   const renderedFrom = 'custom-report';
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer();
-  const { page, limit, filters, sorting, selectedRecords } = state;
+  const { selectedRecords } = state;
 
   const {
     state: { user, permissions, selectedEntity }
@@ -44,7 +45,7 @@ const CustomReport = () => {
 
   useEffect(() => {
     fetchData();
-  }, [page, limit, filters, sorting, selectedEntity]);
+  }, [selectedEntity]);
 
   const fetchGridColumns = () => {
     let columns = [
@@ -57,7 +58,7 @@ const CustomReport = () => {
           <p
             className="text-truncate link"
             onClick={() => {
-                setShowManageDialog({ open: true, id: row?.original?._id });
+              setShowManageDialog({ open: true, id: row?.original?._id });
             }}
           >
             {row.original.customReportName}
@@ -88,18 +89,18 @@ const CustomReport = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-          <HtmlTooltip title="Delete">
-            <IconButton
-              size="small"
-              aria-label="Delete"
-              onClick={() => {
-                setDeleteRecord(row.original);
-                setShowDeleteConfirmBox(true);
-              }}
-            >
-              <DeleteIcon color="error" />
-            </IconButton>
-          </HtmlTooltip>
+        <HtmlTooltip title="Delete">
+          <IconButton
+            size="small"
+            aria-label="Delete"
+            onClick={() => {
+              setDeleteRecord(row.original);
+              setShowDeleteConfirmBox(true);
+            }}
+          >
+            <DeleteIcon color="error" />
+          </IconButton>
+        </HtmlTooltip>
       </>
     )
   };
@@ -112,12 +113,12 @@ const CustomReport = () => {
         let count = data?.length;
         let rows = data?.map((u) => {
           let finalObject: any = prepareDataForGrid(u);
-        finalObject.resource = routes[camelCase(finalObject.resource)] ? routes[camelCase(finalObject.resource)]?.title : finalObject.resource;
-        finalObject.column = finalObject.column
-          ?.split(',')
-          ?.map((s: string) => startCase(s))
-          ?.join(', ');
-        finalObject.filters = finalObject.filters.length > 0 ? finalObject?.filters?.map((item) => startCase(item.term)) : [];
+          finalObject.resource = routes[camelCase(finalObject.resource)] ? routes[camelCase(finalObject.resource)]?.title : finalObject.resource;
+          finalObject.column = finalObject.column
+            ?.split(',')
+            ?.map((s: string) => startCase(s))
+            ?.join(', ');
+          finalObject.filters = finalObject.filters.length > 0 ? finalObject?.filters?.map((item) => startCase(item.term)) : [];
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -171,21 +172,21 @@ const CustomReport = () => {
 
   return (
     <MuiPickersUtilsProvider utils={MomentUtils}>
-    <section className="main-container-v1">
-      <div className="headerbox-v1">
-        <CustomBreadCrumbs
-          routes={[
-                { title: 'Reports', path: '/reports' },
-                { title: 'Custom Report', path: '' }
-          ]}
-        />
-      </div>
-      <CustomContainer>
-        <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className={'flex justify-between align-items-center gap-1 w-full'}></div>
-            <div className="flex flex-wrap gap-[8px] justify-end">
-              <div className="flex gap-[8px] flex-wrap items-center">
+      <section className="main-container-v1">
+        <div className="headerbox-v1">
+          <CustomBreadCrumbs
+            routes={[
+              { title: 'Reports', path: '/reports' },
+              { title: 'Custom Report', path: '' }
+            ]}
+          />
+        </div>
+        <CustomContainer>
+          <div className="header-panel">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className={'flex justify-between align-items-center gap-1 w-full'}></div>
+              <div className="flex flex-wrap gap-[8px] justify-end">
+                <div className="flex gap-[8px] flex-wrap items-center">
                   <Button
                     variant={'contained'}
                     color="primary"
@@ -198,7 +199,7 @@ const CustomReport = () => {
                   >
                     Add
                   </Button>
-                
+
                   <>
                     <Button
                       variant={'outlined'}
@@ -234,52 +235,51 @@ const CustomReport = () => {
                       </MenuItem>
                     </Menu>
                   </>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        {columns ? (
-          <CustomReactTable
-            height={'calc(100vh - 200px)'}
-            columns={columns}
-            state={state}
-            dispatch={dispatch}
-            renderedFrom={renderedFrom}
-            isClientSideGrid={false}
-            refreshGrid={fetchData}
-            showOnlyShowFilteredRecordSwitch={false}
-            showFilters={false}
-            resource = {'Custom Report'}
+          {columns ? (
+            <CustomReactTable
+              height={'calc(100vh - 200px)'}
+              columns={columns}
+              state={state}
+              dispatch={dispatch}
+              renderedFrom={renderedFrom}
+              refreshGrid={fetchData}
+              isClientSideGrid={true}
+              showOnlyShowFilteredRecordSwitch={false}
+              showFilters={false}
+            />
+          ) : (
+            <Box p={2} height={500}>
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Box>
+          )}
+        </CustomContainer>
+        {showDeleteConfirmBox && (
+          <ConfirmationDialog
+            open={showDeleteConfirmBox}
+            message={`Are you sure you want to delete custom report ${deleteRecord?.customReportName || ''} ?`}
+            onClose={() => {
+              setDeleteRecord(null);
+              setShowDeleteConfirmBox(false);
+            }}
+            okBtnLoading={isSubmitting}
+            onOk={handleDelete}
           />
-        ) : (
-          <Box p={2} height={500}>
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Box>
         )}
-      </CustomContainer>
-      {showDeleteConfirmBox && (
-        <ConfirmationDialog
-          open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete custom report ${deleteRecord?.customReportName || ''} ?`}
-          onClose={() => {
-            setDeleteRecord(null);
-            setShowDeleteConfirmBox(false);
-          }}
-          okBtnLoading={isSubmitting}
-          onOk={handleDelete}
-        />
-      )}
-      {showManageDialog.open && (
-        <ManageCustomReport
-          id={showManageDialog.id}
-          handleClose={() => setShowManageDialog({ open: false, id: null })}
-          onSuccess={() => {
-            fetchData();
-            setShowManageDialog({ open: false, id: null });
-          }}
-        />
-      )}
-    </section>
+        {showManageDialog.open && (
+          <ManageCustomReport
+            id={showManageDialog.id}
+            handleClose={() => setShowManageDialog({ open: false, id: null })}
+            onSuccess={() => {
+              fetchData();
+              setShowManageDialog({ open: false, id: null });
+            }}
+          />
+        )}
+      </section>
     </MuiPickersUtilsProvider>
   );
 };

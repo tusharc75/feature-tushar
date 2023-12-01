@@ -488,7 +488,6 @@ const Roles: FC = () => {
               state={state}
               dispatch={dispatch}
               renderedFrom={renderedFrom}
-              isClientSideGrid={false}
               refreshGrid={fetchRoles}
               resource={sidebarResource.role}
             />

@@ -242,7 +242,6 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
               dispatch={dispatch}
               renderedFrom={renderedFrom}
               onSaveEdit={onSaveEdit}
-              isClientSideGrid={false}
               refreshGrid={fetchData}
               showOnlyShowFilteredRecordSwitch={true}
               showFilters={true}

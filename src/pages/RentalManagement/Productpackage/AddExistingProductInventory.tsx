@@ -220,7 +220,6 @@ const AddExistingProductInventory = ({
               dispatch={dispatch}
               renderedFrom={renderedFrom}
               onSaveEdit={onSaveEdit}
-              isClientSideGrid={false}
               refreshGrid={fetchMaterial}
               showOnlyShowFilteredRecordSwitch={true}
             />

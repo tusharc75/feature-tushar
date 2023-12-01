@@ -808,11 +808,9 @@ export default function Attachment() {
               }}
               dispatch={dispatch}
               state={state}
-              childrenProperty="subRows"
               expander={true}
               setWholeRowsCellColor={() => { }}
               renderedFrom={'attachment_render'}
-              isClientSideGrid={false}
               fetchChildAttachment={fetchChildAttachment}
               refreshGrid={fetchAttachments}
             />

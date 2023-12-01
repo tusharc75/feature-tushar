@@ -257,7 +257,6 @@ const DashBoards = () => {
             refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={false}
             showFilters={false}
-            resource={sidebarResource.dashboardMaster}
           />
         ) : <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />

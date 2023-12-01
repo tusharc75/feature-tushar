@@ -332,11 +332,9 @@ const ConvertInventory = () => {
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
-            isClientSideGrid={false}
             refreshGrid={fetchProductInventory}
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={false}
-            resource={sidebarResource.inventoryToAsset}
           />
         ) : (
           <Box p={2} height={500}>
