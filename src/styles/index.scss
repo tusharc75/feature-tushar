@@ -3492,9 +3492,6 @@ body {
 }
 
 .custom-react-table {
-  [data-mode='dark'] & {
-    background-color: var(--dark-primary);
-  }
   * {
     font-family: 'Inter', sans-serif;
   }
