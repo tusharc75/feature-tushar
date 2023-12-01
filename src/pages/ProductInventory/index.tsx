@@ -698,12 +698,11 @@ const InventoryProduct = () => {
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
-            isClientSideGrid={false}
             refreshGrid={fetchProductInventory}
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
             onSaveEdit={onSaveEdit}
-            resource={sidebarResource.productInventory}
+            resource={sidebarResource.product}
           />
         ) : (
           <Box p={2} height={500}>

@@ -220,7 +220,7 @@ function CustomReactTable({
   height = '100%',
   hideSelection = false,
   renderedFrom,
-  isClientSideGrid = true,
+  isClientSideGrid = false,
   expander = false,
   refreshGrid = null,
   dispatch,

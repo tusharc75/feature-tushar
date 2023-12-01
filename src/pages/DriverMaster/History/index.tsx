@@ -14,7 +14,6 @@ const History = ({ id, status }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer();
-  const { rowCount, page, limit, search, filters, sorting, selectedRecords } = state;
 
   const columns = [
     {

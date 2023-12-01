@@ -307,11 +307,10 @@ export default function Alerts({ deviceTemplate }) {
                     state={state}
                     dispatch={dispatch}
                     renderedFrom={renderedFrom}
-                    isClientSideGrid={false}
                     refreshGrid={fetchData}
                     showOnlyShowFilteredRecordSwitch={true}
                     showFilters={true}
-                    resource={sidebarResource.iotDataPoints}
+                    resource={sidebarResource.deviceTemplateAlert}
                 />
             ) : (
                 <Box p={2} height={500}>

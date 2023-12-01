@@ -238,7 +238,6 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
-            isClientSideGrid={false}
             refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={true}
             onSaveEdit={onCellValueChanged}
