@@ -482,32 +482,31 @@ const AddSerializedAsset = ({
                   <Box style={{ display: 'inline' }}>
                     {serializedProducts.length > 0
                       ? serializedProducts.map((d) => (
-                          <Box
-                            m={0.5}
-                            p={1}
-                            border={1}
-                            className={`cursor-pointer ${
-                              selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'dark:text-gray-300'
+                        <Box
+                          m={0.5}
+                          p={1}
+                          border={1}
+                          className={`cursor-pointer ${selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'dark:text-gray-300'
                             }`}
-                            borderColor="var(--common-border-color)"
-                            onClick={() => {
-                              if (selectedProduct === d.id) {
-                                setSelectedProduct(null);
-                              } else {
-                                setSelectedProduct(d.id);
-                              }
-                            }}
-                            style={{ display: 'inline-block' }}
-                          >
-                            {d?.qty < 0 ? (
-                              <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
-                            ) : d?.qty === 0 ? (
-                              <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
-                            ) : (
-                              <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
-                            )}
-                          </Box>
-                        ))
+                          borderColor="var(--common-border-color)"
+                          onClick={() => {
+                            if (selectedProduct === d.id) {
+                              setSelectedProduct(null);
+                            } else {
+                              setSelectedProduct(d.id);
+                            }
+                          }}
+                          style={{ display: 'inline-block' }}
+                        >
+                          {d?.qty < 0 ? (
+                            <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                          ) : d?.qty === 0 ? (
+                            <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
+                          ) : (
+                            <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
+                          )}
+                        </Box>
+                      ))
                       : null}
                   </Box>
                 </Box>
@@ -584,10 +583,10 @@ const AddSerializedAsset = ({
                           selectedRecords?.length !== 0 && !checkUniqWarehouse()
                             ? 'Direct transfer to customer location'
                             : referenceType === 'Rental Job'
-                            ? 'Add to Job'
-                            : referenceType === 'ReplaceAsset'
-                            ? 'Replace'
-                            : 'Add'
+                              ? 'Add to Job'
+                              : referenceType === 'ReplaceAsset'
+                                ? 'Replace'
+                                : 'Add'
                         }
                       >
                         <Button
@@ -672,7 +671,7 @@ const AddSerializedAsset = ({
               {columns ? (
                 <CustomReactTable
                   height={'calc(100vh - 350px)'}
-                  columns={Number(tabValue) === 2 ? columns : columns?.filter((e: any) => e.field !== 'rentalJob')}
+                  columns={Number(tabValue) === 2 ? columns : columns?.filter((e: any) => e.accessor !== 'rentalJob')}
                   state={state}
                   setWholeRowsCellColor={getRowStyleScheduled}
                   dispatch={dispatch}
