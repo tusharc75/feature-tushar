@@ -796,7 +796,6 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
               setWholeRowsCellColor={(rowData) => (rowData.type === 'service' ? 'isService' : '')}
               dispatch={dispatch}
               renderedFrom={renderedFrom}
-              isClientSideGrid={false}
               refreshGrid={fetchData}
               hideSelection={!allowedToEdit}
               expander={true}

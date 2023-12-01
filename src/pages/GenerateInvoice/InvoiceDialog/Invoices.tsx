@@ -230,7 +230,6 @@ const Invoices = ({ resourceId, resource, invoiceFieldName }) => {
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
-            isClientSideGrid={false}
             refreshGrid={fetchData}
           />
         ) : (

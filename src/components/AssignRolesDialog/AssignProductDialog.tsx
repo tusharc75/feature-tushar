@@ -249,7 +249,6 @@ const AssignProductDialog = ({
               dispatch={dispatch}
               renderedFrom={renderedFrom}
               onSaveEdit={onSaveEdit}
-              isClientSideGrid={false}
               refreshGrid={fetchProduct}
               showOnlyShowFilteredRecordSwitch={true}
               showFilters={true}

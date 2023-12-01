@@ -414,7 +414,6 @@ const PurchaseOrder = () => {
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
-            isClientSideGrid={false}
             refreshGrid={fetchPurchaseOrder}
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}

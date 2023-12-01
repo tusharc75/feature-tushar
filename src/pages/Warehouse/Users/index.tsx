@@ -231,7 +231,6 @@ const Users = ({ warehouse }) => {
           dispatch={dispatch}
           renderedFrom={renderedFrom}
           refreshGrid={fetchData}
-          isClientSideGrid={false}
           showOnlyShowFilteredRecordSwitch={false}
         />
       ) : (

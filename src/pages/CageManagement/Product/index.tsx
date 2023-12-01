@@ -153,7 +153,6 @@ const ProductGridLayout = ({ renderedFrom, setAssignHistoryProductQty, plantId, 
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
-            isClientSideGrid={false}
             refreshGrid={fetchProducts}
             showOnlyShowFilteredRecordSwitch={false}
             showFilters={false}

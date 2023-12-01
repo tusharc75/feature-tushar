@@ -367,7 +367,6 @@ const SerializedAssetsCertification = () => {
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
-            isClientSideGrid={false}
             refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={false}
             showFilters={true}

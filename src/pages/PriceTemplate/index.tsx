@@ -303,11 +303,9 @@ const PriceTemplate = () => {
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
-            isClientSideGrid={false}
             refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={false}
-            resource={sidebarResource.priceTemplate}
           />
         ) : (
           <Box p={2} height={500}>

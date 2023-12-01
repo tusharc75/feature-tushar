@@ -383,7 +383,6 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
-            isClientSideGrid={false}
             refreshGrid={fetchData}
             showFilters={true}
             showOnlyShowFilteredRecordSwitch={true}
