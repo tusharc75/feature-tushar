@@ -19,6 +19,7 @@ import SaveFilterDialog from 'src/components/GridFilter/SaveFilterDialog';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isEmpty } from 'lodash';
 import { isMobile, isTablet } from 'react-device-detect';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, currentFomValue, setCurrentFomValue, customFilters, dispatch }) {
   const toastConfig = useContext(CustomToastContext);
@@ -323,12 +324,16 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
                     <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'} width={'100%'}>
                       <span style={{ width: 'calc(100% - 71px)' }}>{option?.title}</span>
                       <Box>
-                        <IconButton size="small" style={{ marginRight: '20px' }}>
-                          <AiFillEdit />
-                        </IconButton>
-                        <IconButton size="small" onClick={() => setIsFilterDeleteConfirm({ open: true, ids: [option._id] })}>
-                          <RiDeleteBin6Fill />
-                        </IconButton>
+                        <HtmlTooltip title={'Edit'} placement="top" arrow enterTouchDelay={0}>
+                          <IconButton size="small" style={{ marginRight: '20px' }}>
+                            <AiFillEdit />
+                          </IconButton>
+                        </HtmlTooltip>
+                        <HtmlTooltip title={'Delete'} placement="top" arrow enterTouchDelay={0}>
+                          <IconButton size="small" onClick={() => setIsFilterDeleteConfirm({ open: true, ids: [option._id] })}>
+                            <RiDeleteBin6Fill />
+                          </IconButton>
+                        </HtmlTooltip>
                       </Box>
                     </Box>
                   )}
