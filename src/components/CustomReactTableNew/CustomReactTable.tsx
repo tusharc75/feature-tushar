@@ -304,13 +304,19 @@ function CustomReactTable({
 
   useEffect(() => {
     columns?.forEach((e) => {
-      if (e.accessor === 'action') {
-        e.disableFilters = true;
-        e.disableSortBy = true;
-        e.canDrag = false;
-        if (!e.maxWidth) {
-          e.maxWidth = 120;
-        }
+      switch (true) {
+        case e.accessor === 'action':
+          e.disableFilters = true;
+          e.disableSortBy = true;
+          e.canDrag = false;
+          if (!e.maxWidth) {
+            e.maxWidth = 120;
+          }
+          break;
+        case e.accessor === 'index':
+          e.disableFilters = e.disableFilters ?? true;
+          e.disableSortBy = e.disableSortBy ?? true;
+          break;
       }
     });
     setBaseColumns(columns);
@@ -1054,7 +1060,7 @@ const DraggableHeader: React.FC<DraggableHeaderProps> = ({ column, index, reorde
           </div>
           {column.isSorted ? column.isSortedDesc ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" /> : ''}
         </div>
-        {column?.columnFilterable && column?.id !== 'action' ? (
+        {column?.columnFilterable && column?.id !== 'action'  ? (
           <div>
             {canFilter ? (
               !isClientSideGrid ? (
