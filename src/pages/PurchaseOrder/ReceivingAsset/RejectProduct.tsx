@@ -164,7 +164,7 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
         }}
           onSubmit={handleSubmit} validateOnMount validate={validate}>
           {({ submitForm, touched, errors, setFieldValue, values }) => (
-            <Form autoComplete="off" autoCorrect="off" noValidate>
+            <Form autoComplete="off" autoCorrect="off" noValidate className='min-h-[calc(100%-111px)]'>
               <CustomDialogHeader
                 title={`Reject Product`}
                 showRequiredLabel={true}
@@ -175,7 +175,7 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
                 }}
                 showManimizeMaximize={true}
               />
-              <CustomDialogContent>
+              <CustomDialogContent className='min-h-[100%]'>
                 <List style={{ padding: 0 }}>
                   <ListItem key={product.materialId}>
                     <ListItemText
@@ -322,7 +322,7 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
                   />
                 </Box>
               </CustomDialogContent>
-              <CustomDialogFooter>
+              <CustomDialogFooter className=' sticky bottom-0 z-[100]'>
                 <Button
                   color="primary"
                   size="small"
