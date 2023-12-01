@@ -210,7 +210,7 @@ const AssignServiceDialog = ({ onSuccess, handleClose, ids = [], extraStaticFilt
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             onSaveEdit={onSaveEdit}
-            isClientSideGrid={false}
+            
             refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}

@@ -778,7 +778,6 @@ const User: FC = () => {
               state={state}
               dispatch={dispatch}
               renderedFrom={renderedFrom}
-              isClientSideGrid={false}
               refreshGrid={fetchUsers}
               showOnlyShowFilteredRecordSwitch={true}
               showFilters={true}

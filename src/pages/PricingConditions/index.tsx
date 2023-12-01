@@ -358,11 +358,9 @@ const PricingCondition = () => {
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
-            isClientSideGrid={false}
             refreshGrid={fetchData}
-            showOnlyShowFilteredRecordSwitch={true}
-            showFilters={true}
-            resource={sidebarResource.pricingCondition}
+            showOnlyShowFilteredRecordSwitch={false}
+            showFilters={false}
           />
         ) : <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />

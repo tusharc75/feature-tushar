@@ -287,7 +287,7 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, selec
             uniqueKey="_id"
             hideAction={true}
             renderedFrom={`service_order_technician`}
-            isClientSideGrid={false}
+            
             hideExpander={true}
           />
         </Box>

@@ -389,7 +389,6 @@ const Entity: FC = () => {
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
-            isClientSideGrid={false}
             refreshGrid={fetchEntity}
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
