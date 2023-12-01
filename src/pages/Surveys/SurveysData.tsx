@@ -102,7 +102,6 @@ const SurveysData = ({ surveyId }) => {
           state={state}
           dispatch={dispatch}
           renderedFrom={renderedFrom}
-          isClientSideGrid={false}
           refreshGrid={fetchData}
           showOnlyShowFilteredRecordSwitch={true}
         />

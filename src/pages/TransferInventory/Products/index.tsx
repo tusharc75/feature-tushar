@@ -441,7 +441,6 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
-            isClientSideGrid={false}
             refreshGrid={fetchProducts}
             onSaveEdit={onSaveEdit}
             hideAction={!allowedToEdit}

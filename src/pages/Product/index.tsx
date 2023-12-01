@@ -147,10 +147,10 @@ const Product = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip title={permissions.product.isCreate ? "Clone" : cloneDisable}>
+        <HtmlTooltip title={permissions?.product?.isCreate ? "Clone" : cloneDisable}>
           <span>
             <IconButton
-              disabled={permissions.product.isCreate ? false : true}
+              disabled={permissions?.product.isCreate ? false : true}
               size="small"
               aria-label="Clone"
               onClick={() => {
@@ -159,15 +159,15 @@ const Product = () => {
                 setIsClone(true);
               }}
             >
-              <FileCopyIcon fontSize="small" color={permissions.product.isCreate ? "primary" : "disabled"} />
+              <FileCopyIcon fontSize="small" color={permissions?.product?.isCreate ? "primary" : "disabled"} />
             </IconButton>
           </span>
         </HtmlTooltip>
 
-        <HtmlTooltip title={permissions.product.isDelete ? "Delete" : deleteDisable}>
+        <HtmlTooltip title={permissions?.product?.isDelete ? "Delete" : deleteDisable}>
           <span>
             <IconButton
-              disabled={permissions.product.isDelete ? false : true}
+              disabled={permissions?.product.isDelete ? false : true}
               size="small"
               aria-label="Delete"
               onClick={() => {
@@ -175,22 +175,22 @@ const Product = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color={permissions.product.isDelete ? "error" : "disabled"} />
+              <DeleteIcon color={permissions?.product.isDelete ? "error" : "disabled"} />
             </IconButton>
           </span>
         </HtmlTooltip>
-        {permissions?.serializedAsset || permissions?.productionOrder &&
-          <HtmlTooltip title={permissions.product.isUpdate ? "Child Product" : childDisable}>
+        {(permissions?.serializedAsset?.isRead || permissions?.productionOrder?.isRead) &&
+          <HtmlTooltip title={permissions?.product?.isUpdate ? "Child Product" : childDisable}>
             <span>
               <IconButton
-                disabled={permissions.product.isUpdate ? false : true}
+                disabled={permissions?.product?.isUpdate ? false : true}
                 size="small"
                 aria-label="View Child Product"
                 onClick={() => {
                   history.push(`${routes.productDetail.path}/${row?.original._id}/bom`, { productName: row?.original.productName });
                 }}
               >
-                <RiBillLine color={permissions.product.isUpdate ? "primary" : "disabled"} />
+                <RiBillLine color={permissions?.product?.isUpdate ? "primary" : "disabled"} />
               </IconButton>
             </span>
           </HtmlTooltip>
@@ -207,7 +207,7 @@ const Product = () => {
       .then(({ data }) => {
         let rows = data?.data?.map((u) => {
           let finalObject = prepareDataForGrid(u);
-          finalObject['canDelete'] = permissions.product.isDelete;
+          finalObject['canDelete'] = permissions?.product.isDelete;
           return finalObject;
         });
         let columns = [...productColumns];
@@ -404,7 +404,7 @@ const Product = () => {
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[{ title: routes.product.title }]} />
         <ImportExportLinks
-          permissions={permissions.product}
+          permissions={permissions?.product}
           module={routes.product.title}
           api={product.api}
           refrenceId={null}
@@ -616,7 +616,7 @@ const Product = () => {
                   </MenuItem>
                   {permissions?.repairType?.isRead && (
                     <MenuItem
-                      disabled={!permissions.product.isUpdate && !permissions?.hasOwnProperty('repairType')}
+                      disabled={!permissions?.product.isUpdate && !permissions?.hasOwnProperty('repairType')}
                       onClick={() => {
                         setOpenAddDialog(true);
                         closeActions();
@@ -637,7 +637,6 @@ const Product = () => {
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
-            isClientSideGrid={false}
             refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}

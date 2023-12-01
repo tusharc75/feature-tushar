@@ -677,7 +677,6 @@ const AddSerializedAsset = ({
                   setWholeRowsCellColor={getRowStyleScheduled}
                   dispatch={dispatch}
                   renderedFrom={renderedFrom}
-                  isClientSideGrid={false}
                   refreshGrid={fetchAssets}
                   showOnlyShowFilteredRecordSwitch={true}
                 />

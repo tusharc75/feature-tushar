@@ -644,7 +644,6 @@ const History = ({ product, warehouse, storageLocation }) => {
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
-            isClientSideGrid={false}
             refreshGrid={fetchRecords}
             hideSelection={true}
           />

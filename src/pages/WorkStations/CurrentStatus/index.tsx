@@ -186,7 +186,6 @@ const CurrentStatus = ({ id }) => {
                 state={state}
                 dispatch={dispatch}
                 renderedFrom={renderedFrom}
-                isClientSideGrid={false}
                 refreshGrid={fetchData}
                 showOnlyShowFilteredRecordSwitch={false}
                 showFilters={false}

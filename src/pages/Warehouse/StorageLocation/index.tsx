@@ -257,7 +257,6 @@ const StorageLocation = ({ warehouse }) => {
           state={state}
           dispatch={dispatch}
           renderedFrom={renderedFrom}
-          isClientSideGrid={false}
           refreshGrid={fetchData}
           showOnlyShowFilteredRecordSwitch={true}
           resource={sidebarResource.storageLocation}

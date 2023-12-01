@@ -303,7 +303,6 @@ const ProductTemplate = () => {
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
-            isClientSideGrid={false}
             refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={false}

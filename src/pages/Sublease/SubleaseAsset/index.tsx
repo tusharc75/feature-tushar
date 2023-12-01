@@ -355,7 +355,6 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, setNextStepTool
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
-            isClientSideGrid={false}
             refreshGrid={fetchData}
           />
         ) : (
