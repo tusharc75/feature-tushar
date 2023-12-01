@@ -437,9 +437,9 @@ function CustomReactTable({
   const getDataFromLocalStorage = () => {
     try {
       const data = localStorage.getItem('gridMetaData');
-      return data && data !== 'undefined' ? JSON.parse(data) : {};
+      return data && data !== 'undefined' ? JSON.parse(data) : false;
     } catch (ex) {
-      return {};
+      return false;
     }
   };
 
@@ -523,12 +523,12 @@ function CustomReactTable({
         const colOrder = [...(expander ? ['expander'] : []), ...(!hideSelection ? ['selection'] : []), ...gridMetaData[renderedFrom]?.order];
         setColumnOrder(colOrder);
       } else {
-        setColumnOrder(newColumns.map((m) => m?.accessor));
+        setColumnOrder(newColumns.map((m) => m?.id ?? m?.accessor));
       }
     } catch (ex) {
       console.error(`Error while getting stored data from local storage - ${renderedFrom}`);
     }
-  }, []);
+  }, [newColumns]);
 
   useEffect(() => {
     rows.forEach((d) => {
