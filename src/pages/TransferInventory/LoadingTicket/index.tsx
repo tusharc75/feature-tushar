@@ -22,8 +22,11 @@ import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import PreviewDownload from 'src/components/PreviewDownload';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import { ExpandMore } from '@material-ui/icons';
+import { Menu, MenuItem } from '@material-ui/core';
 
-const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, updateStatus, canLoad, canReceive }) => {
+const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, updateStatus, canLoad, canReceive, stepFullScreen }) => {
+
   const toastConfig = useContext(CustomToastContext);
 
   const {
@@ -39,6 +42,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
   const [interPlantTransfer, setInterPlantTransfer] = useState(false);
   const [showConfirmInterPlantTransfer, setShowConfirmInterPlantTransfer] = useState(false);
   const [loadingInterPlantTransfer, setLoadingInterPlantTransfer] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
 
   useEffect(() => {
     fetchFields();
@@ -50,7 +54,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
   }, []);
 
   useEffect(() => {
-    fetchProducts();
+    fetchData();
   }, []);
 
   const fetchFields = async () => {
@@ -126,7 +130,8 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
     setColumns([...column, ...extracolumns]);
   };
 
-  const fetchProducts = async () => {
+  const fetchData = async () => {
+    dispatch({ type: 'selection', selectedRecords: [] });
     dispatch({ type: 'loading', loading: true });
     try {
       const {
@@ -269,73 +274,105 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
       });
   };
 
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+
   return (
     <Fragment>
-      <Box className="flex flex-wrap justify-end gap-[8px]" my={1}>
+      <Box display="flex" justifyContent="space-between" m={1}>
         <PreviewDownload
           fileName={`${routes.transferInventory.title}-${transferInventoryData?.transferNumber}`}
           hideDetailButton={true}
           resource={sidebarResource.transferInventory}
           referenceId={transferInventoryData?._id}
-          columns={columns?.filter((e) => ['productName', 'productNumber', 'productDescription', 'productDescription', 'qty']?.includes(e.field))}
+          columns={columns?.filter((e) => ['productName', 'productNumber', 'productDescription', 'productDescription', 'qty']?.includes(e.accessor))}
         />
-        {interPlantTransfer ? (
-          <Box>
-            {allowedToEdit && canReceive && transferInventoryData?.status !== TRANSFER_INVENTORY_STATUS.delivered && (
-              <Button
-                variant={'contained'}
-                color="primary"
-                onClick={() => {
-                  setShowConfirmInterPlantTransfer(true);
-                }}
-                size="small"
-              >
-                {`Receive`}
-              </Button>
+        <Box display="flex">
+          <Button
+            variant={'outlined'}
+            color="default"
+            size="small"
+            onClick={openActions}
+            className={`new-dropdown-v1`}
+            aria-controls="action-menu"
+            endIcon={<ExpandMore />}
+            disabled={selectedRecords?.length ? false : true}
+          >
+            Actions
+          </Button>
+          <Menu
+            anchorEl={anchorEl}
+            keepMounted
+            getContentAnchorEl={null}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left'
+            }}
+            id="action-menu"
+            open={Boolean(anchorEl)}
+            onClose={closeActions}
+          >
+            {interPlantTransfer ? (
+              allowedToEdit && canReceive && transferInventoryData?.status !== TRANSFER_INVENTORY_STATUS.delivered && (
+                <MenuItem
+                  onClick={() => {
+                    closeActions()
+                    setShowConfirmInterPlantTransfer(true);
+                  }}
+                >
+                  {`Receive`}
+                </MenuItem>
+              )
+            ) : (
+              <>
+                {allowedToEdit && canLoad && (
+                  <MenuItem
+                    disabled={selectedRecords.length === 0 || selectedRecords.filter((e: any) => !e?.loadingTicketId).length !== selectedRecords.length}
+                    onClick={() => {
+                      closeActions()
+                      handleLoadingTicketDialog()
+                    }}
+                  >
+                    {`Create Loading Ticket`}
+                  </MenuItem>
+                )}
+                {canReceive && (
+                  <MenuItem
+                    onClick={() => {
+                      closeActions()
+                      setShowConfirmBoxReceive(true);
+                    }}
+                    disabled={
+                      selectedRecords.length === 0 ||
+                      selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !== selectedRecords.length
+                    }
+                  >
+                    {`Receive`}
+                  </MenuItem>
+                )}
+              </>
             )}
-          </Box>
-        ) : (
-          <>
-            {allowedToEdit && canLoad && (
-              <Button
-                variant={'outlined'}
-                color="primary"
-                disabled={selectedRecords.length === 0 || selectedRecords.filter((e: any) => !e?.loadingTicketId).length !== selectedRecords.length}
-                onClick={handleLoadingTicketDialog}
-                size="small"
-              >
-                {`Create Loading Ticket`}
-              </Button>
-            )}
-            {canReceive && (
-              <Button
-                variant={'outlined'}
-                color="primary"
-                onClick={() => {
-                  setShowConfirmBoxReceive(true);
-                }}
-                disabled={
-                  selectedRecords.length === 0 ||
-                  selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !== selectedRecords.length
-                }
-                size="small"
-              >
-                {`Receive`}
-              </Button>
-            )}
-          </>
-        )}
+          </Menu>
+        </Box>
+
       </Box>
       <Box>
         {columns ? (
           <CustomReactTable
-            height={'calc(100vh - 393px)'}
+            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
             columns={columns}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
-            refreshGrid={fetchProducts}
+            refreshGrid={fetchData}
+            hideAction={!allowedToEdit || transferInventoryData?.status === TRANSFER_INVENTORY_STATUS.delivered}
+            hideSelection={!allowedToEdit || transferInventoryData?.status === TRANSFER_INVENTORY_STATUS.delivered}
           />
         ) : (
           <Box p={2} height={500}>
@@ -357,7 +394,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
             ?.flat()}
           onSuccess={() => {
             setShowTicketDialog({ open: false, data: {} });
-            fetchProducts();
+            fetchData();
           }}
         />
       )}
@@ -368,7 +405,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
           }}
           handleSucess={() => {
             setShowConfirmBoxReceive(false);
-            fetchProducts();
+            fetchData();
           }}
           selectedRecords={selectedRecords}
           transferInventoryData={transferInventoryData}

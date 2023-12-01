@@ -15,10 +15,9 @@ import queryString from 'query-string';
 import Steps from 'src/components/Steps';
 import { transferInventorySteps, TRANSFER_INVENTORY_STATUS } from 'src/constants/helpers';
 import TabPanel from 'src/components/TabPanel';
-import { BiEdit, BiFoodMenu } from 'react-icons/bi';
+import { BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
 import Products from './Products';
-import SerializesAssets from './SerializesAssets';
 import LoadingTicket from './LoadingTicket';
 import { camelCase } from 'lodash';
 import ContentFullScreen from '../../components/ContentFullScreen';
@@ -51,7 +50,6 @@ const TransferInventoryDetailPage = () => {
   const [locationKeys, setLocationKeys] = useState([]);
   const [nextStep, setNextStep] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
-  const [statusOptions, setStatusOptions] = useState([]);
   const [stepFullScreen, setStepFullScreen] = useState(false);
 
   const [stepNames, setStepNames] = useState(transferInventorySteps?.map((item) => item.name));
@@ -89,14 +87,6 @@ const TransferInventoryDetailPage = () => {
     axiosInstance()
       .get('/field?resource=Transfer Inventory')
       .then(({ data: { data } }) => {
-        data?.some((o) => {
-          if (o?.fieldData?.fieldName === 'status') {
-            setStatusOptions(
-              o.fieldData.option?.filter((e) => ![TRANSFER_INVENTORY_STATUS.new, TRANSFER_INVENTORY_STATUS.inProgress].includes(e.optionValue))
-            );
-            return true;
-          }
-        });
         setTransferInventoryFields(data);
         setLoading(false);
       })
@@ -202,7 +192,7 @@ const TransferInventoryDetailPage = () => {
       .put(`${routes.transferInventory.path}/${id}/process-status`, {
         processStatus: stepNames[step]
       })
-      .then(() => {})
+      .then(() => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -298,16 +288,7 @@ const TransferInventoryDetailPage = () => {
                     allowedToEdit={allowedToEdit}
                     updateStatus={updateStatus}
                     fetchTransferInventoryData={fetchTransferInventoryData}
-                  />
-                )}
-                {stepNames[currentStep] === 'Serialized Assets' && (
-                  <SerializesAssets
-                    transferInventoryData={transferInventoryData}
-                    setNextStep={setNextStep}
-                    renderedFrom={`${renderedFrom}_grid-2`}
-                    allowedToEdit={allowedToEdit}
                     stepFullScreen={stepFullScreen}
-                    canLoad={canLoad}
                   />
                 )}
                 {stepNames[currentStep] === 'Loading Ticket' && (
@@ -318,6 +299,7 @@ const TransferInventoryDetailPage = () => {
                     allowedToEdit={allowedToEdit}
                     canLoad={canLoad}
                     canReceive={canReceive}
+                    stepFullScreen={stepFullScreen}
                   />
                 )}
               </ContentFullScreen>
