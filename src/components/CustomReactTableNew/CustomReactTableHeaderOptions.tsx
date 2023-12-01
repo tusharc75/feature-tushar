@@ -154,7 +154,7 @@ function CustomReactTableHeaderOptions({
           </>
         )}
         {Object.keys(customFilters).length > 0 && showFilters && (
-          <div style={{ minWidth: '430px' }}>
+          <div className='min-w-[350px] md:min-w-[430px] '>
             <DisplayChips
               columns={columns}
               customFilters={customFilters}
