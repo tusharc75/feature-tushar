@@ -62,6 +62,9 @@ const WorkOrderDetails = () => {
   const [showConfirmBoxScrap, setShowConfirmBoxScrap] = useState(false);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
 
+
+  const [showConfirmVersion, setShowConfirmVersion] = useState({ open: false, withData: 0 });
+
   const columns = [
     { accessor: 'serviceName', Header: 'Service' },
     { accessor: 'serviceType', Header: 'Service Type' },
@@ -200,20 +203,18 @@ const WorkOrderDetails = () => {
     setAddAnchorEl(null);
   };
 
-  const createVersion = async (dataFlag: Boolean = false) => {
-    try {
-      let api = `${workOrder.api}/create-version/${id}`;
-      api += dataFlag ? '/withData' : '';
-      const { data } = await axiosInstance().put(api);
+  const createVersion = (withData) => {
+    axiosInstance().put(`${workOrder.api}/create-version/${id}`, { withData }).then(({ data }) => {
       toastConfig.setToastConfig({
         open: true,
         type: 'success',
         message: data.message
       });
       fetchWorkOrderData();
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
+    })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   };
 
   return (
@@ -260,19 +261,17 @@ const WorkOrderDetails = () => {
                       </HtmlTooltip>
                     </div>
                   )}
-                {permissions?.workOrder?.isUpdate && allowedToEdit && (
-                  <div className="relative isolate ">
-                    <Button
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      size="small"
-                      className={'btn-outline-v1 '}
-                      onClick={openAddActions}
-                      aria-controls="add-menu"
-                    >
-                      {'Create Version'}
-                      <ExpandMore fontSize="small" />
-                    </Button>
-                  </div>
+                {permissions?.workOrder?.isUpdate && allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.completed && (
+                  <Button
+                    variant={'contained'}
+                    size="small"
+                    className={'btn-outline-v1'}
+                    onClick={openAddActions}
+                    aria-controls="add-menu"
+                  >
+                    {'Create Version'}
+                    <ExpandMore fontSize="small" />
+                  </Button>
                 )}
                 <Menu
                   anchorEl={addAnchorEl}
@@ -288,19 +287,19 @@ const WorkOrderDetails = () => {
                 >
                   <MenuItem
                     onClick={() => {
-                      createVersion(true);
                       closeAddActions();
-                    }}
-                  >
-                    With Existing Data
-                  </MenuItem>
-                  <MenuItem
-                    onClick={() => {
-                      createVersion();
-                      closeAddActions();
+                      setShowConfirmVersion({ open: true, withData: 0 });
                     }}
                   >
                     Without Existing Data
+                  </MenuItem>
+                  <MenuItem
+                    onClick={() => {
+                      closeAddActions();
+                      setShowConfirmVersion({ open: true, withData: 1 });
+                    }}
+                  >
+                    With Existing Data
                   </MenuItem>
                 </Menu>
                 <PreviewDownload
@@ -453,6 +452,21 @@ const WorkOrderDetails = () => {
           }}
         />
       )}
+
+      {showConfirmVersion.open && (
+        <ConfirmationDialog
+          open={showConfirmVersion.open}
+          message={`Are you sure you want to new version ?`}
+          onClose={() => {
+            setShowConfirmVersion({ open: false, withData: 0 });
+          }}
+          onOk={() => {
+            createVersion(showConfirmVersion.withData)
+            setShowConfirmVersion({ open: false, withData: 0 });
+          }}
+        />
+      )}
+
       {openUpdateDialog && (
         <ManageWorkOrder
           workOrderId={id}
