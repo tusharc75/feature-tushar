@@ -689,6 +689,7 @@ const RentalManagementDetailsPage = () => {
                   allowedToEdit={allowedToEdit}
                   isProcessor={isProcessor}
                   allowUpdateStatus={allowUpdateStatus}
+                  stepFullScreen={stepFullScreen}
                   checkProgressiveBilling={checkProgressiveBilling}
                 />
               )}
@@ -702,6 +703,7 @@ const RentalManagementDetailsPage = () => {
                   renderedFrom={`${renderedFrom}_grid-4`}
                   allowedToEdit={allowedToEdit}
                   isProcessor={isProcessor}
+                  stepFullScreen={stepFullScreen}
                   allowUpdateStatus={allowUpdateStatus}
                 />
               )}
