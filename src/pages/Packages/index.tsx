@@ -20,7 +20,6 @@ import { Menu, MenuItem } from '@material-ui/core';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
 import MessageDialog from 'src/components/Helpers/MessageDialog';
-import ProductListDialog from './ProductListDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 let searchTimeout;
@@ -44,7 +43,6 @@ const PackageList = () => {
   const [renderCount, setRenderCount] = useState(0);
   const [columns, setColumns] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [openProductListDialog, setOpenProductListDialog] = useState({ open: false, id: null });
 
   useEffect(() => {
     fetchGridColumns();
@@ -382,14 +380,6 @@ const PackageList = () => {
             fetchData();
             setShowManageDialog({ open: false, isClone: false, idToClone: null });
           }}
-        />
-      )}
-      {openProductListDialog.open && (
-        <ProductListDialog
-          renderedFrom={`${renderedFrom}_i-grid-1`}
-          id={openProductListDialog.id}
-          onClose={() => setOpenProductListDialog({ open: false, id: null })}
-          toastConfig={toastConfig}
         />
       )}
     </section>
