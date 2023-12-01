@@ -77,9 +77,9 @@ const ResourceLogs = () => {
           <p
             className="text-truncate link"
             title={row?.original?.optionLabel}
-            onClick={() => window.open(`${routes[`${row?.original?.key}Detail`]?.path}/${row?.original?.optionValue}`)}
+            onClick={() => window.open(`${routes[`${row?.original?.key}Detail`]?.path}/${row?.original?.referenceId?.optionValue}`)}
           >
-            {row?.original?.optionLabel}
+            {row?.original?.referenceId?.optionLabel}
           </p>
         )
       },
@@ -92,9 +92,9 @@ const ResourceLogs = () => {
           <p
             className="link text-truncate"
             title={row?.original?.optionLabel}
-            onClick={() => window.open(`${routes.userDetail.path}/${row?.original?.optionValue}`)}
+            onClick={() => window.open(`${routes.userDetail.path}/${row?.original?.updatedBy?.optionValue}`)}
           >
-            {row?.original?.optionLabel}
+            {row?.original?.updatedBy?.optionLabel}
           </p>
         )
       },
@@ -281,10 +281,7 @@ const ResourceLogs = () => {
             state={state}
             dispatch={dispatch}
             renderedFrom={'resourceLogs'}
-            isClientSideGrid={false}
             refreshGrid={fetchData}
-            showOnlyShowFilteredRecordSwitch={false}
-            showFilters={false}
             hideSelection = {true}
           />
         ) : (
