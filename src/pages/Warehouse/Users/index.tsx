@@ -13,7 +13,6 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
-import AssignUserDialog from 'src/components/AssignRolesDialog/NewAssignUserDialog';
 import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
 
 const Users = ({ warehouse }) => {
@@ -69,18 +68,18 @@ const Users = ({ warehouse }) => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-          <HtmlTooltip title="Delete">
-            <IconButton
-              size="small"
-              aria-label="Delete"
-              onClick={() => {
-                setDeleteRecord(row.original);
-                setShowDeleteConfirmBox(true);
-              }}
-            >
-              <DeleteIcon color="error" />
-            </IconButton>
-          </HtmlTooltip>
+        <HtmlTooltip title="Delete">
+          <IconButton
+            size="small"
+            aria-label="Delete"
+            onClick={() => {
+              setDeleteRecord(row.original);
+              setShowDeleteConfirmBox(true);
+            }}
+          >
+            <DeleteIcon color="error" />
+          </IconButton>
+        </HtmlTooltip>
       </>
     )
   };
@@ -185,41 +184,41 @@ const Users = ({ warehouse }) => {
             </Button>
           </Grid>
           <Grid item xs={9} md={9} sm={9}>
-              <Box display={'flex'} justifyContent={'flex-end'} alignItems="center">
-                <Button
-                  variant="outlined"
-                  color="default"
-                  size="small"
-                  onClick={openActions}
-                  aria-controls="action-menu"
-                  disabled={selectedRecords.length === 0}
-                  endIcon={<ExpandMore />}
-                  className="new-dropdown-v1"
-                >
-                  Actions
-                </Button>
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
+            <Box display={'flex'} justifyContent={'flex-end'} alignItems="center">
+              <Button
+                variant="outlined"
+                color="default"
+                size="small"
+                onClick={openActions}
+                aria-controls="action-menu"
+                disabled={selectedRecords.length === 0}
+                endIcon={<ExpandMore />}
+                className="new-dropdown-v1"
+              >
+                Actions
+              </Button>
+              <Menu
+                anchorEl={anchorEl}
+                keepMounted
+                getContentAnchorEl={null}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'left'
+                }}
+                id="action-menu"
+                open={Boolean(anchorEl)}
+                onClose={closeActions}
+              >
+                <MenuItem
+                  onClick={() => {
+                    closeActions();
+                    setShowDeleteConfirmBox(true);
                   }}
-                  id="action-menu"
-                  open={Boolean(anchorEl)}
-                  onClose={closeActions}
                 >
-                  <MenuItem
-                    onClick={() => {
-                      closeActions();
-                      setShowDeleteConfirmBox(true);
-                    }}
-                  >
-                    {`Delete (${selectedRecords?.length})`}
-                  </MenuItem>
-                </Menu>
-              </Box>
+                  {`Delete (${selectedRecords?.length})`}
+                </MenuItem>
+              </Menu>
+            </Box>
           </Grid>
         </Grid>
       </Box>
@@ -239,17 +238,6 @@ const Users = ({ warehouse }) => {
         </Box>
       )}
       {openDialog && (
-        // <AssignUserDialog
-        //   handleClose={() => {
-        //     setOpenDialog(false);
-        //   }}
-        //   onSuccess={(data) => {
-        //     handleAssignUser(data);
-        //   }}
-        //   reference={'warehouse'}
-        //   isAssigning={isAssigning}
-        //   ignoreUsers={dataRows?.map((e) => e?._id) || []}
-        // />
         <AssignDynamicDialog
           onSuccess={(data) => {
             handleAssignUser(data);
@@ -259,7 +247,6 @@ const Users = ({ warehouse }) => {
           }}
           ids={dataRows?.map((e) => e?._id) || []}
           resource={sidebarResource?.user}
-          reference={'warehouse'}
           isSubmitting={isAssigning}
         />
       )}

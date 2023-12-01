@@ -78,7 +78,6 @@ import WarehouseDetailsPage from './pages/Warehouse/WarehouseDetailsPage';
 import SerializedAsset from './pages/SerializedAsset';
 import SerializedAssetsCertification from './pages/SerializedAssetsCertification';
 import SerializedAssetDetailsPage from './pages/SerializedAsset/SerializedAssetDetailsPage';
-import EquipmentRentalMaster from './pages/EquipmentRentalMaster';
 import ProductDetailsPage from './pages/Product/ProductDetailsPage';
 import RentalManagement from './pages/RentalManagement';
 import RentalManagementDetailsPage from './pages/RentalManagement/RentalManagementDetailsPage';
@@ -546,9 +545,6 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.serializedAssetDetail.path + '/:id'}>
               <SerializedAssetDetailsPage />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.equiptmentRentalMaster.path}>
-              <EquipmentRentalMaster />
             </PrivateRoute>
             <PrivateRoute exact path={routes.rentalManagement.path}>
               <RentalManagement />
