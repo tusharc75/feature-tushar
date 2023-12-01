@@ -41,6 +41,8 @@ import GridFilter from './Filters';
 import type { TInitialState } from './useTableReducer';
 import { TouchBackend } from 'react-dnd-touch-backend';
 import { useStore, SEARCH } from 'src/StateProvider/fastContext';
+import { updateGridHiddenColumns } from './utils';
+import { useData } from 'src/StateProvider/Provider';
 
 const childrenProperty = 'subRows';
 interface CustomCheckBoxProps extends CheckboxProps {
@@ -595,6 +597,10 @@ function CustomReactTable({
     // setSelectedRow([...notIncludedRow, ...flatSelectedData]);
   }, [selectedRowIds, renderedFrom]);
 
+  const {
+    state: { user }
+  }: any = useData();
+
   const reorder = (item: any, newIndex: number) => {
     const { index: currentIndex } = item;
 
@@ -618,9 +624,22 @@ function CustomReactTable({
       (a, b) => newOrderedColumns.findIndex((d) => d === a.accessor) - newOrderedColumns.findIndex((d) => d === b.accessor)
     );
 
-    setColumnOrder(newOrderedColumns);
+    const newcolumnOrderToSave = newBaseColumns
+      ?.filter((o) => o?.sticky === undefined && !['expander', 'selection', 'action']?.includes(o?.accessor))
+      ?.map((o) => o?.accessor);
+
     setBaseColumns(newBaseColumns);
+
+    updateGridHiddenColumns({
+      renderedFrom,
+      user,
+      columnOrder: newcolumnOrderToSave,
+      callback: () => {
+        setColumnOrder(newOrderedColumns);
+      }
+    });
   };
+
 
   const submitInput = () => {
     if (!currentEditingCellPosition) return;
@@ -696,7 +715,7 @@ function CustomReactTable({
                   renderedFrom={renderedFrom}
                   setHiddenColumns={setHiddenColumns}
                   getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
-                  defaultColumns={allColumns}
+                  defaultColumns={newColumns}
                   setColumnOrder={setColumnOrder}
                 />
               </>
