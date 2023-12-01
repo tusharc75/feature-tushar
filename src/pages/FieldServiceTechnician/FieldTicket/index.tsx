@@ -1,29 +1,27 @@
 import { Box, Button, Grid, IconButton, Menu, MenuItem, Paper, Tooltip, Typography } from '@material-ui/core';
 import { Fragment, useContext, useEffect, useImperativeHandle, useReducer, useState } from 'react';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, removeLocalStorage, serviceMaster, sidebarResource } from 'src/constants/helpers';
+import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { camelCase } from 'lodash';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { Link } from 'react-router-dom';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { getFrameworkComponents, getStaticFields } from 'src/constants/useColumns';
-import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import useColumns from 'src/constants/useColumns';
 import ManageFieldTicket from 'src/pages/FieldTicket/ManageFieldTicket';
 import { deleteOne, findAll, findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import CustomTableWithCard, { CardInterface, createBodyColumns } from 'src/components/CustomTableWithCard';
+import { useTableReducer } from 'src/components/CustomReactTableNew';
 
 const FieldTicket = ({ selectedFieldService, fieldRef, fieldRemoveRef }) => {
+  
   const renderedFrom = camelCase(`${routes.fieldTicket?.title}`);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -34,15 +32,13 @@ const FieldTicket = ({ selectedFieldService, fieldRef, fieldRemoveRef }) => {
 
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [columns, setColumns] = useState([]);
-  const [state, dispatch] = useReducer(reducer, intialState);
   const [deleteRecord, setDeleteRecord] = useState(null);
-  const [gridApi, setGridApi] = useState(null);
+  const { state, dispatch } = useTableReducer();
   const [open, setOpen] = useState({ open: false, isClone: false });
   const [fieldTicketId, setFieldTicketId] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
-    state;
+  const { dataRows, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { isOffline } = useContext(CustomOfflineContext);
   const [accessor, setAccessor] = useState<CardInterface | null>(null);
 
@@ -51,6 +47,7 @@ const FieldTicket = ({ selectedFieldService, fieldRef, fieldRemoveRef }) => {
       fetchData(true);
     }
   }));
+
   useImperativeHandle(fieldRemoveRef, () => ({
     async triggerChildFunction() {
       const data: any = await findAll(objectStore.fieldTicket);
@@ -64,9 +61,7 @@ const FieldTicket = ({ selectedFieldService, fieldRef, fieldRemoveRef }) => {
         ?.map((d) => {
           deleteOne(objectStore.fieldTicket, d?._id);
         });
-
-      removeLocalStorage(localStorageSelectedRecords);
-      dispatch({ type: 'selectedRecords', selectedRecords: [] });
+      dispatch({ type: 'selection', selectedRecords: [] });
     }
   }));
 
@@ -89,7 +84,7 @@ const FieldTicket = ({ selectedFieldService, fieldRef, fieldRemoveRef }) => {
         data = response?.data?.data;
         try {
           insertUpdate(objectStore.resource, objectStore.fieldTicket, data);
-        } catch (ex) {}
+        } catch (ex) { }
       }
 
       let columns = [];
@@ -158,15 +153,12 @@ const FieldTicket = ({ selectedFieldService, fieldRef, fieldRemoveRef }) => {
           }
         ]
       });
-    } catch (err) {}
+    } catch (err) { }
   };
 
   const fetchData = async (offlineStore = false) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
     if (isOffline) {
       const data: any = await findAll(objectStore.fieldTicket);
       const dataForThisTechnician = [...data].filter(
@@ -184,7 +176,7 @@ const FieldTicket = ({ selectedFieldService, fieldRef, fieldRemoveRef }) => {
           ...finalObject
         };
       });
-      dispatch({ type: 'initialize', data: rows, count: rows.length, selectedRecords: [] });
+      dispatch({ type: 'initialize', data: rows, count: rows.length });
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
       }, gridLoadingTimeout);
@@ -204,21 +196,7 @@ const FieldTicket = ({ selectedFieldService, fieldRef, fieldRemoveRef }) => {
               ...finalObject
             };
           });
-          if (appendRows) {
-            dispatch({
-              type: 'initialize',
-              data: [...dataRows, ...rows],
-              count: count,
-              selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
-            });
-          } else {
-            dispatch({
-              type: 'initialize',
-              data: rows,
-              count: count,
-              selectedRecords: rows.filter((f) => f.isChecked === true)
-            });
-          }
+          dispatch({ type: 'initialize', data: rows, count: count, });
           dispatch({ type: 'initialize', data: rows, count: count });
           setTimeout(() => {
             dispatch({ type: 'loading', loading: false });
@@ -226,6 +204,7 @@ const FieldTicket = ({ selectedFieldService, fieldRef, fieldRemoveRef }) => {
         });
     }
   };
+
   const addOffline = async (d) => {
     for (let i = 0; i < d?.length; i++) {
       await insertUpdate(objectStore.fieldTicket, d[i]._id, d[i]);
@@ -261,8 +240,7 @@ const FieldTicket = ({ selectedFieldService, fieldRef, fieldRemoveRef }) => {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(selectedRecords.map((m) => m._id))}`;
     }
     return deepFilter;
   };
@@ -284,7 +262,6 @@ const FieldTicket = ({ selectedFieldService, fieldRef, fieldRemoveRef }) => {
           await insertUpdate(objectStore.offlineDataSync, ids[i], { type: 'fieldTicket', data: { ...data.data, offlineSyncStatus: 'delete' } });
         }
       }
-      removeLocalStorage(localStorageSelectedRecords);
       fetchData();
       setShowDeleteConfirmBox(false);
       setDeleteRecord(null);
@@ -297,7 +274,6 @@ const FieldTicket = ({ selectedFieldService, fieldRef, fieldRemoveRef }) => {
       axiosInstance()
         .put(`${routes?.fieldTicket?.path}/remove`, { ids: ids })
         .then(({ data }) => {
-          removeLocalStorage(localStorageSelectedRecords);
           fetchData();
           setShowDeleteConfirmBox(false);
           setDeleteRecord(null);
@@ -441,23 +417,6 @@ const FieldTicket = ({ selectedFieldService, fieldRef, fieldRemoveRef }) => {
                 showSelectAll={true}
                 collapsible={true}
               />
-
-              {/* <CustomAgGrid
-              columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameWorkComponent}
-              setGridApi={setGridApi}
-              dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              allowAction={true}
-              loading={loading}
-              renderedFrom={renderedFrom}
-              refreshGrid={fetchData}
-              showOnlyShowFilteredRecordSwitch={true}
-            /> */}
             </>
           ) : (
             <CommonSkeleton />

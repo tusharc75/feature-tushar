@@ -21,7 +21,6 @@ import Material from './Material';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import { ACTIVITY_RESOURCE, jobProcessSteps } from 'src/constants/helpers';
 import Dispatch from './Dispatch';
-import Invoice from './Invoice';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import Steps, { getIndex } from 'src/components/Steps';
 import { Edit } from '@material-ui/icons';
@@ -189,17 +188,6 @@ const JobDetail = () => {
             aria-controls="a11y-tabpanel-1"
             id="a11y-tab-1"
           />
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <TbFileInvoice className="mr-1" fontSize="inherit" /> Invoice
-              </div>
-            }
-            value={2}
-            aria-controls="a11y-tabpanel-1"
-            id="a11y-tab-1"
-          />
         </Tabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -234,9 +222,6 @@ const JobDetail = () => {
 
             {currentStep === 1 && jobData && <Dispatch renderedFrom={`${renderedFrom}_grid-1`} jobData={jobData} setNextStep={setNextStep} />}
           </ContentFullScreen>
-        </TabPanel>
-        <TabPanel value={tabValue} index={2}>
-          <Invoice />
         </TabPanel>
       </Box>
       {showConfirmBox && (
