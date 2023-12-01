@@ -309,9 +309,7 @@ function CustomReactTable({
           e.disableFilters = true;
           e.disableSortBy = true;
           e.canDrag = false;
-          if (!e.maxWidth) {
-            e.maxWidth = 120;
-          }
+          e.maxWidth = e.maxWidth ?? 120;
           break;
         case e.accessor === 'index':
           e.disableFilters = e.disableFilters ?? true;
