@@ -15,9 +15,9 @@ const GridHeader: FC<GridHeaderProps> = ({ refreshGrid, children, buttons, class
   return (
     <div className={`flex items-center justify-between my-[8px] gap-[8px] flex-wrap ${className}`} {...others}>
       <div>{children}</div>
-      <div className="buttons flex flex-wrap gap-[8px] justify-between w-full sm:w-[unset]">
+      <div className="buttons flex flex-wrap gap-[8px] justify-between w-full sm:w-[unset] ml-auto">
         <div className="buttons flex flex-wrap gap-[8px]">{startButtons}</div>
-        <div className="buttons flex flex-wrap gap-[8px]">
+        <div className="buttons flex flex-wrap gap-[8px] ">
           {buttons}
           {refreshGrid && (
             <HtmlTooltip title="Refresh" placement="top" arrow>
