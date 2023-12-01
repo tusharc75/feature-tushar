@@ -49,7 +49,6 @@ const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, rende
         setNextStep(false);
         try {
             var data: any = [];
-
             const response = await axiosInstance().get(`${productionOrder.api}/material/${productionOrderData._id}`);
             data = response?.data?.data;
             let rows = data.material.filter((e) => e.type === MATERIAL_TYPE.product);
@@ -88,7 +87,7 @@ const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, rende
 
     const fetchFields = async () => {
         const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.productionOrderDetail}`);
-        var data = response?.data?.data?.filter((e) => !['detail', 'description', 'workOrderNumber']?.includes(e?.fieldName));
+        var data = response?.data?.data?.filter((e) => !['detail', 'description', 'workOrderNumber', 'palletNumber']?.includes(e?.fieldName));
         data = CURReplaceByCurrencySingle(data, productionOrderData?.currency || 'USD');
         data?.forEach((e) => {
             e.isColumnEditable = false;

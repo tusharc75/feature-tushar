@@ -9,7 +9,6 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import { AiOutlineDeploymentUnit } from 'react-icons/ai';
 import EntitySelectionsDialog from 'src/components/EntitySelections';
-import AssignUserDialog from 'src/components/AssignRolesDialog/NewAssignUserDialog';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
@@ -24,6 +23,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
 import MessageDialog from 'src/components/Helpers/MessageDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
 
 let searchTimeout;
 
@@ -444,16 +444,15 @@ const Warehouse = () => {
         </Box>}
       </CustomContainer>
       {userAssignDialog && (
-        <AssignUserDialog
-          handleClose={() => {
-            setUserAssignDialog(false);
-          }}
+        <AssignDynamicDialog
           onSuccess={(data) => {
             handleAssignUser(data);
           }}
-          reference={'warehouse'}
-          isAssigning={isAssigning}
-          ignoreUsers={[]}
+          handleClose={() => {
+            setUserAssignDialog(false);
+          }}
+          resource={sidebarResource?.user}
+          isSubmitting={isAssigning}
         />
       )}
       {showDeleteConfirmBox && (

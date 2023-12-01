@@ -28,6 +28,7 @@ import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import AssetQtyDialog from './AssetQtyDialog';
 import { startCase } from 'lodash';
 import { generateCustomTableColumns } from 'src/constants/columns';
+import { Cancel } from '@material-ui/icons';
 
 
 const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, renderedFrom, checkReceivedProduct, allowedToEdit }) => {
@@ -216,7 +217,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
                         setRejectProductDialog(row.original);
                       }}
                     >
-                      <TransformIcon fontSize="small" color={'primary'} />
+                      <Cancel fontSize="small" color={'error'} />
                     </IconButton>
                   </span>
                 </HtmlTooltip>

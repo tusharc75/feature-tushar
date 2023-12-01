@@ -130,7 +130,7 @@ const Diagram = ({ resource, referenceId }) => {
     <Box>
       <Grid container spacing={2}>
         <Grid item xs={12} sm={5} md={5} lg={4} xl={3}>
-          <Box className="container-with-border" p={'20px'} height={'calc(100vh - 150px)'}>
+          <Box className="container-with-border min-h-[calc(100vh-150px)] max-[600px]:[min-height:unset]" p={'20px'} >
             <Box mb={1} display="flex" justifyContent="end" alignItems="center">
               <Button
                 variant={'outlined'}
@@ -146,7 +146,7 @@ const Diagram = ({ resource, referenceId }) => {
               </Button>
             </Box>
             <Box pt={2} pb={2}>
-              <Box className="overflow-auto h-[calc(100vh-250px)]">
+              <Box className="overflow-auto min-[600px]:h-[calc(100vh-250px)]">
                 <div className="grid gap-3">
                   {rowData &&
                     rowData?.map((file, index) => {
