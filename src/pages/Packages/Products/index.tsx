@@ -21,7 +21,7 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { flattenArray } from 'src/constants/columns';
 
-const ProductsTable = ({ packageId, packageData }) => {
+const Products = ({ packageId, packageData }) => {
   const renderedFrom = `${camelCase(routes?.packages.title)}_${packageData?.packageType || 'product'}`;
   const { setToastConfig } = useContext(CustomToastContext);
 
@@ -468,4 +468,4 @@ const ProductsTable = ({ packageId, packageData }) => {
   );
 };
 
-export default ProductsTable;
+export default Products;

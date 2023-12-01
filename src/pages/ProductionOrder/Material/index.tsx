@@ -579,6 +579,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
             handleAdd(rows);
           }}
           isSubmitting={isSubmitting}
+          packageType={"product"}
         />
       )}
       {materialEdit.open && (
