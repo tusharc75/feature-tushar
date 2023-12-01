@@ -19,13 +19,12 @@ const AssignDynamicDialog = ({
   onSuccess,
   handleClose,
   resource,
-  reference = '',
   isSubmitting,
   ids = [],
   extraDeepFilter = [],
   extraFilterById = []
 }) => {
-  const renderedFrom = camelCase(`${routes[resource]?.title || resource}_${reference}`);
+  const renderedFrom = camelCase(`${routes[resource]?.title || resource}`);
 
   const {
     state: { selectedEntity }
