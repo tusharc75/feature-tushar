@@ -26,7 +26,6 @@ import {
   RENTAL_INTERNAL_ASSET_STATUS
 } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { useHistory } from 'react-router-dom';
 import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
 import { isMobile, isTablet } from 'react-device-detect';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
@@ -77,7 +76,8 @@ const LoadingTicket = ({
   allowedToEdit,
   isProcessor,
   allowUpdateStatus,
-  checkProgressiveBilling
+  checkProgressiveBilling,
+  stepFullScreen
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const classes = useStyles();
@@ -129,6 +129,7 @@ const LoadingTicket = ({
       var nonSerializeAsset: any = [];
       var invoiceData: any = [];
 
+      dispatch({ type: 'selection', selectedRecords: [] });
       dispatch({ type: 'loading', loading: true });
 
       if (isOffline) {
@@ -223,10 +224,10 @@ const LoadingTicket = ({
             element.type === 'service'
               ? element?.serviceDetail?.serviceDescription || ''
               : element.type === 'product'
-              ? element?.productDetail?.productDescription || ''
-              : element.type === 'package'
-              ? element?.packageDetail?.packageDescription || ''
-              : '';
+                ? element?.productDetail?.productDescription || ''
+                : element.type === 'package'
+                  ? element?.packageDetail?.packageDescription || ''
+                  : '';
           obj.assetNumber = element?.productDetail?.productName;
           obj.productName = element?.productDetail?.productName;
           obj.productId = element?.productDetail?._id;
@@ -257,10 +258,10 @@ const LoadingTicket = ({
             element.type === 'service'
               ? element?.serviceDetail?.serviceDescription || ''
               : element.type === 'product'
-              ? element?.productDetail?.productDescription || ''
-              : element.type === 'package'
-              ? element?.packageDetail?.packageDescription || ''
-              : '';
+                ? element?.productDetail?.productDescription || ''
+                : element.type === 'package'
+                  ? element?.packageDetail?.packageDescription || ''
+                  : '';
           obj.parentId = element?.parentId;
           obj.parentName = element?.parentName;
           obj.assetNumber = element?.productDetail?.productName;
@@ -376,8 +377,8 @@ const LoadingTicket = ({
               row?.original?.warehouseId && row?.original?.warehouseId !== rentalManagementData?.warehouse?.optionValue
                 ? COLOUR_MASTER.transferAsset.background
                 : [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert]?.includes(row?.original?.status)
-                ? COLOUR_MASTER.lostAssets.background
-                : ''
+                  ? COLOUR_MASTER.lostAssets.background
+                  : ''
           }}
         >
           <h5 className="text-truncate" title={row?.original?.assetNumber}>
@@ -388,8 +389,7 @@ const LoadingTicket = ({
               size="small"
               onClick={() => {
                 window.open(
-                  `${row?.original?.type === 'Asset' ? routes.serializedAssetDetail.path : routes.productDetail.path}/${
-                    row?.original?._id?.split('_')[0]
+                  `${row?.original?.type === 'Asset' ? routes.serializedAssetDetail.path : routes.productDetail.path}/${row?.original?._id?.split('_')[0]
                   }`
                 );
               }}
@@ -554,10 +554,10 @@ const LoadingTicket = ({
     canDrag: false,
     Cell: ({ row }) =>
       user?.user?.brandPolicy?.assetDeliveredStatus &&
-      [RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy, RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable]?.includes(
-        row?.original?.rentalAssetStatus
-      ) &&
-      row?.original?.type === 'Asset' ? (
+        [RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy, RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable]?.includes(
+          row?.original?.rentalAssetStatus
+        ) &&
+        row?.original?.type === 'Asset' ? (
         <HtmlTooltip title={'Change Date'}>
           <span>
             <IconButton
@@ -1235,7 +1235,7 @@ const LoadingTicket = ({
                 </MenuItem>
               </Menu>
               {selectedRecords.length &&
-              selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
+                selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
                 selectedRecords?.length ? (
                 <Box>
                   <Tooltip title="Remove Assets From Loading Ticket(s)">
@@ -1279,13 +1279,15 @@ const LoadingTicket = ({
       <Grid item xs={12} md={12} sm={12}>
         {columns ? (
           <CustomReactTable
-            height={'calc(100vh - 500px)'}
+            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
             columns={columns}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
             refreshGrid={fetchRecords}
+            hideAction={!(allowedToEdit || isProcessor)}
+            hideSelection={!(allowedToEdit || isProcessor)}
           />
         ) : (
           <Box p={2} height={500}>

@@ -1,30 +1,24 @@
-import { useState, useContext, Fragment, useEffect, useReducer } from 'react';
-import { Grid, Box, Button, TextField } from '@material-ui/core';
-import { BiNetworkChart } from 'react-icons/all';
+import { useState, useContext, useEffect} from 'react';
+import { Box, Button, TextField } from '@material-ui/core';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import { Autocomplete } from '@material-ui/lab';
 import CustomContainer from '../../components/CustomContainer';
-import styles from '../Leads/Header.module.scss';
-import { isMobile, isTablet } from 'react-device-detect';
+import { isMobile } from 'react-device-detect';
 import axiosInstance from '../../axios/axiosInstance';
 import { useData } from '../../StateProvider/Provider';
-import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
 import { camelCase } from 'lodash';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { gridLoadingTimeout, getLocalStorageArrayData } from '../../constants/helpers';
-import useColumns, { getFrameworkComponents } from '../../constants/useColumns';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import { gridLoadingTimeout} from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import ManageCycleCountDetermination from './ManageCycleCountDetermination';
-import { Link } from 'react-router-dom';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
 
 const CycleCountDetermination = () => {
   const renderedFrom = camelCase(`${routes.cycleCountDetermination.title}`);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
-
   const [warehouseOption, setWarehouseOption] = useState([]);
   const [warehouse, setWarehouse] = useState(null);
 
@@ -34,22 +28,21 @@ const CycleCountDetermination = () => {
 
   const [open, setOpen] = useState(false);
   const toastConfig = useContext(CustomToastContext);
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
+  const { state, dispatch } = useTableReducer();
   const [columns, setColumns] = useState(null);
-  const [frameworkComponent, setFrameWorkComponent] = useState({});
-  const [loading, setLoading] = useState(false);
   const [editData, setEditData] = useState(null);
-  const { dataRows, rowCount, page, limit, pageSizes, appendRows } = state;
-
+  const { rowCount,  selectedRecords } = state;
   useEffect(() => {
-    fetchGridColumns();
     getWarehouse();
   }, [selectedEntity]);
 
   useEffect(() => {
+    fetchGridColumns();
+  }, []);
+
+  useEffect(() => {
     if (warehouse) {
-      fetchCycleCountDetermination();
+      fetchData();
     }
   }, [warehouse]);
 
@@ -65,43 +58,48 @@ const CycleCountDetermination = () => {
   };
 
   const fetchGridColumns = () => {
-    let rendererNames = [];
-    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-    tempFrameworkComponent = {
-      ...tempFrameworkComponent,
-      nameRenderer: NameRenderer
-    };
-    setFrameWorkComponent({ ...tempFrameworkComponent });
-    setColumns([
+    const columns = [
       {
-        field: 'name',
-        headerName: 'Product Category',
-        show: true,
-        cellRenderer: 'nameRenderer',
-        pivotIndex: 0,
-        primaryField: true
+        accessor: 'name',
+        Header: 'Product Category',
+        width: 120,
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) =>
+          row.original?.name ? (
+            <p
+              className="link text-truncate"
+              title={row?.original?.name}
+              onClick={() => window.open(`${routes.productCategoryDetail.path}/${row?.original?._id}`)}
+            >
+              {row?.original?.name}
+            </p>
+          ) : (
+            <NoDataCell />
+          )
       },
       {
-        field: 'inventoryCycle',
-        headerName: 'Cycle Code',
-        show: true,
-        cellRenderer: 'commonRenderer'
+        accessor: 'inventoryCycle',
+        Header: 'Cycle Code',
+        width: 120,
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => (row.original?.inventoryCycle ? <p className="text-truncate">{row.original?.inventoryCycle}</p> : <NoDataCell />)
       },
       {
-        field: 'user',
-        headerName: 'User',
-        show: true,
-        cellRenderer: 'commonRenderer'
+        accessor: 'user',
+        Header: 'User',
+        width: 120,
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => (row.original?.user ? <p className="text-truncate">{row.original?.user}</p> : <NoDataCell />)
       }
-    ]);
+    ];
+    setColumns(columns);
   };
 
-  const fetchCycleCountDetermination = () => {
-    setLoading(true);
+  const fetchData = () => {
+    dispatch({ type: 'loading', loading: true });
     axiosInstance()
       .get(`/cycle-count-determination?wareHouse=${warehouse}`)
-      .then(({ data: { data, count } }) => {
-        setLoading(false);
+      .then(({ data: { data } }) => {
         setEditData(data);
         let rows = data?.map((u) => {
           let finalObject = prepareDataForGrid(u);
@@ -109,40 +107,14 @@ const CycleCountDetermination = () => {
             ...finalObject
           };
         });
-        if (appendRows) {
-          dispatch({
-            type: 'initialize',
-            data: [...dataRows, ...rows],
-            count: count,
-            selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
-          });
-        } else {
-          dispatch({
-            type: 'initialize',
-            data: rows,
-            count: count,
-            selectedRecords: rows.filter((f) => f.isChecked === true)
-          });
-        }
-        dispatch({ type: 'initialize', data: rows, count: data.count });
+        dispatch({ type: 'initialize', data: rows, count: rows?.length });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
-      })
-
-      .catch((error) => {
+      }).catch((error) => {
         toastConfig.setToastConfig(error);
         dispatch({ type: 'loading', loading: false });
-        setLoading(false);
       });
-  };
-
-  const NameRenderer = (params) => {
-    return (
-      <p className="link text-truncate" title={params.value} onClick={() => window.open(`${routes.productCategoryDetail.path}/${params.data._id}`)}>
-        {params.value}
-      </p>
-    );
   };
 
   return (
@@ -154,19 +126,12 @@ const CycleCountDetermination = () => {
           module="cycleCountDetermination"
           api={'/cycle-count-determination'}
           afterImportCompleted={() => {
-            fetchCycleCountDetermination();
+            fetchData();
           }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
-          recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-          ids={
-            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-              ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-              : []
-          }
           onExportToExcelSuccess={() => {
-            if (gridApi) gridApi.deselectAll();
-            else fetchCycleCountDetermination();
+            fetchData();
           }}
           isDownloadExcel={false}
           additionalParams={'wareHouse=' + warehouse}
@@ -212,56 +177,16 @@ const CycleCountDetermination = () => {
           </div>
         </div>
         {columns ? (
-          Object.keys(frameworkComponent).length > 0 ? (
-            isMobile && !isTablet ? (
-              <CustomSwipableList
-                allowSelection={true}
-                allowSwipe={true}
-                permissions={permissions.cycleCountDetermination}
-                primaryField={columns?.find((d) => d.primaryField)}
-                onClick={(data) => {
-                  const win = window.open(`${routes.productCategoryDetail.path}/${data._id}`, '_blank');
-                  win.focus();
-                }}
-                dataRows={dataRows}
-                selectedRecords={getLocalStorageArrayData(`${localStorageSelectedRecords}`)}
-                dispatch={dispatch}
-                onEdit={(data) => {}}
-                extraParamsToCheckDelete={true}
-                onDelete={(data) => {}}
-                rowCount={rowCount}
-                page={page}
-                loading={loading}
-                additionalDetails={[]}
-                chips={[]}
-                onCreate={false}
-                showClone={true}
-                onClone={(data) => {}}
-                renderedFrom={renderedFrom}
-              />
-            ) : (
-              <CustomAgGrid
-                columns={columns}
-                dataRows={dataRows}
-                frameworkComponents={frameworkComponent}
-                setGridApi={setGridApi}
-                dispatch={dispatch}
-                rowCount={rowCount}
-                limit={limit}
-                pageSizes={pageSizes}
-                page={page}
-                actionWidth={150}
-                allowAction={false}
-                allowPagination={true}
-                allowSelection={false}
-                loading={loading}
-                renderedFrom={renderedFrom}
-                refreshGrid={fetchCycleCountDetermination}
-                isClientSideGrid={true}
-                showOnlyShowFilteredRecordSwitch={false}
-              />
-            )
-          ) : null
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            refreshGrid={fetchData}
+            hideSelection={true}
+            isClientSideGrid={true}
+          />
         ) : (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
@@ -271,7 +196,7 @@ const CycleCountDetermination = () => {
           <ManageCycleCountDetermination
             onSuccess={() => {
               setOpen(false);
-              fetchCycleCountDetermination();
+              fetchData();
             }}
             onClose={() => {
               setOpen(false);

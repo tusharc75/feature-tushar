@@ -85,14 +85,14 @@ const ReceivingTicket = ({
   renderedFrom,
   allowedToEdit,
   isProcessor,
-  allowUpdateStatus
+  allowUpdateStatus,
+  stepFullScreen
 }) => {
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
-  const history = useHistory();
 
   const { state, dispatch } = useTableReducer();
-  const { dataRows, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { selectedRecords } = state;
 
   const [downlodingFile, setDownlodingFile] = useState(false);
   const [showRemoveAssetFromReceivingTicketDialog, setShowRemoveAssetFromReceivingTicketDialog] = useState(false);
@@ -169,6 +169,8 @@ const ReceivingTicket = ({
     try {
       setNextStep(false);
       setNextStepToolTip(null);
+
+      dispatch({ type: 'selection', selectedRecords: [] });
       dispatch({ type: 'loading', loading: true });
 
       var productAssets: any = [];
@@ -1777,14 +1779,14 @@ const ReceivingTicket = ({
       <Grid item xs={12} md={12} sm={12}>
         {columns ? (
           <CustomReactTable
-            height={'calc(100vh - 500px)'}
+            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
             columns={columns}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
             refreshGrid={fetchRecords}
-            hideAction={false}
+            hideAction={!(allowedToEdit || isProcessor)}
             hideSelection={!(allowedToEdit || isProcessor)}
           />
         ) : (
