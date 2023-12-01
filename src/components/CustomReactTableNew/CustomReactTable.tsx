@@ -142,7 +142,7 @@ function TempFilter({ filterValue, id, setFilters, customFilters }) {
 }
 
 // for client side filter
-function DefaultColumnFilter({ column: { filterValue, setFilter, filter } }) {
+function DefaultColumnFilter({ column: { filterValue, setFilter } }) {
   const [isOpen, setIsOpen] = useState(false);
   const ref = React.useRef(null);
   const inputRef = React.useRef(null);
