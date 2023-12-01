@@ -22,7 +22,7 @@ import PreviewDownload from 'src/components/PreviewDownload';
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
 const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
-  
+
   const {
     state: { user, permissions }
   }: any = useData();
@@ -36,7 +36,7 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
 
   const fetchFields = async () => {
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.productionOrderDetail}`);
-    var data = response?.data?.data?.filter((e) => !['detail', 'description', 'workOrderNumber']?.includes(e?.fieldName));
+    var data = response?.data?.data?.filter((e) => !['detail', 'description', 'workOrderNumber', 'palletNumber']?.includes(e?.fieldName));
     data = CURReplaceByCurrencySingle(data, productionOrderData?.currency || 'USD');
     data?.forEach((e) => {
       e.isColumnEditable = false;

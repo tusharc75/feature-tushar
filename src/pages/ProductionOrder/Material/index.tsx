@@ -239,6 +239,9 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
       parent.qty = parent.qty;
       parent.qtyDisplay = parent.qty;
       parent.canDelete = parent?.workOrder ? false : true;
+      if (parent?.workOrder) {
+        parent.workOrderNumber = parent?.workOrder?.optionLabel;
+      }
       parent.subRows = generateNestedData(data.material, parent);
     });
 
@@ -252,7 +255,6 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
       setNextStep(false);
     }
     dispatch({ type: 'initialize', data: rows, count: count });
-    dispatch({ type: 'selection', selectedRecords: [] });
     dispatch({ type: 'loading', loading: false });
   };
 
@@ -282,6 +284,9 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
       _subRow.qty = _subRow.qty;
       _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
       _subRow.canDelete = _subRow?.workOrder ? false : true;
+      if (_subRow?.workOrder) {
+        _subRow.workOrderNumber = _subRow?.workOrder?.optionLabel;
+      }
       _subRow.subRows = generateNestedData(material, _subRow);
     });
     return subRows;
@@ -328,6 +333,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
     axiosInstance()
       .put(`${productionOrder.api}/material/${productionOrderData?._id}/delete`, { ids: rows })
       .then(({ data }) => {
+        dispatch({ type: 'selection', selectedRecords: [] });
         setDeleting(false);
         toastConfig.setToastConfig({
           open: true,
@@ -459,7 +465,6 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
               ids={[]}
             />
             <Box ml={1} />
-
             <Button
               disabled={selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true}
               variant={isMobile ? 'text' : 'outlined'}
