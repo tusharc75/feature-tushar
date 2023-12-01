@@ -9,7 +9,6 @@ import { camelCase } from 'lodash';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
-import AssignProductCategoryDialog from 'src/components/AssignRolesDialog/AssignProductCategoryDialog';
 import { ExpandMore } from '@material-ui/icons';
 import { Menu, MenuItem, Box } from '@material-ui/core';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -41,7 +40,7 @@ const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [columns, setColumns] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
-  
+
   const renderedFrom = camelCase(tabValue === 0 ? routes?.productCategory.title : tabValue === 1 ? routes?.product.title : routes?.serializedAsset.title);
 
   useEffect(() => {
@@ -298,19 +297,6 @@ const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
         />
       )}
       {assignDialog.open && assignDialog.type === 'productCategory' && (
-        // <AssignProductCategoryDialog
-        //     reference={'supplier'}
-        //     referenceData={null}
-        //     ids={assignDialog?.data?.map((item) => item._id) || []}
-        //     isAssigning={false}
-        //     handleClose={() =>
-        //         setAssignDialog({ open: false, type: null, data: null })}
-        //     handleSucess={(data) => {
-        //         const assignData = data?.map((item) => item.id)
-        //         assignItems({ productCategories: assignData || [] })
-        //     }}
-        // />
-
         <AssignDynamicDialog
           onSuccess={(data) => {
             const assignData = data?.map((item) => item.id);
@@ -321,7 +307,6 @@ const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
           }}
           ids={assignDialog?.data?.map((item) => item._id) || []}
           resource={sidebarResource?.productCategory}
-          reference={'supplier'}
           isSubmitting={false}
         />
       )}
