@@ -10,7 +10,7 @@ import CustomReactTable, { useColumns, getStaticFields, useTableReducer } from '
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import { Grid } from '@material-ui/core';
 
-const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, allowedToEdit }) => {
+const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, allowedToEdit, stepFullScreen }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
@@ -27,7 +27,7 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, allowedToEdit })
   }, []);
 
   useEffect(() => {
-    fetchProductInventory();
+    fetchData();
   }, [page, limit, filters, sorting]);
 
   const fetchColumns = () => {
@@ -46,23 +46,18 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, allowedToEdit })
         });
         columns = [...columns, ...getStaticFields()];
         setColumns([...columns]);
-        fetchProductInventory();
+        fetchData();
       });
   };
 
-  const fetchProductInventory = () => {
+  const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
-
     const queryString = getQueryString();
     axiosInstance()
       .get(`${serializedAsset.api}${queryString}`)
       .then(({ data }) => {
         let rows = data.data?.map((u, user) => {
           let finalObject = prepareDataForGrid(u);
-          finalObject['canDelete'] = permissions?.serializedAsset?.isDelete && allowedToEdit;
-          finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions?.serializedAsset.isUpdate && allowedToEdit;
-          finalObject['hideSelection'] = !allowedToEdit;
           return {
             ...finalObject
           };
@@ -133,14 +128,16 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, allowedToEdit })
             module="packages-products"
             api={`${serializedAsset.api}/custom-template`}
             afterImportCompleted={() => {
-              fetchProductInventory();
+              dispatch({ type: 'selection', selectedRecords: [] });
+              fetchData();
             }}
             isExportAllOrSomeFeature={true}
             total={rowCount}
             recordsToExport={selectedRecords?.length}
             ids={selectedRecords?.map((obj) => obj._id)}
             onExportToExcelSuccess={() => {
-              fetchProductInventory();
+              dispatch({ type: 'selection', selectedRecords: [] });
+              fetchData();
             }}
             isDownloadExcel={false}
             isBackgroundWhite={true}
@@ -151,15 +148,14 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, allowedToEdit })
       <Grid item xs={12} md={12} sm={12}>
         {columns ? (
           <CustomReactTable
-            height={'calc(100vh - 350px)'}
+            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
             columns={columns}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
-            refreshGrid={fetchProductInventory}
+            refreshGrid={fetchData}
             hideSelection={!allowedToEdit}
             onSaveEdit={handleValueUpdate}
-            isClientSideGrid={false}
           />
         ) : (
           <Box p={2} height={500}>
