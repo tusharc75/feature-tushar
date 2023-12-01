@@ -1,33 +1,31 @@
-import { Grid, IconButton, TextField } from '@material-ui/core';
+import { Box, IconButton, TextField } from '@material-ui/core';
+import { isMobile } from 'react-device-detect';
 import { Autocomplete } from '@material-ui/lab';
-import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomAgGrid, { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
 import routes from 'src/components/Helpers/Routes';
-import { dateFormat, gridLoadingTimeout, LOG_RESOURCE } from 'src/constants/helpers';
-import { DateTimeRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
-import { Link } from 'react-router-dom';
+import { dateFormat, gridLoadingTimeout, LOG_RESOURCE, dateTimeFormat } from 'src/constants/helpers';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ChangesDialog from './ChangesDialog';
 import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import moment from 'moment';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const ResourceLogs = () => {
   const toastConfig = useContext(CustomToastContext);
-
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
+  const [columns, setColumns] = useState([]);
+  const { state, dispatch } = useTableReducer();
+  const { page, limit} = state;
   const {
     state: { user, permissions }
   }: any = useData();
-  const [gridApi, setGridApi] = useState(null);
   const [openDialog, setOpenDialog] = useState({ open: false, changes: null, operations: null, updatedBy: null });
   const [option, setOption] = useState([]);
-
   const [selectedResource, setSelectedResource] = useState(null);
   const [selectedOption, setSelectedOption] = useState(null);
   const [resourceOptions, setResourceOptions] = useState([]);
@@ -43,6 +41,10 @@ const ResourceLogs = () => {
     if (data?.length === 1) {
       setSelectedResource(data[0]);
     }
+  }, []);
+
+  useEffect(() => {
+    fetchGridColumns();
   }, []);
 
   useEffect(() => {
@@ -64,6 +66,92 @@ const ResourceLogs = () => {
     }
   }, [selectedResource, selectedOption, page, limit]);
 
+  const fetchGridColumns = () => {
+    let columns = [
+      {
+        accessor: 'referenceId',
+        Header: 'Resource',
+        width: 120,
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => (
+          <p
+            className="text-truncate link"
+            title={row?.original?.optionLabel}
+            onClick={() => window.open(`${routes[`${row?.original?.key}Detail`]?.path}/${row?.original?.optionValue}`)}
+          >
+            {row?.original?.optionLabel}
+          </p>
+        )
+      },
+      {
+        accessor: 'updatedBy',
+        Header: 'Updated By',
+        width: 120,
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => (
+          <p
+            className="link text-truncate"
+            title={row?.original?.optionLabel}
+            onClick={() => window.open(`${routes.userDetail.path}/${row?.original?.optionValue}`)}
+          >
+            {row?.original?.optionLabel}
+          </p>
+        )
+      },
+      {
+        accessor: 'date',
+        Header: 'Updated Date Time',
+        width: 120,
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => (
+          <p
+            className="text-truncate"
+          >
+            {moment(row?.original?.date)?.format(dateTimeFormat)}
+          </p>
+        )
+      },
+      {
+        accessor: 'changeString',
+        Header: 'Changes',
+        width: 120,
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => <p className="text-truncate">{row?.original?.changeString}</p>
+      },
+      ActionsRenderer
+    ];
+    setColumns(columns);
+  };
+
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 100,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+         <HtmlTooltip title="View Changes">
+          <IconButton
+            onClick={() =>
+              setOpenDialog({
+                open: true,
+                changes: row?.original?.changes || [],
+                operations: row?.original?.operations || [],
+                updatedBy: row?.original?.updatedBy?.optionLabel || ''
+              })
+            }
+          >
+            <VisibilityIcon color="primary" fontSize="small" />
+          </IconButton>
+        </HtmlTooltip>
+      </>
+    )
+  };
+
   const getQueryString = () => {
     let query = null;
     query = `page=${page}&limit=${limit}&resource=${selectedResource?.optionValue}`;
@@ -75,9 +163,6 @@ const ResourceLogs = () => {
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
     const queryString = getQueryString();
     axiosInstance()
       .get(`/log?${queryString}`)
@@ -93,13 +178,13 @@ const ResourceLogs = () => {
             var operations = [];
 
             if (Array.isArray(u?.changes)) {
-              if(u?.changes?.length === 0){
+              if (u?.changes?.length === 0) {
                 return;
               }
               u?.changes?.forEach((e) => {
                 if (e?.fieldLabel) {
                   if (e?.fieldLabel === 'history' || e?.fieldLabel === 'createdBy' || e?.fieldLabel === '_id') {
-                    return
+                    return;
                   }
                   changes.push(e);
                   var oldValue = e?.oldValue;
@@ -132,8 +217,8 @@ const ResourceLogs = () => {
             } else {
               u.changeString = 'Click View for check changes';
             }
-            if(u?.action == "create"){
-              u.changeString = "Created";
+            if (u?.action == 'create') {
+              u.changeString = 'Created';
             }
             u.changes = changes;
             u.operations = operations;
@@ -150,84 +235,6 @@ const ResourceLogs = () => {
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-  };
-
-  const ResourceRenderer = (params) => (
-    <Fragment>
-      <p
-        className="link text-truncate"
-        title={params?.value?.optionLabel}
-        onClick={() => window.open(`${routes[`${params?.data?.key}Detail`]?.path}/${params?.value?.optionValue}`)}
-      >
-        {params?.value?.optionLabel}
-      </p>
-    </Fragment>
-  );
-
-  const UpdatedByRenderer = (params) => (
-    <Fragment>
-      <p 
-        className="link text-truncate" 
-        title={params?.value?.optionLabel} 
-        onClick = {() => window.open(`${routes.userDetail.path}/${params?.value?.optionValue}`)}
-      >
-        {params?.value?.optionLabel}
-      </p>
-    </Fragment>
-  );
-
-  const columns = [
-    {
-      field: 'referenceId',
-      headerName: 'Resource',
-      show: true,
-      cellRenderer: 'resourceRenderer',
-      filter: false,
-      sortable: false
-    },
-    {
-      field: 'updatedBy',
-      headerName: 'Updated By',
-      show: true,
-      cellRenderer: 'updatedByRenderer',
-      filter: false,
-      sortable: false
-    },
-    {
-      field: 'date',
-      headerName: 'Updated Date Time',
-      show: true,
-      cellRenderer: 'dateTimeRenderer',
-      filter: false,
-      sortable: false
-    },
-    {
-      field: 'changeString',
-      headerName: 'Changes',
-      show: true,
-      cellRenderer: 'commonRenderer',
-      filter: false,
-      sortable: false
-    }
-  ];
-
-  const ActionsRenderer = (params) => {
-    return (
-      <>
-        <HtmlTooltip title="View Changes">
-          <IconButton onClick={() => setOpenDialog({ open: true, changes: params?.data?.changes || [], operations: params?.data?.operations || [], updatedBy: params?.data?.updatedBy?.optionLabel || '' })}>
-            <VisibilityIcon color="primary" fontSize="small" />
-          </IconButton>
-        </HtmlTooltip>
-      </>
-    );
-  };
-
-  const frameworkComponents = {
-    resourceRenderer: ResourceRenderer,
-    updatedByRenderer: UpdatedByRenderer,
-    dateTimeRenderer: DateTimeRenderer,
-    actionsRenderer: ActionsRenderer
   };
 
   return (
@@ -267,22 +274,24 @@ const ResourceLogs = () => {
             )}
           </div>
         </div>
-        <CustomAgGrid
-          columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameworkComponents}
-          setGridApi={setGridApi}
-          dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          loading={loading}
-          allowSelection={false}
-          allowAction={true}
-          renderedFrom={'resourceLogs'}
-          refreshGrid={fetchData}
-        />
+        {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={'resourceLogs'}
+            isClientSideGrid={false}
+            refreshGrid={fetchData}
+            showOnlyShowFilteredRecordSwitch={false}
+            showFilters={false}
+            hideSelection = {true}
+          />
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
       </CustomContainer>
       {openDialog?.open && (
         <ChangesDialog
