@@ -37,6 +37,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import CloseIcon from '@material-ui/icons/Close';
 import { RiFileShredFill } from 'react-icons/ri';
 import Diagram from './Diagram';
+import { ExpandMore } from '@material-ui/icons';
 
 const WorkOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -59,6 +60,7 @@ const WorkOrderDetails = () => {
   const [completed, setCompleted] = useState(false);
 
   const [showConfirmBoxScrap, setShowConfirmBoxScrap] = useState(false);
+  const [addAnchorEl, setAddAnchorEl] = useState(null);
 
   const columns = [
     { accessor: 'serviceName', Header: 'Service' },
@@ -147,7 +149,7 @@ const WorkOrderDetails = () => {
       .put(`${workOrder.api}/remove`, { ids: [id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.push(`${routes.workOrder.path}`)
+        history.push(`${routes.workOrder.path}`);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -183,13 +185,36 @@ const WorkOrderDetails = () => {
       });
   };
 
-
   function a11yProps(index: any) {
     return {
       id: `main-tab-${index}`,
       'aria-controls': `main-tabpanel-${index}`
     };
   }
+
+  const openAddActions = (event) => {
+    setAddAnchorEl(event.currentTarget);
+  };
+
+  const closeAddActions = () => {
+    setAddAnchorEl(null);
+  };
+
+  const createVersion = async (dataFlag: Boolean = false) => {
+    try {
+      let api = `${workOrder.api}/create-version/${id}`;
+      api += dataFlag ? '/withData' : '';
+      const { data } = await axiosInstance().put(api);
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: data.message
+      });
+      fetchWorkOrderData();
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
 
   return (
     <Box className="main-container-v1">
@@ -235,6 +260,49 @@ const WorkOrderDetails = () => {
                       </HtmlTooltip>
                     </div>
                   )}
+                {permissions?.workOrder?.isUpdate && allowedToEdit && (
+                  <div className="relative isolate ">
+                    <Button
+                      variant={isMobile && !isTablet ? 'text' : 'contained'}
+                      size="small"
+                      className={'btn-outline-v1 '}
+                      onClick={openAddActions}
+                      aria-controls="add-menu"
+                    >
+                      {'Create Version'}
+                      <ExpandMore fontSize="small" />
+                    </Button>
+                  </div>
+                )}
+                <Menu
+                  anchorEl={addAnchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  id="add-menu"
+                  open={Boolean(addAnchorEl)}
+                  onClose={closeAddActions}
+                >
+                  <MenuItem
+                    onClick={() => {
+                      createVersion(true);
+                      closeAddActions();
+                    }}
+                  >
+                    With Existing Data
+                  </MenuItem>
+                  <MenuItem
+                    onClick={() => {
+                      createVersion();
+                      closeAddActions();
+                    }}
+                  >
+                    Without Existing Data
+                  </MenuItem>
+                </Menu>
                 <PreviewDownload
                   fileName={`${routes.workOrder.title}-${workOrderData?.workOrderNumber}`}
                   resource={sidebarResource.workOrder}
@@ -265,7 +333,7 @@ const WorkOrderDetails = () => {
               resourceLabel={workOrderData?.workOrderNumber}
               extraRelatedTo={{
                 referenceId: workOrderData?.repairOrder?.optionValue,
-                resource: ACTIVITY_RESOURCE.repairOrder,
+                resource: ACTIVITY_RESOURCE.repairOrder
               }}
             />
           </Box>

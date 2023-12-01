@@ -624,7 +624,7 @@ export default function Contact(props) {
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
-            isClientSideGrid={false}
+            
             refreshGrid={getContacts}
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}

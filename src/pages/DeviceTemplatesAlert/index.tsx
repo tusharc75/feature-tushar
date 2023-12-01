@@ -320,7 +320,6 @@ export default function DeviceTemplatesAlerts() {
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
-            isClientSideGrid={false}
             refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}

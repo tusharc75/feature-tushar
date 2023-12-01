@@ -68,6 +68,7 @@ const IndeterminateCheckbox = React.forwardRef(({ indeterminate, from, style, ..
   );
 });
 
+// for server side filter
 function TempFilter({ filterValue, id, setFilters, customFilters }) {
   const [isOpen, setIsOpen] = useState(false);
   const ref = React.useRef(null);
@@ -140,6 +141,7 @@ function TempFilter({ filterValue, id, setFilters, customFilters }) {
   );
 }
 
+// for client side filter
 function DefaultColumnFilter({ column: { filterValue, setFilter, filter } }) {
   const [isOpen, setIsOpen] = useState(false);
   const ref = React.useRef(null);
@@ -218,7 +220,7 @@ function CustomReactTable({
   height = '100%',
   hideSelection = false,
   renderedFrom,
-  isClientSideGrid = true,
+  isClientSideGrid = false,
   expander = false,
   refreshGrid = null,
   dispatch,
@@ -751,7 +753,7 @@ function CustomReactTable({
               className="border"
             >
               {(loading || error) && (
-                <Box className="bg-[rgba(255,255,255,0.2)] dark:bg-[rgba(0,0,0,0.1)] w-full h-full z-[100] absolute inset-0 flex justify-center items-center">
+                <Box className="bg-[rgba(255,255,255,0.2)] dark:bg-[rgba(0,0,0,0.1)] w-full h-full z-50 absolute inset-0 flex justify-center items-center">
                   <div className="bg-[white] dark:bg-[var(--dark-secondary)] px-10 py-5 rounded-lg text-center shadow-md">
                     {error ? (
                       <>
@@ -772,7 +774,7 @@ function CustomReactTable({
                   <>
                     <Box
                       style={{ height: `calc(${height ?? '100%'} - 60px)` }}
-                      className="w-full h-full z-[100] absolute inset-0 top-[46px] flex justify-center items-center"
+                      className="w-full h-full absolute inset-0 top-[46px] flex justify-center items-center"
                     >
                       <div className=" px-10 py-5 rounded-lg text-center">
                         <p>No data found</p>

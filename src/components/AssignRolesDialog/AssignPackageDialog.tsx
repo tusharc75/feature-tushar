@@ -200,7 +200,6 @@ const AssignPackageDialog = ({ onSuccess, handleClose, packageType = null, ids =
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             onSaveEdit={onSaveEdit}
-            isClientSideGrid={false}
             refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}

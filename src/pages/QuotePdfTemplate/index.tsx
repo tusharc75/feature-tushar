@@ -346,11 +346,9 @@ const QuotePdfTemplate = () => {
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
-            isClientSideGrid={false}
             refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={false}
-            resource={sidebarResource.quotePdfTemplate}
           />
         ) : (
           <Box p={2} height={500}>
