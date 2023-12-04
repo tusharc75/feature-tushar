@@ -2,19 +2,16 @@ import { Box, Button, IconButton, Menu, MenuItem, } from '@material-ui/core';
 import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile } from 'react-device-detect';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import CustomContainer from 'src/components/CustomContainer';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import { camelCase } from 'lodash';
 import { useData } from 'src/StateProvider/Provider';
-import { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import axiosInstance from 'src/axios/axiosInstance';
 import {
   gridLoadingTimeout,
   prepareDataForGrid,
-  removeLocalStorage,
   sidebarResource
 } from 'src/constants/helpers';
 import { useHistory } from 'react-router-dom';
@@ -28,7 +25,7 @@ import ManageFieldTicket from './ManageFieldTicket';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { deleteOne, findAll, findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
@@ -52,9 +49,10 @@ const FieldTicket = () => {
   const {
     state: { permissions, selectedEntity, user }
   }: any = useData();
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
-    state;
+
+  const { state, dispatch } = useTableReducer();
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+
   const [fieldTicketId, setFieldTicketId] = useState(null);
   const [open, setOpen] = useState({ open: false, isClone: false });
   const [anchorEl, setAnchorEl] = useState(null);
@@ -64,6 +62,7 @@ const FieldTicket = () => {
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [columns, setColumns] = useState(null);
+
   const { getColumnData } = useColumns();
   const { isOffline } = useContext(CustomOfflineContext);
 
@@ -278,7 +277,7 @@ const FieldTicket = () => {
   };
 
   const onTypeChange = (event, type) => {
-    dispatch({ type: 'setPage', page: 0 });
+    dispatch({ type: 'pageChange', page: 0 });
     const value = types.find((d) => d.key === type).value;
     setSelectedType(value);
     history.push(`?type=${value}`);
