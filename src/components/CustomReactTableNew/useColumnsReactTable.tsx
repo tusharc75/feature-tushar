@@ -11,7 +11,6 @@ import { useData } from 'src/StateProvider/Provider';
 import { Image } from '@material-ui/icons';
 import CopyToClipboard from '../Helpers/CopyToClipboard';
 
-
 const permissionForLinks = sidebarResourceObjectFromValues();
 
 export const headerName = {
@@ -114,11 +113,11 @@ export const getSortedColumns = (columns = []) => {
 export const staticColumns = ['createdBy', 'updatedBy'];
 
 export default function useColumns() {
-
-  const { state: { permissions } }: any = useData();
+  const {
+    state: { permissions }
+  }: any = useData();
 
   const getColumnData = (title, field, detailScreenRoute = null, masterPage = false) => {
-
     let data = localStorage.getItem('gridMetaData');
 
     let gridMetaData = data == 'undefined' ? {} : JSON.parse(data);
@@ -242,11 +241,10 @@ export default function useColumns() {
             ...commonFieldData,
             Cell: ({ row }) =>
               row?.original?.[field?.fieldName] ? (
-                <h5
-                  className="[display:flex_!important] [flex-wrap:nowrap_!important] items-center"
-                  title={`${row?.original?.[field?.fieldName]}`}
-                >
-                  <span title={row?.original?.[field?.fieldName]} className="text-truncate" >{row?.original?.[field?.fieldName]}</span>
+                <h5 className="[display:flex_!important] [flex-wrap:nowrap_!important] items-center" title={`${row?.original?.[field?.fieldName]}`}>
+                  <span title={row?.original?.[field?.fieldName]} className="text-truncate">
+                    {row?.original?.[field?.fieldName]}
+                  </span>
                   <CopyToClipboard textToCopy={row?.original?.[field?.fieldName]} size={16} />
                 </h5>
               ) : (
@@ -288,7 +286,7 @@ export default function useColumns() {
             canFilter: false
           }
         };
-      } else if (field?.type === 'dateTime') {
+      } else if (field?.type === 'dateTime' || field?.type === 'time') {
         return {
           columnData: {
             ...commonFieldData,

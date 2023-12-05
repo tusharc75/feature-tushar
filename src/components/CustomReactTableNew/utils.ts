@@ -54,7 +54,7 @@ export const updateGridHiddenColumns = ({
     }
     if (callback) callback(request[renderedFrom]);
     postGridMetadata(request, user, callback);
-  }, 600);
+  }, 300);
 };
 
 const postGridMetadata = (request, user, callback) => {
@@ -76,3 +76,5 @@ const fetchGridMetaData = (user) => {
       localStorage.setItem('gridMetaData', tempMetaData);
     });
 };
+
+
