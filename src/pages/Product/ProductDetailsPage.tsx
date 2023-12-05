@@ -665,7 +665,7 @@ const ProductDetailsPage = () => {
               />
             )}
             {tabValue === 6 && <Package renderedFrom={`${renderedFrom}_grid-6`} productId={id} />}
-            {tabValue === 7 && <ParentProduct renderedFrom={`${renderedFrom}_grid-6`} productId={id} />}
+            {tabValue === 7 && <ParentProduct renderedFrom={`${renderedFrom}_grid-7`} productId={id} />}
             {tabValue === 8 && <InventoryHistory id={id} />}
             {tabValue === 9 && <Digital renderedFrom={`${renderedFrom}_grid-8`} productId={id} />}
           </Grid>

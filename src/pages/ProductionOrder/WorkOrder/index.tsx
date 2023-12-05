@@ -318,6 +318,8 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
+
     const queryString = getQueryString();
     setNextStep(false);
     const {
@@ -358,7 +360,6 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       setNextStep(true);
     }
     dispatch({ type: 'initialize', data: rows, count: count });
-    dispatch({ type: 'selection', selectedRecords: [] });
     dispatch({ type: 'loading', loading: false });
   };
 

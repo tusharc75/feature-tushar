@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
 import { Box, Button, IconButton } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
 import { purchaseOrder, gridLoadingTimeout, dateTimeFormat } from '../../../constants/helpers';
 import AddInvoice from './AddInvoice';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -17,7 +17,6 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer();
-  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [addOpen, setAddOpen] = useState({ open: false, invoiceData: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteData, setDeleteData] = useState(null);
@@ -105,6 +104,7 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
     let res = await axiosInstance().get(`${purchaseOrder.api}/invoice/${purchaseOrderData?._id}`);
     dispatch({ type: 'initialize', data: res?.data?.data, count: res?.data?.data?.length });
     setTimeout(() => {
