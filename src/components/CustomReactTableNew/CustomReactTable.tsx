@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import MaUTable from '@material-ui/core/Table';
 import { TableBody, IconButton, TableCell, TableHead, TableRow, Box, CircularProgress, Button, TableFooter } from '@material-ui/core';
 import { Check, Edit, Error } from '@material-ui/icons';
@@ -480,7 +480,7 @@ function CustomReactTable({
       filterTypes,
       initialState: {
         sortBy: sorting.map((d) => {
-          return { desc: d.sort === 'asc' ? false : true };
+          return { id: d.colId, desc: d.sort === 'asc' ? false : true };
         }),
         pageIndex: page,
         expanded: false,
@@ -515,6 +515,8 @@ function CustomReactTable({
     useRowState
   );
 
+  console.log(sortBy);
+
   useEffect(() => {
     try {
       let gridMetaData = getDataFromLocalStorage();
@@ -544,7 +546,7 @@ function CustomReactTable({
   useEffect(() => {
     if (!isClientSideGrid) {
       let tempArray = sorting.map((d) => {
-        return { desc: d.sort === 'asc' ? false : true };
+        return { id: d.colId, desc: d.sort === 'asc' ? false : true };
       });
       if (JSON.stringify(sortBy) !== JSON.stringify(tempArray)) {
         sortBy?.forEach((v) => {
@@ -788,7 +790,7 @@ function CustomReactTable({
                   </div>
                 </Box>
               )}
-              <div className="relative" style={{ height: height ?? '100%' }}>
+              <div className="relative">
                 {!loading && !error && rows.length === 0 && (
                   <>
                     <Box
@@ -801,7 +803,6 @@ function CustomReactTable({
                     </Box>
                   </>
                 )}
-
                 <MaUTable {...getTableProps()} size="small" className="tableWrap table sticky">
                   <TableHead style={{ overflowY: 'auto', overflowX: 'hidden' }} className="header">
                     {headerGroups.map((headerGroup, index) => (
@@ -848,7 +849,7 @@ function CustomReactTable({
                               <TableCell
                                 key={index2}
                                 {...cellProps}
-                                className={`td p-0 [&>*]:h-[45px] [&>*]:flex [&>*]:items-center [&>*]:p-[5px_8px] h-[45px] text-truncate ${
+                                className={`td p-0 [&>*]:h-[45px] [&>*]:flex [&>*]:items-center [&>*]:p-[5px_8px] h-[45px]  ${
                                   cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''
                                 }    ${setWholeRowsCellColor ? setWholeRowsCellColor(row.original) : ''}`}
                                 onClick={() => {
@@ -979,120 +980,118 @@ interface DraggableHeaderProps {
   isClientSideGrid: boolean;
 }
 
-const DraggableHeader: React.FC<DraggableHeaderProps> = forwardRef(
-  ({ column, index, reorder, customFilters, dispatch, isClientSideGrid }, parentRef) => {
-    const ref = React.useRef();
-    const { id, Header, render, canFilter } = column;
-    const [filters, setFilters] = useState([]);
+const DraggableHeader: React.FC<DraggableHeaderProps> = ({ column, index, reorder, customFilters, dispatch, isClientSideGrid }) => {
+  const ref = React.useRef();
+  const { id, Header, render, canFilter } = column;
+  const [filters, setFilters] = useState([]);
 
-    // Use a useEffect to update filters when customFilters changes
-    useEffect(() => {
-      setFilters(
-        Object.keys(customFilters).map((key, i) => ({
-          id: key,
-          value: customFilters[key].filter
-        }))
-      );
-    }, [customFilters]); // Add customFilters as a dependency
+  // Use a useEffect to update filters when customFilters changes
+  useEffect(() => {
+    setFilters(
+      Object.keys(customFilters).map((key, i) => ({
+        id: key,
+        value: customFilters[key].filter
+      }))
+    );
+  }, [customFilters]); // Add customFilters as a dependency
 
-    const MINIMUM_SEARCH_DELAY = 600; // Adjust this delay as needed
+  const MINIMUM_SEARCH_DELAY = 600; // Adjust this delay as needed
 
-    const debouncedFilterDispatch = debounce((updatedCustomFilters) => {
-      dispatch({ type: 'filter', filters: updatedCustomFilters });
+  const debouncedFilterDispatch = debounce((updatedCustomFilters) => {
+    dispatch({ type: 'filter', filters: updatedCustomFilters });
+  }, MINIMUM_SEARCH_DELAY);
+
+  const [, drop] = useDrop({
+    accept: ItemTypes.COLUMN,
+    drop: (item) => {
+      reorder(item, index);
+    },
+    canDrop: () => !column?.lockPosition || column?.id !== 'selection' || column?.id !== 'action'
+  });
+
+  const [{ isDragging }, drag] = useDrag({
+    type: ItemTypes.COLUMN,
+    item: () => {
+      return {
+        id,
+        index,
+        header: Header
+      };
+    },
+    collect: (monitor) => ({
+      isDragging: monitor.isDragging()
+    }),
+    canDrag: !column?.lockPosition || column?.id !== 'selection' || column?.id !== 'action' || column?.id !== 'expand'
+  });
+  useEffect(() => {
+    // Add a timer to delay the dispatch
+    const searchTimer = setTimeout(() => {
+      let tempArray = Object.keys(customFilters).map((key, i) => {
+        return { id: key, value: customFilters[key].filter };
+      });
+
+      if (JSON.stringify(filters) !== JSON.stringify(tempArray)) {
+        var tempResult = {};
+        filters?.forEach((v) => {
+          if (v.value && v.value !== '') {
+            tempResult[v.id] = { filter: v.value };
+          } else {
+            //this is for handling condition where the customFilters has a multiselect type field and we type something in some other filter
+            if (customFilters[v.id] && customFilters[v.id].operator && customFilters[v.id].condition1) {
+              tempResult[v.id] = customFilters[v.id];
+            }
+          }
+        });
+        if (!isClientSideGrid) debouncedFilterDispatch(tempResult);
+      }
     }, MINIMUM_SEARCH_DELAY);
 
-    const [, drop] = useDrop({
-      accept: ItemTypes.COLUMN,
-      drop: (item) => {
-        reorder(item, index);
-      },
-      canDrop: () => !column?.lockPosition || column?.id !== 'selection' || column?.id !== 'action'
-    });
+    // Clear the timer when the component unmounts or when filters change
+    return () => clearTimeout(searchTimer);
+  }, [filters]);
 
-    const [{ isDragging }, drag] = useDrag({
-      type: ItemTypes.COLUMN,
-      item: () => {
-        return {
-          id,
-          index,
-          header: Header
-        };
-      },
-      collect: (monitor) => ({
-        isDragging: monitor.isDragging()
-      }),
-      canDrag: !column?.lockPosition || column?.id !== 'selection' || column?.id !== 'action' || column?.id !== 'expand'
-    });
-    useEffect(() => {
-      // Add a timer to delay the dispatch
-      const searchTimer = setTimeout(() => {
-        let tempArray = Object.keys(customFilters).map((key, i) => {
-          return { id: key, value: customFilters[key].filter };
-        });
+  drag(drop(ref));
 
-        if (JSON.stringify(filters) !== JSON.stringify(tempArray)) {
-          var tempResult = {};
-          filters?.forEach((v) => {
-            if (v.value && v.value !== '') {
-              tempResult[v.id] = { filter: v.value };
-            } else {
-              //this is for handling condition where the customFilters has a multiselect type field and we type something in some other filter
-              if (customFilters[v.id] && customFilters[v.id].operator && customFilters[v.id].condition1) {
-                tempResult[v.id] = customFilters[v.id];
-              }
-            }
-          });
-          if (!isClientSideGrid) debouncedFilterDispatch(tempResult);
-        }
-      }, MINIMUM_SEARCH_DELAY);
-
-      // Clear the timer when the component unmounts or when filters change
-      return () => clearTimeout(searchTimer);
-    }, [filters]);
-
-    drag(drop(ref));
-
-    const headerProps = column.getHeaderProps();
-    if (column.maxWidth) {
-      headerProps.style = { ...headerProps.style, maxWidth: column.maxWidth };
-    }
-
-    return (
-      <TableCell {...headerProps} className="th text-truncate table-header" ref={parentRef}>
-        <div
-          ref={ref}
-          className={`d-flex items-center ${column.id === 'selection' ? 'justify-center' : 'justify-between'} pos-rel`}
-          style={{ width: '100%' }}
-        >
-          <div
-            style={{ opacity: isDragging ? 0.2 : 1 }}
-            className="d-flex gap-2 align-items-center "
-            {...column.getSortByToggleProps({ title: undefined })}
-          >
-            <div className="line-clamp-1">
-              <span className=" overflow-hidden overflow-ellipsis whitespace-normal">{column.render('Header')}</span>
-            </div>
-            {column.isSorted ? column.isSortedDesc ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" /> : ''}
-          </div>
-          {column?.columnFilterable && column?.id !== 'action' ? (
-            <div>
-              {canFilter ? (
-                !isClientSideGrid ? (
-                  <TempFilter
-                    filterValue={filters.find((filter) => filter.id === column.id)?.value || ''}
-                    id={column?.id}
-                    setFilters={setFilters}
-                    customFilters={customFilters}
-                  />
-                ) : (
-                  render('Filter')
-                )
-              ) : null}
-            </div>
-          ) : null}
-        </div>
-        <div {...column.getResizerProps()} className="resizer" />
-      </TableCell>
-    );
+  const headerProps = column.getHeaderProps();
+  if (column.maxWidth) {
+    headerProps.style = { ...headerProps.style, maxWidth: column.maxWidth };
   }
-);
+
+  return (
+    <TableCell {...headerProps} className="th text-truncate table-header">
+      <div
+        ref={ref}
+        className={`d-flex items-center ${column.id === 'selection' ? 'justify-center' : 'justify-between'} pos-rel`}
+        style={{ width: '100%' }}
+      >
+        <div
+          style={{ opacity: isDragging ? 0.2 : 1 }}
+          className="d-flex gap-2 align-items-center "
+          {...column.getSortByToggleProps({ title: undefined })}
+        >
+          <div className="line-clamp-1">
+            <span className=" overflow-hidden overflow-ellipsis whitespace-normal">{column.render('Header')}</span>
+          </div>
+          {column.isSorted ? column.isSortedDesc ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" /> : ''}
+        </div>
+        {column?.columnFilterable && column?.id !== 'action' ? (
+          <div>
+            {canFilter ? (
+              !isClientSideGrid ? (
+                <TempFilter
+                  filterValue={filters.find((filter) => filter.id === column.id)?.value || ''}
+                  id={column?.id}
+                  setFilters={setFilters}
+                  customFilters={customFilters}
+                />
+              ) : (
+                render('Filter')
+              )
+            ) : null}
+          </div>
+        ) : null}
+      </div>
+      <div {...column.getResizerProps()} className="resizer" />
+    </TableCell>
+  );
+};
