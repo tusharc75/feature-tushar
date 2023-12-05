@@ -128,10 +128,10 @@ const StepFieldsDialog = ({
     const [time, setTime] = React.useState(
       user?.brandPolicy?.workOrderTimer
         ? convertMsToTime(
-            stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start
-              ? (stepData?.duration || 0) + (new Date().getTime() - new Date(stepData?.pauseDate || stepData?.startDate).getTime())
-              : stepData?.duration || 0
-          )
+          stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start
+            ? (stepData?.duration || 0) + (new Date().getTime() - new Date(stepData?.pauseDate || stepData?.startDate).getTime())
+            : stepData?.duration || 0
+        )
         : 0
     );
 
@@ -268,7 +268,7 @@ const StepFieldsDialog = ({
   return (
     <>
       <Dialog
-        maxWidth="sm"
+        maxWidth="md"
         fullScreen={fullScreen || isMobile || isTablet}
         TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
@@ -305,7 +305,6 @@ const StepFieldsDialog = ({
                     !isEditing ? (
                       <DetailsPage
                         containerPadding={'0px'}
-                        gridSize={12}
                         data={fieldData.orignalValues}
                         fields={fieldData.fields.map((f) => ({ fieldData: f }))}
                       />
@@ -332,7 +331,7 @@ const StepFieldsDialog = ({
                                 <Box marginY={2}>
                                   <Grid spacing={2} container>
                                     {form?.sectionFields?.map((field, index2) => (
-                                      <Grid key={index2} item xs={12}>
+                                      <Grid key={index2} item xs={12} sm={6} md={6}>
                                         <FormTypes
                                           {...field}
                                           row={field.type === 'radio'}
@@ -395,7 +394,7 @@ const StepFieldsDialog = ({
                       </Typography>
                     </div>
                   )}
-                  <Box mt={2} className={styles.dates}>
+                  <Box mt={3} className={styles.dates}>
                     <RenderStepData />
                   </Box>
                 </div>
@@ -430,8 +429,13 @@ const StepFieldsDialog = ({
                   >
                     {!isEditing ? (
                       <>
-                        <Button variant="outlined" size="small" onClick={handleClose} color="primary">
-                          Close
+                        <Box ml={1} />
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          onClick={handleClose}
+                          color="primary">
+                          Cancel
                         </Button>
                         <Box ml={1} />
                         {allowedToEdit && fieldData?.fields?.length > 0 && (
@@ -442,7 +446,12 @@ const StepFieldsDialog = ({
                       </>
                     ) : (
                       <>
-                        <Button variant="outlined" size="small" onClick={handleClose} color="primary">
+                        <Box ml={1} />
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          onClick={handleClose}
+                          color="primary">
                           Cancel
                         </Button>
                         <Box ml={1} />

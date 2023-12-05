@@ -41,6 +41,8 @@ import GridFilter from './Filters';
 import type { TInitialState } from './useTableReducer';
 import { TouchBackend } from 'react-dnd-touch-backend';
 import { useStore, SEARCH } from 'src/StateProvider/fastContext';
+import { updateGridHiddenColumns } from './utils';
+import { useData } from 'src/StateProvider/Provider';
 
 const childrenProperty = 'subRows';
 interface CustomCheckBoxProps extends CheckboxProps {
@@ -324,91 +326,91 @@ function CustomReactTable({
     () => [
       ...(expander
         ? [
-            {
-              accessor: 'expander',
-              id: 'expander',
-              Header: ({ isAllRowsExpanded }) => (
-                <span
-                  style={{
-                    paddingLeft: '0.3rem',
-                    color: 'black'
-                  }}
-                >
-                  {isAllRowsExpanded ? (
-                    <FaAngleDown
-                      className="cursor-pointer text-[var(--primary-text)]"
-                      onClick={() => {
-                        toggleAllRowsExpanded(false);
-                      }}
-                    />
-                  ) : (
-                    <FaAngleRight
-                      className="cursor-pointer text-[var(--primary-text)]"
-                      onClick={() => {
-                        toggleAllRowsExpanded(true);
-                      }}
-                    />
-                  )}
-                </span>
-              ),
-              sticky: 'left',
-              width: isMobile && !isTablet ? 40 : 70,
-              minWidth: isMobile && !isTablet ? 40 : 70,
-              disableFilters: true,
-              disableSortBy: true,
-              canDrag: false,
-              Cell: ({ row }) => (
-                <div
-                  {...row.getToggleRowExpandedProps?.({
-                    style: {
-                      marginLeft: isMobileView ? 0 : `${row.depth * 15}px`
-                    }
-                  })}
-                >
-                  {row.original.type === 'folder' || row.canExpand ? (
-                    <IconButton size="small" style={{ fontSize: 13 }}>
-                      {row.isExpanded ? (
-                        <FaAngleDown />
-                      ) : (
-                        <FaAngleRight
-                          onClick={async () => {
-                            if (!fetchChildAttachment || row.original[childrenProperty]?.length > 0) return;
-                            const subRows = await fetchChildAttachment(row.original.id);
-                            row.original.subRows = subRows;
-                            row.canExpand = true;
-                            row.isExpanded = true;
-                          }}
-                        />
-                      )}
-                    </IconButton>
-                  ) : null}
-                </div>
-              )
-            }
-          ]
+          {
+            accessor: 'expander',
+            id: 'expander',
+            Header: ({ isAllRowsExpanded }) => (
+              <span
+                style={{
+                  paddingLeft: '0.3rem',
+                  color: 'black'
+                }}
+              >
+                {isAllRowsExpanded ? (
+                  <FaAngleDown
+                    className="cursor-pointer text-[var(--primary-text)]"
+                    onClick={() => {
+                      toggleAllRowsExpanded(false);
+                    }}
+                  />
+                ) : (
+                  <FaAngleRight
+                    className="cursor-pointer text-[var(--primary-text)]"
+                    onClick={() => {
+                      toggleAllRowsExpanded(true);
+                    }}
+                  />
+                )}
+              </span>
+            ),
+            sticky: 'left',
+            width: isMobile && !isTablet ? 40 : 70,
+            minWidth: isMobile && !isTablet ? 40 : 70,
+            disableFilters: true,
+            disableSortBy: true,
+            canDrag: false,
+            Cell: ({ row }) => (
+              <div
+                {...row.getToggleRowExpandedProps?.({
+                  style: {
+                    marginLeft: isMobileView ? 0 : `${row.depth * 15}px`
+                  }
+                })}
+              >
+                {row.original.type === 'folder' || row.canExpand ? (
+                  <IconButton size="small" style={{ fontSize: 13 }}>
+                    {row.isExpanded ? (
+                      <FaAngleDown />
+                    ) : (
+                      <FaAngleRight
+                        onClick={async () => {
+                          if (!fetchChildAttachment || row.original[childrenProperty]?.length > 0) return;
+                          const subRows = await fetchChildAttachment(row.original.id);
+                          row.original.subRows = subRows;
+                          row.canExpand = true;
+                          row.isExpanded = true;
+                        }}
+                      />
+                    )}
+                  </IconButton>
+                ) : null}
+              </div>
+            )
+          }
+        ]
         : []),
       ...(!hideSelection
         ? [
-            {
-              accessor: 'selection',
-              id: 'selection',
-              minWidth: 50,
-              width: 50,
-              sticky: 'left',
-              maxWidth: 50,
-              disableFilters: true,
-              disableSortBy: true,
-              canDrag: false,
-              Header: ({ getToggleAllRowsSelectedProps }) => (
-                <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} className="mx-auto text-center" />
-              ),
-              Cell: ({ row }) => (
-                <div className="mx-auto text-center justify-center">
-                  {row.original.hideSelection ? <></> : <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />}
-                </div>
-              )
-            }
-          ]
+          {
+            accessor: 'selection',
+            id: 'selection',
+            minWidth: 50,
+            width: 50,
+            sticky: 'left',
+            maxWidth: 50,
+            disableFilters: true,
+            disableSortBy: true,
+            canDrag: false,
+            Header: ({ getToggleAllRowsSelectedProps }) => (
+              <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} className="mx-auto text-center" />
+            ),
+            Cell: ({ row }) => (
+              <div className="mx-auto text-center justify-center">
+                {row.original.hideSelection ? <></> : <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />}
+              </div>
+            )
+          }
+        ]
         : []),
       ...baseColumns.map((m) => {
         return m.canFilter === false || m.disableFilters === true
@@ -432,14 +434,14 @@ function CustomReactTable({
     []
   );
 
-  const updateData = () => {};
+  const updateData = () => { };
 
   const getDataFromLocalStorage = () => {
     try {
       const data = localStorage.getItem('gridMetaData');
-      return data && data !== 'undefined' ? JSON.parse(data) : {};
+      return data && data !== 'undefined' ? JSON.parse(data) : false;
     } catch (ex) {
-      return {};
+      return false;
     }
   };
 
@@ -523,12 +525,12 @@ function CustomReactTable({
         const colOrder = [...(expander ? ['expander'] : []), ...(!hideSelection ? ['selection'] : []), ...gridMetaData[renderedFrom]?.order];
         setColumnOrder(colOrder);
       } else {
-        setColumnOrder(newColumns.map((m) => m?.accessor));
+        setColumnOrder(newColumns.map((m) => m?.id ?? m?.accessor));
       }
     } catch (ex) {
       console.error(`Error while getting stored data from local storage - ${renderedFrom}`);
     }
-  }, []);
+  }, [newColumns]);
 
   useEffect(() => {
     rows.forEach((d) => {
@@ -595,6 +597,10 @@ function CustomReactTable({
     // setSelectedRow([...notIncludedRow, ...flatSelectedData]);
   }, [selectedRowIds, renderedFrom]);
 
+  const {
+    state: { user }
+  }: any = useData();
+
   const reorder = (item: any, newIndex: number) => {
     const { index: currentIndex } = item;
 
@@ -618,9 +624,22 @@ function CustomReactTable({
       (a, b) => newOrderedColumns.findIndex((d) => d === a.accessor) - newOrderedColumns.findIndex((d) => d === b.accessor)
     );
 
-    setColumnOrder(newOrderedColumns);
+    const newcolumnOrderToSave = newBaseColumns
+      ?.filter((o) => o?.sticky === undefined && !['expander', 'selection', 'action']?.includes(o?.accessor))
+      ?.map((o) => o?.accessor);
+
     setBaseColumns(newBaseColumns);
+
+    updateGridHiddenColumns({
+      renderedFrom,
+      user,
+      columnOrder: newcolumnOrderToSave,
+      callback: () => {
+        setColumnOrder(newOrderedColumns);
+      }
+    });
   };
+
 
   const submitInput = () => {
     if (!currentEditingCellPosition) return;
@@ -696,7 +715,7 @@ function CustomReactTable({
                   renderedFrom={renderedFrom}
                   setHiddenColumns={setHiddenColumns}
                   getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
-                  defaultColumns={allColumns}
+                  defaultColumns={newColumns}
                   setColumnOrder={setColumnOrder}
                 />
               </>
@@ -829,9 +848,8 @@ function CustomReactTable({
                               <TableCell
                                 key={index2}
                                 {...cellProps}
-                                className={`td p-0 [&>*]:h-[45px] [&>*]:flex [&>*]:items-center [&>*]:p-[5px_8px] h-[45px]  ${
-                                  cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''
-                                }    ${setWholeRowsCellColor ? setWholeRowsCellColor(row.original) : ''}`}
+                                className={`td p-0 [&>*]:h-[45px] [&>*]:flex [&>*]:items-center [&>*]:p-[5px_8px] h-[45px]  ${cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''
+                                  }    ${setWholeRowsCellColor ? setWholeRowsCellColor(row.original) : ''}`}
                                 onClick={() => {
                                   handleCellClick(cell, row);
                                 }}
@@ -840,8 +858,8 @@ function CustomReactTable({
                                 }}
                               >
                                 {!['selection'].includes(cell?.column.id) &&
-                                currentEditingCellPosition?.rowId === row.original._id &&
-                                currentEditingCellPosition?.columnName === cell?.column.id ? (
+                                  currentEditingCellPosition?.rowId === row.original._id &&
+                                  currentEditingCellPosition?.columnName === cell?.column.id ? (
                                   <div className="w-full">
                                     <input
                                       title={`Edit-${cell.id}`}
@@ -1055,7 +1073,7 @@ const DraggableHeader: React.FC<DraggableHeaderProps> = ({ column, index, reorde
           </div>
           {column.isSorted ? column.isSortedDesc ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" /> : ''}
         </div>
-        {column?.columnFilterable && column?.id !== 'action'  ? (
+        {column?.columnFilterable && column?.id !== 'action' ? (
           <div>
             {canFilter ? (
               !isClientSideGrid ? (
