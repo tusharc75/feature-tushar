@@ -21,17 +21,12 @@ import routes from '../../components/Helpers/Routes';
 import SearchBox from '../../components/Helpers/SearchBox';
 import CreateProduct from '../../components/Product/CreateProduct';
 import ImportExportLinks from '../../components/Product/ImportExportLinks';
-import {
-  gridLoadingTimeout,
-  prepareDataForGrid,
-  product,
-  sidebarResource
-} from '../../constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, product, sidebarResource } from '../../constants/helpers';
 import styles from '../Leads/Header.module.scss';
-import AddRepairType from './RepairType/AddRepairTypes';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { childDisable, cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
 
 const ignoreField = ['qty', 'priceTemplate'];
 
@@ -50,8 +45,7 @@ const Product = () => {
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [columns, setColumns] = useState(null);
 
-  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } =
-    state;
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   const [productCategoryList, setProductCategoryList] = useState([]);
   const [productTemplateList, setProductTemplateList] = useState([]);
@@ -93,9 +87,8 @@ const Product = () => {
     }
   }, [productCategory]);
 
-
   useEffect(() => {
-    fetchGridColumns()
+    fetchGridColumns();
   }, []);
 
   useEffect(() => {
@@ -134,7 +127,7 @@ const Product = () => {
         columns = [...columns];
         setProductColumns(columns);
       });
-  }
+  };
 
   const ActionsRenderer = {
     accessor: 'action',
@@ -147,7 +140,7 @@ const Product = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip title={permissions?.product?.isCreate ? "Clone" : cloneDisable}>
+        <HtmlTooltip title={permissions?.product?.isCreate ? 'Clone' : cloneDisable}>
           <span>
             <IconButton
               disabled={permissions?.product.isCreate ? false : true}
@@ -159,12 +152,12 @@ const Product = () => {
                 setIsClone(true);
               }}
             >
-              <FileCopyIcon fontSize="small" color={permissions?.product?.isCreate ? "primary" : "disabled"} />
+              <FileCopyIcon fontSize="small" color={permissions?.product?.isCreate ? 'primary' : 'disabled'} />
             </IconButton>
           </span>
         </HtmlTooltip>
 
-        <HtmlTooltip title={permissions?.product?.isDelete ? "Delete" : deleteDisable}>
+        <HtmlTooltip title={permissions?.product?.isDelete ? 'Delete' : deleteDisable}>
           <span>
             <IconButton
               disabled={permissions?.product.isDelete ? false : true}
@@ -175,12 +168,12 @@ const Product = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color={permissions?.product.isDelete ? "error" : "disabled"} />
+              <DeleteIcon color={permissions?.product.isDelete ? 'error' : 'disabled'} />
             </IconButton>
           </span>
         </HtmlTooltip>
-        {(permissions?.serializedAsset?.isRead || permissions?.productionOrder?.isRead) &&
-          <HtmlTooltip title={permissions?.product?.isUpdate ? "Child Product" : childDisable}>
+        {(permissions?.serializedAsset?.isRead || permissions?.productionOrder?.isRead) && (
+          <HtmlTooltip title={permissions?.product?.isUpdate ? 'Child Product' : childDisable}>
             <span>
               <IconButton
                 disabled={permissions?.product?.isUpdate ? false : true}
@@ -190,14 +183,14 @@ const Product = () => {
                   history.push(`${routes.productDetail.path}/${row?.original._id}/bom`, { productName: row?.original.productName });
                 }}
               >
-                <RiBillLine color={permissions?.product?.isUpdate ? "primary" : "disabled"} />
+                <RiBillLine color={permissions?.product?.isUpdate ? 'primary' : 'disabled'} />
               </IconButton>
             </span>
           </HtmlTooltip>
-        }
+        )}
       </>
     )
-  }
+  };
 
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
@@ -215,9 +208,7 @@ const Product = () => {
           GenrateColoum(ele.fields, columns);
         });
         // make columns unique
-        columns = columns.filter(
-          (item, index, self) => index === self.findIndex((t) => t.accessor === item.accessor)
-        );
+        columns = columns.filter((item, index, self) => index === self.findIndex((t) => t.accessor === item.accessor));
         columns = [...columns, ...getStaticFields()];
         setColumns([...columns, ActionsRenderer]);
         dispatch({ type: 'initialize', data: rows, count: data?.count });
@@ -398,7 +389,6 @@ const Product = () => {
       });
   };
 
-
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -429,10 +419,7 @@ const Product = () => {
             },
             {
               title: 'Child Product Export',
-              api: `${product.api}/unknown/bom/template?export=true${selectedRecords.length
-                ? `&ids=${selectedRecords.map((obj) => obj._id)}`
-                : ''
-                }`,
+              api: `${product.api}/unknown/bom/template?export=true${selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''}`,
               type: 'export'
             },
             {
@@ -447,10 +434,9 @@ const Product = () => {
             },
             {
               title: 'Service/Consumable Export',
-              api: `${product.api}/unknown/service-master/template?export=true${selectedRecords.length
-                ? `&ids=${selectedRecords.map((obj) => obj._id)}`
-                : ''
-                }`,
+              api: `${product.api}/unknown/service-master/template?export=true${
+                selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''
+              }`,
               type: 'export'
             },
             {
@@ -465,10 +451,9 @@ const Product = () => {
             },
             {
               title: 'Service Package Export',
-              api: `${product.api}/unknown/package/template?export=true${selectedRecords.length
-                ? `&ids=${selectedRecords.map((obj) => obj._id)}`
-                : ''
-                }`,
+              api: `${product.api}/unknown/package/template?export=true${
+                selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''
+              }`,
               type: 'export'
             },
             {
@@ -657,15 +642,21 @@ const Product = () => {
             setOpen(false);
             fetchData();
           }}
-          isRedirectToDetailPage={true} openFrom="productMaster" />
+          isRedirectToDetailPage={true}
+          openFrom="productMaster"
+        />
       )}
       {openAddDialog && (
-        <AddRepairType
-          handleSubmit={handleSubmit}
+        <AssignDynamicDialog
+          resource={sidebarResource?.repairType}
+          onSuccess={(data) => {
+            handleSubmit(data?.map((d) => d?._id));
+          }}
+          handleClose={() => {
+            setOpenAddDialog(false);
+          }}
+          ids={[]}
           isSubmitting={isSubmitting}
-          renderedFrom={`${renderedFrom}_repair-type_grid-1`}
-          close={() => setOpenAddDialog(false)}
-          exisitingIds={[]}
         />
       )}
       {showDeleteConfirmBox && (

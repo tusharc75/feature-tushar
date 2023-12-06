@@ -38,6 +38,8 @@ import CloseIcon from '@material-ui/icons/Close';
 import { RiFileShredFill } from 'react-icons/ri';
 import Diagram from './Diagram';
 import { ExpandMore } from '@material-ui/icons';
+import { VscVersions } from 'react-icons/vsc';
+import Versions from './VersionDialogBox';
 
 const WorkOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -64,6 +66,7 @@ const WorkOrderDetails = () => {
 
 
   const [showConfirmVersion, setShowConfirmVersion] = useState({ open: false, withData: 0 });
+  const [versionDialog, setVersionDialog] = useState(false);
 
   const columns = [
     { accessor: 'serviceName', Header: 'Service' },
@@ -273,6 +276,21 @@ const WorkOrderDetails = () => {
                     <ExpandMore fontSize="small" />
                   </Button>
                 )}
+                {workOrderData?.versions?.length &&
+                  <Button
+                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                    color="primary"
+                    size="small"
+                    className={'btn-outline-v1'}
+                    onClick={() => {
+                      setVersionDialog(true)
+                    }}
+                    style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                    startIcon={isMobile && !isTablet ? null : <VscVersions />}
+                  >
+                    {isMobile && !isTablet ? <VscVersions size={20} /> : `Versions : ${workOrderData?.versions?.length + 1}`}
+                  </Button>
+                }
                 <Menu
                   anchorEl={addAnchorEl}
                   keepMounted
@@ -476,6 +494,16 @@ const WorkOrderDetails = () => {
           onSuccess={() => {
             fetchWorkOrderData();
             setOpenUpdateDialog(false);
+          }}
+        />
+      )}
+
+      {versionDialog && (
+        <Versions
+          workOrderId={id}
+          workOrderData={workOrderData}
+          handleClose={() => {
+            setVersionDialog(false)
           }}
         />
       )}

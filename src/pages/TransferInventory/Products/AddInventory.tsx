@@ -47,19 +47,21 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
         accessor: 'qty',
         Header: 'Quantity',
         show: true,
-        disabled: false,
         Cell: ({ row }) => <div>{row.original.qty}</div>,
         editable: true,
-        filter: false
+        disableFilters: true,
+        disableSortBy: true,
+        canDrag: false,
       },
       {
         accessor: 'inventory',
         Header: 'Inventory',
         show: true,
-        disabled: false,
         Cell: ({ row }) => <div>{row.original.inventory}</div>,
         editable: false,
-        filter: false
+        disableFilters: true,
+        disableSortBy: true,
+        canDrag: false,
       }
     );
     setColumns([...columns, ...getStaticFields()]);
@@ -127,7 +129,7 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
     }
 
     if (showFilteredRecordsOnly) {
-      deepFilter = `${deepFilter}&getById=${selectedRecords?.filter((e) => !e?.hideSelection)?.map((m) => m._id)}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(selectedRecords?.filter((e) => !e?.hideSelection)?.map((m) => m._id))}`;
     }
 
     if (sorting.length > 0) {

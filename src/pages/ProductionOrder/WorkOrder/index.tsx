@@ -318,6 +318,8 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
+
     const queryString = getQueryString();
     setNextStep(false);
     const {
@@ -358,7 +360,6 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       setNextStep(true);
     }
     dispatch({ type: 'initialize', data: rows, count: count });
-    dispatch({ type: 'selection', selectedRecords: [] });
     dispatch({ type: 'loading', loading: false });
   };
 
@@ -788,7 +789,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         <>
           <Box zIndex={5} width={'100%'}>
             <CustomReactTable
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
+              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
               columns={columns}
               state={state}
               setWholeRowsCellColor={(rowData) => (rowData.type === 'service' ? 'isService' : '')}

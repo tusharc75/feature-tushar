@@ -15,7 +15,6 @@ const History = ({ id }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer();
-  const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
 
   const columns = [
     {
