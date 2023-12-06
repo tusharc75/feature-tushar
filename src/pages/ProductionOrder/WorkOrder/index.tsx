@@ -163,6 +163,11 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
           )
       },
       {
+        accessor: 'status',
+        Header: 'Status',
+        Cell: ({ row }) => (row.original['status'] ? <p> {row.original.status}</p> : <NoDataCell />)
+      },
+      {
         accessor: 'workOrderStatus',
         Header: 'Result',
         Cell: ({ row }) => (row?.original['workOrderStatus'] ? <h5> {row?.original?.workOrderStatus}</h5> : <NoDataCell />)

@@ -7,7 +7,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTableNew';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { CHILD_RESOURCE, MATERIAL_TYPE, WORK_ORDER_STATUS, productionOrder, sidebarResource } from '../../../constants/helpers';
-import { startCase } from 'lodash';
+import { orderBy, startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { generateCustomTableColumns } from 'src/constants/columns';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
@@ -113,6 +113,11 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
           )
       },
       {
+        accessor: 'status',
+        Header: 'Status',
+        Cell: ({ row }) => (row.original['status'] ? <p> {row.original.status}</p> : <NoDataCell />)
+      },
+      {
         accessor: 'workOrderStatus',
         Header: 'Result',
         width: 200,
@@ -209,15 +214,15 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
       parent.detail = parent.detail
         ? parent.detail
         : parent.type === MATERIAL_TYPE.service
-        ? parent?.serviceDetail?.serviceName
-        : parent.type === MATERIAL_TYPE.product
-        ? parent.productDetail?.productName
-        : parent.packageDetail?.packageName;
+          ? parent?.serviceDetail?.serviceName
+          : parent.type === MATERIAL_TYPE.product
+            ? parent.productDetail?.productName
+            : parent.packageDetail?.packageName;
       parent.description = parent.description
         ? parent.description
         : parent.type === MATERIAL_TYPE.product
-        ? parent?.productDetail?.productDescription
-        : parent?.packageDetail?.packageDescription;
+          ? parent?.productDetail?.productDescription
+          : parent?.packageDetail?.packageDescription;
       parent.qty = parent.qty;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
       if (parent?.workOrder?.status === WORK_ORDER_STATUS.completed) {
@@ -230,7 +235,8 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
   };
 
   const generateNestedData = (material, parent) => {
-    const subRows: any = material.filter((e) => e?.parentId === parent?._id);
+    var subRows: any = material.filter((e) => e?.parentId === parent?._id);
+    subRows = orderBy(subRows, ['type'], ['desc']);
     let productIndex = 0;
     let serviceIndex = 0;
     subRows.forEach((_subRow, index) => {
@@ -239,14 +245,14 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceName
           : _subRow.type === MATERIAL_TYPE.product
-          ? _subRow.productDetail?.productName
-          : _subRow.packageDetail?.packageName;
+            ? _subRow.productDetail?.productName
+            : _subRow.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription
           : _subRow.type === MATERIAL_TYPE.product
-          ? _subRow?.productDetail?.productDescription
-          : _subRow?.packageDetail?.packageDescription;
+            ? _subRow?.productDetail?.productDescription
+            : _subRow?.packageDetail?.packageDescription;
       _subRow.qty = _subRow.qty;
       _subRow.workOrder = parent?.workOrder;
       _subRow.workOrderNumber = parent?.workOrder?.workOrderNumber;
