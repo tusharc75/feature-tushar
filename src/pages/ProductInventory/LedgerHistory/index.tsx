@@ -153,7 +153,7 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
               }
             }
           ]
-        : null),
+        : []),
       {
         accessor: 'supplierPartNumber',
         Header: 'Supplier Part Number',
