@@ -145,6 +145,8 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
         pricingMethodOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`]?.pricingMethod);
       }
       setPriceMethodList(pricingMethodOptions);
+      console.log(pricingMethodOptions)
+
       let pricingConditionOptions = await getPricing(rowData, pricingMethodOptions);
       data.forEach((element) => {
         if (rowData?.type === 'serializedAsset') {
@@ -176,10 +178,10 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
           if (element.fieldName === 'pricingMethod') {
             element.option = pricingMethodOptions;
           }
-          if (element.fieldName === 'pricingCondition') {
-            if (Array.isArray(pricingConditionOptions)) {
-              element.option = pricingConditionOptions;
-            }
+        }
+        if (element.fieldName === 'pricingCondition') {
+          if (Array.isArray(pricingConditionOptions)) {
+            element.option = pricingConditionOptions;
           }
         }
       });
@@ -482,8 +484,10 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
                                                   })
                                               );
                                               let priceFieldName = 'price_' + quotationData?.currency?.toLowerCase();
+                                              const priceValue = priceConditionListConst
+                                                ?.find((d) => d.conditionId === value)
                                               const result = autoCalculateSpecificFields(
-                                                { [priceFieldName]: 0, [field.fieldName]: value },
+                                                { [priceFieldName]: priceValue?.mrp, [field.fieldName]: value },
                                                 values,
                                                 initialData.fields
                                               );
