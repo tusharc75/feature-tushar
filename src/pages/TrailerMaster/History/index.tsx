@@ -1,9 +1,8 @@
 import { useEffect, useContext, Fragment } from 'react';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { Link } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
 import axiosInstance from 'src/axios/axiosInstance';
 import { Box } from '@material-ui/core';
 import { camelCase } from 'lodash';
@@ -15,7 +14,6 @@ const History = ({ id, status }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer();
-  const { rowCount, page, limit, search, filters, sorting, selectedRecords } = state;
 
   const columns = [
     {

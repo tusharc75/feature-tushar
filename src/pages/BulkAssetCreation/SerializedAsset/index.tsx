@@ -46,12 +46,13 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, allowedToEdit, s
         });
         columns = [...columns, ...getStaticFields()];
         setColumns([...columns]);
-        fetchData();
       });
   };
 
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
+
     const queryString = getQueryString();
     axiosInstance()
       .get(`${serializedAsset.api}${queryString}`)
@@ -128,7 +129,6 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, allowedToEdit, s
             module="packages-products"
             api={`${serializedAsset.api}/custom-template`}
             afterImportCompleted={() => {
-              dispatch({ type: 'selection', selectedRecords: [] });
               fetchData();
             }}
             isExportAllOrSomeFeature={true}
@@ -136,7 +136,6 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, allowedToEdit, s
             recordsToExport={selectedRecords?.length}
             ids={selectedRecords?.map((obj) => obj._id)}
             onExportToExcelSuccess={() => {
-              dispatch({ type: 'selection', selectedRecords: [] });
               fetchData();
             }}
             isDownloadExcel={false}
