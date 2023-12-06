@@ -156,7 +156,6 @@ const IrtTicket = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        {console.log(row)}
         <HtmlTooltip title={permissions?.irtTicket?.isCreate ? "Clone" : cloneDisable}  >
           <span>
             <IconButton

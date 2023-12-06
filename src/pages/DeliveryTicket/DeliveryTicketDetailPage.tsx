@@ -635,7 +635,7 @@ export default function DeliveryTicketDetail(props) {
                 referenceId={deliveryTicketData?._id}
                 hideDetailButton={true}
                 fileName={`${routes.deliveryTicket.title}-${deliveryTicketData?.ticketName}`}
-                columns={columns?.filter((e) => ['assetNumber', 'product', 'productDescription'].includes(e.field))}
+                columns={columns?.filter((e) => ['assetNumber', 'product', 'productDescription'].includes(e.accessor))}
               />
               <ActivityButton
                 referenceId={deliveryTicketData?._id}
