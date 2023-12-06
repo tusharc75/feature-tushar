@@ -295,6 +295,8 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
   const handleAdd = async (rows) => {
     setSubmitting(true);
     const material: any = [];
+    const isTrailerNumber = allFields?.find((e) => e?.fieldName === 'trailerNumber');
+
     await asyncForEach(rows, async (d) => {
       const qty = d.qty ? parseFloat(d.qty) : 1;
       await asyncForEach(Array.from(Array(qty).keys()), async (i: any) => {
@@ -304,6 +306,9 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
         element.unit = d?.unitMain && d?.unitMain?.length ? d.unitMain[0] : d?.unit ? d?.unit : '';
         element.qty = 1;
         element.parentId = addDialog.parentId;
+        if (isTrailerNumber && productionOrderData?.trailerNumber) {
+          element.trailerNumber = productionOrderData.trailerNumber;
+        }
         material.push(element);
       });
     });
