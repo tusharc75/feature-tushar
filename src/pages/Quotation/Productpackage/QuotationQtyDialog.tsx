@@ -482,8 +482,10 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
                                                   })
                                               );
                                               let priceFieldName = 'price_' + quotationData?.currency?.toLowerCase();
+                                              const priceValue = priceConditionListConst
+                                                ?.find((d) => d.conditionId === value)
                                               const result = autoCalculateSpecificFields(
-                                                { [priceFieldName]: 0, [field.fieldName]: value },
+                                                { [priceFieldName]: priceValue?.mrp, [field.fieldName]: value },
                                                 values,
                                                 initialData.fields
                                               );
