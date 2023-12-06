@@ -157,7 +157,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                     OpenInNewWindow(routes.purchaseOrder.path);
                   }}
                 >
-                  <OpenInNewIcon fontSize="small" color={'primary'} />
+                  <LibraryBooksIcon fontSize="small" color={'primary'} />
                 </IconButton>
               </HtmlTooltip>
             )}
