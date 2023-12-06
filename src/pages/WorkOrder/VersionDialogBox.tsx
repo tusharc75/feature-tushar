@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
@@ -13,11 +13,13 @@ import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import startCase from 'lodash/startCase';
 import { isMobile } from 'react-device-detect';
+import { orderBy } from 'lodash';
 
 const Versions = ({ workOrderId, workOrderData, handleClose }) => {
+  const { state, dispatch } = useTableReducer();
+
   const [fullScreen, setFullScreen] = useState(true);
   const [columns, setColumns] = useState(null);
-  const [rowsData, setRowsData] = useState(null);
   const [selectedVersion, setSelectedVersion] = useState(workOrderData?.versions[0]?._id);
 
   useEffect(() => {
@@ -53,7 +55,7 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
         Header: 'Index',
         width: 70,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
       },
       {
         accessor: 'type',
@@ -103,49 +105,130 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.qty || <NoDataCell />}</p>
       },
       {
-        accessor: 'order',
-        Header: 'Order',
+        accessor: 'status',
+        Header: 'Status',
         width: 200,
-        Cell: ({ row }) => <p className="text-truncate">{row?.original?.order || <NoDataCell />}</p>
+        Cell: ({ row }) => <p className="text-truncate">{row?.original?.status || <NoDataCell />}</p>
       },
       {
-        accessor: 'consumedQty',
-        Header: 'Consumed Qty',
+        accessor: 'assignedUsers',
+        Header: 'Assigned Technician',
         width: 200,
-        Cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
+        Cell: ({ row }) =>
+          row?.original['assignedUsers'] && row?.original['assignedUsers']?.length ? (
+            row?.original['assignedUsers']?.map((e, i) => {
+              return i === row?.original['assignedUsers'].length - 1 ? (
+                <a
+                  className="link text-truncate [flex-grow:0_!important]"
+                  target="_blank"
+                  href={`${routes.userDetail.path}/${e.optionValue}`}
+                  rel="noreferrer"
+                >
+                  {e?.optionLabel}
+                </a>
+              ) : (
+                <>
+                  <a
+                    className="link text-truncate [flex-grow:0_!important]"
+                    target="_blank"
+                    href={`${routes.userDetail.path}/${e.optionValue}`}
+                    rel="noreferrer"
+                  >
+                    {e?.optionLabel},
+                  </a>
+                  &nbsp;
+                </>
+              );
+            })
+          ) : (
+            <NoDataCell />
+          )
       },
       {
-        accessor: 'requestedQty',
-        Header: 'Requested Qty',
-        width: 200,
-        Cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
+        accessor: 'assignedWorkStations',
+        Header: 'Assigned Work Station',
+        canFilter: true,
+        Cell: ({ row }) =>
+          row?.original['assignedWorkStations'] && row?.original['assignedWorkStations']?.length ? (
+            row?.original['assignedWorkStations']?.map((e, i) => {
+              return i === row?.original['assignedWorkStations'].length - 1 ? (
+                <a
+                  className="link text-truncate [flex-grow:0_!important]"
+                  target="_blank"
+                  href={`${routes.workStationsDetail.path}/${e.optionValue}`}
+                  rel="noreferrer"
+                >
+                  {e?.optionLabel}
+                </a>
+              ) : (
+                <>
+                  <a
+                    className="link text-truncate [flex-grow:0_!important]"
+                    target="_blank"
+                    href={`${routes.workStationsDetail.path}/${e.optionValue}`}
+                    rel="noreferrer"
+                  >
+                    {e?.optionLabel},
+                  </a>
+                  &nbsp;
+                </>
+              );
+            })
+          ) : (
+            <NoDataCell />
+          )
       },
       {
         accessor: 'unit',
         Header: 'Unit',
         width: 200,
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.unit || <NoDataCell />}</p>
-      },
-      {
-        accessor: 'pricingMethod',
-        Header: 'Pricing Method',
-        width: 200,
-        Cell: ({ row }) => <p className="text-truncate">{row?.original?.pricingMethod || <NoDataCell />}</p>
       }
     ];
     setColumns([...cols, ...columns]);
   };
 
+  const generateNestedData = (material, parent) => {
+    var subRows: any = material.filter((e) => e?.parentId === parent?._id);
+    subRows = orderBy(subRows, ['type'], ['desc']);
+    subRows?.forEach((_subRow, index) => {
+      _subRow.index = parent.index + '.' + (index + 1);
+      _subRow.unit = _subRow?.detail?.unit?.join(', ') || '';
+      _subRow.description =
+        _subRow?.type === MATERIAL_TYPE.service
+          ? _subRow?.detail?.serviceDescription
+          : _subRow?.type === MATERIAL_TYPE.product
+          ? _subRow?.detail?.productDescription
+          : _subRow?.type === MATERIAL_TYPE.package
+          ? _subRow?.detail?.packageDescription
+          : '';
+      _subRow.materialId = _subRow?.detail?._id;
+      _subRow.detail =
+        _subRow?.type === MATERIAL_TYPE.service
+          ? _subRow?.detail?.serviceName
+          : _subRow?.type === MATERIAL_TYPE.product
+          ? _subRow?.detail?.productName
+          : _subRow?.type === MATERIAL_TYPE.package
+          ? _subRow?.detail?.packageName
+          : '';
+      _subRow.subRows = generateNestedData(material, _subRow);
+    });
+    return subRows;
+  };
+
   const fetchData = async () => {
-    const version = await axiosInstance().get(`${workOrder.api}/get-version-detail/${workOrderId}/${selectedVersion}`);
-    const versionData = version.data.data;
+    dispatch({ type: 'loading', loading: true });
+    const {
+      data: { data }
+    } = await axiosInstance().get(`${workOrder.api}/get-version-detail/${workOrderId}/${selectedVersion}`);
 
-    const material = versionData[0]?.material || [];
+    const material = data?.material;
 
-    material?.forEach((parent, i) => {
+    let rows = material.filter((e) => e?.parentId == null);
+
+    rows?.forEach((parent, i) => {
       parent.index = i + 1;
       parent.unit = parent?.detail?.unit?.join(', ') || '';
-      parent.pricingMethod = parent?.detail?.pricingMethod?.join(', ') || '';
       parent.description =
         parent?.type === MATERIAL_TYPE.service
           ? parent?.detail?.serviceDescription
@@ -163,8 +246,11 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
           : parent?.type === MATERIAL_TYPE.package
           ? parent?.detail?.packageName
           : '';
+      parent.subRows = generateNestedData(material, parent);
     });
-    setRowsData(material);
+
+    dispatch({ type: 'initialize', data: material, count: material?.length || 0 });
+    dispatch({ type: 'loading', loading: false });
   };
 
   return (
@@ -201,10 +287,7 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
                   className="cursor-pointer"
                   borderColor="var(--common-border-color)"
                   onClick={() => {
-                    if (selectedVersion !== v?._id) {
-                      setRowsData(null);
-                      setSelectedVersion(v?._id);
-                    }
+                    if (selectedVersion !== v?._id) setSelectedVersion(v?._id);
                   }}
                   style={{ display: 'inline-block' }}
                   bgcolor={v?._id === selectedVersion ? 'var(--dark-primary, var(--primary))' : 'var(--dark-secondary, transparent)'}
@@ -214,20 +297,18 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
                 </Box>
               ))}
           </Box>
-          {rowsData && columns ? (
+          {columns ? (
             <Box zIndex={5} width={'100%'} mt={2}>
               <CustomReactTable
                 height={'calc(100vh - 200px)'}
                 columns={columns}
-                data={rowsData}
-                onSelect={() => {}}
-                childrenProperty="subRows"
-                uniqueKey="_id"
+                state={state}
+                dispatch={dispatch}
                 hideSelection={true}
+                refreshGrid={fetchData}
                 hideAction={true}
                 renderedFrom={'workOrder_versions'}
                 isClientSideGrid={true}
-                hideExpander={true}
               />
             </Box>
           ) : (
