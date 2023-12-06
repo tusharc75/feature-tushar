@@ -149,8 +149,7 @@ const AssignProductDialog = ({
 
   const getQueryString = () => {
     const ignoreIds = ids && ids?.length > 0 ? ids : [];
-    // let deepFilter = `?page=${page}&limit=${limit}&ignoreIds=${JSON.stringify(ignoreIds)}`;
-    let deepFilter = `?page=${page}&limit=${limit}`;
+    let deepFilter = `?page=${page}&limit=${limit}&ignoreIds=${JSON.stringify(ignoreIds)}`;
 
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;

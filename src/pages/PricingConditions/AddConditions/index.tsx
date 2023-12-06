@@ -426,7 +426,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
           onSuccess={(product) => {
             handleAdd(product);
           }}
-          ids={condition?.filter(c => c?.materialType === addMaterialDialog.materialType)?.map((e) => e.materialId)}
+          //ids={condition?.filter(c => c?.materialType === addMaterialDialog.materialType)?.map((e) => e.materialId)}
           isSubmitting={isSubmitting}
           hideQty={true}
         />
@@ -439,7 +439,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
           handleClose={() => {
             setAddMaterialDialog({ open: false, materialType: '' });
           }}
-          ids={condition?.filter(c => c?.materialType === addMaterialDialog.materialType)?.map((e) => e.materialId)}
+          //ids={condition?.filter(c => c?.materialType === addMaterialDialog.materialType)?.map((e) => e.materialId)}
           isSubmitting={isSubmitting}
           hideQty={true}
         />
@@ -452,7 +452,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
           handleClose={() => {
             setAddMaterialDialog({ open: false, materialType: '' });
           }}
-          ids={condition?.filter(c => c?.materialType === addMaterialDialog.materialType)?.map((e) => e.materialId)}
+          //ids={condition?.filter(c => c?.materialType === addMaterialDialog.materialType)?.map((e) => e.materialId)}
           isSubmitting={isSubmitting}
           hideQty={true}
         />
