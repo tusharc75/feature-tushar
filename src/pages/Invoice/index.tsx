@@ -371,6 +371,7 @@ const Invoice = () => {
                       onClose={closeActions}
                     >
                       <MenuItem
+                        disabled={!selectedRecords?.every((d) => d?.canDelete)}
                         onClick={() => {
                           closeActions();
                           showConfirmBox();
