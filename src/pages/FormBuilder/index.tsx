@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext} from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import Grid from '@material-ui/core/Grid';
 import { Link } from 'react-router-dom';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
@@ -36,13 +36,15 @@ const FormBuilder = () => {
         width: 120,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) =>
-          row?.original?.resource ? (
-            <Link className="text-truncate link" to={'/form-builder/' + row?.original?.resource}>
-              {row?.original?.resource}
-            </Link>
-          ) : (
-            <NoDataCell />
-          )
+          <div>
+            {row?.original?.resource ? (
+              <Link className="text-truncate link" to={'/form-builder/' + row?.original?.resource}>
+                {row?.original?.resource}
+              </Link>
+            ) : (
+              <NoDataCell />
+            )}
+          </div>
       },
       {
         accessor: 'resourceLabel',
@@ -64,7 +66,7 @@ const FormBuilder = () => {
         Header: 'Section',
         width: 120,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => (row?.original?.section? <p className="text-truncate">{row?.original?.section}</p>: <NoDataCell />)
+        Cell: ({ row }) => (row?.original?.section ? <p className="text-truncate">{row?.original?.section}</p> : <NoDataCell />)
       }
     ];
     setColumns(columns);
