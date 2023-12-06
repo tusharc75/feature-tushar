@@ -211,8 +211,9 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
   };
 
   async function getPricing(values: any, pricingMethodOptions: any = null) {
+    const isPricingMethod = allFields?.find((e) => e.fieldName === 'pricingMethod')
     if (rowData) {
-      if (values?.qty > 0 && values?.pricingMethod !== '' && values?.unit !== '') {
+      if (values?.qty > 0 && values?.unit !== '' && (!isPricingMethod || values?.pricingMethod !== '')) {
         const priceData: any = await calculatePrice([
           {
             materialId: rowData.materialId,
@@ -463,12 +464,12 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
                                             field.fieldName === 'pricingMethod' && priceConditionList && values['pricingCondition']
                                               ? priceMethodList
                                               : field.fieldName === 'pricingCondition' && values['pricingMethod']
-                                              ? priceConditionList
-                                              : field.option
+                                                ? priceConditionList
+                                                : field.option
                                           }
                                           onChange={(e, val) => {
                                             const value = val && val.optionValue ? val.optionValue : '';
-                                            if (field.fieldName === 'pricingCondition') {
+                                            if (field.fieldName === 'pricingCondition' && initialData.fields?.find((e) => e.fieldName === 'pricingMethod')) {
                                               setFieldValue('pricingMethod', '');
                                               setPriceMethodList(
                                                 priceConditionListConst
