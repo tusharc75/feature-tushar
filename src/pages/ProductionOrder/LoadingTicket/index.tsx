@@ -73,7 +73,7 @@ const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, rende
       deliveryTicketList?.map((obj) => {
         if (obj.ticketType === DELIVERY_TICKET_TYPE.loading) {
           rows.map((d, index) => {
-            if (obj?.products?.some((p) => d?.materialId === p?.product)) {
+            if (obj?.products?.some((p) => d?.materialId === p?.product && d?._id === p?.uniqueId)) {
               rows[index]['loadingTicket'] = obj?.ticketName;
               rows[index]['loadingTicketId'] = obj?._id;
               rows[index]['loadingTicketStatus'] = obj?.status;
@@ -306,7 +306,7 @@ const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, rende
                   disabled={
                     selectedRecords?.length === 0 ||
                     selectedRecords?.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !==
-                      selectedRecords?.length
+                    selectedRecords?.length
                   }
                   onClick={() => {
                     handelProcessTickets();
@@ -349,7 +349,7 @@ const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, rende
           referenceData={showTicketDialog.data}
           onClose={() => setShowTicketDialog({ open: false, data: {} })}
           productInventory={[]}
-          products={selectedRecords?.map((e) => ({ ...e, _id: e?.materialId }))}
+          products={selectedRecords?.map((e) => ({ _id: e?.materialId, qty: e?.qty || 1, uniqueId: e._id }))}
           onSuccess={() => {
             setShowTicketDialog({ open: false, data: {} });
             fetchRecords();
