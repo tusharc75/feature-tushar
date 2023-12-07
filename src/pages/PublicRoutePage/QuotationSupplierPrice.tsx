@@ -1,18 +1,16 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axios from 'axios';
 import { backendApi } from '../../config';
 import { Box, Button, Divider, makeStyles } from '@material-ui/core';
-import { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import { downloadExcel, gridLoadingTimeout, prepareDataForGrid } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { getFrameworkComponents } from '../../constants/useColumns';
-import { CommonRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
-import CustomAgGridEditable from 'src/components/AgGridComponents/CustomAgGridEditable';
 import { sortBy } from 'lodash';
 import DetailsPage from 'src/components/Shared/DetailsPage';
 import { FaDiceOne } from 'react-icons/fa';
 import axiosInstance from 'src/axios/axiosInstance';
+import { generateCustomTableColumns } from 'src/constants/columns';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
 
 let levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
 
@@ -62,24 +60,17 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.info.dark
   }
 }));
-
-const displayColumns = ['qty'];
-
 const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
   let renderedFrom = 'QuotationSupplierPrice';
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting } = state;
+  const { state, dispatch } = useTableReducer();
   const [columns, setColumns] = useState(null);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [productData, setProductData] = useState([]);
   const [productArray, setProductArray] = useState([]);
   const [requireFieldArray, setRequireFieldArray] = useState([]);
   const [quotationDetailsData, setQuotationDetailsData] = useState(null);
   const [isSubmited, setIsSubmited] = useState(false);
-  const [disabledSubmitButton, setDisabledSubmitButton] = useState(true);
 
   const quotationFields = [
     {
@@ -146,9 +137,6 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
 
   const fetchProduct = () => {
     dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
     axios
       .get(backendApi + `/quotation/supplier-price-request/supplier-price-response/${quotationData?.data?.requestId}`)
       .then(({ data: { data } }) => {
@@ -185,27 +173,43 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
             primaryField: true
           }
         ];
-        let rendererNames = [];
+
         let fields = [];
+        let tempProductData = [];
         data.products?.forEach((ele) => {
           fields = [...fields, ...ele.fields];
-        });
-        setRequireFieldArray(data?.requiredFields);
-        GenrateColoum(
-          [...new Map(fields.map((item) => [item['_id'], item])).values()],
-          columns,
-          rendererNames,
-          data?.requiredFields,
-          rows,
-          data?.quotation
-        );
+          ele?.fields?.forEach((field) => {
+            const currencyField: any = field?.type === 'currencyAmount' ? {
+              ...ele,
+              fieldName: ele.fieldName + '_' + quotationData.currency.toLowerCase()
+            } : {};
 
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          commonRenderer: CommonRenderer,
-          ...tempFrameworkComponent
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
+            rows.forEach((data) => {
+              if (data[currencyField?.fieldName]) {
+                let productIndex = tempProductData.findIndex((d) => d._id === data?.uniqueId);
+                let tempData = {
+                  _id: data?.uniqueId,
+                  [currencyField?.fieldName]: parseInt(data[currencyField?.fieldName] === '' ? 0 : data[currencyField?.fieldName]),
+                  [`price_${quotationData?.currency.toLowerCase()}`]: parseInt(data[currencyField?.fieldName] === '' ? 0 : data[currencyField?.fieldName])
+                };
+                if (productIndex === -1) {
+                  tempProductData = [...tempProductData, tempData];
+                } else {
+                  tempProductData[productIndex][currencyField?.fieldName] = tempData[currencyField?.fieldName];
+                  tempProductData[productIndex][`price_${quotationData?.currency.toLowerCase()}`] = tempData[currencyField?.fieldName];
+                }
+                setProductData(tempProductData);
+              }
+            });
+          })
+
+          const filteredFields = ele?.fields?.filter((e) => data?.requiredFields.includes(e.fieldName));
+          const newColumns = generateCustomTableColumns(filteredFields, quotationData.currency, renderedFrom,);
+          columns = [...columns, ...newColumns];
+        });
+        console.log('columns', columns)
+        setRequireFieldArray(data?.requiredFields);
+
         columns = sortBy(columns, function (item: any) {
           return levalOrderBy.indexOf(item.leval);
         });
@@ -221,116 +225,15 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
       });
   };
 
-  const GenrateColoum = (fields, column, rendererNames, requiredFields, rows, quotation) => {
-    let _fields = fields;
-    let tempProductData = [];
-    _fields.forEach((ele) => {
-      if (displayColumns.includes(ele.fieldName) || requiredFields.includes(ele.fieldName)) {
-        if (ele.type === 'converter' || ele.type === 'currencyAmount' || ele.isConverter === true) {
-          if (ele.type !== 'currencyAmount' && (ele.type === 'converter' || ele.isConverter === true)) {
-            ele.displayUnits.forEach((_unit) => {
-              let fieldName = ele.fieldName + '_' + _unit.toLowerCase();
-              let fieldLabel = ele.fieldLabel + ' ' + _unit;
-              if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-                let col: any = {};
-                col.field = fieldName;
-                col.headerName = fieldLabel;
-                col.width = 180;
-                col.show = true;
-                col.disabled = false;
-                col.leval = ele.leval;
-                col.cellRenderer = 'commonRenderer';
-                column.push(col);
-              }
-            });
-          } else if (ele.type === 'currencyAmount' && (ele.type === 'converter' || ele.isConverter === true)) {
-            ele.displayUnits.forEach((_unit) => {
-              ele.displayCurrency.forEach((_currency) => {
-                let fieldName = ele.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase();
-                let fieldLabel = ele.fieldLabel + ' ' + _unit + '/' + _currency;
-                if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-                  let col: any = {};
-                  col.field = fieldName;
-                  col.headerName = fieldLabel;
-                  col.width = 180;
-                  col.show = true;
-                  col.disabled = false;
-                  col.leval = ele.leval;
-                  col.cellRenderer = 'commonRenderer';
-                  column.push(col);
-                }
-              });
-            });
-          } else if (ele.type === 'currencyAmount') {
-            ele.displayCurrency.forEach((_currency) => {
-              let fieldName = ele.fieldName + '_' + _currency.toLowerCase();
-              let fieldLabel = ele.fieldLabel + ' ' + _currency;
-              if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-                let col: any = {};
-                col.field = fieldName;
-                col.headerName = fieldLabel;
-                col.width = 180;
-                col.show = true;
-                col.disabled = false;
-                col.leval = ele.leval;
-                col.cellRenderer = 'commonRenderer';
-                if (requiredFields.includes(ele.fieldName)) {
-                  col.cellEditor = 'numericCellEditor';
-                  col.editable = true;
-                  rows.forEach((data) => {
-                    if (data[fieldName]) {
-                      let productIndex = tempProductData.findIndex((d) => d._id === data?.uniqueId);
-                      let tempData = {
-                        _id: data?.uniqueId,
-                        [fieldName]: parseInt(data[fieldName] === '' ? 0 : data[fieldName]),
-                        [`price_${quotation?.currency.toLowerCase()}`]: parseInt(data[fieldName] === '' ? 0 : data[fieldName])
-                      };
-                      if (productIndex === -1) {
-                        tempProductData = [...tempProductData, tempData];
-                      } else {
-                        tempProductData[productIndex][fieldName] = tempData[fieldName];
-                        tempProductData[productIndex][`price_${quotation?.currency.toLowerCase()}`] = tempData[fieldName];
-                      }
-                    }
-                  });
-                  setProductData(tempProductData);
-                }
-                column.push(col);
-              }
-            });
-          }
-        } else {
-          if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
-            let col: any = {};
-            if (
-              ele.type === 'decimal' ||
-              ele.type === 'percent' ||
-              ele.type === 'singleLine' ||
-              ele.type === 'multiLine' ||
-              ele.type === 'multiSelect'
-            ) {
-              col.field = ele.fieldName;
-              col.headerName = ele.fieldLabel;
-              col.width = 180;
-              col.show = true;
-              col.disabled = false;
-              col.leval = ele.leval;
-              col.cellRenderer = 'commonRenderer';
-              column.push(col);
-            }
-          }
-        }
-      }
-    });
-  };
-
-  const onCellValueChanged = (row) => {
+  const onCellValueChanged = (data, row) => {
+    const col = Object.keys(data)[0]
+    const value = data[col]
     let tempFieldsNumber = [];
-    let productIndex = productData.findIndex((d) => d._id === row.data?.uniqueId);
+    let productIndex = productData.findIndex((d) => d._id === row?.uniqueId);
     let tempData = {
-      _id: row.data?.uniqueId,
-      [row?.column?.colId]: parseInt(row?.data[row?.column?.colId] === '' ? 0 : row?.data[row?.column?.colId]),
-      [`price_${quotationDetailsData?.currency.toLowerCase()}`]: parseInt(row?.data[row?.column?.colId] === '' ? 0 : row?.data[row?.column?.colId])
+      _id: row?.uniqueId,
+      [col]: parseInt(row[col] === '' ? 0 : row[col]),
+      [`price_${quotationDetailsData?.currency.toLowerCase()}`]: parseInt(row[col] === '' ? 0 : row[col])
     };
     if (productIndex === -1) {
       setProductData((prevState) => [...prevState, tempData]);
@@ -338,7 +241,7 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
       let tempProductData = productData;
       tempProductData[productIndex][`price_${quotationDetailsData?.currency.toLowerCase()}`] =
         tempData[`price_${quotationDetailsData?.currency.toLowerCase()}`];
-      tempProductData[productIndex][row?.column?.colId] = tempData[row?.column?.colId];
+      tempProductData[productIndex][col] = tempData[col];
       setProductData(tempProductData);
     }
   };
@@ -507,26 +410,22 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
                 </div>
               </div>
               {columns ? (
-                <CustomAgGridEditable
+                <CustomReactTable
+                  height={'calc(100vh - 200px)'}
                   columns={columns}
-                  dataRows={dataRows}
-                  frameworkComponents={frameWorkComponent}
-                  setGridApi={setGridApi}
+                  onSelect={() => { }}
+                  state={state}
                   dispatch={dispatch}
-                  rowCount={rowCount}
-                  limit={limit}
-                  pageSizes={pageSizes}
-                  page={page}
-                  allowAction={false}
-                  loading={loading}
-                  allowSelection={false}
-                  refreshGrid={fetchProduct}
                   renderedFrom={renderedFrom}
-                  isClientSideGrid={true}
-                  onCellValueChanged={onCellValueChanged}
+                  refreshGrid={fetchProduct}
+                  onSaveEdit={onCellValueChanged}
+                  showOnlyShowFilteredRecordSwitch={true}
+                  isClientSideGrid={false}
+                  hideAction={false}
+                  hideSelection={false}
                 />
               ) : (
-                <Box p={2}>
+                <Box p={2} height={500}>
                   <CommonSkeleton lenArray={[...Array(10).keys()]} />
                 </Box>
               )}
