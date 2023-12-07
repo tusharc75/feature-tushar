@@ -1,16 +1,16 @@
-import React, { useState, useEffect, useContext, Fragment, useReducer } from 'react';
-import { Grid, Box, IconButton, Tooltip, Chip } from '@material-ui/core';
+import React, { useState, useEffect, useContext, Fragment } from 'react';
+import { Box, IconButton } from '@material-ui/core';
 import axiosInstance from 'src/axios/axiosInstance';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { gridLoadingTimeout, isObjectEmpty } from 'src/constants/helpers';
-import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
-import { CommonRenderer, ImageRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
 import { MdAddShoppingCart } from 'react-icons/md';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import { prepareDataForGrid } from '../../../constants/helpers';
 import { Link } from 'react-router-dom';
+import { Image } from '@material-ui/icons';
 import routes from '../../../components/Helpers/Routes';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 
@@ -20,57 +20,86 @@ const ProductGridLayout = ({ renderedFrom, setAssignCartProductQty, plantId, sea
   const {
     state: { user, permissions }
   }: any = useData();
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const [columns,setColumns] = useState([]);
+  const { state, dispatch } = useTableReducer();
+  const { page, limit, search, filters, sorting } = state;
 
-  const columns = [
-    { field: 'productName', headerName: 'Product Name', show: true, disabled: true, cellRenderer: 'productNameRenderer' },
-    {
-      field: 'availableInventory',
-      headerName: 'Inventory',
-      show: true,
-      filter: false,
-      sortable: false,
-      disabled: true,
-      cellRenderer: 'commonRenderer'
-    },
-    { field: 'productCategory', headerName: 'Product Category', show: false, cellRenderer: 'commonRenderer' },
-    { field: 'productImage', headerName: 'Product Image', show: false, cellRenderer: 'imageRenderer' }
-  ];
+  useEffect(() => {
+    fetchGridColumns();
+  }, [])
 
-  const ProductNameRenderer = (params) =>
-    params?.value ? (
-      <Link className="link text-truncate" title={params.value} to={`${routes.posProductDetail.path}/${params.data?._id}/${params.data?.plantId}`}>
-        {params.value}
-      </Link>
-    ) : (
-      <NoDataCell />
-    );
+  const fetchGridColumns = ()=>{
+    let columns = [
+      {
+        accessor: 'productName',
+        Header: 'Product Name',
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original?.productName ? <Link className="link text-truncate" title={row?.original?.productName} to={`${routes.posProductDetail.path}/${row?.original?._id}/${row?.original?.plantId}`}>
+          {row.original?.productName}
+        </Link>: <NoDataCell />;
+        }
+      },
+      {
+        accessor: 'availableInventory',
+        Header: 'Available Inventory',
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original?.availableInventory ? <p className="text-truncate">{row.original.availableInventory}</p> : <NoDataCell />;
+        }
+      },
+      // {
+      //   accessor: 'productCategory',
+      //   Header: 'Product Category',
+      //   isVisible: false,
+      //   width: 200,
+      //   Cell: ({ row }) => {
+      //     return row.original?.productCategory ? <p className="text-truncate">{row.original.productCategory}</p> : <NoDataCell />;
+      //   }
+      // },
+      // {
+      //   accessor: 'productImage',
+      //   Header: 'Product Image',
+      //   show: false,
+      //   width: 200,
+      //   Cell: ({ row }) => {
+      //     return row?.original?.productImage ? <div><Avatar className="grid-avatar" src={row?.original?.productImage}>
+      //     <Image style={{ fontSize: 18 }} />
+      //   </Avatar> </div> : <NoDataCell />;
+      //   }
+      // },
+      ActionsRenderer
+    ]
+    setColumns(columns);
+  }
 
-  const ActionsRenderer = (params) => (
-    <HtmlTooltip title={params?.data?.availableInventory ? 'Add to cart' : 'No inventory'}>
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 110,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+       <HtmlTooltip title={row?.original?.availableInventory ? 'Add to cart' : 'No inventory'}>
       <span>
         <IconButton
           size="small"
-          disabled={!params.data?.availableInventory || params.data?.availableInventory === 0}
+          disabled={!row?.original?.availableInventory || row?.original?.availableInventory === 0}
           aria-label="Add to cart"
           onClick={() => {
-            setAssignCartProductQty(params.data);
+            setAssignCartProductQty(row?.original);
           }}
-          color={params?.data?.availableInventory ? 'secondary' : 'inherit'}
+          color={row?.original?.availableInventory ? 'secondary' : 'inherit'}
         >
           <MdAddShoppingCart />
         </IconButton>
       </span>
     </HtmlTooltip>
-  );
-
-  const frameWorkComponent = {
-    commonRenderer: CommonRenderer,
-    imageRenderer: ImageRenderer,
-    productNameRenderer: ProductNameRenderer,
-    actionsRenderer: ActionsRenderer
+      </>)
   };
 
   useEffect(() => {
@@ -106,7 +135,7 @@ const ProductGridLayout = ({ renderedFrom, setAssignCartProductQty, plantId, sea
       deepFilter = deepFilter + '&filterById=' + JSON.stringify(filterById) + '&filterType=and';
     }
     if (search) {
-      deepFilter = `${deepFilter}&search=${search}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     return deepFilter;
   };
@@ -114,9 +143,6 @@ const ProductGridLayout = ({ renderedFrom, setAssignCartProductQty, plantId, sea
   const fetchProducts = () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
     let api = `/pos?wareHouse=${plantId}${queryString}`;
     axiosInstance()
       .get(api)
@@ -139,41 +165,25 @@ const ProductGridLayout = ({ renderedFrom, setAssignCartProductQty, plantId, sea
       });
   };
 
-  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
-  if (columnState) {
-    columns.forEach((item) => {
-      columnState.forEach((d) => {
-        if (d.colId === item.field) {
-          item.show = !d.hide;
-        }
-      });
-    });
-  }
+  
 
   return (
     <Fragment>
-      {columns && frameWorkComponent ? (
-        <CustomAgGrid
-          columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameWorkComponent}
-          setGridApi={setGridApi}
-          dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          actionWidth={100}
-          loading={loading}
-          renderedFrom={renderedFrom}
-          refreshGrid={fetchProducts}
-          allowSelection={false}
-        />
-      ) : (
-        <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>
-      )}
+       {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            refreshGrid={fetchProducts}
+            hideSelection = {true}
+          />
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
     </Fragment>
   );
 };
