@@ -1,16 +1,15 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
+import { useState, useEffect, useContext, Fragment } from 'react';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
 import { Box, CircularProgress } from '@material-ui/core';
 import SearchBox from '../../../components/Helpers/SearchBox';
-import CustomAgGrid, { reducer, intialState } from '../../../components/AgGridComponents/CustomAgGrid';
-import { gridLoadingTimeout, CustomDialogTransition, isObjectEmpty, prepareDataForGrid, getLocalStorageArrayData } from '../../../constants/helpers';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import { gridLoadingTimeout, CustomDialogTransition, isObjectEmpty, prepareDataForGrid, sidebarResource } from '../../../constants/helpers';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import Dialog from '@material-ui/core/Dialog/Dialog';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import useColumns, { getStaticFields, getFrameworkComponents } from '../../../constants/useColumns';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
 import { camelCase } from 'lodash';
@@ -19,23 +18,17 @@ let searchTimeout;
 
 const WarhouseList = ({ api, isCustomer = false, addWarehouse, onClose, isAddingWarehouse, assignedWarehouse }) => {
   const renderedFrom = camelCase(routes?.warehouse?.title);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
-
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { selectedEntity }
   }: any = useData();
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
+  const { state, dispatch } = useTableReducer();
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { getColumnData } = useColumns();
-
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, showFilteredRecordsOnly } = state;
-
   const [columns, setColumns] = useState(null);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
 
   useEffect(() => {
-    localStorage.removeItem(localStorageSelectedRecords);
+    dispatch({ type: 'selection', selectedRecords: [] });
     fetchGridColumns();
   }, []);
 
@@ -47,13 +40,14 @@ const WarhouseList = ({ api, isCustomer = false, addWarehouse, onClose, isAdding
     searchTimeout = setTimeout(() => {
       fetchMaterial();
     }, millisec);
-  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
+  }, [search]);
+
+  useEffect(() => {
+    fetchMaterial();
+  }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchMaterial = () => {
     dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
     const queryString = getQueryString();
     axiosInstance()
       .get(`${api}${queryString}`)
@@ -81,8 +75,7 @@ const WarhouseList = ({ api, isCustomer = false, addWarehouse, onClose, isAdding
     const ignoreIds = assignedWarehouse && assignedWarehouse?.length > 0 ? assignedWarehouse : [];
     let deepFilter = `?page=${page}&limit=${limit}&ignoreIds=${JSON.stringify(ignoreIds)}`;
     if (showFilteredRecordsOnly) {
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
     }
     const updatedFilters = [];
 
@@ -106,29 +99,20 @@ const WarhouseList = ({ api, isCustomer = false, addWarehouse, onClose, isAdding
     return deepFilter;
   };
 
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get('/field?resource=Warehouse')
-      .then(({ data: { data } }) => {
-        let columns = [];
-        let rendererNames = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes?.warehouseDetail?.path);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName);
-            }
-          }
-        });
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
-        columns = [...columns, ...getStaticFields()];
-        setColumns([...columns]);
-      });
+  const fetchGridColumns = async () => {
+    let data;
+    const response = await axiosInstance().get(`/field?resource=${sidebarResource.warehouse}`);
+    data = response?.data?.data;
+    let columns = [];
+    data.forEach((o) => {
+      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.warehouseDetail.path, true);
+      if (currentColumn !== null) {
+        columns = [...columns, currentColumn?.columnData];
+      }
+      return o?.fieldData;
+    });
+    columns = [...columns, ...getStaticFields()];
+    setColumns(columns);
   };
 
   const handleSearch = (e) => {
@@ -149,44 +133,32 @@ const WarhouseList = ({ api, isCustomer = false, addWarehouse, onClose, isAdding
                     size="small"
                     color="primary"
                     onClick={() => {
-                      addWarehouse(getLocalStorageArrayData(`${localStorageSelectedRecords}`));
+                      addWarehouse(selectedRecords);
                     }}
                     variant="contained"
-                    disabled={!getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length || isAddingWarehouse}
+                    disabled={!selectedRecords?.length || isAddingWarehouse}
                     endIcon={isAddingWarehouse && <CircularProgress size={20} color="primary" />}
                   >
-                    Assign{' '}
-                    {getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-                      ? ' (' + getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length + ')'
-                      : ''}
+                    Assign {selectedRecords?.length ? ' (' + selectedRecords?.length + ')' : ''}
                   </Button>
                 </Box>
               </Grid>
             </Grid>
           </Box>
           {columns ? (
-            <CustomAgGrid
-              columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameWorkComponent}
-              setGridApi={setGridApi}
-              dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              allowAction={false}
-              loading={loading}
-              allowSelection={true}
-              showOnlyShowFilteredRecordSwitch={true}
-              refreshGrid={fetchMaterial}
-              renderedFrom={renderedFrom}
-            />
-          ) : (
-            <Box p={2} height={500}>
-              <CommonSkeleton lenArray={[...Array(10).keys()]} />
-            </Box>
-          )}
+          <CustomReactTable
+            height={'calc(100vh - 250px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            refreshGrid={fetchMaterial}
+            showOnlyShowFilteredRecordSwitch={true}
+            resource={sidebarResource.warehouse}
+          />
+        ) : <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>}
         </div>
       </Dialog>
     </Fragment>

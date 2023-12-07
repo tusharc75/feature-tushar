@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext, useReducer, Fragment } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import Grid from '@material-ui/core/Grid';
 import { Link } from 'react-router-dom';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
@@ -6,61 +6,76 @@ import routes from './../../components/Helpers/Routes';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomContainer from '../../components/CustomContainer';
-import { FaWpforms } from 'react-icons/fa';
-import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
 import { gridLoadingTimeout } from '../../constants/helpers';
-import { useHistory } from 'react-router-dom';
-import { isMobile, isTablet } from 'react-device-detect';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { CommonRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
+import { isMobile } from 'react-device-detect';
 import { Box, Button } from '@material-ui/core';
 import styles from './Header.module.scss';
 import ArrangeView from './ArrangeView';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
 
 const FormBuilder = () => {
   const renderedFrom = 'form-builder';
-
   const toastConfig = useContext(CustomToastContext);
-  const history = useHistory();
-
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
+  const { state, dispatch } = useTableReducer();
+  const { page, limit } = state;
   const [arrangeViewOpen, setArrangeViewOpen] = useState(false);
   const [resource, setResource] = useState([]);
+  const [columns, setColumns] = useState([]);
 
-  const columns = [
-    { field: 'resource', headerName: 'Resource', show: false, cellRenderer: 'commonRenderer' },
-    { field: 'resourceLabel', headerName: 'Resource Label', show: true, disabled: true, cellRenderer: 'resourceRenderer' },
-    { field: 'homePageLabel', headerName: 'Home Page Label', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    { field: 'section', headerName: 'Section', show: true, disabled: true }
-  ];
+  useEffect(() => {
+    fetchGridColumns();
+  }, []);
 
-  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
-  if (columnState) {
-    columns?.forEach((item) => {
-      columnState?.forEach((d) => {
-        if (d.colId === item.field) {
-          item.show = !d.hide;
-        }
-      });
-    });
-  }
+  const fetchGridColumns = () => {
+    const columns = [
+      {
+        accessor: 'resource',
+        Header: 'Resource',
+        width: 120,
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) =>
+          <div>
+            {row?.original?.resource ? (
+              <Link className="text-truncate link" to={'/form-builder/' + row?.original?.resource}>
+                {row?.original?.resource}
+              </Link>
+            ) : (
+              <NoDataCell />
+            )}
+          </div>
+      },
+      {
+        accessor: 'resourceLabel',
+        Header: 'Resource Label',
+        width: 120,
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => (row?.original?.resourceLabel ? <p className="text-truncate">{row?.original?.resourceLabel}</p> : <NoDataCell />)
+      },
 
-  const ResourceRenderer = (params) => (
-    <Link className="link" to={'/form-builder/' + params.data.resource}>
-      {params.data.resourceLabel}
-    </Link>
-  );
+      {
+        accessor: 'homePageLabel',
+        Header: 'Home Page Label',
+        width: 120,
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => (row?.original?.homePageLabel ? <p className="text-truncate">{row?.original?.homePageLabel}</p> : <NoDataCell />)
+      },
+      {
+        accessor: 'section',
+        Header: 'Section',
+        width: 120,
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => (row?.original?.section ? <p className="text-truncate">{row?.original?.section}</p> : <NoDataCell />)
+      }
+    ];
+    setColumns(columns);
+  };
 
   useEffect(() => {
     fetchGetBrandResource();
   }, []);
 
-  const frameworkComponents = {
-    commonRenderer: CommonRenderer,
-    resourceRenderer: ResourceRenderer
-  };
   const closeHandler = () => {
     setArrangeViewOpen(false);
     fetchGetBrandResource();
@@ -68,9 +83,6 @@ const FormBuilder = () => {
 
   const fetchGetBrandResource = () => {
     dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
     axiosInstance()
       .get(`/sa-formbuilder/resource?allResource=true`)
       .then(({ data: { data } }) => {
@@ -113,23 +125,22 @@ const FormBuilder = () => {
           </Grid>
         </Grid>
         {arrangeViewOpen && <ArrangeView open={arrangeViewOpen} close={closeHandler} resourceData={resource} />}
-        <CustomAgGrid
-          columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameworkComponents}
-          setGridApi={setGridApi}
-          dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          allowAction={false}
-          allowSelection={false}
-          isClientSideGrid={true}
-          loading={loading}
-          refreshGrid={fetchGetBrandResource}
-          renderedFrom={renderedFrom}
-        />
+        {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 250px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            refreshGrid={fetchGetBrandResource}
+            isClientSideGrid={true}
+            hideSelection={true}
+          />
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
       </CustomContainer>
     </section>
   );

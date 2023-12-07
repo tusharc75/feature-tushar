@@ -1,51 +1,50 @@
-import { useState, useEffect, useContext, useReducer } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
 import { Box } from '@material-ui/core';
-import CustomAgGrid, { reducer, intialState } from '../../../components/AgGridComponents/CustomAgGrid';
-import {
-  gridLoadingTimeout,
-  prepareDataForGrid,
-  deliveryTicket
-} from '../../../constants/helpers';
+import CustomReactTable, { useColumns, getStaticFields, useTableReducer } from 'src/components/CustomReactTableNew';
+import { gridLoadingTimeout, prepareDataForGrid, deliveryTicket } from '../../../constants/helpers';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import useColumns, { getStaticFields, getFrameworkComponents } from '../../../constants/useColumns';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
 import { findOne, objectStore } from 'src/constants/indexdbhelper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
-import { isMobile, isTablet } from 'react-device-detect';
-import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
 
 const DeliveryTicketProduct = ({ renderedFrom, deliveryTicketId }) => {
   const toastConfig = useContext(CustomToastContext);
-
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting } = state;
-  const [columns, setColumns] = useState(null);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
-  const {
-    state: { user, permissions }
-  }: any = useData();
   const { isOffline } = useContext(CustomOfflineContext);
+
+  const { state, dispatch } = useTableReducer();
+
+  const [columns, setColumns] = useState(null);
+  const {
+    state: { user }
+  }: any = useData();
   const { getColumnData } = useColumns();
 
-  const defaultColumns = [{ field: 'qty', headerName: 'Qty', show: true, order: 1, disabled: true, cellRenderer: 'commonRenderer' }];
+  const defaultColumns = [
+    {
+      accessor: 'qty',
+      Header: 'Qty',
+      order: 1,
+      disabled: true,
+      canFilter: true,
+      Cell: ({ row }) => (row?.original?.qty ? <h5>{row?.original?.qty}</h5> : <NoDataCell />)
+    }
+  ];
+
   useEffect(() => {
     fetchGridColumns();
   }, []);
 
   useEffect(() => {
     fetchProduct();
-  }, [page, limit, filters, sorting, search]);
+  }, []);
 
   const fetchProduct = async () => {
     try {
       dispatch({ type: 'loading', loading: true });
-      if (gridApi) {
-        gridApi.setRowData([]);
-      }
       let data;
       if (isOffline) {
         const deliveryTicket = await findOne(objectStore.deliveryTicket, deliveryTicketId);
@@ -87,73 +86,28 @@ const DeliveryTicketProduct = ({ renderedFrom, deliveryTicketId }) => {
       fields = response?.data?.data;
     }
     let columns = [];
-    let rendererNames = [];
     fields.forEach((o) => {
       let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path);
       if (currentColumn !== null) {
         columns = [...columns, currentColumn?.columnData];
-        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-          rendererNames.push(currentColumn?.rendererName);
-        }
       }
     });
-    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-    tempFrameworkComponent = {
-      ...tempFrameworkComponent
-    };
-    setFrameWorkComponent({ ...tempFrameworkComponent });
-    columns = [...columns, ...getStaticFields()];
     setColumns([...defaultColumns, ...columns]);
   };
 
   return (
     <Box mt={2}>
-      {isMobile && !isTablet ? (
-        <CustomSwipableList
-          allowSelection={false}
-          allowSwipe={false}
-          permissions={permissions}
-          primaryField={columns?.find((d) => d.field === 'productName')}
-          onClick={(data) => { }}
-          selectedRecords={[]}
-          dataRows={dataRows}
-          dispatch={dispatch}
-          onEdit={() => { }}
-          extraParamsToCheckDelete={true}
-          onDelete={() => { }}
-          rowCount={rowCount}
-          page={page}
-          loading={loading}
-          onCreate={null}
-          showClone={false}
-          fullHeight={true}
-          renderedFrom={renderedFrom}
-          onClone={() => { }}
-          chips={[
-            {
-              label: 'Qty: ',
-              field: 'qty'
-            }
-          ]}
-        />
-      ) : columns ? (
-        <CustomAgGrid
+      {columns ? (
+        <CustomReactTable
+          height={'calc(100vh - 150px)'}
           columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameWorkComponent}
-          setGridApi={setGridApi}
+          state={state}
           dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          allowAction={false}
-          loading={loading}
-          allowSelection={false}
-          showOnlyShowFilteredRecordSwitch={true}
-          refreshGrid={fetchProduct}
           renderedFrom={renderedFrom}
+          refreshGrid={fetchProduct}
           isClientSideGrid={true}
+          hideSelection={true}
+          hideAction={true}
         />
       ) : (
         <Box p={2} height={500}>

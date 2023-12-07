@@ -38,6 +38,8 @@ import CloseIcon from '@material-ui/icons/Close';
 import { RiFileShredFill } from 'react-icons/ri';
 import Diagram from './Diagram';
 import { ExpandMore } from '@material-ui/icons';
+import { VscVersions } from 'react-icons/vsc';
+import Versions from './Versions';
 
 const WorkOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -61,6 +63,10 @@ const WorkOrderDetails = () => {
 
   const [showConfirmBoxScrap, setShowConfirmBoxScrap] = useState(false);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
+
+
+  const [showConfirmVersion, setShowConfirmVersion] = useState({ open: false, withData: 0 });
+  const [versionDialog, setVersionDialog] = useState(false);
 
   const columns = [
     { accessor: 'serviceName', Header: 'Service' },
@@ -200,20 +206,18 @@ const WorkOrderDetails = () => {
     setAddAnchorEl(null);
   };
 
-  const createVersion = async (dataFlag: Boolean = false) => {
-    try {
-      let api = `${workOrder.api}/create-version/${id}`;
-      api += dataFlag ? '/withData' : '';
-      const { data } = await axiosInstance().put(api);
+  const createVersion = (withData) => {
+    axiosInstance().put(`${workOrder.api}/${id}/version`, { withData }).then(({ data }) => {
       toastConfig.setToastConfig({
         open: true,
         type: 'success',
         message: data.message
       });
       fetchWorkOrderData();
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
+    })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   };
 
   return (
@@ -260,20 +264,33 @@ const WorkOrderDetails = () => {
                       </HtmlTooltip>
                     </div>
                   )}
-                {permissions?.workOrder?.isUpdate && allowedToEdit && (
-                  <div className="relative isolate ">
-                    <Button
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      size="small"
-                      className={'btn-outline-v1 '}
-                      onClick={openAddActions}
-                      aria-controls="add-menu"
-                    >
-                      {'Create Version'}
-                      <ExpandMore fontSize="small" />
-                    </Button>
-                  </div>
+                {permissions?.workOrder?.isUpdate && allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.completed && (
+                  <Button
+                    variant={'contained'}
+                    size="small"
+                    className={'btn-outline-v1'}
+                    onClick={openAddActions}
+                    aria-controls="add-menu"
+                  >
+                    {'Create Version'}
+                    <ExpandMore fontSize="small" />
+                  </Button>
                 )}
+                {workOrderData?.versions?.length &&
+                  <Button
+                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                    color="primary"
+                    size="small"
+                    className={'btn-outline-v1'}
+                    onClick={() => {
+                      setVersionDialog(true)
+                    }}
+                    style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                    startIcon={isMobile && !isTablet ? null : <VscVersions />}
+                  >
+                    {isMobile && !isTablet ? <VscVersions size={20} /> : `Versions : ${workOrderData?.versions?.length + 1}`}
+                  </Button>
+                }
                 <Menu
                   anchorEl={addAnchorEl}
                   keepMounted
@@ -288,19 +305,19 @@ const WorkOrderDetails = () => {
                 >
                   <MenuItem
                     onClick={() => {
-                      createVersion(true);
                       closeAddActions();
-                    }}
-                  >
-                    With Existing Data
-                  </MenuItem>
-                  <MenuItem
-                    onClick={() => {
-                      createVersion();
-                      closeAddActions();
+                      setShowConfirmVersion({ open: true, withData: 0 });
                     }}
                   >
                     Without Existing Data
+                  </MenuItem>
+                  <MenuItem
+                    onClick={() => {
+                      closeAddActions();
+                      setShowConfirmVersion({ open: true, withData: 1 });
+                    }}
+                  >
+                    With Existing Data
                   </MenuItem>
                 </Menu>
                 <PreviewDownload
@@ -453,6 +470,21 @@ const WorkOrderDetails = () => {
           }}
         />
       )}
+
+      {showConfirmVersion.open && (
+        <ConfirmationDialog
+          open={showConfirmVersion.open}
+          message={`Are you sure you want to new version ?`}
+          onClose={() => {
+            setShowConfirmVersion({ open: false, withData: 0 });
+          }}
+          onOk={() => {
+            createVersion(showConfirmVersion.withData)
+            setShowConfirmVersion({ open: false, withData: 0 });
+          }}
+        />
+      )}
+
       {openUpdateDialog && (
         <ManageWorkOrder
           workOrderId={id}
@@ -462,6 +494,15 @@ const WorkOrderDetails = () => {
           onSuccess={() => {
             fetchWorkOrderData();
             setOpenUpdateDialog(false);
+          }}
+        />
+      )}
+      {versionDialog && (
+        <Versions
+          workOrderId={id}
+          workOrderData={workOrderData}
+          handleClose={() => {
+            setVersionDialog(false)
           }}
         />
       )}

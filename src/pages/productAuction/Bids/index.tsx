@@ -1,20 +1,55 @@
-import { useState, useReducer, useEffect } from 'react';
-import CustomAgGrid, { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
-import { gridLoadingTimeout } from 'src/constants/helpers';
-import { CommonRenderer, DateTimeRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
+import { useState, useEffect } from 'react';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import { dateTimeFormat, gridLoadingTimeout } from 'src/constants/helpers';
+import { isMobile } from 'react-device-detect';
+import moment from 'moment';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { Box } from '@material-ui/core';
 
 const BidsPage = ({ bids }) => {
-
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const [gridApi, setGridApi] = useState(null);
-
-  const { dataRows, rowCount, page, limit, pageSizes } = state;
+  const { state, dispatch } = useTableReducer();
+  const [columns, setColumns] = useState(null)
+  useEffect(() => {
+    fetchGridColumns();
+  }, [])
+  
+  const fetchGridColumns = ()=>{
+    const columns = [
+      {
+        accessor: 'user',
+        Header: 'User',
+        width: 120,
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => <p className="text-truncate">{row?.original?.user}</p>
+      },
+      {
+        accessor: 'amount',
+        Header: 'Amount',
+        width: 120,
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => <p className="text-truncate">{row?.original?.amount}</p>
+      },
+      
+      {
+        accessor: 'date',
+        Header: 'Date',
+        width: 120,
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => (
+          <p
+            className="text-truncate"
+          >
+            {moment(row?.original?.date)?.format(dateTimeFormat)}
+          </p>
+        )
+      },
+      
+    ]
+    setColumns(columns)
+  }
 
   useEffect(() => {
     dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
     bids?.forEach(element => {
       element.user = element?.user?.firstName + ` ` + element?.user?.lastName
     });
@@ -26,36 +61,28 @@ const BidsPage = ({ bids }) => {
     setTimeout(() => {
       dispatch({ type: 'loading', loading: false });
     }, gridLoadingTimeout);
-  }, []);
-
-  const columns = [
-    { field: "user", headerName: "User", show: true, cellRenderer: "commonRenderer" },
-    { field: "amount", headerName: "Amount", show: true, cellRenderer: "commonRenderer" },
-    { field: "date", headerName: "Date", show: true, cellRenderer: "dateTimeRenderer" },
-  ]
-
-  const frameworkComponents = {
-    commonRenderer: CommonRenderer,
-    dateTimeRenderer: DateTimeRenderer
-  };
+  },[])
 
   return (
-    <CustomAgGrid
-      setGridApi={setGridApi}
-      columns={columns}
-      dataRows={dataRows}
-      frameworkComponents={frameworkComponents}
-      dispatch={dispatch}
-      rowCount={rowCount}
-      limit={limit}
-      pageSizes={pageSizes}
-      page={page}
-      allowAction={false}
-      loading={false}
-      allowSelection={false}
-      refreshGrid={() => { }}
-      showOnlyShowFilteredRecordSwitch={false}
-    />
+    <>
+     {columns ? (
+      <CustomReactTable
+        height={'calc(100vh - 200px)'}
+        columns={columns}
+        state={state}
+        dispatch={dispatch}
+        renderedFrom={'bids'}
+        refreshGrid={()=>{}}
+        isClientSideGrid = {true}
+        hideSelection = {true}
+      />
+    ) : (
+      <Box p={2} height={500}>
+        <CommonSkeleton lenArray={[...Array(10).keys()]} />
+      </Box>
+    )}
+    </>
+   
   );
 };
 

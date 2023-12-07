@@ -1,31 +1,15 @@
-import React, { useState, useEffect, useContext, Fragment, useReducer } from 'react';
-import {
-  MenuItem,
-  Grid,
-  Box,
-  Button,
-  IconButton,
-  Menu
-} from '@material-ui/core';
-import { Autocomplete, Skeleton } from '@material-ui/lab';
+import { useState, useEffect, useContext, Fragment, useReducer } from 'react';
+import { MenuItem, Grid, Box, Button, IconButton, Menu } from '@material-ui/core';
 import Add from '@material-ui/icons/Add';
-import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import {
-  pricingCondition,
-  gridLoadingTimeout,
-  PRICING_TYPE,
-  sidebarResource,
-  MATERIAL_TYPE
-} from '../../../constants/helpers';
+import { pricingCondition, gridLoadingTimeout, PRICING_TYPE, sidebarResource, MATERIAL_TYPE } from '../../../constants/helpers';
 import EditIcon from '@material-ui/icons/Edit';
-import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridComponents/CustomAgGrid';
-import { CommonRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
-import GridDeleteIcon from '../../../components/Helpers/GridDeleteIcon';
+import DeleteIcon from '@material-ui/icons/Delete';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import ConditionDialog from './ConditionDialog';
 import { camelCase, startCase } from 'lodash';
@@ -35,23 +19,20 @@ import { isMobile, isTablet } from 'react-device-detect';
 import styles from '../../Leads/Header.module.scss';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
-import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
-import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
-import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import { deleteDisable } from 'src/constants/messageHelpers';
 
 const AddConditions = ({ pricingConditionId, detailData }) => {
   const renderFrom = camelCase(`${routes?.pricingCondition.title}_condition_selected`);
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions }
+    state: { permissions }
   }: any = useData();
 
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, rowCount, selectedRecords } = state;
   const [addMaterialDialog, setAddMaterialDialog] = useState({ open: false, materialType: '' });
-
   const [condition, setCondition] = useState(null);
   const [showDialog, setShowDialog] = useState({ open: false, isBulkedit: false });
   const [conditionData, setConditionData] = useState(null);
@@ -59,7 +40,6 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
   const [addAnchorEl, setAddAnchorEl] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
-  const localStorageSelectedRecords = `${renderFrom}_selected`;
   const [isSubmitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -68,21 +48,21 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
 
   const fetchCondition = () => {
     dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
+    dispatch({ type: 'selection', selectedRecords: [] });
+
     setCondition(null);
     axiosInstance()
       .get(`${pricingCondition.api}/condition/${pricingConditionId}`)
       .then(({ data: { data } }) => {
         setCondition(JSON.parse(JSON.stringify(data)));
         data.forEach((element) => {
-          element.detail = `${element.materialType === MATERIAL_TYPE.product
-            ? element.productDetail?.productName
-            : element.materialType === MATERIAL_TYPE.service
+          element.detail = `${
+            element.materialType === MATERIAL_TYPE.product
+              ? element.productDetail?.productName
+              : element.materialType === MATERIAL_TYPE.service
               ? element.serviceDetail?.serviceName
               : element.packageDetail?.packageName
-            }`;
+          }`;
           element.materialType = startCase(element.materialType);
           element.conditionType = PRICING_TYPE?.filter((e) => element.conditionType?.includes(e.optionValue))
             ?.map((e) => e.optionLabel)
@@ -137,12 +117,10 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
         setAnchorEl(null);
         setDeleteRecord(null);
         setShowDeleteConfirmBox(false);
-        localStorage.removeItem(localStorageSelectedRecords);
       })
       .catch((error) => {
         setDeleteRecord(null);
         setShowDeleteConfirmBox(false);
-        localStorage.removeItem(localStorageSelectedRecords);
         toastConfig.setToastConfig(error);
       });
   };
@@ -161,75 +139,112 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
     }
   };
 
-  const DetailRenderer = (params) => (
-    <Fragment>
-      <p
-        onClick={() => {
-          handleOpen(params.data._id);
-        }}
-        className="link text-truncate"
-        title={params.data.detail}
-      >
-        {params.data.detail}
-      </p>
-      <Box ml={1}>
-        <IconButton
-          size="small"
-          onClick={() => {
-            window.open(
-              `${params.data.materialType === 'Product'
-                ? routes.productDetail.path
-                : params.data.materialType === 'Service'
-                  ? routes.serviceMasterDetail.path
-                  : routes.packagesDetail.path
-              }/${params.data.materialId}`
-            );
-          }}
-        >
-          <OpenInNewIcon fontSize="small" color="primary" />
-        </IconButton>
-      </Box>
-    </Fragment>
-  );
-
-  const ActionsRenderer = (params) => (
-    <>
-      <HtmlTooltip title="Edit">
-        <IconButton
-          size="small"
-          aria-label="Edit"
-          onClick={() => {
-            handleOpen(params.data._id);
-          }}
-        >
-          <EditIcon color="primary" />
-        </IconButton>
-      </HtmlTooltip>
-      <GridDeleteIcon
-        hasDeletePermission={permissions?.pricingCondition?.isUpdate}
-        ownerId={user?.user?._id}
-        userId={user?.user?._id}
-        onDelete={() => {
-          setDeleteRecord(params.data);
-          setShowDeleteConfirmBox(true);
-        }}
-        entity="pricingCondition"
-      />
-    </>
-  );
-
-  const frameworkComponents = {
-    detailRenderer: DetailRenderer,
-    actionsRenderer: ActionsRenderer,
-    commonRenderer: CommonRenderer
-  };
-
   const columns = [
-    { field: 'detail', headerName: 'Detail', show: true, disabled: true, cellRenderer: 'detailRenderer' },
-    { field: 'materialType', headerName: 'Type', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    { field: 'conditionType', headerName: 'Pricing Type', disabled: true, show: true, cellRenderer: 'commonRenderer' },
-    { field: 'unit', headerName: 'Unit', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    { field: 'pricingMethod', headerName: 'Pricing Method', show: true, disabled: true, cellRenderer: 'commonRenderer' }
+    {
+      accessor: 'detail',
+      Header: 'Detail',
+      disabled: true,
+      Cell: ({ row }) =>
+        row?.original?.detail ? (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <h5
+              className="link text-truncate"
+              onClick={() => {
+                handleOpen(row?.original._id);
+              }}
+            >
+              {row?.original?.detail}
+            </h5>
+            <Box ml={1}>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(
+                    `${
+                      row?.original?.materialType === 'Product'
+                        ? routes.productDetail.path
+                        : row?.original?.materialType === 'Service'
+                        ? routes.serviceMasterDetail.path
+                        : routes.packagesDetail.path
+                    }/${row?.original?.materialId}`
+                  );
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
+            </Box>
+          </div>
+        ) : (
+          <NoDataCell />
+        )
+    },
+    {
+      accessor: 'materialType',
+      Header: 'Type',
+      disabled: true,
+      Cell: ({ row }) => (row?.original?.materialType ? <h5 className="text-truncate">{row?.original?.materialType}</h5> : <NoDataCell />)
+    },
+    {
+      accessor: 'conditionType',
+      Header: 'Pricing Type',
+      disabled: true,
+      Cell: ({ row }) => (row?.original?.conditionType ? <h5 className="text-truncate">{row?.original?.conditionType}</h5> : <NoDataCell />)
+    },
+    {
+      accessor: 'unit',
+      Header: 'Unit',
+      disabled: true,
+      Cell: ({ row }) => (row?.original?.unit ? <h5 className="text-truncate">{row?.original?.unit}</h5> : <NoDataCell />)
+    },
+    {
+      accessor: 'pricingMethod',
+      Header: 'Pricing Method',
+      disabled: true,
+      Cell: ({ row }) => (row?.original?.pricingMethod ? <h5 className="text-truncate">{row?.original?.pricingMethod}</h5> : <NoDataCell />)
+    },
+    {
+      accessor: 'action',
+      Header: 'Actions',
+      minWidth: 100,
+      width: 110,
+      sticky: 'right',
+      disableFilters: true,
+      disableSortBy: true,
+      canDrag: false,
+      Cell: ({ row }) => (
+        <>
+          <HtmlTooltip title="Edit">
+            <span>
+              <IconButton
+                size="small"
+                aria-label="Edit"
+                onClick={() => {
+                  handleOpen(row?.original?._id);
+                }}
+              >
+                <EditIcon fontSize="small" color="primary" />
+              </IconButton>
+            </span>
+          </HtmlTooltip>
+
+          <HtmlTooltip title={permissions?.pricingCondition?.isUpdate ? 'Delete' : deleteDisable}>
+            <span>
+              <IconButton
+                size="small"
+                aria-label="Delete"
+                disabled={!permissions?.pricingCondition?.isUpdate}
+                onClick={() => {
+                  setDeleteRecord(row?.original);
+                  setShowDeleteConfirmBox(true);
+                }}
+              >
+                <DeleteIcon fontSize="small" color={permissions?.pricingCondition?.isUpdate ? 'error' : 'disabled'} />
+              </IconButton>
+            </span>
+          </HtmlTooltip>
+        </>
+      )
+    }
   ];
 
   const openAddActions = (event) => {
@@ -299,8 +314,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
               total={rowCount}
               recordsToExport={selectedRecords.length}
               onExportToExcelSuccess={() => {
-                if (gridApi) gridApi.deselectAll();
-                else fetchCondition();
+                fetchCondition();
               }}
               hideDefaultImportExport={true}
               extraImportExportLinks={[
@@ -400,22 +414,14 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       </Box>
       <Grid item xs={12} md={12} sm={12} className="mt-3">
         {columns && condition ? (
-          <CustomAgGrid
+          <CustomReactTable
+            height={'calc(100vh - 393px)'}
             columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameworkComponents}
-            setGridApi={setGridApi}
+            state={state}
             dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            allowAction={true}
-            loading={loading}
-            isClientSideGrid={true}
-            selectedRecords={selectedRecords}
             renderedFrom={renderFrom}
             refreshGrid={fetchCondition}
+            isClientSideGrid={true}
           />
         ) : (
           <Box p={2} height={500}>
@@ -430,9 +436,9 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
             handleAdd(data);
           }}
           handleClose={() => {
-            setAddMaterialDialog({ open: false, materialType: '' })
+            setAddMaterialDialog({ open: false, materialType: '' });
           }}
-          ids={condition?.filter(c => c?.materialType === addMaterialDialog.materialType)?.map((e) => e.materialId)}
+          ids={condition?.filter((c) => c?.materialType === addMaterialDialog.materialType)?.map((e) => e.materialId)}
           isSubmitting={isSubmitting}
         />
       )}
@@ -443,9 +449,9 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
             handleAdd(data);
           }}
           handleClose={() => {
-            setAddMaterialDialog({ open: false, materialType: '' })
+            setAddMaterialDialog({ open: false, materialType: '' });
           }}
-          ids={condition?.filter(c => c?.materialType === addMaterialDialog.materialType)?.map((e) => e.materialId)}
+          ids={condition?.filter((c) => c?.materialType === addMaterialDialog.materialType)?.map((e) => e.materialId)}
           isSubmitting={isSubmitting}
         />
       )}
@@ -456,9 +462,9 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
             handleAdd(data);
           }}
           handleClose={() => {
-            setAddMaterialDialog({ open: false, materialType: '' })
+            setAddMaterialDialog({ open: false, materialType: '' });
           }}
-          ids={condition?.filter(c => c?.materialType === addMaterialDialog.materialType)?.map((e) => e.materialId)}
+          ids={condition?.filter((c) => c?.materialType === addMaterialDialog.materialType)?.map((e) => e.materialId)}
           isSubmitting={isSubmitting}
         />
       )}
@@ -480,8 +486,9 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete pricing setup condition  ${deleteRecord?.productDetail?.productName || deleteRecord?.packageDetail?.packageName || ''
-            } ?`}
+          message={`Are you sure you want to delete pricing setup condition  ${
+            deleteRecord?.productDetail?.productName || deleteRecord?.packageDetail?.packageName || ''
+          } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

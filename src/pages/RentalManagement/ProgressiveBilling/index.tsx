@@ -1,11 +1,15 @@
 import { Box, Button, Grid, IconButton } from '@material-ui/core';
-import { useContext, useEffect, useReducer, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
-import CustomRenderCell from 'src/components/Helpers/CustomRenderCell';
+import CustomReactTable, {
+  getStaticFields,
+  useColumns,
+  useTableReducer,
+  checkStaticField
+} from 'src/components/CustomReactTableNew';
 import routes from 'src/components/Helpers/Routes';
+import { Link } from 'react-router-dom';
 import { gridLoadingTimeout, invoice, isObjectEmpty, prepareDataForGrid } from 'src/constants/helpers';
-import useColumns, { checkStaticField, getFrameworkComponents, getStaticFields } from 'src/constants/useColumns';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import CreateBillingDialog from './CreateBillingDialog';
@@ -16,26 +20,19 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import VisibilityIcon from '@material-ui/icons/Visibility';
+import { deleteDisable } from 'src/constants/messageHelpers';
 
 const ProgressiveBilling = ({ rentalId, rentalManagementData, allowCreateInvoice }) => {
-
   const renderedFrom = camelCase(routes?.invoice?.title);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
-
   const toastConfig = useContext(CustomToastContext);
-
   const [createBillDialog, setCreateBillDialog] = useState({ open: false });
   const [viewBillDialog, setViewBillDialog] = useState({ open: false, invoiceData: null });
-
-  const { state: { user, permissions, selectedEntity } }: any = useData();
-
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-
+  const {
+    state: { user, permissions, selectedEntity }
+  }: any = useData();
+  const { state, dispatch } = useTableReducer();
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { getColumnData } = useColumns();
-  const [frameworkComponent, setFrameworkComponent] = useState({});
   const [columns, setColumns] = useState(null);
   const [deleteRecord, setDeleteRecord] = useState<any>({});
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
@@ -54,92 +51,84 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, allowCreateInvoice
     const response = await axiosInstance().get(`/field?resource=Invoice`);
     data = response?.data?.data;
     let columns = [];
-    let rendererNames = [];
     data.forEach((o) => {
-      if (o?.fieldData?.fieldName === 'invoiceNumber') {
-        columns = [
-          ...columns,
-          {
-            ...o?.fieldData,
-            pivotIndex: 0,
-            field: o?.fieldData?.fieldName,
-            headerName: o?.fieldData?.fieldLabel,
-            show: true,
-            disabled: true,
-            cellRenderer: 'invoiceMaterialRenderer'
-          }
-        ];
-      } else {
-        let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.invoiceDetail.path);
-        if (currentColumn !== null) {
-          columns = [...columns, currentColumn?.columnData];
-          if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-            rendererNames.push(currentColumn?.rendererName);
-          }
-        }
+      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes?.invoiceDetail.path, true);
+      if (currentColumn !== null) {
+        columns = [...columns, currentColumn?.columnData];
       }
       return o?.fieldData;
     });
-    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-    tempFrameworkComponent = {
-      ...tempFrameworkComponent,
-      invoiceMaterialRenderer: InvoiceMaterialRenderer,
-      actionsRenderer: ActionsRenderer
-    };
-    setFrameworkComponent({ ...tempFrameworkComponent });
+
     let staticFields = getStaticFields();
     staticFields.forEach((field) => {
       columns.push(checkStaticField(routes.projectSales.title, field));
     });
-    setColumns([...columns]);
+    columns = [...columns, ActionsRenderer];
+    columns?.forEach((column) => {
+      if (column?.primaryField) {
+        column.Cell = ({ row }) => (
+          <>
+            <Link
+              className="link text-truncate"
+              onClick={() => {
+                setViewBillDialog({ open: true, invoiceData: row?.original });
+              }}
+            >
+             {row?.original?.invoiceNumber}
+            </Link>
+          </>
+        );
+      }
+    });
+
+    setColumns(columns);
   };
 
-  const InvoiceMaterialRenderer = (params) => (
-    <span
-      className="link"
-      onClick={() => {
-        setViewBillDialog({ open: true, invoiceData: params.data });
-      }}
-    >
-      <CustomRenderCell value={params?.value} />
-    </span>
-  );
-
-  const ActionsRenderer = (params) => (
-    <>
-      <HtmlTooltip title="View Invoice">
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 110,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        <HtmlTooltip title="View Invoice">
         <IconButton
           size="small"
           onClick={() => {
-            setViewBillDialog({ open: true, invoiceData: params.data });
+            setViewBillDialog({ open: true, invoiceData: row?.original});
           }}
         >
           <VisibilityIcon fontSize="small" color="primary" />
         </IconButton>
       </HtmlTooltip>
-      <Box ml={1}>
-        <HtmlTooltip title="Delete">
-          <IconButton
-            size="small"
-            aria-label="Delete"
-            disabled={params?.data?.canDelete ? false : true}
-            onClick={() => {
-              setDeleteRecord(params.data);
-              setIsConformDialogVisible(true);
-            }}
-          >
-            <DeleteIcon fontSize="small" color={params?.data?.canDelete ? "error" : "disabled"} />
-          </IconButton>
+
+        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              disabled={row?.original?.canDelete ? false : true}
+              onClick={() => {
+                setDeleteRecord(row.original);
+                setIsConformDialogVisible(true);
+              }}
+            >
+              <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
+            </IconButton>
+          </span>
         </HtmlTooltip>
-      </Box>
-    </>
-  );
+      </>
+    )
+  };
 
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}&rentalJob=${rentalId}`;
     if (showFilteredRecordsOnly) {
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || [])?.map((m) => m._id))}`;
     }
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
@@ -162,10 +151,8 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, allowCreateInvoice
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
     const queryString = getQueryString();
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
     await axiosInstance()
       .get(`${invoice.api}${queryString}`)
       .then(({ data: { data, count } }) => {
@@ -221,7 +208,7 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, allowCreateInvoice
 
   return (
     <>
-      {allowCreateInvoice &&
+      {allowCreateInvoice && (
         <Box display="flex" justifyContent="flex-end">
           <Box display="flex" alignItems="center" pt={2} pr={2}>
             <Button variant="contained" color="primary" size="small" onClick={() => setCreateBillDialog({ open: true })} aria-controls="action-menu">
@@ -229,32 +216,22 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, allowCreateInvoice
             </Button>
           </Box>
         </Box>
-      }
+      )}
       <Grid item xs={12} md={12} sm={12} className="mt-3">
-        {columns?.length ? (
-          <CustomAgGrid
+      {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 250px)'}
             columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameworkComponent}
-            setGridApi={setGridApi}
+            state={state}
             dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            actionWidth={120}
-            loading={loading}
             renderedFrom={renderedFrom}
-            allowSelection={false}
-            allowAction={true}
-            isClientSideGrid={true}
             refreshGrid={fetchData}
+            hideSelection={true}
+            isClientSideGrid={true}
           />
-        ) : (
-          <Box p={2} height={500}>
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Box>
-        )}
+        ) : <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>}
       </Grid>
       {createBillDialog.open && (
         <CreateBillingDialog

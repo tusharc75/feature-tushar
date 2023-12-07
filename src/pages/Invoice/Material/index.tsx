@@ -27,7 +27,7 @@ import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import EditIcon from '@material-ui/icons/Edit';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 
-const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }) => {
+const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, fetchInvoiceData }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -216,10 +216,10 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
         </>
     });
     setColumns(coloum);
-    fetchInvoiceData();
+    fetchData();
   };
 
-  const fetchInvoiceData = async () => {
+  const fetchData = async () => {
     setNextStep(false);
     var data: any = [];
     let assignedAssets = [];
@@ -251,9 +251,11 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
       parent.assetQty = assignedAssets.filter((i) => i.parentId === parent._id).length;
       parent.subRows = generateNestedData(data.material, parent);
     });
-    if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
-      setNextStep(true);
-    } else {
+    fetchInvoiceData()
+    // if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
+    //   setNextStep(true);
+    // }
+    if (rows?.length) {
       setNextStep(true);
     }
     setRowsData(rows);
@@ -340,7 +342,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
           type: 'success',
           message: data.message
         });
-        fetchInvoiceData();
+        fetchData();
         setIsAdding(false);
       })
       .catch((error) => {
@@ -356,7 +358,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
       .put(`${routes.invoice.path}/material/${invoiceData._id}`, { material: rows })
       .then(({ data }) => {
         setUpdating(false);
-        fetchInvoiceData();
+        fetchData();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -385,7 +387,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
       .put(`${invoice.api}/material/${invoiceData?._id}/delete`, { ids: rows })
       .then(() => {
         setDeleting(false);
-        fetchInvoiceData();
+        fetchData();
         setDeleteData(null);
       })
       .catch((error) => {

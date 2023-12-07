@@ -279,6 +279,7 @@ const BulkAssetCreationDetailsPage = () => {
                       bulkAssetCreationData={bulkAssetCreationData}
                       renderedFrom={`${renderedFrom}_grid-2`}
                       allowedToEdit={allowedToEdit}
+                      stepFullScreen={stepFullScreen}
                     />
                   )}
                 </ContentFullScreen>

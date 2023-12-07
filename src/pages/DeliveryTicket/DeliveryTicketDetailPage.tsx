@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useState, useReducer, Fragment } from 'react';
+import { useContext, useEffect, useState, Fragment } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { Box, Grid, Button, IconButton, Tooltip, Tabs, Tab } from '@material-ui/core';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
@@ -11,7 +11,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ManageDeliveryTicket from './ManageDeliveryTicket';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
+import CustomReactTable, { useColumns, getStaticFields, useTableReducer } from 'src/components/CustomReactTableNew';
 import { serializedAsset, gridLoadingTimeout } from '../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import SignatureDialog from '../../components/Helpers/SignatureDialog';
@@ -32,8 +32,6 @@ import {
   DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_FROM_TO_TYPE
 } from '../../constants/helpers';
-import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import { objectStore, findOne, findAll } from '../../constants/indexdbhelper';
@@ -75,6 +73,11 @@ export default function DeliveryTicketDetail(props) {
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
+
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, selectedRecords } = state;
+
+  const { getColumnData } = useColumns();
   const { tab }: any = queryString.parse(history.location.search);
   const [deliveryTicketData, setDeliveryTicketData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -85,14 +88,9 @@ export default function DeliveryTicketDetail(props) {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [deliveryTicketFields, setDeliveryTicketFields] = useState([]);
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
   const [okBtnLoading, setOkBtnLoading] = useState(false);
   const [showRemoveAssetFromLoadingTicketDialog, setShowRemoveAssetFromLoadingTicketDialog] = useState(false);
-  const { dataRows, rowCount, page, limit, pageSizes, selectedRecords } = state;
-  const { getColumnData } = useColumns();
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
   const [canEdit, setCanEdit] = useState(false);
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false);
 
@@ -313,10 +311,7 @@ export default function DeliveryTicketDetail(props) {
 
   const fetchDeliveryTicketData = async () => {
     try {
-      if (gridApi) {
-        gridApi.deselectAll();
-      }
-      localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
+      dispatch({ type: 'selection', selectedRecords: [] });
       if (selectedEntity) {
         setLoading(true);
         let data;
@@ -366,23 +361,14 @@ export default function DeliveryTicketDetail(props) {
         data = response?.data?.data;
       }
       let columns = [];
-      let rendererNames = [];
       data.forEach((o) => {
         let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path);
         if (currentColumn !== null) {
           columns = [...columns, currentColumn?.columnData];
-          if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-            rendererNames.push(currentColumn?.rendererName);
-          }
         }
       });
-      let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-      tempFrameworkComponent = {
-        ...tempFrameworkComponent
-      };
-      setFrameWorkComponent({ ...tempFrameworkComponent });
       columns = [...columns, ...getStaticFields()];
-      setColumns([...columns]);
+      setColumns(columns);
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -394,9 +380,7 @@ export default function DeliveryTicketDetail(props) {
     }
     try {
       dispatch({ type: 'loading', loading: true });
-      if (gridApi) {
-        gridApi.setRowData([]);
-      }
+
       let data;
       if (isOffline) {
         const deliveryTicket = await findOne(objectStore.deliveryTicket, id);
@@ -651,7 +635,7 @@ export default function DeliveryTicketDetail(props) {
                 referenceId={deliveryTicketData?._id}
                 hideDetailButton={true}
                 fileName={`${routes.deliveryTicket.title}-${deliveryTicketData?.ticketName}`}
-                columns={columns?.filter((e) => ['assetNumber', 'product', 'productDescription'].includes(e.field))}
+                columns={columns?.filter((e) => ['assetNumber', 'product', 'productDescription'].includes(e.accessor))}
               />
               <ActivityButton
                 referenceId={deliveryTicketData?._id}
@@ -790,55 +774,17 @@ export default function DeliveryTicketDetail(props) {
                 <Box mx={1} />
               </Grid>
               <Grid item xs={12}>
-                {isMobile && !isTablet ? (
-                  <CustomSwipableList
-                    allowSelection={false}
-                    allowSwipe={true}
-                    permissions={permissions}
-                    primaryField={columns?.find((d) => d.field === 'assetNumber')}
-                    onClick={(data) => {
-                      history.push(`${routes.serializedAssetDetail.path}/${data._id}`);
-                    }}
-                    dataRows={dataRows}
-                    selectedRecords={selectedRecords}
-                    dispatch={dispatch}
-                    onEdit={() => {}}
-                    extraParamsToCheckDelete={true}
-                    onDelete={() => {}}
-                    rowCount={rowCount}
-                    page={page}
-                    loading={loading}
-                    chips={[
-                      {
-                        label: `Product Description: `,
-                        field: 'productName',
-                        forceShow: true
-                      }
-                    ]}
-                    onCreate={null}
-                    showClone={false}
-                    fullHeight={true}
-                    renderedFrom={renderedFrom}
-                    onClone={() => {}}
-                  />
-                ) : Object.keys(frameWorkComponent).length > 0 ? (
-                  <CustomAgGrid
-                    isClientSideGrid={true}
-                    allowSelection={deliveryTicketData?.status === 'New'}
-                    allowAction={false}
+                {columns ? (
+                  <CustomReactTable
+                    height={'calc(100vh - 150px)'}
                     columns={columns}
-                    dataRows={dataRows}
-                    frameworkComponents={frameWorkComponent}
-                    setGridApi={setGridApi}
+                    state={state}
                     dispatch={dispatch}
-                    rowCount={rowCount}
-                    limit={limit}
-                    pageSizes={pageSizes}
-                    page={page}
-                    actionWidth={150}
-                    loading={false}
                     renderedFrom={renderedFrom}
                     refreshGrid={fetchProductInventory}
+                    hideSelection={!(deliveryTicketData?.status === 'New')}
+                    hideAction={true}
+                    isClientSideGrid={true}
                   />
                 ) : (
                   <Box p={2} height={500}>

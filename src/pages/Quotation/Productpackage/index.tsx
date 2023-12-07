@@ -6,7 +6,7 @@ import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Add from '@material-ui/icons/Add';
 import { quotation, pricingCondition, supplierContact, QUOTATION_TYPE, MATERIAL_TYPE, ASSET_STATUS, SERVICE_TYPE, PRICING_SETUP_TYPE } from '../../../constants/helpers';
@@ -37,9 +37,10 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
     state: { user, permissions }
   }: any = useData();
 
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, page, limit, filters, sorting, selectedRecords } = state;
   const [isUpdating, setUpdating] = useState(false);
 
-  const [selectedProducts, setSelectedProducts] = useState([]);
   const [isProductEdit, setIsProductEdit] = useState({ open: false, isBulkedit: false, showSaveAndNext: false });
   const [isSubmitting, setSubmitting] = useState(false);
   const [recordToUpdate, setRecordToUpdate] = useState(null);
@@ -58,7 +59,6 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
     bottom: null
   });
   const [columns, setColumns] = useState(null);
-  const [rowsData, setRowsData] = useState(null);
   const [allFields, setAllFields] = useState([]);
   const [requestDialog, setRequestDialog] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -267,6 +267,8 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
 
   const fetchData = async () => {
     setNextStep(false);
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
     var data: any = [];
     const response = await axiosInstance().get(`${quotation.api}/productpackage/${quotationData._id}/${versionId}`);
     data = response?.data?.data;
@@ -303,8 +305,8 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
     } else {
       setNextStep(true);
     }
-    setRowsData(rows);
-    setSelectedProducts([]);
+    dispatch({ type: 'initialize', data: rows, count: rows?.length });
+    dispatch({ type: 'loading', loading: false });
     updateDOASetup(data?.doasetup);
   };
 
@@ -430,12 +432,12 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
           message: data.message
         });
         if (saveAndNext) {
-          const rowIndex = rowsData.findIndex((d) => d._id === rows[0]?._id);
-          setRecordToUpdate(rowsData[rowIndex + 1]);
+          const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
+          setRecordToUpdate(dataRows[rowIndex + 1]);
           setIsProductEdit({
             open: true,
             isBulkedit: false,
-            showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false
+            showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
           });
         } else {
           setIsProductEdit({ open: false, isBulkedit: false, showSaveAndNext: false });
@@ -503,7 +505,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
 
   const handelAskPriceToSupplier = (content, contactId, selectedFields = [], displayColumns = []) => {
     let data: any = {
-      material: selectedProducts?.map((d) => {
+      material: selectedRecords?.map((d) => {
         return {
           _id: d?._id,
           materialId: d?.materialId
@@ -541,18 +543,18 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
   };
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
-    const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
+    const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
     if (inputField.hasOwnProperty('qtyDisplay')) {
       inputField['qty'] = inputField['qtyDisplay'];
     }
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
+    rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
     handleSaveData(rows);
   };
 
   useEffect(() => {
-    var serializedProduct = flattenArray(selectedProducts)?.filter((e) => e.type === MATERIAL_TYPE.product && e?.serializedProduct);
-    var serializedAsset = flattenArray(selectedProducts)?.filter((d) => d.type === MATERIAL_TYPE.serializedAsset);
+    var serializedProduct = flattenArray(selectedRecords)?.filter((e) => e.type === MATERIAL_TYPE.product && e?.serializedProduct);
+    var serializedAsset = flattenArray(selectedRecords)?.filter((d) => d.type === MATERIAL_TYPE.serializedAsset);
     serializedProduct = uniqBy(serializedProduct, '_id');
     const products = serializedProduct?.map((m) => {
       const alreadyAssets = serializedAsset.filter((e) => e?.parentId === m?._id) || [];
@@ -564,7 +566,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
       };
     });
     setProducts([...products?.filter((e) => e.qty > 0)]);
-  }, [selectedProducts]);
+  }, [selectedRecords]);
 
   return (
     <Fragment>
@@ -621,7 +623,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
                 variant={'outlined'}
                 color="default"
                 size="small"
-                disabled={rowsData?.length > 0 ? false : true}
+                disabled={dataRows?.length > 0 ? false : true}
                 onClick={openActions}
                 aria-controls="action-menu"
                 endIcon={<ExpandMore />}
@@ -644,7 +646,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
             >
               {quotationData?.type === QUOTATION_TYPE.rentalJob && products.length > 0 && (
                 <MenuItem
-                  disabled={selectedProducts?.filter((e) => e.type === MATERIAL_TYPE.product)?.length <= 0}
+                  disabled={selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product)?.length <= 0}
                   onClick={() => {
                     closeActions();
                     setAddDialog({ open: true, type: 'serializedAsset', parentId: null });
@@ -654,10 +656,10 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
                 </MenuItem>
               )}
               <MenuItem
-                disabled={selectedProducts.length === 0}
+                disabled={selectedRecords.length === 0}
                 onClick={() => {
                   let tempSupplierAccountId = [];
-                  selectedProducts?.forEach((element) => {
+                  selectedRecords?.forEach((element) => {
                     element?.supplierAccount?.forEach((e) => {
                       if (tempSupplierAccountId.findIndex((d) => d === e?.optionValue) === -1) {
                         tempSupplierAccountId.push(e?.optionValue);
@@ -701,7 +703,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
                 View Customer Price
               </MenuItem> */}
               <MenuItem
-                disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
+                disabled={!Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length)}
                 onClick={() => {
                   setIsProductEdit({ open: true, isBulkedit: true, showSaveAndNext: false });
                   closeActions();
@@ -710,11 +712,11 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
                 Bulk Edit
               </MenuItem>
               <MenuItem
-                disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
+                disabled={!Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length) || isDeleting}
                 onClick={() => {
                   const dataToDelete =
-                    selectedProducts &&
-                    selectedProducts
+                    selectedRecords &&
+                    selectedRecords
                       .filter((e) => !e.hideSelection)
                       .map((rec: any) => {
                         const obj: any = {};
@@ -733,20 +735,21 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
           </div>
         </Box>
       </Box>
-      {columns && rowsData ? (
+      {columns ? (
         <Box zIndex={5} width={'100%'}>
           <CustomReactTable
-            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
-            columns={columns}
-            data={rowsData}
-            setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-            onSelect={setSelectedProducts}
-            childrenProperty="subRows"
-            uniqueKey="_id"
-            renderedFrom="quotation_product_package"
-            isClientSideGrid={true}
-            onSaveEdit={onSaveInlineEdit}
-          />
+              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
+              columns={columns}
+              state={state}
+              setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
+              dispatch={dispatch}
+              renderedFrom={renderedFrom}
+              refreshGrid={fetchData}
+              isClientSideGrid = {true}
+              onSaveEdit={onSaveInlineEdit}
+              // hideSelection={!allowedToEdit}
+              // expander={true}
+            />
         </Box>
       ) : (
         <Box height={500}>
@@ -775,7 +778,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
           quotationData={quotationData}
           rowData={recordToUpdate}
           material={material}
-          selectedProducts={selectedProducts}
+          selectedProducts={selectedRecords}
           showSaveAndNext={isProductEdit?.showSaveAndNext}
         />
       )}
@@ -798,7 +801,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
             warehouse: quotationData?.warehouse?.optionValue
           }}
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
-          ids={[...rowsData?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.map((e: any) => e?.serializedAssetDetail?._id)]}
+          ids={[...dataRows?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.map((e: any) => e?.serializedAssetDetail?._id)]}
           isAssigning={isSubmitting}
           // extraStaticFilter={[{ field: 'status', term: [ASSET_STATUS.new, ASSET_STATUS.available] }]}
           handleSucess={(rows) => {

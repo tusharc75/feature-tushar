@@ -1,39 +1,24 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { Box, CircularProgress, TextField } from '@material-ui/core';
-import CustomAgGrid, { reducer, intialState } from '../../../components/AgGridComponents/CustomAgGrid';
-import {
-  gridLoadingTimeout,
-  CustomDialogTransition,
-  packages,
-  isObjectEmpty,
-  prepareDataForGrid,
-  getLocalStorageArrayData,
-  deliveryTicket
-} from '../../../constants/helpers';
+import { Box } from '@material-ui/core';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import { gridLoadingTimeout, prepareDataForGrid } from '../../../constants/helpers';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import { generateColoum } from '../../../constants/columns';
+import { generateCustomTableColumns } from '../../../constants/columns';
 import { useData } from '../../../StateProvider/Provider';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
-import { isMobile, isTablet } from 'react-device-detect';
-import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import { fetch_rental_cost_fields } from 'src/components/RentalManagment/helper';
-import { CommonRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
-import useColumns, { getFrameworkComponents } from 'src/constants/useColumns';
 
 const DeliveryTicketAdditionalCost = ({ renderedFrom, additionalCost }) => {
   const toastConfig = useContext(CustomToastContext);
-
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
-  const [columns, setColumns] = useState(null);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
-  const {
-    state: { user, permissions }
-  }: any = useData();
   const { isOffline } = useContext(CustomOfflineContext);
-  const { getColumnData } = useColumns();
+
+  const { state, dispatch } = useTableReducer();
+
+  const [columns, setColumns] = useState(null);
+  const {
+    state: { user }
+  }: any = useData();
 
   useEffect(() => {
     fetchGridColumns();
@@ -41,10 +26,8 @@ const DeliveryTicketAdditionalCost = ({ renderedFrom, additionalCost }) => {
 
   const fetchAdditionalCost = async () => {
     try {
+      dispatch({ type: 'selection', selectedRecords: [] });
       dispatch({ type: 'loading', loading: true });
-      if (gridApi) {
-        gridApi.setRowData([]);
-      }
       let data = additionalCost;
       let rows = data.map((u) => {
         let res = {
@@ -64,71 +47,24 @@ const DeliveryTicketAdditionalCost = ({ renderedFrom, additionalCost }) => {
 
   const fetchGridColumns = async () => {
     const fields = await fetch_rental_cost_fields('USD', isOffline);
-    let rendererNames = [];
-    let columns = [];
-    generateColoum(fields, columns, rendererNames, false, renderedFrom, getColumnData);
-    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-    tempFrameworkComponent = {
-      commonRenderer: CommonRenderer,
-      ...tempFrameworkComponent
-    };
-    setFrameWorkComponent({ ...tempFrameworkComponent });
-    setColumns([...columns]);
+    let columns = generateCustomTableColumns(fields, 'USD', renderedFrom);
+    setColumns(columns);
     fetchAdditionalCost();
   };
 
   return (
     <Box mt={2}>
-      {isMobile && !isTablet ? (
-        <CustomSwipableList
-          allowSelection={false}
-          allowSwipe={false}
-          permissions={permissions}
-          primaryField={columns?.find((d) => d.field === 'costType')}
-          onClick={(data) => {}}
-          selectedRecords={[]}
-          dataRows={dataRows}
-          dispatch={dispatch}
-          onEdit={() => {}}
-          extraParamsToCheckDelete={true}
-          onDelete={() => {}}
-          rowCount={rowCount}
-          page={page}
-          loading={loading}
-          onCreate={null}
-          showClone={false}
-          fullHeight={true}
-          renderedFrom={renderedFrom}
-          onClone={() => {}}
-          chips={[
-            {
-              label: 'Description: ',
-              field: 'description'
-            },
-            {
-              label: 'Qty: ',
-              field: 'qty'
-            }
-          ]}
-        />
-      ) : columns ? (
-        <CustomAgGrid
+      {columns ? (
+        <CustomReactTable
+          height={'calc(100vh - 150px)'}
           columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameWorkComponent}
-          setGridApi={setGridApi}
+          state={state}
           dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          allowAction={false}
-          loading={loading}
-          allowSelection={false}
-          showOnlyShowFilteredRecordSwitch={true}
-          refreshGrid={fetchAdditionalCost}
           renderedFrom={renderedFrom}
+          refreshGrid={fetchAdditionalCost}
           isClientSideGrid={true}
+          hideSelection={true}
+          hideAction={true}
         />
       ) : (
         <Box p={2} height={500}>

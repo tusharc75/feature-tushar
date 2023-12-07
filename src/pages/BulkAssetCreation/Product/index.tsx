@@ -121,7 +121,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
 
   const fetchBulkAssetCreationProduct = () => {
     dispatch({ type: 'loading', loading: true });
-
+    dispatch({ type: 'selection', selectedRecords: [] });
     setNextStep(false);
     axiosInstance()
       .get(`${bulkAssetCreation.api}/product/${bulkAssetCreationData._id}`)
@@ -275,7 +275,6 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
       .then(() => {
         fetchBulkAssetCreationProduct();
         setShowDeleteConfirmBox(false);
-        dispatch({ type: 'selection', selectedRecords: [] });
         setDeleteBulkAssetCreationProduct([]);
         setLoadingButton(false);
       })
@@ -398,7 +397,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
       )}
       {columns ? (
         <CustomReactTable
-          height={'calc(100vh - 400px)'}
+          height={'calc(100vh - 393px)'}
           columns={columns}
           state={state}
           dispatch={dispatch}
