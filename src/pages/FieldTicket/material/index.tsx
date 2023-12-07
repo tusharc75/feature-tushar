@@ -24,6 +24,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import { Add, ExpandMore } from '@material-ui/icons';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 import { useData } from 'src/StateProvider/Provider';
+import { isEmpty } from 'lodash';
 
 const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, handleChangeStatus }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -40,9 +41,7 @@ const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, h
   const [isUpdating, setUpdating] = useState(false);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
 
-
   const [isSubmitting, setIsSubmitting] = useState(false);
-
 
   const {
     state: { permissions }
@@ -231,7 +230,16 @@ const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, h
   };
 
   const handleAdd = async (rows) => {
-    setIsSubmitting(true)
+    setIsSubmitting(true);
+    const tax: any = {};
+    if (fieldTicketData?.taxCode) {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`${routes?.taxMaster.path}/by-zipcode?taxCode=${fieldTicketData?.taxCode?.optionValue}`);
+      tax.taxCode = fieldTicketData?.taxCode?.optionValue;
+      tax.taxPercentage = data?.length ? data[0]?.taxRate : 0;
+    }
+
     const material: any = [];
     rows.forEach((d) => {
       const element: any = {};
@@ -246,6 +254,10 @@ const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, h
       element.estimateJobDuration = 1;
       if (calValues && calValues['estimateJobDuration']) {
         element.estimateJobDuration = calValues['estimateJobDuration'];
+      }
+      if(!isEmpty(tax)){
+        element.taxCode = tax?.taxCode;
+        element.taxPercentage = tax?.taxPercentage;
       }
       material.push(element);
     });
@@ -284,11 +296,11 @@ const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, h
         }
         fetchMaterial();
         setServiceDialog({ open: false, type: '' });
-        setIsSubmitting(false)
+        setIsSubmitting(false);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        setIsSubmitting(false)
+        setIsSubmitting(false);
       });
   };
 
