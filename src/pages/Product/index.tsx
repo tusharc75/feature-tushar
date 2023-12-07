@@ -27,6 +27,7 @@ import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTab
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { childDisable, cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
+import { generateCustomTableColumns } from 'src/constants/columns';
 
 const ignoreField = ['qty', 'priceTemplate'];
 
@@ -205,9 +206,9 @@ const Product = () => {
         });
         let columns = [...productColumns];
         data.productTemplate?.forEach((ele) => {
-          GenrateColoum(ele.fields, columns);
+          const newColumns = generateCustomTableColumns(ele.fields, '', renderedFrom);
+          columns = [...columns, ...newColumns];
         });
-        // make columns unique
         columns = columns.filter((item, index, self) => index === self.findIndex((t) => t.accessor === item.accessor));
         columns = [...columns, ...getStaticFields()];
         setColumns([...columns, ActionsRenderer]);
@@ -222,72 +223,6 @@ const Product = () => {
       });
   };
 
-  const GenrateColoum = (fields, column) => {
-    fields.forEach((ele) => {
-      if (ignoreField.includes(ele.fieldName)) {
-      } else if (ele.type === 'converter' || ele.type === 'currencyAmount' || ele.isConverter === true) {
-        if (ele.type !== 'currencyAmount' && (ele.type === 'converter' || ele.isConverter === true)) {
-          ele.displayUnits.forEach((_unit) => {
-            let fieldName = ele.fieldName + '_' + _unit.toLowerCase();
-            let fieldLabel = ele.fieldLabel + ' ' + _unit;
-            if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-              let col: any = {};
-              col.accessor = fieldName;
-              col.Header = fieldLabel;
-              col.width = 180;
-              col.show = true;
-              col.filter = false;
-              col.sortable = false;
-              col.editable = false;
-              col.leval = 'product-template';
-              column.push(col);
-            }
-          });
-        } else if (ele.type === 'currencyAmount' && (ele.type === 'converter' || ele.isConverter === true)) {
-          ele.displayUnits.forEach((_unit) => {
-            ele.displayCurrency.forEach((_currency) => {
-              let fieldName = ele.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase();
-              let fieldLabel = ele.fieldLabel + ' ' + _unit + '/' + _currency;
-              if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-                let col: any = {};
-                col.accessor = fieldName;
-                col.Header = fieldLabel;
-                col.width = 180;
-                col.show = true;
-                col.filter = false;
-                col.sortable = false;
-                col.editable = false;
-                col.leval = 'product-template';
-                column.push(col);
-              }
-            });
-          });
-        } else if (ele.type === 'currencyAmount') {
-          ele.displayCurrency.forEach((_currency) => {
-            let fieldName = ele.fieldName + '_' + _currency.toLowerCase();
-            let fieldLabel = ele.fieldLabel + ' ' + _currency;
-            if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-              let col: any = {};
-              col.accessor = fieldName;
-              col.Header = fieldLabel;
-              col.width = 180;
-              col.editable = false;
-              col.show = true;
-              col.filter = false;
-              col.sortable = false;
-              col.leval = 'product-template';
-              column.push(col);
-            }
-          });
-        }
-      } else {
-        if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
-          let currentColumn: any = getColumnData(renderedFrom, ele, routes.productDetail.path);
-          column.push({ ...currentColumn.columnData, leval: 'product-template', filter: false, sortable: false });
-        }
-      }
-    });
-  };
 
   const getQueryString = (isExport = false) => {
     let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
@@ -434,9 +369,8 @@ const Product = () => {
             },
             {
               title: 'Service/Consumable Export',
-              api: `${product.api}/unknown/service-master/template?export=true${
-                selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''
-              }`,
+              api: `${product.api}/unknown/service-master/template?export=true${selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''
+                }`,
               type: 'export'
             },
             {
@@ -451,9 +385,8 @@ const Product = () => {
             },
             {
               title: 'Service Package Export',
-              api: `${product.api}/unknown/package/template?export=true${
-                selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''
-              }`,
+              api: `${product.api}/unknown/package/template?export=true${selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''
+                }`,
               type: 'export'
             },
             {

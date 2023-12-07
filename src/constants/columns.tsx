@@ -136,7 +136,7 @@ export const getCustomColumnData = (title, field) => {
   }
 };
 
-export const generateCustomTableColumns = (fields: any[], currency: string, renderedFrom = null) => {
+export const generateCustomTableColumns = (fields: any[], currency: string, renderedFrom = null, row = null) => {
   let column = [];
   let _fields = fields;
   _fields.forEach((ele) => {
@@ -256,7 +256,7 @@ export const generateCustomTableColumns = (fields: any[], currency: string, rend
             ...currentColumn,
             width: 200,
             Cell: ({ row }) =>
-              row.original[ele.fieldName] ? ele.lookup ? columnData(ele, row) : <p>{row.original[ele.fieldName]?.join()}</p> : <NoDataCell />
+              row.original[ele.fieldName] ? ele.lookup ? columnData(ele, row) : <p>{row.original[ele.fieldName]}</p> : <NoDataCell />
           });
         } else if (ele.type === 'multiFileUpload') {
 
@@ -292,8 +292,8 @@ export const generateCustomTableColumns = (fields: any[], currency: string, rend
 const columnData = (ele, row) => {
 
   const path = routes[`${camelCase(ele?.lookupResource)}Detail`]?.path
-  ? routes[`${camelCase(ele?.lookupResource)}Detail`]?.path
-  : `${camelCase(ele?.lookupResource)}/detail`;
+    ? routes[`${camelCase(ele?.lookupResource)}Detail`]?.path
+    : `${camelCase(ele?.lookupResource)}/detail`;
 
   if (ele.type === 'multiSelect' && ele.lookup) {
     return (

@@ -117,8 +117,8 @@ function Versions({ id, label, childResource, resource, referenceData, versions,
         parent?.type === 'service'
           ? parent?.serviceDetail?.serviceDescription
           : parent?.type === 'product'
-          ? parent?.productDetail?.productDescription
-          : '';
+            ? parent?.productDetail?.productDescription
+            : '';
     });
 
     cost?.forEach((ele, i) => {
@@ -184,7 +184,7 @@ function Versions({ id, label, childResource, resource, referenceData, versions,
                 height={'calc(100vh - 200px)'}
                 columns={columns}
                 data={rowsData}
-                onSelect={() => {}}
+                onSelect={() => { }}
                 childrenProperty="subRows"
                 uniqueKey="_id"
                 hideSelection={true}
