@@ -27,7 +27,7 @@ const ShowPdf = ({ data }) => {
   }, [data]);
 
   return (
-    <Box height={'calc(100vh - 150px)'}>
+    <Box height={'calc(100vh - 75px)'}>
       {loading ? (
         <Loader style={{ minHeight: 500 }} text="Loading..." />
       ) : (

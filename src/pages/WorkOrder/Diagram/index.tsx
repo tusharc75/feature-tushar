@@ -1,4 +1,4 @@
-import { Box, Button, Collapse, Dialog, Grid, IconButton, Tooltip, Typography } from '@material-ui/core';
+import { Box, Button, Collapse, Dialog, IconButton, Tooltip, Typography } from '@material-ui/core';
 import { Add, Delete } from '@material-ui/icons';
 import EditIcon from '@material-ui/icons/Edit';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
@@ -15,6 +15,8 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { ATTACHMENT_TYPE, CustomDialogTransition } from 'src/constants/helpers';
 import ViewImage from './ViewImage1';
 import { getFileIcon, getFileNameWithExtension } from './utils';
+import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 
 const Diagram = ({ resource, referenceId }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -36,11 +38,6 @@ const Diagram = ({ resource, referenceId }) => {
       .get(`/attachment/resource-attachment-type?resource=${resource}&referenceId=${referenceId}&attachmentType=${ATTACHMENT_TYPE.diagram}`)
       .then(({ data: { data } }) => {
         setRowData(data);
-        if (data?.length && !selectedAttachment) {
-          if (data[0]?.file?.length) {
-            setSelectedAttachment({ ...data[0]?.file[0], attachmentId: data[0]?._id });
-          }
-        }
         const expend: any = {};
         data?.forEach((file) => {
           expend[file?._id] = true;
@@ -106,7 +103,7 @@ const Diagram = ({ resource, referenceId }) => {
   const ShowOtherFiles = ({ data }) => {
     const FileIcon = getFileIcon(data.url);
     return (
-      <div className="flex justify-center items-center h-full absolute inset-0">
+      <div className="flex justify-center items-center h-full inset-0">
         <div className="flex flex-col gap-2 items-center">
           <FileIcon size={150} className="text-center" />
           <p className=" line-clamp-1 text-[14px] font-normal">{getFileNameWithExtension(data)}</p>
@@ -128,148 +125,154 @@ const Diagram = ({ resource, referenceId }) => {
 
   return (
     <Box>
-      <Grid container spacing={2}>
-        <Grid item xs={12} sm={5} md={5} lg={4} xl={3}>
-          <Box className="container-with-border min-h-[calc(100vh-150px)] max-[600px]:[min-height:unset]" p={'20px'} >
-            <Box mb={1} display="flex" justifyContent="end" alignItems="center">
-              <Button
-                variant={'outlined'}
-                color="primary"
-                size="small"
-                startIcon={<Add />}
-                onClick={() => {
-                  setAttachemntDialog({ open: true, id: null });
-                }}
-                aria-controls="add-menu"
-              >
-                Add
-              </Button>
-            </Box>
-            <Box pt={2} pb={2}>
-              <Box className="overflow-auto min-[600px]:h-[calc(100vh-250px)]">
-                <div className="grid gap-3">
-                  {rowData &&
-                    rowData?.map((file, index) => {
-                      return (
-                        <div key={file._id} className="shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
-                          <div
-                            className={`head flex items-center justify-between cursor-pointer w-full p-[8px_15px] ${
-                              expended[file?._id]
-                                ? 'bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)] rounded-[4px_4px_0_0]'
-                                : 'bg-[var(--accordion-summary-bg,#fff)] rounded-[4px]'
-                            }`}
-                            onClick={() => {
-                              setExpended((prev) => ({
-                                ...prev,
-                                [file?._id]: expended[file?._id] ? false : true
-                              }));
-                            }}
-                          >
-                            <div className="flex items-center">
-                              <span className="p-1">{expended[file?._id] ? <ExpandMoreIcon /> : <KeyboardArrowRight />}</span>
-                              <Box ml={2}>
-                                <Typography style={{ fontWeight: 600 }} className=" break-all" title={file?.name}>
-                                  {file?.name}
-                                </Typography>
-                              </Box>
-                            </div>
-                            <div className="flex gap-2">
-                              <HtmlTooltip title="Edit" placement="top" arrow>
-                                <IconButton
-                                  size="small"
-                                  color="inherit"
-                                  aria-label="edit"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setAttachemntDialog({ open: true, id: file?._id });
-                                  }}
-                                >
-                                  <EditIcon style={{ fontSize: '18px' }} />
-                                </IconButton>
-                              </HtmlTooltip>
-                              <HtmlTooltip title="Delete" placement="top" arrow>
-                                <IconButton
-                                  size="small"
-                                  color="inherit"
-                                  style={{ color: 'red' }}
-                                  aria-label="delete"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setSelectedFile(file);
-                                    setShowConfirmBox(true);
-                                  }}
-                                >
-                                  <Delete style={{ fontSize: '18px' }} />
-                                </IconButton>
-                              </HtmlTooltip>
-                            </div>
-                          </div>
-
-                          <Collapse in={expended[file?._id]}>
-                            <div className="border border-[var(--common-border-color)]">
-                              {file?.file?.map((f) => {
-                                const Icon = getFileIcon(f.url);
-                                return (
-                                  <Box
-                                    key={f.url}
-                                    onClick={() => {
-                                      setSelectedAttachment({ ...f, attachmentId: file?._id });
-                                    }}
-                                    className="px-[18px] py-[8px] cursor-pointer"
-                                    style={{
-                                      border:
-                                        selectedAttachment?.url === f?.url
-                                          ? '1px solid var(--dark-active-border-color,#0F9FA9 )'
-                                          : '1px solid transparent',
-                                      borderBottomColor:
-                                        selectedAttachment?.url === f?.url ? 'var(--dark-active-border-color,#0F9FA9 )' : 'var(--common-border-color)'
-                                    }}
-                                  >
-                                    <Tooltip enterTouchDelay={0} title={f.name} placement={'top'} arrow>
-                                      <div className="flex gap-2 items-center">
-                                        <div className="w-[20px]">
-                                          <Icon size={20} />
-                                        </div>
-                                        <p className=" line-clamp-1 text-[14px] font-normal">{getFileNameWithExtension(f)}</p>
-                                      </div>
-                                    </Tooltip>
-                                  </Box>
-                                );
-                              })}
-                            </div>
-                          </Collapse>
-                        </div>
-                      );
-                    })}
-                </div>
-              </Box>
-            </Box>
-          </Box>
-        </Grid>
-        <Grid item xs={12} sm={7} md={7} lg={8} xl={9} className="min-h-[600px]">
-          <Box
-            className="container-with-border relative"
-            p={'20px'}
-            style={{
-              overflow: 'hidden',
-              minHeight: '100%'
+      <Box className="container-with-border min-h-[calc(100vh-150px)] max-[600px]:[min-height:unset]" p={'20px'}>
+        <Box mb={1} display="flex" justifyContent="end" alignItems="center">
+          <Button
+            variant={'outlined'}
+            color="primary"
+            size="small"
+            startIcon={<Add />}
+            onClick={() => {
+              setAttachemntDialog({ open: true, id: null });
             }}
+            aria-controls="add-menu"
           >
-            {selectedAttachment && (
-              <>
-                {checkImageType(selectedAttachment?.url?.split('.')[1]) ? (
-                  // <ViewImage data={selectedAttachment} fetchData={fetchData} />
-                  <ViewImage data={selectedAttachment} fetchData={fetchData} setSelectedAttachment={setSelectedAttachment} />
-                ) : checkpdfType(selectedAttachment?.url?.split('.')[1]) ? (
-                  <ShowPdf data={selectedAttachment} />
-                ) : (
-                  <ShowOtherFiles data={selectedAttachment} key={selectedAttachment.url} />
-                )}
-              </>
-            )}
+            Add
+          </Button>
+        </Box>
+        <Box pt={2} pb={2}>
+          <Box className="overflow-auto min-[600px]:h-[calc(100vh-250px)]">
+            <div className="grid gap-3">
+              {rowData &&
+                rowData?.map((file, index) => {
+                  return (
+                    <div key={file._id} className="shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
+                      <div
+                        className={`head flex items-center justify-between cursor-pointer w-full p-[8px_15px] ${
+                          expended[file?._id]
+                            ? 'bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)] rounded-[4px_4px_0_0]'
+                            : 'bg-[var(--accordion-summary-bg,#fff)] rounded-[4px]'
+                        }`}
+                        onClick={() => {
+                          setExpended((prev) => ({
+                            ...prev,
+                            [file?._id]: expended[file?._id] ? false : true
+                          }));
+                        }}
+                      >
+                        <div className="flex items-center">
+                          <span className="p-1">{expended[file?._id] ? <ExpandMoreIcon /> : <KeyboardArrowRight />}</span>
+                          <Box ml={2}>
+                            <Typography style={{ fontWeight: 600 }} className=" break-all" title={file?.name}>
+                              {file?.name}
+                            </Typography>
+                          </Box>
+                        </div>
+                        <div className="flex gap-2">
+                          <HtmlTooltip title="Edit" placement="top" arrow>
+                            <IconButton
+                              size="small"
+                              color="inherit"
+                              aria-label="edit"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setAttachemntDialog({ open: true, id: file?._id });
+                              }}
+                            >
+                              <EditIcon style={{ fontSize: '18px' }} />
+                            </IconButton>
+                          </HtmlTooltip>
+                          <HtmlTooltip title="Delete" placement="top" arrow>
+                            <IconButton
+                              size="small"
+                              color="inherit"
+                              style={{ color: 'red' }}
+                              aria-label="delete"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedFile(file);
+                                setShowConfirmBox(true);
+                              }}
+                            >
+                              <Delete style={{ fontSize: '18px' }} />
+                            </IconButton>
+                          </HtmlTooltip>
+                        </div>
+                      </div>
+
+                      <Collapse in={expended[file?._id]}>
+                        <div className="border border-[var(--common-border-color)]">
+                          {file?.file?.map((f) => {
+                            const Icon = getFileIcon(f.url);
+                            return (
+                              <Box
+                                key={f.url}
+                                onClick={() => {
+                                  setSelectedAttachment({ ...f, attachmentId: file?._id });
+                                }}
+                                className="px-[18px] py-[8px] cursor-pointer"
+                                style={{
+                                  border:
+                                    selectedAttachment?.url === f?.url
+                                      ? '1px solid var(--dark-active-border-color,#0F9FA9 )'
+                                      : '1px solid transparent',
+                                  borderBottomColor:
+                                    selectedAttachment?.url === f?.url ? 'var(--dark-active-border-color,#0F9FA9 )' : 'var(--common-border-color)'
+                                }}
+                              >
+                                <Tooltip enterTouchDelay={0} title={f.name} placement={'top'} arrow>
+                                  <div className="flex gap-2 items-center">
+                                    <div className="w-[20px]">
+                                      <Icon size={20} />
+                                    </div>
+                                    <p className=" line-clamp-1 text-[14px] font-normal">{getFileNameWithExtension(f)}</p>
+                                  </div>
+                                </Tooltip>
+                              </Box>
+                            );
+                          })}
+                        </div>
+                      </Collapse>
+                    </div>
+                  );
+                })}
+            </div>
           </Box>
-        </Grid>
-      </Grid>
+        </Box>
+      </Box>
+      {selectedAttachment && (
+        <Dialog
+          open={true}
+          fullScreen={true}
+          TransitionComponent={CustomDialogTransition}
+          aria-labelledby="customized-dialog-title"
+          maxWidth={'md'}
+          onClose={(e, reason) => {
+            if (reason !== 'backdropClick') {
+              setSelectedAttachment(null);
+            }
+          }}
+          fullWidth
+        >
+          <CustomDialogHeader
+            title={'Show Diagram'}
+            showManimizeMaximize={false}
+            showRequiredLabel={false}
+            onClose={() => {
+              setSelectedAttachment(null);
+            }}
+          />
+          <CustomDialogContent>
+            {checkImageType(selectedAttachment?.url?.split('.')[1]) ? (
+              <ViewImage data={selectedAttachment} fetchData={fetchData} setSelectedAttachment={setSelectedAttachment} />
+            ) : checkpdfType(selectedAttachment?.url?.split('.')[1]) ? (
+              <ShowPdf data={selectedAttachment} />
+            ) : (
+              <ShowOtherFiles data={selectedAttachment} key={selectedAttachment.url} />
+            )}
+          </CustomDialogContent>
+        </Dialog>
+      )}
       {attachemntDialog.open && (
         <Dialog
           open={true}

@@ -480,7 +480,7 @@ function CustomReactTable({
       filterTypes,
       initialState: {
         sortBy: sorting.map((d) => {
-          return { desc: d.sort === 'asc' ? false : true };
+          return { id: d.colId, desc: d.sort === 'asc' ? false : true };
         }),
         pageIndex: page,
         expanded: false,
@@ -544,7 +544,7 @@ function CustomReactTable({
   useEffect(() => {
     if (!isClientSideGrid) {
       let tempArray = sorting.map((d) => {
-        return { desc: d.sort === 'asc' ? false : true };
+        return { id: d.colId, desc: d.sort === 'asc' ? false : true };
       });
       if (JSON.stringify(sortBy) !== JSON.stringify(tempArray)) {
         sortBy?.forEach((v) => {
