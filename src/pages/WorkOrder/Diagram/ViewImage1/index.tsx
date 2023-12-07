@@ -154,7 +154,7 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
           </CustomButton>
         )}
       </Box>
-      <Box height="calc(100vh - 150px)" style={{ overflow: 'hidden', position: 'relative', overflowX: 'auto', overflowY: 'auto' }}>
+      <Box height="calc(100vh - 115px)" style={{ overflow: 'hidden', position: 'relative', overflowX: 'auto', overflowY: 'auto' }}>
         <img src={url} alt="image" />
         <div style={{ width: widthHeight.width, height: widthHeight.height, position: 'absolute', top: 0, left: 0, overflow: 'hidden' }}>
           {texts.map((text) => (
