@@ -295,8 +295,6 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
   const handleAdd = async (rows) => {
     setSubmitting(true);
     const material: any = [];
-    const isTrailerNumber = allFields?.find((e) => e?.fieldName === 'trailerNumber');
-
     await asyncForEach(rows, async (d) => {
       const qty = d.qty ? parseFloat(d.qty) : 1;
       await asyncForEach(Array.from(Array(qty).keys()), async (i: any) => {
@@ -306,9 +304,6 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
         element.unit = d?.unitMain && d?.unitMain?.length ? d.unitMain[0] : d?.unit ? d?.unit : '';
         element.qty = 1;
         element.parentId = addDialog.parentId;
-        if (isTrailerNumber && productionOrderData?.trailerNumber) {
-          element.trailerNumber = productionOrderData.trailerNumber;
-        }
         material.push(element);
       });
     });
@@ -440,22 +435,24 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
               >
                 Add Existing Products
               </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  closeAddActions();
-                  setAddDialog({ open: true, type: 'newProduct', parentId: null });
-                }}
-              >
-                Add New Product
-              </MenuItem>
-              <MenuItem
+              {permissions?.product?.isCreate &&
+                <MenuItem
+                  onClick={() => {
+                    closeAddActions();
+                    setAddDialog({ open: true, type: 'newProduct', parentId: null });
+                  }}
+                >
+                  Add New Product
+                </MenuItem>
+              }
+              {/* <MenuItem
                 onClick={() => {
                   closeAddActions();
                   setAddDialog({ open: true, type: MATERIAL_TYPE.package, parentId: null });
                 }}
               >
                 Add Existing Packages
-              </MenuItem>
+              </MenuItem> */}
             </Menu>
           </Box>
           <Box display="flex">
@@ -537,7 +534,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
               refreshGrid={fetchData}
               onSaveEdit={onSaveInlineEdit}
               hideSelection={!allowedToEdit}
-              expander={true}
+              hideAction={!allowedToEdit}
             />
           </Box>
         </>

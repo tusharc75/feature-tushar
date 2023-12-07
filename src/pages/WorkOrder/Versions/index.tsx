@@ -13,14 +13,15 @@ import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import startCase from 'lodash/startCase';
 import { isMobile } from 'react-device-detect';
-import { orderBy } from 'lodash';
+import { camelCase, orderBy } from 'lodash';
 
 const Versions = ({ workOrderId, workOrderData, handleClose }) => {
-  const { state, dispatch } = useTableReducer();
 
-  const [fullScreen, setFullScreen] = useState(true);
+  let renderedFrom = `${camelCase(routes?.workOrder.title)}_version`;
+
+  const { state, dispatch } = useTableReducer();
   const [columns, setColumns] = useState(null);
-  const [selectedVersion, setSelectedVersion] = useState(workOrderData?.versions[0]?._id);
+  const [selectedVersion, setSelectedVersion] = useState(workOrderData?.versions[workOrderData?.versions?.length - 1]?._id);
 
   useEffect(() => {
     fetchFields();
@@ -105,10 +106,21 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.qty || <NoDataCell />}</p>
       },
       {
+        accessor: 'unit',
+        Header: 'Unit',
+        width: 200,
+        Cell: ({ row }) => <p className="text-truncate">{row?.original?.unit || <NoDataCell />}</p>
+      },
+      {
         accessor: 'status',
         Header: 'Status',
         width: 200,
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.status || <NoDataCell />}</p>
+      },
+      {
+        accessor: 'serviceStatus',
+        Header: 'Result',
+        Cell: ({ row }) => (row?.original['serviceStatus'] ? <h5> {row?.original?.serviceStatus}</h5> : <NoDataCell />)
       },
       {
         accessor: 'assignedUsers',
@@ -178,14 +190,41 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
             <NoDataCell />
           )
       },
-      {
-        accessor: 'unit',
-        Header: 'Unit',
-        width: 200,
-        Cell: ({ row }) => <p className="text-truncate">{row?.original?.unit || <NoDataCell />}</p>
-      }
+
     ];
     setColumns([...cols, ...columns]);
+  };
+
+  const fetchData = async () => {
+    dispatch({ type: 'loading', loading: true });
+    const {
+      data: { data }
+    } = await axiosInstance().get(`${workOrder.api}/${workOrderId}/version/${selectedVersion}`);
+
+    let rows = data?.filter((e) => e?.parentId == null);
+    rows?.forEach((parent, i) => {
+      parent.index = i + 1;
+      parent.detail =
+        parent?.type === MATERIAL_TYPE.service
+          ? parent?.serviceDetail?.serviceName
+          : parent?.type === MATERIAL_TYPE.product
+            ? parent?.productDetail?.productName
+            : parent?.type === MATERIAL_TYPE.package
+              ? parent?.packageDetail?.packageName
+              : '';
+      parent.description =
+        parent?.type === MATERIAL_TYPE.service
+          ? parent?.serviceDetail?.serviceDescription
+          : parent?.type === MATERIAL_TYPE.product
+            ? parent?.productDetail?.productDescription
+            : parent?.type === MATERIAL_TYPE.package
+              ? parent?.packageDetail?.packageDescription
+              : '';
+      parent.subRows = generateNestedData(data, parent);
+    });
+
+    dispatch({ type: 'initialize', data: rows, count: rows?.length || 0 });
+    dispatch({ type: 'loading', loading: false });
   };
 
   const generateNestedData = (material, parent) => {
@@ -193,89 +232,38 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
     subRows = orderBy(subRows, ['type'], ['desc']);
     subRows?.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + (index + 1);
-      _subRow.unit = _subRow?.detail?.unit?.join(', ') || '';
-      _subRow.description =
-        _subRow?.type === MATERIAL_TYPE.service
-          ? _subRow?.detail?.serviceDescription
-          : _subRow?.type === MATERIAL_TYPE.product
-          ? _subRow?.detail?.productDescription
-          : _subRow?.type === MATERIAL_TYPE.package
-          ? _subRow?.detail?.packageDescription
-          : '';
-      _subRow.materialId = _subRow?.detail?._id;
       _subRow.detail =
         _subRow?.type === MATERIAL_TYPE.service
-          ? _subRow?.detail?.serviceName
+          ? _subRow?.serviceDetail?.serviceName
           : _subRow?.type === MATERIAL_TYPE.product
-          ? _subRow?.detail?.productName
-          : _subRow?.type === MATERIAL_TYPE.package
-          ? _subRow?.detail?.packageName
-          : '';
+            ? _subRow?.productDetail?.productName
+            : _subRow?.type === MATERIAL_TYPE.package
+              ? _subRow?.packageDetail?.packageName
+              : '';
+      _subRow.description =
+        _subRow?.type === MATERIAL_TYPE.service
+          ? _subRow?.serviceDetail?.serviceDescription
+          : _subRow?.type === MATERIAL_TYPE.product
+            ? _subRow?.productDetail?.productDescription
+            : _subRow?.type === MATERIAL_TYPE.package
+              ? _subRow?.packageDetail?.packageDescription
+              : '';
       _subRow.subRows = generateNestedData(material, _subRow);
     });
     return subRows;
   };
 
-  const fetchData = async () => {
-    dispatch({ type: 'loading', loading: true });
-    const {
-      data: { data }
-    } = await axiosInstance().get(`${workOrder.api}/get-version-detail/${workOrderId}/${selectedVersion}`);
-
-    const material = data?.material;
-
-    let rows = material.filter((e) => e?.parentId == null);
-
-    rows?.forEach((parent, i) => {
-      parent.index = i + 1;
-      parent.unit = parent?.detail?.unit?.join(', ') || '';
-      parent.description =
-        parent?.type === MATERIAL_TYPE.service
-          ? parent?.detail?.serviceDescription
-          : parent?.type === MATERIAL_TYPE.product
-          ? parent?.detail?.productDescription
-          : parent?.type === MATERIAL_TYPE.package
-          ? parent?.detail?.packageDescription
-          : '';
-      parent.materialId = parent?.detail?._id;
-      parent.detail =
-        parent?.type === MATERIAL_TYPE.service
-          ? parent?.detail?.serviceName
-          : parent?.type === MATERIAL_TYPE.product
-          ? parent?.detail?.productName
-          : parent?.type === MATERIAL_TYPE.package
-          ? parent?.detail?.packageName
-          : '';
-      parent.subRows = generateNestedData(material, parent);
-    });
-
-    dispatch({ type: 'initialize', data: material, count: material?.length || 0 });
-    dispatch({ type: 'loading', loading: false });
-  };
 
   return (
     <>
-      <Dialog
-        open
-        fullScreen={fullScreen}
-        maxWidth="md"
-        fullWidth
+      <Dialog open fullScreen maxWidth="md" fullWidth
         onClose={(e, reason) => {
           if (reason !== 'backdropClick') {
             handleClose();
           }
         }}
       >
-        <CustomDialogHeader
-          title={`Versions - ${workOrderData?.workOrderNumber}`}
-          onClose={handleClose}
-          isMinimized={!fullScreen}
-          onMinimizeMaximize={() => {
-            setFullScreen((prevState) => !prevState);
-          }}
-          showRequiredLabel={false}
-          showManimizeMaximize={true}
-        />
+        <CustomDialogHeader title={`Versions - ${workOrderData?.workOrderNumber}`} onClose={handleClose} showRequiredLabel={false} />
         <CustomDialogContent>
           <Box width={'100%'} display="flex" flexWrap="wrap">
             {workOrderData?.versions &&
@@ -307,8 +295,9 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
                 hideSelection={true}
                 refreshGrid={fetchData}
                 hideAction={true}
-                renderedFrom={'workOrder_versions'}
+                renderedFrom={renderedFrom}
                 isClientSideGrid={true}
+                expander={true}
               />
             </Box>
           ) : (

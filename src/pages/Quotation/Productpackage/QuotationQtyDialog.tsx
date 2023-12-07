@@ -145,8 +145,6 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
         pricingMethodOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`]?.pricingMethod);
       }
       setPriceMethodList(pricingMethodOptions);
-      console.log(pricingMethodOptions)
-
       let pricingConditionOptions = await getPricing(rowData, pricingMethodOptions);
       data.forEach((element) => {
         if (rowData?.type === 'serializedAsset') {
