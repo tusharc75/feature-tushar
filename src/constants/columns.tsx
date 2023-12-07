@@ -292,8 +292,8 @@ export const generateCustomTableColumns = (fields: any[], currency: string, rend
 const columnData = (ele, row) => {
 
   const path = routes[`${camelCase(ele?.lookupResource)}Detail`]?.path
-    ? routes[`${camelCase(ele?.lookupResource)}Detail`]?.path
-    : `${camelCase(ele?.lookupResource)}/detail`;
+  ? routes[`${camelCase(ele?.lookupResource)}Detail`]?.path
+  : `/${camelCase(ele?.lookupResource)}/detail`;
 
   if (ele.type === 'multiSelect' && ele.lookup) {
     return (
