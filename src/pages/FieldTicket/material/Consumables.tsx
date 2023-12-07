@@ -32,6 +32,7 @@ import ConsumablesQtyDialog from 'src/pages/WorkOrder/Consumables/ConsumablesQty
 import History from '../../ProductInventory/LedgerHistory';
 import QtyRequestLog from 'src/pages/WorkOrder/Consumables/QtyRequestLog';
 import { Add } from '@material-ui/icons';
+import { isEmpty } from 'lodash';
 
 const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -325,6 +326,14 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
 
   const handleSubmit = async (rows) => {
     setSubmitting(true)
+    const tax: any = {};
+    if (fieldTicketData?.taxCode) {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`${routes?.taxMaster.path}/by-zipcode?taxCode=${fieldTicketData?.taxCode?.optionValue}`);
+      tax.taxCode = fieldTicketData?.taxCode?.optionValue;
+      tax.taxPercentage = data?.length ? data[0]?.taxRate : 0;
+    }
     const material: any = [];
     rows.forEach((d) => {
       const element: any = {};
@@ -340,6 +349,10 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
       element.estimateJobDuration = 1;
       if (calValues && calValues['estimateJobDuration']) {
         element.estimateJobDuration = calValues['estimateJobDuration'];
+      }
+      if(!isEmpty(tax)){
+        element.taxCode = tax?.taxCode;
+        element.taxPercentage = tax?.taxPercentage;
       }
       material.push(element);
     });
