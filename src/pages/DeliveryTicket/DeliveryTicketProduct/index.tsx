@@ -33,6 +33,7 @@ const DeliveryTicketProduct = ({ renderedFrom, deliveryTicketId }) => {
       Cell: ({ row }) => (row?.original?.qty ? <h5>{row?.original?.qty}</h5> : <NoDataCell />)
     }
   ];
+
   useEffect(() => {
     fetchGridColumns();
   }, []);
@@ -91,7 +92,6 @@ const DeliveryTicketProduct = ({ renderedFrom, deliveryTicketId }) => {
         columns = [...columns, currentColumn?.columnData];
       }
     });
-    columns = [...columns, ...getStaticFields()];
     setColumns([...defaultColumns, ...columns]);
   };
 
