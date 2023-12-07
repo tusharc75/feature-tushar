@@ -110,7 +110,6 @@ const AssignServiceDialog = ({ onSuccess, handleClose, ids = [], extraStaticFilt
 
   const getQueryString = () => {
     const ignoreIds = ids && ids?.length > 0 ? ids : [];
-
     let deepFilter = `?page=${page}&limit=${limit}&ignoreIds=${JSON.stringify(ignoreIds)}`;
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;

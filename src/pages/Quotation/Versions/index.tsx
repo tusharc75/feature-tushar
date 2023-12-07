@@ -1,11 +1,9 @@
-import { Dialog, IconButton, Tooltip } from '@material-ui/core';
-import { useContext, useReducer, useState } from 'react';
+import { Box, Dialog, IconButton } from '@material-ui/core';
+import { useContext, useEffect, useState } from 'react';
 import axiosInstance from '../../../axios/axiosInstance';
 import { gridLoadingTimeout } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { useEffect } from 'react';
-import CustomAgGrid, { reducer, intialState } from '../../../components/AgGridComponents/CustomAgGrid';
-import { CommonRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
 import CustomRenderCell from '../../../components/Helpers/CustomRenderCell';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -16,34 +14,93 @@ import { Link } from 'react-router-dom';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ManageQuotationDialog from '../ManageQuotationDialog';
 import { useData } from '../../../StateProvider/Provider';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import { cloneDisable } from 'src/constants/messageHelpers';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
-export default function Version({ onClose, quotationId, handleChangeVersion, referenceType = "" }) {
-
+export default function Version({ onClose, quotationId, handleChangeVersion, referenceType = '' }) {
   const renderedFrom = `${camelCase(routes?.quotation.title)}_versions`;
+  const { state, dispatch } = useTableReducer();
 
   const {
     state: { permissions }
   }: any = useData();
 
   const toastConfig = useContext(CustomToastContext);
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showManageQuotationDialog, setShowManageQuotationDialog] = useState({ open: false, isClone: false, idToClone: null, versionId: null });
 
   const [columns, setColumns] = useState([]);
 
   useEffect(() => {
-    const column: any = [];
-    column.push({ field: 'version', headerName: 'Version', show: true, width: 140, disabled: true, cellRenderer: 'nameRenderer' });
-    if (referenceType === "rentalJob" || referenceType === "repairOrder") {
-      column.push({ field: 'quotationNumber', headerName: 'Quotation Number', show: true, cellRenderer: 'quotationNumberRenderer' });
-    }
-    column.push({ field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' });
-    column.push({ field: 'comment', headerName: 'Comment', show: true, cellRenderer: 'commonRenderer' });
-    setColumns(column)
+    fetchGridColumns();
   }, []);
+
+  const fetchGridColumns = () => {
+    let columns = [];
+    columns.push({
+      accessor: 'version',
+      Header: 'Version',
+      width: 200,
+      Cell: ({ row }) => {
+        return row.original?.version ? (
+          referenceType === 'rentalJob' || referenceType === 'repairOrder' ? (
+            <p className="text-truncate">{row?.original?.version}</p>
+          ) : (
+            <Link
+              className="link text-truncate"
+              onClick={() => {
+                handleChangeVersion(row?.original?.version);
+              }}
+            >
+              <CustomRenderCell value={row?.original?.version} />
+            </Link>
+          )
+        ) : (
+          <NoDataCell />
+        );
+      }
+    });
+    if (referenceType === 'rentalJob' || referenceType === 'repairOrder') {
+      columns.push({
+        accessor: 'quotationNumber',
+        Header: 'Quotation Number',
+        width: 200,
+        Cell: ({ row }) => {
+          return row?.original?.quotationNumber ? (
+            <Link
+              className="link text-truncate"
+              title={row?.original?.quotationNumber}
+              to={`${routes.quotationDetail.path}/${row?.original?.quotationId}`}
+            >
+              {row?.original?.quotationNumber}
+            </Link>
+          ) : (
+            <NoDataCell />
+          );
+        }
+      });
+    }
+    columns.push({
+      accessor: 'status',
+      Header: 'Status',
+      width: 200,
+      Cell: ({ row }) => {
+        return row.original?.status ? <p className="text-truncate">{row.original.status}</p> : <NoDataCell />;
+      }
+    });
+    columns.push({
+      accessor: 'comment',
+      Header: 'Comment',
+      width: 200,
+      Cell: ({ row }) => {
+        return row.original?.comment ? <p className="text-truncate">{row.original.comment}</p> : <NoDataCell />;
+      }
+    });
+    columns = [...columns,  ActionsRenderer];
+    setColumns(columns);
+  };
 
   useEffect(() => {
     if (quotationId) {
@@ -51,61 +108,41 @@ export default function Version({ onClose, quotationId, handleChangeVersion, ref
     }
   }, [quotationId]);
 
-  const NameRenderer = (params) => (
-    referenceType === "rentalJob" || referenceType === "repairOrder" ?
-      <span>{params.data.version}</span> :
-      <span
-        className="link"
-        onClick={() => {
-          handleChangeVersion(params.data.version);
-        }}
-      >
-        <CustomRenderCell value={params?.value} />
-      </span>
-  );
-
-  const QuotationNumberRenderer = (params) => (
-    <Link className="link text-truncate"
-      title={params.value} to={`${routes.quotationDetail.path}/${params.data?.quotationId}`}>
-      {params.value}
-    </Link>
-  );
-
-  const ActionsRenderer = (params) => (
-    <>
-      {permissions?.quotation?.isCreate && (
-        <Tooltip title={`Clone Version to ${routes.quotation.title}`}>
-          <IconButton
-            size="small"
-            aria-label="Clone"
-            onClick={() => {
-              setShowManageQuotationDialog({
-                open: true,
-                isClone: true,
-                idToClone: params?.data?.quotationId,
-                versionId: params?.data?._id
-              })
-            }}
-          >
-            <FileCopyIcon fontSize="small" color="primary" />
-          </IconButton>
-        </Tooltip>
-      )}
-    </>
-  );
-
-  const frameworkComponents = {
-    nameRenderer: NameRenderer,
-    quotationNumberRenderer: QuotationNumberRenderer,
-    commonRenderer: CommonRenderer,
-    actionsRenderer: ActionsRenderer
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 110,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        <HtmlTooltip title={permissions?.quotation?.isCreate ? `Clone Version to ${routes.quotation.title}` : cloneDisable}>
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Clone"
+              onClick={() => {
+                setShowManageQuotationDialog({
+                  open: true,
+                  isClone: true,
+                  idToClone: row?.original?.quotationId,
+                  versionId: row?.original?._id
+                });
+              }}
+            >
+              <FileCopyIcon fontSize="small" color={permissions?.quotation?.isCreate ? 'primary' : 'disabled'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+      </>
+    )
   };
 
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
     axiosInstance()
       .get(`/quotation/${quotationId}`)
       .then(({ data: { data } }) => {
@@ -141,23 +178,22 @@ export default function Version({ onClose, quotationId, handleChangeVersion, ref
         showRequiredLabel={false}
       />
       <CustomDialogContent>
-        <CustomAgGrid
-          columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameworkComponents}
-          setGridApi={setGridApi}
-          dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          actionWidth={150}
-          isClientSideGrid={true}
-          allowSelection={false}
-          loading={loading}
-          refreshGrid={fetchData}
-          renderedFrom={renderedFrom}
-        />
+      {columns ? (
+          <CustomReactTable
+              height={fullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
+              columns={columns}
+              state={state}
+              dispatch={dispatch}
+              renderedFrom={renderedFrom}
+              refreshGrid={fetchData}
+              isClientSideGrid = {true}
+              hideSelection={true}
+            />
+      ) : (
+        <Box height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
+      )}
       </CustomDialogContent>
       {showManageQuotationDialog.open && (
         <ManageQuotationDialog
