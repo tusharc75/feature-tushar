@@ -39,7 +39,7 @@ import { RiFileShredFill } from 'react-icons/ri';
 import Diagram from './Diagram';
 import { ExpandMore } from '@material-ui/icons';
 import { VscVersions } from 'react-icons/vsc';
-import Versions from './VersionDialogBox';
+import Versions from './Versions';
 
 const WorkOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -207,7 +207,7 @@ const WorkOrderDetails = () => {
   };
 
   const createVersion = (withData) => {
-    axiosInstance().put(`${workOrder.api}/create-version/${id}`, { withData }).then(({ data }) => {
+    axiosInstance().put(`${workOrder.api}/${id}/version`, { withData }).then(({ data }) => {
       toastConfig.setToastConfig({
         open: true,
         type: 'success',
@@ -497,7 +497,6 @@ const WorkOrderDetails = () => {
           }}
         />
       )}
-
       {versionDialog && (
         <Versions
           workOrderId={id}
