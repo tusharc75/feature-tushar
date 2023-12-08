@@ -307,7 +307,13 @@ const RenderSubCard = ({
         {expander && expanderCol && flexRender(expanderCell.column.columnDef.cell, expanderCell.getContext())}
         {allowSelection && !row.original.hideSelection && (
           <div>
-            <IndeterminateCheckbox {...row.getToggleRowSelectedProps?.()} />
+            <IndeterminateCheckbox
+              {...{
+                checked: row.getIsSelected(),
+                indeterminate: row.getIsSomeSelected(),
+                onChange: row.getToggleSelectedHandler()
+              }}
+            />
           </div>
         )}
         <div className="flex-grow">

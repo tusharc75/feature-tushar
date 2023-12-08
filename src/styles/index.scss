@@ -3800,11 +3800,29 @@ body {
   }
 
   .sticky-cell-left:nth-last-child(1 of .sticky-cell-left) {
-    border-right: 1px solid var(--common-border-color, rgba(224, 224, 224, 1));
+    &::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      bottom: 0px;
+      width: 1px;
+      height: 100%;
+      background-color: var(--common-border-color, rgba(224, 224, 224, 1));
+    }
+    // border-right: 1px solid var(--common-border-color, rgba(224, 224, 224, 1));
   }
 
   .sticky-cell-right:nth-child(1 of .sticky-cell-right) {
-    border-left: 1px solid var(--common-border-color, rgba(224, 224, 224, 1));
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: 0px;
+      width: 1px;
+      height: 100%;
+      background-color: var(--common-border-color, rgba(224, 224, 224, 1));
+    }
+    // border-left: 1px solid var(--common-border-color, rgba(224, 224, 224, 1));
   }
 
   & thead > tr > th::before {
