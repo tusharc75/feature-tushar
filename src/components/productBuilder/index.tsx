@@ -150,7 +150,6 @@ const ProductBuilder = (props) => {
 
             return item;
           });
-          console.log(customFields)
           const newColumns = generateCustomTableColumns(customFields, currency, renderedFrom);
           columns = [...columns, ...newColumns];
         });

@@ -207,7 +207,6 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
           const newColumns = generateCustomTableColumns(filteredFields, quotationData.currency, renderedFrom,);
           columns = [...columns, ...newColumns];
         });
-        console.log('columns', columns)
         setRequireFieldArray(data?.requiredFields);
 
         columns = sortBy(columns, function (item: any) {

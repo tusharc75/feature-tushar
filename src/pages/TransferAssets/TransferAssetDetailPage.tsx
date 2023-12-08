@@ -39,20 +39,17 @@ const TransferAssetDetailPage = () => {
     state: { user, permissions }
   }: any = useData();
 
-  const [headingLabel, setHeadingLabel] = useState('');
   const [tabValue, setTabValue] = useState(parsedTab);
   const [loading, setLoading] = useState(true);
   const [isDeleting, setDeleting] = useState(false);
   const [transferAssetData, setTransferAssetData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [isNextStep, setNextStep] = useState(true);
-  const [isPrevStep, setPrevStep] = useState(true);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [transferAssetFields, setTransferAssetFields] = useState([]);
   const [existingAssets, setExistingAssets] = useState([]);
   const [loadingTickets, setLoadingTickets] = useState([]);
   const [receivingTickets, setReceivingTickets] = useState([]);
-  const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [currentStep, setCurrentStep] = useState(0);
   const [isTransferEnded, setTransferIsEnded] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
@@ -149,8 +146,6 @@ const TransferAssetDetailPage = () => {
       .get(`${routes.transferAsset.path}/${id}`)
       .then(({ data: { data } }) => {
         fetchFields(data?.transferType);
-        setTransferAssetData(data);
-        setHeadingLabel(data.transferAssetNumber);
         var steps: any = transferAssetSteps;
         if (data?.transferType === 'Internal') {
           steps = steps?.filter((e) => e.name !== 'Receiving Ticket');
@@ -161,8 +156,6 @@ const TransferAssetDetailPage = () => {
         setCurrentStep(
           steps?.map((item) => item.name)?.indexOf(data?.processStatus) !== -1 ? steps?.map((item) => item.name)?.indexOf(data?.processStatus) : 0
         );
-
-        setCustomizedRoutes([routes.transferAsset, { title: data.transferAssetNumber }]);
 
         var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
         if (user?.role?.selectedEntity?.superAdminAccess) {
@@ -180,8 +173,8 @@ const TransferAssetDetailPage = () => {
           data?.transferType === 'Internal'
             ? data?.transfertoPlant?.entity
             : data?.transferType === 'External Customer'
-            ? data?.transfertoCustomer?.entity
-            : data?.transfertoSupplier?.entity;
+              ? data?.transfertoCustomer?.entity
+              : data?.transfertoSupplier?.entity;
 
         if (warehouseEntity?.length) {
           const isReceiveable = warehouseEntity.filter((w: any) => userEntity.indexOf(w) > -1)?.length > 0;
@@ -189,6 +182,7 @@ const TransferAssetDetailPage = () => {
         } else {
           setCanReceive(true);
         }
+        setTransferAssetData(data);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -269,7 +263,7 @@ const TransferAssetDetailPage = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={customizedRoutes} />
+          <CustomBreadCrumbs routes={[routes.transferAsset, { title: transferAssetData?.transferAssetNumber }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -354,10 +348,7 @@ const TransferAssetDetailPage = () => {
             <ContentFullScreen title={stepNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
               {currentStep === 0 && (
                 <AssetsGrid
-                  fetchAssets={fetchAssets}
-                  currentStep={currentStep}
                   permissions={permissions}
-                  user={user}
                   setNextStep={setNextStep}
                   updateTransferStatus={updateTransferStatus}
                   transferAssetData={transferAssetData}
@@ -370,7 +361,6 @@ const TransferAssetDetailPage = () => {
                 <LoadingTicketGrid
                   setTickets={setLoadingTickets}
                   currentStep={currentStep}
-                  setPrevStep={setPrevStep}
                   transferAssetId={id}
                   transferAssetData={transferAssetData}
                   permissions={permissions}
@@ -389,7 +379,6 @@ const TransferAssetDetailPage = () => {
                 <ReceivingTicketGrid
                   setTickets={setReceivingTickets}
                   currentStep={currentStep}
-                  setPrevStep={setPrevStep}
                   transferAssetId={id}
                   transferAssetData={transferAssetData}
                   fetchAssets={fetchAssets}
@@ -417,7 +406,7 @@ const TransferAssetDetailPage = () => {
         <ConfirmationDialog
           okBtnLoading={isDeleting}
           open={showConfirmBox}
-          message={`Are you sure you want to delete this transfer asset: ${headingLabel} ?`}
+          message={`Are you sure you want to delete this transfer asset: ${transferAssetData?.transferAssetNumber} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}
