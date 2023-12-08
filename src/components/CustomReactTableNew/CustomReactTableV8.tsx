@@ -655,7 +655,7 @@ const CustomReactTable = ({
             />
           ) : null}
 
-          {(!isClientSideGrid || data.length > 2) && (
+          {(!isClientSideGrid || data.length > 25) && (
             <Pagination
               count={rowCount ?? data.length}
               page={page}
