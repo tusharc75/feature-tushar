@@ -5,13 +5,13 @@ import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { gridLoadingTimeout, prepareDataForGrid, product } from '../../../constants/helpers';
 import CarouselDialog from '../../../components/CarouselDialog';
-import CustomAgGrid, { reducer, intialState } from '../../../components/AgGridComponents/CustomAgGrid';
-import useColumns, { getFrameworkComponents } from '../../../constants/useColumns';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 import { Delete, Edit } from '@material-ui/icons';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import DeleteButton from '../../../components/Helpers/DeleteButton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider'
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 interface ConfigProps {
   productFields: any[];
@@ -42,13 +42,10 @@ const ProductConfiguration = (props: ConfigProps) => {
     values: {},
     images: []
   });
-
   const { getColumnData } = useColumns();
-  const [frameWorkComponent, setFrameWorkComponent] = React.useState({});
   const [columns, setColumns] = React.useState([]);
-  const [gridApi, setGridApi] = React.useState(null);
-  const [state, dispatch] = React.useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading: gridLoading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const { state, dispatch } = useTableReducer();
+  const { selectedRecords } = state;
 
   React.useEffect(() => {
     if (productData) {
@@ -60,9 +57,18 @@ const ProductConfiguration = (props: ConfigProps) => {
     }
   }, [productData]);
 
-  const ActionRenderer = (params) => (
-    <>
-      <IconButton size="small" color="inherit" onClick={() => editData(params.data)}>
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 110,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+         <IconButton size="small" color="inherit" onClick={() => editData(row?.original)}>
         <Edit fontSize="small" />
       </IconButton>
       <IconButton
@@ -71,14 +77,14 @@ const ProductConfiguration = (props: ConfigProps) => {
         onClick={() => {
           setShowConfirmBox({
             open: true,
-            ids: [params.data.id]
+            ids: [row?.original?.id]
           });
         }}
       >
         <Delete color="error" fontSize="small" />
       </IconButton>
-    </>
-  );
+      </>)
+  };
 
   const editData = (data) => {
     const { images, ...rest } = data;
@@ -97,23 +103,15 @@ const ProductConfiguration = (props: ConfigProps) => {
       const { fields } = data;
       setSpecFields(fields);
       let columns = [];
-      let rendererNames = [];
       fields.forEach((o) => {
-        let currentColumn = getColumnData(renderedFrom, o, routes.product.path);
+        let currentColumn = getColumnData(renderedFrom, o, routes.product.path, true);
         if (currentColumn !== null) {
           columns = [...columns, currentColumn?.columnData];
-          if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-            rendererNames.push(currentColumn?.rendererName);
-          }
         }
+        return o?.fieldData;
       });
-      let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-      tempFrameworkComponent = {
-        ...tempFrameworkComponent,
-        actionsRenderer: ActionRenderer
-      };
-      setFrameWorkComponent({ ...tempFrameworkComponent });
-      setColumns([...columns]);
+      columns = [...columns, ActionsRenderer];
+      setColumns(columns);
     } catch (err) {
       setToastConfig(err);
     }
@@ -121,9 +119,7 @@ const ProductConfiguration = (props: ConfigProps) => {
 
   const getConfigurationData = () => {
     dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
+    dispatch({ type: 'selection', selectedRecords: [] });
     axiosInstance()
       .get(`${routes.product.path}/${id}/images`)
       .then(({ data: { data } }) => {
@@ -199,24 +195,22 @@ const ProductConfiguration = (props: ConfigProps) => {
         </Box>
       }
       <Box>
-        {Object.keys(frameWorkComponent).length > 0 && (
-          <CustomAgGrid
-            allowSelection={permissions?.product?.isUpdate}
-            allowAction={permissions?.product}
+      {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
             columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameWorkComponent}
-            setGridApi={setGridApi}
+            state={state}
             dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            actionWidth={150}
-            loading={gridLoading}
-            isClientSideGrid
             renderedFrom={renderedFrom}
+            refreshGrid={()=>{}}
+            isClientSideGrid = {true}
+            hideAction = {!(permissions?.product)}
+            hideSelection = {!(permissions?.product?.isUpdate)}
           />
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
         )}
       </Box>
       {openDialog && (

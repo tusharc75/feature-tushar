@@ -1,22 +1,98 @@
-import { useState, useEffect, useReducer } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog } from '@material-ui/core';
-import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition } from '../../../constants/helpers';
+import { CustomDialogTransition, dateTimeFormat } from '../../../constants/helpers';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
-import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridComponents/CustomAgGrid';
-import { CommonRenderer, DateTimeRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
 import { capitalize } from 'lodash';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { useAppTheme } from 'src/constants/AppConfig';
+import moment from 'moment';
 
 const Logs = ({ handleClose, detail, inventoryHistory }) => {
   const [themeColor] = useAppTheme();
   const isDarkTheme = themeColor === 'dark';
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
+  const [columns, setColumns] = useState([]);
+  const { state, dispatch } = useTableReducer();
 
+  useEffect(() => {
+    fetchGridColumns();
+  }, []);
+
+  const fetchGridColumns = () => {
+    let columns = [
+      {
+        accessor: 'date',
+        Header: 'Date',
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original?.date ? <p className="text-truncate">{moment(row?.original?.date)?.format(dateTimeFormat)}</p> : <NoDataCell />;
+        }
+      },
+      {
+        accessor: 'type',
+        Header: 'Type',
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original?.type ? <p className="text-truncate">{row.original.type}</p> : <NoDataCell />;
+        }
+      },
+      {
+        accessor: 'qty',
+        Header: 'Qty',
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original?.qty ? (
+            <div
+              style={{
+                backgroundColor:
+                  row?.original?.type === 'Debit'
+                    ? isDarkTheme
+                      ? 'hsl(1 100% 65% / 1)'
+                      : '#FFCCCB'
+                    : isDarkTheme
+                    ? 'hsl(120 73% 40% / 1)'
+                    : '#90ee90'
+              }}
+            >
+              {row?.original?.type === 'Debit' ? `-${row?.original?.qty}` : row?.original?.qty}
+            </div>
+          ) : (
+            <NoDataCell />
+          );
+        }
+      },
+      {
+        accessor: 'supplierPartNumber',
+        Header: 'Supplier Part Number',
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original?.supplierPartNumber ? <p className="text-truncate">{row.original.supplierPartNumber}</p> : <NoDataCell />;
+        }
+      },
+      {
+        accessor: 'comment',
+        Header: 'Comment',
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original?.comment ? <p className="text-truncate">{row.original.comment}</p> : <NoDataCell />;
+        }
+      },
+      {
+        accessor: 'transactionDate',
+        Header: 'Actual Transaction Date',
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original?.transactionDate ? (
+            <p className="text-truncate">{moment(row?.original?.transactionDate)?.format(dateTimeFormat)}</p>
+          ) : (
+            <NoDataCell />
+          );
+        }
+      }
+    ];
+    setColumns(columns);
+  };
   useEffect(() => {
     const data = JSON.parse(JSON.stringify(inventoryHistory));
     let rows = data?.map((u: any, index) => {
@@ -28,70 +104,20 @@ const Logs = ({ handleClose, detail, inventoryHistory }) => {
     dispatch({ type: 'initialize', data: rows, count: rows.length });
   }, []);
 
-  const columns = [
-    { field: 'date', headerName: 'Date', show: true, cellRenderer: 'dateTimeRenderer', filter: false, sortable: false },
-    { field: 'type', headerName: 'Type', show: true, cellRenderer: 'commonRenderer' },
-    {
-      field: 'qty',
-      headerName: 'Qty',
-      show: true,
-      cellRenderer: 'creditDebitRenderer',
-      filter: false,
-      sortable: false,
-      cellStyle: (params) => {
-        if (params?.data?.type === 'Credit') {
-          return { backgroundColor: isDarkTheme ? 'hsl(120 73% 40% / 1)' : '#90ee90' };
-        }
-        if (params?.data?.type === 'Debit') {
-          return { backgroundColor: isDarkTheme ? 'hsl(1 100% 65% / 1)' : '#FFCCCB' };
-        }
-      }
-    },
-    { field: 'supplierPartNumber', headerName: 'Supplier Part Number', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'comment', headerName: 'Comment', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'transactionDate', headerName: 'Actual Transaction Date', show: false, filter: false, sortable: false, cellRenderer: 'dateTimeRenderer' }
-  ];
-
-  const CreditDebitRenderer = (params: any) => (
-    <span>{params?.value ? params?.data?.type === 'Debit' ? `-${params?.value}` : params?.value : <NoDataCell />}</span>
-  );
-
-  const frameworkComponents = {
-    commonRenderer: CommonRenderer,
-    creditDebitRenderer: CreditDebitRenderer,
-    dateTimeRenderer: DateTimeRenderer
-  };
-
   return (
-    <Dialog
-      fullWidth
-      fullScreen
-      TransitionComponent={CustomDialogTransition}
-      aria-labelledby="customized-dialog-title"
-      open={true}
-    >
-      <CustomDialogHeader
-        title={`Logs - ${detail}`}
-        showRequiredLabel={false}
-        onClose={handleClose}
-      />
+    <Dialog fullWidth fullScreen TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
+      <CustomDialogHeader title={`Logs - ${detail}`} showRequiredLabel={false} onClose={handleClose} />
       <CustomDialogContent>
-        <CustomAgGrid
+        <CustomReactTable
+          height={'calc(100vh - 200px)'}
           columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameworkComponents}
-          setGridApi={setGridApi}
+          state={state}
           dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          allowAction={false}
-          loading={loading}
-          isClientSideGrid={true}
-          allowSelection={false}
           renderedFrom={'purchaseOrder_logs'}
-          refreshGrid={() => { }}
+          isClientSideGrid={true}
+          refreshGrid={() => {}}
+          hideAction={true}
+          hideSelection={true}
         />
       </CustomDialogContent>
     </Dialog>
