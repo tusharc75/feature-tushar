@@ -184,7 +184,6 @@ const AddExistingProduct = (props) => {
         });
 
         columns = [...columns, ...getStaticFields()];
-        console.log(columns)
         setColumns([...columns]);
         dispatch({ type: 'initialize', data: rows, count: data.count });
         setTimeout(() => {
