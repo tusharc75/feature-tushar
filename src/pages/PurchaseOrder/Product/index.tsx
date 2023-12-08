@@ -28,6 +28,7 @@ import { isEmpty, map, startCase, uniq } from 'lodash';
 import EditIcon from '@material-ui/icons/Edit';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import PreviewDownload from 'src/components/PreviewDownload';
+import { fetchTaxRate } from './helper';
 
 const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: hasPermission, checkReceivedProduct }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -325,8 +326,8 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
         item.type === 'Product'
           ? item?.productDetail?.productDescription
           : item.type === 'Service'
-            ? item?.serviceDetail?.serviceDescription
-            : item?.description;
+          ? item?.serviceDetail?.serviceDescription
+          : item?.description;
       res.materialId = item.type === 'Product' ? item?.productDetail?._id : item.type === 'Service' ? item?.serviceDetail?._id : item?._id;
       res.productNumber = item.productDetail?.productNumber;
       res.serializedProduct = item.productDetail?.serializedProduct;
@@ -382,15 +383,23 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
     setAddAnchorEl(null);
   };
 
-  const handleAddProduct = (rows) => {
+  const handleAddProduct = async (rows) => {
     setAddingProducts(true);
+    const tax: any = {};
+    if (purchaseOrderData?.taxCode) {
+      const taxRate = await fetchTaxRate(purchaseOrderData?.taxCode?.optionValue);
+      tax.taxCode = purchaseOrderData?.taxCode?.optionValue;
+      tax.taxPercentage = taxRate?.length ? taxRate[0]?.taxRate : 0;
+    }
     let products = rows?.map((d) => ({
       productId: d.productId || d._id,
       qty: d.qty ? parseInt(d.qty) : 1,
       expectedDelivery: purchaseOrderData?.deliveryDate,
       unit: d?.unitMain?.length ? d?.unitMain[0] : '',
-      costCode: d?.costCode ? d?.costCode : ''
+      costCode: d?.costCode ? d?.costCode : '',
+      ...tax
     }));
+
     axiosInstance()
       .post(`${purchaseOrder.api}/product/${purchaseOrderData._id}/add`, { products })
       .then(() => {
@@ -507,23 +516,30 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
       });
   };
 
-  const handleAddService = (rows) => {
-    setSubmitting(true)
+  const handleAddService = async (rows) => {
+    setSubmitting(true);
+    const tax: any = {};
+    if (purchaseOrderData?.taxCode) {
+      const taxRate = await fetchTaxRate(purchaseOrderData?.taxCode?.optionValue);
+      tax.taxCode = purchaseOrderData?.taxCode?.optionValue;
+      tax.taxPercentage = taxRate?.length ? taxRate[0]?.taxRate : 0;
+    }
     let tempServiceArray = rows?.map((d) => ({
       serviceId: d._id,
       qty: d.qty ? parseInt(d.qty) : 1,
-      unit: d?.unitMain?.length ? d?.unitMain[0] : ''
+      unit: d?.unitMain?.length ? d?.unitMain[0] : '',
+      ...tax
     }));
     axiosInstance()
       .post(`${purchaseOrder.api}/service/${purchaseOrderData._id}/add`, { services: tempServiceArray })
       .then(() => {
         fetchData();
         setAddServiceDialog(false);
-        setSubmitting(false)
+        setSubmitting(false);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        setSubmitting(false)
+        setSubmitting(false);
       });
   };
 
@@ -574,8 +590,8 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
       }
       let rows: any = [{ ...rowData, ...updatedData }];
       rows = await calculateRowsField(material, inputField, productFields, updatedData);
-      rows?.forEach(element => {
-        element.productId = updatedData?.productId
+      rows?.forEach((element) => {
+        element.productId = updatedData?.productId;
       });
       handleUpdateQty(rows);
     } else if (rowData?.type === 'Service') {
@@ -620,7 +636,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
                   Add Existing Products
                 </MenuItem>
               )}
-              {(permissions?.serviceMaster?.isRead && user?.user?.brandPolicy?.purchaseOrderAddService) && (
+              {permissions?.serviceMaster?.isRead && user?.user?.brandPolicy?.purchaseOrderAddService && (
                 <MenuItem
                   onClick={() => {
                     closeAddActions();
@@ -645,10 +661,12 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
               fileName={`${routes.purchaseOrder.title}-${purchaseOrderData?.purchaseOrderNumber}`}
               resource={sidebarResource.purchaseOrder}
               referenceId={purchaseOrderData?._id}
-              columns={columns?.map((e) => { return { ...e, accessor: e.accessor === 'serializedProductView' ? 'serializedProduct' : e.accessor } })}
+              columns={columns?.map((e) => {
+                return { ...e, accessor: e.accessor === 'serializedProductView' ? 'serializedProduct' : e.accessor };
+              })}
               isSendEmail={true}
-              button1Title='Ordered'
-              button2Title='Received'
+              button1Title="Ordered"
+              button2Title="Received"
               defaultColumns={[
                 'index',
                 'type',
@@ -659,7 +677,8 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
                 `totalPrice_${purchaseOrderData?.currency?.toLowerCase()}`,
                 `tax_${purchaseOrderData?.currency?.toLowerCase()}`,
                 `finalPrice_${purchaseOrderData?.currency?.toLowerCase()}`
-              ]} />
+              ]}
+            />
             <HtmlTooltip title="Please select some product">
               <Button
                 variant={'outlined'}
@@ -689,12 +708,12 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
               <MenuItem
                 disabled={
                   selectedProducts?.filter((e) => !e.hideSelection).length > 0 &&
-                    uniq(
-                      map(
-                        selectedProducts?.filter((e) => !e.hideSelection),
-                        'type'
-                      )
-                    )?.length === 1
+                  uniq(
+                    map(
+                      selectedProducts?.filter((e) => !e.hideSelection),
+                      'type'
+                    )
+                  )?.length === 1
                     ? false
                     : true
                 }
@@ -761,15 +780,26 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
           handleCloseDialog={() => setAddProductDialog(false)}
           reference="purchaseOrder"
           onSuccess={handleAddProduct}
-          extraDeepFilter={(purchaseOrderData?.expenseItem === true || purchaseOrderData?.expenseItem === false) ? [{
-            field: 'expenseItem',
-            term: purchaseOrderData?.expenseItem
-              ? 'Yes' : 'No'
-          }] : []}
-          extraFilterById={purchaseOrderData?.chartOfAccount && !isEmpty(purchaseOrderData?.chartOfAccount) ? [{
-            field: 'chartOfAccount',
-            term: { $in: purchaseOrderData?.chartOfAccount?.map((e) => e?.optionValue) }
-          }] : []}
+          extraDeepFilter={
+            purchaseOrderData?.expenseItem === true || purchaseOrderData?.expenseItem === false
+              ? [
+                  {
+                    field: 'expenseItem',
+                    term: purchaseOrderData?.expenseItem ? 'Yes' : 'No'
+                  }
+                ]
+              : []
+          }
+          extraFilterById={
+            purchaseOrderData?.chartOfAccount && !isEmpty(purchaseOrderData?.chartOfAccount)
+              ? [
+                  {
+                    field: 'chartOfAccount',
+                    term: { $in: purchaseOrderData?.chartOfAccount?.map((e) => e?.optionValue) }
+                  }
+                ]
+              : []
+          }
           isSubmitting={isAddingProducts}
         />
       )}

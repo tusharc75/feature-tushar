@@ -13,12 +13,12 @@ import {
   Typography,
   makeStyles
 } from '@material-ui/core';
-import { Edit, ExpandMore } from '@material-ui/icons';
+import { ExpandMore } from '@material-ui/icons';
 import ThumbDownIcon from '@material-ui/icons/ThumbDown';
 import ThumbUpIcon from '@material-ui/icons/ThumbUp';
 import { Skeleton } from '@material-ui/lab';
 import queryString from 'query-string';
-import React, { useContext, useEffect, useMemo, useReducer, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import ReactDOM from 'react-dom';
 import { IoArrowDownCircleSharp } from 'react-icons/all';
@@ -34,7 +34,6 @@ import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../../StateProvider/Provider';
 import axiosInstance from '../../../axios/axiosInstance';
-import { intialState, reducer } from '../../../components/AgGridComponents/CustomAgGrid';
 import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
@@ -53,9 +52,10 @@ import {
 import contactClass from '../../Contact/contact.module.scss';
 import DOAReasonDialog from '../../DOA/DOAReasonDialog';
 import ManageQuoteDialog from '../ManageQuote/ManageQuoteDialog';
-import AllVersionStatus from './AllVersionStatus';
+import AllVersionStatus from '../AllVersionStatus';
 import QuoteDetailPage from './QuoteDetailPage';
 import QuoteProcess from './QuoteProcess';
+import { useTableReducer } from 'src/components/CustomReactTableNew';
 
 const useStyles = makeStyles((theme) => ({
   reasonDialog: {
@@ -139,7 +139,7 @@ export default function QuoteDetail() {
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
-  const [state, dispatch] = useReducer(reducer, intialState);
+  const { state, dispatch } = useTableReducer();
   const [quoteData, setQuoteData] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -309,7 +309,7 @@ export default function QuoteDetail() {
     setOpenUpdateDialog(true);
     setIsQuoteClone(true);
   };
-  
+
   const handleSetSteps = (steps) => {
     setSteps(steps);
   };

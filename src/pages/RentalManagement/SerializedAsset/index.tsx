@@ -129,7 +129,27 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             <p className="text-truncate" title={row.original.detail}>
               {row.original.detail}
             </p>
-            {!isOffline && row.original.isPurchaseOrder ? (
+
+            {row.original?.type === 'asset' && row.original?.isNonSerializeAsset ? null : (
+              <IconButton
+                size="small"
+                onClick={() => {
+                  if (row.original.type === 'service') {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'product') {
+                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'asset') {
+                    window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
+                  } else {
+                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  }
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
+            )}
+
+            {!isOffline && row.original.isPurchaseOrder && (
               <HtmlTooltip title={`${routes.purchaseOrder.title}`}>
                 <IconButton
                   size="small"
@@ -137,28 +157,11 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                     OpenInNewWindow(routes.purchaseOrder.path);
                   }}
                 >
-                  <OpenInNewIcon fontSize="small" color={'primary'} />
+                  <LibraryBooksIcon fontSize="small" color={'primary'} />
                 </IconButton>
               </HtmlTooltip>
-            ) : (
-              row.original?.type === 'asset' && row.original?.isNonSerializeAsset ? null :
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    if (row.original.type === 'service') {
-                      window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                    } else if (row.original.type === 'product') {
-                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                    } else if (row.original.type === 'asset') {
-                      window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
-                    } else {
-                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                    }
-                  }}
-                >
-                  <OpenInNewIcon fontSize="small" color="primary" />
-                </IconButton>
             )}
+            
             {row.original.isBulkAssetCreation && (
               <HtmlTooltip title={`${routes.bulkAssetCreation.title}`}>
                 <IconButton

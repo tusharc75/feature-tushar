@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext} from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import Grid from '@material-ui/core/Grid';
 import { Link } from 'react-router-dom';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
@@ -31,41 +31,34 @@ const FormBuilder = () => {
   const fetchGridColumns = () => {
     const columns = [
       {
-        accessor: 'resource',
-        Header: 'Resource',
-        width: 120,
-        sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) =>
-          row?.original?.resource ? (
-            <Link className="text-truncate link" to={'/form-builder/' + row?.original?.resource}>
-              {row?.original?.resource}
-            </Link>
-          ) : (
-            <NoDataCell />
-          )
-      },
-      {
         accessor: 'resourceLabel',
         Header: 'Resource Label',
         width: 120,
-        sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => (row?.original?.resourceLabel ? <p className="text-truncate">{row?.original?.resourceLabel}</p> : <NoDataCell />)
+        Cell: ({ row }) =>
+          <div>
+            <Link className="text-truncate link" to={'/form-builder/' + row?.original?.resource}>
+              {row?.original?.resourceLabel || row?.original?.resource}
+            </Link>
+          </div>
       },
-
       {
         accessor: 'homePageLabel',
         Header: 'Home Page Label',
         width: 120,
-        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (row?.original?.homePageLabel ? <p className="text-truncate">{row?.original?.homePageLabel}</p> : <NoDataCell />)
       },
       {
         accessor: 'section',
         Header: 'Section',
         width: 120,
-        sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => (row?.original?.section? <p className="text-truncate">{row?.original?.section}</p>: <NoDataCell />)
-      }
+        Cell: ({ row }) => (row?.original?.section ? <p className="text-truncate">{row?.original?.section}</p> : <NoDataCell />)
+      },
+      {
+        accessor: 'resource',
+        Header: 'Resource',
+        width: 120,
+        Cell: ({ row }) => (row?.original?.resource ? <p className="text-truncate">{row?.original?.resource}</p> : <NoDataCell />)
+      },
     ];
     setColumns(columns);
   };

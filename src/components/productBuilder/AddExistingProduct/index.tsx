@@ -1,44 +1,34 @@
-import { useState, useEffect, useContext, useReducer } from 'react';
-import Grid from '@material-ui/core/Grid';
+import { useState, useEffect, useContext } from 'react';
 import Button from '@material-ui/core/Button';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import Dialog from '@material-ui/core/Dialog';
 import axiosInstance from '../../../axios/axiosInstance';
-import { getLocalStorageArrayData, gridLoadingTimeout, isObjectEmpty, product } from '../../../constants/helpers';
+import { gridLoadingTimeout, isObjectEmpty, product, sidebarResource } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomAgGrid, { reducer, intialState } from '../../../components/AgGridComponents/CustomAgGrid';
 import { sortBy } from 'lodash';
-import NoDataCell from '../../../components/Helpers/NoDataCell';
 import SearchBox from '../../Helpers/SearchBox';
 import { CustomDialogTransition } from '../../../constants/helpers';
-import { CommonRenderer } from '../../AgGridComponents/CustomAgGridCellRenderers';
 import { Link } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
-import { Box, Chip, Menu, MenuItem } from '@material-ui/core';
+import { Box, } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import TextField from '@material-ui/core/TextField';
-import useColumns, { getStaticFields, getFrameworkComponents } from '../../../constants/useColumns';
 import { prepareDataForGrid } from '../../../constants/helpers';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 
 var levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
 
 const ignoreField = ['qty', 'priceTemplate'];
 const renderedFrom = 'productPage';
-const localStorageSelectedRecords = `${renderedFrom}_selected`;
-
 const AddExistingProduct = (props) => {
   const toastConfig = useContext(CustomToastContext);
   const { handleClose, addProductInBuilder } = props;
-  const [productList, setProductList] = useState([]);
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { state, dispatch } = useTableReducer();
+  const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   const [productColoums, setProductColoums] = useState([]);
-  const [productRendererNames, setProductRendererNames] = useState([]);
   const [columns, setColumns] = useState(null);
-  const [frameWorkComponent, setFrameWorkComponent] = useState(null);
 
   const [productCategoryList, setProductCategoryList] = useState([]);
   const [productTemplateList, setProductTemplateList] = useState([]);
@@ -90,36 +80,18 @@ const AddExistingProduct = (props) => {
           setIsProductTemplate(false);
         }
         let columns = [];
-        let rendererNames = [];
         data.forEach((o) => {
           if (!ignoreField.includes(o?.fieldData.fieldName)) {
-            if (o?.fieldData?.fieldName === 'productName') {
-              columns = [
-                ...columns,
-                {
-                  pivotIndex: 0,
-                  field: o?.fieldData?.fieldName,
-                  headerName: o?.fieldData?.fieldLabel,
-                  show: true,
-                  disabled: true,
-                  cellRenderer: 'productNameRenderer'
-                }
-              ];
-            } else {
-              let currentColumn = getColumnData(routes.product.title, o?.fieldData, routes.product.path);
-              if (currentColumn !== null) {
-                columns = [...columns, currentColumn?.columnData];
-                if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-                  rendererNames.push(currentColumn?.rendererName);
-                }
-              }
+            let currentColumn = getColumnData(routes.product.title, o?.fieldData, routes.product.path);
+            if (currentColumn !== null) {
+              columns = [...columns, currentColumn?.columnData];
             }
           }
         });
         columns.forEach((ele) => {
           ele.leval = 'product';
         });
-        setProductRendererNames(rendererNames);
+        // setProductRendererNames(rendererNames);
         setProductColoums(columns);
       });
   }, []);
@@ -134,7 +106,7 @@ const AddExistingProduct = (props) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
 
     if (showFilteredRecordsOnly) {
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(getLocalStorageArrayData(localStorageSelectedRecords)?.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${selectedRecords?.map((m) => m._id)}`;
     }
 
     if (!isObjectEmpty(filters)) {
@@ -174,15 +146,10 @@ const AddExistingProduct = (props) => {
   const fetchProduct = () => {
     dispatch({ type: 'loading', loading: true });
 
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
-
     const queryString = getQueryString();
     axiosInstance()
       .get(`${product.api}${queryString}`)
       .then(({ data }) => {
-        setProductList(JSON.parse(JSON.stringify(data.data)));
         let rows = data.data.map((item) => {
           let res = {
             ...prepareDataForGrid(item)
@@ -190,34 +157,33 @@ const AddExistingProduct = (props) => {
           return res;
         });
         let columns = [...productColoums];
-        let rendererNames = [...productRendererNames];
         data.productTemplate?.forEach((ele) => {
-          GenrateColoum(ele.fields, columns, rendererNames);
+          ele.fields.forEach((field) => {
+            let currentColumn = getColumnData(renderedFrom, field, `${routes.productDetail.path}`);
+            if (currentColumn !== null) {
+              columns = [...columns, currentColumn?.columnData];
+            }
+          })
         });
+        columns = columns.filter((column, index, self) => self.findIndex((col) => col.accessor === column.accessor) === index);
         columns.push({
-          field: 'inventoryCount',
-          headerName: 'Inventory Count',
+          accessor: 'inventoryCount',
+          Header: 'Inventory Count',
           show: true,
-          cellRenderer: 'commonRenderer',
+          Cell: ({ row }) => <p className="text-truncate">{row.original?.inventoryCount}</p>,
           leval: 'price-builder-custom'
         });
-        columns.push({ field: 'warehouses', headerName: 'Plants', show: true, cellRenderer: 'commonRenderer', leval: 'price-builder-custom' });
+        columns.push({
+          accessor: 'warehouses',
+          Header: 'Plants', show: true,
+          Cell: ({ row }) => <p className="text-truncate">{row.original?.warehouses}</p>,
+          leval: 'price-builder-custom'
+        });
         columns = sortBy(columns, function (item: any) {
           return levalOrderBy.indexOf(item.leval);
         });
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent,
-          commonRenderer: CommonRenderer,
-          productNameRenderer: ProductNameRenderer
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
+
         columns = [...columns, ...getStaticFields()];
-        columns.forEach((e) => {
-          if (e.cellRenderer === 'linkRenderer') {
-            e.cellRenderer = 'commonRenderer';
-          }
-        });
         setColumns([...columns]);
         dispatch({ type: 'initialize', data: rows, count: data.count });
         setTimeout(() => {
@@ -229,86 +195,12 @@ const AddExistingProduct = (props) => {
         dispatch({ type: 'loading', loading: false });
       });
   };
-
-  const GenrateColoum = (fields, column, rendererNames) => {
-    fields.forEach((ele) => {
-      if (ignoreField.includes(ele.fieldName)) {
-      } else if (ele.type === 'converter' || ele.type === 'currencyAmount' || ele.isConverter === true) {
-        if (ele.type !== 'currencyAmount' && (ele.type === 'converter' || ele.isConverter === true)) {
-          ele.displayUnits.forEach((_unit) => {
-            let fieldName = ele.fieldName + '_' + _unit.toLowerCase();
-            let fieldLabel = ele.fieldLabel + ' ' + _unit;
-            if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-              let col: any = {};
-              col.field = fieldName;
-              col.headerName = fieldLabel;
-              col.width = 180;
-              col.show = true;
-              col.filter = false;
-              col.sortable = false;
-              col.fil
-              col.cellRenderer = 'commonRenderer';
-              col.leval = 'product-template';
-              column.push(col);
-            }
-          });
-        } else if (ele.type === 'currencyAmount' && (ele.type === 'converter' || ele.isConverter === true)) {
-          ele.displayUnits.forEach((_unit) => {
-            ele.displayCurrency.forEach((_currency) => {
-              let fieldName = ele.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase();
-              let fieldLabel = ele.fieldLabel + ' ' + _unit + '/' + _currency;
-              if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-                let col: any = {};
-                col.field = fieldName;
-                col.headerName = fieldLabel;
-                col.width = 180;
-                col.show = true;
-                col.filter = false;
-                col.sortable = false;
-                col.cellRenderer = 'commonRenderer';
-                col.leval = 'product-template';
-                column.push(col);
-              }
-            });
-          });
-        } else if (ele.type === 'currencyAmount') {
-          ele.displayCurrency.forEach((_currency) => {
-            let fieldName = ele.fieldName + '_' + _currency.toLowerCase();
-            let fieldLabel = ele.fieldLabel + ' ' + _currency;
-            if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-              let col: any = {};
-              col.field = fieldName;
-              col.headerName = fieldLabel;
-              col.width = 180;
-              col.show = true;
-              col.filter = false;
-              col.sortable = false;
-              col.cellRenderer = 'commonRenderer';
-              col.leval = 'product-template';
-              column.push(col);
-            }
-          });
-        }
-      } else {
-        if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
-          let currentColumn: any = getColumnData(routes.product.title, ele, routes.productDetail.path);
-          column.push({ ...currentColumn.columnData, leval: 'product-template' });
-          if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-            rendererNames.push(currentColumn?.rendererName);
-          }
-        }
-      }
-    });
-  };
-
   const handleAdd = () => {
-    const objsWithOrder = getLocalStorageArrayData(localStorageSelectedRecords);
-    const orderIds = objsWithOrder?.sort((a, b) => a?.sequenceOrder - b?.sequenceOrder)?.map((m) => m._id);
+    const orderIds = selectedRecords?.sort((a, b) => a?.sequenceOrder - b?.sequenceOrder)?.map((m) => m._id);
 
     dispatch({ type: 'loading', loading: true });
-
     axiosInstance()
-      .get(`${product.api}?limit=0&getById=${JSON.stringify(getLocalStorageArrayData(localStorageSelectedRecords).map((m) => m._id))}`)
+      .get(`${product.api}?limit=0&getById=${JSON.stringify(selectedRecords.map((m) => m._id))}`)
       .then(({ data: { data } }) => {
         const sortedData = orderIds?.map((m) => data.find((f) => f._id === m));
         sortedData.forEach((_d) => {
@@ -403,42 +295,41 @@ const AddExistingProduct = (props) => {
                 color="primary"
                 onClick={handleAdd}
                 variant="contained"
-                disabled={getLocalStorageArrayData(localStorageSelectedRecords).length > 0 ? false : true}
+                disabled={selectedRecords.length > 0 ? false : true}
               >
-                {getLocalStorageArrayData(localStorageSelectedRecords).length
-                  ? '(' + getLocalStorageArrayData(localStorageSelectedRecords).length + ')  '
+                {selectedRecords.length
+                  ? '(' + selectedRecords.length + ')  '
                   : ''}
                 Add
               </Button>
             </div>
           </div>
         </Box>
-        {columns && frameWorkComponent ? (
-          <CustomAgGrid
+        {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
             columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameWorkComponent}
-            setGridApi={setGridApi}
+            onSelect={() => { }}
+            state={state}
             dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            allowAction={false}
-            loading={loading}
-            refreshGrid={fetchProduct}
             renderedFrom={renderedFrom}
+            refreshGrid={fetchProduct}
             showOnlyShowFilteredRecordSwitch={true}
-            sequenceWise={true}
+            isClientSideGrid={false}
+            hideAction={true}
+            resource={sidebarResource.product}
           />
         ) : (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
+
       </div>
     </Dialog>
   );
 };
 
 export default AddExistingProduct;
+
+

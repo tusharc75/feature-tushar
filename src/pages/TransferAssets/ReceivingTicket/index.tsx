@@ -30,7 +30,6 @@ interface ReceivingGridProps {
   transferAssetData: any;
   transferAssetId: string | any;
   setNextStep: any;
-  setPrevStep: any;
   setTransferIsEnded?: any;
   currentStep: number;
   setTickets: any;
@@ -46,7 +45,6 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
     permissions,
     fetchAssets,
     transferAssetId,
-    setPrevStep,
     transferAssetData,
     setTickets,
     setNextStep,

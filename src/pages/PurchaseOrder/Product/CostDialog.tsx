@@ -14,6 +14,7 @@ import FormTypes from '../../../components/Helpers/FormTypes';
 import { uniq, map, orderBy, isEqual } from 'lodash';
 import { fetch_po_cost_fields } from '../../../components/PurchaseOrder/helper';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
+import { fetchTaxRate } from './helper';
 
 const CostDialog = ({ onClose, purchaseOrderData, handleAddCost, handleUpdateCost, costData, bulkEdit, showSaveAndNext, loadingEdit }) => {
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
@@ -57,13 +58,23 @@ const CostDialog = ({ onClose, purchaseOrderData, handleAddCost, handleUpdateCos
     EvaluteproductFields(poFields);
   };
 
-  const EvaluteproductFields = (fields) => {
+  const EvaluteproductFields = async (fields) => {
     const sections = uniq(map(fields, 'sectionName'));
     const customData = sections.map((name) => {
       let sectionFields = fields.filter((field) => field.sectionName === name);
       sectionFields = orderBy(sectionFields, 'order', 'asc');
       return { name, sectionFields };
     });
+
+    if (purchaseOrderData?.taxCode) {
+      const taxCodeOptions = await fetchTaxRate(purchaseOrderData?.taxCode?.optionValue);
+      fields?.forEach((e: any) => {
+        if (e?.fieldName === 'taxCode') {
+          e.option = taxCodeOptions;
+        }
+      });
+    }
+
     setFields(customData);
   };
 
@@ -175,6 +186,10 @@ const CostDialog = ({ onClose, purchaseOrderData, handleAddCost, handleUpdateCos
                                           options={field.option}
                                           setFieldValue={(name, value) => {
                                             setFieldValue(name, value);
+                                            if (field.fieldName === 'taxCode') {
+                                              const taxCode = field.option?.find((d) => d.optionValue === value);
+                                              setFieldValue('taxPercentage', taxCode?.taxRate || 0);
+                                            }
                                           }}
                                           required={field.required}
                                           fullWidth

@@ -298,7 +298,8 @@ export default function useColumns() {
                 )}
               </div>
             ),
-            canFilter: false
+            canFilter: false,
+            disableSortBy: true
           }
         };
       } else if (field?.type === 'dateTime') {
@@ -316,7 +317,8 @@ export default function useColumns() {
                 )}
               </div>
             ),
-            canFilter: false
+            canFilter: false,
+            disableSortBy: true
           }
         };
       } else if (field?.type === 'checkBox') {
@@ -341,6 +343,18 @@ export default function useColumns() {
                   <NoDataCell />
                 )}
               </div>
+            )
+          }
+        };
+      } else if (field?.type === 'number') {
+        return {
+          columnData: {
+            ...commonFieldData,
+            canFilter: false,
+            Cell: ({ row }) => (
+              <>
+                <h5 className="text-truncate">{row.original[field?.fieldName] ? row.original[field?.fieldName] : 0}</h5>
+              </>
             )
           }
         };

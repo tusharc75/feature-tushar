@@ -435,22 +435,24 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
               >
                 Add Existing Products
               </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  closeAddActions();
-                  setAddDialog({ open: true, type: 'newProduct', parentId: null });
-                }}
-              >
-                Add New Product
-              </MenuItem>
-              <MenuItem
+              {permissions?.product?.isCreate &&
+                <MenuItem
+                  onClick={() => {
+                    closeAddActions();
+                    setAddDialog({ open: true, type: 'newProduct', parentId: null });
+                  }}
+                >
+                  Add New Product
+                </MenuItem>
+              }
+              {/* <MenuItem
                 onClick={() => {
                   closeAddActions();
                   setAddDialog({ open: true, type: MATERIAL_TYPE.package, parentId: null });
                 }}
               >
                 Add Existing Packages
-              </MenuItem>
+              </MenuItem> */}
             </Menu>
           </Box>
           <Box display="flex">
@@ -532,7 +534,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
               refreshGrid={fetchData}
               onSaveEdit={onSaveInlineEdit}
               hideSelection={!allowedToEdit}
-              expander={true}
+              hideAction={!allowedToEdit}
             />
           </Box>
         </>

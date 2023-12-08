@@ -11,7 +11,6 @@ import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import TransferEntityDialog from '../../components/AssignRolesDialog/TransferEntityDialog';
 import CustomContainer from '../../components/CustomContainer';
-import CustomDialogComponent from '../../components/CustomDialog/CustomDialogComponent';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
@@ -31,7 +30,6 @@ import {
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageQuoteDialog from './ManageQuote/ManageQuoteDialog';
-import VersionStatus from './VersionStatus';
 import './style.scss';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
@@ -41,6 +39,7 @@ import SearchBox from 'src/components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import DeleteIcon from '@material-ui/icons/Delete';
+import AllVersionStatus from './AllVersionStatus';
 
 const types = [
   {
@@ -88,7 +87,7 @@ const QuoteBuilders = () => {
     opportunityId: history.location?.state?.opportunityId,
     opportunityName: history.location?.state?.opportunityName
   });
-  const [showVersionsDialog, setShowVersionsDialog] = useState(false);
+  const [showVersionsDialog, setShowVersionsDialog] = useState({ open: false, id: null, quoteData: null });
   const [columns, setColumns] = useState(null);
   const [clonedData, setClonedData] = useState([]);
   const [clonedId, setClonedId] = useState(null);
@@ -130,8 +129,8 @@ const QuoteBuilders = () => {
                   <span
                     className="cursor-pointer link ml-1"
                     onClick={() => {
-                      setShowVersionsDialog(true);
-                      getVersionStatus(row.original._id, row.original.currency);
+                      setShowVersionsDialog({ open: true, id: row.original._id, quoteData: row.original });
+                      // getVersionStatus(row.original._id, row.original.currency);
                     }}
                   >
                     ({row.original.versionCount})
@@ -441,7 +440,7 @@ const QuoteBuilders = () => {
     setshowCreateQuoteDialog(true);
     setIsClone(true);
     setClonedId(quoteId);
-    setShowVersionsDialog(false);
+    setShowVersionsDialog({ open: false, id: null, quoteData: null });
   };
 
   const handleFilter = (event, newFilter) => {
@@ -708,24 +707,24 @@ const QuoteBuilders = () => {
         />
       )}
 
-      {showVersionsDialog && (
-        <CustomDialogComponent
-          title="All Version Status"
-          open={showVersionsDialog}
-          onClose={() => {
-            setShowVersionsDialog(false);
-            setVersionStatusData([]);
+      {showVersionsDialog.open && (
+        <AllVersionStatus
+          open={showVersionsDialog.open}
+          onClose={() => setShowVersionsDialog({ open: false, id: null, quoteData: null })}
+          quoteId={showVersionsDialog.id}
+          quoteData={showVersionsDialog.quoteData}
+          quotePermissions={permissions?.quoteBuilder}
+          fetchQuoteData={() => { }}
+          handleChangeVersionFromAllVersion={(versionNumber) => {
+            history.push(`quotes/detail/${showVersionsDialog.id}`, {
+              versionNumber: `${versionNumber}`,
+              tabValue: 1
+            })
           }}
-        >
-          {versionStatusData.length === 0 ? (
-            <CommonSkeleton lenArray={arr} />
-          ) : (
-            <VersionStatus
-              handleCloneQuoteWithVersionFromAllVersion={handleCloneQuoteWithVersionFromAllVersion}
-              versionStatusData={versionStatusData}
-            />
-          )}
-        </CustomDialogComponent>
+          handleCloneQuoteWithVersionFromAllVersion={(versionNumber) => {
+            handleCloneQuoteWithVersionFromAllVersion(showVersionsDialog.id, versionNumber)
+          }}
+        />
       )}
       {showTransferEntityDialog && (
         <TransferEntityDialog

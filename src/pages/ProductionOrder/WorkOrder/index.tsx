@@ -83,7 +83,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
 
   const fetchFields = async () => {
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.productionOrderDetail}`);
-    var data = response?.data?.data?.filter((e) => !['detail', 'description', 'workOrderNumber', 'palletNumber']?.includes(e?.fieldName));
+    var data = response?.data?.data?.filter((e) => !['detail', 'description', 'workOrderNumber']?.includes(e?.fieldName));
     data = CURReplaceByCurrencySingle(data, productionOrderData?.currency || 'USD');
     data?.forEach((e) => {
       e.isColumnEditable = false;
@@ -161,6 +161,11 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
           ) : (
             <NoDataCell />
           )
+      },
+      {
+        accessor: 'status',
+        Header: 'Status',
+        Cell: ({ row }) => (row.original['status'] ? <p> {row.original.status}</p> : <NoDataCell />)
       },
       {
         accessor: 'workOrderStatus',
@@ -789,7 +794,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         <>
           <Box zIndex={5} width={'100%'}>
             <CustomReactTable
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
+              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
               columns={columns}
               state={state}
               setWholeRowsCellColor={(rowData) => (rowData.type === 'service' ? 'isService' : '')}

@@ -1,4 +1,4 @@
-import { Menu, MenuItem } from '@material-ui/core';
+import { Box, Menu, MenuItem } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
@@ -10,17 +10,18 @@ import { Link, useHistory } from 'react-router-dom';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
-import { CreatedByRenderer, UpdatedByRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import routes from '../../components/Helpers/Routes';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { gridLoadingTimeout, prepareDataForGrid } from '../../constants/helpers';
+import { dateFormat, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CreateNewDialog from './CreateNewDialog';
 import { gridFilterParser } from 'src/constants/useColumns';
+import moment from 'moment';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const ProductBuilder = () => {
   const renderedFrom = camelCase(routes?.productBuilder.title);
@@ -36,31 +37,36 @@ const ProductBuilder = () => {
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
-  // const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [okButtonLoading] = useState(false);
 
-  //  Grid Variables - Start
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, appendRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } =
+  const { state, dispatch } = useTableReducer();
+  const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } =
     state;
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const columns = [
     {
-      field: 'name',
-      headerName: 'Name',
+      accessor: 'name',
+      Header: 'Name',
       show: true,
       disabled: true,
-      cellRenderer: 'nameRenderer'
+      Cell: ({ row }) => <Link className="link" to={`${routes.productBuilder.path}/${row?.original?.id}`}>
+        {row?.original?.name}
+      </Link>
     },
     {
-      field: 'createdBy',
-      headerName: 'Created By',
+      accessor: 'createdBy',
+      Header: 'Created By',
       show: true,
       sortable: false,
-      cellRenderer: 'createdByRenderer'
+      Cell: ({ row }) => row.original?.createdByDate ? (
+        <h5 className="createBy" title={`${row.original?.createdByDate} • ${moment(row.original?.createdByDate).format(dateFormat)}`}>
+          {row.original?.createdByDate}
+          <span className="createdAtTime badge-date">{moment(row.original?.createdByDate)?.format(dateFormat)}</span>
+        </h5>
+      ) : (
+        <NoDataCell />
+      )
     }
   ];
   //  Grid Variables - End
@@ -121,8 +127,7 @@ const ProductBuilder = () => {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(selectedRecords.map((m) => m._id))}`;
     }
     return deepFilter;
   };
@@ -131,10 +136,6 @@ const ProductBuilder = () => {
     dispatch({ type: 'loading', loading: true });
 
     const queryString = getQueryString();
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
-
     axiosInstance()
       .get(`/productbuilder${queryString}`)
       .then(({ data: { data } }) => {
@@ -147,24 +148,7 @@ const ProductBuilder = () => {
             ...finalObject
           };
         });
-
-        if (appendRows) {
-          dispatch({
-            type: 'initialize',
-            data: [...dataRows, ...rows],
-            count: data.length
-            // selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
-          });
-        } else {
-          dispatch({
-            type: 'initialize',
-            data: rows,
-            count: data.length
-            // selectedRecords: rows.filter((f) => f.isChecked === true)
-          });
-        }
-
-        // dispatch({ type: 'initialize', data: rows, count: data.length });
+        dispatch({ type: 'initialize', data: rows, count: data.length });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -204,13 +188,6 @@ const ProductBuilder = () => {
           toastConfig.setToastConfig(error);
         });
     }
-  };
-
-  const frameworkComponents = {
-    nameRenderer: NameRenderer,
-    createdByRenderer: CreatedByRenderer,
-    updatedByRenderer: UpdatedByRenderer,
-    actionsRenderer: ActionsRenderer
   };
 
   const openActions = (event) => {
@@ -299,55 +276,22 @@ const ProductBuilder = () => {
             </div>
           </div>
         </div>
-        {isMobile ? (
-          <CustomSwipableList
-            allowSelection={true}
-            allowSwipe={true}
-            permissions={permission}
-            primaryField={columns?.find((d) => d.field === 'name')}
-            onClick={(d) => {
-              history.push(`${routes.productBuilder.path}/${d.id}`);
-            }}
-            dataRows={dataRows}
-            selectedRecords={selectedRecords}
-            dispatch={dispatch}
-            onEdit={(d) => {
-              history.push(`${routes.productBuilder.path}/${d.id}`);
-            }}
-            extraParamsToCheckDelete={true}
-            onDelete={(d) => {
-              setDeleteRecord(d);
-              setShowDeleteConfirmBox(true);
-            }}
-            rowCount={rowCount}
-            page={page}
-            loading={loading}
-            additionalDetails={[]}
-            chips={[]}
-            owerCollaboratorInitialsOrImages=""
-            onCreate={false}
-            showClone={false}
-            onClone={() => {}}
-            renderedFrom={renderedFrom}
-          />
-        ) : (
-          <CustomAgGrid
+        {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
             columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameworkComponents}
-            setGridApi={setGridApi}
+            state={state}
             dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            allowSelection={true}
-            actionWidth={100}
-            isClientSideGrid={true}
-            loading={loading}
             renderedFrom={renderedFrom}
             refreshGrid={fetchProductBuilder}
+            showOnlyShowFilteredRecordSwitch={true}
+            showFilters={true}
+            resource={sidebarResource.productBuilder}
           />
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
         )}
         {showDeleteWarningConfirmBox ? (
           <MessageDialog

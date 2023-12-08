@@ -292,6 +292,28 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
       });
   };
 
+  const validate = (formValues = {}) => {
+    if (isEmpty(formValues)) return false;
+    const field = coloums?.filter((c) => c?.type === 'date' || c?.type === 'dateTime');
+    let isValid = true;
+    field?.forEach((f) => {
+      if (formValues[`to_${f?.fieldName}`]) {
+        const minDate =
+          betweenDate && betweenDate[`from_${f?.fieldName}`]
+            ? betweenDate[`from_${f?.fieldName}`]
+            : formValues[`from_${f?.fieldName}`]
+            ? formValues[`from_${f?.fieldName}`]
+            : new Date();
+
+        if (new Date(minDate).getTime() > new Date(formValues[`to_${f?.fieldName}`]).getTime()) {
+          isValid = false;
+        }
+      }
+    });
+
+    return isValid;
+  };
+
   return (
     <MuiPickersUtilsProvider utils={MomentUtils}>
       <Dialog
@@ -475,7 +497,7 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
             {selectedUserFilter ? 'Update Filter' : 'Save Filter'}
           </Button>
           <Button
-            disabled={isEmpty(formValues) ? true : false}
+            disabled={!validate(formValues) ? true : false}
             onClick={handleApplyFilter}
             size="small"
             className="no-shadow"

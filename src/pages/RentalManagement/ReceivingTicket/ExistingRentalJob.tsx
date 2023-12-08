@@ -1,87 +1,83 @@
-
-import Box from "@material-ui/core/Box/Box";
-import React, { useState, useEffect, useReducer, useContext, Fragment } from "react";
-import CustomAgGrid, { intialState, reducer } from "../../../components/AgGridComponents/CustomAgGrid";
-import Grid from "@material-ui/core/Grid/Grid";
-import { Button, Dialog, IconButton } from "@material-ui/core";
-import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import { CustomDialogTransition, gridLoadingTimeout, deliveryTicket, rentalManagement, ASSET_STATUS } from "../../../constants/helpers";
-import { useData } from "../../../StateProvider/Provider";
-import axiosInstance from "../../../axios/axiosInstance";
-import routes from "../../../components/Helpers/Routes";
-import { prepareDataForGrid, DELIVERY_TICKET_REFERENCE_TYPE, getObjKeys, DELIVERY_FROM_TO_TYPE, DELIVERY_TICKET_TYPE, sidebarResource, generateUniqueIdOnly } from "../../../constants/helpers";
-import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
-import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from "../../../constants/useColumns"
+import Box from '@material-ui/core/Box/Box';
+import { useState, useEffect, useContext } from 'react';
+import CustomReactTable, { checkStaticField, getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import Grid from '@material-ui/core/Grid/Grid';
+import { Button, Dialog } from '@material-ui/core';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { CustomDialogTransition, gridLoadingTimeout, deliveryTicket, rentalManagement, ASSET_STATUS } from '../../../constants/helpers';
+import { useData } from '../../../StateProvider/Provider';
+import axiosInstance from '../../../axios/axiosInstance';
+import routes from '../../../components/Helpers/Routes';
+import {
+  prepareDataForGrid,
+  DELIVERY_TICKET_REFERENCE_TYPE,
+  getObjKeys,
+  DELIVERY_FROM_TO_TYPE,
+  DELIVERY_TICKET_TYPE,
+  sidebarResource,
+  generateUniqueIdOnly
+} from '../../../constants/helpers';
+import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import ManageRentalManagementDialog from '../ManageRental';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onClose, onSuccess }) => {
+  const toastConfig = useContext(CustomToastContext);
+  const {
+    state: { user, selectedEntity }
+  }: any = useData();
 
-  const { state: { user, permissions, selectedEntity } }: any = useData();
-  const [frameWorkComponent, setFrameWorkComponent] = useState({})
-  const [columns, setColumns] = useState([])
-  const { getColumnData } = useColumns();
-  const [showTicketDialog, setShowTicketDialog] = useState({ open: false, ticketType: "", data: {}, rentalJob: null });
+  const [columns, setColumns] = useState(null);
+  const [showTicketDialog, setShowTicketDialog] = useState({ open: false, ticketType: '', data: {}, rentalJob: null });
   const [showRentalDialog, setShowRentalDialog] = useState({ open: false, data: {} });
-  const [assetsAdd, setAssetsAdd] = useState([])
+  const [assetsAdd, setAssetsAdd] = useState([]);
 
-  const toastConfig = useContext(CustomToastContext)
-
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-
-  const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
+  const { state, dispatch } = useTableReducer();
+  const { selectedRecords } = state;
+  const { getColumnData } = useColumns();
 
   useEffect(() => {
-    fetchGridColumns()
-  }, [])
+    fetchGridColumns();
+  }, []);
 
   const fetchGridColumns = async () => {
-    const response = await axiosInstance().get(`/field?resource=Rental Management&entity=${selectedEntity}&view=true`)
-    const data = response?.data?.data
-    let columns = []
-    let rendererNames = []
-    data.forEach(o => {
-      let currentColumn = getColumnData(routes.rentalManagement, o?.fieldData, routes.rentalManagementDetail.path)
+    const response = await axiosInstance().get(`/field?resource=Rental Management&entity=${selectedEntity}&view=true`);
+    const data = response?.data?.data;
+    let columns = [];
+    data.forEach((o) => {
+      let currentColumn = getColumnData(routes.rentalManagement, o?.fieldData, routes.rentalManagementDetail.path);
       if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData]
-        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-          rendererNames.push(currentColumn?.rendererName)
-        }
+        columns = [...columns, currentColumn?.columnData];
       }
-      return o?.fieldData
-    })
-    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
-    tempFrameworkComponent = {
-      ...tempFrameworkComponent,
-    }
-    setFrameWorkComponent({ ...tempFrameworkComponent })
-    let staticFields = getStaticFields()
-    staticFields.forEach(field => {
-      columns.push(checkStaticField(routes.rentalManagement.title, field))
-    })
-    setColumns([...columns])
-    fetchRentalManagement()
-  }
+      return o?.fieldData;
+    });
+    let staticFields = getStaticFields();
+    staticFields.forEach((field) => {
+      columns.push(checkStaticField(routes.rentalManagement.title, field));
+    });
+    setColumns([...columns]);
+    fetchRentalManagement();
+  };
 
   const fetchRentalManagement = async () => {
-    dispatch({ type: "loading", loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
+
     try {
-      const data: any = {}
+      const data: any = {};
       data.rentalJob = referenceData._id;
-      const product = []
-      productInventory.filter((e) => e.type === "Asset")?.forEach((ele) => {
-        const filter = product.filter((e) => e.product === ele?.product?.optionValue);
-        if (filter.length) {
-          filter[0].qty = filter[0].qty + 1;
-        }
-        else {
-          product.push({ product: ele?.product?.optionValue, qty: 1 })
-        }
-      })
+      const product = [];
+      productInventory
+        .filter((e) => e.type === 'Asset')
+        ?.forEach((ele) => {
+          const filter = product.filter((e) => e.product === ele?.product?.optionValue);
+          if (filter.length) {
+            filter[0].qty = filter[0].qty + 1;
+          } else {
+            product.push({ product: ele?.product?.optionValue, qty: 1 });
+          }
+        });
       data.product = product;
       const response: any = await axiosInstance().post(`${rentalManagement.api}/pending-asset-rental`, data);
       const count = response?.data?.count;
@@ -89,14 +85,14 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
         let finalObject = prepareDataForGrid(u, user);
         return finalObject;
       });
-      dispatch({ type: "initialize", data: rows, count: count });
+      dispatch({ type: 'initialize', data: rows, count: count });
       setTimeout(() => {
-        dispatch({ type: "loading", loading: false });
+        dispatch({ type: 'loading', loading: false });
       }, gridLoadingTimeout);
     } catch (error) {
-      dispatch({ type: "loading", loading: false });
+      dispatch({ type: 'loading', loading: false });
     }
-  }
+  };
 
   const calculateNestedQty = (material, parent) => {
     const childProduct: any = material.filter((e) => e.parentId === parent._id);
@@ -104,90 +100,94 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
       child.qty = child.qty * parent.qty;
       calculateNestedQty(material, child);
     });
-  }
+  };
 
   const handleCreateReceivingTicket = async (rentalData, isOnlyAssetAdd) => {
-
-    const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalData._id}`)
+    const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalData._id}`);
     const assetsAdd = [];
-    const inventory = JSON.parse(JSON.stringify(productInventory.filter((e) => e.type === "Asset")))
-    var material = response?.data?.data?.material
+    const inventory = JSON.parse(JSON.stringify(productInventory.filter((e) => e.type === 'Asset')));
+    var material = response?.data?.data?.material;
 
     material?.forEach((element) => {
       if (element.parentId === null) {
-        calculateNestedQty(material, element)
+        calculateNestedQty(material, element);
       }
-    })
+    });
 
     material?.forEach((e: any) => {
-      if (e.type === "product") {
+      if (e.type === 'product') {
         let qty = e.qty;
         while (qty) {
-          const result = inventory.filter(f => f?.product?.optionValue === e.materialId && !f.isCounted);
+          const result = inventory.filter((f) => f?.product?.optionValue === e.materialId && !f.isCounted);
           if (result.length) {
             let obj: any = {};
-            obj._id = e._id
+            obj._id = e._id;
             obj.inventory = result[0]._id;
-            obj.product = e.materialId
-            assetsAdd.push(obj)
+            obj.product = e.materialId;
+            assetsAdd.push(obj);
             result[0].isCounted = true;
           }
           qty--;
         }
       }
-    })
+    });
 
-    if (assetsAdd.length !== productInventory.filter((e) => e.type === "Asset").length) {
-      alert("Product is not same")
-      return
+    if (assetsAdd.length !== productInventory.filter((e) => e.type === 'Asset').length) {
+      alert('Product is not same');
+      return;
     }
 
     if (isOnlyAssetAdd) {
-      axiosInstance().post(`${rentalManagement.api}/${rentalData._id}/inventory`, { "products": assetsAdd })
+      axiosInstance()
+        .post(`${rentalManagement.api}/${rentalData._id}/inventory`, { products: assetsAdd })
         .then(({ data }) => {
-          onSuccess()
-        }).catch((error) => {
+          onSuccess();
+        })
+        .catch((error) => {
           toastConfig.setToastConfig(error);
         });
-    }
-    else {
+    } else {
       setAssetsAdd(assetsAdd);
-      const response = await axiosInstance().get(`/field?resource=${sidebarResource["deliveryTicket"]}`)
+      const response = await axiosInstance().get(`/field?resource=${sidebarResource['deliveryTicket']}`);
       let fieldsDataForCreate = response?.data?.data?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      const tempInitialData = getObjKeys("", fieldsDataForCreate)
-      tempInitialData["ticketName"] = `${referenceData?.rentalJobName}_${generateUniqueIdOnly()}`;
-      tempInitialData["ticketType"] = DELIVERY_TICKET_TYPE.receiving;
-      tempInitialData["type"] = DELIVERY_TICKET_REFERENCE_TYPE.rentalJob;
-      tempInitialData["rentalJob"] = referenceData._id;
-      tempInitialData["pickupFromType"] = DELIVERY_FROM_TO_TYPE.customer;
-      tempInitialData["pickupFrom"] = referenceData?.customerAccount?.optionValue;
-      tempInitialData["pickupFromAddress"] = referenceData.shippingAddress?.optionValue;
-      tempInitialData["deliveryToType"] = DELIVERY_FROM_TO_TYPE.customer;
-      tempInitialData["deliveryTo"] = rentalData?.deliveryTo;
-      tempInitialData["deliveryToAddress"] = rentalData?.deliveryToAddress;
-      tempInitialData["wellName"] = referenceData?.wellName?.optionValue;
+      const tempInitialData = getObjKeys('', fieldsDataForCreate);
+      tempInitialData['ticketName'] = `${referenceData?.rentalJobName}_${generateUniqueIdOnly()}`;
+      tempInitialData['ticketType'] = DELIVERY_TICKET_TYPE.receiving;
+      tempInitialData['type'] = DELIVERY_TICKET_REFERENCE_TYPE.rentalJob;
+      tempInitialData['rentalJob'] = referenceData._id;
+      tempInitialData['pickupFromType'] = DELIVERY_FROM_TO_TYPE.customer;
+      tempInitialData['pickupFrom'] = referenceData?.customerAccount?.optionValue;
+      tempInitialData['pickupFromAddress'] = referenceData.shippingAddress?.optionValue;
+      tempInitialData['deliveryToType'] = DELIVERY_FROM_TO_TYPE.customer;
+      tempInitialData['deliveryTo'] = rentalData?.deliveryTo;
+      tempInitialData['deliveryToAddress'] = rentalData?.deliveryToAddress;
+      tempInitialData['wellName'] = referenceData?.wellName?.optionValue;
       if (referenceData?.wellNumber) {
         if (referenceData?.wellNumber?.optionValue) {
           tempInitialData['wellNumber'] = referenceData?.wellNumber?.optionValue;
-        }
-        else {
+        } else {
           tempInitialData['wellNumber'] = referenceData?.wellNumber?.map((e) => e?.optionValue);
         }
       }
-      tempInitialData["afeNumber"] = referenceData?.afeNumber;
+      tempInitialData['afeNumber'] = referenceData?.afeNumber;
       if (referenceData?.processor?.optionValue) {
-        tempInitialData["deliveryPerson"] = referenceData?.processor?.optionValue;
+        tempInitialData['deliveryPerson'] = referenceData?.processor?.optionValue;
       }
-      tempInitialData["productInventory"] = productInventory?.filter((e) => e.type === "Asset")?.map(d => d?._id)
-      tempInitialData["products"] = []
-      productInventory?.filter((e) => e.type === "Product")?.forEach((ele) => {
-        tempInitialData["products"].push({ product: ele._id, qty: ele.qty })
-      })
-      axiosInstance().post(`${deliveryTicket.api}`, tempInitialData).then(({ data }) => {
-        handleCreateLoadingTicketAddAsstes(data?.data, rentalData._id, assetsAdd)
-      }).catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+      tempInitialData['productInventory'] = productInventory?.filter((e) => e.type === 'Asset')?.map((d) => d?._id);
+      tempInitialData['products'] = [];
+      productInventory
+        ?.filter((e) => e.type === 'Product')
+        ?.forEach((ele) => {
+          tempInitialData['products'].push({ product: ele._id, qty: ele.qty });
+        });
+      axiosInstance()
+        .post(`${deliveryTicket.api}`, tempInitialData)
+        .then(({ data }) => {
+          handleCreateLoadingTicketAddAsstes(data?.data, rentalData._id, assetsAdd);
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
 
       // const data = {}
       // data["ticketName"] = referenceData.rentalJobName;
@@ -209,134 +209,143 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
       // data["isDeliveryToDisable"] = true;
       // setShowTicketDialog({ open: true, ticketType: DELIVERY_TICKET_TYPE.receiving, data: data, rentalJob: rentalData._id });
     }
-  }
+  };
 
   const handleCreateLoadingTicketAddAsstes = (data, rentalJob, assets) => {
     const deliveryTicketData: any = {};
     deliveryTicketData._id = data._id;
     deliveryTicketData.rentalJob = rentalJob;
     deliveryTicketData.ticketType = DELIVERY_TICKET_TYPE.loading;
-    axiosInstance().post(`${rentalManagement.api}/${rentalJob}/inventory`, { "products": assets })
+    axiosInstance()
+      .post(`${rentalManagement.api}/${rentalJob}/inventory`, { products: assets })
       .then(({ data }) => {
-        axiosInstance().post(`${deliveryTicket.api}/auto-create-ticket`, deliveryTicketData).then(({ data }) => {
-          setShowTicketDialog({ open: false, ticketType: "", data: {}, rentalJob: null });
-          onSuccess()
-        }).catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
-      }).catch((error) => {
+        axiosInstance()
+          .post(`${deliveryTicket.api}/auto-create-ticket`, deliveryTicketData)
+          .then(({ data }) => {
+            setShowTicketDialog({ open: false, ticketType: '', data: {}, rentalJob: null });
+            onSuccess();
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
+          });
+      })
+      .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-  }
+  };
 
   const cloneRentalDetail = (rentalData) => {
     const data: any = {};
     data._id = referenceData._id;
     data.newRentalJobId = rentalData._id;
-    axiosInstance().post(`${rentalManagement.api}/clone-rental-detail`, data)
+    axiosInstance()
+      .post(`${rentalManagement.api}/clone-rental-detail`, data)
       .then(({ data }) => {
         let isOnlyAssetAdd = false;
         if (productInventory.some((e) => e.status === ASSET_STATUS.inUse)) {
-          isOnlyAssetAdd = false
+          isOnlyAssetAdd = false;
+        } else {
+          isOnlyAssetAdd = true;
         }
-        else {
-          isOnlyAssetAdd = true
-        }
-        handleCreateReceivingTicket({ _id: rentalData._id, deliveryTo: rentalData.customerAccount, deliveryToAddress: rentalData.shippingAddress }, isOnlyAssetAdd)
-      }).catch((error) => {
+        handleCreateReceivingTicket(
+          { _id: rentalData._id, deliveryTo: rentalData.customerAccount, deliveryToAddress: rentalData.shippingAddress },
+          isOnlyAssetAdd
+        );
+      })
+      .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-  }
+  };
 
-  return (<Dialog
-    fullScreen={true}
-    TransitionComponent={CustomDialogTransition}
-    aria-labelledby="customized-dialog-title"
-    open={true}
-  >
-    <CustomDialogHeader title={`Select ${routes.rentalManagement.title}`} onClose={onClose} ></CustomDialogHeader>
-    <div className="listing-grid p-3">
-      <Box mb={2}>
-        <Grid item xs={12} sm={12} md={12} container justify={"flex-end"} >
-          <Button size="small"
-            color="primary"
-            onClick={() => { setShowRentalDialog({ open: true, data: {} }) }}
-            variant="contained"
-          >
-            {`Create ${routes.rentalManagement.title}`}</Button>
-          <Box mx={1} />
-          <Button size="small"
-            color="primary"
-            onClick={() => {
-              let isOnlyAssetAdd = false;
-              if (productInventory.some((e) => e.status === ASSET_STATUS.inUse)) {
-                isOnlyAssetAdd = false
-              }
-              else {
-                isOnlyAssetAdd = true
-              }
-              handleCreateReceivingTicket({
-                _id: selectedRecords[0]?._id,
-                deliveryTo: selectedRecords[0]?.customerAccountId,
-                deliveryToAddress: selectedRecords[0]?.shippingAddressId
-              }, isOnlyAssetAdd)
-            }}
-            variant={"contained"}
-            disabled={selectedRecords.length > 1 || selectedRecords.length === 0}
-          >
-            {`Perform Transfer`}</Button>
-        </Grid>
-      </Box>
-      {Object.keys(frameWorkComponent).length > 0 ?
-        <CustomAgGrid
-          columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameWorkComponent}
-          setGridApi={setGridApi}
-          dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          actionWidth={100}
-          loading={loading}
-          allowAction={false}
-          renderedFrom={"rental_management_existing"}
-          allowSelection={true}
-          isClientSideGrid={true}
-          refreshGrid={fetchRentalManagement}
-          showOnlyShowFilteredRecordSwitch={true}
-          isMultipleSelection={false}
-        /> : null
-      }
-    </div>
-    {showTicketDialog.open && (
-      <ManageDeliveryTicket
-        ticketType={showTicketDialog.ticketType}
-        referenceType={DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}
-        referenceData={showTicketDialog.data}
-        productInventory={productInventory?.filter((e) => e.type === "Asset")}
-        products={productInventory?.filter((e) => e.type === "Product")}
-        onClose={() => setShowTicketDialog({ open: false, ticketType: "", data: {}, rentalJob: null })}
-        onSuccess={(data) => {
-          handleCreateLoadingTicketAddAsstes(data, showTicketDialog.rentalJob, assetsAdd)
-        }}
-      />
-    )}
-    {showRentalDialog.open && (
-      <ManageRentalManagementDialog
-        rentalManagementId={null}
-        isClone={false}
-        open={showRentalDialog.open}
-        referenceData={{ warehouse: referenceData?.warehouse?.optionValue }}
-        onClose={() => { setShowRentalDialog({ open: false, data: {} }) }}
-        onSuccess={(data) => {
-          cloneRentalDetail(data)
-        }}
-      />
-    )}
-  </Dialog>
+  return (
+    <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
+      <CustomDialogHeader title={`Select ${routes.rentalManagement.title}`} onClose={onClose}></CustomDialogHeader>
+      <div className="listing-grid p-3">
+        <Box mb={2}>
+          <Grid item xs={12} sm={12} md={12} container justify={'flex-end'}>
+            <Button
+              size="small"
+              color="primary"
+              onClick={() => {
+                setShowRentalDialog({ open: true, data: {} });
+              }}
+              variant="contained"
+            >
+              {`Create ${routes.rentalManagement.title}`}
+            </Button>
+            <Box mx={1} />
+            <Button
+              size="small"
+              color="primary"
+              onClick={() => {
+                let isOnlyAssetAdd = false;
+                if (productInventory.some((e) => e.status === ASSET_STATUS.inUse)) {
+                  isOnlyAssetAdd = false;
+                } else {
+                  isOnlyAssetAdd = true;
+                }
+                handleCreateReceivingTicket(
+                  {
+                    _id: selectedRecords[0]?._id,
+                    deliveryTo: selectedRecords[0]?.customerAccountId,
+                    deliveryToAddress: selectedRecords[0]?.shippingAddressId
+                  },
+                  isOnlyAssetAdd
+                );
+              }}
+              variant={'contained'}
+              disabled={selectedRecords.length > 1 || selectedRecords.length === 0}
+            >
+              {`Perform Transfer`}
+            </Button>
+          </Grid>
+        </Box>
+        {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={'rental_management_existing'}
+            refreshGrid={fetchRentalManagement}
+            hideAction={true}
+            isClientSideGrid={true}
+          />
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
+      </div>
+      {showTicketDialog.open && (
+        <ManageDeliveryTicket
+          ticketType={showTicketDialog.ticketType}
+          referenceType={DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}
+          referenceData={showTicketDialog.data}
+          productInventory={productInventory?.filter((e) => e.type === 'Asset')}
+          products={productInventory?.filter((e) => e.type === 'Product')}
+          onClose={() => setShowTicketDialog({ open: false, ticketType: '', data: {}, rentalJob: null })}
+          onSuccess={(data) => {
+            handleCreateLoadingTicketAddAsstes(data, showTicketDialog.rentalJob, assetsAdd);
+          }}
+        />
+      )}
+      {showRentalDialog.open && (
+        <ManageRentalManagementDialog
+          rentalManagementId={null}
+          isClone={false}
+          open={showRentalDialog.open}
+          referenceData={{ warehouse: referenceData?.warehouse?.optionValue }}
+          onClose={() => {
+            setShowRentalDialog({ open: false, data: {} });
+          }}
+          onSuccess={(data) => {
+            cloneRentalDetail(data);
+          }}
+        />
+      )}
+    </Dialog>
   );
-}
+};
 
 export default ExistingRentalJob;

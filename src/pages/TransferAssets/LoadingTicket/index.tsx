@@ -27,7 +27,6 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import PreviewDownload from 'src/components/PreviewDownload';
 import { useColumns } from 'src/components/CustomReactTableNew';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
-import { Link } from 'react-router-dom';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import InfoIcon from '@material-ui/icons/Info';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
@@ -37,7 +36,6 @@ interface LoadingGridProps {
   transferAssetData?: any;
   transferAssetId: string | any;
   setNextStep: any;
-  setPrevStep: any;
   currentStep: number;
   setTickets?: any;
   setExistingAssets?: any;
