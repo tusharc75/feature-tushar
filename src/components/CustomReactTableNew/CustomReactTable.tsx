@@ -535,6 +535,9 @@ function CustomReactTable({
           setColumnOrder(colOrder);
           dispatch({type : 'updateColumnState', colState : selectedReportView?.columnState})
         }
+        else {
+          setColumnOrder(newColumns.map((m) => m?.id ?? m?.accessor));
+        }
       }
       else{
         let gridMetaData = getDataFromLocalStorage();
