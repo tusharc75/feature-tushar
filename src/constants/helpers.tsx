@@ -2326,58 +2326,58 @@ export const REPORT_LIST = [
   {
     title: 'Purchase Order Details',
     permission: 'purchaseOrder',
-    key: 'purchaseOrderType',
-    // key: 'standardReport',
+    // key: 'purchaseOrderType',
+    key: 'standardReport',
     type: 'purchaseOrderDetails'
   },
   {
     title: 'Inventory Evaluation',
     permission: 'purchaseOrder',
-    key: 'purchaseOrderType',
-    // key: 'standardReport',
+    // key: 'purchaseOrderType',
+    key: 'standardReport',
     type: 'inventoryEvaluation'
   },
   {
     title: 'Inventory History',
     permission: 'purchaseOrder',
-    key: 'purchaseOrderType',
-    // key: 'standardReport',
+    // key: 'purchaseOrderType',
+    key: 'standardReport',
     type: 'inventoryHistory'
   },
   {
     title: 'Average Price By Supplier',
     permission: 'purchaseOrder',
-    key: 'purchaseOrderType',
-    // key: 'standardReport',
+    // key: 'purchaseOrderType',
+    key: 'standardReport',
     type: 'averagePriceBySupplier'
   },
   {
     title: 'Number Of Assets by Status',
     permission: 'serializedAsset',
-    key: 'purchaseOrderType',
-    // key: 'standardReport',
+    // key: 'purchaseOrderType',
+     key: 'standardReport',
     type: 'numberOfAssetsByStatus'
   },
   {
     title: 'Asset Utilization',
     permission: 'serializedAsset',
-    key: 'purchaseOrderType',
-    // key: 'standardReport',
+    // key: 'purchaseOrderType',
+    key: 'standardReport',
     type: 'assetUtilization'
   },
   {
     title: 'User Session',
     permission: 'user',
-    key: 'purchaseOrderType',
-    // key: 'standardReport',
+    // key: 'purchaseOrderType',
+    key: 'standardReport',
     type: 'userSession'
   },
   {
     title: 'In Used Serialized Asset',
     permission: 'serializedAsset',
-    key: 'purchaseOrderType',
-    // key: 'standardReport',
-    type: 'inUseSerializedAsset'
+    // key: 'purchaseOrderType',
+    key: 'standardReport',
+    type: 'inUsedSerializedAsset'
   }
 ];
 
