@@ -379,10 +379,13 @@ const CustomReactTable = ({
   });
 
   useEffect(() => {
-    table.setPageSize(limit);
-    if (!isClientSideGrid) return;
-    table.setPageIndex(page);
-  }, [isClientSideGrid, limit, page, table]);
+    if (isClientSideGrid) {
+      table.setPageSize(data.length);
+    } else {
+      table.setPageSize(limit);
+      table.setPageIndex(page);
+    }
+  }, [isClientSideGrid, limit, page, table, data]);
 
   const { rows } = table.getRowModel();
 

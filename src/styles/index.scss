@@ -3913,11 +3913,12 @@ body {
       z-index: 11;
       min-width: 146px;
       background: #ffffff;
-      box-shadow: 0px 4px 40px rgba(0, 0, 0, 0.08);
+
       border-radius: 17px;
 
       &.open {
         top: 5px;
+        box-shadow: 0px 4px 40px rgba(0, 0, 0, 0.08);
         bottom: 0;
       }
       input {
