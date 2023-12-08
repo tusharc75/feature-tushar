@@ -955,7 +955,7 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
   return obj;
 };
 
-export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
+export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boolean = false) => {
   const obj = {};
 
   const filterValues = (data: object | any) => (typeof data === 'string' ? data : typeof data === 'object' ? data?.optionValue : '');
@@ -1011,7 +1011,9 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
     } else if (key.type === 'decimal' || key.type === 'percent' || key.type === 'formula') {
       obj[key.fieldName] = dataObj[key.fieldName] || dataObj[key.fieldName] === 0 ? dataObj[key.fieldName] : 0;
     } else if (key.type === 'dateTime') {
-      obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : new Date();
+      obj[key.fieldName] = dataObj[key.fieldName] && !isClone ? dataObj[key.fieldName] : new Date();
+    } else if (key.type === 'date') {
+      obj[key.fieldName] = dataObj[key.fieldName] && !isClone ? dataObj[key.fieldName] : new Date();
     } else if (key.type === 'lookUpDisplay') {
     } else {
       obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : '';
@@ -2355,7 +2357,7 @@ export const REPORT_LIST = [
     title: 'Number Of Assets by Status',
     permission: 'serializedAsset',
     // key: 'purchaseOrderType',
-     key: 'standardReport',
+    key: 'standardReport',
     type: 'numberOfAssetsByStatus'
   },
   {

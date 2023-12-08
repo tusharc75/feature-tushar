@@ -62,7 +62,7 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
             isEmailAlert: data?.isEmailAlert,
             emailAlertUsers: data?.emailAlertUsers?.map((e) => ({ userId: e })),
             isCreateTask: data?.isCreateTask,
-            taksAssignUsers: data?.taksAssignUsers?.map((t) => ({ userId: t }))
+            taskAssignUsers: data?.taskAssignUsers?.map((t) => ({ userId: t }))
           });
           setLoading(false);
         })
@@ -76,7 +76,7 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
         isEmailAlert: false,
         emailAlertUsers: [],
         isCreateTask: false,
-        taksAssignUsers: []
+        taskAssignUsers: []
       });
       setLoading(false);
     }
@@ -157,8 +157,8 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
       }
     }
     if (values?.isCreateTask) {
-      if (values?.taksAssignUsers?.length <= 0) {
-        errors['taksAssignUsers'] = 'Taks Assign Users is Required';
+      if (values?.taskAssignUsers?.length <= 0) {
+        errors['taskAssignUsers'] = 'Task Assign Users is Required';
       }
     }
     return errors;
@@ -378,8 +378,8 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
                           {values['isCreateTask'] && (
                             <div className="flex-grow max-w-md min-w-[min(250px,100%)]">
                               <UserDropdown
-                                name="taksAssignUsers"
-                                label="Taks Assign Users"
+                                name="taskAssignUsers"
+                                label="Task Assign Users"
                                 errors={errors}
                                 touched={touched}
                                 required={true}
@@ -387,7 +387,7 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
                                   setFieldValue(name, value);
                                 }}
                                 multiple={true}
-                                value={values['taksAssignUsers']}
+                                value={values['taskAssignUsers']}
                                 email={[]}
                               />
                             </div>

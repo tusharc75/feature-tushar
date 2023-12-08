@@ -418,6 +418,7 @@ const PurchaseOrder = () => {
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
             resource={sidebarResource.purchaseOrder}
+            setWholeRowsCellColor={(rowData) => (rowData.deleted ? 'error' : '')}
           />
         ) : (
           <Box p={2} height={500}>

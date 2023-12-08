@@ -350,17 +350,22 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
       if (calValues && calValues['estimateJobDuration']) {
         element.estimateJobDuration = calValues['estimateJobDuration'];
       }
-      if(!isEmpty(tax)){
+      if (!isEmpty(tax)) {
         element.taxCode = tax?.taxCode;
         element.taxPercentage = tax?.taxPercentage;
       }
       material.push(element);
     });
-    const priceData: any = await calculatePrice(fieldTicketData, material);
-    AddConsumables(material, priceData);
+    if (fieldTicketData?.pricingCondition?.optionValue) {
+      const priceData: any = await calculatePrice(fieldTicketData, material);
+      AddMaterial(material, priceData?.filter((e) => e.conditionId === fieldTicketData?.pricingCondition?.optionValue));
+    }
+    else {
+      AddMaterial(material, null);
+    }
   };
 
-  const AddConsumables = async (material, priceData) => {
+  const AddMaterial = async (material, priceData) => {
     const tempMaterial = [...material];
     if (priceData) {
       tempMaterial.forEach((element) => {

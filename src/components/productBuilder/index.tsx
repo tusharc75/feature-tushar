@@ -656,7 +656,7 @@ const ProductBuilder = (props) => {
             refreshGrid={fetchProduct}
             onSaveEdit={onCellValueChanged}
             showOnlyShowFilteredRecordSwitch={true}
-            isClientSideGrid={false}
+            isClientSideGrid={true}
             hideAction={!Editable}
             hideSelection={!Editable}
             setWholeRowsCellColor={(row) => {
