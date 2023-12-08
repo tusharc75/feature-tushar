@@ -25,7 +25,7 @@ import AddSerializedAsset from 'src/pages/RentalManagement/SerializedAsset/AddSe
 import ReplaceAssetReason from '../../../components/RentalManagment/ReplaceAssetReason';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import PreviewDownload from 'src/components/PreviewDownload';
-import useColumns from 'src/components/CustomReactTableNew/useColumnsReactTable';
+import { useColumns } from 'src/components/CustomReactTableNew';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import InfoIcon from '@material-ui/icons/Info';

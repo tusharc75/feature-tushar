@@ -13,7 +13,7 @@ function reducer(state: TInitialState, action: TActios) {
         ...state,
         error: false,
         dataRows: action.data,
-        rowCount: action.count,
+        rowCount: action.count
       };
     case 'selection':
       return {
@@ -82,11 +82,6 @@ function reducer(state: TInitialState, action: TActios) {
         ...state,
         showFilteredRecordsOnly: !state.showFilteredRecordsOnly
       };
-    case 'updateColumnState':
-      return {
-        ...state,
-        colState : action.colState
-      }
     default:
       break;
   }
@@ -108,7 +103,7 @@ const intialState = {
   currentEditingCellPosition: null,
   error: false,
   showFilteredRecordsOnly: false,
-  colState : []
+  colState: []
 };
 
 export type TInitialState = {
@@ -125,12 +120,11 @@ export type TInitialState = {
   currentEditingCellPosition: { rowId: string; columnName: string } | null;
   error: boolean;
   showFilteredRecordsOnly: boolean;
-  colState : any[];
 };
 
 export type TActios =
   | { type: 'loading'; loading: boolean }
-  | { type: 'initialize'; data: any[]; count: number; }
+  | { type: 'initialize'; data: any[]; count: number }
   | { type: 'selection'; selectedRecords: any[] }
   | { type: 'update'; data: any[] }
   | { type: 'onlyFilter'; filters: any }
@@ -143,7 +137,8 @@ export type TActios =
   | { type: 'currentEditingCellPosition'; cellPosition: { rowId: string; columnName: string } | null }
   | { type: 'error'; error: boolean }
   | { type: 'showFilteredRecordsOnly' }
-  | { type: 'updateColumnState', colState: any[]}
+  | { type: 'columnOrder'; columnOrder: boolean }
+  | { type: 'hiddenColumns'; hiddenColumns: boolean };
 
 export const useTableReducer = () => {
   const [state, dispatch] = useReducer(reducer, intialState);

@@ -1,26 +1,19 @@
 import { Dispatch, ReactNode } from 'react';
-import type { TInitialState } from 'src/components/CustomReactTableNew/useTableReducer';
+import type { TInitialState } from 'src/components/CustomReactTableNew/hooks/useTableReducer';
 
 export type TSwipableListInputProps = {
-  toggleAllRowsSelected: (value?: boolean) => void;
-  dispatch: Dispatch<any>;
+  table: any;
+  allColumns: any;
   allowSelection: boolean;
   dataRows: any[];
-  rowCount: number;
-  page: number;
+  dispatch: Dispatch<any>;
   loading: boolean;
-  renderedFrom: string;
-  allColumns: any;
   expander: boolean;
-  prepareRow: any;
-  IndeterminateCheckbox: any;
   backgroundColorClass?: (data: any) => string | null;
+  renderedFrom: string;
+  state: TInitialState;
   submitInput: any;
   cellValue: any;
   setCellValue: any;
-  handleCellClick: any;
-  handleKeyDown: any;
-  state: TInitialState;
   isClientSideGrid: boolean;
-  footerGroups: any;
 };

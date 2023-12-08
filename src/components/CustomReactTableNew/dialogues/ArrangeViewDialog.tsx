@@ -1,33 +1,32 @@
-import React, { useEffect } from 'react';
 import {
-  makeStyles,
-  Theme,
-  createStyles,
+  Box,
+  Button,
   Dialog,
   List,
   ListItem,
-  ListItemText,
   ListItemIcon,
   ListItemSecondaryAction,
+  ListItemText,
   ListSubheader,
   Switch,
-  Button,
-  Box,
   TextField,
+  Theme,
   Typography,
-  Checkbox
+  createStyles,
+  makeStyles
 } from '@material-ui/core';
 import { DragHandle } from '@material-ui/icons';
 import { XYCoord } from 'dnd-core';
-import { DndProvider, useDrag, useDrop, DropTargetMonitor } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
 import update from 'immutability-helper';
-import CustomDialogContent from '../CustomDialog/CustomDialogContent';
-import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
-import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import { startCase } from 'lodash';
+import React, { useEffect } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
+import { DndProvider, DropTargetMonitor, useDrag, useDrop } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 import { TouchBackend } from 'react-dnd-touch-backend';
+import CustomDialogContent from '../../CustomDialog/CustomDialogContent';
+import CustomDialogFooter from '../../CustomDialog/CustomDialogFooter';
+import CustomDialogHeader from '../../CustomDialog/CustomDialogHeader';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -58,16 +57,8 @@ const ItemTypes = {
 };
 
 const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
-  const {
-    onClose,
-    columns,
-    updateGridHiddenColumns,
-    renderedFrom,
-    setHiddenColumns,
-    getToggleHideAllColumnsProps,
-    setColumnOrder,
-    defaultColumns,
-  } = props;
+  const { onClose, columns, updateGridHiddenColumns, renderedFrom, setHiddenColumns, getToggleHideAllColumnsProps, setColumnOrder, defaultColumns } =
+    props;
 
   const classes = useStyles();
   const [sortedColumns, setSortedColumns] = React.useState([]);
@@ -94,7 +85,9 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
         updatedCols = [
           ...(expanderCol ? [expanderCol] : []),
           ...(selectionCol ? [selectionCol] : []),
-          ...updatedCols.filter((d) => !['expander', 'selection', 'action']?.includes(d.accessor)).sort((a, b) => colOrder.findIndex((d) => d === a.accessor) - colOrder.findIndex((d) => d === b.accessor)),
+          ...updatedCols
+            .filter((d) => !['expander', 'selection', 'action']?.includes(d.accessor))
+            .sort((a, b) => colOrder.findIndex((d) => d === a.accessor) - colOrder.findIndex((d) => d === b.accessor)),
           ...(actionCol ? [actionCol] : [])
         ];
       }
@@ -131,7 +124,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
     if (renderedFrom && renderedFrom !== '') {
       updateGridHiddenColumns([], []);
     }
-    setColumnOrder(defaultColumns?.map((col) => col?.accessor));
+    setColumnOrder(defaultColumns?.map((col) => col?.id));
     setHiddenColumns([]);
     onClose();
   };
@@ -148,12 +141,16 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
       dataToStore.push(object);
     });
     if (renderedFrom && renderedFrom !== '') {
-      const hidedColumns = dataToStore?.filter((o) => !o?.isVisible && !['expander', 'selection', 'action']?.includes(o?.accessor)).map((o) => o?.accessor);
-      const columnOrder = dataToStore?.filter((o) => o?.sticky === undefined && !['expander', 'selection', 'action']?.includes(o?.accessor))?.map((o) => o?.accessor);
+      const hidedColumns = dataToStore
+        ?.filter((o) => !o?.isVisible && !['expander', 'selection', 'action']?.includes(o?.accessor))
+        .map((o) => o?.accessor);
+      const columnOrder = dataToStore
+        ?.filter((o) => o?.sticky === undefined && !['expander', 'selection', 'action']?.includes(o?.accessor))
+        ?.map((o) => o?.accessor);
       updateGridHiddenColumns(hidedColumns, columnOrder);
     }
-    setColumnOrder([...sortedColumns.map((m) => m.accessor)]);
-    setHiddenColumns([...sortedColumns].filter((f) => f.sticky === undefined && f.isVisible === false).map((m) => m.accessor));
+    setColumnOrder([...sortedColumns.map((m) => m.accessor ?? m.id)]);
+    setHiddenColumns([...sortedColumns].filter((f) => f.sticky === undefined && f.isVisible === false).map((m) => m.accessor ?? m.id));
     onClose();
   };
 
@@ -179,7 +176,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
   useEffect(() => {
     if (!searchVal) return;
     const matchedColumns = sortedColumns.filter((col) => {
-      const fieldName = typeof col.Header === 'string' ? col.Header.toLowerCase() : '';
+      const fieldName = typeof col.header === 'string' ? col.header.toLowerCase() : '';
       return fieldName.includes(searchVal.toLowerCase());
     });
     setSearchedColumns(matchedColumns);
@@ -264,8 +261,14 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
               (column, index) =>
                 column?.accessor !== 'selection' &&
                 column?.accessor !== 'expander' && (
-                  <ListItem key={`${column.accessor}-${index}`} divider disableGutters disabled={column.disabled} className={column.sticky ? 'd-none' : ''}>
-                    <ListItemText id="switch-list-column" primary={column.Header} />
+                  <ListItem
+                    key={`${column.accessor}-${index}`}
+                    divider
+                    disableGutters
+                    disabled={column.disabled}
+                    className={column.sticky ? 'd-none' : ''}
+                  >
+                    <ListItemText id="switch-list-column" primary={column.header} />
                     <ListItemSecondaryAction>
                       {column.sticky ? (
                         ''
@@ -384,7 +387,7 @@ const RenderListItem = (props: ItemProps) => {
         <ListItemIcon className={`${classes.cursor} pl-2`}>
           <DragHandle />
         </ListItemIcon>
-        <ListItemText id={column.accessor} primary={column.Header || startCase(column?.accessor)} />
+        <ListItemText id={column.accessor} primary={column.header || startCase(column?.accessor)} />
         <ListItemSecondaryAction>
           <Switch
             size="small"
