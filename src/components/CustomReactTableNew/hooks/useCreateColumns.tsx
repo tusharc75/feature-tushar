@@ -130,7 +130,7 @@ export const useCreateColumns = ({ columns, expander, fetchChildAttachment, hide
       e.cell = e.cell ?? e.Cell;
       e.header = e.header ?? e.Header;
 
-      if (e.disableFilters) {
+      if (e.disableFilters || e.id === 'index') {
         e.accessorKey = undefined;
       } else {
         e.accessorKey = e.accessor ?? e.id;
