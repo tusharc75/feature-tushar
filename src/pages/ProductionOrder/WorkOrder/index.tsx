@@ -104,7 +104,6 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         accessor: 'type',
         Header: 'Type',
         sticky: isMobile ? 'none' : 'left',
-        canFilter: true,
         Cell: ({ row }) => (row.original['type'] ? <h5>{`${startCase(row.original?.type)} `}</h5> : <NoDataCell />)
       },
       {
@@ -212,7 +211,6 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       coloum.push({
         accessor: 'assignedWorkStations',
         Header: 'Assigned Work Station',
-        canFilter: true,
         Cell: ({ row }) =>
           row?.original['assignedWorkStations'] && row?.original['assignedWorkStations']?.length ? (
             row?.original['assignedWorkStations']?.map((e, i) => {

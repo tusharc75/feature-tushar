@@ -170,14 +170,14 @@ const InventoryProduct = () => {
             if (o.fieldData.type === 'number' && ['minInventory', 'maxInventory'].includes(o.fieldData.fieldName)) {
               columns.push({
                 ...currentColumn?.columnData,
-                canFilter: false,
+                disableFilters: true,
                 editable: plantId === 'All' ? false : permissions?.productInventory?.isUpdate,
                 Cell: ({ row }) => <h5 className="text-truncate">{row?.original[o.fieldData.fieldName] || 0}</h5>
               });
             } else if (['inventory'].includes(currentColumn?.columnData?.accessor)) {
               columns.push({
                 ...currentColumn?.columnData,
-                canFilter: false,
+                disableFilters: true,
                 Cell: ({ row }) => <h5 className="text-truncate">{row?.original[o.fieldData.fieldName] || 0}</h5>
               });
             } else {
@@ -194,7 +194,7 @@ const InventoryProduct = () => {
             {
               accessor: 'availableInventory',
               Header: 'Available Inventory',
-              canFilter: false,
+              disableFilters: true,
               disableSortBy: true,
               show: true,
               Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.availableInventory || 0}</h5>
@@ -202,7 +202,7 @@ const InventoryProduct = () => {
             {
               accessor: 'softHold',
               Header: 'Soft Hold',
-              canFilter: false,
+              disableFilters: true,
               disableSortBy: true,
               show: true,
               Cell: ({ row }) =>
@@ -220,7 +220,7 @@ const InventoryProduct = () => {
             {
               accessor: 'purchaseOrderQty',
               Header: 'On PO',
-              canFilter: false,
+              disableFilters: true,
               disableSortBy: true,
               show: true,
               Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.purchaseOrderQty || 0}</h5>

@@ -88,12 +88,12 @@ const Report = () => {
                     switch (o?.fieldData?.type) {
                         case 'reference':
                             currentColumn.columnData.Cell = ({ row }) => ReferenceRenderer(row);
-                            currentColumn.columnData.canFilter = false;
+                            currentColumn.columnData.disableFilters = true;
                             currentColumn.columnData.disableSortBy = true;
                             break;
                         case 'creditDebit':
                             currentColumn.columnData.Cell = ({ row }) => CreditDebitRenderer(row)
-                            currentColumn.columnData.canFilter = false;
+                            currentColumn.columnData.disableFilters = true;
                             currentColumn.columnData.disableSortBy = true;
                             break;
                         case 'creditDebitType':
@@ -103,7 +103,7 @@ const Report = () => {
                 }
                 if (o?.fieldData?.fieldName === 'serialNumber') {
                     currentColumn.columnData.Cell = ({ row }) => SerialNumberRenderer(row)
-                    currentColumn.columnData.canFilter = false;
+                    currentColumn.columnData.disableFilters = true;
                     currentColumn.columnData.disableSortBy = true;
                 }
                 if (type === "number-of-assets-by-status" && o?.fieldData?.fieldName === "product") {
@@ -366,7 +366,7 @@ const Report = () => {
                             accessor: e.fieldName,
                             Header: e.fieldLabel,
                             disableSortBy: true,
-                            canFilter: false,
+                            disableFilters: true,
                             Cell: ({ row }) => {
                                 return (
                                     <div>

@@ -29,7 +29,6 @@ const DeliveryTicketProduct = ({ renderedFrom, deliveryTicketId }) => {
       Header: 'Qty',
       order: 1,
       disabled: true,
-      canFilter: true,
       Cell: ({ row }) => (row?.original?.qty ? <h5>{row?.original?.qty}</h5> : <NoDataCell />)
     }
   ];
