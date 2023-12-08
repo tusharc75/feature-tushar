@@ -3,7 +3,7 @@ import { Fragment } from 'react';
 import { Link } from 'react-router-dom';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import moment from 'moment';
-import { Avatar } from '@material-ui/core';
+import { Avatar, Tooltip } from '@material-ui/core';
 import { dateFormat, dateTimeFormat, sidebarResourceObjectFromValues } from 'src/constants/helpers';
 import { leadDetailPage } from 'src/routes/Lead';
 import routes from '../../Helpers/Routes';
@@ -118,6 +118,14 @@ export const getSortedColumns = (columns = []) => {
 
 export const staticColumns = ['createdBy', 'updatedBy'];
 
+const getTitle = (data) => {
+  if (data.length) {
+    let restParams = data.map((o) => (o?.optionLabel ? o?.optionLabel : typeof o !== 'object' ? o : '')).join(', ');
+    return restParams;
+  }
+  return '';
+};
+
 export default function useColumns() {
   const {
     state: { permissions }
@@ -211,6 +219,7 @@ export default function useColumns() {
         };
       } else if (field?.lookup) {
         let joinedFieldName = field?.fieldName.indexOf(' ') > 0 ? camelCase(field?.fieldName) : field?.fieldName;
+        const more = `rest${joinedFieldName}`
         let pathName = routes[`${camelCase(field?.lookupResource)}Detail`]?.path
           ? routes[`${camelCase(field?.lookupResource)}Detail`]?.path
           : `${camelCase(field?.lookupResource)}/detail`;
@@ -221,15 +230,22 @@ export default function useColumns() {
               permissions[permissionForLinks[field?.lookupResource]]?.isRead ? (
                 <span>
                   {row?.original?.[field?.fieldName] ? (
-                    <Link
-                      className="link text-truncate"
-                      title={row?.original?.[field?.fieldName]}
-                      to={`${pathName}/${row?.original?.[`${field?.fieldName}Id`]}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {row?.original?.[field?.fieldName]}
-                    </Link>
+                    <>
+                      <Link
+                        className="link text-truncate"
+                        title={row?.original?.[field?.fieldName]}
+                        to={`${pathName}/${row?.original?.[`${field?.fieldName}Id`]}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {row?.original?.[field?.fieldName]}
+                      </Link>
+                      {row?.original?.[more]?.length > 0 && (
+                        <Tooltip title={getTitle(row?.original?.[more])}>
+                          <span className="createdAtTime badge-date">{`+${row?.original?.[more].length} more..`}</span>
+                        </Tooltip>
+                      )}
+                    </>
                   ) : (
                     <NoDataCell />
                   )}

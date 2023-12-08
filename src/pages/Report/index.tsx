@@ -1,22 +1,19 @@
 import React from 'react';
 import { useParams, useHistory } from 'react-router-dom';
-import { Grid, useTheme, useMediaQuery, Button, Box } from '@material-ui/core';
+import { Grid, useTheme, Button, Box } from '@material-ui/core';
 import { camelCase, startCase } from 'lodash';
 import axios from 'axios';
 import moment from 'moment';
-import { MdDescription, MdChevronLeft, MdFilterList } from 'react-icons/md';
+import { MdDescription, MdFilterList } from 'react-icons/md';
 import styles from '../Leads/Header.module.scss';
 import routes from './../../components/Helpers/Routes';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
 import { prepareDataForGrid, gridLoadingTimeout, downloadExcel, primaryFields, sidebarResource, isObjectEmpty } from './../../constants/helpers';
 import Loader from '../../components/Loader';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import ReportFilters from './ReportFilters';
@@ -24,23 +21,24 @@ import ReportFilters from './ReportFilters';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import DialogContent from '@material-ui/core/DialogContent';
 import Dialog from '@material-ui/core/Dialog';
+import CustomReactTable, { useTableReducer, useColumns, getStaticFields } from 'src/components/CustomReactTableNew';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
 
 let cancelTokenSource = null;
 
 const Report = () => {
   const history = useHistory();
   const theme = useTheme();
-  const isSmall = useMediaQuery(theme.breakpoints.down('sm'));
   const initialRender = React.useRef(true);
   const toastConfig = React.useContext(CustomToastContext);
   const {
-    state: { permissions, selectedEntity }
+    state: { selectedEntity }
   } = useData();
   let { resource } = useParams();
 
   let resourceCamelCase = camelCase(resource);
   let resourceStartCase = startCase(resource);
-  const renderedFrom = `${resource}_report`;
+  const renderedFrom = `${resource}_report_new`;
 
   const [showGrid, setShowGrid] = React.useState(false);
   const [selectedData, setSelectedData] = React.useState(null);
@@ -59,12 +57,10 @@ const Report = () => {
   const [statusTimeFrame, setStatusTimeFrame] = React.useState<any>('custom');
 
   // Grid Configs
-  const [frameWorkComponent, setFrameWorkComponent] = React.useState({});
   const { getColumnData } = useColumns();
   const [columns, setColumns] = React.useState(null);
-  const [gridApi, setGridApi] = React.useState(null);
-  const [state, dispatch] = React.useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, sorting, search, limit, filters, pageSizes } = state;
+  const { state, dispatch } = useTableReducer();
+  const { loading, page, sorting, search, limit, filters, pageSizes, colState } = state;
 
   const fetchGridColumns = async () => {
     setLoadingColumns(true);
@@ -113,7 +109,6 @@ const Report = () => {
     setResourceColumns(resourceColumns);
     setLoadingColumns(false);
     let columns = [];
-    let rendererNames = [];
     data.forEach((o) => {
       if (o?.fieldData?.fieldName === primaryFields[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]) {
         o.fieldData.primaryField = true;
@@ -125,33 +120,38 @@ const Report = () => {
       );
       if (currentColumn !== null) {
         columns = [...columns, currentColumn?.columnData];
-        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-          rendererNames.push(currentColumn?.rendererName);
-        }
       }
-    });
-    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-    tempFrameworkComponent = {
-      ...tempFrameworkComponent
-    };
-    setFrameWorkComponent({ ...tempFrameworkComponent });
+    });   
+   
     columns = [...columns, ...getStaticFields()];
     if (resourceStartCase === 'Purchase Order') {
       columns.splice(1, 0, {
-        field: 'poAmount',
-        headerName: 'Purchase Order Amount',
+        accessor: 'poAmount',
+        Header: 'Purchase Order Amount',
         show: true,
         disabled: false,
-        cellRenderer: 'commonRenderer'
+        Cell : ({row}) => (
+          <>
+            <h5 className="text-truncate">
+                {row.original['poAmount'] ? row.original['poAmount'] : <NoDataCell/>}
+            </h5>
+          </>
+        )
       });
     }
     if (resourceStartCase === 'Work Order') {
       columns.push({
-        field: 'totalConsumablesCost',
-        headerName: 'Total Consumables Cost',
+        accessor: 'totalConsumablesCost',
+        Header: 'Total Consumables Cost',
         show: true,
         disabled: false,
-        cellRenderer: 'commonRenderer'
+        Cell : ({row}) => (
+          <>
+            <h5 className="text-truncate">
+                {row.original['totalConsumablesCost'] ? row.original['totalConsumablesCost'] : <NoDataCell/>}
+            </h5>
+          </>
+        )
       });
     }
     setColumns([...columns]);
@@ -212,9 +212,7 @@ const Report = () => {
     }
     cancelTokenSource = axios.CancelToken.source();
     dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
+   
     let api = null;
     if (resourceCamelCase === 'workOrder') {
       api = `${routes[resourceCamelCase].path}/${filterQuery}report=1`;
@@ -343,20 +341,21 @@ const Report = () => {
       message: 'Please wait exporting data',
       type: 'info'
     });
-    let columns = [];
-    if (gridApi) {
-      columns = gridApi.columnController.displayedColumns;
-      columns = columns.map((col) => col.colId);
-    }
+   
+    let newColumns = columns.map((col)=>col.accessor);
+
+    if(colState.length){
+        newColumns = colState?.filter((col)=>col.isVisible).map((col)=>col.accessor)
+    }   
     setExporting(true);
     let filterQuery = getFilter(true);
     let api = null;
     if (resourceCamelCase === 'workOrder') {
       api = `${routes[resourceCamelCase].path}/template/${filterQuery}export=true&report=1`;
     } else if (resourceCamelCase === 'quotes') {
-      api = `quote-builder/report/export?exportColumn=${JSON.stringify(columns)}&export=1&${filterQuery}`;
+      api = `quote-builder/report/export?exportColumn=${JSON.stringify(newColumns)}&export=1&${filterQuery}`;
     } else {
-      api = `${routes[resourceCamelCase].path}/report/export?exportColumn=${JSON.stringify(columns)}&export=1&${filterQuery}`;
+      api = `${routes[resourceCamelCase].path}/report/export?exportColumn=${JSON.stringify(newColumns)}&export=1&${filterQuery}`;
     }
 
     axiosInstance()
@@ -502,61 +501,20 @@ const Report = () => {
             )}
 
             <div>
-              {Object.keys(frameWorkComponent).length > 0 && columns ? (
-                isSmall ? (
-                  <CustomSwipableList
-                    allowSelection={false}
-                    allowSwipe={false}
-                    permissions={permissions[resourceCamelCase]}
-                    primaryField={columns?.find((d) => d.primaryField)}
-                    onClick={(data) => {
-                      // history.push(`${routes[resourceCamelCase].path}/detail/${data._id}`);
-                    }}
-                    selectedRecords={[]}
-                    dataRows={dataRows}
-                    dispatch={dispatch}
-                    onEdit={() => { }}
-                    extraParamsToCheckDelete={false}
-                    rowCount={rowCount}
-                    page={page}
-                    loading={loading}
-                    chips={columns
-                      .filter((col) => col.hasOwnProperty('cellRendererParams'))
-                      .map((col) => ({
-                        field: col.field,
-                        label: col.headerName
-                      }))}
-                    additionalDetails={[]}
-                    owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-                    onCreate={false}
-                    showClone={false}
-                    onDelete={(data) => { }}
-                    onClone={(data) => { }}
-                    renderedFrom={routes.transferAsset?.title}
-                  />
-                ) : (
-                  <CustomAgGrid
-                    setSelectedReportView={setSelectedReportView}
-                    selectedReportView={selectedReportView}
-                    reportSave={true}
-                    columns={columns}
-                    dataRows={dataRows}
-                    frameworkComponents={frameWorkComponent}
-                    setGridApi={setGridApi}
-                    dispatch={dispatch}
-                    rowCount={rowCount}
-                    limit={limit}
-                    pageSizes={pageSizes}
-                    page={page}
-                    actionWidth={100}
-                    loading={loading}
-                    renderedFrom={renderedFrom}
-                    allowSelection={false}
-                    allowAction={false}
-                    refreshGrid={fetchResourceData}
-                    showOnlyShowFilteredRecordSwitch={false}
-                  />
-                )
+              {columns ? (
+                <CustomReactTable
+                  height={'calc(100vh - 200px)'}
+                  columns={columns}
+                  state={state}
+                  dispatch={dispatch}
+                  renderedFrom={renderedFrom}
+                  refreshGrid={fetchResourceData}
+                  hideSelection={true}
+                  reportSave={true}
+                  setSelectedReportView={setSelectedReportView}
+                  selectedReportView={selectedReportView}
+                />
+
               ) : (
                 <Loader text={'Loading Data...'} style={{ marginTop: '15vh' }} />
               )}
