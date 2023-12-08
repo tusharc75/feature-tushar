@@ -7,7 +7,6 @@ import axiosInstance from '../../axios/axiosInstance';
 import { dateTimeFormat, getLocalStorageArrayData, gridLoadingTimeout, isObjectEmpty, product, removeLocalStorage, sidebarResource } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import { sortBy } from 'lodash';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import { CustomDialogTransition } from '../../constants/helpers';
