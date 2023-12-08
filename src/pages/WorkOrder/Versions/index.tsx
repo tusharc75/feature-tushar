@@ -159,7 +159,6 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
       {
         accessor: 'assignedWorkStations',
         Header: 'Assigned Work Station',
-        canFilter: true,
         Cell: ({ row }) =>
           row?.original['assignedWorkStations'] && row?.original['assignedWorkStations']?.length ? (
             row?.original['assignedWorkStations']?.map((e, i) => {

@@ -108,7 +108,9 @@ const RentalManagement = () => {
       width: 100,
       disableFilters: true,
       disableSortBy: true,
-      Cell: ({ row }) => (row?.original?.['subleaseAssets'] ? 'Yes' : 'No')
+      Cell: ({ row }) => <div>
+        {row?.original?.subleaseAssets ? 'Yes' : 'No'}
+      </div>
     }
   ];
 
@@ -157,8 +159,10 @@ const RentalManagement = () => {
             minWidth: 180,
             width: 180,
             Cell: ({ row }) => (
-              <>
-                <Link className="link text-truncate" title={row?.original[o?.fieldData?.fieldName]} to={`${routes.rentalManagement.path}/detail/${row?.original?._id}`}>
+              <div>
+                <Link className="link text-truncate"
+                  title={row?.original[o?.fieldData?.fieldName]}
+                  to={`${routes.rentalManagement.path}/detail/${row?.original?._id}`}>
                   {row?.original[o?.fieldData?.fieldName]}
                 </Link>
                 {row?.original?.assetsNotReceivedInPo && (
@@ -168,7 +172,7 @@ const RentalManagement = () => {
                     </HtmlTooltip>
                   </Box>
                 )}
-              </>
+              </div>
             )
           }
         ];
@@ -176,8 +180,8 @@ const RentalManagement = () => {
         let currentColumn: any = getColumnData(renderedFrom, o?.fieldData, routes.rentalManagementDetail.path, true);
         if (currentColumn !== null) {
           if (isOffline) {
-            currentColumn.columnData['filter'] = false;
-            currentColumn.columnData['sortable'] = false;
+            currentColumn.columnData['disableFilters'] = true;
+            currentColumn.columnData['disableSortBy'] = true;
           }
           columns = [...columns, currentColumn?.columnData]
         }
@@ -617,9 +621,8 @@ const RentalManagement = () => {
         {singleRentalManagementDelete.show && (
           <ConfirmationDialog
             open={singleRentalManagementDelete.show}
-            message={`Are you sure you want to delete this ${routes.rentalManagement.title.toLowerCase()} ${
-              singleRentalManagementDelete ? (singleRentalManagementDelete?.id ? singleRentalManagementDelete?.rentalJobName : '') : ''
-            }?`}
+            message={`Are you sure you want to delete this ${routes.rentalManagement.title.toLowerCase()} ${singleRentalManagementDelete ? (singleRentalManagementDelete?.id ? singleRentalManagementDelete?.rentalJobName : '') : ''
+              }?`}
             onClose={() =>
               setSingleRentalManagementDelete({
                 id: null,

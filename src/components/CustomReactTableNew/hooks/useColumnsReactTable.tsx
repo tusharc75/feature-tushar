@@ -48,7 +48,7 @@ export const getStaticFields = () => {
       header: 'Created By',
       show: true,
       minSize: 185,
-      canFilter: false,
+      disableFilters: true,
       cell: ({ row }) =>
         row?.original?.createdBy ? (
           <h5 className="createBy" title={`${row?.original?.createdBy} • ${moment(row?.original?.createdByDate?.slice(0, 10)).format(dateFormat)}`}>
@@ -67,7 +67,7 @@ export const getStaticFields = () => {
       header: 'Updated By',
       minSize: 185,
       show: true,
-      canFilter: false,
+      disableFilters: true,
       cell: ({ row }) =>
         row?.original?.updatedBy ? (
           <h5 className="updateBy" title={`${row?.original?.updatedBye} • ${moment(row?.original?.updatedByDate?.slice(0, 10)).format(dateFormat)}`}>
@@ -146,8 +146,6 @@ export default function useColumns() {
         minSize: 180,
         size: 200,
         header: fieldHeaderName,
-
-        // ...getColumnWidth(fieldHeaderName),
         show: gridMetaData[title]?.hide && gridMetaData[title]?.hide.indexOf(field?.fieldName) >= 0 ? false : true,
         disabled: gridMetaData[title]?.disabled && gridMetaData[title]?.disabled.indexOf(field?.fieldName) >= 0 ? true : false,
         primaryField: field?.primaryField ?? false
@@ -211,8 +209,7 @@ export default function useColumns() {
         };
       } else if (field?.lookup) {
         let joinedFieldName = field?.fieldName.indexOf(' ') > 0 ? camelCase(field?.fieldName) : field?.fieldName;
-        let pathName = routes[`${camelCase(field?.lookupResource)}Detail`]?.path
-          ? routes[`${camelCase(field?.lookupResource)}Detail`]?.path
+        let pathName = routes[`${camelCase(field?.lookupResource)}Detail`]?.path ? routes[`${camelCase(field?.lookupResource)}Detail`]?.path
           : `${camelCase(field?.lookupResource)}/detail`;
         return {
           columnData: {
@@ -268,7 +265,7 @@ export default function useColumns() {
         return {
           columnData: {
             ...commonFieldData,
-            canFilter: false,
+            disableFilters: true,
             sortable: false,
             minWidth: 80,
             cell: ({ row }) => (
@@ -298,7 +295,7 @@ export default function useColumns() {
                 )}
               </div>
             ),
-            canFilter: false,
+            disableFilters: true,
             disableSortBy: true
           }
         };
@@ -317,7 +314,7 @@ export default function useColumns() {
                 )}
               </div>
             ),
-            canFilter: false,
+            disableFilters: true,
             disableSortBy: true
           }
         };
@@ -325,14 +322,16 @@ export default function useColumns() {
         return {
           columnData: {
             ...commonFieldData,
-            cell: ({ row }) => <span>{Boolean(row?.original?.[field?.fieldName]) ? 'Yes' : 'No'}</span>
+            cell: ({ row }) => <div>
+              <span>{Boolean(row?.original?.[field?.fieldName]) ? 'Yes' : 'No'}</span>
+            </div>
           }
         };
       } else if (field?.type === 'colorPicker') {
         return {
           columnData: {
             ...commonFieldData,
-            canFilter: false,
+            disableFilters: true,
             cell: ({ row }) => (
               <div>
                 {row?.original?.[field?.fieldName] ? (
@@ -350,7 +349,7 @@ export default function useColumns() {
         return {
           columnData: {
             ...commonFieldData,
-            canFilter: false,
+            disableFilters: true,
             Cell: ({ row }) => (
               <>
                 <h5 className="text-truncate">{row.original[field?.fieldName] ? row.original[field?.fieldName] : 0}</h5>

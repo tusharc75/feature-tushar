@@ -62,7 +62,7 @@ const History = ({ id, status }) => {
       Header: 'Date & Time',
       minWidth: 150,
       width: 150,
-      canFilter: false,
+      disableFilters: true,
       Cell: ({ row }) => (
         <>
           {row?.original?.date ? (

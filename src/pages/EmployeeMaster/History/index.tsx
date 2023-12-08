@@ -96,7 +96,7 @@ const History = ({ id }) => {
       Header: 'Start Date',
       minWidth: 150,
       width: 150,
-      canFilter: false,
+      disableFilters: true,
       disabled: true,
       Cell: ({ row }) => (
         <>
@@ -115,7 +115,7 @@ const History = ({ id }) => {
       Header: 'End Date',
       minWidth: 150,
       width: 150,
-      canFilter: false,
+      disableFilters: true,
       disabled: true,
       Cell: ({ row }) => (
         <>
