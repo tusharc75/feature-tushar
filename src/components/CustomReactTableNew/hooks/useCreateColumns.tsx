@@ -3,8 +3,9 @@ import { useMemo } from 'react';
 import { FaAngleDown, FaAngleRight } from 'react-icons/fa';
 import { IndeterminateCheckbox, TColType } from '../TableComponents/TableHelperComponents';
 import { childrenProperty, insertChildRowIntoTable } from '../utils';
+import { fuzzySort } from '../ReactTableHelpers';
 
-export const useCreateColumns = ({ columns, expander, fetchChildAttachment, hideSelection, dispatch, state }) => {
+export const useCreateColumns = ({ columns, expander, fetchChildAttachment, hideSelection, dispatch, state, isClientSideGrid }) => {
   const { dataRows: allRows } = state;
 
   const fetchChildAttachmentWrapper = async (row) => {
@@ -128,6 +129,7 @@ export const useCreateColumns = ({ columns, expander, fetchChildAttachment, hide
       e.id = e.id ?? e.accessor;
       e.cell = e.cell ?? e.Cell;
       e.header = e.header ?? e.Header;
+      e.accessorKey = e.accessor ?? e.id;
       e.size = e.size ?? e.width;
       switch (true) {
         case e.accessor === 'action':
@@ -145,6 +147,12 @@ export const useCreateColumns = ({ columns, expander, fetchChildAttachment, hide
           e.disableFilters = e.disableFilters ?? true;
           e.disableSortBy = e.disableSortBy ?? true;
           e.enableResizing = false;
+          break;
+        case e.disableFilters !== true && isClientSideGrid:
+          e.filterFn = 'fuzzy';
+          break;
+        case e.disableSortBy !== true && isClientSideGrid:
+          e.sortingFn = fuzzySort;
           break;
       }
       updatedColumn.push(e);

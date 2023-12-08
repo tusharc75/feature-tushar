@@ -405,7 +405,9 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({ header, table,
                 customFilters={customFilters}
               />
             ) : (
-              <Filter column={header.column} table={table} />
+              <>
+                <Filter column={header.column} table={table} />
+              </>
             )}
           </>
         ) : null}
