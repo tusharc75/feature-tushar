@@ -150,7 +150,6 @@ const ProductBuilder = (props) => {
 
             return item;
           });
-          console.log(customFields)
           const newColumns = generateCustomTableColumns(customFields, currency, renderedFrom);
           columns = [...columns, ...newColumns];
         });
@@ -657,7 +656,7 @@ const ProductBuilder = (props) => {
             refreshGrid={fetchProduct}
             onSaveEdit={onCellValueChanged}
             showOnlyShowFilteredRecordSwitch={true}
-            isClientSideGrid={false}
+            isClientSideGrid={true}
             hideAction={!Editable}
             hideSelection={!Editable}
             setWholeRowsCellColor={(row) => {

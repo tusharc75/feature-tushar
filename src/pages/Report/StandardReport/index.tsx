@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams, useHistory, Link } from 'react-router-dom';
-import { Grid, useTheme, useMediaQuery, Button, Box, Tooltip, IconButton } from '@material-ui/core';
+import { Grid, Button, Box, IconButton } from '@material-ui/core';
 import { camelCase, capitalize, startCase } from 'lodash';
 import axios from 'axios';
 import moment from 'moment';
@@ -10,52 +10,46 @@ import routes from 'src/components/Helpers/Routes';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomContainer from 'src/components/CustomContainer';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import CustomAgGrid, { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
 import { useData } from 'src/StateProvider/Provider';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import useColumns, { getStaticFields, getFrameworkComponents } from 'src/constants/useColumns';
 import {
     prepareDataForGrid,
     gridLoadingTimeout,
     downloadExcel,
-    primaryFields,
-    productInventory,
     isObjectEmpty,
-    sidebarResource,
-    product
 } from 'src/constants/helpers';
 import Loader from 'src/components/Loader';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import ReportFilters from '../ReportFilters';
-import { DateRenderer, NumberRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
-import HistoryIcon from '@material-ui/icons/History';
 import AverageCostHistory from '../AverageCostHistory';
-import { CommonRenderer, DateTimeRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { useAppTheme } from 'src/constants/AppConfig';
 
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import DialogContent from '@material-ui/core/DialogContent';
 import Dialog from '@material-ui/core/Dialog';
+import CustomReactTable, { useTableReducer, useColumns, getStaticFields } from 'src/components/CustomReactTableNew';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import HistoryIcon from '@material-ui/icons/History';
+
 
 let cancelTokenSource = null;
 
 const Report = () => {
     const [themeColor] = useAppTheme();
     const isDarkTheme = themeColor === 'dark';
-    const theme = useTheme();
     const initialRender = React.useRef(true);
     const toastConfig = React.useContext(CustomToastContext);
     const {
-        state: { user, permissions, selectedEntity }
+        state: { selectedEntity }
     } = useData();
     const { type } = useParams();
     const history = useHistory();
 
     const resourceCamelCase = camelCase(type);
     const resourceStartCase = startCase(type);
-    const renderedFrom = `${type}_report`;
+    const renderedFrom = `${type}_report_new`;
 
     const [showGrid, setShowGrid] = React.useState(false);
     const [selectedData, setSelectedData] = React.useState(null);
@@ -74,12 +68,10 @@ const Report = () => {
     const [statusTimeFrame, setStatusTimeFrame] = React.useState<any>('custom');
 
     // Grid Configs
-    const [frameWorkComponent, setFrameWorkComponent] = React.useState({});
     const { getColumnData } = useColumns();
     const [columns, setColumns] = React.useState(null);
-    const [gridApi, setGridApi] = React.useState(null);
-    const [state, dispatch] = React.useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, sorting, search, limit, filters, pageSizes } = state;
+    const { state, dispatch } = useTableReducer();
+    const { loading, page, sorting, search, limit, filters, pageSizes, colState } = state;
 
     const [showPriceHistory, setShowPriceHistory] = React.useState({ open: false, product: '', productName: '' });
     const [showPricefilter, setShowPricefilter] = React.useState({ warehouse: null, fromDate: null, toDate: null });
@@ -88,48 +80,58 @@ const Report = () => {
         try {
             setLoadingColumns(true);
             let columns = [];
-            let rendererNames = [];
 
             let {
                 data: { data: { columnFields, filterFields } }
             } = await axiosInstance().get(`/report/${type}/column`);
             const customRendererTypes = ['refer', 'creditDebit', 'date', 'creditDebitType'];
+            
             columnFields.forEach((o) => {
+
                 const currentColumn: any = getColumnData(type, o?.fieldData, '');
+               
                 if (customRendererTypes?.includes(o?.fieldData?.type)) {
                     switch (o?.fieldData?.type) {
-                        case 'date':
-                            currentColumn.columnData.rendererName = 'dateRenderer';
-                            break;
                         case 'refer':
-                            currentColumn.columnData.rendererName = 'referenceRenderer';
+                            currentColumn.columnData.Cell = ({ row }) => ReferenceRenderer(row);
+                            currentColumn.columnData.canFilter = false;
+                            currentColumn.columnData.disableSortBy = true;
                             break;
                         case 'creditDebit':
-                            currentColumn.columnData.rendererName = 'creditDebitRenderer'
-                            currentColumn.columnData.cellStyle = (params) => {
-                                if (params?.data?.type === 'credit') {
-                                    return { backgroundColor: isDarkTheme ? 'hsl(120 73% 40% / 1)' : '#90ee90' };
-                                }
-                                if (params?.data?.type === 'debit') {
-                                    return { backgroundColor: isDarkTheme ? 'hsl(1 100% 65% / 1)' : '#FFCCCB' };
-                                }
-                            }
+                            currentColumn.columnData.Cell = ({ row }) => CreditDebitRenderer(row)
+                            currentColumn.columnData.canFilter = false;
+                            currentColumn.columnData.disableSortBy = true;
+
                             break;
                         case 'creditDebitType':
-                            currentColumn.columnData.rendererName = 'creditDebitTypeRenderer';
+                            currentColumn.columnData.Cell = ({ row }) => CreditDebitTypeRenderer(row);
                             break;
                     }
                 }
+                
+                if(o?.fieldData?.fieldName === 'serialNumber'){
+                    currentColumn.columnData.Cell = ({row}) => SerialNumberRenderer(row)
+                    currentColumn.columnData.canFilter = false;
+                    currentColumn.columnData.disableSortBy = true;
+                }
+
+                if(type === "number-of-assets-by-status" && o?.fieldData?.fieldName === "product"){
+                    currentColumn.columnData.Cell = ({row}) => ProductRenderer(row)
+                }
+               
+
                 if (currentColumn !== null && !o?.fieldData?.hideColumn) {
-                    columns = [...columns, { ...currentColumn?.columnData, filter: false, sortable: false }];
-                    if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-                        rendererNames.push(currentColumn?.rendererName);
-                    }
+                    columns = [...columns, { ...currentColumn?.columnData }];
                 }
 
             });
-            let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-            setFrameWorkComponent({ ...tempFrameworkComponent, ...customFrameworkComponents });
+            
+            if(type === 'inventory-evaluation'){
+                columns = [...columns, ActionsRenderer]
+            }
+            if(type === "in-used-serialized-asset"){
+                columns = [...columns, ...getStaticFields()]
+            }
 
             setResourceColumns(filterFields);
             setColumns(columns);
@@ -181,65 +183,190 @@ const Report = () => {
         });
     }, [selectedData, selectedResources]);
 
-    const CreditDebitRenderer = (params: any) => (
-        <span>{params?.value ? params?.data?.type === 'debit' ? `-${params?.value}` : params?.value : <NoDataCell />}</span>
-    );
+    const CreditDebitRenderer = (row) => {
+        return (
+            <div
+                style={{
+                    backgroundColor:
+                        row?.original?.type === 'credit'
+                            ? isDarkTheme
+                                ? 'hsl(120 73% 40% / 1)'
+                                : '#90ee90'
+                            : row?.original?.type === 'debit'
+                                ? isDarkTheme
+                                    ? 'hsl(1 100% 65% / 1)'
+                                    : '#FFCCCB'
+                                : ''
+                }}
+            >
+                {row?.original?.qty ? (
+                    <h5 className="text-truncate" title={row?.original?.qty}>
+                        {row?.original?.type === 'debit' ? `-${row?.original?.qty}` : row?.original?.qty}
+                    </h5>
+                ) : (
+                    <NoDataCell />
+                )}
+            </div>
+        )
+    }
 
-    const ReferenceRenderer = (params) =>
-        params?.value ? (
-            params.data.referenceType === 'Purchase Order' ? (
-                <Link className="link" title={params.value} to={`${routes.purchaseOrderDetail.path}/${params.data.referenceId}`} target="_blank">
-                    {params.value}
-                </Link>
-            ) : params.data.referenceType === 'Transfer Inventory' ? (
-                <Link className="link" title={params.value} to={`${routes.transferInventoryDetail.path}/${params.data.referenceId}`} target="_blank">
-                    {params.value}
-                </Link>
-            ) : params.data.referenceType === 'Transfer Asset' ? (
-                <Link className="link" title={params.value} to={`${routes.transferAssetDetail.path}/${params.data.referenceId}`} target="_blank">
-                    {params.value}
-                </Link>
-            ) : params.data.referenceType === 'Sales Order' ? (
-                <Link className="link" title={params.value} to={`${routes.salesOrderDetail.path}/${params.data.referenceId}`} target="_blank">
-                    {params.value}
-                </Link>
-            ) : params.data.referenceType === 'Bulk Asset Creation' ? (
-                <Link className="link" title={params.value} to={`${routes.bulkAssetCreationDetail.path}/${params.data.referenceId}`} target="_blank">
-                    {params.value}
-                </Link>
-            ) : params.data.referenceType === 'Serialized Asset' ? (
-                <Link className="link" title={params.value} to={`${routes.serializedAssetDetail.path}/${params.data.referenceId}`} target="_blank">
-                    {params.value}
-                </Link>
-            ) : params.data.referenceType === 'Rental Job' ? (
-                <Link className="link" title={params.value} to={`${routes.rentalManagementDetail.path}/${params.data.referenceId}`} target="_blank">
-                    {params.value}
-                </Link>
-            ) : params.data.referenceType === 'Work Order' ? (
-                <Link className="link" title={params.value} to={`${routes.workOrderDetail.path}/${params.data.referenceId}`} target="_blank">
-                    {params.value}
-                </Link>
-            ) : params.data.referenceType === 'Field Ticket' ? (
-                <Link className="link" title={params.value} to={`${routes.fieldTicketDetail.path}/${params.data.referenceId}`} target="_blank">
-                    {params.value}
-                </Link>
+    const ProductRenderer = (row) =>{
+
+        return (
+            row?.original?.productName ? (
+                <Link className="link" title={row?.original?.productName} to={`${routes.productDetail.path}/${row?.original?.productId}`} target="_blank">
+                    {row?.original?.productName}
+                    </Link>
+            ) : <NoDataCell/>
+        )
+    }
+
+    const ReferenceRenderer = (row) => {
+        return (
+            row?.original?.reference ? (
+                row?.original?.referenceType === 'Purchase Order' ? (
+                    <Link
+                        className="link"
+                        target="_blank"
+                        title={row?.original?.reference}
+                        to={`${routes.purchaseOrderDetail.path}/${row?.original?.referenceId}`}
+                    >
+                        {row?.original?.reference}
+                    </Link>
+                ) : row?.original?.referenceType === 'Transfer Inventory' ? (
+                    <Link
+                        className="link"
+                        target="_blank"
+                        title={row?.original?.reference}
+                        to={`${routes.transferInventoryDetail.path}/${row?.original?.referenceId}`}
+                    >
+                        {row?.original?.reference}
+                    </Link>
+                ) : row?.original?.referenceType === 'Transfer Asset' ? (
+                    <Link
+                        className="link"
+                        target="_blank"
+                        title={row?.original?.reference}
+                        to={`${routes.transferAssetDetail.path}/${row?.original?.referenceId}`}
+                    >
+                        {row?.original?.reference}
+                    </Link>
+                ) : row?.original?.referenceType === 'Sales Order' ? (
+                    <Link
+                        className="link"
+                        target="_blank"
+                        title={row?.original?.reference}
+                        to={`${routes.salesOrderDetail.path}/${row?.original?.referenceId}`}
+                    >
+                        {row?.original?.reference}
+                    </Link>
+                ) : row?.original?.referenceType === 'Bulk Asset Creation' ? (
+                    <Link
+                        className="link"
+                        target="_blank"
+                        title={row?.original?.reference}
+                        to={`${routes.bulkAssetCreationDetail.path}/${row?.original?.referenceId}`}
+                    >
+                        {row?.original?.reference}
+                    </Link>
+                ) : row?.original?.referenceType === 'Serialized Asset' ? (
+                    <Link
+                        className="link"
+                        target="_blank"
+                        title={row?.original?.reference}
+                        to={`${routes.serializedAssetDetail.path}/${row?.original?.referenceId}`}
+                    >
+                        {row?.original?.reference}
+                    </Link>
+                ) : row?.original?.referenceType === 'Rental Job' ? (
+                    <Link
+                        className="link"
+                        target="_blank"
+                        title={row?.original?.reference}
+                        to={`${routes.rentalManagementDetail.path}/${row?.original?.referenceId}`}
+                    >
+                        {row?.original?.reference}
+                    </Link>
+                ) : row?.original?.referenceType === 'Work Order' ? (
+                    <Link
+                        className="link"
+                        target="_blank"
+                        title={row?.original?.reference}
+                        to={`${routes.workOrderDetail.path}/${row?.original?.referenceId}`}
+                    >
+                        {row?.original?.reference}
+                    </Link>
+                ) : row?.original?.referenceType === 'Field Ticket' ? (
+                    <Link
+                        className="link"
+                        target="_blank"
+                        title={row?.original?.reference}
+                        to={`${routes.fieldTicketDetail.path}/${row?.original?.referenceId}`}
+                    >
+                        {row?.original?.reference}
+                    </Link>
+                ) : (
+                    row?.original?.reference
+                )
+            ) : row?.original?.referenceType === 'Product Inventory' ? (
+                <h5 className="text-truncate">Manual Entry</h5>
             ) : (
-                params.value
+                <NoDataCell />
             )
-        ) : params?.value.referenceType === 'Product Inventory' ? (
-            <p>Manual Entry</p>
-        ) : (
-            <NoDataCell />
-        );
+        )
+    }
 
-    const CreditDebitTypeRenderer = (params: any) => <span>{capitalize(params?.value)}</span>;
+    const CreditDebitTypeRenderer = (row) => {
+        return (
+            <div
+            >
+                {row?.original?.type ? (
+                    <span>
+                        {capitalize(row?.original?.type)}
+                    </span>
+                ) : (
+                    <NoDataCell />
+                )}
+            </div>
+        )
+    }
 
-    const customFrameworkComponents = {
-        dateRenderer: DateRenderer,
-        referenceRenderer: ReferenceRenderer,
-        creditDebitRenderer: CreditDebitRenderer,
-        creditDebitTypeRenderer: CreditDebitTypeRenderer,
-    };
+    const SerialNumberRenderer = (row) =>{
+        return (
+            <>
+                <span>{row.original.serialNumber?.length ? row.original.serialNumber?.map((e) => e?.serialNumber)?.toString() : <NoDataCell />}</span>
+            </>
+        )
+    }
+
+    const ActionsRenderer = {
+        accessor: 'action',
+        Header: 'Actions',
+        minWidth: 100,
+        width: 100,
+        sticky: 'right',
+        disableFilters: true,
+        disableSortBy: true,
+        canDrag: false,
+        Cell: ({ row }) => (
+          <>
+            <HtmlTooltip title={'View History'}>
+              <span>
+                <IconButton
+                  size="small"
+                  aria-label="Delete"
+                  onClick={() => {
+                    setShowPriceHistory({ open: true, product: row?.original?._id, productName: row?.original?.productName });
+                  }}
+                >
+                  <HistoryIcon fontSize="small" color="primary" />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
+          </>
+        )
+      };
+
 
     const fetchResourceData = () => {
         setShowGrid(true);
@@ -248,10 +375,7 @@ const Report = () => {
             cancelTokenSource.cancel();
         }
         cancelTokenSource = axios.CancelToken.source();
-        dispatch({ type: 'loading', loading: true });
-        if (gridApi) {
-            gridApi.setRowData([]);
-        }
+        dispatch({ type: 'loading', loading: true })
 
         var api = `/report/${type}`;
         axiosInstance()
@@ -263,14 +387,32 @@ const Report = () => {
                     setLoadingColumns(true);
                     columns = columns?.map((e) => {
                         return {
-                            field: e.fieldName,
-                            headerName: e.fieldLabel,
-                            show: true,
-                            disabled: false,
-                            cellRenderer: e.fieldName === 'user' ? 'userRenderer' : 'commonRenderer',
-                            filter: false,
-                            sortable: false
-                        };
+                            accessor: e.fieldName,
+                            Header: e.fieldLabel,
+                            disableSortBy: true,
+                            canFilter: false,
+                            Cell: ({ row }) => {
+                                return (
+                                    <>
+                                        {row?.original?.[e?.fieldName] ? (
+                                            e.fieldName === "user" ? (
+                                                <Link className="link" title={row?.original?.[e?.fieldName]} to={`${routes.userDetail.path}/${row?.original?.userId}`} target="_blank">
+                                                    {row?.original?.[e?.fieldName]}
+                                                </Link>
+                                            ) : (
+                                                <h5 className="text-truncate" title={row?.original?.[e?.fieldName]}>
+                                                    {row?.original?.[e?.fieldName]}
+                                                </h5>
+                                            )
+                                        ) : (
+                                            <NoDataCell />
+                                        )}
+                                    </>
+                                );
+                            }
+                            
+                        }
+                        
                     });
                     setColumns(columns);
                     setLoadingColumns(false);
@@ -411,11 +553,11 @@ const Report = () => {
             message: 'Please wait exporting data',
             type: 'info'
         });
-        let columns = [];
-        if (gridApi) {
-            columns = gridApi.columnController.displayedColumns;
-            columns = columns.map((col) => col.colId);
-        }
+        let newColumns = columns.map((col)=>col.accessor);
+
+        if(colState.length){
+            newColumns = colState?.filter((col)=>col.isVisible).map((col)=>col.accessor)
+        }        
         setExporting(true);
         let filterQuery = getFilter(true);
 
@@ -423,7 +565,7 @@ const Report = () => {
         api = `/report/${type}/export`;
 
         axiosInstance()
-            .get(`${api}${filterQuery}&exportColumn=${JSON.stringify(columns)} `, {
+            .get(`${api}${filterQuery}&exportColumn=${JSON.stringify(newColumns)} `, {
                 responseType: 'arraybuffer'
             })
             .then((res) => {
@@ -547,28 +689,20 @@ const Report = () => {
                         )}
 
                         <div>
-                            {Object.keys(frameWorkComponent).length > 0 && columns ? (
-                                <CustomAgGrid
+                            {columns ? (
+                                <CustomReactTable
+                                    height={'calc(100vh - 200px)'}
+                                    columns={columns}
+                                    state={state}
+                                    dispatch={dispatch}
+                                    renderedFrom={renderedFrom}
+                                    refreshGrid={fetchResourceData}
+                                    hideSelection={true}
+                                    reportSave={true}
                                     setSelectedReportView={setSelectedReportView}
                                     selectedReportView={selectedReportView}
-                                    reportSave={true}
-                                    columns={columns}
-                                    dataRows={dataRows}
-                                    frameworkComponents={frameWorkComponent}
-                                    setGridApi={setGridApi}
-                                    dispatch={dispatch}
-                                    rowCount={rowCount}
-                                    limit={limit}
-                                    pageSizes={pageSizes}
-                                    page={page}
-                                    actionWidth={100}
-                                    loading={loading}
-                                    renderedFrom={renderedFrom}
-                                    allowSelection={false}
-                                    allowAction={resourceCamelCase === 'inventoryEvaluation'}
-                                    refreshGrid={fetchResourceData}
-                                    showOnlyShowFilteredRecordSwitch={false}
                                 />
+
                             ) : (
                                 <Loader text={'Loading Data...'} style={{ marginTop: '15vh' }} />
                             )}
