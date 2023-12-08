@@ -1,15 +1,15 @@
 import camelCase from 'lodash/camelCase';
-import { Fragment } from 'react';
 import { Link } from 'react-router-dom';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import moment from 'moment';
-import { Avatar, Tooltip } from '@material-ui/core';
+import { Avatar } from '@material-ui/core';
 import { dateFormat, dateTimeFormat, sidebarResourceObjectFromValues } from 'src/constants/helpers';
 import { leadDetailPage } from 'src/routes/Lead';
 import routes from '../../Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
 import { Image } from '@material-ui/icons';
 import CopyToClipboard from '../../Helpers/CopyToClipboard';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const permissionForLinks = sidebarResourceObjectFromValues();
 
@@ -30,12 +30,6 @@ export const detailPagePath = {
   subMarketSegment: routes?.marketSegment?.path,
   customerContact: routes?.customerContactDetail?.path,
   supplierContact: routes?.supplierContactDetail?.path
-};
-
-export const disabledColumns = {
-  [routes.rentalManagementDetail.title]: [],
-  [routes.deliveryTicketDetail.title]: [],
-  [routes.lead.title]: ['firstName']
 };
 
 export const getStaticFields = () => {
@@ -239,9 +233,9 @@ export default function useColumns() {
                         {row?.original?.[field?.fieldName]}
                       </Link>
                       {row?.original?.[more]?.length > 0 && (
-                        <Tooltip title={getTitle(row?.original?.[more])}>
+                        <HtmlTooltip title={getTitle(row?.original?.[more])}>
                           <span className="createdAtTime badge-date">{`+${row?.original?.[more].length} more..`}</span>
-                        </Tooltip>
+                        </HtmlTooltip>
                       )}
                     </>
                   ) : (

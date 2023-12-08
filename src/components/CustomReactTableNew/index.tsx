@@ -6,7 +6,6 @@ import Pagination from './TableComponents/Pagination';
 import useColumns, {
   headerName,
   detailPagePath,
-  disabledColumns,
   getStaticFields,
   getColumnHiddenStatus,
   checkStaticField,
@@ -21,7 +20,6 @@ export {
   useColumns,
   headerName,
   detailPagePath,
-  disabledColumns,
   getStaticFields,
   getColumnHiddenStatus,
   checkStaticField,
