@@ -14,20 +14,20 @@ import {
   DELIVERY_TICKET_TYPE,
   transferAsset,
   serializedAsset,
-  dateFormat
+  dateFormat,
+  TRANSFER_ASSET_STATUS
 } from 'src/constants/helpers';
 import AddSerializedAsset from 'src/pages/RentalManagement/SerializedAsset/AddSerializedAsset';
 import useColumns from 'src/components/CustomReactTableNew/useColumnsReactTable';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { Delete } from '@material-ui/icons';
 
 interface AssetsGridProps {
   permissions?: any;
-  user?: any;
-  currentStep: number | any;
   setNextStep?: any;
-  fetchAssets: any;
   updateTransferStatus?: any;
   transferAssetData?: any;
   renderedFrom?: string;
@@ -35,9 +35,8 @@ interface AssetsGridProps {
   stepFullScreen: any;
 }
 
-const AssetsGrid: FC<AssetsGridProps> = (props) => {
+const AssetsGrid: FC<AssetsGridProps> = ({ allowedToEdit, permissions, setNextStep, updateTransferStatus, transferAssetData, renderedFrom, stepFullScreen }) => {
 
-  const { allowedToEdit, permissions, user, fetchAssets, currentStep, setNextStep, updateTransferStatus, transferAssetData, renderedFrom, stepFullScreen } = props;
   const toastConfig = useContext(CustomToastContext);
 
   const [isRemovingAssets, setRemovingAssets] = useState(false);
@@ -52,12 +51,11 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
   const [isAdding, setIsAdding] = useState(false);
 
   useEffect(() => {
-    if (currentStep === 0) {
-      if (transferAssetData) {
-        fetchGridColumns();
-      }
+    if (transferAssetData) {
+      fetchGridColumns();
+      fetchData();
     }
-  }, [transferAssetData, currentStep]);
+  }, [transferAssetData]);
 
   const ActionsRenderer = [
     {
@@ -70,16 +68,20 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
       disableSortBy: true,
       canDrag: false,
       Cell: ({ row }) => (
-        <GridDeleteIcon
-          hasDeletePermission={permissions?.transferAsset?.isUpdate}
-          ownerId={transferAssetData?.createdBy.user._id}
-          userId={user?.user?._id}
-          onDelete={() => {
-            setShowConfirmBox(true);
-            setRemoveData([row.original?._id]);
-          }}
-          entity=""
-        />
+        <div>
+          <HtmlTooltip title={`Remove`}>
+            <IconButton
+              size="small"
+              disabled={allowedToEdit && !row?.original?.deliveryTicketId ? false : true}
+              onClick={() => {
+                setShowConfirmBox(true);
+                setRemoveData([row.original?._id]);
+              }}
+            >
+              <Delete fontSize="small" color={allowedToEdit && !row?.original?.deliveryTicketId ? 'error' : 'disabled'} />
+            </IconButton>
+          </HtmlTooltip>
+        </div>
       )
     }
   ];
@@ -167,56 +169,43 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
       });
   };
 
-  useEffect(() => {
-    if (currentStep === 0) {
-      if (transferAssetData) {
-        fetchAssetsData(true);
-      }
-    }
-  }, [currentStep, transferAssetData]);
-
-  const fetchLoadingTickets = () =>
-    new Promise((resolve, reject) => {
-      axiosInstance()
-        .get(
-          `${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.transferAsset}&referenceId=${transferAssetData?._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`
-        )
-        .then(({ data: { data } }) => {
-          resolve(data);
-        })
-        .catch((err) => {
-          reject(err);
-        });
-    });
-
-  const fetchAssetsData = async (forceRefresh) => {
+  const fetchData = async () => {
     try {
-      let data = await fetchAssets(forceRefresh);
-      let ticketData: any = await fetchLoadingTickets();
-      if (currentStep === 0) {
-        if (data.length === 0 && transferAssetData?.status !== 'New') {
-          updateTransferStatus('New');
-        } else if (data.length > 0 && transferAssetData?.status !== 'In Progress') {
-          updateTransferStatus('In Progress');
-        }
-      }
+
+      const assetResponce = await axiosInstance().get(`${routes.transferAsset.path}/get-asset/${transferAssetData?._id}`)
+      let assets = assetResponce?.data?.data?.assets;
+
+      const ticketResponce = await axiosInstance().get(`${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.transferAsset}&referenceId=${transferAssetData?._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`)
+      let ticketData: any = ticketResponce?.data?.data;
+
       for (let i = 0; i < ticketData.length; i++) {
-        for (let j = 0; j < data.length; j++) {
-          if (ticketData[i]?.productInventory.some((asset: any) => data[j]._id === (typeof asset === 'object' ? asset.optionValue : asset))) {
-            data[j].deliveryTicket = ticketData[i].ticketName;
-            data[j].deliveryTicketId = ticketData[i]._id;
-            data[j].deliveryTicketStatus = ticketData[i].status;
+        for (let j = 0; j < assets.length; j++) {
+          if (ticketData[i]?.productInventory.some((asset: any) => assets[j]._id === (typeof asset === 'object' ? asset.optionValue : asset))) {
+            assets[j].deliveryTicket = ticketData[i].ticketName;
+            assets[j].deliveryTicketId = ticketData[i]._id;
+            assets[j].deliveryTicketStatus = ticketData[i].status;
           }
         }
       }
-      data = data?.map((d: any, index: number) => {
+      assets = assets?.map((d: any, index: number) => {
         let finalObject: any = prepareDataForGrid(d);
         return {
           index: index + 1,
           ...finalObject
         };
       });
-      setDataRows(data)
+      setDataRows(assets)
+      if (assets?.length > 0) {
+        setNextStep(true);
+      } else {
+        setNextStep(false);
+      }
+
+      if (assets.length === 0 && transferAssetData?.status !== TRANSFER_ASSET_STATUS.new) {
+        updateTransferStatus(TRANSFER_ASSET_STATUS.new);
+      } else if (assets.length > 0 && transferAssetData?.status !== TRANSFER_ASSET_STATUS.inProgress) {
+        updateTransferStatus(TRANSFER_ASSET_STATUS.inProgress);
+      }
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -232,7 +221,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
         setRemoveData([]);
         setShowConfirmBox(false);
         setRemovingAssets(false);
-        fetchAssetsData(true);
+        fetchData();
       } catch (error) {
         setShowConfirmBox(false);
         setRemovingAssets(false);
@@ -241,16 +230,6 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
       }
     }
   };
-
-  useEffect(() => {
-    if (currentStep === 0) {
-      if (dataRows?.length > 0) {
-        setNextStep(true);
-      } else {
-        setNextStep(false);
-      }
-    }
-  }, [dataRows, currentStep]);
 
   return (
     <Fragment>
@@ -325,8 +304,8 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
               })
               .then(({ data }) => {
                 setAddSerializedAssetDialog(false);
-                updateTransferStatus('In Progress');
-                fetchAssetsData(true);
+                updateTransferStatus(TRANSFER_ASSET_STATUS.inProgress);
+                fetchData();
                 setIsAdding(false);
                 toastConfig.setToastConfig({
                   open: true,

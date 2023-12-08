@@ -471,6 +471,7 @@ const AddSerializedAsset = ({
         open={true}
       >
         <CustomDialogHeader
+          showRequiredLabel={false}
           title={`${referenceType === 'ReplaceAsset' ? 'Replace' : 'Add'} ${routes.serializedAsset.title}`}
           onClose={handleSerializedAssetClose}
         ></CustomDialogHeader>
@@ -670,7 +671,7 @@ const AddSerializedAsset = ({
             <Box>
               {columns ? (
                 <CustomReactTable
-                  height={'calc(100vh - 350px)'}
+                  height={referenceType === 'Repair Job' ? 'calc(100vh - 350px)' : 'calc(100vh - 250px)'}
                   columns={Number(tabValue) === 2 ? columns : columns?.filter((e: any) => e.accessor !== 'rentalJob')}
                   state={state}
                   setWholeRowsCellColor={getRowStyleScheduled}
