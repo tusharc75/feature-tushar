@@ -1,11 +1,11 @@
-import { useState } from 'react';
 import { IconButton } from '@material-ui/core';
 import SwapHorizIcon from '@material-ui/icons/SwapHoriz';
-import axiosInstance from '../../axios/axiosInstance';
-import { useData } from '../../StateProvider/Provider';
-import { SET_GRID_METADATA } from '../../StateProvider/actionTypes';
-import ArrangeViewDialog from './ArrangeViewDialog';
-import HtmlTooltip from '../CustomTooltipTitle';
+import { useState } from 'react';
+import { useData } from '../../../StateProvider/Provider';
+import { SET_GRID_METADATA } from '../../../StateProvider/actionTypes';
+import axiosInstance from '../../../axios/axiosInstance';
+import HtmlTooltip from '../../CustomTooltipTitle';
+import ArrangeViewDialog from '../dialogues/ArrangeViewDialog';
 
 let timeout;
 
@@ -16,16 +16,14 @@ const ArrangeViewButton = ({
   setHiddenColumns = null,
   getToggleHideAllColumnsProps = null,
   setColumnOrder = null,
-  defaultColumns = null,
+  defaultColumns = null
 }) => {
-
   const [openColumnSelection, setOpenColumnSelection] = useState(false);
 
   const {
     state: { user }
   }: any = useData();
   const { dispatch }: any = useData();
-
 
   const updateGridHiddenColumns = (hiddenColumns = [], columnOrder = []) => {
     if (timeout) clearTimeout(timeout);
@@ -38,7 +36,7 @@ const ArrangeViewButton = ({
       } else {
         request[renderedFrom] = {
           order: columnOrder,
-          hide: hiddenColumns,
+          hide: hiddenColumns
         };
       }
       updateGridMetaData(request);
@@ -46,10 +44,11 @@ const ArrangeViewButton = ({
   };
 
   const updateGridMetaData = (request) => {
-    axiosInstance().post(`user/meta-grid`, {
-      _id: user?.user?._id,
-      gridMetaData: { ...request }
-    })
+    axiosInstance()
+      .post(`user/meta-grid`, {
+        _id: user?.user?._id,
+        gridMetaData: { ...request }
+      })
       .then((data) => {
         fetchGridMetaData();
       });

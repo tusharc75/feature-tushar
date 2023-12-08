@@ -13,7 +13,7 @@ function reducer(state: TInitialState, action: TActios) {
         ...state,
         error: false,
         dataRows: action.data,
-        rowCount: action.count,
+        rowCount: action.count
       };
     case 'selection':
       return {
@@ -77,6 +77,7 @@ function reducer(state: TInitialState, action: TActios) {
         ...state,
         showFilteredRecordsOnly: !state.showFilteredRecordsOnly
       };
+
     default:
       break;
   }
@@ -114,11 +115,13 @@ export type TInitialState = {
   currentEditingCellPosition: { rowId: string; columnName: string } | null;
   error: boolean;
   showFilteredRecordsOnly: boolean;
+  columnOrder: string[];
+  hiddenColumns: string[];
 };
 
 export type TActios =
   | { type: 'loading'; loading: boolean }
-  | { type: 'initialize'; data: any[]; count: number; }
+  | { type: 'initialize'; data: any[]; count: number }
   | { type: 'selection'; selectedRecords: any[] }
   | { type: 'update'; data: any[] }
   | { type: 'filter'; filters: any }
@@ -129,7 +132,9 @@ export type TActios =
   | { type: 'complete' }
   | { type: 'currentEditingCellPosition'; cellPosition: { rowId: string; columnName: string } | null }
   | { type: 'error'; error: boolean }
-  | { type: 'showFilteredRecordsOnly' };
+  | { type: 'showFilteredRecordsOnly' }
+  | { type: 'columnOrder'; columnOrder: boolean }
+  | { type: 'hiddenColumns'; hiddenColumns: boolean };
 
 export const useTableReducer = () => {
   const [state, dispatch] = useReducer(reducer, intialState);

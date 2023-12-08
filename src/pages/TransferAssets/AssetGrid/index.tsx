@@ -17,7 +17,7 @@ import {
   dateFormat
 } from 'src/constants/helpers';
 import AddSerializedAsset from 'src/pages/RentalManagement/SerializedAsset/AddSerializedAsset';
-import useColumns from 'src/components/CustomReactTableNew/useColumnsReactTable';
+import { useColumns } from 'src/components/CustomReactTableNew';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -36,8 +36,18 @@ interface AssetsGridProps {
 }
 
 const AssetsGrid: FC<AssetsGridProps> = (props) => {
-
-  const { allowedToEdit, permissions, user, fetchAssets, currentStep, setNextStep, updateTransferStatus, transferAssetData, renderedFrom, stepFullScreen } = props;
+  const {
+    allowedToEdit,
+    permissions,
+    user,
+    fetchAssets,
+    currentStep,
+    setNextStep,
+    updateTransferStatus,
+    transferAssetData,
+    renderedFrom,
+    stepFullScreen
+  } = props;
   const toastConfig = useContext(CustomToastContext);
 
   const [isRemovingAssets, setRemovingAssets] = useState(false);
@@ -216,7 +226,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
           ...finalObject
         };
       });
-      setDataRows(data)
+      setDataRows(data);
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -307,8 +317,7 @@ const AssetsGrid: FC<AssetsGridProps> = (props) => {
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
-        )
-        }
+        )}
       </Box>
       {openAddNewAssets && (
         <AddSerializedAsset

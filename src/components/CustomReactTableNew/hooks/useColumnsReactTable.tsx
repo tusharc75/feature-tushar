@@ -6,11 +6,10 @@ import moment from 'moment';
 import { Avatar } from '@material-ui/core';
 import { dateFormat, dateTimeFormat, sidebarResourceObjectFromValues } from 'src/constants/helpers';
 import { leadDetailPage } from 'src/routes/Lead';
-import routes from '../Helpers/Routes';
+import routes from '../../Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
 import { Image } from '@material-ui/icons';
-import CopyToClipboard from '../Helpers/CopyToClipboard';
-
+import CopyToClipboard from '../../Helpers/CopyToClipboard';
 
 const permissionForLinks = sidebarResourceObjectFromValues();
 
@@ -42,12 +41,15 @@ export const disabledColumns = {
 export const getStaticFields = () => {
   return [
     {
+      id: 'createdBy',
+      accessorKey: 'createdBy',
       accessor: 'createdBy',
-      Header: 'Created By',
+      size: 200,
+      header: 'Created By',
       show: true,
-      minWidth: 185,
+      minSize: 185,
       canFilter: false,
-      Cell: ({ row }) =>
+      cell: ({ row }) =>
         row?.original?.createdBy ? (
           <h5 className="createBy" title={`${row?.original?.createdBy} • ${moment(row?.original?.createdByDate?.slice(0, 10)).format(dateFormat)}`}>
             {row?.original?.createdBy}
@@ -58,12 +60,15 @@ export const getStaticFields = () => {
         )
     },
     {
+      id: 'updatedBy',
+      accessorKey: 'updatedBy',
       accessor: 'updatedBy',
-      Header: 'Updated By',
-      minWidth: 185,
+      size: 200,
+      header: 'Updated By',
+      minSize: 185,
       show: true,
       canFilter: false,
-      Cell: ({ row }) =>
+      cell: ({ row }) =>
         row?.original?.updatedBy ? (
           <h5 className="updateBy" title={`${row?.original?.updatedBye} • ${moment(row?.original?.updatedByDate?.slice(0, 10)).format(dateFormat)}`}>
             {row?.original?.updatedBy}
@@ -114,11 +119,11 @@ export const getSortedColumns = (columns = []) => {
 export const staticColumns = ['createdBy', 'updatedBy'];
 
 export default function useColumns() {
-
-  const { state: { permissions } }: any = useData();
+  const {
+    state: { permissions }
+  }: any = useData();
 
   const getColumnData = (title, field, detailScreenRoute = null, masterPage = false) => {
-
     let data = localStorage.getItem('gridMetaData');
 
     let gridMetaData = data == 'undefined' ? {} : JSON.parse(data);
@@ -135,8 +140,13 @@ export default function useColumns() {
     } else {
       let fieldHeaderName = headerName[field?.fieldName] ?? field?.fieldLabel;
       let commonFieldData = {
+        id: field?.fieldName,
+        accessorKey: field?.fieldName,
         accessor: field?.fieldName,
-        Header: fieldHeaderName,
+        minSize: 180,
+        size: 200,
+        header: fieldHeaderName,
+
         // ...getColumnWidth(fieldHeaderName),
         show: gridMetaData[title]?.hide && gridMetaData[title]?.hide.indexOf(field?.fieldName) >= 0 ? false : true,
         disabled: gridMetaData[title]?.disabled && gridMetaData[title]?.disabled.indexOf(field?.fieldName) >= 0 ? true : false,
@@ -148,8 +158,10 @@ export default function useColumns() {
         return {
           columnData: {
             ...commonFieldData,
+            id: 'concatedName',
+            accessorKey: 'concatedName',
             accessor: 'concatedName',
-            Cell: ({ row }) => (
+            cell: ({ row }) => (
               <span>
                 {row?.original?.concatedName ? (
                   <Link
@@ -175,8 +187,7 @@ export default function useColumns() {
             lockPosition: true,
             ...commonFieldData,
             disabled: true,
-            accessor: fieldName,
-            Cell: ({ row }) =>
+            cell: ({ row }) =>
               permissions[permissionForLinks[field?.resource]]?.isRead || permissions[updatedTitle]?.isRead ? (
                 <span>
                   {row?.original?.[fieldName] ? (
@@ -206,7 +217,7 @@ export default function useColumns() {
         return {
           columnData: {
             ...commonFieldData,
-            Cell: ({ row }) =>
+            cell: ({ row }) =>
               permissions[permissionForLinks[field?.lookupResource]]?.isRead ? (
                 <span>
                   {row?.original?.[field?.fieldName] ? (
@@ -224,7 +235,7 @@ export default function useColumns() {
                   )}
                 </span>
               ) : (
-                <>
+                <div>
                   {row?.original?.[field?.fieldName] ? (
                     <h5 className="text-truncate" title={row?.original?.[field?.fieldName]}>
                       {row?.original?.[field?.fieldName]}
@@ -232,7 +243,7 @@ export default function useColumns() {
                   ) : (
                     <NoDataCell />
                   )}
-                </>
+                </div>
               )
           }
         };
@@ -240,13 +251,12 @@ export default function useColumns() {
         return {
           columnData: {
             ...commonFieldData,
-            Cell: ({ row }) =>
+            cell: ({ row }) =>
               row?.original?.[field?.fieldName] ? (
-                <h5
-                  className="[display:flex_!important] [flex-wrap:nowrap_!important] items-center"
-                  title={`${row?.original?.[field?.fieldName]}`}
-                >
-                  <span title={row?.original?.[field?.fieldName]} className="text-truncate" >{row?.original?.[field?.fieldName]}</span>
+                <h5 className="[display:flex_!important] [flex-wrap:nowrap_!important] items-center" title={`${row?.original?.[field?.fieldName]}`}>
+                  <span title={row?.original?.[field?.fieldName]} className="text-truncate">
+                    {row?.original?.[field?.fieldName]}
+                  </span>
                   <CopyToClipboard textToCopy={row?.original?.[field?.fieldName]} size={16} />
                 </h5>
               ) : (
@@ -260,7 +270,8 @@ export default function useColumns() {
             ...commonFieldData,
             canFilter: false,
             sortable: false,
-            Cell: ({ row }) => (
+            minWidth: 80,
+            cell: ({ row }) => (
               <div>
                 <Avatar className="grid-avatar" src={row?.original?.[field?.fieldName]}>
                   <Image style={{ fontSize: 18 }} />
@@ -274,8 +285,10 @@ export default function useColumns() {
         return {
           columnData: {
             ...commonFieldData,
-            Cell: ({ row }) => (
-              <>
+            minWidth: 80,
+            width: 200,
+            cell: ({ row }) => (
+              <div>
                 {row?.original?.[field?.fieldName] ? (
                   <h5 className="createBy" title={`${moment(row?.original?.[field?.fieldName]).format(dateFormat)}`}>
                     {moment(row?.original?.[field?.fieldName])?.format(dateFormat)}
@@ -283,7 +296,7 @@ export default function useColumns() {
                 ) : (
                   <NoDataCell />
                 )}
-              </>
+              </div>
             ),
             canFilter: false
           }
@@ -292,8 +305,8 @@ export default function useColumns() {
         return {
           columnData: {
             ...commonFieldData,
-            Cell: ({ row }) => (
-              <>
+            cell: ({ row }) => (
+              <div>
                 {row?.original?.[field?.fieldName] ? (
                   <h5 className="createBy" title={`${moment(row?.original?.[field?.fieldName]).format(dateTimeFormat)}`}>
                     {moment(row?.original?.[field?.fieldName])?.format(dateTimeFormat)}
@@ -301,7 +314,7 @@ export default function useColumns() {
                 ) : (
                   <NoDataCell />
                 )}
-              </>
+              </div>
             ),
             canFilter: false
           }
@@ -310,7 +323,7 @@ export default function useColumns() {
         return {
           columnData: {
             ...commonFieldData,
-            Cell: ({ row }) => <span>{Boolean(row?.original?.[field?.fieldName]) ? 'Yes' : 'No'}</span>
+            cell: ({ row }) => <span>{Boolean(row?.original?.[field?.fieldName]) ? 'Yes' : 'No'}</span>
           }
         };
       } else if (field?.type === 'colorPicker') {
@@ -318,8 +331,8 @@ export default function useColumns() {
           columnData: {
             ...commonFieldData,
             canFilter: false,
-            Cell: ({ row }) => (
-              <>
+            cell: ({ row }) => (
+              <div>
                 {row?.original?.[field?.fieldName] ? (
                   <h5 className="text-truncate" title={row?.original?.[field?.fieldName]}>
                     {row?.original?.[field?.fieldName]}
@@ -327,7 +340,7 @@ export default function useColumns() {
                 ) : (
                   <NoDataCell />
                 )}
-              </>
+              </div>
             )
           }
         };
@@ -335,8 +348,8 @@ export default function useColumns() {
         return {
           columnData: {
             ...commonFieldData,
-            Cell: ({ row }) => (
-              <>
+            cell: ({ row }) => (
+              <div>
                 {row?.original?.[field?.fieldName] ? (
                   <h5 className="text-truncate" title={row?.original?.[field?.fieldName]}>
                     {row?.original?.[field?.fieldName]}
@@ -344,7 +357,7 @@ export default function useColumns() {
                 ) : (
                   <NoDataCell />
                 )}
-              </>
+              </div>
             )
           }
         };
