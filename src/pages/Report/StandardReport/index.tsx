@@ -25,11 +25,10 @@ import ReportFilters from '../ReportFilters';
 import AverageCostHistory from '../AverageCostHistory';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { useAppTheme } from 'src/constants/AppConfig';
-
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import DialogContent from '@material-ui/core/DialogContent';
 import Dialog from '@material-ui/core/Dialog';
-import CustomReactTable, { useTableReducer, useColumns, getStaticFields } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer, useColumns } from 'src/components/CustomReactTableNew';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import HistoryIcon from '@material-ui/icons/History';
 
@@ -37,6 +36,7 @@ import HistoryIcon from '@material-ui/icons/History';
 let cancelTokenSource = null;
 
 const Report = () => {
+
     const [themeColor] = useAppTheme();
     const isDarkTheme = themeColor === 'dark';
     const initialRender = React.useRef(true);
@@ -80,19 +80,13 @@ const Report = () => {
         try {
             setLoadingColumns(true);
             let columns = [];
-
-            let {
-                data: { data: { columnFields, filterFields } }
-            } = await axiosInstance().get(`/report/${type}/column`);
-            const customRendererTypes = ['refer', 'creditDebit', 'date', 'creditDebitType'];
-            
+            let { data: { data: { columnFields, filterFields } } } = await axiosInstance().get(`/report/${type}/column`);
+            const customRendererTypes = ['reference', 'creditDebit', 'date', 'creditDebitType'];
             columnFields.forEach((o) => {
-
                 const currentColumn: any = getColumnData(type, o?.fieldData, '');
-               
                 if (customRendererTypes?.includes(o?.fieldData?.type)) {
                     switch (o?.fieldData?.type) {
-                        case 'refer':
+                        case 'reference':
                             currentColumn.columnData.Cell = ({ row }) => ReferenceRenderer(row);
                             currentColumn.columnData.canFilter = false;
                             currentColumn.columnData.disableSortBy = true;
@@ -101,38 +95,27 @@ const Report = () => {
                             currentColumn.columnData.Cell = ({ row }) => CreditDebitRenderer(row)
                             currentColumn.columnData.canFilter = false;
                             currentColumn.columnData.disableSortBy = true;
-
                             break;
                         case 'creditDebitType':
                             currentColumn.columnData.Cell = ({ row }) => CreditDebitTypeRenderer(row);
                             break;
                     }
                 }
-                
-                if(o?.fieldData?.fieldName === 'serialNumber'){
-                    currentColumn.columnData.Cell = ({row}) => SerialNumberRenderer(row)
+                if (o?.fieldData?.fieldName === 'serialNumber') {
+                    currentColumn.columnData.Cell = ({ row }) => SerialNumberRenderer(row)
                     currentColumn.columnData.canFilter = false;
                     currentColumn.columnData.disableSortBy = true;
                 }
-
-                if(type === "number-of-assets-by-status" && o?.fieldData?.fieldName === "product"){
-                    currentColumn.columnData.Cell = ({row}) => ProductRenderer(row)
+                if (type === "number-of-assets-by-status" && o?.fieldData?.fieldName === "product") {
+                    currentColumn.columnData.Cell = ({ row }) => ProductRenderer(row)
                 }
-               
-
                 if (currentColumn !== null && !o?.fieldData?.hideColumn) {
                     columns = [...columns, { ...currentColumn?.columnData }];
                 }
-
             });
-            
-            if(type === 'inventory-evaluation'){
+            if (type === 'inventory-evaluation') {
                 columns = [...columns, ActionsRenderer]
             }
-            if(type === "in-used-serialized-asset"){
-                columns = [...columns, ...getStaticFields()]
-            }
-
             setResourceColumns(filterFields);
             setColumns(columns);
             setLoadingColumns(false);
@@ -210,133 +193,128 @@ const Report = () => {
         )
     }
 
-    const ProductRenderer = (row) =>{
-
+    const ProductRenderer = (row) => {
         return (
-            row?.original?.productName ? (
+            <div>{row?.original?.productName ? (
                 <Link className="link" title={row?.original?.productName} to={`${routes.productDetail.path}/${row?.original?.productId}`} target="_blank">
                     {row?.original?.productName}
-                    </Link>
-            ) : <NoDataCell/>
+                </Link>
+            ) : <NoDataCell />}</div>
         )
     }
 
     const ReferenceRenderer = (row) => {
         return (
-            row?.original?.reference ? (
-                row?.original?.referenceType === 'Purchase Order' ? (
-                    <Link
-                        className="link"
-                        target="_blank"
-                        title={row?.original?.reference}
-                        to={`${routes.purchaseOrderDetail.path}/${row?.original?.referenceId}`}
-                    >
-                        {row?.original?.reference}
-                    </Link>
-                ) : row?.original?.referenceType === 'Transfer Inventory' ? (
-                    <Link
-                        className="link"
-                        target="_blank"
-                        title={row?.original?.reference}
-                        to={`${routes.transferInventoryDetail.path}/${row?.original?.referenceId}`}
-                    >
-                        {row?.original?.reference}
-                    </Link>
-                ) : row?.original?.referenceType === 'Transfer Asset' ? (
-                    <Link
-                        className="link"
-                        target="_blank"
-                        title={row?.original?.reference}
-                        to={`${routes.transferAssetDetail.path}/${row?.original?.referenceId}`}
-                    >
-                        {row?.original?.reference}
-                    </Link>
-                ) : row?.original?.referenceType === 'Sales Order' ? (
-                    <Link
-                        className="link"
-                        target="_blank"
-                        title={row?.original?.reference}
-                        to={`${routes.salesOrderDetail.path}/${row?.original?.referenceId}`}
-                    >
-                        {row?.original?.reference}
-                    </Link>
-                ) : row?.original?.referenceType === 'Bulk Asset Creation' ? (
-                    <Link
-                        className="link"
-                        target="_blank"
-                        title={row?.original?.reference}
-                        to={`${routes.bulkAssetCreationDetail.path}/${row?.original?.referenceId}`}
-                    >
-                        {row?.original?.reference}
-                    </Link>
-                ) : row?.original?.referenceType === 'Serialized Asset' ? (
-                    <Link
-                        className="link"
-                        target="_blank"
-                        title={row?.original?.reference}
-                        to={`${routes.serializedAssetDetail.path}/${row?.original?.referenceId}`}
-                    >
-                        {row?.original?.reference}
-                    </Link>
-                ) : row?.original?.referenceType === 'Rental Job' ? (
-                    <Link
-                        className="link"
-                        target="_blank"
-                        title={row?.original?.reference}
-                        to={`${routes.rentalManagementDetail.path}/${row?.original?.referenceId}`}
-                    >
-                        {row?.original?.reference}
-                    </Link>
-                ) : row?.original?.referenceType === 'Work Order' ? (
-                    <Link
-                        className="link"
-                        target="_blank"
-                        title={row?.original?.reference}
-                        to={`${routes.workOrderDetail.path}/${row?.original?.referenceId}`}
-                    >
-                        {row?.original?.reference}
-                    </Link>
-                ) : row?.original?.referenceType === 'Field Ticket' ? (
-                    <Link
-                        className="link"
-                        target="_blank"
-                        title={row?.original?.reference}
-                        to={`${routes.fieldTicketDetail.path}/${row?.original?.referenceId}`}
-                    >
-                        {row?.original?.reference}
-                    </Link>
-                ) : (
-                    row?.original?.reference
-                )
-            ) : row?.original?.referenceType === 'Product Inventory' ? (
-                <h5 className="text-truncate">Manual Entry</h5>
-            ) : (
-                <NoDataCell />
-            )
-        )
-    }
-
-    const CreditDebitTypeRenderer = (row) => {
-        return (
-            <div
-            >
-                {row?.original?.type ? (
-                    <span>
-                        {capitalize(row?.original?.type)}
-                    </span>
+            <div>
+                {row?.original?.reference ? (
+                    row?.original?.referenceType === 'Purchase Order' ? (
+                        <Link
+                            className="link"
+                            target="_blank"
+                            title={row?.original?.reference}
+                            to={`${routes.purchaseOrderDetail.path}/${row?.original?.referenceId}`}
+                        >
+                            {row?.original?.reference}
+                        </Link>
+                    ) : row?.original?.referenceType === 'Transfer Inventory' ? (
+                        <Link
+                            className="link"
+                            target="_blank"
+                            title={row?.original?.reference}
+                            to={`${routes.transferInventoryDetail.path}/${row?.original?.referenceId}`}
+                        >
+                            {row?.original?.reference}
+                        </Link>
+                    ) : row?.original?.referenceType === 'Transfer Asset' ? (
+                        <Link
+                            className="link"
+                            target="_blank"
+                            title={row?.original?.reference}
+                            to={`${routes.transferAssetDetail.path}/${row?.original?.referenceId}`}
+                        >
+                            {row?.original?.reference}
+                        </Link>
+                    ) : row?.original?.referenceType === 'Sales Order' ? (
+                        <Link
+                            className="link"
+                            target="_blank"
+                            title={row?.original?.reference}
+                            to={`${routes.salesOrderDetail.path}/${row?.original?.referenceId}`}
+                        >
+                            {row?.original?.reference}
+                        </Link>
+                    ) : row?.original?.referenceType === 'Bulk Asset Creation' ? (
+                        <Link
+                            className="link"
+                            target="_blank"
+                            title={row?.original?.reference}
+                            to={`${routes.bulkAssetCreationDetail.path}/${row?.original?.referenceId}`}
+                        >
+                            {row?.original?.reference}
+                        </Link>
+                    ) : row?.original?.referenceType === 'Serialized Asset' ? (
+                        <Link
+                            className="link"
+                            target="_blank"
+                            title={row?.original?.reference}
+                            to={`${routes.serializedAssetDetail.path}/${row?.original?.referenceId}`}
+                        >
+                            {row?.original?.reference}
+                        </Link>
+                    ) : row?.original?.referenceType === 'Rental Job' ? (
+                        <Link
+                            className="link"
+                            target="_blank"
+                            title={row?.original?.reference}
+                            to={`${routes.rentalManagementDetail.path}/${row?.original?.referenceId}`}
+                        >
+                            {row?.original?.reference}
+                        </Link>
+                    ) : row?.original?.referenceType === 'Work Order' ? (
+                        <Link
+                            className="link"
+                            target="_blank"
+                            title={row?.original?.reference}
+                            to={`${routes.workOrderDetail.path}/${row?.original?.referenceId}`}
+                        >
+                            {row?.original?.reference}
+                        </Link>
+                    ) : row?.original?.referenceType === 'Field Ticket' ? (
+                        <Link
+                            className="link"
+                            target="_blank"
+                            title={row?.original?.reference}
+                            to={`${routes.fieldTicketDetail.path}/${row?.original?.referenceId}`}
+                        >
+                            {row?.original?.reference}
+                        </Link>
+                    ) : (
+                        row?.original?.reference
+                    )
+                ) : row?.original?.referenceType === 'Product Inventory' ? (
+                    <h5 className="text-truncate">Manual Entry</h5>
                 ) : (
                     <NoDataCell />
-                )}
+                )
+                }
             </div>
         )
     }
 
-    const SerialNumberRenderer = (row) =>{
-        return (
-            <>
-                <span>{row.original.serialNumber?.length ? row.original.serialNumber?.map((e) => e?.serialNumber)?.toString() : <NoDataCell />}</span>
-            </>
-        )
+    const CreditDebitTypeRenderer = (row) => {
+        return <div>
+            {row?.original?.type ? (
+                <span>
+                    {capitalize(row?.original?.type)}
+                </span>
+            ) : (
+                <NoDataCell />
+            )}
+        </div>
+    }
+
+    const SerialNumberRenderer = (row) => {
+        return (<div>{row.original.serialNumber?.length ? row.original.serialNumber?.map((e) => e?.serialNumber)?.toString() : <NoDataCell />}</div>)
     }
 
     const ActionsRenderer = {
@@ -349,23 +327,22 @@ const Report = () => {
         disableSortBy: true,
         canDrag: false,
         Cell: ({ row }) => (
-          <>
+
             <HtmlTooltip title={'View History'}>
-              <span>
-                <IconButton
-                  size="small"
-                  aria-label="Delete"
-                  onClick={() => {
-                    setShowPriceHistory({ open: true, product: row?.original?._id, productName: row?.original?.productName });
-                  }}
-                >
-                  <HistoryIcon fontSize="small" color="primary" />
-                </IconButton>
-              </span>
+                <span>
+                    <IconButton
+                        size="small"
+                        aria-label="Delete"
+                        onClick={() => {
+                            setShowPriceHistory({ open: true, product: row?.original?._id, productName: row?.original?.productName });
+                        }}
+                    >
+                        <HistoryIcon fontSize="small" color="primary" />
+                    </IconButton>
+                </span>
             </HtmlTooltip>
-          </>
         )
-      };
+    };
 
 
     const fetchResourceData = () => {
@@ -378,10 +355,9 @@ const Report = () => {
         dispatch({ type: 'loading', loading: true })
 
         var api = `/report/${type}`;
-        axiosInstance()
-            .get(`${api}${filterQuery}`, {
-                cancelToken: cancelTokenSource.token
-            })
+        axiosInstance().get(`${api}${filterQuery}`, {
+            cancelToken: cancelTokenSource.token
+        })
             .then(({ data: { data, count, columns } }) => {
                 if (resourceCamelCase === 'userSession') {
                     setLoadingColumns(true);
@@ -393,10 +369,14 @@ const Report = () => {
                             canFilter: false,
                             Cell: ({ row }) => {
                                 return (
-                                    <>
+                                    <div>
                                         {row?.original?.[e?.fieldName] ? (
                                             e.fieldName === "user" ? (
-                                                <Link className="link" title={row?.original?.[e?.fieldName]} to={`${routes.userDetail.path}/${row?.original?.userId}`} target="_blank">
+                                                <Link
+                                                    className="link"
+                                                    title={row?.original?.[e?.fieldName]}
+                                                    to={`${routes.userDetail.path}/${row?.original?.userId}`}
+                                                    target="_blank">
                                                     {row?.original?.[e?.fieldName]}
                                                 </Link>
                                             ) : (
@@ -407,12 +387,10 @@ const Report = () => {
                                         ) : (
                                             <NoDataCell />
                                         )}
-                                    </>
+                                    </div>
                                 );
                             }
-                            
                         }
-                        
                     });
                     setColumns(columns);
                     setLoadingColumns(false);
@@ -527,7 +505,6 @@ const Report = () => {
                 });
             });
         }
-
         if (deepFilter && deepFilter.length > 0) {
             filterQuery = `${filterQuery}deepFilter=${encodeURIComponent(JSON.stringify(deepFilter))}&`;
         }
@@ -542,7 +519,6 @@ const Report = () => {
         if (resourceCamelCase === 'userSession') {
             return `?column=true&${filterQuery}`;
         }
-
         return `?${filterQuery}`;
     };
 
@@ -553,11 +529,11 @@ const Report = () => {
             message: 'Please wait exporting data',
             type: 'info'
         });
-        let newColumns = columns.map((col)=>col.accessor);
+        let newColumns = columns.map((col) => col.accessor);
 
-        if(colState.length){
-            newColumns = colState?.filter((col)=>col.isVisible).map((col)=>col.accessor)
-        }        
+        if (colState.length) {
+            newColumns = colState?.filter((col) => col.isVisible).map((col) => col.accessor)
+        }
         setExporting(true);
         let filterQuery = getFilter(true);
 
@@ -603,111 +579,108 @@ const Report = () => {
                     )}
                 </div>
                 <CustomContainer>
-                    <>
-                        <div className="header-panel">
-                            <Grid container className={styles.filter_side_container}>
-                                <Grid item xs={12} className="d-flex align-items-center gap-1 layout-for-tablet">
-                                    <Box display="flex" justifyContent="center" alignItems="center">
-                                        {showGrid && (
-                                            <Box mr={1}>
-                                                <Button
-                                                    size="small"
-                                                    variant="outlined"
-                                                    color="primary"
-                                                    disableElevation
-                                                    onClick={() => {
-                                                        setShowGrid(false);
-                                                        dispatch({ type: 'onlyFilter', filters: {} });
-                                                    }}
-                                                    startIcon={<MdFilterList />}
-                                                >
-                                                    Show Filters
-                                                </Button>
-                                            </Box>
-                                        )}
-                                        <MdDescription size={22} className="headerLogo" />
-                                        <span className="listingHeader">{` ${selectedReportView?.name ?? 'Reports'} `}</span>
-                                    </Box>
-                                </Grid>
+                    <div className="header-panel">
+                        <Grid container className={styles.filter_side_container}>
+                            <Grid item xs={12} className="d-flex align-items-center gap-1 layout-for-tablet">
+                                <Box display="flex" justifyContent="center" alignItems="center">
+                                    {showGrid && (
+                                        <Box mr={1}>
+                                            <Button
+                                                size="small"
+                                                variant="outlined"
+                                                color="primary"
+                                                disableElevation
+                                                onClick={() => {
+                                                    setShowGrid(false);
+                                                    dispatch({ type: 'onlyFilter', filters: {} });
+                                                }}
+                                                startIcon={<MdFilterList />}
+                                            >
+                                                Show Filters
+                                            </Button>
+                                        </Box>
+                                    )}
+                                    <MdDescription size={22} className="headerLogo" />
+                                    <span className="listingHeader">{` ${selectedReportView?.name ?? 'Reports'} `}</span>
+                                </Box>
                             </Grid>
-                        </div>
-                        {!showGrid && (
-                            <Dialog
-                                open={true}
-                                maxWidth="md"
-                                fullWidth
-                                onClose={(e, reason) => {
-                                    if (reason !== 'backdropClick') {
-                                        history.push(routes.reports.path);
-                                        setShowGrid(true);
-                                        dispatch({ type: 'onlyFilter', filters: {} });
-                                    }
+                        </Grid>
+                    </div>
+                    {!showGrid && (
+                        <Dialog
+                            open={true}
+                            maxWidth="md"
+                            fullWidth
+                            onClose={(e, reason) => {
+                                if (reason !== 'backdropClick') {
+                                    history.push(routes.reports.path);
+                                    setShowGrid(true);
+                                    dispatch({ type: 'onlyFilter', filters: {} });
+                                }
+                            }}
+                        >
+                            <CustomDialogHeader
+                                title={`Set Filters`}
+                                onClose={() => {
+                                    history.push(routes.reports.path);
+                                    setShowGrid(true);
+                                    dispatch({ type: 'onlyFilter', filters: {} });
                                 }}
-                            >
-                                <CustomDialogHeader
-                                    title={`Set Filters`}
-                                    onClose={() => {
-                                        history.push(routes.reports.path);
-                                        setShowGrid(true);
-                                        dispatch({ type: 'onlyFilter', filters: {} });
-                                    }}
-                                />
-                                <div className="p-4 min-h-[600px]">
-                                    <DialogContent>
-                                        <ReportFilters
-                                            resourceColumns={resourceColumns}
-                                            betweenDate={betweenDate}
-                                            setBetweenDate={setBetweenDate}
-                                            resource={'Purchase Order Type'}
-                                            setSelectedData={setSelectedData}
-                                            loading={loading}
-                                            fetchReportData={fetchResourceData}
-                                            filterOptions={filterOptions}
-                                            setFilterOptions={setFilterOptions}
-                                            selectedResources={selectedResources}
-                                            setSelectedResources={setSelectedResources}
-                                            resourceOptions={resourceOptions}
-                                            setResourceOptions={setResourceOptions}
-                                            formValues={formValues}
-                                            setFormValues={setFormValues}
-                                            loadingColumns={loadingColumns}
-                                            setSelectedReportView={setSelectedReportView}
-                                            selectedReportView={selectedReportView}
-                                            reportList={reportList}
-                                            setReportList={setReportList}
-                                            statusPeriod={statusPeriod}
-                                            setStatusPeriod={setStatusPeriod}
-                                            statusPeriodDate={statusPeriodDate}
-                                            setStatusPeriodDate={setStatusPeriodDate}
-                                            statusTimeFrame={statusTimeFrame}
-                                            setStatusTimeFrame={setStatusTimeFrame}
-                                            selectedData={selectedData}
-                                        />
-                                    </DialogContent>
-                                </div>
-                            </Dialog>
+                            />
+                            <div className="p-4 min-h-[600px]">
+                                <DialogContent>
+                                    <ReportFilters
+                                        resourceColumns={resourceColumns}
+                                        betweenDate={betweenDate}
+                                        setBetweenDate={setBetweenDate}
+                                        resource={'Purchase Order Type'}
+                                        setSelectedData={setSelectedData}
+                                        loading={loading}
+                                        fetchReportData={fetchResourceData}
+                                        filterOptions={filterOptions}
+                                        setFilterOptions={setFilterOptions}
+                                        selectedResources={selectedResources}
+                                        setSelectedResources={setSelectedResources}
+                                        resourceOptions={resourceOptions}
+                                        setResourceOptions={setResourceOptions}
+                                        formValues={formValues}
+                                        setFormValues={setFormValues}
+                                        loadingColumns={loadingColumns}
+                                        setSelectedReportView={setSelectedReportView}
+                                        selectedReportView={selectedReportView}
+                                        reportList={reportList}
+                                        setReportList={setReportList}
+                                        statusPeriod={statusPeriod}
+                                        setStatusPeriod={setStatusPeriod}
+                                        statusPeriodDate={statusPeriodDate}
+                                        setStatusPeriodDate={setStatusPeriodDate}
+                                        statusTimeFrame={statusTimeFrame}
+                                        setStatusTimeFrame={setStatusTimeFrame}
+                                        selectedData={selectedData}
+                                    />
+                                </DialogContent>
+                            </div>
+                        </Dialog>
+                    )}
+                    <div>
+                        {columns ? (
+                            <CustomReactTable
+                                height={'calc(100vh - 200px)'}
+                                columns={columns}
+                                state={state}
+                                dispatch={dispatch}
+                                renderedFrom={renderedFrom}
+                                refreshGrid={fetchResourceData}
+                                hideSelection={true}
+                                reportSave={true}
+                                setSelectedReportView={setSelectedReportView}
+                                selectedReportView={selectedReportView}
+                            />
+
+                        ) : (
+                            <Loader text={'Loading Data...'} style={{ marginTop: '15vh' }} />
                         )}
-
-                        <div>
-                            {columns ? (
-                                <CustomReactTable
-                                    height={'calc(100vh - 200px)'}
-                                    columns={columns}
-                                    state={state}
-                                    dispatch={dispatch}
-                                    renderedFrom={renderedFrom}
-                                    refreshGrid={fetchResourceData}
-                                    hideSelection={true}
-                                    reportSave={true}
-                                    setSelectedReportView={setSelectedReportView}
-                                    selectedReportView={selectedReportView}
-                                />
-
-                            ) : (
-                                <Loader text={'Loading Data...'} style={{ marginTop: '15vh' }} />
-                            )}
-                        </div>
-                    </>
+                    </div>
                 </CustomContainer>
             </div>
             {showPriceHistory.open && (
