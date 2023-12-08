@@ -34,7 +34,7 @@ function reducer(state: TInitialState, action: TActios) {
     case 'filter':
       return {
         ...state,
-        loading: true,
+        loading: action.loading ?? true,
         filters: action.filters,
         page: 0
       };
@@ -42,7 +42,7 @@ function reducer(state: TInitialState, action: TActios) {
       return {
         ...state,
         sorting: action.sorting,
-        loading: true
+        loading: action.loading ?? true
       };
     case 'search':
       return {
@@ -60,7 +60,7 @@ function reducer(state: TInitialState, action: TActios) {
         ...state,
         limit: action.limit,
         page: 0,
-        loading: true
+        loading: action.loading ?? true
       };
     case 'error':
       return {
@@ -128,11 +128,11 @@ export type TActios =
   | { type: 'selection'; selectedRecords: any[] }
   | { type: 'update'; data: any[] }
   | { type: 'onlyFilter'; filters: any }
-  | { type: 'filter'; filters: any }
-  | { type: 'sort'; sorting: any[] }
+  | { type: 'filter'; filters: any; loading?: boolean }
+  | { type: 'sort'; sorting: any[]; loading?: boolean }
   | { type: 'search'; search: string }
   | { type: 'pageChange'; page: number }
-  | { type: 'pageSizeChange'; limit: number }
+  | { type: 'pageSizeChange'; limit: number; loading?: boolean }
   | { type: 'complete' }
   | { type: 'currentEditingCellPosition'; cellPosition: { rowId: string; columnName: string } | null }
   | { type: 'error'; error: boolean }

@@ -2,15 +2,24 @@ import { FilterFn, SortingFn, sortingFns } from '@tanstack/react-table';
 import { RankingInfo, rankItem, compareItems } from '@tanstack/match-sorter-utils';
 import { childrenProperty } from './utils';
 
-export const fuzzyFilter: FilterFn<any> = (row, columnId, filterValue, addMeta) => {
+declare module '@tanstack/table-core' {
+  interface FilterFns {
+    fuzzy: FilterFn<unknown>;
+  }
+  interface FilterMeta {
+    itemRank: RankingInfo;
+  }
+}
+
+export const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
   // Do not filter
-  if (filterValue === '' || filterValue === null || filterValue === undefined) return row;
+  if (value === '' || value === null || value === undefined) return row;
 
   // In case of a complex filter, the parent component should provide the filter logic
-  if (typeof filterValue !== 'string') {
+  if (typeof value !== 'string') {
     return [];
   }
-  const textSearchValues = filterValue.trim().toLocaleLowerCase();
+  const textSearchValues = value.trim().toLocaleLowerCase();
 
   // Rank the item
   const itemRank = rankItem(row.getValue(columnId), textSearchValues);
