@@ -137,7 +137,6 @@ export default function useColumns() {
       let commonFieldData = {
         accessor: field?.fieldName,
         Header: fieldHeaderName,
-        // ...getColumnWidth(fieldHeaderName),
         show: gridMetaData[title]?.hide && gridMetaData[title]?.hide.indexOf(field?.fieldName) >= 0 ? false : true,
         disabled: gridMetaData[title]?.disabled && gridMetaData[title]?.disabled.indexOf(field?.fieldName) >= 0 ? true : false,
         primaryField: field?.primaryField ?? false
