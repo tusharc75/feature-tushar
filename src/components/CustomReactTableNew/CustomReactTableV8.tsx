@@ -263,6 +263,9 @@ const CustomReactTable = ({
     const debouncedFilterDispatch = debounce((updatedCustomFilters) => {
       dispatch({ type: 'filter', filters: updatedCustomFilters, loading: isClientSideGrid ? false : true });
     }, MINIMUM_SEARCH_DELAY);
+    const instantFilterDispatch = (updatedCustomFilters) => {
+      dispatch({ type: 'filter', filters: updatedCustomFilters, loading: isClientSideGrid ? false : true });
+    };
 
     setTimeout(() => {
       let tempArray = Object.keys(customFilters).map((key, i) => {
@@ -281,7 +284,11 @@ const CustomReactTable = ({
             }
           }
         });
-        debouncedFilterDispatch(tempResult);
+        if (isClientSideGrid) {
+          instantFilterDispatch(tempResult);
+        } else {
+          debouncedFilterDispatch(tempResult);
+        }
       }
     }, MINIMUM_SEARCH_DELAY);
   };
@@ -648,7 +655,7 @@ const CustomReactTable = ({
             />
           ) : null}
 
-          {(!isClientSideGrid || data.length > 2) && (
+          {(!isClientSideGrid || data.length > 25) && (
             <Pagination
               count={rowCount ?? data.length}
               page={page}

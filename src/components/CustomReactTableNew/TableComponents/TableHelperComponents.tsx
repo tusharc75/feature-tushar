@@ -206,7 +206,7 @@ export function Filter({ column, table }: { column: Column<any, unknown>; table:
           setIsOpen(true);
         }}
         size="small"
-        className={``}
+        className={`${columnFilterValue ? 'activeFilter' : ''}`}
       >
         <CgSearch />
       </IconButton>
