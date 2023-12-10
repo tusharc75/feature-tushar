@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { Box, Dialog, Grid } from '@material-ui/core';
+import { Box, Dialog, Grid, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@material-ui/core';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -10,6 +10,11 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { ViewDialog } from './ViewDialog';
 import { PreviewFields } from './PreviewFields';
+import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
+import DownloadIcon from '@material-ui/icons/GetApp';
+import { Accordion, AccordionDetails, AccordionSummary } from '../CustomAccordion';
+import { capitalize, set } from 'lodash';
+import NoDataCell from '../Helpers/NoDataCell';
 
 
 export const PreviewDialog = ({
@@ -21,12 +26,14 @@ export const PreviewDialog = ({
   hideDetailButton,
   allColumn,
   resource,
+  referenceId,
   defaultColumns,
   columns,
   button1Title,
   button2Title,
   operation,
-  isExcelDownload
+  isExcelDownload,
+  isAsyncDownload
 }) => {
   const toastConfig = useContext(CustomToastContext);
 
@@ -41,12 +48,19 @@ export const PreviewDialog = ({
   const [selectedExcelView, setSelectedExcelView] = useState(null);
   const [visibleColumnsExcel, setVisibleColumnsExcel] = useState([]);
 
+  const [myRequestsShow, setMyRequestsShow] = useState(false);
+  const [myRequests, setMyRequests] = useState(null);
+  const [downloadingRequest, setDownloadingRequest] = useState({ loading: false, id: null })
+
   useEffect(() => {
     setDefaultColumns()
   }, [columns]);
 
   useEffect(() => {
     fetchUserViews();
+    if (isAsyncDownload && type === 'PDF') {
+      fetchUserRequests();
+    }
   }, []);
 
   const setDefaultColumns = () => {
@@ -80,6 +94,51 @@ export const PreviewDialog = ({
       setVisibleColumnsExcel(columnsArray?.map(e => { return allColumn.find(col => col.fieldName === e) }).filter(col => col !== undefined));
     }
   };
+
+  const fetchUserRequests = () => {
+    axiosInstance()
+      .get(`/pdf/async-download/${referenceId}/my-requests?resource=${resource}`)
+      .then(({ data: { data } }) => {
+        setMyRequests(data);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const downloadFile = (data) => {
+    setDownloadingRequest({ loading: true, id: data._id });
+    axiosInstance()
+      .get(`user/download?fileName=${data?.file}`, {
+        responseType: 'blob',
+        onDownloadProgress: (progressEvent) => {
+          let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
+
+          if (percentCompleted === 100) {
+            toastConfig.setToastConfig({
+              message: 'File Downloaded Successfully',
+              open: true,
+              type: 'success'
+            });
+            setTimeout(() => {
+              setDownloadingRequest({ loading: false, id: null });
+            }, 2000);
+          }
+        }
+      })
+      .then(({ data }) => {
+        const file = new Blob([data], { type: 'application/pdf' });
+        const fileURL = URL.createObjectURL(file);
+        const pdfWindow = window.open();
+        pdfWindow.location.href = fileURL;
+        toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
+        setDownloadingRequest({ loading: false, id: null });
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        setDownloadingRequest({ loading: false, id: null });
+      });
+  }
 
   return (
     <>
@@ -139,6 +198,60 @@ export const PreviewDialog = ({
                 </Box>
               }
             </Grid>
+            {isAsyncDownload && type === 'PDF' && <Grid item style={{ padding: 5, marginTop: 10 }} xs={12} md={12} sm={12}>
+              <Box
+                sx={{
+                  // border: "1px solid gray",
+                  // borderRadius: '5px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
+                <Accordion expanded={myRequestsShow} onChange={() => setMyRequestsShow(!myRequestsShow)}>
+                  <AccordionSummary>
+                    <Typography variant="inherit" >Your Requests {myRequests?.length ? `(${myRequests?.length})` : ""}</Typography>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <Box>
+                      <TableContainer>
+                        <Table>
+                          <TableHead>
+                            <TableRow>
+                              <TableCell>Pdf Name</TableCell>
+                              <TableCell>Status</TableCell>
+                              <TableCell>Action</TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {myRequests && myRequests?.length > 0 ?
+                              myRequests?.map((row) => (
+                                <TableRow key={row._id}>
+                                  <TableCell>{row?.file ?? <NoDataCell />}</TableCell>
+                                  <TableCell>
+                                    <Typography variant="inherit" >{capitalize(row?.status)}</Typography>
+                                  </TableCell>
+                                  <TableCell>
+                                    <IconButton
+                                      color="primary"
+                                      size="small"
+                                      disabled={row?.status !== 'processed'}
+                                      onClick={(e) => {
+                                        downloadFile(row);
+                                      }}
+                                    >
+                                      <DownloadIcon />
+                                    </IconButton>
+                                  </TableCell>
+                                </TableRow>
+                              )) : "No Requests Found"}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    </Box>
+                  </AccordionDetails>
+                </Accordion>
+              </Box>
+            </Grid>}
           </Grid>
         </CustomDialogContent>
         <CustomDialogFooter>
