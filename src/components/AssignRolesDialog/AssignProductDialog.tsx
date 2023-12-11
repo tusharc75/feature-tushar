@@ -212,9 +212,9 @@ const AssignProductDialog = ({
         dispatch({ type: 'selection', selectedRecords: [...selectedRecords, editRow] });
       }
     }else{
-      const updatedSelectedRecords = selectedRecords.map((e) => {
+      const updatedSelectedRecords = selectedRecords?.map((e) => {
         if (e?._id === row?._id) {
-          return { ...e, qty: parseInt(data.qty), isChecked: true };
+          return { ...e, qty: parseInt(data?.qty), isChecked: true };
         }
         return e;
       });
