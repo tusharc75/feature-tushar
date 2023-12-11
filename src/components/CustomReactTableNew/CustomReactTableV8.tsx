@@ -296,20 +296,17 @@ const CustomReactTable = ({
   const setGlobalFilter = useCallback(
     (value: string) => {
       let timer: NodeJS.Timeout;
-      if (!isClientSideGrid) {
-        if (value) {
-          timer = setTimeout(() => {
-            let query = value?.trim();
-            if (query !== '') {
-              dispatch({ type: 'search', search: query });
-            }
-          }, 500);
-        } else {
-          timer = setTimeout(() => {
-            dispatch({ type: 'search', search: '' });
-            dispatch({ type: 'loading', loading: false });
-          }, 500);
-        }
+      if (value) {
+        timer = setTimeout(() => {
+          let query = value?.trim();
+          if (query !== '') {
+            dispatch({ type: 'search', search: query, loading: isClientSideGrid ? false : true });
+          }
+        }, 500);
+      } else {
+        timer = setTimeout(() => {
+          dispatch({ type: 'search', search: '', loading: false });
+        }, 500);
       }
       return () => clearTimeout(timer);
     },
