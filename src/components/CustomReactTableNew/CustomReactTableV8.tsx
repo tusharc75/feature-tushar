@@ -56,7 +56,10 @@ const CustomReactTable = ({
   showFilters = false,
   resource = null,
   onSaveEdit = null,
-  hideAction = false
+  hideAction = false,
+  selectedReportView = null,
+  setSelectedReportView = null,
+  reportSave = false
 }) => {
   const {
     currentEditingCellPosition,
@@ -125,23 +128,45 @@ const CustomReactTable = ({
   // For Column Order
   useEffect(() => {
     try {
-      const stickyColumnNames = getStickyColumnNames({ allColumn: newColumns, expander, hideSelection });
-      let gridMetaData = getDataFromLocalStorage();
-      if (gridMetaData && gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide?.length) {
-        setHiddenColumns(gridMetaData[renderedFrom]?.hide || []);
+      if(reportSave || renderedFrom?.includes('_report')){
+        if(selectedReportView){
+          const newColumnsState = selectedReportView?.columnState
+          let hiddenCols = [];
+          let colOrder = [...(expander ? ['expander'] : []), ...(!hideSelection ? ['selection'] : [])];
+          newColumnsState.map((m)=>{
+            colOrder.push(m.accessor);
+            if(!m.isVisible){
+              hiddenCols.push(m.accessor)
+            }
+          })
+          setHiddenColumns(hiddenCols);
+          setColumnOrder(colOrder);
+          dispatch({type : 'updateColumnState', colState : selectedReportView?.columnState})
+        }
+        else {
+          setColumnOrder(newColumns.map((m) => m?.id ?? m?.accessor));
+        }
       }
-      if (gridMetaData && gridMetaData[renderedFrom]?.order && gridMetaData[renderedFrom]?.order?.length) {
-        const colOrder = [...stickyColumnNames.left, ...gridMetaData[renderedFrom]?.order, ...stickyColumnNames.right];
-        setColumnOrder(colOrder);
-        setSortedColumns(returnSortedColumns(newColumns, colOrder));
-      } else {
-        setSortedColumns(newColumns);
-        setColumnOrder(newColumns.map((m) => m?.id ?? m?.accessor));
+      else {
+
+        const stickyColumnNames = getStickyColumnNames({ allColumn: newColumns, expander, hideSelection });
+        let gridMetaData = getDataFromLocalStorage();
+        if (gridMetaData && gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide?.length) {
+          setHiddenColumns(gridMetaData[renderedFrom]?.hide || []);
+        }
+        if (gridMetaData && gridMetaData[renderedFrom]?.order && gridMetaData[renderedFrom]?.order?.length) {
+          const colOrder = [...stickyColumnNames.left, ...gridMetaData[renderedFrom]?.order, ...stickyColumnNames.right];
+          setColumnOrder(colOrder);
+          setSortedColumns(returnSortedColumns(newColumns, colOrder));
+        } else {
+          setSortedColumns(newColumns);
+          setColumnOrder(newColumns.map((m) => m?.id ?? m?.accessor));
+        }
       }
     } catch (ex) {
       console.error(`Error while getting stored data from local storage - ${renderedFrom}`);
     }
-  }, [newColumns, expander, hideSelection, renderedFrom]);
+  }, [newColumns, expander, hideSelection, renderedFrom, selectedReportView]);
 
   function reorder(draggedColumnId: string, targetColumnId: string, columnOrder: string[]) {
     columnOrder.splice(columnOrder.indexOf(targetColumnId), 0, columnOrder.splice(columnOrder.indexOf(draggedColumnId), 1)[0] as string);
@@ -429,6 +454,10 @@ const CustomReactTable = ({
                   // getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
                   defaultColumns={newColumns}
                   setColumnOrder={setColumnOrder}
+                  setSelectedReportView={setSelectedReportView}
+                  selectedReportView={selectedReportView}
+                  reportSave = {reportSave}
+                  dispatchTable = {dispatch}
                 />
               </>
             }
