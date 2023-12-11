@@ -90,7 +90,7 @@ const ArrangeViewButton = ({
 
       {openColumnSelection && (
         <>
-          {renderedFrom?.includes('report') && reportSave ? (
+          {reportSave ? (
             <ReportArrangeView
               columns={columns}
               onClose={() => setOpenColumnSelection(false)}
@@ -100,8 +100,8 @@ const ArrangeViewButton = ({
               getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
               setColumnOrder={setColumnOrder}
               dispatch={dispatchTable}
-              setSelectedReportView = {setSelectedReportView}
-              selectedReportView = {selectedReportView}
+              setSelectedReportView={setSelectedReportView}
+              selectedReportView={selectedReportView}
             />
           ) : (
             <ArrangeViewDialog
