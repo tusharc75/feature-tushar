@@ -271,6 +271,7 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
             fileName={`${routes.productionOrder.title}-${productionOrderData?.productionOrderNumber}`}
             resource={sidebarResource.productionOrder}
             referenceId={productionOrderData._id}
+            referenceLabel={productionOrderData?.productionOrderNumber}
             columns={columns}
             isSendEmail={true}
             isAsyncDownload={true}
