@@ -123,6 +123,7 @@ export default function Current({ assetId }) {
                         ? currentData
                         : currentData?.filter((e) => e?.fieldLabel?.toLowerCase()?.includes(searchValue?.trim()?.toLowerCase()))
                     }
+                    assetId={assetId}
                   />
                 ))}
               </div>
