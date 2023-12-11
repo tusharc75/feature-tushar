@@ -361,7 +361,7 @@ export default function useColumns() {
           columnData: {
             ...commonFieldData,
             disableFilters: true,
-            Cell: ({ row }) => (
+            cell: ({ row }) => (
               <>
                 <h5 className="text-truncate">{row.original[field?.fieldName] ? row.original[field?.fieldName] : 0}</h5>
               </>
@@ -425,7 +425,7 @@ export default function useColumns() {
             column.push({
               accessor: fieldName,
               Header: fieldLabel,
-              Cell: ({ row }) => {
+              cell: ({ row }) => {
                 return row?.original[fieldName] ? <p>{row?.original[fieldName]}</p> : <NoDataCell />;
               },
               editable: Boolean(field?.isColumnEditable),
@@ -444,7 +444,7 @@ export default function useColumns() {
                 editable: Boolean(field?.isColumnEditable),
                 decimalPlaces: field?.decimalPlaces,
                 primaryField: field?.primaryField ?? false,
-                Cell: ({ row }) => {
+                cell: ({ row }) => {
                   return row?.original[fieldName] ? (
                     <p>{formatAmountWithCurrency(currency, row?.original[fieldName])?.amountWithouCurrencyCode}</p>
                   ) : (
@@ -464,7 +464,7 @@ export default function useColumns() {
               editable: Boolean(field?.isColumnEditable),
               decimalPlaces: field?.decimalPlaces,
               primaryField: field?.primaryField ?? false,
-              Cell: ({ row }) => {
+              cell: ({ row }) => {
                 return row?.original[fieldName] ? (
                   <p>{formatAmountWithCurrency(currency, row?.original[fieldName])?.amountWithouCurrencyCode}</p>
                 ) : (
@@ -646,10 +646,10 @@ export default function useColumns() {
       else if (field?.type === 'number') {
         column.push({
           ...commonFieldData,
+          editable: Boolean(field?.isColumnEditable),
           disableFilters: true,
           disableSortBy: true,
-          editable: Boolean(field?.isColumnEditable),
-          Cell: ({ row }) => (
+          cell: ({ row }) => (
             <div>
               <h5 className="text-truncate">{row.original[field?.fieldName] ? row.original[field?.fieldName] : 0}</h5>
             </div>
@@ -662,7 +662,7 @@ export default function useColumns() {
           disableFilters: true,
           disableSortBy: true,
           editable: Boolean(field?.isColumnEditable),
-          Cell: ({ row }) => (row.original[field.fieldName] ? <p>{row.original[field.fieldName]}</p> : <NoDataCell />),
+          cell: ({ row }) => (row.original[field.fieldName] ? <p>{row.original[field.fieldName]}</p> : <NoDataCell />),
           Footer: (info) => {
             const qtyTotal = info.rows
               .filter((f) => !f.original.parentId && f.original.hasOwnProperty(field.fieldName) && !isNaN(f.original[field.fieldName]))
@@ -676,7 +676,7 @@ export default function useColumns() {
           ...commonFieldData,
           disableFilters: true,
           disableSortBy: true,
-          Cell: ({ row }) => row.original[field.fieldName] ? <SignatureCell base64={row?.original[field.fieldName]} /> : <NoDataCell />
+          cell: ({ row }) => row.original[field.fieldName] ? <SignatureCell base64={row?.original[field.fieldName]} /> : <NoDataCell />
         });
       }
       else {
