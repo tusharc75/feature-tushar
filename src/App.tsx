@@ -244,7 +244,6 @@ import CreditMemo from './pages/CreditMemo';
 import CreditMemoDetail from './pages/CreditMemo/CreditMemoDetail';
 import GenerateInvoice from './pages/GenerateInvoice';
 import StandardReportView from './pages/Report/StandardReport'
-import UserDownloadReport from './pages/UserDownloadRequest';
 import UserDownloadRequest from './pages/UserDownloadRequest';
 
 var notificationInterval: any = null;

@@ -6,7 +6,7 @@ import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTab
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
 import routes from 'src/components/Helpers/Routes';
-import { gridLoadingTimeout,  dateTimeFormat } from 'src/constants/helpers';
+import { gridLoadingTimeout,  dateTimeFormat, prepareDataForGrid } from 'src/constants/helpers';
 import PreviewIcon from '@material-ui/icons/Visibility';
 import GetAppIcon from '@material-ui/icons/GetApp';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -72,7 +72,8 @@ const UserDownloadRequest = () => {
         disableFilters: true,
         disableSortBy: true,
         width: 120,
-        Cell: ({ row }) => <p className="text-truncate">{moment(row?.original?.createdBy?.date)?.format(dateTimeFormat)}</p>
+        Cell: ({ row }) => <p className="text-truncate">
+          {moment(row?.original?.createdByDate)?.format(dateTimeFormat)}</p>
       },
       ActionsRenderer
     ];
@@ -185,7 +186,11 @@ const UserDownloadRequest = () => {
             data: { data, count }
           }
         }) => {
-          dispatch({ type: 'initialize', data: data, count: count });
+          let rows = data?.map((u) => {
+            let finalObject = prepareDataForGrid(u, user);
+            return finalObject;
+          });
+          dispatch({ type: 'initialize', data: rows, count: count });
           setTimeout(() => {
             dispatch({ type: 'loading', loading: false });
           }, gridLoadingTimeout);
