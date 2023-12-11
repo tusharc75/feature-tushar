@@ -1,5 +1,5 @@
 import { useState, useEffect, Fragment, useContext } from 'react';
-import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { Box, Button, IconButton, Menu, MenuItem, Typography } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
@@ -33,7 +33,11 @@ import AssignWorkStationDialog from 'src/pages/WorkOrder/Service/AssignWorkStati
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AttachmentDialog from 'src/pages/WorkOrder/Service/AttachmentDialog';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
+import SyncIcon from '@material-ui/icons/Sync';
+
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+
+var apiCallInterval: any = null;
 
 const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, setCurrentStep }) => {
 
@@ -71,7 +75,13 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
 
   const autoCreateWorkOrder = async () => {
     try {
+      apiCallInterval = setInterval(async () => {
+        await fetchData();
+      }, 30000);
       await axiosInstance().post(`${productionOrder.api}/${productionOrderData._id}/work-order`);
+      if (apiCallInterval) {
+        clearInterval(apiCallInterval);
+      }
       setIsAutoCreating(false)
     } catch (error) {
       setIsAutoCreating(false)
@@ -629,6 +639,10 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
 
   return (
     <Fragment>
+      {isAutoCreating &&
+        <Box p={1} display="flex" alignItems="center">
+          <SyncIcon className="rotate" /> <Typography variant='subtitle2' >Work order Auto Creation in Progress</Typography>
+        </Box>}
       <Box display="flex" alignItems="center" justifyContent={'flex-end'} gridColumnGap={8} flex={1} m={1} my={1}>
         {allowedToEdit && (
           <Box display="flex" gridColumnGap={5}>
