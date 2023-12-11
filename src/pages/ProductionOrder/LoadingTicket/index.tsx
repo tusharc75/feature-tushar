@@ -23,9 +23,8 @@ import { uniq, map, startCase } from 'lodash';
 import { ExpandMore } from '@material-ui/icons';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { useData } from 'src/StateProvider/Provider';
-import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
-import { generateCustomTableColumns } from 'src/constants/columns';
 
 const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, renderedFrom, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -35,6 +34,7 @@ const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, rende
   const [columns, setColumns] = useState(null);
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
+  const { generateColumns } = useColumns();
 
   const {
     state: { user, permissions }
@@ -125,7 +125,7 @@ const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, rende
     data?.forEach((e) => {
       e.isColumnEditable = false;
     });
-    const newColumns = generateCustomTableColumns(data, productionOrderData?.currency || 'USD', renderedFrom);
+    const newColumns = generateColumns(renderedFrom, data, null, false, productionOrderData?.currency || 'USD');
     let coloum: any = [
       {
         accessor: 'index',

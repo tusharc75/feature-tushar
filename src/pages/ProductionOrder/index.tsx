@@ -47,7 +47,7 @@ const ProductionOrder = () => {
   let { type }: any = queryString.parse(history.location.search);
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const {
     state: { user, permissions, selectedEntity }
@@ -88,14 +88,7 @@ const ProductionOrder = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=Production Order`);
     data = response?.data?.data;
-    let columns = [];
-    data.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productionOrderDetail.path, true);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-      }
-      return o?.fieldData;
-    });
+    let columns = generateColumns(renderedFrom, data, routes.productionOrderDetail.path, true);
     columns = [...columns, ...getStaticFields(), ActionsRenderer];
     setColumns(columns);
   };
