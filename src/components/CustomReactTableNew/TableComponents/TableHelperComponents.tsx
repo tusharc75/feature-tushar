@@ -384,7 +384,7 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({ header, table,
               {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
             </span>
           </div>
-          {column.getCanSort() ? (
+          {column.getCanSort() && columnDef.disableSortBy !== true ? (
             <>
               {{
                 asc: <ExpandLess fontSize="small" />,
@@ -395,7 +395,7 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({ header, table,
             ''
           )}
         </div>
-        {column?.getCanFilter() && column?.id !== 'action' ? (
+        {column?.getCanFilter() && column?.id !== 'action' && columnDef.disableFilters !== true ? (
           <>
             {!isClientSideGrid ? (
               <TempFilter
