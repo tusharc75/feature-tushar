@@ -20,6 +20,7 @@ export type TColType = {
   lockPosition?: undefined | boolean;
   primaryField?: undefined | boolean;
   id: string;
+  isVisible: undefined | boolean;
 } & ColumnDef<any>;
 
 // Editable Cell input
