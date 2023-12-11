@@ -26,6 +26,7 @@ import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { generateCustomTableColumns } from 'src/constants/columns';
 import EditIcon from '@material-ui/icons/Edit';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 
 const Consumables = ({
   isCreate,
@@ -515,6 +516,18 @@ const Consumables = ({
                 Delete
               </MenuItem>
             </Menu>
+            <Box ml={1}></Box>
+            <ImportExportMenu
+              permissions={permissions?.workOrder}
+              module="consumables"
+              api={`${workOrder.api}/${workOrderId}/consumable`}
+              afterImportCompleted={() => {
+                fetchData();
+              }}
+              isExportAllOrSomeFeature={true}
+              ids={[]}
+              additionalParams={`workOrderIds=${JSON.stringify([workOrderId])}`}
+            />
           </Box>
         </Box>
       )}

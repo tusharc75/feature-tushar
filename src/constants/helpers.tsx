@@ -2206,14 +2206,6 @@ export const INTERVALS = [
   {
     optionValue: '1day',
     optionLabel: '1 Day'
-  },
-  {
-    optionValue: '7days',
-    optionLabel: '7 Days'
-  },
-  {
-    optionValue: '30days',
-    optionLabel: '30 Days'
   }
 ];
 
@@ -2843,3 +2835,8 @@ export const ATTACHMENT_TYPE = {
   certificate: 'Certificate',
   mtr: 'MTR'
 };
+
+export const FILE_PROCESS_STATUS = {
+  processing: 'Processing',
+  completed: 'Completed'
+} as const;

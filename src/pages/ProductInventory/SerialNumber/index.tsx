@@ -79,7 +79,7 @@ const SerialNumber = ({ product, warehouse }) => {
     {
       accessor: 'createdBy',
       Header: 'Created By',
-      canFilter: false,
+      disableFilters: true,
       Cell: ({ row }) => (
         <>
           {row?.original?.createdBy ? (

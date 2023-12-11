@@ -86,9 +86,9 @@ function CustomReactTableHeaderOptions({
   const [chipData, setChipData] = useState([]);
   const [isFilterPresent, setIsFilterPresent] = useState<boolean>(false);
 
-  useEffect(()=>{
-    if(selectedRecords === 0){
-      if ( checked) {
+  useEffect(() => {
+    if (selectedRecords === 0) {
+      if (checked) {
         setChecked(false);
         dispatchTable({
           type: 'showFilteredRecordsOnly'
@@ -96,11 +96,10 @@ function CustomReactTableHeaderOptions({
         dispatchTable({ type: 'pageChange', page: 0 });
       }
       setDisableSelectionSwitch(true);
-    }else{
+    } else {
       setDisableSelectionSwitch(false);
     }
-  },[selectedRecords])
-
+  }, [selectedRecords]);
 
   const clearSingleFilter = (name) => {
     // Create a copy of the customFilters object
@@ -154,7 +153,7 @@ function CustomReactTableHeaderOptions({
           </>
         )}
         {Object.keys(customFilters).length > 0 && showFilters && (
-          <div className='min-w-[350px] md:min-w-[430px] '>
+          <div className="min-w-[350px] md:min-w-[430px] ">
             <DisplayChips
               columns={columns}
               customFilters={customFilters}

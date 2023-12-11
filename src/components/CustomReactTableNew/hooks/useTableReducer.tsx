@@ -13,7 +13,7 @@ function reducer(state: TInitialState, action: TActios) {
         ...state,
         error: false,
         dataRows: action.data,
-        rowCount: action.count,
+        rowCount: action.count
       };
     case 'selection':
       return {
@@ -34,7 +34,7 @@ function reducer(state: TInitialState, action: TActios) {
     case 'filter':
       return {
         ...state,
-        loading: true,
+        loading: action.loading ?? true,
         filters: action.filters,
         page: 0
       };
@@ -42,13 +42,13 @@ function reducer(state: TInitialState, action: TActios) {
       return {
         ...state,
         sorting: action.sorting,
-        loading: true
+        loading: action.loading ?? true
       };
     case 'search':
       return {
         ...state,
         search: action.search,
-        loading: true
+        loading: action.loading ?? true
       };
     case 'pageChange':
       return {
@@ -60,7 +60,7 @@ function reducer(state: TInitialState, action: TActios) {
         ...state,
         limit: action.limit,
         page: 0,
-        loading: true
+        loading: action.loading ?? true
       };
     case 'error':
       return {
@@ -108,7 +108,7 @@ const intialState = {
   currentEditingCellPosition: null,
   error: false,
   showFilteredRecordsOnly: false,
-  colState : []
+  colState: []
 };
 
 export type TInitialState = {
@@ -125,25 +125,27 @@ export type TInitialState = {
   currentEditingCellPosition: { rowId: string; columnName: string } | null;
   error: boolean;
   showFilteredRecordsOnly: boolean;
-  colState : any[];
+  colState: any[];
 };
 
 export type TActios =
   | { type: 'loading'; loading: boolean }
-  | { type: 'initialize'; data: any[]; count: number; }
+  | { type: 'initialize'; data: any[]; count: number }
   | { type: 'selection'; selectedRecords: any[] }
   | { type: 'update'; data: any[] }
   | { type: 'onlyFilter'; filters: any }
-  | { type: 'filter'; filters: any }
-  | { type: 'sort'; sorting: any[] }
-  | { type: 'search'; search: string }
+  | { type: 'filter'; filters: any; loading?: boolean }
+  | { type: 'sort'; sorting: any[]; loading?: boolean }
+  | { type: 'search'; search: string; loading?: boolean }
   | { type: 'pageChange'; page: number }
-  | { type: 'pageSizeChange'; limit: number }
+  | { type: 'pageSizeChange'; limit: number; loading?: boolean }
   | { type: 'complete' }
   | { type: 'currentEditingCellPosition'; cellPosition: { rowId: string; columnName: string } | null }
   | { type: 'error'; error: boolean }
   | { type: 'showFilteredRecordsOnly' }
-  | { type: 'updateColumnState', colState: any[]}
+  | { type: 'columnOrder'; columnOrder: boolean }
+  | { type: 'hiddenColumns'; hiddenColumns: boolean }
+  | { type: 'updateColumnState'; colState: any[] }
 
 export const useTableReducer = () => {
   const [state, dispatch] = useReducer(reducer, intialState);

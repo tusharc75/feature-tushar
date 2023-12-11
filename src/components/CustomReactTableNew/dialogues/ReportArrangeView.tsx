@@ -15,19 +15,22 @@ import {
   Box,
   TextField,
   Typography,
-  Checkbox
+  Checkbox,
+  CircularProgress
 } from '@material-ui/core';
 import { DragHandle } from '@material-ui/icons';
 import { XYCoord } from 'dnd-core';
 import { DndProvider, useDrag, useDrop, DropTargetMonitor } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import update from 'immutability-helper';
-import CustomDialogContent from '../CustomDialog/CustomDialogContent';
-import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
-import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
+import CustomDialogContent from '../../CustomDialog/CustomDialogContent';
+import CustomDialogFooter from '../../CustomDialog/CustomDialogFooter';
+import CustomDialogHeader from '../../CustomDialog/CustomDialogHeader';
 import { startCase } from 'lodash';
 import { isMobile, isTablet } from 'react-device-detect';
 import { TouchBackend } from 'react-dnd-touch-backend';
+import axiosInstance from 'src/axios/axiosInstance';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -50,14 +53,16 @@ interface ArrangeColumnsProps {
   setHiddenColumns?: any;
   getToggleHideAllColumnsProps?: any;
   setColumnOrder?: any;
-  defaultColumns: any[];
+  selectedReportView: object | any;
+  setSelectedReportView: any;
+  dispatch : any;
 }
 
 const ItemTypes = {
   CARD: 'card'
 };
 
-const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
+const ReportArrangeView = (props: ArrangeColumnsProps) => {
   const {
     onClose,
     columns,
@@ -66,9 +71,10 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
     setHiddenColumns,
     getToggleHideAllColumnsProps,
     setColumnOrder,
-    defaultColumns,
+    selectedReportView,
+    setSelectedReportView,
+    dispatch
   } = props;
-
   const classes = useStyles();
   const [sortedColumns, setSortedColumns] = React.useState([]);
   const [searchedColumns, setSearchedColumns] = React.useState([]);
@@ -76,29 +82,43 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
 
   const [allChecked, setAllChecked] = React.useState(true);
   const [isMinimized, setMinimized] = React.useState(true);
+  const [error, setError] = React.useState(null);
+  const [reportName, setReportName] = React.useState(selectedReportView ? selectedReportView.name : '');
+  const [isSubmitting, setSubmitting] = React.useState(false);
+
+  const toastConfig = React.useContext(CustomToastContext);
 
   React.useEffect(() => {
     try {
-      const data = localStorage.getItem('gridMetaData');
-      const gridMetaData = JSON.parse(data || '{}');
-      const hiddenCols = gridMetaData[renderedFrom]?.hide || [];
-      var updatedCols = columns.map((col) => ({
-        ...col,
-        isVisible: !hiddenCols.includes(col.accessor)
-      }));
-      if (gridMetaData && gridMetaData[renderedFrom]?.order && gridMetaData[renderedFrom]?.order?.length) {
-        const colOrder = gridMetaData[renderedFrom]?.order;
-        const actionCol = updatedCols.find((d) => d.accessor === 'action');
-        const expanderCol = updatedCols.find((d) => d.accessor === 'expander');
-        const selectionCol = updatedCols.find((d) => d.accessor === 'selection');
-        updatedCols = [
-          ...(expanderCol ? [expanderCol] : []),
-          ...(selectionCol ? [selectionCol] : []),
-          ...updatedCols.filter((d) => !['expander', 'selection', 'action']?.includes(d.accessor)).sort((a, b) => colOrder.findIndex((d) => d === a.accessor) - colOrder.findIndex((d) => d === b.accessor)),
-          ...(actionCol ? [actionCol] : [])
-        ];
+      if(!selectedReportView){
+        
+        var updatedCols = columns.map((col) => ({
+          ...col,
+          isVisible: true
+        }));
+        
+        setSortedColumns(updatedCols);
       }
-      setSortedColumns(updatedCols);
+      else{
+        let savedColumns = selectedReportView.columnState
+        var updatedCols = columns.map((col) => ({
+          ...col,
+          isVisible: (savedColumns?.find((column)=>column.accessor === col.accessor))?.isVisible
+        }));
+        if(savedColumns){
+          const colOrder = savedColumns.map((m)=>m.accessor)
+          const actionCol = updatedCols.find((d) => d.accessor === 'action');
+          const expanderCol = updatedCols.find((d) => d.accessor === 'expander');
+          const selectionCol = updatedCols.find((d) => d.accessor === 'selection');
+          updatedCols = [
+            ...(expanderCol ? [expanderCol] : []),
+            ...(selectionCol ? [selectionCol] : []),
+            ...updatedCols.filter((d) => !['expander', 'selection', 'action']?.includes(d.accessor)).sort((a, b) => colOrder.findIndex((d) => d === a.accessor) - colOrder.findIndex((d) => d === b.accessor)),
+            ...(actionCol ? [actionCol] : [])
+          ];
+        }
+        setSortedColumns(updatedCols);
+      }
     } catch (ex) {
       setSortedColumns([...columns]);
       console.error(`Error while getting stored data from local storage - ${renderedFrom}`);
@@ -127,16 +147,11 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
     setAllChecked(event.target.checked);
   };
 
-  const handleReset = () => {
-    if (renderedFrom && renderedFrom !== '') {
-      updateGridHiddenColumns([], []);
-    }
-    setColumnOrder(defaultColumns?.map((col) => col?.accessor));
-    setHiddenColumns([]);
-    onClose();
-  };
-
   const handleSaveChange = () => {
+    if(!reportName){
+      setError('Report name is required')!;
+      return ;
+    }
     let dataToStore = [];
     sortedColumns.forEach((f) => {
       let object = {};
@@ -147,14 +162,67 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
       });
       dataToStore.push(object);
     });
-    if (renderedFrom && renderedFrom !== '') {
-      const hidedColumns = dataToStore?.filter((o) => !o?.isVisible && !['expander', 'selection', 'action']?.includes(o?.accessor)).map((o) => o?.accessor);
-      const columnOrder = dataToStore?.filter((o) => o?.sticky === undefined && !['expander', 'selection', 'action']?.includes(o?.accessor))?.map((o) => o?.accessor);
-      updateGridHiddenColumns(hidedColumns, columnOrder);
-    }
+    // if (renderedFrom && renderedFrom !== '') {
+    //   const hidedColumns = dataToStore?.filter((o) => !o?.isVisible && !['expander', 'selection', 'action']?.includes(o?.accessor)).map((o) => o?.accessor);
+    //   const columnOrder = dataToStore?.filter((o) => o?.sticky === undefined && !['expander', 'selection', 'action']?.includes(o?.accessor))?.map((o) => o?.accessor);
+    //   updateGridHiddenColumns(hidedColumns, columnOrder);
+    // }
     setColumnOrder([...sortedColumns.map((m) => m.accessor)]);
     setHiddenColumns([...sortedColumns].filter((f) => f.sticky === undefined && f.isVisible === false).map((m) => m.accessor));
-    onClose();
+    const newColState = sortedColumns?.map(({accessor,isVisible})=>({accessor,isVisible}))
+    dispatch({type : 'updateColumnState', colState : newColState})
+    saveColumnSettings(sortedColumns)
+    // onClose();
+  };
+
+  const saveColumnSettings = (columnState: any) => {
+    
+    const newColState = columnState?.map(({accessor,isVisible})=>({accessor,isVisible}))
+    if (selectedReportView) {
+      setSubmitting(true);
+      axiosInstance()
+        .put(`/report-colum-setting/${selectedReportView._id}`, {
+          resource: renderedFrom.split('_')[0],
+          columnState: newColState,
+          name: reportName.trimEnd()
+        })
+        .then(({ data: { data } }) => {
+          setSubmitting(false);
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: 'Settings saved successfully'
+          });
+          setSelectedReportView(data);
+          onClose();
+        })
+        .catch((error) => {
+          setSubmitting(false);
+          toastConfig.setToastConfig(error);
+        });
+    } else {
+      setSubmitting(true);
+      axiosInstance()
+        .post(`/report-colum-setting`, {
+          resource: renderedFrom.split('_')[0],
+          columnState: newColState,
+          name: reportName.trimEnd()
+        })
+        .then(({ data: { data } }) => {
+          setSubmitting(false);
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: 'Settings saved successfully'
+          });
+          setSelectedReportView(data);
+          onClose();
+        })
+        .catch((error) => {
+          setSubmitting(false);
+          toastConfig.setToastConfig(error);
+        });
+    }
   };
 
   const moveItem = React.useCallback(
@@ -184,7 +252,6 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
     });
     setSearchedColumns(matchedColumns);
   }, [searchVal]);
-
   return (
     <Dialog open onClose={onClose} maxWidth="sm" fullWidth fullScreen={!isMinimized || (isMobile && !isTablet)}>
       <CustomDialogHeader
@@ -196,6 +263,25 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
         onMinimizeMaximize={() => setMinimized((prevState) => !prevState)}
       />
       <CustomDialogContent>
+      <TextField
+          required
+          variant="outlined"
+          type="text"
+          label="Report View Name"
+          name="reportName"
+          fullWidth
+          margin="dense"
+          value={reportName}
+          error={Boolean(error)}
+          helperText={Boolean(error) && error}
+          onChange={(e) => {
+            const value = e.target.value.trimStart();
+            setReportName(value);
+            if (value) {
+              setError(null);
+            }
+          }}
+        />
         <List
           disablePadding
           subheader={
@@ -293,10 +379,14 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
         <Button variant="outlined" color="primary" onClick={onClose}>
           Close
         </Button>
-        <Button variant="outlined" color="primary" onClick={handleReset}>
-          Reset
-        </Button>
-        <Button variant="contained" color="primary" disableElevation disabled={false} onClick={handleSaveChange}>
+        <Button
+          startIcon={isSubmitting && <CircularProgress size={18} color="inherit" />}
+          variant="contained"
+          color="primary"
+          disableElevation
+          disabled={isSubmitting}
+          onClick={handleSaveChange}
+        >
           Save changes
         </Button>
       </CustomDialogFooter>
@@ -400,4 +490,4 @@ const RenderListItem = (props: ItemProps) => {
   );
 };
 
-export default ArrangeViewDialog;
+export default ReportArrangeView;

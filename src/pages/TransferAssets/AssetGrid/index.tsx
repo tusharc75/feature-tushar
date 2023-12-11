@@ -18,7 +18,7 @@ import {
   TRANSFER_ASSET_STATUS
 } from 'src/constants/helpers';
 import AddSerializedAsset from 'src/pages/RentalManagement/SerializedAsset/AddSerializedAsset';
-import useColumns from 'src/components/CustomReactTableNew/useColumnsReactTable';
+import { useColumns } from 'src/components/CustomReactTableNew';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -35,8 +35,15 @@ interface AssetsGridProps {
   stepFullScreen: any;
 }
 
-const AssetsGrid: FC<AssetsGridProps> = ({ allowedToEdit, permissions, setNextStep, updateTransferStatus, transferAssetData, renderedFrom, stepFullScreen }) => {
-
+const AssetsGrid: FC<AssetsGridProps> = ({
+  allowedToEdit,
+  permissions,
+  setNextStep,
+  updateTransferStatus,
+  transferAssetData,
+  renderedFrom,
+  stepFullScreen
+}) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [isRemovingAssets, setRemovingAssets] = useState(false);
@@ -171,11 +178,12 @@ const AssetsGrid: FC<AssetsGridProps> = ({ allowedToEdit, permissions, setNextSt
 
   const fetchData = async () => {
     try {
-
-      const assetResponce = await axiosInstance().get(`${routes.transferAsset.path}/get-asset/${transferAssetData?._id}`)
+      const assetResponce = await axiosInstance().get(`${routes.transferAsset.path}/get-asset/${transferAssetData?._id}`);
       let assets = assetResponce?.data?.data?.assets;
 
-      const ticketResponce = await axiosInstance().get(`${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.transferAsset}&referenceId=${transferAssetData?._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`)
+      const ticketResponce = await axiosInstance().get(
+        `${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.transferAsset}&referenceId=${transferAssetData?._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`
+      );
       let ticketData: any = ticketResponce?.data?.data;
 
       for (let i = 0; i < ticketData.length; i++) {
@@ -194,7 +202,7 @@ const AssetsGrid: FC<AssetsGridProps> = ({ allowedToEdit, permissions, setNextSt
           ...finalObject
         };
       });
-      setDataRows(assets)
+      setDataRows(assets);
       if (assets?.length > 0) {
         setNextStep(true);
       } else {
@@ -286,8 +294,7 @@ const AssetsGrid: FC<AssetsGridProps> = ({ allowedToEdit, permissions, setNextSt
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
-        )
-        }
+        )}
       </Box>
       {openAddNewAssets && (
         <AddSerializedAsset

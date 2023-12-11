@@ -65,7 +65,7 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
       accessor: 'date',
       Header: 'Date',
       show: true,
-      canFilter: false,
+      disableFilters: true,
       disableSortBy: false,
       Cell: ({ row }) =>
         row?.original?.date ? (
@@ -93,7 +93,7 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
       accessor: 'reference',
       Header: 'Reference',
       show: true,
-      canFilter: false,
+      disableFilters: true,
       disableSortBy: false,
       Cell: ({ row }) =>
         row?.original?.reference ? (
@@ -195,7 +195,7 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
       accessor: 'qty',
       Header: 'Quantity',
       show: true,
-      canFilter: false,
+      disableFilters: true,
       disableSortBy: false,
       Cell: ({ row }) =>
         row?.original?.qty ? (
@@ -227,7 +227,7 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
       accessor: 'price',
       Header: `Cost ${curr}`,
       show: true,
-      canFilter: false,
+      disableFilters: true,
       disableSortBy: false,
       Cell: ({ row }) =>
         row?.original?.price ? (
@@ -242,7 +242,7 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
       accessor: 'totalPrice',
       Header: `Amount ${curr}`,
       show: true,
-      canFilter: false,
+      disableFilters: true,
       disableSortBy: false,
       Cell: ({ row }) =>
         row?.original?.totalPrice ? (
@@ -287,7 +287,7 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
       accessor: 'transactionDate',
       Header: 'Actual Transaction Date',
       show: true,
-      canFilter: false,
+      disableFilters: true,
       disableSortBy: false,
       Cell: ({ row }) =>
         row?.original?.transactionDate ? (

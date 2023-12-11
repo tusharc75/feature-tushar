@@ -3,7 +3,7 @@ import { createStyles, Theme, makeStyles, useTheme } from '@material-ui/core/sty
 import { Popover, Box, Typography, Divider, IconButton, List, useMediaQuery } from '@material-ui/core';
 import { Create, Clear, ArrowBack, Group } from '@material-ui/icons';
 
-import ChatList from './ChatList';
+import ChatListITem from './ChatListITem';
 import ChatBox from './ChatBox';
 import NewChat from './NewChat';
 import axiosInstance from '../../axios/axiosInstance';
@@ -142,7 +142,7 @@ const ChatsPopover = (props) => {
           ) : (
             <List disablePadding dense className={classes.listRoot}>
               {chatList.map((chat, i) => (
-                <ChatList key={i} userId={user._id} socket={socket} chat={chat} setSelectedChat={setSelectedChat} getChats={getChats} />
+                <ChatListITem key={i} userId={user._id} socket={socket} chat={chat} setSelectedChat={setSelectedChat} getChats={getChats} />
               ))}
             </List>
           )}

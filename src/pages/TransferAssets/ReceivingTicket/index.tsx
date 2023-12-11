@@ -21,7 +21,7 @@ import { groupBy } from 'lodash';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import PreviewDownload from 'src/components/PreviewDownload';
-import useColumns from 'src/components/CustomReactTableNew/useColumnsReactTable';
+import { useColumns } from 'src/components/CustomReactTableNew';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 interface ReceivingGridProps {
@@ -78,12 +78,14 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
       .get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
         let columns = [];
-        data?.filter(d => ['assetNumber', 'serialNumber', 'product', 'productDescription', 'status']?.includes(d?.fieldData?.fieldName))?.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-          }
-        });
+        data
+          ?.filter((d) => ['assetNumber', 'serialNumber', 'product', 'productDescription', 'status']?.includes(d?.fieldData?.fieldName))
+          ?.forEach((o) => {
+            let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path);
+            if (currentColumn !== null) {
+              columns = [...columns, currentColumn?.columnData];
+            }
+          });
 
         const column = [
           {
@@ -103,9 +105,11 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
             width: 300,
             Cell: ({ row }) =>
               row?.original?.loadingTicket ? (
-                <p title={row?.original?.loadingTicket}
+                <p
+                  title={row?.original?.loadingTicket}
                   className="link cursor-pointer"
-                  onClick={() => window.open(`${routes.deliveryTicketDetail.path}/${row?.original?.loadingTicketId}`)}>
+                  onClick={() => window.open(`${routes.deliveryTicketDetail.path}/${row?.original?.loadingTicketId}`)}
+                >
                   {row?.original?.loadingTicket}
                 </p>
               ) : (
@@ -126,9 +130,11 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
             width: 300,
             Cell: ({ row }) =>
               row?.original?.receivingTicket ? (
-                <p title={row?.original?.receivingTicket}
+                <p
+                  title={row?.original?.receivingTicket}
                   className="link cursor-pointer"
-                  onClick={() => window.open(`${routes.deliveryTicketDetail.path}/${row?.original?.receivingTicketId}`)}>
+                  onClick={() => window.open(`${routes.deliveryTicketDetail.path}/${row?.original?.receivingTicketId}`)}
+                >
                   {row?.original?.receivingTicket}
                 </p>
               ) : (
@@ -140,8 +146,8 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
             Header: 'Receiving Ticket Status',
             width: 200,
             Cell: ({ row }) => <p className="text-truncate">{row?.original?.receivingTicketStatus || <NoDataCell />}</p>
-          },
-        ]
+          }
+        ];
         setColumns(column);
       });
   };
@@ -188,7 +194,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
           ...finalObject
         };
       });
-      setDataRows(assetData)
+      setDataRows(assetData);
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -316,8 +322,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
                     if (transferAssetData?.wellNumber) {
                       if (transferAssetData?.wellNumber?.optionValue) {
                         data['wellNumber'] = transferAssetData?.wellNumber?.optionValue;
-                      }
-                      else {
+                      } else {
                         data['wellNumber'] = transferAssetData?.wellNumber?.map((e) => e?.optionValue);
                       }
                     }
@@ -336,9 +341,9 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
               )}
               <Box component="span" mx={1} />
               {permissions?.transferAsset?.isUpdate &&
-                selectedRecords.length &&
-                selectedRecords?.filter((f) => f.hasOwnProperty('receivingTicket') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new)
-                  ?.length === selectedRecords?.length ? (
+              selectedRecords.length &&
+              selectedRecords?.filter((f) => f.hasOwnProperty('receivingTicket') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new)
+                ?.length === selectedRecords?.length ? (
                 <Button variant="contained" size="small" color="primary" onClick={() => setShowConfirmBox(true)}>
                   Remove Receiving Ticket
                 </Button>
@@ -368,8 +373,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
-        )
-        }
+        )}
       </Box>
       {showTicketDialog.open && (
         <ManageDeliveryTicket

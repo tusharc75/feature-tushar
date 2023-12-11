@@ -101,7 +101,6 @@ const ServiceTable = ({ packageId, packageData }) => {
     sticky: 'right',
     editable: permissions?.packages?.isUpdate,
     cellEditor: 'numericCellEditor',
-    canFilter: false,
     disableFilters: true,
     disableSortBy: true,
     canDrag: false,
