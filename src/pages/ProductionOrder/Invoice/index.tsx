@@ -272,6 +272,7 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
             referenceId={productionOrderData._id}
             columns={columns}
             isSendEmail={true}
+            isAsyncDownload={true}
           />
         </Box>
       </Box>
