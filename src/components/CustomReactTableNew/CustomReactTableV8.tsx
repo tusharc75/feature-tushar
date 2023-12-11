@@ -73,7 +73,8 @@ const CustomReactTable = ({
     filters: customFilters,
     sorting,
     error,
-    showFilteredRecordsOnly
+    showFilteredRecordsOnly,
+    colState
   }: TInitialState = state;
   const {
     state: { user }
@@ -125,37 +126,47 @@ const CustomReactTable = ({
     setIsFilterOpen(false);
   };
 
-  // For Column Order
+  // For Column Order and hidden columns
   useEffect(() => {
     try {
-      if(reportSave || renderedFrom?.includes('_report')){
-        if(selectedReportView){
-          const newColumnsState = selectedReportView?.columnState
-          let hiddenCols = [];
-          let colOrder = [...(expander ? ['expander'] : []), ...(!hideSelection ? ['selection'] : [])];
-          newColumnsState.map((m)=>{
-            colOrder.push(m.accessor);
-            if(!m.isVisible){
-              hiddenCols.push(m.accessor)
-            }
-          })
-          setHiddenColumns(hiddenCols);
-          setColumnOrder(colOrder);
-          dispatch({type : 'updateColumnState', colState : selectedReportView?.columnState})
-        }
-        else {
-          setColumnOrder(newColumns.map((m) => m?.id ?? m?.accessor));
+      const stickyColumnNames = getStickyColumnNames({ allColumn: newColumns, expander, hideSelection });
+
+      const hColumns = [];
+      for (const col of newColumns) {
+        if (col.isVisible === false) {
+          hColumns.push(col.id);
         }
       }
-      else {
 
-        const stickyColumnNames = getStickyColumnNames({ allColumn: newColumns, expander, hideSelection });
+      if (reportSave || renderedFrom?.includes('_report')) {
+        if (selectedReportView) {
+          let colOrder = [...(expander ? ['expander'] : []), ...(!hideSelection ? ['selection'] : [])];
+          setHiddenColumns(hColumns);
+          setColumnOrder(colOrder);
+          dispatch({ type: 'updateColumnState', colState: selectedReportView?.columnState });
+        } else {
+          setColumnOrder(newColumns.map((m) => m?.id ?? m?.accessor));
+        }
+      } else {
         let gridMetaData = getDataFromLocalStorage();
         if (gridMetaData && gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide?.length) {
-          setHiddenColumns(gridMetaData[renderedFrom]?.hide || []);
+          for (const n of [...gridMetaData[renderedFrom]?.hide]) {
+            if (stickyColumnNames.stickyColumns.includes(n) || !n) continue;
+            if (n === 'qtyDisplay') hColumns.push('qty');
+            if (n === 'qty') hColumns.push('qtyDisplay');
+            hColumns.push(n);
+          }
+          setHiddenColumns(hColumns);
         }
         if (gridMetaData && gridMetaData[renderedFrom]?.order && gridMetaData[renderedFrom]?.order?.length) {
-          const colOrder = [...stickyColumnNames.left, ...gridMetaData[renderedFrom]?.order, ...stickyColumnNames.right];
+          const defaultCols = [];
+          for (const c of [...gridMetaData[renderedFrom]?.order]) {
+            if (c === 'qtyDisplay') {
+              defaultCols.push('qty');
+            }
+            defaultCols.push(c);
+          }
+          const colOrder = [...stickyColumnNames.left, ...defaultCols, ...stickyColumnNames.right];
           setColumnOrder(colOrder);
           setSortedColumns(returnSortedColumns(newColumns, colOrder));
         } else {
@@ -456,8 +467,8 @@ const CustomReactTable = ({
                   setColumnOrder={setColumnOrder}
                   setSelectedReportView={setSelectedReportView}
                   selectedReportView={selectedReportView}
-                  reportSave = {reportSave}
-                  dispatchTable = {dispatch}
+                  reportSave={reportSave}
+                  dispatchTable={dispatch}
                 />
               </>
             }

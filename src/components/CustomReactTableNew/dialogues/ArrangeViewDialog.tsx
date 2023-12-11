@@ -149,8 +149,17 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
         ?.map((o) => o?.accessor);
       updateGridHiddenColumns(hidedColumns, columnOrder);
     }
-    setColumnOrder([...sortedColumns.map((m) => m.accessor ?? m.id)]);
-    setHiddenColumns([...sortedColumns].filter((f) => f.sticky === undefined && f.isVisible === false).map((m) => m.accessor ?? m.id));
+    const columnOrder = [];
+    for (const col of [...sortedColumns]) {
+      if (col.id === 'qty' || col.id === 'qtyDisplay') {
+        columnOrder.push('qtyDisplay');
+        columnOrder.push('qty');
+        continue;
+      }
+      columnOrder.push(col.id ?? col.accessor);
+    }
+    setColumnOrder(columnOrder);
+    setHiddenColumns([...sortedColumns].filter((f) => f.sticky === undefined && f.isVisible === false).map((m) => m.id ?? m.accessor));
     onClose();
   };
 

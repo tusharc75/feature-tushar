@@ -210,18 +210,28 @@ export const getStickyColumnNames = ({
 }) => {
   const left = [];
   const right = [];
+  const stickyColumns = [];
+
   for (let col of allColumn) {
     const colName = col?.id ?? col?.accessor;
     if (colName === 'expander' && expander) {
       left.push(colName);
+      stickyColumns.push(colName);
       continue;
     }
     if (colName === 'selection' && !hideSelection) {
       left.push(colName);
+      stickyColumns.push(colName);
       continue;
     }
-    if (col.sticky === 'left') left.push(colName);
-    if (col.sticky === 'right') right.push(colName);
+    if (col.sticky === 'left') {
+      left.push(colName);
+      stickyColumns.push(colName);
+    }
+    if (col.sticky === 'right') {
+      right.push(colName);
+      stickyColumns.push(colName);
+    }
   }
-  return { left, right };
+  return { left, right, stickyColumns };
 };
