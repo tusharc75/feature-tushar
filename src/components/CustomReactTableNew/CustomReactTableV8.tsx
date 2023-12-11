@@ -138,7 +138,7 @@ const CustomReactTable = ({
         }
       }
 
-      if (reportSave || renderedFrom?.includes('_report')) {
+      if (reportSave) {
         if (selectedReportView) {
           let colOrder = [...(expander ? ['expander'] : []), ...(!hideSelection ? ['selection'] : [])];
           setHiddenColumns(hColumns);
@@ -147,7 +147,8 @@ const CustomReactTable = ({
         } else {
           setColumnOrder(newColumns.map((m) => m?.id ?? m?.accessor));
         }
-      } else {
+      }
+      else {
         let gridMetaData = getDataFromLocalStorage();
         if (gridMetaData && gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide?.length) {
           for (const n of [...gridMetaData[renderedFrom]?.hide]) {
