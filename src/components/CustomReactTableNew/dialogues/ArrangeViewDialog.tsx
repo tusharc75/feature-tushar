@@ -149,7 +149,11 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
         ?.map((o) => o?.accessor);
       updateGridHiddenColumns(hidedColumns, columnOrder);
     }
-    setColumnOrder([...sortedColumns.map((m) => m.accessor ?? m.id)]);
+    setColumnOrder([
+      ...sortedColumns.map((m) => {
+        return m.id ?? m.accessor;
+      })
+    ]);
     setHiddenColumns([...sortedColumns].filter((f) => f.sticky === undefined && f.isVisible === false).map((m) => m.accessor ?? m.id));
     onClose();
   };

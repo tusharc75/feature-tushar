@@ -224,8 +224,14 @@ export const getStickyColumnNames = ({
       stickyColumns.push(colName);
       continue;
     }
-    if (col.sticky === 'left') left.push(colName);
-    if (col.sticky === 'right') right.push(colName);
+    if (col.sticky === 'left') {
+      left.push(colName);
+      stickyColumns.push(colName);
+    }
+    if (col.sticky === 'right') {
+      right.push(colName);
+      stickyColumns.push(colName);
+    }
   }
   return { left, right, stickyColumns };
 };
