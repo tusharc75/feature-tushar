@@ -133,6 +133,7 @@ export const useCreateColumns = ({ columns, expander, fetchChildAttachment, hide
         e.cell = e.cell ?? e.Cell;
         e.header = e.header ?? e.Header;
         e.accessorKey = e.accessor ?? e.id;
+        e.maxSize = e.maxSize ?? e.maxWidth;
 
         e.size = e.size ?? e.width;
         switch (true) {
