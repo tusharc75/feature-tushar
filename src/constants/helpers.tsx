@@ -2843,3 +2843,8 @@ export const ATTACHMENT_TYPE = {
   certificate: 'Certificate',
   mtr: 'MTR'
 };
+
+export const FILE_PROCESS_STATUS = {
+  processing: 'Processing',
+  completed: 'Completed'
+} as const;
