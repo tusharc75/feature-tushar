@@ -32,6 +32,7 @@ import { AutoCompleteIcon } from 'src/assets/svg/svgIcons';
 import AssignWorkStationDialog from 'src/pages/WorkOrder/Service/AssignWorkStationDialog';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AttachmentDialog from 'src/pages/WorkOrder/Service/AttachmentDialog';
+import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
 const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, setCurrentStep }) => {
@@ -794,6 +795,19 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                 Delete
               </MenuItem>
             </Menu>
+            <Box ml={1}></Box>
+            <ImportExportMenu
+              permissions={permissions?.workOrder}
+              module="consumables"
+              api={`${workOrder.api}/unknown/consumable`}
+              afterImportCompleted={() => {
+                fetchData();
+              }}
+              isExportAllOrSomeFeature={true}
+              ids={[]}
+              disabled={selectedRecords?.length === 0}
+              additionalParams={`workOrderIds=${JSON.stringify(selectedRecords?.map((e) => e?.workOrder?._id) || [])}`}
+            />
           </Box>
         )}
       </Box>
