@@ -173,7 +173,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
           <IconButton
             size="small"
             aria-label="Details"
-            disabled={row.original.hideSelection || !allowedToEdit || row.original?.assetQty > 0 || (subleaseData.type === SUBLEASE_TYPE.vendor && isIssued)}
+            disabled={row.original.canDelete ? false : true}
             onClick={() => {
               const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
               if (row.original?.type === 'package' && row.original?.subRows?.length) {
@@ -184,9 +184,8 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
               setDeleteData(obj);
             }}
           >
-            <DeleteIcon fontSize="small" color={row.original.hideSelection || !allowedToEdit || row.original?.assetQty > 0 || (subleaseData.type === SUBLEASE_TYPE.vendor && isIssued) ? "disabled" : "error"} />
+            <DeleteIcon fontSize="small" color={row.original.canDelete ? "error" : "disabled"} />
           </IconButton>
-
         </>
       )
     });
@@ -219,8 +218,10 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
       parent.description = parent.type === 'product' ? parent.productDetail?.productDescription : parent.packageDetail?.packageDescription;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + subleaseData?.currency?.toLowerCase()] ? true : !isRateRequired;
-      parent.assetQty = inventory?.filter((e) => e._id === parent._id).length
+      parent.assetQty = subleaseData.type === SUBLEASE_TYPE.vendor ? inventory?.filter((e) => e?.inventoryDetail?.product === parent.materialId).length :
+        inventory?.filter((e) => e._id === parent._id).length
       parent.hideSelection = parent.assetQty > 0 ? true : false;
+      parent.canDelete = parent.assetQty === 0 && allowedToEdit ? true : false;
       if (parent.type === 'package') {
         const subRows: any = data.material.filter((e) => e.parentId === parent._id);
         var assetQty = 0;
@@ -230,7 +231,9 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
           _subRow.description = _subRow.productDetail?.productDescription;
           _subRow.qtyDisplay = `${parent.qty * _subRow.qty}`;
           _subRow.isValid = _subRow['finalPrice_' + subleaseData?.currency?.toLowerCase()] ? true : !isRateRequired;
-          _subRow.assetQty = inventory?.filter((e) => e._id === _subRow._id).length
+          _subRow.assetQty = subleaseData.type === SUBLEASE_TYPE.vendor ? inventory?.filter((e) => e?.inventoryDetail?.product === parent.materialId).length :
+            inventory?.filter((e) => e._id === parent._id).length
+          _subRow.canDelete = _subRow.assetQty === 0 && allowedToEdit ? true : false;
           _subRow.hideSelection = _subRow.assetQty > 0 ? true : false;
           assetQty += _subRow.assetQty;
         });
@@ -545,7 +548,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
             </MenuItem>
             <MenuItem
               color="primary"
-              disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
+              disabled={selectedProducts?.length && selectedProducts.every((e) => e.canDelete) ? false : true}
               onClick={() => {
                 const dataToDelete =
                   selectedProducts &&
