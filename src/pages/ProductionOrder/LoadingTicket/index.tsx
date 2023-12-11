@@ -17,7 +17,7 @@ import {
   CHILD_RESOURCE,
   MATERIAL_TYPE
 } from '../../../constants/helpers';
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import { uniq, map, startCase } from 'lodash';
 import { ExpandMore } from '@material-ui/icons';
@@ -131,7 +131,7 @@ const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, rende
         accessor: 'index',
         Header: 'Index',
         width: 70,
-        sticky: isMobile ? 'none' : 'left',
+        sticky: 'left',
         Cell: ({ row }) => <h5 className="text-truncate">{row.original.index}</h5>,
         Footer: () => {
           return <>Total</>;
@@ -141,7 +141,7 @@ const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, rende
         accessor: 'type',
         Header: 'Type',
         disableFilters: true,
-        sticky: isMobile ? 'none' : 'left',
+        sticky: isMobile || isTablet ? 'none' : 'left',
         width: 100,
         Cell: ({ row }) => (row.original['type'] ? <h5>{`${startCase(row.original?.type)} `}</h5> : <NoDataCell />)
       },
@@ -150,7 +150,7 @@ const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, rende
         Header: ' Details',
         minWidth: 200,
         width: 200,
-        sticky: isMobile ? 'none' : 'left',
+        sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row, rows }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <h5 className="text-truncate">{row.original?.detail}</h5>

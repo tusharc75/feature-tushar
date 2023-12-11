@@ -10,7 +10,7 @@ import { CHILD_RESOURCE, MATERIAL_TYPE, WORK_ORDER_STATUS, productionOrder, side
 import { orderBy, startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import PreviewDownload from 'src/components/PreviewDownload';
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
@@ -42,7 +42,7 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
         accessor: 'index',
         Header: 'Index',
         width: 70,
-        sticky: isMobile ? 'none' : 'left',
+        sticky:  'left',
         Cell: ({ row }) => <h5 className="text-truncate">{row.original.index}</h5>,
         Footer: () => {
           return <>Total</>;
@@ -52,7 +52,7 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
         accessor: 'type',
         Header: 'Type',
         disableFilters: true,
-        sticky: isMobile ? 'none' : 'left',
+        sticky: isMobile || isTablet ? 'none' : 'left',
         width: 100,
         Cell: ({ row }) => (row.original['type'] ? <h5>{`${startCase(row.original?.type)} `}</h5> : <NoDataCell />)
       },
@@ -61,6 +61,7 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
         Header: ' Details',
         minWidth: 200,
         width: 200,
+        sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row, rows }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <h5 className="text-truncate">{row.original?.detail}</h5>
