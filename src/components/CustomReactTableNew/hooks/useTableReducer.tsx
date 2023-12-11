@@ -120,6 +120,7 @@ export type TInitialState = {
   currentEditingCellPosition: { rowId: string; columnName: string } | null;
   error: boolean;
   showFilteredRecordsOnly: boolean;
+  colState: any[];
 };
 
 export type TActios =
