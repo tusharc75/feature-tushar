@@ -11,6 +11,7 @@ import { Image } from '@material-ui/icons';
 import CopyToClipboard from '../../Helpers/CopyToClipboard';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import SignatureCell from 'src/components/Helpers/SignatureCell';
+import DropdownCell from '../Cells/DropdownCell';
 
 const permissionForLinks = sidebarResourceObjectFromValues();
 
@@ -539,48 +540,15 @@ export default function useColumns() {
         })
       }
       else if (field?.lookup) {
-        let joinedFieldName = field?.fieldName.indexOf(' ') > 0 ? camelCase(field?.fieldName) : field?.fieldName;
-        const more = `rest${joinedFieldName}`
-        let pathName = routes[`${camelCase(field?.lookupResource)}Detail`]?.path
-          ? routes[`${camelCase(field?.lookupResource)}Detail`]?.path
-          : `${camelCase(field?.lookupResource)}/detail`;
         column.push({
           ...commonFieldData,
           cell: ({ row }) =>
-            permissions[permissionForLinks[field?.lookupResource]]?.isRead ? (
-              <span>
-                {row?.original?.[field?.fieldName] ? (
-                  <>
-                    <Link
-                      className="link text-truncate"
-                      title={row?.original?.[field?.fieldName]}
-                      to={`${pathName}/${row?.original?.[`${field?.fieldName}Id`]}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {row?.original?.[field?.fieldName]}
-                    </Link>
-                    {row?.original?.[more]?.length > 0 && (
-                      <HtmlTooltip title={getTitle(row?.original?.[more])}>
-                        <span className="createdAtTime badge-date">{`+${row?.original?.[more].length} more..`}</span>
-                      </HtmlTooltip>
-                    )}
-                  </>
-                ) : (
-                  <NoDataCell />
-                )}
-              </span>
-            ) : (
-              <div>
-                {row?.original?.[field?.fieldName] ? (
-                  <h5 className="text-truncate" title={row?.original?.[field?.fieldName]}>
-                    {row?.original?.[field?.fieldName]}
-                  </h5>
-                ) : (
-                  <NoDataCell />
-                )}
-              </div>
-            )
+            <DropdownCell
+              permissions={permissions}
+              permissionForLinks={permissionForLinks}
+              field={field}
+              original={row?.original}
+            />
         })
       }
       else if (['mobileNumber', 'phone', 'email']?.includes(field?.type)) {
