@@ -69,7 +69,8 @@ const CustomReactTable = ({
     search,
     filters: customFilters,
     sorting,
-    error
+    error,
+    showFilteredRecordsOnly
   }: TInitialState = state;
   const {
     state: { user }
@@ -185,7 +186,16 @@ const CustomReactTable = ({
         return { id: d.colId, desc: d.sort === 'asc' ? false : true };
       });
 
-      if (JSON.stringify(sortBy) === JSON.stringify(tempArray)) return;
+      if (JSON.stringify(sortBy) === JSON.stringify(tempArray)) {
+        sortBy?.forEach((v) => {
+          dispatch({
+            type: 'sort',
+            sorting: [{ colId: v.id, sort: 'desc' }],
+            loading: isClientSideGrid ? false : true
+          });
+        });
+        return;
+      }
 
       sortBy?.forEach((v) => {
         // reset sorted Column
@@ -370,13 +380,23 @@ const CustomReactTable = ({
   useEffect(() => {
     const selectedRows = table.getSelectedRowModel().flatRows;
     const selectedRecordIds = selectedRecords.map((d) => d._id);
+
+    if (selectedRecords.length === 0) {
+      table.resetRowSelection();
+    }
+
     if (selectedRecords.length !== selectedRows.length) {
       for (const row of rows) {
-        if (!selectedRecordIds.includes(row.original._id)) continue;
+        if (!selectedRecordIds.includes(row.original._id)) {
+          if (row.getIsSelected()) {
+            row.toggleSelected(false);
+          }
+          continue;
+        }
         row.toggleSelected(true);
       }
     }
-  }, [selectedRecords]);
+  }, [selectedRecords, rows.length]);
 
   return (
     <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
