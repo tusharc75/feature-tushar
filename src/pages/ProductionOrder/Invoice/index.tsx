@@ -4,12 +4,11 @@ import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { CHILD_RESOURCE, MATERIAL_TYPE, WORK_ORDER_STATUS, productionOrder, sidebarResource } from '../../../constants/helpers';
 import { orderBy, startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { generateCustomTableColumns } from 'src/constants/columns';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { isMobile } from 'react-device-detect';
 import PreviewDownload from 'src/components/PreviewDownload';
@@ -24,6 +23,7 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
   const { page, limit, filters, sorting } = state;
 
   const [columns, setColumns] = useState(null);
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchFields();
@@ -36,7 +36,7 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
     data?.forEach((e) => {
       e.isColumnEditable = false;
     });
-    const newColumns = generateCustomTableColumns(data, productionOrderData?.currency || 'USD', renderedFrom);
+    const newColumns = generateColumns(renderedFrom, data, null, false, productionOrderData?.currency || 'USD');
     let coloum: any = [
       {
         accessor: 'index',
@@ -115,13 +115,15 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
       {
         accessor: 'status',
         Header: 'Status',
-        Cell: ({ row }) => (row.original['status'] ? <p> {row.original.status}</p> : <NoDataCell />)
+        Cell: ({ row }) => <div>{row.original['status'] ? <p> {row.original.status}</p> : <NoDataCell />}</div>
       },
       {
         accessor: 'workOrderStatus',
         Header: 'Result',
         width: 200,
-        Cell: ({ row }) => (row?.original['workOrderStatus'] ? <h5> {row?.original?.workOrderStatus}</h5> : <NoDataCell />)
+        Cell: ({ row }) => <div>
+          {row?.original['workOrderStatus'] ? <h5> {row?.original?.workOrderStatus}</h5> : <NoDataCell />}
+        </div>
       },
       {
         accessor: 'assignedUsers',
@@ -129,7 +131,7 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
         disableFilters: true,
         width: 200,
         Cell: ({ row }) =>
-          row?.original['assignedUsers'] && row?.original['assignedUsers']?.length ? (
+          <div>{row?.original['assignedUsers'] && row?.original['assignedUsers']?.length ? (
             row?.original['assignedUsers']?.map((e, i) => {
               return i === row?.original['assignedUsers'].length - 1 ? (
                 <a className="link text-truncate" target="_blank" href={`${routes.userDetail.path}/${e.optionValue}`} rel="noreferrer">
@@ -143,7 +145,7 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
             })
           ) : (
             <NoDataCell />
-          )
+          )}</div>
       }
     ];
     if (permissions?.workStations?.isRead) {
@@ -153,7 +155,7 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
         disableFilters: true,
         width: 200,
         Cell: ({ row }) =>
-          row?.original['assignedWorkStations'] && row?.original['assignedWorkStations']?.length ? (
+          <div>{row?.original['assignedWorkStations'] && row?.original['assignedWorkStations']?.length ? (
             row?.original['assignedWorkStations']?.map((e, i) => {
               return i === row?.original['assignedWorkStations'].length - 1 ? (
                 <a className="link text-truncate" target="_blank" href={`${routes.workStationsDetail.path}/${e.optionValue}`} rel="noreferrer">
@@ -167,7 +169,7 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
             })
           ) : (
             <NoDataCell />
-          )
+          )}</div>
       });
     }
     coloum = [...coloum, ...newColumns];
