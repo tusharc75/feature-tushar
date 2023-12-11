@@ -212,9 +212,9 @@ const Report = () => {
     cancelTokenSource = axios.CancelToken.source();
     dispatch({ type: 'loading', loading: true });
 
-    let api = null;
+    let api = `/report${routes[resourceCamelCase].path}${filterQuery}`;;
     if (resourceCamelCase === 'quotes') {
-      api = `quote-builder/report${filterQuery}`;
+      api = `/report/quote-builder/${filterQuery}`;
     } else {
       api = `/report${routes[resourceCamelCase].path}${filterQuery}`;
     }
