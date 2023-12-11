@@ -79,7 +79,7 @@ const CustomReactTable = ({
   const debouncedSearch = useDebounce(search, 500);
 
   const isMobileView = useMediaQuery('(max-width:768px)');
-  const newColumns = useCreateColumns({ columns, expander, fetchChildAttachment, hideSelection, dispatch, state, isClientSideGrid });
+  const newColumns = useCreateColumns({ columns, expander, fetchChildAttachment, hideSelection, hideAction, dispatch, state, isClientSideGrid });
 
   const columnFilters = React.useMemo(() => {
     let tempArray = Object.keys(customFilters).map((key, i) => {
