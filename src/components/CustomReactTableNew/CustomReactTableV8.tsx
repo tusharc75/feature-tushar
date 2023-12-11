@@ -152,14 +152,23 @@ const CustomReactTable = ({
         if (gridMetaData && gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide?.length) {
           for (const n of [...gridMetaData[renderedFrom]?.hide]) {
             if (stickyColumnNames.stickyColumns.includes(n) || !n) continue;
+            if (n === 'qtyDisplay') hColumns.push('qty');
+            if (n === 'qty') hColumns.push('qtyDisplay');
             hColumns.push(n);
           }
           setHiddenColumns(hColumns);
         }
         if (gridMetaData && gridMetaData[renderedFrom]?.order && gridMetaData[renderedFrom]?.order?.length) {
-          const colOrder = [...stickyColumnNames.left, ...gridMetaData[renderedFrom]?.order, ...stickyColumnNames.right];
-          setSortedColumns(returnSortedColumns(newColumns, colOrder));
+          const defaultCols = [];
+          for (const c of [...gridMetaData[renderedFrom]?.order]) {
+            if (c === 'qtyDisplay') {
+              defaultCols.push('qty');
+            }
+            defaultCols.push(c);
+          }
+          const colOrder = [...stickyColumnNames.left, ...defaultCols, ...stickyColumnNames.right];
           setColumnOrder(colOrder);
+          setSortedColumns(returnSortedColumns(newColumns, colOrder));
         } else {
           setSortedColumns(newColumns);
           setColumnOrder(newColumns.map((m) => m?.id ?? m?.accessor));
