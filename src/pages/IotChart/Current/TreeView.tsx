@@ -1,13 +1,18 @@
 import { useEffect, useState } from 'react';
-import { Box, Grid, IconButton, Typography } from '@material-ui/core';
+import { Box, Dialog, Grid, IconButton, Typography } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
+import HistoryIcon from '@material-ui/icons/History';
 import { withStyles } from '@material-ui/core/styles';
 import MuiAccordion from '@material-ui/core/Accordion';
 import MuiAccordionSummary from '@material-ui/core/AccordionSummary';
 import MuiAccordionDetails from '@material-ui/core/AccordionDetails';
 import moment from 'moment';
 import { dateTimeFormat } from 'src/constants/helpers';
+import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
+import Chart from '../Helper/Chart';
+import FilterModel from '../Helper/FilterModel';
 
 const Accordion = withStyles({
   root: {
@@ -57,65 +62,139 @@ const AccordionDetails = withStyles((theme) => ({
   }
 }))(MuiAccordionDetails);
 
-export default function TreeView({ expandedAccordition, setExpandedAccordition, category, currentData }) {
+export default function TreeView({ expandedAccordition, setExpandedAccordition, category, currentData, assetId }) {
+  const [dateFilters, setDateFilters] = useState({
+    from: new Date(moment().subtract(8, 'days').format('MM/DD/YYYY')),
+    to: new Date(),
+    intervals: '1hour'
+  });
+  const [dataPoint, setDataPoint] = useState(null);
 
-  return (<Accordion
-    expanded={expandedAccordition[category?._id]}
-    className={`omsAccordian w-full`}
-    onChange={() => {
-      setExpandedAccordition((prev) => (
-        {
-          ...prev,
-          [category?._id]: expandedAccordition[category?._id] ? false : true
-        }
-      ));
-    }}>
-    <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
-      <Box display="flex">
-        <Box>
-          <IconButton size="small"> {expandedAccordition[category?._id] ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
-        </Box>
-        <Box padding="5px">
-          <Typography variant="subtitle2" style={{ fontSize: '14.2056px', fontWeight: 600 }}>
-            {category?.iotDataPointsCategoryName}
-          </Typography>
-        </Box>
-      </Box>
-    </AccordionSummary>
-    <AccordionDetails>
-      {expandedAccordition[category?._id] &&
-        <>
-          <Grid container spacing={1}>
-            {currentData?.filter((d) => d?.category?.optionValue === category?._id)?.map((data) => {
-              return (
-                <Grid item xs={12} sm={6} lg={4} md={4}>
-                  <Box border="1px solid var(--common-border-color)" className="p-[10px] rounded-md min-h-full">
-                    <p className="mb-2 flex flex-wrap justify-between text-[14px] text-[var(--primary-text)]">
-                      <strong className=" line-clamp-1">{data?.fieldLabel} : </strong>
-                      <span className=" font-medium">
-                        {data?.fieldValue || 0}
-                        {data?.unit && `(${data?.unit})`}
-                      </span>
-                    </p>
-                    <span className="text-gray-500 dark:text-gray-300 text-[12px]">{moment(data?.time).format(dateTimeFormat)}</span>
+  const handleClose = () => {
+    setDateFilters({
+      from: new Date(moment().subtract(8, 'days').format('MM/DD/YYYY')),
+      to: new Date(),
+      intervals: '1hour'
+    });
+    setDataPoint(null);
+  };
+  return (
+    <>
+      <Accordion
+        expanded={expandedAccordition[category?._id]}
+        className={`omsAccordian w-full`}
+        onChange={() => {
+          setExpandedAccordition((prev) => ({
+            ...prev,
+            [category?._id]: expandedAccordition[category?._id] ? false : true
+          }));
+        }}
+      >
+        <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
+          <Box display="flex">
+            <Box>
+              <IconButton size="small"> {expandedAccordition[category?._id] ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
+            </Box>
+            <Box padding="5px">
+              <Typography variant="subtitle2" style={{ fontSize: '14.2056px', fontWeight: 600 }}>
+                {category?.iotDataPointsCategoryName}
+              </Typography>
+            </Box>
+          </Box>
+        </AccordionSummary>
+        <AccordionDetails>
+          {expandedAccordition[category?._id] && (
+            <>
+              <Grid container spacing={1}>
+                {currentData?.filter((d) => d?.category?.optionValue === category?._id)?.length ? (
+                  <Box className="p-[10px] " width={'100%'} textAlign="end">
+                    {' '}
+                    Last Updated -{' '}
+                    <span className="text-gray-500 dark:text-gray-300 text-[12px]">
+                      {moment(currentData?.filter((d) => d?.category?.optionValue === category?._id)[0]?.time).format(dateTimeFormat)}
+                    </span>
                   </Box>
+                ) : null}
+                {currentData
+                  ?.filter((d) => d?.category?.optionValue === category?._id)
+                  ?.map((data) => {
+                    return (
+                      <Grid item xs={12} sm={6} lg={4} md={4}>
+                        <Box
+                          border="1px solid var(--common-border-color)"
+                          className="p-[10px] rounded-md min-h-full"
+                          display="flex"
+                          justifyContent="space-between"
+                          alignItems="center"
+                        >
+                          <p style={{ width: '100%' }} className="flex flex-wrap justify-between text-[14px] text-[var(--primary-text)]">
+                            <strong className=" line-clamp-1">{data?.fieldLabel} : </strong>
+                            <span className=" font-medium">
+                              {data?.fieldValue || 0}
+                              {data?.unit && `(${data?.unit})`}
+                            </span>
+                          </p>
+                          <Box ml={1}>
+                            <IconButton
+                              size="small"
+                              onClick={() => {
+                                setDataPoint(data);
+                              }}
+                            >
+                              <HistoryIcon fontSize="small" />
+                            </IconButton>
+                          </Box>
+                          {/* <span className="text-gray-500 dark:text-gray-300 text-[12px]">{moment(data?.time).format(dateTimeFormat)}</span> */}
+                        </Box>
+                      </Grid>
+                    );
+                  })}
+              </Grid>
+              <div className="grid gap-3">
+                {category?.child?.map((child: any) => (
+                  <TreeView
+                    expandedAccordition={expandedAccordition}
+                    setExpandedAccordition={setExpandedAccordition}
+                    category={child}
+                    currentData={currentData}
+                    assetId={assetId}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+        </AccordionDetails>
+      </Accordion>
+      {dataPoint && (
+        <Dialog
+          fullWidth
+          maxWidth="md"
+          open
+          onClose={handleClose}
+          fullScreen
+          aria-labelledby="assign-roles-dialog"
+        >
+          <CustomDialogHeader
+            title={`${dataPoint?.fieldLabel}`}
+            showRequiredLabel={false}
+            onClose={handleClose}
+          />
+          <CustomDialogContent>
+            <Box mt={2}>
+              <Grid direction="row" justifyContent="flex-end" alignItems="center" container spacing={2}>
+                <Grid>
+                  <FilterModel dateFilters={dateFilters} setDateFilters={setDateFilters} />
                 </Grid>
-              );
-            })}
-          </Grid>
-          <div className="grid gap-3">
-            {category?.child?.map((child: any) => (
-              <TreeView
-                expandedAccordition={expandedAccordition}
-                setExpandedAccordition={setExpandedAccordition}
-                category={child}
-                currentData={currentData}
-              />
-            ))}
-          </div>
-        </>
-      }
-    </AccordionDetails>
-  </Accordion>
+              </Grid>
+              <Box mt={2}>
+                <div className="container rounded-[0_!important] w-100 h-[591px] px-4 [overflow:hidden_!important] py-1">
+                  <Chart dateFilters={dateFilters} assetId={assetId} dataPoints={[dataPoint]} />
+                </div>
+              </Box>
+            </Box>
+          </CustomDialogContent>
+        </Dialog>
+      )}
+    </>
   );
 }
