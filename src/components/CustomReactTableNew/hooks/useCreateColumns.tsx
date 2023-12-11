@@ -125,34 +125,33 @@ export const useCreateColumns = ({ columns, expander, fetchChildAttachment, hide
       updatedColumn.push(selectionColumn);
     }
 
-    columns?.filter((e) => e.accessor !== 'action')?.forEach((ele) => {
-      const e = { ...ele };
-      e.id = e.id ?? e.accessor;
-      e.cell = e.cell ?? e.Cell;
-      e.header = e.header ?? e.Header;
-      if (e.disableFilters || e.id === 'index') {
-        e.accessorKey = undefined;
-      } else {
+    columns
+      ?.filter((e) => e.accessor !== 'action')
+      ?.forEach((ele) => {
+        const e = { ...ele };
+        e.id = e.id ?? e.accessor;
+        e.cell = e.cell ?? e.Cell;
+        e.header = e.header ?? e.Header;
         e.accessorKey = e.accessor ?? e.id;
-      }
-      e.size = e.size ?? e.width;
-      switch (true) {
-        case e.accessor === 'index':
-          e.disableFilters = e.disableFilters ?? true;
-          e.disableSortBy = e.disableSortBy ?? true;
-          e.enableResizing = false;
-          break;
-        case e.disableFilters !== true && isClientSideGrid:
-          e.filterFn = 'fuzzy';
-          break;
-        case e.disableSortBy !== true && isClientSideGrid:
-          e.sortingFn = fuzzySort;
-          break;
-      }
-      updatedColumn.push(e);
-    })
 
-    const actionColumn = columns?.find((e) => e.accessor === 'action')
+        e.size = e.size ?? e.width;
+        switch (true) {
+          case e.accessor === 'index':
+            e.disableFilters = e.disableFilters ?? true;
+            e.disableSortBy = e.disableSortBy ?? true;
+            e.enableResizing = false;
+            break;
+          case e.disableFilters !== true && isClientSideGrid:
+            e.filterFn = 'fuzzy';
+            break;
+          case e.disableSortBy !== true && isClientSideGrid:
+            e.sortingFn = fuzzySort;
+            break;
+        }
+        updatedColumn.push(e);
+      });
+
+    const actionColumn = columns?.find((e) => e.accessor === 'action');
     if (!hideAction && actionColumn) {
       updatedColumn.push({
         ...actionColumn,
@@ -164,7 +163,7 @@ export const useCreateColumns = ({ columns, expander, fetchChildAttachment, hide
         enableResizing: false,
         id: 'action',
         cell: actionColumn?.Cell,
-        header: actionColumn?.Header,
+        header: actionColumn?.Header
       });
     }
 
