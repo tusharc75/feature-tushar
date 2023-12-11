@@ -206,7 +206,7 @@ export function Filter({ column, table }: { column: Column<any, unknown>; table:
           setIsOpen(true);
         }}
         size="small"
-        className={``}
+        className={`${columnFilterValue ? 'activeFilter' : ''}`}
       >
         <CgSearch />
       </IconButton>
@@ -405,7 +405,9 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({ header, table,
                 customFilters={customFilters}
               />
             ) : (
-              <Filter column={header.column} table={table} />
+              <>
+                <Filter column={header.column} table={table} />
+              </>
             )}
           </>
         ) : null}

@@ -3896,6 +3896,19 @@ body {
     }
   }
   .search-container {
+    .activeFilter {
+      position: relative;
+      &::before {
+        content: '';
+        position: absolute;
+        background-color: #df9000;
+        width: 5px;
+        height: 5px;
+        top: 0;
+        right: 0px;
+        border-radius: 100vmax;
+      }
+    }
     svg {
       font-size: 18px;
     }

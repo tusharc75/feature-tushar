@@ -78,7 +78,7 @@ const CustomReactTable = ({
   const debouncedSearch = useDebounce(search, 500);
 
   const isMobileView = useMediaQuery('(max-width:768px)');
-  const newColumns = useCreateColumns({ columns, expander, fetchChildAttachment, hideSelection, dispatch, state });
+  const newColumns = useCreateColumns({ columns, expander, fetchChildAttachment, hideSelection, dispatch, state, isClientSideGrid });
 
   const columnFilters = React.useMemo(() => {
     let tempArray = Object.keys(customFilters).map((key, i) => {
@@ -220,7 +220,6 @@ const CustomReactTable = ({
   const setSorting = useCallback(
     (getSortBy) => {
       const sortBy: SortingState = getSortBy();
-      if (isClientSideGrid) return;
 
       let tempArray = sorting.map((d) => {
         return { id: d.colId, desc: d.sort === 'asc' ? false : true };
@@ -233,18 +232,20 @@ const CustomReactTable = ({
         if (tempArray.find((t) => t.id === v.id && t.desc)) {
           dispatch({
             type: 'sort',
-            sorting: []
+            sorting: [],
+            loading: isClientSideGrid ? false : true
           });
           return;
         }
         // set new sorting Column
         dispatch({
           type: 'sort',
-          sorting: [{ colId: v.id, sort: v.desc ? 'desc' : 'asc' }]
+          sorting: [{ colId: v.id, sort: v.desc ? 'desc' : 'asc' }],
+          loading: isClientSideGrid ? false : true
         });
       });
     },
-    [sorting]
+    [sorting, isClientSideGrid]
   );
 
   const getSorting = useMemo(() => {
@@ -254,12 +255,17 @@ const CustomReactTable = ({
     return tempArray;
   }, [sorting]);
 
-  const setColumnFilters = (filters) => {
+  const setColumnFilters = (filtersfn) => {
     const MINIMUM_SEARCH_DELAY = 600;
 
+    const filters = filtersfn();
+
     const debouncedFilterDispatch = debounce((updatedCustomFilters) => {
-      dispatch({ type: 'filter', filters: updatedCustomFilters });
+      dispatch({ type: 'filter', filters: updatedCustomFilters, loading: isClientSideGrid ? false : true });
     }, MINIMUM_SEARCH_DELAY);
+    const instantFilterDispatch = (updatedCustomFilters) => {
+      dispatch({ type: 'filter', filters: updatedCustomFilters, loading: isClientSideGrid ? false : true });
+    };
 
     setTimeout(() => {
       let tempArray = Object.keys(customFilters).map((key, i) => {
@@ -278,7 +284,11 @@ const CustomReactTable = ({
             }
           }
         });
-        if (!isClientSideGrid) debouncedFilterDispatch(tempResult);
+        if (isClientSideGrid) {
+          instantFilterDispatch(tempResult);
+        } else {
+          debouncedFilterDispatch(tempResult);
+        }
       }
     }, MINIMUM_SEARCH_DELAY);
   };
@@ -346,6 +356,7 @@ const CustomReactTable = ({
     enableRowSelection: !hideSelection,
     enablePinning: true,
     autoResetPageIndex,
+    enableFilters: true,
 
     initialState: {
       columnVisibility: getVisibleColumns()
@@ -379,12 +390,9 @@ const CustomReactTable = ({
   });
 
   useEffect(() => {
-    if (isClientSideGrid) {
-      table.setPageSize(data.length);
-    } else {
-      table.setPageSize(limit);
-      table.setPageIndex(page);
-    }
+    table.setPageSize(limit);
+    if (!isClientSideGrid) return;
+    table.setPageIndex(page);
   }, [isClientSideGrid, limit, page, table, data]);
 
   const { rows } = table.getRowModel();
@@ -647,17 +655,19 @@ const CustomReactTable = ({
             />
           ) : null}
 
-          {!isClientSideGrid && (
+          {(!isClientSideGrid || data.length > 25) && (
             <Pagination
-              count={rowCount}
+              count={rowCount ?? data.length}
               page={page}
               onPageChange={(event, newPage) => {
-                table.setPageIndex(newPage);
                 dispatch({ type: 'pageChange', page: newPage });
+                if (!isClientSideGrid) return;
+                table.setPageIndex(newPage);
               }}
               rowsPerPage={limit}
               onRowsPerPageChange={(event, value) => {
-                dispatch({ type: 'pageSizeChange', limit: value });
+                dispatch({ type: 'pageSizeChange', limit: value, loading: isClientSideGrid ? false : true });
+                if (!isClientSideGrid) return;
                 table.setPageSize(value);
               }}
               rowsPerPageOptions={gridPageSizes}

@@ -209,8 +209,9 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
     } = await axiosInstance().get(`${productionOrder.api}/${productionOrderData._id}/work-order/service${queryString}`);
 
     let rows = data?.material.filter((e) => e.type === MATERIAL_TYPE.product && e?.parentId === null);
+    const totalPrev = page * limit;
     rows.forEach((parent, i) => {
-      parent.index = i + 1;
+      parent.index = i + 1 + totalPrev;
       parent.detail = parent.detail
         ? parent.detail
         : parent.type === MATERIAL_TYPE.service
@@ -272,6 +273,7 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
             referenceId={productionOrderData._id}
             columns={columns}
             isSendEmail={true}
+            isAsyncDownload={true}
           />
         </Box>
       </Box>

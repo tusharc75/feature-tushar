@@ -64,8 +64,10 @@ const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, rende
       } = await axiosInstance().get(
         `${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.productionOrder}&referenceId=${productionOrderData._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`
       );
+
+      const totalPrev = page * limit;
       rows.forEach((parent, i) => {
-        parent.index = i + 1;
+        parent.index = i + 1 + totalPrev;
         parent.detail = parent.detail ? parent.detail : parent.productDetail?.productName;
         parent.description = parent.description ? parent.description : parent?.productDetail?.productDescription;
         parent.qty = parent.qty;
