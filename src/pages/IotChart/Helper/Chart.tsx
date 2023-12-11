@@ -8,6 +8,7 @@ import ReactApexChart from 'react-apexcharts';
 import { ApexOptions } from 'apexcharts';
 import FilterAlertModel from './FilterAlertModel';
 import { useAppTheme } from 'src/constants/AppConfig';
+import moment from 'moment';
 
 const Chart = ({ dateFilters, assetId, dataPoints }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -60,6 +61,12 @@ const Chart = ({ dateFilters, assetId, dataPoints }) => {
     // },
     tooltip: {
       shared: true,
+      x: {
+        formatter: function (value) {
+          const formattedDateTime = moment(value).format('D MMM YYYY HH:mm');
+          return formattedDateTime;
+        }
+      },
       y: {
         formatter: function (val, { seriesIndex, w }) {
           const dataPoint = dataPoints?.find((d) => d?.fieldLabel === w?.globals?.seriesNames[seriesIndex]);

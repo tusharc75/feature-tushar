@@ -2206,14 +2206,6 @@ export const INTERVALS = [
   {
     optionValue: '1day',
     optionLabel: '1 Day'
-  },
-  {
-    optionValue: '7days',
-    optionLabel: '7 Days'
-  },
-  {
-    optionValue: '30days',
-    optionLabel: '30 Days'
   }
 ];
 
