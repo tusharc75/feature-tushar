@@ -5,7 +5,7 @@ import { IndeterminateCheckbox, TColType } from '../TableComponents/TableHelperC
 import { childrenProperty, insertChildRowIntoTable } from '../utils';
 import { fuzzySort } from '../ReactTableHelpers';
 
-export const useCreateColumns = ({ columns, expander, fetchChildAttachment, hideSelection, dispatch, state, isClientSideGrid }) => {
+export const useCreateColumns = ({ columns, expander, fetchChildAttachment, hideSelection, hideAction, dispatch, state, isClientSideGrid }) => {
   const { dataRows: allRows } = state;
 
   const fetchChildAttachmentWrapper = async (row) => {
@@ -115,6 +115,7 @@ export const useCreateColumns = ({ columns, expander, fetchChildAttachment, hide
     }),
     []
   );
+
   const newColumns: TColType[] = useMemo(() => {
     const updatedColumn = [];
     if (expander) {
@@ -123,46 +124,50 @@ export const useCreateColumns = ({ columns, expander, fetchChildAttachment, hide
     if (!hideSelection) {
       updatedColumn.push(selectionColumn);
     }
-    for (let i = 0; i < columns.length; i++) {
-      const e = { ...columns[i] };
 
-      e.id = e.id ?? e.accessor;
-      e.cell = e.cell ?? e.Cell;
-      e.header = e.header ?? e.Header;
-
-      if (e.disableFilters || e.id === 'index') {
-        e.accessorKey = undefined;
-      } else {
+    columns
+      ?.filter((e) => e.accessor !== 'action')
+      ?.forEach((ele) => {
+        const e = { ...ele };
+        e.id = e.id ?? e.accessor;
+        e.cell = e.cell ?? e.Cell;
+        e.header = e.header ?? e.Header;
         e.accessorKey = e.accessor ?? e.id;
-      }
+        e.maxSize = e.maxSize ?? e.maxWidth;
 
-      e.size = e.size ?? e.width;
-      switch (true) {
-        case e.accessor === 'action':
-          e.disableFilters = true;
-          e.disableSortBy = true;
-          e.canDrag = false;
-          e.maxSize = e.maxWidth ?? 120;
-          e.size = e.width ?? 120;
-          e.enableResizing = false;
-          e.id = 'action';
-          e.cell = e.Cell;
-          e.header = e.Header;
-          break;
-        case e.accessor === 'index':
-          e.disableFilters = e.disableFilters ?? true;
-          e.disableSortBy = e.disableSortBy ?? true;
-          e.enableResizing = false;
-          break;
-        case e.disableFilters !== true && isClientSideGrid:
-          e.filterFn = 'fuzzy';
-          break;
-        case e.disableSortBy !== true && isClientSideGrid:
-          e.sortingFn = fuzzySort;
-          break;
-      }
-      updatedColumn.push(e);
+        e.size = e.size ?? e.width;
+        switch (true) {
+          case e.accessor === 'index':
+            e.disableFilters = e.disableFilters ?? true;
+            e.disableSortBy = e.disableSortBy ?? true;
+            e.enableResizing = false;
+            break;
+          case e.disableFilters !== true && isClientSideGrid:
+            e.filterFn = 'fuzzy';
+            break;
+          case e.disableSortBy !== true && isClientSideGrid:
+            e.sortingFn = fuzzySort;
+            break;
+        }
+        updatedColumn.push(e);
+      });
+
+    const actionColumn = columns?.find((e) => e.accessor === 'action');
+    if (!hideAction && actionColumn) {
+      updatedColumn.push({
+        ...actionColumn,
+        disableFilters: true,
+        disableSortBy: true,
+        canDrag: false,
+        maxSize: actionColumn?.maxWidth ?? 120,
+        size: actionColumn?.width ?? 120,
+        enableResizing: false,
+        id: 'action',
+        cell: actionColumn?.Cell,
+        header: actionColumn?.Header
+      });
     }
+
     return updatedColumn;
   }, [columns, expander, expanderColumn, selectionColumn, hideSelection]);
 

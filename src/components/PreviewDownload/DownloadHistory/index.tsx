@@ -5,6 +5,11 @@ import DownloadIcon from '@material-ui/icons/GetApp';
 import { Box, Grid, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@material-ui/core';
 import { FILE_PROCESS_STATUS, dateTimeFormat } from 'src/constants/helpers';
 import moment from 'moment';
+import SyncIcon from '@material-ui/icons/Sync';
+import PreviewIcon from '@material-ui/icons/Visibility';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+
+var apiCallInterval: any = null;
 
 const DownloadHistory = ({ referenceId, resource, loadingType }) => {
 
@@ -21,16 +26,25 @@ const DownloadHistory = ({ referenceId, resource, loadingType }) => {
         axiosInstance().get(`/pdf/async-download/${referenceId}/history?resource=${resource}`)
             .then(({ data: { data } }) => {
                 setHistoryData(data);
+                if (apiCallInterval) {
+                    clearInterval(apiCallInterval);
+                }
+                if (data?.length && data?.find((e) => e.status === FILE_PROCESS_STATUS.processing)) {
+                    apiCallInterval = setInterval(async () => {
+                        await fetchData();
+                    }, 30000);
+                }
             })
             .catch((err) => {
                 toastConfig.setToastConfig(err);
             });
     };
 
-    const downloadFile = (data) => {
+    const downloadFile = (data, type) => {
+        const fileName = data?.file;
         setIsDownloading({ loading: true, id: data._id });
         axiosInstance()
-            .get(`user/download?fileName=${data?.file}`, {
+            .get(`user/download?fileName=${fileName}`, {
                 responseType: 'blob',
                 onDownloadProgress: (progressEvent) => {
                     let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
@@ -47,11 +61,25 @@ const DownloadHistory = ({ referenceId, resource, loadingType }) => {
                 }
             })
             .then(({ data }) => {
-                const file = new Blob([data], { type: 'application/pdf' });
-                const fileURL = URL.createObjectURL(file);
-                const pdfWindow = window.open();
-                pdfWindow.location.href = fileURL;
-                toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
+                if (type === 'Preview') {
+                    const blobData = new Blob([data], { type: 'application/pdf' });
+                    const fileURL = URL.createObjectURL(blobData);
+                    const link = document.createElement('a');
+                    link.href = fileURL;
+                    link.target = '_blank';
+                    link.style.display = 'none';
+                    link.click();
+                    toastConfig.setToastConfig({ open: true, type: 'success', message: 'File Previewed Successfully.' });
+                }
+                else {
+                    const blobData = new Blob([data], { type: 'application/pdf' });
+                    const url = window.URL.createObjectURL(blobData);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.setAttribute('download', fileName);
+                    link.click();
+                    toastConfig.setToastConfig({ open: true, type: 'success', message: 'File Downloaded Successfully.' });
+                }
                 setIsDownloading({ loading: false, id: null });
             })
             .catch((err) => {
@@ -81,17 +109,31 @@ const DownloadHistory = ({ referenceId, resource, loadingType }) => {
                                     </TableCell>
                                     <TableCell>
                                         {row?.status === FILE_PROCESS_STATUS.completed ?
-                                            <IconButton
-                                                color="primary"
-                                                size="small"
-                                                onClick={(e) => {
-                                                    downloadFile(row);
-                                                }}
-                                            >
-                                                <DownloadIcon />
-                                            </IconButton>
-
-                                            : null}
+                                            <>
+                                                <HtmlTooltip title='Preview'>
+                                                    <IconButton
+                                                        color="primary"
+                                                        size="small"
+                                                        onClick={(e) => {
+                                                            downloadFile(row, 'Preview');
+                                                        }}
+                                                    >
+                                                        <PreviewIcon />
+                                                    </IconButton>
+                                                </HtmlTooltip>
+                                                <HtmlTooltip title='Download'>
+                                                    <IconButton
+                                                        color="primary"
+                                                        size="small"
+                                                        onClick={(e) => {
+                                                            downloadFile(row, 'Download');
+                                                        }}
+                                                    >
+                                                        <DownloadIcon />
+                                                    </IconButton>
+                                                </HtmlTooltip>
+                                            </>
+                                            : <SyncIcon className="rotate" />}
                                     </TableCell>
                                 </TableRow>
                             ))}

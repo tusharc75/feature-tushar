@@ -56,7 +56,10 @@ const CustomReactTable = ({
   showFilters = false,
   resource = null,
   onSaveEdit = null,
-  hideAction = false
+  hideAction = false,
+  selectedReportView = null,
+  setSelectedReportView = null,
+  reportSave = false
 }) => {
   const {
     currentEditingCellPosition,
@@ -69,7 +72,9 @@ const CustomReactTable = ({
     search,
     filters: customFilters,
     sorting,
-    error
+    error,
+    showFilteredRecordsOnly,
+    colState
   }: TInitialState = state;
   const {
     state: { user }
@@ -78,7 +83,7 @@ const CustomReactTable = ({
   const debouncedSearch = useDebounce(search, 500);
 
   const isMobileView = useMediaQuery('(max-width:768px)');
-  const newColumns = useCreateColumns({ columns, expander, fetchChildAttachment, hideSelection, dispatch, state, isClientSideGrid });
+  const newColumns = useCreateColumns({ columns, expander, fetchChildAttachment, hideSelection, hideAction, dispatch, state, isClientSideGrid });
 
   const columnFilters = React.useMemo(() => {
     let tempArray = Object.keys(customFilters).map((key, i) => {
@@ -121,26 +126,59 @@ const CustomReactTable = ({
     setIsFilterOpen(false);
   };
 
-  // For Column Order
+  // For Column Order and hidden columns
   useEffect(() => {
     try {
       const stickyColumnNames = getStickyColumnNames({ allColumn: newColumns, expander, hideSelection });
-      let gridMetaData = getDataFromLocalStorage();
-      if (gridMetaData && gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide?.length) {
-        setHiddenColumns(gridMetaData[renderedFrom]?.hide || []);
+
+      const hColumns = [];
+      for (const col of newColumns) {
+        if (col.isVisible === false) {
+          hColumns.push(col.id);
+        }
       }
-      if (gridMetaData && gridMetaData[renderedFrom]?.order && gridMetaData[renderedFrom]?.order?.length) {
-        const colOrder = [...stickyColumnNames.left, ...gridMetaData[renderedFrom]?.order, ...stickyColumnNames.right];
-        setColumnOrder(colOrder);
-        setSortedColumns(returnSortedColumns(newColumns, colOrder));
-      } else {
-        setSortedColumns(newColumns);
-        setColumnOrder(newColumns.map((m) => m?.id ?? m?.accessor));
+
+      if (reportSave) {
+        if (selectedReportView) {
+          let colOrder = [...(expander ? ['expander'] : []), ...(!hideSelection ? ['selection'] : [])];
+          setHiddenColumns(hColumns);
+          setColumnOrder(colOrder);
+          dispatch({ type: 'updateColumnState', colState: selectedReportView?.columnState });
+        } else {
+          setColumnOrder(newColumns.map((m) => m?.id ?? m?.accessor));
+        }
+      }
+      else {
+        let gridMetaData = getDataFromLocalStorage();
+        if (gridMetaData && gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide?.length) {
+          for (const n of [...gridMetaData[renderedFrom]?.hide]) {
+            if (stickyColumnNames.stickyColumns.includes(n) || !n) continue;
+            if (n === 'qtyDisplay') hColumns.push('qty');
+            if (n === 'qty') hColumns.push('qtyDisplay');
+            hColumns.push(n);
+          }
+          setHiddenColumns(hColumns);
+        }
+        if (gridMetaData && gridMetaData[renderedFrom]?.order && gridMetaData[renderedFrom]?.order?.length) {
+          const defaultCols = [];
+          for (const c of [...gridMetaData[renderedFrom]?.order]) {
+            if (c === 'qtyDisplay') {
+              defaultCols.push('qty');
+            }
+            defaultCols.push(c);
+          }
+          const colOrder = [...stickyColumnNames.left, ...defaultCols, ...stickyColumnNames.right];
+          setColumnOrder(colOrder);
+          setSortedColumns(returnSortedColumns(newColumns, colOrder));
+        } else {
+          setSortedColumns(newColumns);
+          setColumnOrder(newColumns.map((m) => m?.id ?? m?.accessor));
+        }
       }
     } catch (ex) {
       console.error(`Error while getting stored data from local storage - ${renderedFrom}`);
     }
-  }, [newColumns, expander, hideSelection, renderedFrom]);
+  }, [newColumns, expander, hideSelection, renderedFrom, selectedReportView]);
 
   function reorder(draggedColumnId: string, targetColumnId: string, columnOrder: string[]) {
     columnOrder.splice(columnOrder.indexOf(targetColumnId), 0, columnOrder.splice(columnOrder.indexOf(draggedColumnId), 1)[0] as string);
@@ -185,7 +223,16 @@ const CustomReactTable = ({
         return { id: d.colId, desc: d.sort === 'asc' ? false : true };
       });
 
-      if (JSON.stringify(sortBy) === JSON.stringify(tempArray)) return;
+      if (JSON.stringify(sortBy) === JSON.stringify(tempArray)) {
+        sortBy?.forEach((v) => {
+          dispatch({
+            type: 'sort',
+            sorting: [{ colId: v.id, sort: 'desc' }],
+            loading: isClientSideGrid ? false : true
+          });
+        });
+        return;
+      }
 
       sortBy?.forEach((v) => {
         // reset sorted Column
@@ -370,13 +417,23 @@ const CustomReactTable = ({
   useEffect(() => {
     const selectedRows = table.getSelectedRowModel().flatRows;
     const selectedRecordIds = selectedRecords.map((d) => d._id);
+
+    if (selectedRecords.length === 0) {
+      table.resetRowSelection();
+    }
+
     if (selectedRecords.length !== selectedRows.length) {
       for (const row of rows) {
-        if (!selectedRecordIds.includes(row.original._id)) continue;
+        if (!selectedRecordIds.includes(row.original._id)) {
+          if (row.getIsSelected()) {
+            row.toggleSelected(false);
+          }
+          continue;
+        }
         row.toggleSelected(true);
       }
     }
-  }, [selectedRecords]);
+  }, [selectedRecords, rows.length]);
 
   return (
     <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
@@ -409,6 +466,10 @@ const CustomReactTable = ({
                   // getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
                   defaultColumns={newColumns}
                   setColumnOrder={setColumnOrder}
+                  setSelectedReportView={setSelectedReportView}
+                  selectedReportView={selectedReportView}
+                  reportSave={reportSave}
+                  dispatchTable={dispatch}
                 />
               </>
             }

@@ -13,7 +13,6 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { prepareDataForGrid, gridLoadingTimeout, downloadExcel, primaryFields, sidebarResource, isObjectEmpty } from './../../constants/helpers';
-import Loader from '../../components/Loader';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import ReportFilters from './ReportFilters';
@@ -23,6 +22,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import Dialog from '@material-ui/core/Dialog';
 import CustomReactTable, { useTableReducer, useColumns, getStaticFields } from 'src/components/CustomReactTableNew';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 let cancelTokenSource = null;
 
@@ -56,7 +56,6 @@ const Report = () => {
   const [selectedReportView, setSelectedReportView] = React.useState(null);
   const [statusTimeFrame, setStatusTimeFrame] = React.useState<any>('custom');
 
-  // Grid Configs
   const { getColumnData } = useColumns();
   const [columns, setColumns] = React.useState(null);
   const { state, dispatch } = useTableReducer();
@@ -121,8 +120,8 @@ const Report = () => {
       if (currentColumn !== null) {
         columns = [...columns, currentColumn?.columnData];
       }
-    });   
-   
+    });
+
     columns = [...columns, ...getStaticFields()];
     if (resourceStartCase === 'Purchase Order') {
       columns.splice(1, 0, {
@@ -130,10 +129,10 @@ const Report = () => {
         Header: 'Purchase Order Amount',
         show: true,
         disabled: false,
-        Cell : ({row}) => (
+        Cell: ({ row }) => (
           <>
             <h5 className="text-truncate">
-                {row.original['poAmount'] ? row.original['poAmount'] : <NoDataCell/>}
+              {row.original['poAmount'] ? row.original['poAmount'] : <NoDataCell />}
             </h5>
           </>
         )
@@ -145,10 +144,10 @@ const Report = () => {
         Header: 'Total Consumables Cost',
         show: true,
         disabled: false,
-        Cell : ({row}) => (
+        Cell: ({ row }) => (
           <>
             <h5 className="text-truncate">
-                {row.original['totalConsumablesCost'] ? row.original['totalConsumablesCost'] : <NoDataCell/>}
+              {row.original['totalConsumablesCost'] ? row.original['totalConsumablesCost'] : <NoDataCell />}
             </h5>
           </>
         )
@@ -212,14 +211,12 @@ const Report = () => {
     }
     cancelTokenSource = axios.CancelToken.source();
     dispatch({ type: 'loading', loading: true });
-   
-    let api = null;
-    if (resourceCamelCase === 'workOrder') {
-      api = `${routes[resourceCamelCase].path}/${filterQuery}report=1`;
-    } else if (resourceCamelCase === 'quotes') {
-      api = `quote-builder/report${filterQuery}`;
+
+    let api = `/report${routes[resourceCamelCase].path}${filterQuery}`;;
+    if (resourceCamelCase === 'quotes') {
+      api = `/report/quote-builder/${filterQuery}`;
     } else {
-      api = `${routes[resourceCamelCase].path}/report${filterQuery}`;
+      api = `/report${routes[resourceCamelCase].path}${filterQuery}`;
     }
 
     axiosInstance()
@@ -247,7 +244,6 @@ const Report = () => {
       });
   };
 
-  // Create and return query for filters
   const getFilter = (isExport = false) => {
     let filterQuery = `page=${page}&`;
     let deepFilter = [];
@@ -341,21 +337,17 @@ const Report = () => {
       message: 'Please wait exporting data',
       type: 'info'
     });
-   
-    let newColumns = columns.map((col)=>col.accessor);
-
-    if(colState.length){
-        newColumns = colState?.filter((col)=>col.isVisible).map((col)=>col.accessor)
-    }   
+    let newColumns = columns.map((col) => col.accessor);
+    if (colState.length) {
+      newColumns = colState?.filter((col) => col.isVisible).map((col) => col.accessor)
+    }
     setExporting(true);
     let filterQuery = getFilter(true);
     let api = null;
-    if (resourceCamelCase === 'workOrder') {
-      api = `${routes[resourceCamelCase].path}/template/${filterQuery}export=true&report=1`;
-    } else if (resourceCamelCase === 'quotes') {
-      api = `quote-builder/report/export?exportColumn=${JSON.stringify(newColumns)}&export=1&${filterQuery}`;
+    if (resourceCamelCase === 'quotes') {
+      api = `/report/quote-builder/export?exportColumn=${JSON.stringify(newColumns)}&${filterQuery}`;
     } else {
-      api = `${routes[resourceCamelCase].path}/report/export?exportColumn=${JSON.stringify(newColumns)}&export=1&${filterQuery}`;
+      api = `/report${routes[resourceCamelCase].path}/export?exportColumn=${JSON.stringify(newColumns)}&${filterQuery}`;
     }
 
     axiosInstance()
@@ -499,7 +491,6 @@ const Report = () => {
                 </DialogContent>
               </Dialog>
             )}
-
             <div>
               {columns ? (
                 <CustomReactTable
@@ -514,10 +505,9 @@ const Report = () => {
                   setSelectedReportView={setSelectedReportView}
                   selectedReportView={selectedReportView}
                 />
-
-              ) : (
-                <Loader text={'Loading Data...'} style={{ marginTop: '15vh' }} />
-              )}
+              ) : <Box p={2} height={500}>
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
+              </Box>}
             </div>
           </>
         </CustomContainer>
