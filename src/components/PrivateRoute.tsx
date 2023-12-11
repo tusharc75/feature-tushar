@@ -59,7 +59,8 @@ const ProtectedRoute = ({ children, ...rest }) => {
         'resource-calendar',
         'serialized-asset-new',
         'import-export',
-        'custom-report'
+        'custom-report',
+        'user-download-request'
       ].indexOf(pathnames[0]) >= 0
     ) {
       setAccess(true);

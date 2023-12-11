@@ -244,6 +244,8 @@ import CreditMemo from './pages/CreditMemo';
 import CreditMemoDetail from './pages/CreditMemo/CreditMemoDetail';
 import GenerateInvoice from './pages/GenerateInvoice';
 import StandardReportView from './pages/Report/StandardReport'
+import UserDownloadReport from './pages/UserDownloadRequest';
+import UserDownloadRequest from './pages/UserDownloadRequest';
 
 var notificationInterval: any = null;
 
@@ -1073,6 +1075,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.subleaseInvoice.path}>
               <GenerateInvoice resourceRendered="sublease" />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.userDownloadRequest.path}>
+              <UserDownloadRequest />
             </PrivateRoute>
             <PrivateRoute exact path={routes.repairOrderInvoice.path}>
               <GenerateInvoice resourceRendered="repairOrder" />
