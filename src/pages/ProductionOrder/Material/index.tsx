@@ -224,8 +224,9 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
       data: { data, count }
     } = await axiosInstance().get(`${productionOrder.api}/material/${productionOrderData._id}${queryString}`);
     let rows = data?.material?.filter((e) => e.parentId === null);
+    const totalPrev = page * limit;
     rows.forEach((parent, i) => {
-      parent.index = i + 1;
+      parent.index = i + 1 + totalPrev;
       parent.detail = parent?.detail
         ? parent?.detail
         : parent.type === MATERIAL_TYPE.product
