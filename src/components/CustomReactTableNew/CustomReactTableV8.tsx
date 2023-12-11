@@ -185,7 +185,16 @@ const CustomReactTable = ({
         return { id: d.colId, desc: d.sort === 'asc' ? false : true };
       });
 
-      if (JSON.stringify(sortBy) === JSON.stringify(tempArray)) return;
+      if (JSON.stringify(sortBy) === JSON.stringify(tempArray)) {
+        sortBy?.forEach((v) => {
+          dispatch({
+            type: 'sort',
+            sorting: [{ colId: v.id, sort: 'desc' }],
+            loading: isClientSideGrid ? false : true
+          });
+        });
+        return;
+      }
 
       sortBy?.forEach((v) => {
         // reset sorted Column
