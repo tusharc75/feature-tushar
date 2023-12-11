@@ -501,6 +501,9 @@ const Report = () => {
                   renderedFrom={renderedFrom}
                   refreshGrid={fetchResourceData}
                   hideSelection={true}
+                  reportSave = {true}
+                  setSelectedReportView = {setSelectedReportView}
+                  selectedReportView = {selectedReportView}
                 />
               ) : (
                 <Loader text={'Loading Data...'} style={{ marginTop: '15vh' }} />

@@ -6,6 +6,7 @@ import { SET_GRID_METADATA } from '../../../StateProvider/actionTypes';
 import axiosInstance from '../../../axios/axiosInstance';
 import HtmlTooltip from '../../CustomTooltipTitle';
 import ArrangeViewDialog from '../dialogues/ArrangeViewDialog';
+import ReportArrangeView from '../dialogues/ReportArrangeView';
 
 let timeout;
 
@@ -16,7 +17,11 @@ const ArrangeViewButton = ({
   setHiddenColumns = null,
   getToggleHideAllColumnsProps = null,
   setColumnOrder = null,
-  defaultColumns = null
+  defaultColumns = null,
+  setSelectedReportView,
+  selectedReportView,
+  reportSave,
+  dispatchTable
 }) => {
   const [openColumnSelection, setOpenColumnSelection] = useState(false);
 
@@ -85,16 +90,31 @@ const ArrangeViewButton = ({
 
       {openColumnSelection && (
         <>
-          <ArrangeViewDialog
-            columns={columns}
-            onClose={() => setOpenColumnSelection(false)}
-            updateGridHiddenColumns={updateGridHiddenColumns}
-            renderedFrom={renderedFrom}
-            defaultColumns={defaultColumns}
-            setHiddenColumns={setHiddenColumns}
-            getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
-            setColumnOrder={setColumnOrder}
-          />
+          {renderedFrom?.includes('report') && reportSave ? (
+            <ReportArrangeView
+              columns={columns}
+              onClose={() => setOpenColumnSelection(false)}
+              updateGridHiddenColumns={updateGridHiddenColumns}
+              renderedFrom={renderedFrom}
+              setHiddenColumns={setHiddenColumns}
+              getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
+              setColumnOrder={setColumnOrder}
+              dispatch={dispatchTable}
+              setSelectedReportView = {setSelectedReportView}
+              selectedReportView = {selectedReportView}
+            />
+          ) : (
+            <ArrangeViewDialog
+              columns={columns}
+              onClose={() => setOpenColumnSelection(false)}
+              updateGridHiddenColumns={updateGridHiddenColumns}
+              renderedFrom={renderedFrom}
+              defaultColumns={defaultColumns}
+              setHiddenColumns={setHiddenColumns}
+              getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
+              setColumnOrder={setColumnOrder}
+            />
+          )}
         </>
       )}
     </>

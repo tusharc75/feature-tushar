@@ -82,6 +82,11 @@ function reducer(state: TInitialState, action: TActios) {
         ...state,
         showFilteredRecordsOnly: !state.showFilteredRecordsOnly
       };
+    case 'updateColumnState':
+      return {
+        ...state,
+        colState : action.colState
+      }
     default:
       break;
   }
@@ -139,7 +144,8 @@ export type TActios =
   | { type: 'error'; error: boolean }
   | { type: 'showFilteredRecordsOnly' }
   | { type: 'columnOrder'; columnOrder: boolean }
-  | { type: 'hiddenColumns'; hiddenColumns: boolean };
+  | { type: 'hiddenColumns'; hiddenColumns: boolean }
+  | { type: 'updateColumnState'; colState: any[] }
 
 export const useTableReducer = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
