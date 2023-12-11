@@ -107,46 +107,6 @@ const CustomReactTable = ({
     }
   }, [newColumns]);
 
-  // For row selection
-  useEffect(() => {
-    let flatSelectedData = [];
-    Object.keys(rowSelection).forEach((key) => {
-      const splittedArray = key.split('.');
-      if (splittedArray.length === 0) {
-        const { subRows, ...rest } = data[key];
-        flatSelectedData.push({ ...rest });
-      } else if (rowSelection[key]) {
-        let dataToStore = null;
-        splittedArray.forEach((f, index) => {
-          if (index === 0) {
-            dataToStore = { ...data[f] };
-          } else {
-            dataToStore = { ...dataToStore['subRows'][f] };
-          }
-        });
-        const { subRows, ...rest } = dataToStore;
-        flatSelectedData.push({ ...rest });
-      }
-    });
-
-    const includedRow: any = [];
-    const notIncludedRow: any = [];
-
-    selectedRecords.forEach((row) => {
-      if (data.find((d) => d.id === row.id)) {
-        includedRow.push(row);
-      } else {
-        notIncludedRow.push(row);
-      }
-    });
-
-    if (onSelect) onSelect([...notIncludedRow, ...flatSelectedData]);
-    dispatch({
-      type: 'selection',
-      selectedRecords: [...notIncludedRow, ...flatSelectedData]
-    });
-  }, [rowSelection, renderedFrom]);
-
   const resetField = () => {
     dispatch({
       type: 'currentEditingCellPosition',
@@ -296,20 +256,17 @@ const CustomReactTable = ({
   const setGlobalFilter = useCallback(
     (value: string) => {
       let timer: NodeJS.Timeout;
-      if (!isClientSideGrid) {
-        if (value) {
-          timer = setTimeout(() => {
-            let query = value?.trim();
-            if (query !== '') {
-              dispatch({ type: 'search', search: query });
-            }
-          }, 500);
-        } else {
-          timer = setTimeout(() => {
-            dispatch({ type: 'search', search: '' });
-            dispatch({ type: 'loading', loading: false });
-          }, 500);
-        }
+      if (value) {
+        timer = setTimeout(() => {
+          let query = value?.trim();
+          if (query !== '') {
+            dispatch({ type: 'search', search: query, loading: isClientSideGrid ? false : true });
+          }
+        }, 500);
+      } else {
+        timer = setTimeout(() => {
+          dispatch({ type: 'search', search: '', loading: false });
+        }, 500);
       }
       return () => clearTimeout(timer);
     },
@@ -396,6 +353,30 @@ const CustomReactTable = ({
   }, [isClientSideGrid, limit, page, table, data]);
 
   const { rows } = table.getRowModel();
+
+  // For row selection
+  useEffect(() => {
+    const selectedRows = table.getSelectedRowModel().flatRows.map((d) => {
+      const { subRows, ...rest } = d.original;
+      return { ...rest };
+    });
+    dispatch({
+      type: 'selection',
+      selectedRecords: selectedRows
+    });
+  }, [rowSelection, renderedFrom, table]);
+
+  // Row selection effect for parent component;
+  useEffect(() => {
+    const selectedRows = table.getSelectedRowModel().flatRows;
+    const selectedRecordIds = selectedRecords.map((d) => d._id);
+    if (selectedRecords.length !== selectedRows.length) {
+      for (const row of rows) {
+        if (!selectedRecordIds.includes(row.original._id)) continue;
+        row.toggleSelected(true);
+      }
+    }
+  }, [selectedRecords]);
 
   return (
     <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>

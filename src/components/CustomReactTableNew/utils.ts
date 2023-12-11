@@ -170,7 +170,8 @@ export const handleCellClick = ({ cell, row, dispatch, setCellValue }) => {
       columnName: cell.column.id
     }
   });
-  setCellValue(cell?.value || null);
+
+  setCellValue(cell?.getValue() || null);
 };
 
 export const insertChildRowIntoTable = ({ existingRows, subRowsToInsert, parentId, dispatch }) => {

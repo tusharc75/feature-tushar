@@ -48,7 +48,7 @@ function reducer(state: TInitialState, action: TActios) {
       return {
         ...state,
         search: action.search,
-        loading: true
+        loading: action.loading ?? true
       };
     case 'pageChange':
       return {
@@ -130,7 +130,7 @@ export type TActios =
   | { type: 'onlyFilter'; filters: any }
   | { type: 'filter'; filters: any; loading?: boolean }
   | { type: 'sort'; sorting: any[]; loading?: boolean }
-  | { type: 'search'; search: string }
+  | { type: 'search'; search: string; loading?: boolean }
   | { type: 'pageChange'; page: number }
   | { type: 'pageSizeChange'; limit: number; loading?: boolean }
   | { type: 'complete' }
