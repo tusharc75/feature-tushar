@@ -64,7 +64,7 @@ export const getStaticFields = () => {
       disableFilters: true,
       cell: ({ row }) =>
         row?.original?.updatedBy ? (
-          <h5 className="updateBy" title={`${row?.original?.updatedBye} • ${moment(row?.original?.updatedByDate?.slice(0, 10)).format(dateFormat)}`}>
+          <h5 className="updateBy" title={`${row?.original?.updatedBy} • ${moment(row?.original?.updatedByDate?.slice(0, 10)).format(dateFormat)}`}>
             {row?.original?.updatedBy}
             <span className="updatedAtTime badge-date">{moment(row?.original?.updatedByDate?.slice(0, 10)).format(dateFormat)}</span>
           </h5>
