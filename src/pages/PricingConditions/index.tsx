@@ -64,7 +64,7 @@ const PricingCondition = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.pricingCondition}`);
     data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes.pricingConditionDetail.path, true);      
+    const newColumns = generateColumns(renderedFrom, data, routes.pricingConditionDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
@@ -351,8 +351,9 @@ const PricingCondition = () => {
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             refreshGrid={fetchData}
-            showOnlyShowFilteredRecordSwitch={false}
-            showFilters={false}
+            showOnlyShowFilteredRecordSwitch={true}
+            showFilters={true}
+            resource={sidebarResource.pricingCondition}
           />
         ) : <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
