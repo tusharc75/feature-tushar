@@ -77,7 +77,6 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
         const newColumns = generateColumns(
           renderedFrom,
           data?.filter((d) => ['assetNumber', 'serialNumber', 'product', 'productDescription', 'status']?.includes(d?.fieldData?.fieldName)),
-          routes.serializedAssetDetail.path
         );
 
         const column = [
@@ -358,6 +357,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
               dispatch={dispatch}
               hideSelection={!allowedToEdit}
               hideAction={true}
+              refreshGrid={fetchAssetsData}
               renderedFrom={renderedFrom}
               isClientSideGrid={true}
             />

@@ -412,6 +412,7 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
                             columns={columns}
                             state={state}
                             dispatch={dispatch}
+                            refreshGrid={fetchRecords}
                             renderedFrom={renderedFrom}
                             isClientSideGrid={true}
                             hideSelection={!allowedToEdit}

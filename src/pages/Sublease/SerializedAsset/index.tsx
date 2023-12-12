@@ -466,6 +466,7 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
                                 columns={columns}
                                 state={state}
                                 dispatch={dispatch}
+                                refreshGrid={fetchRowData}
                                 setWholeRowsCellColor={(rowData) => {
                                     if (!rowData.isValid) return 'error';
                                     return '';

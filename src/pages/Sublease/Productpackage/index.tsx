@@ -582,6 +582,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
             columns={columns}
             state={state}
             dispatch={dispatch}
+            refreshGrid={fetchProductInventory}
             setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
             hideSelection={!allowedToEdit}
             onSaveEdit={onSaveInlineEdit}

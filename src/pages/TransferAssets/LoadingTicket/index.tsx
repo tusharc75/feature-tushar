@@ -14,7 +14,8 @@ import {
   serializedAsset,
   prepareDataForGrid,
   ASSET_STATUS,
-  TRANSFER_ASSET_STATUS
+  TRANSFER_ASSET_STATUS,
+  COLOUR_MASTER
 } from 'src/constants/helpers';
 import { isMobile } from 'react-device-detect';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -119,9 +120,15 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
         );
         newColumns?.forEach((o) => {
           if (o?.accessor === 'assetNumber') {
-            o.Cell = ({ row }) =>
+            o.cell = ({ row }) =>
               row?.original?.assetNumber ? (
-                <div className="d-flex gap-2 align-items-center">
+                <div className="d-flex gap-2 align-items-center" style={{
+                  backgroundColor:
+                    row?.original?.isReplaced
+                      ? COLOUR_MASTER.replaceAssetColor.background
+                      : [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(row?.original?.status) ? COLOUR_MASTER.lostAssets.background
+                        : '',
+                }}>
                   <p> {row.original?.assetNumber}</p>
                   <Box ml={1}>
                     <IconButton
@@ -144,17 +151,9 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
               ) : (
                 <NoDataCell />
               );
-            o.setCellClassNames = (row) => {
-              if ([ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(row?.status)) {
-                return 'error';
-              }
-              if (row?.isReplaced) {
-                return 'isPurchaseOrder';
-              }
-            };
           }
-          if (o?.accessor === 'product') {
-            o.Cell = ({ row }) =>
+          else if (o?.accessor === 'product') {
+            o.cell = ({ row }) =>
               row?.original?.product ? (
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                   <p> {row.original?.product}</p>
@@ -533,6 +532,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
               dispatch={dispatch}
               hideSelection={!allowedToEdit}
               hideAction={true}
+              refreshGrid={fetchAssetsData}
               renderedFrom={renderedFrom}
               isClientSideGrid={true}
             />

@@ -191,6 +191,7 @@ function Slip({ subleaseData, stepFullScreen, renderedFrom, statusNames, updateS
                                 columns={columns}
                                 state={state}
                                 dispatch={dispatch}
+                                refreshGrid={fetchRowData}
                                 hideSelection={true}
                                 hideAction={true}
                                 renderedFrom={renderedFrom}

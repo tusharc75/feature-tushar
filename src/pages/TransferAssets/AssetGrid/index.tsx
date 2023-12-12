@@ -96,17 +96,14 @@ const AssetsGrid: FC<AssetsGridProps> = ({
     axiosInstance()
       .get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
-        let columns = [];
         const newColumns = generateColumns(
           renderedFrom,
-          data?.filter((d) => ['assetNumber', 'serialNumber', 'product', 'productDescription', 'status']?.includes(d?.fieldData?.fieldName)),
-          null, false, null
+          data?.filter((d) => ['assetNumber', 'serialNumber', 'product', 'productDescription', 'status']?.includes(d?.fieldData?.fieldName))
         );
         console.log(newColumns)
         newColumns?.forEach((o) => {
-          if ((o.accessor = 'assetNumber')) {
-            o.width = 300;
-            o.Cell = ({ row }) =>
+          if (o.accessor === 'assetNumber') {
+            o.cell = ({ row }) =>
               row?.original?.assetNumber ? (
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                   <p> {row.original?.assetNumber}</p>
@@ -125,9 +122,8 @@ const AssetsGrid: FC<AssetsGridProps> = ({
                 <NoDataCell />
               );
           }
-          if ((o.accessor = 'product')) {
-            o.width = 300;
-            o.Cell = ({ row }) =>
+          else if (o.accessor === 'product') {
+            o.cell = ({ row }) =>
               row?.original?.product ? (
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                   <p> {row.original?.product}</p>
@@ -273,6 +269,7 @@ const AssetsGrid: FC<AssetsGridProps> = ({
               columns={columns}
               state={state}
               dispatch={dispatch}
+              refreshGrid={fetchData}
               hideSelection={!allowedToEdit}
               hideAction={!allowedToEdit}
               renderedFrom={renderedFrom}
