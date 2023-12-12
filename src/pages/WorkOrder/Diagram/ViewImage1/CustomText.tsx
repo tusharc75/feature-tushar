@@ -32,7 +32,7 @@ const CustomText = ({ textState, setTextState, onEdit, editingTextRef, onSelect 
         text.id === textState.id
           ? {
             ...text,
-            isFixed: false
+            isFixed: false,
           }
           : text
       )
@@ -56,7 +56,7 @@ const CustomText = ({ textState, setTextState, onEdit, editingTextRef, onSelect 
           height: '100%',
           display: 'flex',
           justifyContent: 'center',
-          alignItems: 'center'
+          position: 'absolute'
         }}
         onDoubleClick={onDoubleClick}
         onClick={onSelect}
@@ -64,7 +64,7 @@ const CustomText = ({ textState, setTextState, onEdit, editingTextRef, onSelect 
         <span
           style={{
             fontSize: textState.fontSize,
-            color: 'black',
+            color: textState.fill,
             textAlign: 'center',
             width: '100%',
             height: '100%'
