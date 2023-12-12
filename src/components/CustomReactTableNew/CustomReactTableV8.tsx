@@ -147,8 +147,7 @@ const CustomReactTable = ({
         } else {
           setColumnOrder(newColumns.map((m) => m?.id ?? m?.accessor));
         }
-      }
-      else {
+      } else {
         let gridMetaData = getDataFromLocalStorage();
         if (gridMetaData && gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide?.length) {
           for (const n of [...gridMetaData[renderedFrom]?.hide]) {
@@ -522,14 +521,26 @@ const CustomReactTable = ({
             )}
           </GridHeader>
           {!isMobileView && (
-            <>
+            <div className="relative">
+              {!loading && !error && rows.length === 0 && (
+                <>
+                  <Box
+                    style={{ height: `calc(${height ?? '100%'} - 60px)` }}
+                    className="w-full h-full absolute inset-0 top-[46px] flex justify-center items-center -z-10"
+                  >
+                    <div className=" px-10 py-5 rounded-lg text-center">
+                      <p>No data found</p>
+                    </div>
+                  </Box>
+                </>
+              )}
               <div
                 style={{
                   display: 'block',
-                  overflow: !loading && !error && rows.length === 0 ? 'hidden' : 'auto',
+                  overflow: loading ? 'hidden' : 'auto',
                   height: height ?? '100%'
                 }}
-                className="border"
+                className="border z-10"
               >
                 {(loading || error) && (
                   <Box className="bg-[rgba(255,255,255,0.2)] dark:bg-[rgba(0,0,0,0.1)] w-full h-full z-50 absolute inset-0 flex justify-center items-center">
@@ -554,18 +565,6 @@ const CustomReactTable = ({
                     position: 'relative'
                   }}
                 >
-                  {!loading && !error && rows.length === 0 && (
-                    <>
-                      <Box
-                        style={{ height: `calc(${height ?? '100%'} - 60px)` }}
-                        className="w-full h-full absolute inset-0 top-[46px] flex justify-center items-center"
-                      >
-                        <div className=" px-10 py-5 rounded-lg text-center">
-                          <p>No data found</p>
-                        </div>
-                      </Box>
-                    </>
-                  )}
                   <MaUTable size="small" className="tableWrap table sticky">
                     <TableHead
                       style={{ overflowY: 'auto', overflowX: 'hidden' }}
@@ -675,7 +674,7 @@ const CustomReactTable = ({
                   </MaUTable>
                 </div>
               </div>
-            </>
+            </div>
           )}
           {isMobileView && rows ? (
             <SwipableListForMobile
