@@ -195,7 +195,7 @@ const AddExistingProductInventory = ({
   return (
     <Fragment>
       <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
-        <CustomDialogHeader title={`Add ${startCase(type)}`} onClose={handleProductInventoryClose}></CustomDialogHeader>
+        <CustomDialogHeader title={`Add ${startCase(type)}`} onClose={handleProductInventoryClose} showRequiredLabel={false}></CustomDialogHeader>
         <div className="listing-grid p-3">
           <Box mb={2}>
             <Grid container>

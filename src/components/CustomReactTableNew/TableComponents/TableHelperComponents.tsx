@@ -379,9 +379,8 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({ header, table,
         <div className={`d-flex gap-2 align-items-center ${column.id === 'selection' ? 'justify-center' : 'justify-between'}`}>
           <div className="line-clamp-1">
             <span
-              className={`overflow-hidden overflow-ellipsis whitespace-normal ${
-                header.column.getCanSort() && columnDef.disableSortBy !== true ? 'cursor-pointer' : ''
-              }`}
+              className={`overflow-hidden overflow-ellipsis whitespace-normal ${header.column.getCanSort() && columnDef.disableSortBy !== true ? 'cursor-pointer' : ''
+                }`}
               onClick={header.column.getToggleSortingHandler()}
             >
               {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
@@ -486,12 +485,16 @@ export const CellRenderer = ({
         <CellShell>
           <div className="w-full">
             <input
-              title={`Edit-${cell.id}`}
               autoFocus
+              type="number"
               onBlur={() => (cell.getValue() !== cellValue ? submitInput() : resetField())}
               value={cellValue}
-              className="dark:text-[white]  appearance-none w-full focus-within:outline-[var(--new-theme-color)] bg-[transparent] outline-[transparent] shadow-0 border-[0] px-[2px] py-[4px] [border-bottom:1px_solid_var(--common-border-color)_!important]"
-              onChange={(e) => setCellValue(e.target.value)}
+              className="dark:text-[white] appearance-none w-full focus-within:outline-[var(--new-theme-color)] bg-[transparent] outline-[transparent] shadow-0 border-[0] px-[2px] py-[4px] [border-bottom:1px_solid_var(--common-border-color)_!important]"
+              onChange={(e) => {
+                let value: any = e.target.value;
+                value = parseFloat(parseFloat(value)?.toFixed(cell?.column?.columnDef?.decimalPlaces || 0));
+                setCellValue(value)
+              }}
             />
           </div>
         </CellShell>
