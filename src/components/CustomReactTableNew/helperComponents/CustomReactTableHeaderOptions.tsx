@@ -127,7 +127,7 @@ function CustomReactTableHeaderOptions({
     <>
       <div
         className="table-filter-v1"
-        style={{ flexBasis: isFilterPresent ? '766px' : 'unset', maxWidth: isFilterPresent ? '766px' : 'unset', paddingRight: '52px' }}
+        // style={{ flexBasis: isFilterPresent ? '766px' : 'unset', maxWidth: isFilterPresent ? '766px' : 'unset', paddingRight: '52px' }}
       >
         {showOnlyShowFilteredRecordSwitch && (
           <>
@@ -153,7 +153,7 @@ function CustomReactTableHeaderOptions({
           </>
         )}
         {Object.keys(customFilters).length > 0 && showFilters && (
-          <div className="min-w-[350px] md:min-w-[430px] ">
+          <div className="min-w-[100%] block min-h-[5px]">
             <DisplayChips
               columns={columns}
               customFilters={customFilters}

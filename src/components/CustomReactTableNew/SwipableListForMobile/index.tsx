@@ -68,7 +68,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
 
   return (
     <>
-      <div className="relative rounded-lg">
+      <div className="relative rounded-lg bg-[white] dark:bg-[var(--dark-primary)]">
         {/* Loader */}
         {loading || error ? (
           <div className=" absolute inset-0 flex items-center justify-center bg-[rgba(255,255,255,0.54)] dark:bg-[rgba(5,9,19,0.54)] backdrop-blur-[10px]">
@@ -96,81 +96,65 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
           id={`scrollableDiv_${renderedFrom}`}
           className=""
         >
-          <div>
+          <div className="grid gap-2">
             {dataRows.length
               ? dataRows?.map((row, index) => {
-                if (row.depth !== 0) return null;
-                let expanderCell = null;
-                if (expander && expanderCol) {
-                  expanderCell = row.getVisibleCells()[0];
-                }
-                return (
-                  <div
-                    className={`shadow-[0px_3px_26px_0px_rgba(0,0,0,0.06)] rounded-md my-2 px-3 py-2 [--left-gutter:20px] dark:bg-[var(--dark-secondary)] ${backgroundColorClass && backgroundColorClass(row.original) + ' td-color'
+                  if (row.depth !== 0) return null;
+                  let expanderCell = null;
+                  if (expander && expanderCol) {
+                    expanderCell = row.getVisibleCells()[0];
+                  }
+                  return (
+                    <div
+                      className={`shadow-[0px_3px_26px_0px_rgba(0,0,0,0.06)] rounded-md px-3 py-2 [--left-gutter:20px] dark:bg-[var(--dark-secondary)] ${
+                        backgroundColorClass && backgroundColorClass(row.original) + ' td-color'
                       }`}
-                    key={row.original._id}
-                    style={{
-                      border: '1px solid var(--common-border-color)',
-                      cursor: otherFieldsLength > DEFAULT_DATA_ROWS_VISIBLE ? 'pointer' : 'auto'
-                    }}
-                  >
-                    <div className={`flex gap-2 items-center`}>
-                      {expander && expanderCol && flexRender(expanderCell.column.columnDef.cell, expanderCell.getContext())}
-                      {allowSelection && !row.original.hideSelection && (
-                        <div>
-                          <IndeterminateCheckbox
-                            {...{
-                              checked: row.getIsSelected(),
-                              indeterminate: row.getIsSomeSelected(),
-                              onChange: row.getToggleSelectedHandler()
-                            }}
-                          />
-                        </div>
-                      )}
-                      <div className="flex-grow">
-                        <div className="flex gap-2 justify-between items-center">
-                          {primaryField && (
-                            <h4 className="quote-name line-clamp-1 [&>*]:line-clamp-1 [&>*]:[font-weight:700_!important] [&>*]:[white-space:unset_!important]">
-                              {primaryField.cell({ row })}
-                            </h4>
-                          )}
-                          <div className="icon-layout  d-flex align-items-center gap-2">
-                            {actionField && actionField?.cell({ row })}
-                            {otherFieldsLength > DEFAULT_DATA_ROWS_VISIBLE && (
-                              <IconButton
-                                size="small"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleCollapse(row.original._id);
-                                }}
-                              >
-                                {compareCollapse(row.original._id) ? <BsChevronContract /> : <BsChevronExpand />}
-                              </IconButton>
+                      key={row.original._id}
+                      style={{
+                        border: '1px solid var(--common-border-color)',
+                        cursor: otherFieldsLength > DEFAULT_DATA_ROWS_VISIBLE ? 'pointer' : 'auto'
+                      }}
+                    >
+                      <div className={`flex gap-2 items-center`}>
+                        {expander && expanderCol && flexRender(expanderCell.column.columnDef.cell, expanderCell.getContext())}
+                        {allowSelection && !row.original.hideSelection && (
+                          <div>
+                            <IndeterminateCheckbox
+                              {...{
+                                checked: row.getIsSelected(),
+                                indeterminate: row.getIsSomeSelected(),
+                                onChange: row.getToggleSelectedHandler()
+                              }}
+                            />
+                          </div>
+                        )}
+                        <div className="flex-grow">
+                          <div className="flex gap-2 justify-between items-center">
+                            {primaryField && (
+                              <h4 className="quote-name line-clamp-1 [&>*]:line-clamp-1 [&>*]:[font-weight:700_!important] [&>*]:[white-space:unset_!important]">
+                                {primaryField.cell({ row })}
+                              </h4>
                             )}
+                            <div className="icon-layout  d-flex align-items-center gap-2">
+                              {actionField && actionField?.cell({ row })}
+                              {otherFieldsLength > DEFAULT_DATA_ROWS_VISIBLE && (
+                                <IconButton
+                                  size="small"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleCollapse(row.original._id);
+                                  }}
+                                >
+                                  {compareCollapse(row.original._id) ? <BsChevronContract /> : <BsChevronExpand />}
+                                </IconButton>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="px-2 mt-2 pt-2 grid gap-2" style={{ borderTop: '1px dashed var(--common-border-color)' }}>
-                      <div className="grid gap-2 w-full">
-                        {defaultDisplay.map((field) => {
-                          return (
-                            <RenderCellWithHeader
-                              key={field.id}
-                              field={field}
-                              row={row}
-                              submitInput={submitInput}
-                              cellValue={cellValue}
-                              setCellValue={setCellValue}
-                              state={state}
-                              dispatch={dispatch}
-                            />
-                          );
-                        })}
-                      </div>
-                      <Collapse in={compareCollapse(row.original._id)}>
+                      <div className="px-2 mt-2 pt-2 grid gap-2" style={{ borderTop: '1px dashed var(--common-border-color)' }}>
                         <div className="grid gap-2 w-full">
-                          {collapsibleFields.map((field) => {
+                          {defaultDisplay.map((field) => {
                             return (
                               <RenderCellWithHeader
                                 key={field.id}
@@ -185,57 +169,74 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                             );
                           })}
                         </div>
-                      </Collapse>
+                        <Collapse in={compareCollapse(row.original._id)}>
+                          <div className="grid gap-2 w-full">
+                            {collapsibleFields.map((field) => {
+                              return (
+                                <RenderCellWithHeader
+                                  key={field.id}
+                                  field={field}
+                                  row={row}
+                                  submitInput={submitInput}
+                                  cellValue={cellValue}
+                                  setCellValue={setCellValue}
+                                  state={state}
+                                  dispatch={dispatch}
+                                />
+                              );
+                            })}
+                          </div>
+                        </Collapse>
+                      </div>
+                      {expander && (
+                        <Collapse in={row.getIsExpanded()}>
+                          <div className="mt-3">
+                            {row.subRows?.map((row, index) => {
+                              return (
+                                <RenderSubCard
+                                  key={row?.original?._id || index}
+                                  {...{
+                                    depth: 1,
+                                    dispatch,
+                                    allowSelection,
+                                    dataRows: row.subRows || [],
+                                    renderedFrom,
+                                    expander,
+                                    backgroundColorClass,
+                                    otherFieldsLength,
+                                    handleCollapse,
+                                    expanderCol,
+                                    setIsAllChecked,
+                                    index,
+                                    actionField,
+                                    primaryField,
+                                    compareCollapse,
+                                    defaultDisplay,
+                                    collapsibleFields,
+                                    IndeterminateCheckbox,
+                                    row,
+                                    submitInput,
+                                    cellValue,
+                                    setCellValue,
+                                    state
+                                  }}
+                                />
+                              );
+                            })}
+                          </div>
+                        </Collapse>
+                      )}
                     </div>
-                    {expander && (
-                      <Collapse in={row.getIsExpanded()}>
-                        <div className="mt-3">
-                          {row.subRows?.map((row, index) => {
-                            return (
-                              <RenderSubCard
-                                key={row?.original?._id || index}
-                                {...{
-                                  depth: 1,
-                                  dispatch,
-                                  allowSelection,
-                                  dataRows: row.subRows || [],
-                                  renderedFrom,
-                                  expander,
-                                  backgroundColorClass,
-                                  otherFieldsLength,
-                                  handleCollapse,
-                                  expanderCol,
-                                  setIsAllChecked,
-                                  index,
-                                  actionField,
-                                  primaryField,
-                                  compareCollapse,
-                                  defaultDisplay,
-                                  collapsibleFields,
-                                  IndeterminateCheckbox,
-                                  row,
-                                  submitInput,
-                                  cellValue,
-                                  setCellValue,
-                                  state
-                                }}
-                              />
-                            );
-                          })}
-                        </div>
-                      </Collapse>
-                    )}
-                  </div>
-                );
-              })
+                  );
+                })
               : !loading &&
-              !error && (
-                <div className=" absolute inset-0 flex items-center justify-center bg-[rgba(255,255,255,0.54)] dark:bg-[rgba(5,9,19,0.54)] backdrop-blur-[10px] rounded-lg">
-                  <div className="bg-[white] dark:bg-[var(--dark-secondary)] px-10 py-5 rounded-lg">
-                    <p>No Data Found.</p>
+                !error && (
+                  <div className=" absolute inset-0 flex items-center justify-center bg-[rgba(255,255,255,0.54)] dark:bg-[rgba(5,9,19,0.54)] backdrop-blur-[10px] rounded-lg">
+                    <div className="bg-[white] dark:bg-[var(--dark-secondary)] px-10 py-5 rounded-lg">
+                      <p>No Data Found.</p>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
             {/* {dataRows?.length > 0 && footerGroups?.length > 0 && isClientSideGrid && (
               <>
@@ -293,8 +294,9 @@ const RenderSubCard = ({
   }
   return (
     <div
-      className={`shadow-[0px_3px_26px_0px_rgba(0,0,0,0.06)] rounded-md my-2 px-3 py-2 [--left-gutter:20px] dark:bg-[var(--dark-secondary)] ${backgroundColorClass && backgroundColorClass(row.original) + ' td-color'
-        }`}
+      className={`shadow-[0px_3px_26px_0px_rgba(0,0,0,0.06)] rounded-md my-2 px-3 py-2 [--left-gutter:20px] dark:bg-[var(--dark-secondary)] ${
+        backgroundColorClass && backgroundColorClass(row.original) + ' td-color'
+      }`}
       key={row.original._id}
       style={{
         border: '1px solid var(--common-border-color)',
