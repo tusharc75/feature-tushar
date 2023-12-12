@@ -28,12 +28,12 @@ import { Menu, MenuItem } from '@material-ui/core';
 const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, updateStatus, canLoad, canReceive, stepFullScreen }) => {
 
   const toastConfig = useContext(CustomToastContext);
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, selectedRecords } = state;
 
   const {
     state: { user }
   }: any = useData();
-  const { state, dispatch } = useTableReducer();
-  const { dataRows, selectedRecords } = state;
 
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
   const [showConfirmBoxReceive, setShowConfirmBoxReceive] = useState(false);
@@ -199,14 +199,10 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
       }
 
       dispatch({ type: 'initialize', data: rows, count: rows.length });
-      setTimeout(() => {
-        dispatch({ type: 'loading', loading: false });
-      }, gridLoadingTimeout);
+      dispatch({ type: 'loading', loading: false });
     } catch (err) {
       toastConfig.setToastConfig(err);
-      setTimeout(() => {
-        dispatch({ type: 'loading', loading: false });
-      }, gridLoadingTimeout);
+      dispatch({ type: 'loading', loading: false });
     }
   };
 

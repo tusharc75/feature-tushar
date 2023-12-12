@@ -14,7 +14,8 @@ import {
   serializedAsset,
   prepareDataForGrid,
   ASSET_STATUS,
-  TRANSFER_ASSET_STATUS
+  TRANSFER_ASSET_STATUS,
+  COLOUR_MASTER
 } from 'src/constants/helpers';
 import { isMobile } from 'react-device-detect';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -26,11 +27,10 @@ import AddSerializedAsset from 'src/pages/RentalManagement/SerializedAsset/AddSe
 import ReplaceAssetReason from '../../../components/RentalManagment/ReplaceAssetReason';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import PreviewDownload from 'src/components/PreviewDownload';
-import { useColumns } from 'src/components/CustomReactTableNew';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import InfoIcon from '@material-ui/icons/Info';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 
 interface LoadingGridProps {
   permissions: any;
@@ -66,24 +66,19 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     stepFullScreen
   } = props;
   const toastConfig = useContext(CustomToastContext);
-
+  const { generateColumns } = useColumns();
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, selectedRecords } = state;
   const [assetWithNoTicket, setAssetWithNoTicket] = useState([]);
   const [isRemovingTicket, setRemovingTicket] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [showConfirmBoxReceive, setShowConfirmBoxReceive] = useState(false);
-
-  const history = useHistory();
-
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
   const [anchorActionEl, setAnchorActionEl] = useState(null);
-  const [dataRows, setDataRows] = useState(null);
-  const [selectedRecords, setSelectedRecords] = useState([]);
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState({ open: false, products: [] });
   const [showReplaceReason, setShowReplaceReason] = useState({ open: false, data: {} });
   const [replaceLoading, setReplaceLoading] = useState(false);
   const [columns, setColumns] = useState(null);
-
-  const { generateColumns } = useColumns();
 
   useEffect(() => {
     if (transferAssetId) {
@@ -121,13 +116,19 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
         const newColumns = generateColumns(
           renderedFrom,
           data?.filter((d) => ['assetNumber', 'serialNumber', 'product', 'productDescription', 'status']?.includes(d?.fieldData?.fieldName)),
-          routes.serializedAssetDetail.path
+          false
         );
         newColumns?.forEach((o) => {
           if (o?.accessor === 'assetNumber') {
-            o.Cell = ({ row }) =>
+            o.cell = ({ row }) =>
               row?.original?.assetNumber ? (
-                <div className="d-flex gap-2 align-items-center">
+                <div className="d-flex gap-2 align-items-center" style={{
+                  backgroundColor:
+                    row?.original?.isReplaced
+                      ? COLOUR_MASTER.replaceAssetColor.background
+                      : [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(row?.original?.status) ? COLOUR_MASTER.lostAssets.background
+                        : '',
+                }}>
                   <p> {row.original?.assetNumber}</p>
                   <Box ml={1}>
                     <IconButton
@@ -150,17 +151,9 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
               ) : (
                 <NoDataCell />
               );
-            o.setCellClassNames = (row) => {
-              if ([ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(row?.status)) {
-                return 'error';
-              }
-              if (row?.isReplaced) {
-                return 'isPurchaseOrder';
-              }
-            };
           }
-          if (o?.accessor === 'product') {
-            o.Cell = ({ row }) =>
+          else if (o?.accessor === 'product') {
+            o.cell = ({ row }) =>
               row?.original?.product ? (
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                   <p> {row.original?.product}</p>
@@ -226,6 +219,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
   };
 
   const fetchAssetsData = async () => {
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
     await fetchFields();
     try {
       const result = await axiosInstance().get(`${routes.transferAsset.path}/get-asset/${transferAssetData?._id}`);
@@ -263,8 +258,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
         };
       });
       setExistingAssets(assetData);
-      setDataRows(assetData);
-      setSelectedRecords(assetData?.filter((f) => f.isChecked === true));
+      dispatch({ type: 'initialize', data: assetData, count: assetData?.length });
+      dispatch({ type: 'loading', loading: false });
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -528,20 +523,18 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
         )}
       </Box>
       <Box mt={1}>
-        {columns && dataRows ? (
+        {columns ? (
           <Box zIndex={5} width={'100%'}>
             <CustomReactTable
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
               columns={columns}
-              data={dataRows}
-              onSelect={setSelectedRecords}
-              childrenProperty="subRows"
-              uniqueKey="_id"
+              state={state}
+              dispatch={dispatch}
               hideSelection={!allowedToEdit}
               hideAction={true}
+              refreshGrid={fetchAssetsData}
               renderedFrom={renderedFrom}
               isClientSideGrid={true}
-              hideExpander={true}
             />
           </Box>
         ) : (
@@ -615,3 +608,4 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
 };
 
 export default LoadingTicketGrid;
+

@@ -379,7 +379,7 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
         maxWidth: `${colSize}px`,
         paddingLeft: columnDef.id === 'expander' ? '8px' : '6px',
         zIndex: columnDef.sticky === 'left' || columnDef.sticky === 'right' ? 12 : 'unset',
-        ...style
+        ...(virtualization ? {} : style)
       }}
     >
       <div

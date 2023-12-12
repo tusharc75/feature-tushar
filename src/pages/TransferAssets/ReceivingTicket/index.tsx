@@ -21,9 +21,8 @@ import { groupBy } from 'lodash';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import PreviewDownload from 'src/components/PreviewDownload';
-import { useColumns } from 'src/components/CustomReactTableNew';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 interface ReceivingGridProps {
   fetchAssets: any;
   permissions: any;
@@ -56,7 +55,9 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
     stepFullScreen
   } = props;
   const toastConfig = useContext(CustomToastContext);
-
+  const { generateColumns } = useColumns();
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, selectedRecords } = state;
   const [assetWithNoTicket, setAssetWithNoTicket] = useState([]);
   const [loadingTicketsNotDelivered, setLoadingTicketsNotDelivered] = useState([]);
 
@@ -64,11 +65,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
 
   const [isRemovingTicket, setRemovingTicket] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
-  const [dataRows, setDataRows] = useState(null);
-  const [selectedRecords, setSelectedRecords] = useState([]);
   const [columns, setColumns] = useState(null);
-
-  const { generateColumns } = useColumns();
 
   const history = useHistory();
 
@@ -80,7 +77,6 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
         const newColumns = generateColumns(
           renderedFrom,
           data?.filter((d) => ['assetNumber', 'serialNumber', 'product', 'productDescription', 'status']?.includes(d?.fieldData?.fieldName)),
-          routes.serializedAssetDetail.path
         );
 
         const column = [
@@ -88,7 +84,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
             accessor: 'index',
             Header: 'Index',
             width: 70,
-            sticky: isMobile ? 'none' : 'left',
+            sticky: 'left',
             Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
             Footer: () => {
               return <>Total</>;
@@ -155,6 +151,8 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
   }, [transferAssetId]);
 
   const fetchAssetsData = async (forceRefresh) => {
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
     await fetchFields();
 
     try {
@@ -190,7 +188,8 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
           ...finalObject
         };
       });
-      setDataRows(assetData);
+      dispatch({ type: 'initialize', data: assetData, count: assetData?.length });
+      dispatch({ type: 'loading', loading: false });
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -337,9 +336,9 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
               )}
               <Box component="span" mx={1} />
               {permissions?.transferAsset?.isUpdate &&
-              selectedRecords.length &&
-              selectedRecords?.filter((f) => f.hasOwnProperty('receivingTicket') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new)
-                ?.length === selectedRecords?.length ? (
+                selectedRecords.length &&
+                selectedRecords?.filter((f) => f.hasOwnProperty('receivingTicket') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new)
+                  ?.length === selectedRecords?.length ? (
                 <Button variant="contained" size="small" color="primary" onClick={() => setShowConfirmBox(true)}>
                   Remove Receiving Ticket
                 </Button>
@@ -349,20 +348,18 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
         </Box>
       )}
       <Box mt={1}>
-        {columns && dataRows ? (
+        {columns ? (
           <Box zIndex={5} width={'100%'}>
             <CustomReactTable
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
               columns={columns}
-              data={dataRows}
-              onSelect={setSelectedRecords}
-              childrenProperty="subRows"
-              uniqueKey="_id"
+              state={state}
+              dispatch={dispatch}
               hideSelection={!allowedToEdit}
               hideAction={true}
+              refreshGrid={fetchAssetsData}
               renderedFrom={renderedFrom}
               isClientSideGrid={true}
-              hideExpander={true}
             />
           </Box>
         ) : (
