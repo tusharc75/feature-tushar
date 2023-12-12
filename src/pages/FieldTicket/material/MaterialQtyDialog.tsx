@@ -267,7 +267,11 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
         const calValues = autoCalculateSpecificFields(values, { ...element, ...values, ...tempRate }, allFields);
         rows.push({ ...element, ...calValues });
       });
-      handleSaveData(rows);
+      let updatedRows: any = [];
+      rows = rows?.forEach((e: any) => {
+        updatedRows.push({ _id: e._id, ...getObjKeysWithValues(e, allFields) });
+      })
+      handleSaveData(updatedRows);
     } else {
       const rows = await calculateRowsField(material, values, allFields, rowData);
       handleSaveData(rows, saveAndNext);
@@ -288,6 +292,9 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
           }
         ]);
         let tempPriceData = priceData.filter((d) => d.mrp !== undefined && d.mrp !== null && d.mrp !== 0);
+        if (fieldTicketData?.pricingCondition?.optionValue) {
+          tempPriceData = tempPriceData?.filter((e) => e.conditionId === fieldTicketData?.pricingCondition?.optionValue)
+        }
         setPriceConditionList(
           uniqBy(
             tempPriceData.map((d) => {
