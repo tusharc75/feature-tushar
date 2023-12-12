@@ -99,7 +99,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
   }, []);
 
   useEffect(() => {
-    const allShow = sortedColumns.filter((f) => f.sticky === undefined).some((s) => s.isVisible === false);
+    const allShow = sortedColumns.filter((f) => !['left', 'right']?.includes(f.sticky)).some((s) => s.isVisible === false);
     setAllChecked(!allShow);
   }, [sortedColumns]);
 
@@ -145,7 +145,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
         ?.filter((o) => !o?.isVisible && !['expander', 'selection', 'action']?.includes(o?.accessor))
         .map((o) => o?.accessor);
       const columnOrder = dataToStore
-        ?.filter((o) => o?.sticky === undefined && !['expander', 'selection', 'action']?.includes(o?.accessor))
+        ?.filter((o) => !['left', 'right']?.includes(o?.sticky) && !['expander', 'selection', 'action']?.includes(o?.accessor))
         ?.map((o) => o?.accessor);
       updateGridHiddenColumns(hidedColumns, columnOrder);
     }
@@ -159,7 +159,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
       columnOrder.push(col.id ?? col.accessor);
     }
     setColumnOrder(columnOrder);
-    setHiddenColumns([...sortedColumns].filter((f) => f.sticky === undefined && f.isVisible === false).map((m) => m.id ?? m.accessor));
+    setHiddenColumns([...sortedColumns].filter((f) => !['left', 'right']?.includes(f?.sticky) && f.isVisible === false).map((m) => m.id ?? m.accessor));
     onClose();
   };
 
@@ -275,11 +275,11 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
                     divider
                     disableGutters
                     disabled={column.disabled}
-                    className={column.sticky ? 'd-none' : ''}
+                    className={['left', 'right']?.includes(column?.sticky) ? 'd-none' : ''}
                   >
                     <ListItemText id="switch-list-column" primary={column.header} />
                     <ListItemSecondaryAction>
-                      {column.sticky ? (
+                      {['left', 'right']?.includes(column?.sticky) ? (
                         ''
                       ) : (
                         <Switch
@@ -388,7 +388,7 @@ const RenderListItem = (props: ItemProps) => {
   const opacity = isDragging ? 0 : 1;
   drag(drop(ref));
 
-  return column.sticky ? (
+  return ['left', 'right']?.includes(column?.sticky) ? (
     <div className="d-none"></div>
   ) : (
     <div ref={ref} style={{ opacity }} data-handler-accessor={handlerId}>

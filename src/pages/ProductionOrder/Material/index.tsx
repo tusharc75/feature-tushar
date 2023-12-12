@@ -77,15 +77,18 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
         accessor: 'type',
         Header: 'Type',
         width: 100,
-        sticky: isMobile || isTablet ? 'none' : 'left',
+        disabled: true,
+        sticky: 'none',
+        //sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (row.original['type'] ? <h5>{`${startCase(row.original?.type)} `}</h5> : <NoDataCell />)
       },
       {
         accessor: 'detail',
         Header: ' Details',
+        disabled: true,
         minWidth: 200,
         width: 200,
-        sticky: isMobile || isTablet ? 'none' : 'left',
+        sticky: 'none',
         Cell: ({ row, rows }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {allowedToEdit ? (

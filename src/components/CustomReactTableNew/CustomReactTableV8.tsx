@@ -159,16 +159,14 @@ const CustomReactTable = ({
           setHiddenColumns(hColumns);
         }
         if (gridMetaData && gridMetaData[renderedFrom]?.order && gridMetaData[renderedFrom]?.order?.length) {
-          const defaultCols = [];
-          for (const c of [...gridMetaData[renderedFrom]?.order]) {
-            if (c === 'qtyDisplay') {
-              defaultCols.push('qty');
-            }
-            defaultCols.push(c);
+          const colOrder = gridMetaData[renderedFrom]?.order || [];
+          let orderIndices = {};
+          for (let i = 0; i < colOrder.length; i++) {
+            orderIndices[colOrder[i]] = i;
           }
-          const colOrder = [...stickyColumnNames.left, ...defaultCols, ...stickyColumnNames.right];
-          setColumnOrder(colOrder);
-          setSortedColumns(returnSortedColumns(newColumns, colOrder));
+          let orderedArr = [...newColumns].sort((a, b) => orderIndices[a?.id || a?.accessor] - orderIndices[b?.id || b?.accessor]);
+          setSortedColumns(returnSortedColumns(newColumns, orderedArr));
+          setColumnOrder(orderedArr.map((m) => m?.id ?? m?.accessor));
         } else {
           setSortedColumns(newColumns);
           setColumnOrder(newColumns.map((m) => m?.id ?? m?.accessor));
@@ -178,6 +176,8 @@ const CustomReactTable = ({
       console.error(`Error while getting stored data from local storage - ${renderedFrom}`);
     }
   }, [newColumns, expander, hideSelection, renderedFrom, selectedReportView]);
+
+
 
   function reorder(draggedColumnId: string, targetColumnId: string, columnOrder: string[]) {
     columnOrder.splice(columnOrder.indexOf(targetColumnId), 0, columnOrder.splice(columnOrder.indexOf(draggedColumnId), 1)[0] as string);
@@ -191,8 +191,8 @@ const CustomReactTable = ({
       (a, b) => columnOrder.findIndex((d) => d === a.accessor) - columnOrder.findIndex((d) => d === b.accessor)
     );
 
-    const newcolumnOrderToSave = newBaseColumns
-      ?.filter((o) => o?.sticky === undefined && !['expander', 'selection', 'action']?.includes(o?.id))
+    const newcolumnOrderToSave = newBaseColumns?.filter((o) => !['left', 'right']?.includes(o?.sticky)
+      && !['expander', 'selection', 'action']?.includes(o?.id))
       ?.map((o) => o?.id);
 
     setBaseColumns(newBaseColumns);
