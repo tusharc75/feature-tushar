@@ -584,13 +584,13 @@ const CustomReactTable = ({
               page={page}
               onPageChange={(event, newPage) => {
                 dispatch({ type: 'pageChange', page: newPage });
-                if (!isClientSideGrid) return;
+                if (!isClientSideGrid || rowCount <= limit || data.length <= limit) return;
                 table.setPageIndex(newPage);
               }}
               rowsPerPage={limit}
               onRowsPerPageChange={(event, value) => {
                 dispatch({ type: 'pageSizeChange', limit: value, loading: isClientSideGrid ? false : true });
-                if (!isClientSideGrid) return;
+                if (!isClientSideGrid || rowCount <= limit || data.length <= limit) return;
                 table.setPageSize(value);
               }}
               rowsPerPageOptions={gridPageSizes}
