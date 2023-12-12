@@ -18,6 +18,8 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { cloneDisable, deleteDisable, editDisable } from 'src/constants/messageHelpers';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 
+let searchTimeout;
+
 export default function IotDataPoints({ deviceTemplate }) {
   const renderedFrom = `${camelCase(routes?.iotDataPoints.title)}_iotDataPoints`;
   const toastConfig = useContext(CustomToastContext);
@@ -25,7 +27,7 @@ export default function IotDataPoints({ deviceTemplate }) {
     state: { permissions, selectedEntity }
   }: any = useData();
   const { state, dispatch } = useTableReducer();
-  const { page, limit, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { page, limit, filters, sorting, selectedRecords, showFilteredRecordsOnly, search } = state;
   const [columns, setColumns] = useState(null);
 
   const { generateColumns } = useColumns();
@@ -120,6 +122,16 @@ export default function IotDataPoints({ deviceTemplate }) {
     )
   };
 
+  useEffect(() => {
+    let millisec = Object.keys(search).length > 0 ? 600 : 5;
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+    searchTimeout = setTimeout(() => {
+      fetchData();
+    }, millisec);
+  }, [search]);
+
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
@@ -136,6 +148,8 @@ export default function IotDataPoints({ deviceTemplate }) {
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
+      })
+      .finally(() => {
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
@@ -169,6 +183,9 @@ export default function IotDataPoints({ deviceTemplate }) {
 
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+    }
+    if (search) {
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
 
     if (showFilteredRecordsOnly) {
