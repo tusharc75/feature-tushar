@@ -429,7 +429,7 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
         </Box>
       )}
       {columns ? (
-        <Box p="6px" zIndex={5} width={'100%'} style={{border : "5px solid red" }}>
+        <Box p="6px" zIndex={5} width={'100%'} >
           <CustomReactTable
             height={'calc(100vh - 345px)'}
             columns={columns}
