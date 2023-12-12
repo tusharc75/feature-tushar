@@ -119,11 +119,11 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
         Cell: ({ row }) => <div>{row.original['status'] ? <p> {row.original.status}</p> : <NoDataCell />}</div>
       },
       {
-        accessor: 'workOrderStatus',
+        accessor: 'serviceStatus',
         Header: 'Result',
         width: 200,
         Cell: ({ row }) => <div>
-          {row?.original['workOrderStatus'] ? <h5> {row?.original?.workOrderStatus}</h5> : <NoDataCell />}
+          {row?.original['serviceStatus'] ? <h5> {row?.original?.serviceStatus}</h5> : <NoDataCell />}
         </div>
       },
       {
@@ -231,6 +231,7 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
       if (parent?.workOrder?.status === WORK_ORDER_STATUS.completed) {
         parent.workOrderStatus = parent?.workOrder?.status;
+        parent.status = parent?.workOrder?.status;
       }
       parent.subRows = generateNestedData(data.material, parent);
     });

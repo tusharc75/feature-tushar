@@ -273,8 +273,8 @@ function Parts({ id }) {
             <Box ml={1} />
             <Box display="flex" style={{ marginLeft: 'auto' }}>
               <ImportExportMenu
-                permissions={permissions?.packages}
-                module="packages-products"
+                permissions={permissions?.product}
+                module="products"
                 api={`${product.api}/unknown/bom`}
                 afterImportCompleted={() => {
                   fetchBOMData();

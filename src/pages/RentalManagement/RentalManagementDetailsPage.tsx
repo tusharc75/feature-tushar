@@ -754,7 +754,7 @@ const RentalManagementDetailsPage = () => {
             open={showCancelConfirmBox.open}
             message={
               showCancelConfirmBox.isQuote
-                ? 'Do you want to create a new version of the quote?'
+                ? `Do you want to create a new version of the ${routes?.quotation?.title?.toLowerCase()}?`
                 : `Are you sure you want to cancel this ${routes.rentalManagement.title.toLowerCase()} ?`
             }
             onClose={() => {

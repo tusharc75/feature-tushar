@@ -5,7 +5,7 @@ import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import { dateFormat, gridLoadingTimeout, prepareDataForGrid, } from 'src/constants/helpers';
+import { dateFormat, gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
 import { camelCase } from 'lodash';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
@@ -20,7 +20,6 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
 
 export default function Rules({ deviceTemplate }) {
-
   const renderedFrom = `${camelCase(routes?.deviceTemplateAlert.title)}_rules`;
   const { state, dispatch } = useTableReducer();
   const toastConfig = useContext(CustomToastContext);
@@ -45,8 +44,11 @@ export default function Rules({ deviceTemplate }) {
   const fetchGridColumns = () => {
     const column = [
       {
-        accessor: 'ruleName', Header: 'Rule Name', show: true, disabled: true,
-        Cell: ({ row }) => (
+        accessor: 'ruleName',
+        Header: 'Rule Name',
+        show: true,
+        disabled: true,
+        Cell: ({ row }) =>
           row.original?.ruleName ? (
             <p
               onClick={() => {
@@ -59,11 +61,13 @@ export default function Rules({ deviceTemplate }) {
           ) : (
             <NoDataCell />
           )
-        )
       },
       {
-        accessor: 'createdBy', Header: 'Created By', show: true, filter: false,
-        Cell: ({ row }) => (
+        accessor: 'createdBy',
+        Header: 'Created By',
+        show: true,
+        filter: false,
+        Cell: ({ row }) =>
           row.original?.createdBy ? (
             <h5 className="createBy" title={`${row.original?.createdBy} • ${moment(row.original?.createdByDate).format(dateFormat)}`}>
               {row.original?.createdBy}
@@ -72,11 +76,13 @@ export default function Rules({ deviceTemplate }) {
           ) : (
             <NoDataCell />
           )
-        )
       },
       {
-        accessor: 'updatedBy', Header: 'Updated By', show: true, filter: false,
-        Cell: ({ row }) => (
+        accessor: 'updatedBy',
+        Header: 'Updated By',
+        show: true,
+        filter: false,
+        Cell: ({ row }) =>
           row.original?.updatedBy ? (
             <h5
               className="updateBy"
@@ -89,7 +95,6 @@ export default function Rules({ deviceTemplate }) {
           ) : (
             <NoDataCell />
           )
-        )
       }
     ];
     setColumns([...column, ActionsRenderer]);
@@ -105,52 +110,50 @@ export default function Rules({ deviceTemplate }) {
     disableSortBy: true,
     canDrag: false,
     Cell: ({ row }) => (
-      (
-        <>
-          <HtmlTooltip title={row.original?.allowedToEdit ? "Edit" : editDisable}>
-            <span>
-              <IconButton
-                disabled={!row.original?.allowedToEdit}
-                size="small"
-                aria-label="Edit"
-                onClick={() => {
-                  setOpen({ open: true, isClone: false, id: row.original?._id });
-                }}
-              >
-                <EditIcon fontSize="small" color={row.original?.allowedToEdit ? "primary" : "disabled"} />
-              </IconButton>
-            </span>
-          </HtmlTooltip>
-
-          <HtmlTooltip title="Clone">
+      <>
+        <HtmlTooltip title={row.original?.allowedToEdit ? 'Edit' : editDisable}>
+          <span>
             <IconButton
+              disabled={!row.original?.allowedToEdit}
               size="small"
-              aria-label="Clone"
+              aria-label="Edit"
               onClick={() => {
-                setOpen({ open: true, isClone: true, id: row.original?.id });
+                setOpen({ open: true, isClone: false, id: row.original?._id });
               }}
             >
-              <FileCopyIcon fontSize="small" color="primary" />
+              <EditIcon fontSize="small" color={row.original?.allowedToEdit ? 'primary' : 'disabled'} />
             </IconButton>
-          </HtmlTooltip>
+          </span>
+        </HtmlTooltip>
 
-          <HtmlTooltip title={row.original?.canDelete ? "Delete" : deleteDisable}>
-            <IconButton
-              disabled={!row.original?.canDelete}
-              size="small"
-              aria-label="Delete"
-              onClick={() => {
-                setDeleteRecord(row.original);
-                setShowDeleteConfirmBox(true);
-              }}
-            >
-              <DeleteIcon fontSize="small" color="error" />
-            </IconButton>
-          </HtmlTooltip>
-        </>
-      )
+        <HtmlTooltip title="Clone">
+          <IconButton
+            size="small"
+            aria-label="Clone"
+            onClick={() => {
+              setOpen({ open: true, isClone: true, id: row.original?.id });
+            }}
+          >
+            <FileCopyIcon fontSize="small" color="primary" />
+          </IconButton>
+        </HtmlTooltip>
+
+        <HtmlTooltip title={row.original?.canDelete ? 'Delete' : deleteDisable}>
+          <IconButton
+            disabled={!row.original?.canDelete}
+            size="small"
+            aria-label="Delete"
+            onClick={() => {
+              setDeleteRecord(row.original);
+              setShowDeleteConfirmBox(true);
+            }}
+          >
+            <DeleteIcon fontSize="small" color="error" />
+          </IconButton>
+        </HtmlTooltip>
+      </>
     )
-  }
+  };
 
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
@@ -168,6 +171,8 @@ export default function Rules({ deviceTemplate }) {
           };
         });
         dispatch({ type: 'initialize', data: rows, count: count });
+      })
+      .finally(() => {
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
@@ -193,7 +198,6 @@ export default function Rules({ deviceTemplate }) {
         fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
-
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -274,6 +278,7 @@ export default function Rules({ deviceTemplate }) {
           refreshGrid={fetchData}
           showOnlyShowFilteredRecordSwitch={true}
           showFilters={false}
+          isClientSideGrid={true}
         />
       ) : (
         <Box p={2} height={500}>
