@@ -38,7 +38,6 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
 
   const [isUpdating, setUpdating] = useState(false);
 
-  const [selectedProducts, setSelectedProducts] = useState([]);
   const [isProductEdit, setIsProductEdit] = useState({ open: false, isBulkedit: false });
 
   const [recordToUpdate, setRecordToUpdate] = useState(null);
@@ -273,7 +272,6 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
     }
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
-    setSelectedProducts([]);
   };
 
   const handleAdd = async (rows) => {
@@ -517,7 +515,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
           <Box ml={1}>
             <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : 'Actions'}>
               <Button
-                disabled={selectedProducts?.length || !allowedToEdit || (subleaseData.type === SUBLEASE_TYPE.vendor && !isIssued) ? false : true}
+                disabled={selectedRecords?.length || !allowedToEdit || (subleaseData.type === SUBLEASE_TYPE.vendor && !isIssued) ? false : true}
                 variant={'outlined'}
                 color="default"
                 size="small"
@@ -544,7 +542,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
           >
             <MenuItem
               color="primary"
-              disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
+              disabled={!Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length)}
               onClick={() => {
                 setAnchorEl(null);
                 setIsProductEdit({ open: true, isBulkedit: true });
@@ -554,11 +552,11 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
             </MenuItem>
             <MenuItem
               color="primary"
-              disabled={selectedProducts?.length && selectedProducts.every((e) => e.canDelete) ? false : true}
+              disabled={selectedRecords?.length && selectedRecords.every((e) => e.canDelete) ? false : true}
               onClick={() => {
                 const dataToDelete =
-                  selectedProducts &&
-                  selectedProducts
+                  selectedRecords &&
+                  selectedRecords
                     .filter((e) => !e.hideSelection)
                     .map((rec: any) => {
                       const obj: any = {};
@@ -621,7 +619,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
             subleaseData={subleaseData}
             rowData={recordToUpdate}
             material={material}
-            selectedProducts={selectedProducts}
+            selectedProducts={selectedRecords}
             loading={isUpdating}
           />
         )
