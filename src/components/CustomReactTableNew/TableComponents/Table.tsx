@@ -163,87 +163,73 @@ const TableComponent = ({
 
   return (
     <>
-      <div className="relative">
-        {!loading && !error && rows.length === 0 && (
-          <>
-            <Box
-              style={{ height: `calc(${height ?? '100%'} - 60px)` }}
-              className="w-full h-full absolute inset-0 top-[46px] flex justify-center items-center -z-10"
-            >
-              <div className=" px-10 py-5 rounded-lg text-center">
-                <p>No data found</p>
-              </div>
-            </Box>
-          </>
+      <div
+        style={{
+          display: 'block',
+          overflow: loading ? 'hidden' : 'auto',
+          height: height ?? '100%'
+        }}
+        className="border z-10"
+        ref={virtualization ? parentRef : undefined}
+      >
+        {(loading || error) && (
+          <Box className="bg-[rgba(255,255,255,0.2)] dark:bg-[rgba(0,0,0,0.1)] w-full h-full z-50 absolute inset-0 flex justify-center items-center">
+            <div className="bg-[white] dark:bg-[var(--dark-secondary)] px-10 py-5 rounded-lg text-center shadow-md">
+              {error ? (
+                <>
+                  <Error className="mx-auto mb-2" />
+                  <p>Something Went Wrong</p>
+                </>
+              ) : loading ? (
+                <>
+                  <CircularProgress />
+                  <p>Loading...</p>
+                </>
+              ) : null}
+            </div>
+          </Box>
         )}
-        <div
-          style={{
-            display: 'block',
-            overflow: loading ? 'hidden' : 'auto',
-            height: height ?? '100%'
-          }}
-          className="border z-10"
-          ref={virtualization ? parentRef : undefined}
-        >
-          {(loading || error) && (
-            <Box className="bg-[rgba(255,255,255,0.2)] dark:bg-[rgba(0,0,0,0.1)] w-full h-full z-50 absolute inset-0 flex justify-center items-center">
-              <div className="bg-[white] dark:bg-[var(--dark-secondary)] px-10 py-5 rounded-lg text-center shadow-md">
-                {error ? (
-                  <>
-                    <Error className="mx-auto mb-2" />
-                    <p>Something Went Wrong</p>
-                  </>
-                ) : loading ? (
-                  <>
-                    <CircularProgress />
-                    <p>Loading...</p>
-                  </>
-                ) : null}
-              </div>
-            </Box>
-          )}
 
-          <MaUTable
-            size="small"
-            className="tableWrap table sticky"
-            style={{ width: `${columnVirtualizer.getTotalSize()}px`, height: `${rowVirtualizer.getTotalSize()}px` }}
+        <MaUTable
+          size="small"
+          className="tableWrap table sticky"
+          style={{ width: `${columnVirtualizer.getTotalSize()}px`, height: `${rowVirtualizer.getTotalSize()}px` }}
+        >
+          <TableHead
+            style={{
+              overflowY: 'auto',
+              overflowX: 'hidden'
+            }}
+            className="header sticky top-0 bg-[var(--dark-primary,_white)] z-[11]"
           >
-            <TableHead
-              style={{
-                overflowY: 'auto',
-                overflowX: 'hidden'
-              }}
-              className="header sticky top-0 bg-[var(--dark-primary,_white)] z-[11]"
-            >
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow className="tr sticky top-0 bg-[var(--dark-primary,_white)] z-[11] " key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
-                    return (
-                      <DraggableHeader
-                        virtualization={virtualization}
-                        table={table}
-                        customFilters={customFilters}
-                        dispatch={dispatch}
-                        isClientSideGrid={isClientSideGrid}
-                        reorder={reorder}
-                        header={header}
-                        key={header.id}
-                      />
-                    );
-                  })}
-                </TableRow>
-              ))}
-            </TableHead>
-            <TableBody
-              style={{
-                overflow: 'hidden'
-              }}
-              className="body relative"
-            >
-              {virtualization ? <VirtualTable /> : <NormalTable />}
-            </TableBody>
-          </MaUTable>
-        </div>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow className="tr sticky top-0 bg-[var(--dark-primary,_white)] z-[11] " key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <DraggableHeader
+                      virtualization={virtualization}
+                      table={table}
+                      customFilters={customFilters}
+                      dispatch={dispatch}
+                      isClientSideGrid={isClientSideGrid}
+                      reorder={reorder}
+                      header={header}
+                      key={header.id}
+                    />
+                  );
+                })}
+              </TableRow>
+            ))}
+          </TableHead>
+          <TableBody
+            style={{
+              overflow: 'hidden'
+            }}
+            className="body relative"
+          >
+            {virtualization ? <VirtualTable /> : <NormalTable />}
+          </TableBody>
+        </MaUTable>
       </div>
     </>
   );

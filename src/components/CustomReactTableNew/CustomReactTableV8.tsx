@@ -525,24 +525,38 @@ const CustomReactTable = ({
             )}
           </GridHeader>
           {!isMobileView && (
-            <TableComponent
-              virtualization={virtualization}
-              {...{
-                state,
-                setWholeRowsCellColor,
-                table,
-                dispatch,
-                setCellValue,
-                submitInput,
-                cellValue,
-                resetField,
-                isClientSideGrid,
-                reorder,
-                loading,
-                error,
-                height
-              }}
-            />
+            <div className="relative">
+              {!loading && !error && rows.length === 0 && (
+                <>
+                  <Box
+                    style={{ height: `calc(${height ?? '100%'} - 60px)` }}
+                    className="w-full h-full absolute inset-0 top-[46px] flex justify-center items-center -z-10"
+                  >
+                    <div className=" px-10 py-5 rounded-lg text-center">
+                      <p>No data found</p>
+                    </div>
+                  </Box>
+                </>
+              )}
+              <TableComponent
+                virtualization={virtualization}
+                {...{
+                  state,
+                  setWholeRowsCellColor,
+                  table,
+                  dispatch,
+                  setCellValue,
+                  submitInput,
+                  cellValue,
+                  resetField,
+                  isClientSideGrid,
+                  reorder,
+                  loading,
+                  error,
+                  height
+                }}
+              />
+            </div>
           )}
           {isMobileView && rows ? (
             <SwipableListForMobile
