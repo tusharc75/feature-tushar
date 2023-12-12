@@ -38,6 +38,7 @@ import { CellRenderer, defaultColumn, DraggableHeader, IndeterminateCheckbox } f
 import { useCreateColumns } from './hooks/useCreateColumns';
 import type { TInitialState } from './hooks/useTableReducer';
 import { childrenProperty, getDataFromLocalStorage, getStickyColumnNames, updateGridHiddenColumns, useSkipper } from './utils';
+import TableComponent from './TableComponents/Table';
 
 const CustomReactTable = ({
   columns,
@@ -59,7 +60,8 @@ const CustomReactTable = ({
   hideAction = false,
   selectedReportView = null,
   setSelectedReportView = null,
-  reportSave = false
+  reportSave = false,
+  virtualization = false
 }) => {
   const {
     currentEditingCellPosition,
@@ -181,8 +183,6 @@ const CustomReactTable = ({
     }
   }, [newColumns, expander, hideSelection, renderedFrom, selectedReportView]);
 
-
-
   function reorder(draggedColumnId: string, targetColumnId: string, columnOrder: string[]) {
     columnOrder.splice(columnOrder.indexOf(targetColumnId), 0, columnOrder.splice(columnOrder.indexOf(draggedColumnId), 1)[0] as string);
     const dragItem = newColumns.find((col) => col?.id === draggedColumnId || col?.accessor === draggedColumnId);
@@ -195,8 +195,8 @@ const CustomReactTable = ({
       (a, b) => columnOrder.findIndex((d) => d === a.accessor) - columnOrder.findIndex((d) => d === b.accessor)
     );
 
-    const newcolumnOrderToSave = newBaseColumns?.filter((o) => !['left', 'right']?.includes(o?.sticky)
-      && !['expander', 'selection', 'action']?.includes(o?.id))
+    const newcolumnOrderToSave = newBaseColumns
+      ?.filter((o) => !['left', 'right']?.includes(o?.sticky) && !['expander', 'selection', 'action']?.includes(o?.id))
       ?.map((o) => o?.id);
 
     setBaseColumns(newBaseColumns);
@@ -525,160 +525,24 @@ const CustomReactTable = ({
             )}
           </GridHeader>
           {!isMobileView && (
-            <div className="relative">
-              {!loading && !error && rows.length === 0 && (
-                <>
-                  <Box
-                    style={{ height: `calc(${height ?? '100%'} - 60px)` }}
-                    className="w-full h-full absolute inset-0 top-[46px] flex justify-center items-center -z-10"
-                  >
-                    <div className=" px-10 py-5 rounded-lg text-center">
-                      <p>No data found</p>
-                    </div>
-                  </Box>
-                </>
-              )}
-              <div
-                style={{
-                  display: 'block',
-                  overflow: loading ? 'hidden' : 'auto',
-                  height: height ?? '100%'
-                }}
-                className="border z-10"
-              >
-                {(loading || error) && (
-                  <Box className="bg-[rgba(255,255,255,0.2)] dark:bg-[rgba(0,0,0,0.1)] w-full h-full z-50 absolute inset-0 flex justify-center items-center">
-                    <div className="bg-[white] dark:bg-[var(--dark-secondary)] px-10 py-5 rounded-lg text-center shadow-md">
-                      {error ? (
-                        <>
-                          <Error className="mx-auto mb-2" />
-                          <p>Something Went Wrong</p>
-                        </>
-                      ) : loading ? (
-                        <>
-                          <CircularProgress />
-                          <p>Loading...</p>
-                        </>
-                      ) : null}
-                    </div>
-                  </Box>
-                )}
-                <div
-                  className="relative"
-                  style={{
-                    position: 'relative'
-                  }}
-                >
-                  <MaUTable size="small" className="tableWrap table sticky">
-                    <TableHead
-                      style={{ overflowY: 'auto', overflowX: 'hidden' }}
-                      className="header sticky top-0 bg-[var(--dark-primary,_white)] z-[11]"
-                    >
-                      {table.getHeaderGroups().map((headerGroup) => (
-                        <TableRow className="tr sticky top-0 bg-[var(--dark-primary,_white)] z-[11] " key={headerGroup.id}>
-                          {headerGroup.headers.map((header) => {
-                            return (
-                              <DraggableHeader
-                                table={table}
-                                customFilters={customFilters}
-                                dispatch={dispatch}
-                                isClientSideGrid={isClientSideGrid}
-                                reorder={reorder}
-                                header={header}
-                                key={header.id}
-                              />
-                            );
-                          })}
-                        </TableRow>
-                      ))}
-                    </TableHead>
-                    <TableBody
-                      style={{
-                        overflow: 'hidden'
-                      }}
-                      className="body relative"
-                    >
-                      {rows.map((row) => {
-                        return (
-                          <TableRow key={row.id} className={`tr`}>
-                            {row.getVisibleCells().map((cell, index) => {
-                              return (
-                                <CellRenderer
-                                  key={cell.id}
-                                  {...{
-                                    state,
-                                    cell,
-                                    setWholeRowsCellColor,
-                                    row,
-                                    index,
-                                    table,
-                                    dispatch,
-                                    setCellValue,
-                                    submitInput,
-                                    cellValue,
-                                    resetField
-                                  }}
-                                />
-                              );
-                            })}
-                          </TableRow>
-                        );
-                      })}
-                      {/* {rowVirtualizer.getVirtualItems().map((virtualRow, index) => {
-                        const row = rows[virtualRow.index] as Row<any>;
-                        return (
-                          <TableRow
-                            key={row.id}
-                            className={`tr  d-flex`}
-                            style={{
-                              display: 'flex',
-                              maxHeight: `${virtualRow.size}px`,
-                              height: `${virtualRow.size}px`,
-                              position: 'absolute',
-                              width: '100%',
-                              top: 0,
-                              left: 0,
-                              transform: `translateY(${virtualRow.start}px)`
-                            }}
-                          >
-                            {columnVirtualizer.getVirtualItems().map((virtualCell, index) => {
-                              const cell = row.getVisibleCells()[virtualCell.index];
-                              return (
-                                <CellRenderer
-                                  key={cell.id}
-                                  styles={{
-                                    position: 'absolute',
-                                    top: 0,
-                                    left: `${virtualCell.start}px`,
-                                    width: `${virtualCell.size}px`,
-                                    height: `${virtualRow.size}px`
-                                    // transform: `translateX(${virtualCell.start}px) translateY(${virtualRow.start}px)`
-                                  }}
-                                  {...{
-                                    state,
-                                    cell,
-                                    setWholeRowsCellColor,
-                                    row,
-                                    index,
-                                    table,
-                                    dispatch,
-                                    setCellValue,
-                                    submitInput,
-                                    cellValue,
-                                    resetField
-                                  }}
-                                />
-                              );
-                            })}
-                           
-                          </TableRow>
-                        );
-                      })} */}
-                    </TableBody>
-                  </MaUTable>
-                </div>
-              </div>
-            </div>
+            <TableComponent
+              virtualization={virtualization}
+              {...{
+                state,
+                setWholeRowsCellColor,
+                table,
+                dispatch,
+                setCellValue,
+                submitInput,
+                cellValue,
+                resetField,
+                isClientSideGrid,
+                reorder,
+                loading,
+                error,
+                height
+              }}
+            />
           )}
           {isMobileView && rows ? (
             <SwipableListForMobile

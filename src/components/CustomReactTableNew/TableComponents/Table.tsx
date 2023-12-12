@@ -1,0 +1,252 @@
+import React, { Dispatch, useEffect } from 'react';
+import { Box, CircularProgress, TableBody, TableHead, TableRow } from '@material-ui/core';
+import { CellRenderer, DraggableHeader } from './TableHelperComponents';
+import MaUTable from '@material-ui/core/Table';
+import { TActios, TInitialState } from '../hooks/useTableReducer';
+import { Row, Table } from '@tanstack/react-table';
+import { useVirtualizer } from '@tanstack/react-virtual';
+import { Error } from '@material-ui/icons';
+
+type TTableProps = {
+  state: TInitialState;
+  setWholeRowsCellColor: any;
+  dispatch: Dispatch<TActios>;
+  table: Table<any>;
+  setCellValue: React.Dispatch<React.SetStateAction<string>>;
+  submitInput: () => void;
+  cellValue: string;
+  resetField: () => void;
+  isClientSideGrid: boolean;
+  reorder: (draggedColumnId: string, targetColumnId: string, columnOrder: string[]) => string[];
+  loading: boolean;
+  error: boolean;
+  height?: any;
+  virtualization: boolean;
+};
+
+const TableComponent = ({
+  state,
+  setWholeRowsCellColor,
+  table,
+  dispatch,
+  setCellValue,
+  submitInput,
+  cellValue,
+  resetField,
+  isClientSideGrid,
+  reorder,
+  loading,
+  error,
+  height,
+  virtualization = false
+}: TTableProps) => {
+  const { filters: customFilters }: TInitialState = state;
+  const columns = table.getAllColumns();
+  const { rows } = table.getRowModel();
+
+  // virtualization
+  const parentRef = React.useRef();
+
+  const rowVirtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: (i) => 45,
+    overscan: 3
+  });
+
+  const columnVirtualizer = useVirtualizer({
+    horizontal: true,
+    count: columns.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: (i) => columns[i].getSize(),
+    overscan: 3
+  });
+
+  useEffect(() => {
+    if (virtualization) rowVirtualizer.measure();
+  }, [rowVirtualizer, rows.length, virtualization]);
+
+  useEffect(() => {
+    if (virtualization) columnVirtualizer.measure();
+  }, [columnVirtualizer, columns.length, virtualization]);
+
+  const VirtualTable = () => {
+    return (
+      <>
+        {rowVirtualizer.getVirtualItems().map((virtualRow, index) => {
+          const row = rows[virtualRow.index] as Row<any>;
+          return (
+            <TableRow
+              key={row.id}
+              className={`tr  d-flex`}
+              style={{
+                maxHeight: `${virtualRow.size}px`,
+                height: `${virtualRow.size}px`,
+                position: 'absolute',
+                width: '100%',
+                top: 0,
+                left: 0,
+                transform: `translateY(${virtualRow.start}px)`
+              }}
+            >
+              {columnVirtualizer.getVirtualItems().map((virtualCell, index) => {
+                const cell = row.getVisibleCells()[virtualCell.index];
+                return (
+                  <CellRenderer
+                    key={cell.id}
+                    virtualStyles={{
+                      position: 'absolute',
+                      top: 0,
+                      left: `${virtualCell.start}px`,
+                      width: `${virtualCell.size}px`,
+                      height: `${virtualRow.size}px`
+                      // transform: `translateX(${virtualCell.start}px) translateY(${virtualRow.start}px)`
+                    }}
+                    {...{
+                      virtualization,
+                      state,
+                      cell,
+                      setWholeRowsCellColor,
+                      row,
+                      index,
+                      table,
+                      dispatch,
+                      setCellValue,
+                      submitInput,
+                      cellValue,
+                      resetField
+                    }}
+                  />
+                );
+              })}
+            </TableRow>
+          );
+        })}
+      </>
+    );
+  };
+
+  const NormalTable = () => {
+    return (
+      <>
+        {rows.map((row) => {
+          return (
+            <TableRow key={row.id} className={`tr`}>
+              {row.getVisibleCells().map((cell, index) => {
+                return (
+                  <CellRenderer
+                    key={cell.id}
+                    virtualStyles={{}}
+                    {...{
+                      virtualization,
+                      state,
+                      cell,
+                      setWholeRowsCellColor,
+                      row,
+                      index,
+                      table,
+                      dispatch,
+                      setCellValue,
+                      submitInput,
+                      cellValue,
+                      resetField
+                    }}
+                  />
+                );
+              })}
+            </TableRow>
+          );
+        })}
+      </>
+    );
+  };
+
+  return (
+    <>
+      <div className="relative">
+        {!loading && !error && rows.length === 0 && (
+          <>
+            <Box
+              style={{ height: `calc(${height ?? '100%'} - 60px)` }}
+              className="w-full h-full absolute inset-0 top-[46px] flex justify-center items-center -z-10"
+            >
+              <div className=" px-10 py-5 rounded-lg text-center">
+                <p>No data found</p>
+              </div>
+            </Box>
+          </>
+        )}
+        <div
+          style={{
+            display: 'block',
+            overflow: loading ? 'hidden' : 'auto',
+            height: height ?? '100%'
+          }}
+          className="border z-10"
+          ref={virtualization ? parentRef : undefined}
+        >
+          {(loading || error) && (
+            <Box className="bg-[rgba(255,255,255,0.2)] dark:bg-[rgba(0,0,0,0.1)] w-full h-full z-50 absolute inset-0 flex justify-center items-center">
+              <div className="bg-[white] dark:bg-[var(--dark-secondary)] px-10 py-5 rounded-lg text-center shadow-md">
+                {error ? (
+                  <>
+                    <Error className="mx-auto mb-2" />
+                    <p>Something Went Wrong</p>
+                  </>
+                ) : loading ? (
+                  <>
+                    <CircularProgress />
+                    <p>Loading...</p>
+                  </>
+                ) : null}
+              </div>
+            </Box>
+          )}
+
+          <MaUTable
+            size="small"
+            className="tableWrap table sticky"
+            style={{ width: `${columnVirtualizer.getTotalSize()}px`, height: `${rowVirtualizer.getTotalSize()}px` }}
+          >
+            <TableHead
+              style={{
+                overflowY: 'auto',
+                overflowX: 'hidden'
+              }}
+              className="header sticky top-0 bg-[var(--dark-primary,_white)] z-[11]"
+            >
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow className="tr sticky top-0 bg-[var(--dark-primary,_white)] z-[11] " key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <DraggableHeader
+                        virtualization={virtualization}
+                        table={table}
+                        customFilters={customFilters}
+                        dispatch={dispatch}
+                        isClientSideGrid={isClientSideGrid}
+                        reorder={reorder}
+                        header={header}
+                        key={header.id}
+                      />
+                    );
+                  })}
+                </TableRow>
+              ))}
+            </TableHead>
+            <TableBody
+              style={{
+                overflow: 'hidden'
+              }}
+              className="body relative"
+            >
+              {virtualization ? <VirtualTable /> : <NormalTable />}
+            </TableBody>
+          </MaUTable>
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default TableComponent;
