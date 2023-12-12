@@ -167,6 +167,8 @@ const TableComponent = ({
     );
   };
 
+  const styles = virtualization ? { width: `${columnVirtualizer.getTotalSize()}px`, height: `${rowVirtualizer.getTotalSize()}px` } : {};
+
   return (
     <>
       <div
@@ -196,11 +198,7 @@ const TableComponent = ({
           </Box>
         )}
 
-        <MaUTable
-          size="small"
-          className="tableWrap table sticky"
-          style={{ width: `${columnVirtualizer.getTotalSize()}px`, height: `${rowVirtualizer.getTotalSize()}px` }}
-        >
+        <MaUTable size="small" className="tableWrap table sticky" style={styles}>
           <TableHead
             style={{
               overflowY: 'auto',
