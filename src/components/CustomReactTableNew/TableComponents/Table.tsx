@@ -1,4 +1,4 @@
-import React, { Dispatch, useEffect } from 'react';
+import React, { Dispatch, useEffect, useMemo } from 'react';
 import { Box, CircularProgress, TableBody, TableHead, TableRow } from '@material-ui/core';
 import { CellRenderer, DraggableHeader } from './TableHelperComponents';
 import MaUTable from '@material-ui/core/Table';
@@ -42,6 +42,12 @@ const TableComponent = ({
 }: TTableProps) => {
   const { filters: customFilters }: TInitialState = state;
   const columns = table.getAllColumns();
+  const { columnVisibility } = table.getState();
+
+  const visibleColumns = useMemo(() => {
+    return columns.filter((column) => columnVisibility[column.id]);
+  }, [columnVisibility, columns]);
+
   const { rows } = table.getRowModel();
 
   // virtualization
@@ -56,9 +62,9 @@ const TableComponent = ({
 
   const columnVirtualizer = useVirtualizer({
     horizontal: true,
-    count: columns.length,
+    count: visibleColumns.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: (i) => columns[i].getSize(),
+    estimateSize: (i) => visibleColumns[i].getSize(),
     overscan: 3
   });
 
@@ -68,7 +74,7 @@ const TableComponent = ({
 
   useEffect(() => {
     if (virtualization) columnVirtualizer.measure();
-  }, [columnVirtualizer, columns.length, virtualization]);
+  }, [columnVirtualizer, visibleColumns.length, virtualization]);
 
   const VirtualTable = () => {
     return (
