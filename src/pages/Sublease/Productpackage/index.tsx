@@ -231,9 +231,12 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
           _subRow.description = _subRow.productDetail?.productDescription;
           _subRow.qtyDisplay = `${parent.qty * _subRow.qty}`;
           _subRow.isValid = _subRow['finalPrice_' + subleaseData?.currency?.toLowerCase()] ? true : !isRateRequired;
-          _subRow.assetQty = subleaseData.type === SUBLEASE_TYPE.vendor ? inventory?.filter((e) => e?.inventoryDetail?.product === parent.materialId).length :
-            inventory?.filter((e) => e._id === parent._id).length
+          _subRow.assetQty = subleaseData.type === SUBLEASE_TYPE.vendor ? inventory?.filter((e) => e?.inventoryDetail?.product === _subRow.materialId).length :
+            inventory?.filter((e) => e._id === _subRow._id).length
           _subRow.canDelete = _subRow.assetQty === 0 && allowedToEdit ? true : false;
+          if (!_subRow.canDelete) {
+            parent.canDelete = false
+          }
           _subRow.hideSelection = _subRow.assetQty > 0 ? true : false;
           assetQty += _subRow.assetQty;
         });
