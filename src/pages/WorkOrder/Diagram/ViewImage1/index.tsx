@@ -116,10 +116,11 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
   return !loading ? (
     <div>
       <Box mb={1} display="flex" justifyContent="space-between" alignItems="center">
-        <Box>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
           <Button size="small" variant="outlined" color="primary" onClick={handleAddText}>
             Add Text
           </Button>
+          <Box ml={1} />
           {selectedText && !editingText && (
             <Button
               size="small"
@@ -136,6 +137,26 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
               }}
             >
               Remove Text
+            </Button>
+          )}
+          <Box ml={1} />
+          {selectedText && !editingText && (
+            <Button
+              size="small"
+              variant="outlined"
+              color="primary"
+              onClick={() => {
+                setTexts((state) => {
+                  return state.map((s) => {
+                    if (s.id === selectedText.id) {
+                      return { ...s, fill: s.fill === 'black' ? 'white' : 'black' };
+                    }
+                    return s;
+                  });
+                });
+              }}
+            >
+              Change Color
             </Button>
           )}
         </Box>
@@ -157,7 +178,7 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
       <Box height="calc(100vh - 115px)" style={{ overflow: 'hidden', position: 'relative', overflowX: 'auto', overflowY: 'auto' }}>
         <img src={url} alt="image" />
         <div style={{ width: widthHeight.width, height: widthHeight.height, position: 'absolute', top: 0, left: 0, overflow: 'hidden' }}>
-          {texts.map((text) => (
+          {texts.map((text: any) => (
             <CustomText
               key={text.id}
               textState={text}
@@ -172,21 +193,21 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
           {editingText && (
             <textarea
               autoFocus
+              aria-multiline
               ref={inputRef}
               style={{
                 position: 'absolute',
-                top: editingText.x,
-                left: editingText.y,
-                width: editingText.width,
+                top: editingText.y,
+                left: editingText.x,
+                // width: editingText.width,
                 overflow: 'hidden',
-                resize: 'none',
                 outline: 'none',
-                border: 'none',
+                border: '1px solid black',
                 margin: 0,
                 padding: 0,
                 fontSize: editingText.fontSize,
                 background: 'none',
-                color: editingText.fill
+                color: editingText.fill,
               }}
               onKeyDown={(e) => {
                 if (e?.keyCode === 13) {
