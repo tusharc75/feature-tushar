@@ -89,61 +89,64 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
         minWidth: 200,
         width: 200,
         sticky: 'none',
-        Cell: ({ row, rows }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            {allowedToEdit ? (
-              <h5
-                onClick={() => {
-                  setMaterialEdit({
-                    open: true,
-                    data: row.original,
-                    bulkedit: false,
-                    showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
-                  });
-                }}
-                className="link text-truncate"
-                title={row.original?.detail}
-              >
-                {row.original?.detail}
-              </h5>
-            ) : (
-              <h5 className="text-truncate">{row.original?.detail}</h5>
-            )}
-            {allowedToEdit && row.original.type === MATERIAL_TYPE.package && (
-              <>
-                <Box ml={1}>
-                  <span>({row.original?.subRows?.length})</span>
-                </Box>
-                <Box ml={1}>
-                  <HtmlTooltip title="Add Existing Products">
-                    <IconButton
-                      onClick={() => {
-                        setAddDialog({ open: true, type: MATERIAL_TYPE.product, parentId: row.original?._id });
-                      }}
-                      size="small"
-                    >
-                      <Add fontSize="small" color="primary" />
-                    </IconButton>
-                  </HtmlTooltip>
-                </Box>
-              </>
-            )}
-            <Box ml={1}>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  if (row.original.type === MATERIAL_TYPE.product) {
-                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                  } else {
-                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                  }
-                }}
-              >
-                <OpenInNewIcon fontSize="small" color="primary" />
-              </IconButton>
-            </Box>
-          </div>
-        )
+        Cell: ({ row, table }) => {
+          const { rows } = table.getRowModel();
+          return (
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              {allowedToEdit ? (
+                <h5
+                  onClick={() => {
+                    setMaterialEdit({
+                      open: true,
+                      data: row.original,
+                      bulkedit: false,
+                      showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
+                    });
+                  }}
+                  className="link text-truncate"
+                  title={row.original?.detail}
+                >
+                  {row.original?.detail}
+                </h5>
+              ) : (
+                <h5 className="text-truncate">{row.original?.detail}</h5>
+              )}
+              {allowedToEdit && row.original.type === MATERIAL_TYPE.package && (
+                <>
+                  <Box ml={1}>
+                    <span>({row.original?.subRows?.length})</span>
+                  </Box>
+                  <Box ml={1}>
+                    <HtmlTooltip title="Add Existing Products">
+                      <IconButton
+                        onClick={() => {
+                          setAddDialog({ open: true, type: MATERIAL_TYPE.product, parentId: row.original?._id });
+                        }}
+                        size="small"
+                      >
+                        <Add fontSize="small" color="primary" />
+                      </IconButton>
+                    </HtmlTooltip>
+                  </Box>
+                </>
+              )}
+              <Box ml={1}>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    if (row.original.type === MATERIAL_TYPE.product) {
+                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                    } else {
+                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                    }
+                  }}
+                >
+                  <OpenInNewIcon fontSize="small" color="primary" />
+                </IconButton>
+              </Box>
+            </div>
+          );
+        }
       },
       {
         accessor: 'description',
@@ -234,13 +237,13 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
       parent.detail = parent?.detail
         ? parent?.detail
         : parent.type === MATERIAL_TYPE.product
-          ? parent.productDetail?.productName
-          : parent.packageDetail?.packageName;
+        ? parent.productDetail?.productName
+        : parent.packageDetail?.packageName;
       parent.description = parent?.description
         ? parent?.description
         : parent.type === MATERIAL_TYPE.product
-          ? parent?.productDetail?.productDescription
-          : parent?.packageDetail?.packageDescription;
+        ? parent?.productDetail?.productDescription
+        : parent?.packageDetail?.packageDescription;
       parent.qty = parent.qty;
       parent.qtyDisplay = parent.qty;
       parent.canDelete = parent?.workOrder ? false : true;
@@ -279,13 +282,13 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
       _subRow.detail = _subRow?.detail
         ? _subRow?.detail
         : _subRow.type === MATERIAL_TYPE.product
-          ? _subRow.productDetail?.productName
-          : _subRow.packageDetail?.packageName;
+        ? _subRow.productDetail?.productName
+        : _subRow.packageDetail?.packageName;
       _subRow.description = _subRow?.description
         ? _subRow?.description
         : _subRow.type === MATERIAL_TYPE.product
-          ? _subRow?.productDetail?.productDescription
-          : _subRow?.packageDetail?.packageDescription;
+        ? _subRow?.productDetail?.productDescription
+        : _subRow?.packageDetail?.packageDescription;
       _subRow.qty = _subRow.qty;
       _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
       _subRow.canDelete = _subRow?.workOrder ? false : true;
@@ -440,7 +443,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
               >
                 Add Existing Products
               </MenuItem>
-              {permissions?.product?.isCreate &&
+              {permissions?.product?.isCreate && (
                 <MenuItem
                   onClick={() => {
                     closeAddActions();
@@ -449,7 +452,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
                 >
                   Add New Product
                 </MenuItem>
-              }
+              )}
               {/* <MenuItem
                 onClick={() => {
                   closeAddActions();
@@ -591,7 +594,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
             handleAdd(rows);
           }}
           isSubmitting={isSubmitting}
-          packageType={"product"}
+          packageType={'product'}
         />
       )}
       {materialEdit.open && (
