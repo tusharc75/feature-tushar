@@ -14,8 +14,8 @@ interface GridHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
 const GridHeader: FC<GridHeaderProps> = ({ refreshGrid, children, buttons, className, loading, startButtons, ...others }) => {
   return (
     <div className={`flex items-center justify-between my-[8px] gap-[8px] flex-wrap ${className}`} {...others}>
-      <div>{children}</div>
-      <div className="buttons flex flex-wrap gap-[8px] justify-between w-full sm:w-[unset] ml-auto">
+      <div className="flex-grow">{children}</div>
+      <div className="buttons flex flex-wrap gap-[8px] justify-between w-full min-[768px]:w-[unset] ml-auto">
         <div className="buttons flex flex-wrap gap-[8px]">{startButtons}</div>
         <div className="buttons flex flex-wrap gap-[8px] ">
           {buttons}

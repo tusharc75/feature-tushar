@@ -8,14 +8,13 @@ import { fetch_quotation_product_fields } from 'src/components/Quotation/helper'
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { prepareDataForGrid, quotation } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import SendEmail from '../SendEmail';
-import { capitalize, startCase } from 'lodash';
+import { capitalize, } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { generateCustomTableColumns } from 'src/constants/columns';
 import { useData } from 'src/StateProvider/Provider';
 import { AiFillEdit } from 'react-icons/ai';
 import { useHistory } from 'react-router-dom';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 
 const QuoteBuilder = ({
   quotationData,
@@ -38,8 +37,11 @@ const QuoteBuilder = ({
     state: { user, permissions }
   }: any = useData();
 
+  const { generateColumns } = useColumns();
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, selectedRecords } = state;
+
   const [columns, setColumns] = useState(null);
-  const [rowsData, setRowsData] = useState(null);
   const [allColumn, setAllColumn] = useState([]);
 
   useEffect(() => {
@@ -61,7 +63,7 @@ const QuoteBuilder = ({
     data?.forEach((e) => {
       e.isColumnEditable = false;
     });
-    const newColumns = generateCustomTableColumns(data, quotationData?.currency, renderedFrom);
+    const newColumns = generateColumns(renderedFrom, data, null, false, quotationData?.currency);
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';
@@ -71,7 +73,7 @@ const QuoteBuilder = ({
         accessor: 'index',
         Header: 'Index',
         width: 70,
-        sticky: isMobile ? 'none' : 'left',
+        sticky: 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
@@ -80,7 +82,7 @@ const QuoteBuilder = ({
       {
         accessor: 'type',
         Header: 'Type',
-        sticky: isMobile ? 'none' : 'left',
+        sticky: isMobile || isTablet ? 'none' : 'left',
         width: 100,
         Cell: ({ row }) => <p className="text-truncate">{row.original.type === 'serializedAsset' ? 'Asset' : capitalize(row.original.type)}</p>
       },
@@ -106,14 +108,13 @@ const QuoteBuilder = ({
                   size="small"
                   onClick={() => {
                     window.open(
-                      `${
-                        row.original.type === 'serializedAsset'
-                          ? routes.serializedAssetDetail.path
-                          : row.original.type === 'product'
+                      `${row.original.type === 'serializedAsset'
+                        ? routes.serializedAssetDetail.path
+                        : row.original.type === 'product'
                           ? routes.productDetail.path
                           : row.original.type === 'package'
-                          ? routes.packagesDetail.path
-                          : routes.serviceMasterDetail.path
+                            ? routes.packagesDetail.path
+                            : routes.serviceMasterDetail.path
                       }/${row.original.materialId}`
                     );
                   }}
@@ -127,18 +128,18 @@ const QuoteBuilder = ({
       },
       ...(permissions?.leadTimeMaster
         ? [
-            {
-              accessor: 'leadTime',
-              Header: 'Lead Time (Days)',
-              Cell: ({ row }) => (row.original?.leadTime && row.original?.leadTime?.length ? <p>{row.original['leadTime']}</p> : <p>0</p>),
-              Footer: (info) => {
-                const total = info.rows
-                  .filter((f) => f.values.hasOwnProperty('leadTime') && !isNaN(f.values['leadTime']))
-                  .reduce((sum, row) => parseInt(row.values['leadTime']) + sum, 0);
-                return <>{total}</>;
-              }
+          {
+            accessor: 'leadTime',
+            Header: 'Lead Time (Days)',
+            Cell: ({ row }) => (row.original?.leadTime && row.original?.leadTime?.length ? <p>{row.original['leadTime']}</p> : <p>0</p>),
+            Footer: (info) => {
+              const total = info.rows
+                .filter((f) => f.values.hasOwnProperty('leadTime') && !isNaN(f.values['leadTime']))
+                .reduce((sum, row) => parseInt(row.values['leadTime']) + sum, 0);
+              return <>{total}</>;
             }
-          ]
+          }
+        ]
         : []),
       {
         accessor: 'description',
@@ -155,6 +156,8 @@ const QuoteBuilder = ({
   };
 
   const fetchProductInventory = async () => {
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
     setNextStep(false);
     setPrevStep(false);
 
@@ -166,23 +169,22 @@ const QuoteBuilder = ({
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail?.assetNumber
-          : parent.type === 'product'
+      parent.detail = `${parent.type === 'serializedAsset'
+        ? parent.serializedAssetDetail?.assetNumber
+        : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
-      }`;
+            ? parent.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName
+        }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDescription || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : '';
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : '';
       parent.leadTime = Array.isArray(parent?.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
@@ -209,7 +211,8 @@ const QuoteBuilder = ({
         return res;
       });
     }
-    setRowsData([...rows, ...cost]);
+    dispatch({ type: 'initialize', data: [...rows, ...cost], count: [...rows, ...cost]?.length });
+    dispatch({ type: 'loading', loading: false });
     handleCheckNextPrev();
   };
 
@@ -243,23 +246,22 @@ const QuoteBuilder = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = `${
-        _subRow.type === 'serializedAsset'
-          ? _subRow.serializedAssetDetail?.assetNumber
-          : _subRow.type === 'product'
+      _subRow.detail = `${_subRow.type === 'serializedAsset'
+        ? _subRow.serializedAssetDetail?.assetNumber
+        : _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.packageDetail?.packageName
-      }`;
+            ? _subRow.serviceDetail?.serviceName
+            : _subRow.packageDetail?.packageName
+        }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qtyDisplay = _subRow.qty;
@@ -376,19 +378,18 @@ const QuoteBuilder = ({
           </Box>
         )}
       </Box>
-      {columns && rowsData ? (
+      {columns ? (
         <Box zIndex={5} width={'100%'}>
           <CustomReactTable
             height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
             columns={columns}
-            data={rowsData}
+            state={state}
+            dispatch={dispatch}
+            refreshGrid={fetchProductInventory}
             setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-            onSelect={() => {}}
+            renderedFrom={renderedFrom}
             hideSelection={true}
             hideAction={true}
-            childrenProperty="subRows"
-            uniqueKey="_id"
-            renderedFrom="quotation_product_package"
             isClientSideGrid={true}
           />
         </Box>

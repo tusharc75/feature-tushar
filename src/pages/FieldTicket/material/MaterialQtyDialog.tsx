@@ -268,8 +268,8 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
         rows.push({ _id: element._id, ...calValues });
       });
       let updatedRows: any = [];
-      rows = rows?.forEach((e : any) => {
-          updatedRows.push({_id: e._id, ...getObjKeysWithValues(e, allFields)});
+      rows = rows?.forEach((e: any) => {
+        updatedRows.push({ _id: e._id, ...getObjKeysWithValues(e, allFields) });
       })
       handleSaveData(updatedRows);
     } else {
@@ -292,6 +292,9 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
           }
         ]);
         let tempPriceData = priceData.filter((d) => d.mrp !== undefined && d.mrp !== null && d.mrp !== 0);
+        if (fieldTicketData?.pricingCondition?.optionValue) {
+          tempPriceData = tempPriceData?.filter((e) => e.conditionId === fieldTicketData?.pricingCondition?.optionValue)
+        }
         setPriceConditionList(
           uniqBy(
             tempPriceData.map((d) => {

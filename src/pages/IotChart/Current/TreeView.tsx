@@ -187,7 +187,7 @@ export default function TreeView({ expandedAccordition, setExpandedAccordition, 
                 </Grid>
               </Grid>
               <Box mt={2}>
-                <div className="container rounded-[0_!important] w-100 h-[591px] px-4 [overflow:hidden_!important] py-1">
+                <div>
                   <Chart dateFilters={dateFilters} assetId={assetId} dataPoints={[dataPoint]} />
                 </div>
               </Box>

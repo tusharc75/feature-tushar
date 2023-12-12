@@ -1,34 +1,93 @@
 import { Box, TextField } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
-import { useEffect, useState } from 'react';
+import moment from 'moment';
+import { useContext, useEffect, useState } from 'react';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
+import { dateTimeFormat, gridLoadingTimeout } from 'src/constants/helpers';
 
-const Alarms = ({ deviceTemplate }) => {
+const Alarms = ({ deviceTemplate, assetId }) => {
   const { state, dispatch } = useTableReducer();
+  const { page, limit } = state;
+  const toastConfig = useContext(CustomToastContext);
 
-  const [alarmOptions, setAlarmOptions] = useState([]);
-  const [selectedAlarm, setSelectedAlarm] = useState(null);
+  const [alarmOptions, setAlarmOptions] = useState(null);
+  const [selectedAlarm, setSelectedAlarm] = useState({ optionValue: 'All', optionLabel: 'All' });
+
+  const fetchData = async () => {
+    dispatch({ type: 'loading', loading: true });
+    const queryString = getQueryString();
+    axiosInstance()
+      .get(`/report/iot/alerts${queryString}`)
+      .then(({ data: { data, count } }) => {
+        dispatch({ type: 'initialize', data: data, count: count });
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
+      });
+  };
+
+  const getQueryString = () => {
+    let deepFilter = `?page=${page}&limit=${limit}&asset=${assetId}`;
+    if (selectedAlarm?.optionValue === 'All') {
+      deepFilter = deepFilter + `&dataPoints=${alarmOptions?.map((e) => e.optionValue)?.toString()}`
+    }
+    else {
+      deepFilter = deepFilter + `&dataPoints=${selectedAlarm.optionValue}`
+    }
+    return `${deepFilter}`;
+  };
 
   const columns = [
     {
-      accessor: 'dateTime',
-      Header: 'Date Time',
-      Cell: ({ row }) => <>dateTime</>
+      accessor: 'fieldName',
+      Header: 'Alert',
+      disabled: true,
+      disableFilters: true,
+      disableSortBy: true,
+      Cell: ({ row }) => <div>{row?.original?.fieldName}</div>
     },
     {
-      accessor: 'alertNumber ',
+      accessor: 'time',
+      Header: 'Date Time',
+      disabled: true,
+      disableFilters: true,
+      disableSortBy: true,
+      Cell: ({ row }) => <div>{moment(row?.original.time).format(dateTimeFormat)}</div>
+    },
+    {
+      accessor: 'alertNumber',
       Header: 'Alert Number ',
-      Cell: ({ row }) => <>alertNumber</>
+      disabled: true,
+      disableFilters: true,
+      disableSortBy: true,
+      Cell: ({ row }) => <div>{row?.original?.fieldValue}</div>
     },
     {
       accessor: 'message',
       Header: 'Message',
-      Cell: ({ row }) => <>message</>
+      disabled: true,
+      disableFilters: true,
+      disableSortBy: true,
+      Cell: ({ row }) => row?.original.message ? <div>{row?.original.message}</div> : <NoDataCell />
     }
   ];
+
+  useEffect(() => {
+    if (alarmOptions) {
+      fetchData()
+    }
+  }, [page, limit, alarmOptions, selectedAlarm])
 
   useEffect(() => {
     if (deviceTemplate) {
@@ -53,17 +112,24 @@ const Alarms = ({ deviceTemplate }) => {
   return (
     <Box display="flex" flexDirection="column">
       <Box ml={1}>
-        <Autocomplete
-          options={alarmOptions}
-          getOptionLabel={(option) => (option && option?.optionLabel) || ''}
-          style={{ width: '350px' }}
+        {alarmOptions &&
+          <Autocomplete
+            options={[{ optionValue: 'All', optionLabel: 'All' }, ...alarmOptions]}
+            getOptionLabel={(option) => (option && option?.optionLabel) || ''}
+            style={{ width: '350px' }}
             value={selectedAlarm}
-          onChange={(event, newValue) => {
-            setSelectedAlarm(newValue);
-          }}
-          size="small"
-          renderInput={(params) => <TextField {...params} label="Select DataPoint" size="small" variant="outlined" />}
-        />
+            onChange={(event, newValue: any) => {
+              setSelectedAlarm(newValue);
+            }}
+            disableClearable
+            size="small"
+            renderInput={(params) =>
+              <TextField {...params}
+                label="Select Alarm"
+                size="small"
+                variant="outlined" />}
+          />
+        }
       </Box>
       {columns ? (
         <CustomReactTable
@@ -72,7 +138,7 @@ const Alarms = ({ deviceTemplate }) => {
           state={state}
           dispatch={dispatch}
           renderedFrom={'iotChart_Alarms'}
-          refreshGrid={() => {}}
+          refreshGrid={fetchData}
           hideSelection={true}
           hideAction={true}
         />
