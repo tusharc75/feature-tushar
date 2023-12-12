@@ -183,10 +183,10 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         Cell: ({ row }) => <div>{row.original['status'] ? <p> {row.original.status}</p> : <NoDataCell />}</div>
       },
       {
-        accessor: 'workOrderStatus',
+        accessor: 'serviceStatus',
         Header: 'Result',
         width: 200,
-        Cell: ({ row }) => <div>{row?.original['workOrderStatus'] ? <h5> {row?.original?.workOrderStatus}</h5> : <NoDataCell />}</div>
+        Cell: ({ row }) => <div>{row?.original['serviceStatus'] ? <h5> {row?.original?.serviceStatus}</h5> : <NoDataCell />}</div>
       },
       {
         accessor: 'assignedUsers',
@@ -369,6 +369,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       if (parent?.workOrder?.status === WORK_ORDER_STATUS.completed) {
         parent.hideSelection = true;
         parent.workOrderStatus = parent?.workOrder?.status;
+        parent.status = parent?.workOrder?.status;
       }
       parent.subRows = generateNestedData(data.material, parent);
       if (parent?.workOrder?.status === WORK_ORDER_STATUS.new) {
