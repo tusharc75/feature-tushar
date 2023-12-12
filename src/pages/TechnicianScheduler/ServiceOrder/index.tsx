@@ -26,7 +26,7 @@ const TECHNICIAN_RESOURCE = [
   }
 ];
 
-function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, setSelectedRecords }) {
+function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, updateSelectedRecord }) {
   const {
     state: { permissions }
   }: any = useData();
@@ -50,7 +50,7 @@ function ServiceOrder({ assignTechnicianDialog, handleSucess, handleClose, setSe
   }, []);
 
   useEffect(()=>{
-      setSelectedRecords(selectedRecords) 
+    updateSelectedRecord(selectedRecords) 
   },[selectedRecords])
 
   useEffect(() => {
