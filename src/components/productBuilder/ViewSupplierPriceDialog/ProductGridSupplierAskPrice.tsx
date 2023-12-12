@@ -1,13 +1,10 @@
 import { useState, useEffect, useContext, useReducer } from "react";
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog'
-import axiosInstance from '../../../axios/axiosInstance'
 import { dateTimeFormat, gridLoadingTimeout, sidebarResource } from '../../../constants/helpers';
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import CommonSkeleton from '../../Helpers/CommonSkeleton'
 import { sortBy } from 'lodash';
-import routes from "../../Helpers/Routes";
 import { Box, Typography } from "@material-ui/core";
 import { prepareDataForGrid } from "../../../constants/helpers";
 import DeleteButton from "src/components/Helpers/DeleteButton";
@@ -15,9 +12,8 @@ import moment from "moment";
 import CustomReactTable, { useColumns, useTableReducer } from "src/components/CustomReactTableNew";
 import { generateCustomTableColumns } from "src/constants/columns";
 
-
-
 const displayColumns = ["qty", "productName", "productDescription", "unit", "responseDate", "status"]
+
 let levalOrderBy = [
     "product",
     "product-custom",
@@ -31,13 +27,11 @@ const ProductGridSupplierAskPrice = (props) => {
     const toastConfig = useContext(CustomToastContext)
     const { productData, handleAdd, handleReject } = props;
     const renderedFrom = "quoteSupplierPrice" + productData?._id;
-    const { getColumnData } = useColumns();
     const { state, dispatch } = useTableReducer();
     const { dataRows, rowCount, loading, page, limit, pageSizes, search,
         filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
     const [columns, setColumns] = useState(null);
-    const [frameWorkComponent, setFrameWorkComponent] = useState(null)
 
     useEffect(() => {
         fetchProduct()
@@ -57,18 +51,15 @@ const ProductGridSupplierAskPrice = (props) => {
             return res;
         });
         let columns = []
-        let rendererNames = [];
         productData?.fields?.forEach((ele) => {
             const filteredFields = ele?.filter((e) => !productData?.requiredFields.includes(e.fieldName));
             const newColumns = generateCustomTableColumns(filteredFields, '', renderedFrom);
             columns = [...columns, ...newColumns];
         })
-
         columns = sortBy([...columns], function (item: any) {
             return levalOrderBy.indexOf(item.leval)
         });
         setColumns([...columns])
-
         dispatch({ type: "initialize", data: rows, count: rows.length });
         setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
     };
