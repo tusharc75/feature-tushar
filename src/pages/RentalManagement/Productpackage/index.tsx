@@ -91,7 +91,6 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
       });
     }
     const newColumns = generateColumns(renderedFrom, data, null, false, rentalManagementData?.currency);
-
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';
@@ -111,6 +110,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
         accessor: 'type',
         Header: 'Type',
         disableFilters: true,
+        disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         width: 200,
         Cell: ({ row }) =>
@@ -138,6 +138,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
         Header: 'Details',
         minWidth: 300,
         width: 300,
+        disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row, table }) => (<div style={{ display: 'flex', alignItems: 'center' }}>
           {isOffline || !allowedToEdit || quotationApproved ? (
