@@ -68,7 +68,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [columns, setColumns] = useState(null);
 
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const history = useHistory();
 
@@ -77,15 +77,11 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
     axiosInstance()
       .get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
-        let columns = [];
-        data
-          ?.filter((d) => ['assetNumber', 'serialNumber', 'product', 'productDescription', 'status']?.includes(d?.fieldData?.fieldName))
-          ?.forEach((o) => {
-            let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path);
-            if (currentColumn !== null) {
-              columns = [...columns, currentColumn?.columnData];
-            }
-          });
+        const newColumns = generateColumns(
+          renderedFrom,
+          data?.filter((d) => ['assetNumber', 'serialNumber', 'product', 'productDescription', 'status']?.includes(d?.fieldData?.fieldName)),
+          routes.serializedAssetDetail.path
+        );
 
         const column = [
           {
@@ -98,7 +94,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
               return <>Total</>;
             }
           },
-          ...columns,
+          ...newColumns,
           {
             accessor: 'loadingTicket',
             Header: 'Loading Ticket',

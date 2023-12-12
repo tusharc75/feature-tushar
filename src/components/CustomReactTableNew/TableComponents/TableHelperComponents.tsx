@@ -40,6 +40,7 @@ export const EditableCell = ({ value: initialValue, row: { index }, column: { id
 
   return <input value={value} onChange={onChange} onBlur={onBlur} />;
 };
+
 export const defaultColumn: Partial<ColumnDef<any>> = {
   cell: ({ getValue, row: { index }, column: { id }, table }) => {
     const initialValue = getValue();
@@ -368,6 +369,7 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({ header, table,
         minWidth: `${colSize}px`,
         maxWidth: `${colSize}px`,
         paddingLeft: columnDef.id === 'expander' ? '8px' : '6px',
+        zIndex: columnDef.sticky === 'left' || columnDef.sticky === 'right' ? 12 : 'unset',
         ...style
       }}
     >
@@ -486,12 +488,16 @@ export const CellRenderer = ({
         <CellShell>
           <div className="w-full">
             <input
-              title={`Edit-${cell.id}`}
               autoFocus
+              type="number"
               onBlur={() => (cell.getValue() !== cellValue ? submitInput() : resetField())}
               value={cellValue}
-              className="dark:text-[white]  appearance-none w-full focus-within:outline-[var(--new-theme-color)] bg-[transparent] outline-[transparent] shadow-0 border-[0] px-[2px] py-[4px] [border-bottom:1px_solid_var(--common-border-color)_!important]"
-              onChange={(e) => setCellValue(e.target.value)}
+              className="dark:text-[white] appearance-none w-full focus-within:outline-[var(--new-theme-color)] bg-[transparent] outline-[transparent] shadow-0 border-[0] px-[2px] py-[4px] [border-bottom:1px_solid_var(--common-border-color)_!important]"
+              onChange={(e) => {
+                let value: any = e.target.value;
+                value = parseFloat(parseFloat(value)?.toFixed(cell?.column?.columnDef?.decimalPlaces || 0));
+                setCellValue(value);
+              }}
             />
           </div>
         </CellShell>

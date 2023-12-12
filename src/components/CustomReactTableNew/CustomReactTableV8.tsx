@@ -86,10 +86,14 @@ const CustomReactTable = ({
   const newColumns = useCreateColumns({ columns, expander, fetchChildAttachment, hideSelection, hideAction, dispatch, state, isClientSideGrid });
 
   const columnFilters = React.useMemo(() => {
-    let tempArray = Object.keys(customFilters).map((key, i) => {
-      return { id: key, value: customFilters[key].filter };
-    });
-    return tempArray;
+    const filters = [];
+
+    for (const key of Object.keys(customFilters)) {
+      // in case of complex filters api should porovide filtered value
+      if (typeof customFilters[key].filter !== 'string') continue;
+      filters.push({ id: key, value: customFilters[key].filter });
+    }
+    return filters;
   }, [customFilters]);
 
   const [searchQuery] = useStore((store) => store[SEARCH]);
@@ -147,8 +151,7 @@ const CustomReactTable = ({
         } else {
           setColumnOrder(newColumns.map((m) => m?.id ?? m?.accessor));
         }
-      }
-      else {
+      } else {
         let gridMetaData = getDataFromLocalStorage();
         if (gridMetaData && gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide?.length) {
           for (const n of [...gridMetaData[renderedFrom]?.hide]) {
@@ -160,16 +163,14 @@ const CustomReactTable = ({
           setHiddenColumns(hColumns);
         }
         if (gridMetaData && gridMetaData[renderedFrom]?.order && gridMetaData[renderedFrom]?.order?.length) {
-          const defaultCols = [];
-          for (const c of [...gridMetaData[renderedFrom]?.order]) {
-            if (c === 'qtyDisplay') {
-              defaultCols.push('qty');
-            }
-            defaultCols.push(c);
+          const colOrder = gridMetaData[renderedFrom]?.order || [];
+          let orderIndices = {};
+          for (let i = 0; i < colOrder.length; i++) {
+            orderIndices[colOrder[i]] = i;
           }
-          const colOrder = [...stickyColumnNames.left, ...defaultCols, ...stickyColumnNames.right];
-          setColumnOrder(colOrder);
-          setSortedColumns(returnSortedColumns(newColumns, colOrder));
+          let orderedArr = [...newColumns].sort((a, b) => orderIndices[a?.id || a?.accessor] - orderIndices[b?.id || b?.accessor]);
+          setSortedColumns(returnSortedColumns(newColumns, orderedArr));
+          setColumnOrder(orderedArr.map((m) => m?.id ?? m?.accessor));
         } else {
           setSortedColumns(newColumns);
           setColumnOrder(newColumns.map((m) => m?.id ?? m?.accessor));
@@ -179,6 +180,8 @@ const CustomReactTable = ({
       console.error(`Error while getting stored data from local storage - ${renderedFrom}`);
     }
   }, [newColumns, expander, hideSelection, renderedFrom, selectedReportView]);
+
+
 
   function reorder(draggedColumnId: string, targetColumnId: string, columnOrder: string[]) {
     columnOrder.splice(columnOrder.indexOf(targetColumnId), 0, columnOrder.splice(columnOrder.indexOf(draggedColumnId), 1)[0] as string);
@@ -192,8 +195,8 @@ const CustomReactTable = ({
       (a, b) => columnOrder.findIndex((d) => d === a.accessor) - columnOrder.findIndex((d) => d === b.accessor)
     );
 
-    const newcolumnOrderToSave = newBaseColumns
-      ?.filter((o) => o?.sticky === undefined && !['expander', 'selection', 'action']?.includes(o?.id))
+    const newcolumnOrderToSave = newBaseColumns?.filter((o) => !['left', 'right']?.includes(o?.sticky)
+      && !['expander', 'selection', 'action']?.includes(o?.id))
       ?.map((o) => o?.id);
 
     setBaseColumns(newBaseColumns);
@@ -522,14 +525,26 @@ const CustomReactTable = ({
             )}
           </GridHeader>
           {!isMobileView && (
-            <>
+            <div className="relative">
+              {!loading && !error && rows.length === 0 && (
+                <>
+                  <Box
+                    style={{ height: `calc(${height ?? '100%'} - 60px)` }}
+                    className="w-full h-full absolute inset-0 top-[46px] flex justify-center items-center -z-10"
+                  >
+                    <div className=" px-10 py-5 rounded-lg text-center">
+                      <p>No data found</p>
+                    </div>
+                  </Box>
+                </>
+              )}
               <div
                 style={{
                   display: 'block',
-                  overflow: !loading && !error && rows.length === 0 ? 'hidden' : 'auto',
+                  overflow: loading ? 'hidden' : 'auto',
                   height: height ?? '100%'
                 }}
-                className="border"
+                className="border z-10"
               >
                 {(loading || error) && (
                   <Box className="bg-[rgba(255,255,255,0.2)] dark:bg-[rgba(0,0,0,0.1)] w-full h-full z-50 absolute inset-0 flex justify-center items-center">
@@ -554,18 +569,6 @@ const CustomReactTable = ({
                     position: 'relative'
                   }}
                 >
-                  {!loading && !error && rows.length === 0 && (
-                    <>
-                      <Box
-                        style={{ height: `calc(${height ?? '100%'} - 60px)` }}
-                        className="w-full h-full absolute inset-0 top-[46px] flex justify-center items-center"
-                      >
-                        <div className=" px-10 py-5 rounded-lg text-center">
-                          <p>No data found</p>
-                        </div>
-                      </Box>
-                    </>
-                  )}
                   <MaUTable size="small" className="tableWrap table sticky">
                     <TableHead
                       style={{ overflowY: 'auto', overflowX: 'hidden' }}
@@ -675,7 +678,7 @@ const CustomReactTable = ({
                   </MaUTable>
                 </div>
               </div>
-            </>
+            </div>
           )}
           {isMobileView && rows ? (
             <SwipableListForMobile

@@ -40,7 +40,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteBulkAssetCreationProduct, setDeleteBulkAssetCreationProduct] = useState([]);
 
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchFields();
@@ -109,14 +109,8 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.bulkAssetCreationProduct}`);
     var fields = response?.data?.data;
     fields = CURReplaceByCurrencySingle(fields, bulkAssetCreationData?.currency ? bulkAssetCreationData?.currency : 'USD');
-    fields?.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o, routes.bulkAssetCreationDetail.path);
-
-      if (currentColumn !== null) {
-        coloum = [...coloum, currentColumn?.columnData];
-      }
-    });
-    setColumns([...coloum, ActionsRenderer]);
+    const newColumns = generateColumns(renderedFrom, fields, routes.bulkAssetCreationDetail.path);
+    setColumns([...coloum, ...newColumns, ActionsRenderer]);
   };
 
   const fetchBulkAssetCreationProduct = () => {

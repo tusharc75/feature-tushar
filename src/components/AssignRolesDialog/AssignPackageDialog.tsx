@@ -22,7 +22,7 @@ const AssignPackageDialog = ({ onSuccess, handleClose, packageType = null, ids =
 
   const { state, dispatch } = useTableReducer();
   const { dataRows, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const {
     state: { selectedEntity }
@@ -63,13 +63,8 @@ const AssignPackageDialog = ({ onSuccess, handleClose, packageType = null, ids =
       .get('/field?resource=Packages&view=true')
       .then(({ data: { data } }) => {
         let columns = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.packagesDetail.path);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-          }
-        });
-        columns = [...columns, ...getStaticFields()];
+        let newColumns = generateColumns(renderedFrom, data, routes.packagesDetail.path);
+        columns = [...newColumns, ...getStaticFields()];
         if (hideQty) {
           setColumns([...columns]);
         } else {
@@ -162,6 +157,15 @@ const AssignPackageDialog = ({ onSuccess, handleClose, packageType = null, ids =
       if (editRow) {
         dispatch({ type: 'selection', selectedRecords: [...selectedRecords, editRow] });
       }
+    } 
+    else {
+      const updatedSelectedRecords = selectedRecords?.map((e) => {
+        if (e?._id === row?._id) {
+          return { ...e, qty: parseInt(data?.qty), isChecked: true };
+        }
+        return e;
+      });
+      dispatch({ type: 'selection', selectedRecords: updatedSelectedRecords });
     }
     dispatch({ type: 'update', data: rows });
   };

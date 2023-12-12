@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Grid, useTheme, Button, Box } from '@material-ui/core';
 import { camelCase, startCase } from 'lodash';
 import axios from 'axios';
-import {  MdChevronLeft } from 'react-icons/md';
+import { MdChevronLeft } from 'react-icons/md';
 import styles from '../Leads/Header.module.scss';
 import routes from './../../components/Helpers/Routes';
 import axiosInstance from '../../axios/axiosInstance';
@@ -46,7 +46,7 @@ const CustomReport = () => {
   const [reportList, setReportList] = React.useState([]);
   const [statusTimeFrame, setStatusTimeFrame] = React.useState<any>('custom');
   const [customReportData, setCustomReportData] = React.useState(null);
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
   const [columns, setColumns] = React.useState(null);
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, loading } = state;
@@ -74,23 +74,15 @@ const CustomReport = () => {
     setResourceColumns(data);
     setLoadingColumns(false);
     let columns = [];
+
     data.forEach((o) => {
       if (o?.fieldData?.fieldName === primaryFields[camelCase(res) === 'quotes' ? 'quoteBuilder' : camelCase(res)]) {
         o.fieldData.primaryField = true;
       }
-      let currentColumn = getColumnData(
-        renderedFrom,
-        o?.fieldData,
-        routes[`${camelCase(res) === 'quotes' ? 'quoteBuilder' : camelCase(res)}Detail`].path,
-        true
-      );
-
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-      }
-      return o?.fieldData;
     });
-    columns = [...columns, ...getStaticFields()];
+    let newColumns = generateColumns(renderedFrom, data, routes[`${camelCase(res) === 'quotes' ? 'quoteBuilder' : camelCase(res)}Detail`].path, true);
+    columns = [...newColumns, ...getStaticFields()];
+
     if (startCase(res) === 'Purchase Order') {
       columns.splice(1, 0, {
         accessor: 'poAmount',
@@ -225,10 +217,10 @@ const CustomReport = () => {
       type: 'info'
     });
     let exportColumns = [];
-    exportColumns=
+    exportColumns =
       customReportData?.column && customReportData?.column.length > 0
-        ? columns.filter((col) => customReportData?.column.includes(col.accessor)).map((col)=> col.accessor)
-        : columns.map((col)=> col.accessor)
+        ? columns.filter((col) => customReportData?.column.includes(col.accessor)).map((col) => col.accessor)
+        : columns.map((col) => col.accessor);
     setExporting(true);
     let filterQuery = getFilter(true);
     axiosInstance()

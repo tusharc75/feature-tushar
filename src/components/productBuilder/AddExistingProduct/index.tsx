@@ -35,7 +35,7 @@ const AddExistingProduct = (props) => {
   const [productCategory, setProductCategory] = useState(null);
   const [productTemplate, setProductTemplate] = useState(null);
   const [isProductTemplate, setIsProductTemplate] = useState(true);
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     axiosInstance()
@@ -79,20 +79,12 @@ const AddExistingProduct = (props) => {
         if (data.filter((e) => e.fieldData.fieldName === 'productTemplate').length === 0) {
           setIsProductTemplate(false);
         }
-        let columns = [];
-        data.forEach((o) => {
-          if (!ignoreField.includes(o?.fieldData.fieldName)) {
-            let currentColumn = getColumnData(routes.product.title, o?.fieldData, routes.product.path);
-            if (currentColumn !== null) {
-              columns = [...columns, currentColumn?.columnData];
-            }
-          }
-        });
-        columns.forEach((ele) => {
+        const newColumns = generateColumns(routes.product.title, data?.filter(d => !ignoreField?.includes(d?.fieldData?.fieldName)), routes.product.path);
+        newColumns?.forEach((ele) => {
           ele.leval = 'product';
         });
         // setProductRendererNames(rendererNames);
-        setProductColoums(columns);
+        setProductColoums(newColumns);
       });
   }, []);
 
@@ -157,14 +149,14 @@ const AddExistingProduct = (props) => {
           return res;
         });
         let columns = [...productColoums];
+        const fields: any = []
         data.productTemplate?.forEach((ele) => {
           ele.fields.forEach((field) => {
-            let currentColumn = getColumnData(renderedFrom, field, `${routes.productDetail.path}`);
-            if (currentColumn !== null) {
-              columns = [...columns, currentColumn?.columnData];
-            }
+            fields.push(field)
           })
         });
+        const newColumns =  generateColumns(renderedFrom, fields, `${routes.productDetail.path}`);
+        columns = [...columns, ...newColumns]
         columns = columns.filter((column, index, self) => self.findIndex((col) => col.accessor === column.accessor) === index);
         columns.push({
           accessor: 'inventoryCount',

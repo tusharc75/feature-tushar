@@ -14,7 +14,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CustomRenderCell from 'src/components/Helpers/CustomRenderCell';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { camelCase } from 'lodash';
-import CustomReactTable, { checkStaticField, getStaticFields, useColumns, useTableReducer, } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { checkStaticField, getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 import { deleteDisable } from 'src/constants/messageHelpers';
 
 const Invoices = ({ resourceId, resource, invoiceFieldName }) => {
@@ -27,7 +27,7 @@ const Invoices = ({ resourceId, resource, invoiceFieldName }) => {
   const { state, dispatch } = useTableReducer();
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
   const [deleteRecord, setDeleteRecord] = useState<any>({});
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
@@ -42,55 +42,41 @@ const Invoices = ({ resourceId, resource, invoiceFieldName }) => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.invoice}`);
     data = response?.data?.data;
-    let columns = [];
-    data.forEach((o) => {
-      if (o?.fieldData?.fieldName === 'invoiceNumber') {
-        columns = [
-          ...columns,
-          {
-            ...o?.fieldData,
-            index: 0,
-            accessor: o?.fieldData?.fieldName,
-            Header: o?.fieldData?.fieldLabel,
-            show: true,
-            disabled: true,
-            Cell: ({ row }) => (
-              <>
-                <span
-                  className="link"
-                  onClick={() => {
-                    setViewInvoiceDialog({ open: true, invoice: row.original?._id });
-                  }}
-                >
-                  <CustomRenderCell value={row.original[o?.fieldData?.fieldName]} />
-                </span>
-                <Box ml={1}>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      window.open(`${routes.invoiceDetail.path}/${row.original?._id}`);
-                    }}
-                  >
-                    <OpenInNewIcon fontSize="small" color="primary" />
-                  </IconButton>
-                </Box>
-              </>
-            )
-          }
-        ];
-      } else {
-        let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.invoiceDetail.path);
-        if (currentColumn !== null) {
-          columns = [...columns, currentColumn?.columnData];
-        }
+    const newColumns = generateColumns(renderedFrom, data, routes.invoiceDetail.path);
+    newColumns?.forEach((o) => {
+      if (o.accessor === 'invoiceNumber') {
+        o.show = true;
+        o.disabled = true;
+        o.index = 0;
+        o.cell = ({ row }) => (
+          <>
+            <span
+              className="link"
+              onClick={() => {
+                setViewInvoiceDialog({ open: true, invoice: row.original?._id });
+              }}
+            >
+              <CustomRenderCell value={row.original?.invoiceNumber} />
+            </span>
+            <Box ml={1}>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.invoiceDetail.path}/${row.original?._id}`);
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
+            </Box>
+          </>
+        );
       }
-      return o?.fieldData;
     });
     let staticFields = getStaticFields();
     staticFields.forEach((field) => {
-      columns.push(checkStaticField(routes.projectSales.title, field));
+      newColumns.push(checkStaticField(routes.projectSales.title, field));
     });
-    setColumns([...columns, ActionsRenderer]);
+    setColumns([...newColumns, ActionsRenderer]);
   };
 
   const ActionsRenderer = {
@@ -116,7 +102,7 @@ const Invoices = ({ resourceId, resource, invoiceFieldName }) => {
             </IconButton>
           </span>
         </HtmlTooltip>
-        <HtmlTooltip title={row.original?.canDelete ? "Delete" : deleteDisable}>
+        <HtmlTooltip title={row.original?.canDelete ? 'Delete' : deleteDisable}>
           <span>
             <IconButton
               disabled={!row.original?.canDelete}
@@ -127,13 +113,13 @@ const Invoices = ({ resourceId, resource, invoiceFieldName }) => {
                 setIsConformDialogVisible(true);
               }}
             >
-              <DeleteIcon color={row.original?.canDelete ? "error" : "disabled"} />
+              <DeleteIcon color={row.original?.canDelete ? 'error' : 'disabled'} />
             </IconButton>
           </span>
         </HtmlTooltip>
       </>
     )
-  }
+  };
 
   useEffect(() => {
     fetchData();

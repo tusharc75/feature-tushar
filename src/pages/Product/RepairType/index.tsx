@@ -39,7 +39,7 @@ const ProductRepairType = (props: Props) => {
   const {
     state: { permissions }
   }: any = useData();
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchGridColumns();
@@ -53,14 +53,8 @@ const ProductRepairType = (props: Props) => {
     axiosInstance()
       .get(`/field?resource=${repairType.resource}`)
       .then(({ data: { data } }) => {
-        let columns = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(routes.repairType?.title, o?.fieldData, routes.repairTypeDetail.path);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-          }
-        });
-        setColumns([...columns, ActionsRenderer]);
+        const newColumns = generateColumns(routes.repairType?.title, data, routes.repairTypeDetail.path);
+        setColumns([...newColumns, ActionsRenderer]);
       });
   };
 

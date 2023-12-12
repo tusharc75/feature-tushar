@@ -20,7 +20,7 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, allowedToEdit, s
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, filters, sorting, selectedRecords } = state;
   const [columns, setColumns] = useState(null);
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchColumns();
@@ -34,18 +34,13 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, allowedToEdit, s
     axiosInstance()
       .get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
-        let columns = [];
-        data.forEach((o) => {
-          let currentColumn: any = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path);
-          if (currentColumn !== null) {
-            if (o.fieldData.type === 'singleLine' && o.fieldData.fieldName !== 'assetNumber') {
-              currentColumn.columnData.editable = true;
-            }
-            columns = [...columns, currentColumn?.columnData];
+        const newColumns = generateColumns(renderedFrom, data, routes.serializedAssetDetail.path);
+        newColumns?.forEach((o) => {
+          if (data?.find((d) => d?.fieldData.fieldName === o.accessor)?.fieldData?.type === 'singleLine' && o.accessor !== 'assetNumber') {
+            o.editable = true;
           }
         });
-        columns = [...columns, ...getStaticFields()];
-        setColumns([...columns]);
+        setColumns([...newColumns, ...getStaticFields()]);
       });
   };
 

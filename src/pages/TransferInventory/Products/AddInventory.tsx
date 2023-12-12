@@ -18,7 +18,7 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
   const { state, dispatch } = useTableReducer();
   const { page, dataRows, limit, selectedRecords, search, filters, sorting, showFilteredRecordsOnly } = state;
   const [columns, setColumns] = useState(null);
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const {
     state: { user }
@@ -35,14 +35,8 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
   const fetchFields = async () => {
     const productResult = await axiosInstance().get(`/field?resource=${sidebarResource.product}&view=true`);
     const data = productResult?.data?.data;
-    let columns = [];
-    data.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-      }
-    });
-    columns.unshift(
+    const newColumns = generateColumns(renderedFrom, data, routes.productDetail.path, true);
+    newColumns.unshift(
       {
         accessor: 'qty',
         Header: 'Quantity',
@@ -64,7 +58,7 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
         canDrag: false,
       }
     );
-    setColumns([...columns, ...getStaticFields()]);
+    setColumns([...newColumns, ...getStaticFields()]);
   };
 
   const fetchData = () => {
@@ -173,6 +167,14 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
       if (editRow) {
         dispatch({ type: 'selection', selectedRecords: [...selectedRecords, editRow] });
       }
+    } else {
+      const updatedSelectedRecords = selectedRecords?.map((e) => {
+        if (e?._id === row?._id) {
+          return { ...e, qty: parseInt(data?.qty), isChecked: true };
+        }
+        return e;
+      });
+      dispatch({ type: 'selection', selectedRecords: updatedSelectedRecords });
     }
     dispatch({ type: 'update', data: rows });
   };

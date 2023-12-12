@@ -61,7 +61,7 @@ const AddSerializedAsset = ({
 
   const { state, dispatch } = useTableReducer();
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const {
     state: { permissions, user }
@@ -107,13 +107,7 @@ const AddSerializedAsset = ({
       .get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
         setCheckMTRValidation(data?.some((e) => e?.fieldData?.fieldName === 'mtrAttached'));
-        let columns = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-          }
-        });
+        let newColumns = generateColumns(renderedFrom, data, routes.serializedAssetDetail.path);
         const inUseColoumns: any = [
           {
             accessor: 'rentalJob',
@@ -132,8 +126,7 @@ const AddSerializedAsset = ({
           }
         ];
 
-        columns = [...inUseColoumns, ...columns, ...getStaticFields()];
-        setColumns([...columns]);
+        setColumns([...inUseColoumns, ...newColumns, ...getStaticFields()]);
       });
   };
 

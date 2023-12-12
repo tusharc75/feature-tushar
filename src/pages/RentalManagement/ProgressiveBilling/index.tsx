@@ -32,7 +32,7 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, allowCreateInvoice
   }: any = useData();
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
   const [deleteRecord, setDeleteRecord] = useState<any>({});
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
@@ -51,22 +51,15 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, allowCreateInvoice
     const response = await axiosInstance().get(`/field?resource=Invoice`);
     data = response?.data?.data;
     let columns = [];
-    data.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes?.invoiceDetail.path, true);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-      }
-      return o?.fieldData;
-    });
-
+    let newColumns = generateColumns(renderedFrom, data, routes.invoiceDetail.path, true);
     let staticFields = getStaticFields();
     staticFields.forEach((field) => {
-      columns.push(checkStaticField(routes.projectSales.title, field));
+      newColumns.push(checkStaticField(routes.projectSales.title, field));
     });
-    columns = [...columns, ActionsRenderer];
+    columns = [...newColumns, ActionsRenderer];
     columns?.forEach((column) => {
       if (column?.primaryField) {
-        column.Cell = ({ row }) => (
+        column.cell = ({ row }) => (
           <>
             <Link
               className="link text-truncate"

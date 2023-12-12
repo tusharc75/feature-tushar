@@ -57,7 +57,7 @@ const RentalManagement = () => {
 
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const {
     state: { user, permissions, selectedEntity }
@@ -148,45 +148,32 @@ const RentalManagement = () => {
       }
     }
 
-    let columns = [];
-    data.forEach((o) => {
-      if (o?.fieldData?.fieldName === 'rentalJobName') {
-        columns = [
-          ...columns,
-          {
-            accessor: o?.fieldData?.fieldName,
-            Header: o?.fieldData?.fieldLabel,
-            minWidth: 180,
-            width: 180,
-            Cell: ({ row }) => (
-              <div>
-                <Link className="link text-truncate"
-                  title={row?.original[o?.fieldData?.fieldName]}
-                  to={`${routes.rentalManagement.path}/detail/${row?.original?._id}`}>
-                  {row?.original[o?.fieldData?.fieldName]}
-                </Link>
-                {row?.original?.assetsNotReceivedInPo && (
-                  <Box ml={1}>
-                    <HtmlTooltip title={`Assets on PO not received`}>
-                      <Warning style={{ fontSize: '14px' }} fontSize="small" color="error" />
-                    </HtmlTooltip>
-                  </Box>
-                )}
-              </div>
-            )
-          }
-        ];
-      } else {
-        let currentColumn: any = getColumnData(renderedFrom, o?.fieldData, routes.rentalManagementDetail.path, true);
-        if (currentColumn !== null) {
-          if (isOffline) {
-            currentColumn.columnData['disableFilters'] = true;
-            currentColumn.columnData['disableSortBy'] = true;
-          }
-          columns = [...columns, currentColumn?.columnData]
+    let newColumns = generateColumns(renderedFrom, data, routes.rentalManagementDetail.path, true);
+
+    newColumns?.forEach(o => {
+      if(o.accessor === 'rentalJobName'){
+        o.cell= ({ row }) => (
+          <div>
+            <Link className="link text-truncate"
+              title={row?.original?.rentalJobName}
+              to={`${routes.rentalManagement.path}/detail/${row?.original?._id}`}>
+              {row?.original?.rentalJobName}
+            </Link>
+            {row?.original?.assetsNotReceivedInPo && (
+              <Box ml={1}>
+                <HtmlTooltip title={`Assets on PO not received`}>
+                  <Warning style={{ fontSize: '14px' }} fontSize="small" color="error" />
+                </HtmlTooltip>
+              </Box>
+            )}
+          </div>
+        )
+      } else{
+        if (isOffline) {
+          o['disableFilters'] = true;
+          o['disableSortBy'] = true;
         }
       }
-      return o?.fieldData;
     });
 
     let staticFields: any = getStaticFields();
@@ -194,9 +181,9 @@ const RentalManagement = () => {
       staticFields = [...extraColumns, ...staticFields];
     }
     staticFields.forEach((field) => {
-      columns.push(checkStaticField(renderedFrom, field));
+      newColumns.push(checkStaticField(renderedFrom, field));
     });
-    setColumns([...columns, ActionsRenderer]);
+    setColumns([...newColumns, ActionsRenderer]);
   };
 
   const ActionsRenderer = {

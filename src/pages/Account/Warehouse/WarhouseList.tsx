@@ -24,7 +24,7 @@ const WarhouseList = ({ api, isCustomer = false, addWarehouse, onClose, isAdding
   }: any = useData();
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
 
   useEffect(() => {
@@ -103,16 +103,8 @@ const WarhouseList = ({ api, isCustomer = false, addWarehouse, onClose, isAdding
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.warehouse}`);
     data = response?.data?.data;
-    let columns = [];
-    data.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.warehouseDetail.path, true);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-      }
-      return o?.fieldData;
-    });
-    columns = [...columns, ...getStaticFields()];
-    setColumns(columns);
+    const newColumns = generateColumns(renderedFrom, data, routes.warehouseDetail.path, true)
+    setColumns([...newColumns, ...getStaticFields()]);
   };
 
   const handleSearch = (e) => {

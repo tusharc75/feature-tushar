@@ -68,7 +68,7 @@ const Report = () => {
     const [statusTimeFrame, setStatusTimeFrame] = React.useState<any>('custom');
 
     // Grid Configs
-    const { getColumnData } = useColumns();
+    const { generateColumns } = useColumns();
     const [columns, setColumns] = React.useState(null);
     const { state, dispatch } = useTableReducer();
     const { loading, page, sorting, search, limit, filters, pageSizes, colState } = state;
@@ -82,39 +82,39 @@ const Report = () => {
             let columns = [];
             let { data: { data: { columnFields, filterFields } } } = await axiosInstance().get(`/report/${type}/column`);
             const customRendererTypes = ['reference', 'creditDebit', 'date', 'creditDebitType'];
-            columnFields.forEach((o) => {
-                const currentColumn: any = getColumnData(type, o?.fieldData, '');
-                if (customRendererTypes?.includes(o?.fieldData?.type)) {
-                    switch (o?.fieldData?.type) {
+            let newColumns = generateColumns(type, columnFields, '');
+
+            newColumns?.forEach(o => {
+                const fieldType = columnFields?.find(c => c?.fieldData?.fieldName === o?.accessor)?.type;
+                if (customRendererTypes?.includes(fieldType)) {
+                    switch (fieldType) {
                         case 'reference':
-                            currentColumn.columnData.Cell = ({ row }) => ReferenceRenderer(row);
-                            currentColumn.columnData.disableFilters = true;
-                            currentColumn.columnData.disableSortBy = true;
+                            o.cell = ({ row }) => ReferenceRenderer(row);
+                            o.disableFilters = true;
+                            o.disableSortBy = true;
                             break;
                         case 'creditDebit':
-                            currentColumn.columnData.Cell = ({ row }) => CreditDebitRenderer(row)
-                            currentColumn.columnData.disableFilters = true;
-                            currentColumn.columnData.disableSortBy = true;
+                            o.cell = ({ row }) => CreditDebitRenderer(row)
+                            o.disableFilters = true;
+                            o.disableSortBy = true;
                             break;
                         case 'creditDebitType':
-                            currentColumn.columnData.Cell = ({ row }) => CreditDebitTypeRenderer(row);
+                            o.cell = ({ row }) => CreditDebitTypeRenderer(row);
                             break;
                     }
                 }
-                if (o?.fieldData?.fieldName === 'serialNumber') {
-                    currentColumn.columnData.Cell = ({ row }) => SerialNumberRenderer(row)
-                    currentColumn.columnData.disableFilters = true;
-                    currentColumn.columnData.disableSortBy = true;
+                if (o?.accessor === 'serialNumber') {
+                    o.cell = ({ row }) => SerialNumberRenderer(row)
+                    o.disableFilters = true;
+                    o.disableSortBy = true;
                 }
-                if (type === "number-of-assets-by-status" && o?.fieldData?.fieldName === "product") {
-                    currentColumn.columnData.Cell = ({ row }) => ProductRenderer(row)
-                }
-                if (currentColumn !== null && !o?.fieldData?.hideColumn) {
-                    columns = [...columns, { ...currentColumn?.columnData }];
+                if (type === "number-of-assets-by-status" && o?.accessor === "product") {
+                    o.cell = ({ row }) => ProductRenderer(row)
                 }
             });
+
             if (type === 'inventory-evaluation') {
-                columns = [...columns, ActionsRenderer]
+                columns = [...newColumns, ActionsRenderer]
             }
             setResourceColumns(filterFields);
             setColumns(columns);

@@ -78,7 +78,7 @@ const Job = () => {
   const [renderCount, setRenderCount] = useState(0);
   const [viewType, setViewType] = useState(1);
 
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchGridColumns();
@@ -88,16 +88,8 @@ const Job = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=Job`);
     data = response?.data?.data;
-    let columns = [];
-    data.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.jobDetail.path, true);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-      }
-      return o?.fieldData;
-    });
-    columns = [...columns, ...getStaticFields(), ActionsRenderer];
-    setColumns([...columns]);
+    const newColumns = generateColumns(renderedFrom, data, routes.jobDetail.path, true);
+    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
   useEffect(() => {

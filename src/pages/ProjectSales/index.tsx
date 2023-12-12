@@ -51,7 +51,7 @@ const ProjectSales: FC = () => {
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
   const [isOpen, setIsOpen] = useState({ open: false, isClone: false, idToClone: null });
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [selectedType, setselectedType] = useState(1);
@@ -81,14 +81,8 @@ const ProjectSales: FC = () => {
       .get(`/field?resource=${sidebarResource.projectSales}`)
       .then(({ data: { data } }) => {
         let columns = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.projectSalesDetail.path, true);
-
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-          }
-        });
-        columns = [...columns, ...getStaticFields()];
+        let newColumns = generateColumns(renderedFrom, data, routes.projectSalesDetail.path, true);
+        columns = [...newColumns, ...getStaticFields()];
         setColumns([...columns, ActionsRenderer]);
       });
   };

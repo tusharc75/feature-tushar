@@ -21,7 +21,7 @@ const AssignServiceDialog = ({ onSuccess, handleClose, ids = [], extraStaticFilt
 
   const { state, dispatch } = useTableReducer();
   const { dataRows, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const {
     state: { permissions, selectedEntity, user }
@@ -62,13 +62,8 @@ const AssignServiceDialog = ({ onSuccess, handleClose, ids = [], extraStaticFilt
       .get('/field?resource=Service Master&view=true')
       .then(({ data: { data } }) => {
         let columns = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serviceMasterDetail.path);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-          }
-        });
-        columns = [...columns, ...getStaticFields()];
+        let newColumns = generateColumns(renderedFrom, data, routes.serviceMasterDetail.path);
+        columns = [...newColumns, ...getStaticFields()];
         if (hideQty) {
           setColumns([...columns]);
         } else {
@@ -168,6 +163,15 @@ const AssignServiceDialog = ({ onSuccess, handleClose, ids = [], extraStaticFilt
         dispatch({ type: 'selection', selectedRecords: [...selectedRecords, editRow] });
       }
     }
+    else {
+      const updatedSelectedRecords = selectedRecords?.map((e) => {
+        if (e?._id === row?._id) {
+          return { ...e, qty: parseInt(data?.qty), isChecked: true };
+        }
+        return e;
+      });
+      dispatch({ type: 'selection', selectedRecords: updatedSelectedRecords });
+    }
     dispatch({ type: 'update', data: rows });
   };
 
@@ -209,7 +213,7 @@ const AssignServiceDialog = ({ onSuccess, handleClose, ids = [], extraStaticFilt
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             onSaveEdit={onSaveEdit}
-            
+
             refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}

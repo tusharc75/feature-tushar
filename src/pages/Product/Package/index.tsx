@@ -12,7 +12,7 @@ const Package = ({ renderedFrom, productId }) => {
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer();
 
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
   const {
     state: { user }
@@ -54,17 +54,8 @@ const Package = ({ renderedFrom, productId }) => {
     axiosInstance()
       .get('/field?resource=Packages&view=true')
       .then(({ data: { data } }) => {
-        let columns = [];
-        let rendererNames = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.packagesDetail.path);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-          }
-        });
-
-        columns = [...columns, ...getStaticFields()];
-        setColumns([...columns]);
+        const newColumns = generateColumns(renderedFrom, data, routes.packagesDetail.path, true);
+        setColumns([...newColumns, ...getStaticFields()]);
       });
   };
 

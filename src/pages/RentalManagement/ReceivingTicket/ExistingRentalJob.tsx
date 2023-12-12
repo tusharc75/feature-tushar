@@ -35,7 +35,7 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
 
   const { state, dispatch } = useTableReducer();
   const { selectedRecords } = state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchGridColumns();
@@ -44,19 +44,12 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
   const fetchGridColumns = async () => {
     const response = await axiosInstance().get(`/field?resource=Rental Management&entity=${selectedEntity}&view=true`);
     const data = response?.data?.data;
-    let columns = [];
-    data.forEach((o) => {
-      let currentColumn = getColumnData(routes.rentalManagement, o?.fieldData, routes.rentalManagementDetail.path);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-      }
-      return o?.fieldData;
-    });
+    let newColumns = generateColumns(routes.rentalManagement, data, routes.rentalManagementDetail.path);
     let staticFields = getStaticFields();
     staticFields.forEach((field) => {
-      columns.push(checkStaticField(routes.rentalManagement.title, field));
+      newColumns.push(checkStaticField(routes.rentalManagement.title, field));
     });
-    setColumns([...columns]);
+    setColumns([...newColumns]);
     fetchRentalManagement();
   };
 

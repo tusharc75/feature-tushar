@@ -55,7 +55,7 @@ const BulkAssetCreation = () => {
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchGridColumns();
@@ -69,16 +69,8 @@ const BulkAssetCreation = () => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource.bulkAssetCreation}`)
       .then(({ data: { data } }) => {
-        let columns = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.bulkAssetCreationDetail.path, true);
-
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-          }
-        });
-        columns = [...columns, ...getStaticFields()];
-        setColumns([...columns, ActionsRenderer]);
+        const newColumns = generateColumns(renderedFrom, data, routes.bulkAssetCreationDetail.path, true)
+        setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
       });
   };
 

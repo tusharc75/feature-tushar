@@ -63,7 +63,7 @@ const FieldTicket = () => {
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [columns, setColumns] = useState(null);
 
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
   const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
@@ -88,15 +88,8 @@ const FieldTicket = () => {
         console.error(`Rental Management: Error while storing data for Offline context. Error: ${ex.message}`);
       }
     }
-    let columns = [];
-    data.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.fieldTicketDetail.path, true);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-      }
-    });
-    columns = [...columns, ...getStaticFields()];
-    setColumns([...columns, ActionsRenderer]);
+    const newColumns = generateColumns(renderedFrom, data, routes.fieldTicketDetail.path, true);
+    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
   const fetchData = async () => {

@@ -32,7 +32,7 @@ const AssignProductDialog = ({
 
   const { state, dispatch } = useTableReducer();
   const { dataRows, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const {
     state: { user, selectedEntity }
@@ -79,13 +79,8 @@ const AssignProductDialog = ({
           setIsProductType(false);
         }
         let columns = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-          }
-        });
-        columns = [...columns, ...getStaticFields()];
+        let newColumns = generateColumns(renderedFrom, data, routes.productDetail.path);
+        columns = [...newColumns, ...getStaticFields()];
         if (hideQty) {
           setColumns([...columns]);
         } else {
@@ -211,6 +206,15 @@ const AssignProductDialog = ({
       if (editRow) {
         dispatch({ type: 'selection', selectedRecords: [...selectedRecords, editRow] });
       }
+    }
+    else {
+      const updatedSelectedRecords = selectedRecords?.map((e) => {
+        if (e?._id === row?._id) {
+          return { ...e, qty: parseInt(data?.qty), isChecked: true };
+        }
+        return e;
+      });
+      dispatch({ type: 'selection', selectedRecords: updatedSelectedRecords });
     }
     dispatch({ type: 'update', data: rows });
   };

@@ -20,7 +20,7 @@ const TypewiseTickets = ({ referenceType, referenceId, renderedFrom }) => {
   const { state, dispatch } = useTableReducer();
   
   const { dataRows, selectedRecords } = state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
   const [downlodingFile, setDownlodingFile] = useState(false);
   const {
@@ -37,13 +37,8 @@ const TypewiseTickets = ({ referenceType, referenceId, renderedFrom }) => {
       .then(({ data: { data } }) => {
         let columns = [];
         data = data.filter((e) => !['productInventory', 'pickupFromType', 'deliveryToType'].includes(e?.fieldData?.fieldName));
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.deliveryTicketDetail.path);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-          }
-        });
-        columns = [...columns, ...getStaticFields()];
+        let newColumns = generateColumns(renderedFrom, data, routes.deliveryTicketDetail.path);
+        columns = [...newColumns, ...getStaticFields()];
         columns = columns.filter((e) => !['warehouse', 'customerAccount', 'supplierAccount'].includes(e.field));
         columns.forEach((e) => {
           if (e.field === 'pickupFrom') {

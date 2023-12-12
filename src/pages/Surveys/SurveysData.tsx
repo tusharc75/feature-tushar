@@ -21,7 +21,7 @@ const SurveysData = ({ surveyId }) => {
   const {
     state: { permissions, selectedEntity }
   }: any = useData();
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   React.useEffect(() => {
     fetchGridColumns();
@@ -34,18 +34,9 @@ const SurveysData = ({ surveyId }) => {
   const fetchGridColumns = async () => {
     let data;
     const response = await axiosInstance().get(`surveys/fields/${surveyId}`);
-    data = response?.data?.data;
-    
-    let columns = [];
-    data.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o, routes.surveysDetail.path, true);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-      }
-      return o?.fieldData;
-    });
-    columns = [...columns, ...getStaticFields(), ActionsRenderer];
-    setColumns(columns);
+    data = response?.data?.data;    
+    const newColumns = generateColumns(renderedFrom, data, routes.surveysDetail.path, true);
+    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
   const fetchData = () => {

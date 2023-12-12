@@ -29,7 +29,7 @@ const AddExistingProductInventory = ({
 
   const { state, dispatch } = useTableReducer();
   const { dataRows, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const {
     state: { user, selectedEntity }
@@ -150,13 +150,8 @@ const AddExistingProductInventory = ({
       .get(type === 'product' ? '/field?resource=Product&view=true' : `/field?resource=Packages&entity=${selectedEntity}&view=true`)
       .then(({ data: { data } }) => {
         let columns = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, type === 'product' ? routes.productDetail.path : routes.packagesDetail.path);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-          }
-        });
-        columns = [...columns, ...getStaticFields()];
+        let newColumns = generateColumns(renderedFrom, data, type === 'product' ? routes.productDetail.path : routes.packagesDetail.path);
+        columns = [...newColumns, ...getStaticFields()];
         setColumns([...columns, ...defaultColumns]);
       });
   };
@@ -180,13 +175,22 @@ const AddExistingProductInventory = ({
         dispatch({ type: 'selection', selectedRecords: [...selectedRecords, editRow] });
       }
     }
+    else {
+      const updatedSelectedRecords = selectedRecords?.map((e) => {
+        if (e?._id === row?._id) {
+          return { ...e, qty: parseInt(data?.qty), isChecked: true };
+        }
+        return e;
+      });
+      dispatch({ type: 'selection', selectedRecords: updatedSelectedRecords });
+    }
     dispatch({ type: 'update', data: rows });
   };
 
   return (
     <Fragment>
       <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
-        <CustomDialogHeader title={`Add ${startCase(type)}`} onClose={handleProductInventoryClose}></CustomDialogHeader>
+        <CustomDialogHeader title={`Add ${startCase(type)}`} onClose={handleProductInventoryClose} showRequiredLabel={false}></CustomDialogHeader>
         <div className="listing-grid p-3">
           <Box mb={2}>
             <Grid container>

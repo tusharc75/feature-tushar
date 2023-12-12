@@ -410,7 +410,8 @@ export default function useColumns() {
         width: 200,
         Header: headerName[field?.fieldName] ?? field?.fieldLabel,
         show: gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide.indexOf(field?.fieldName) >= 0 ? false : true,
-        primaryField: field?.primaryField ?? false
+        primaryField: field?.primaryField ?? false,
+        decimalPlaces: field?.decimalPlaces || 0,
       };
 
       if (hideColumns.indexOf(field?.fieldName) >= 0) {

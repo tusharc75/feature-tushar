@@ -37,7 +37,7 @@ const FrequentlyAskedQuestion = () => {
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } =
     state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
   const [anchorEl, setAnchorEl] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
@@ -58,16 +58,8 @@ const FrequentlyAskedQuestion = () => {
     let data;
     const response = await axiosInstance().get('/field?resource=Frequently Asked Question');
     data = response?.data?.data;
-    let columns = [];
-    data.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.frequentlyAskedQuestionDetail.path, true);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-      }
-      return o?.fieldData;
-    });
-    columns = [...columns, ...getStaticFields(),ActionsRenderer];
-    setColumns(columns);
+    const newColumns = generateColumns(renderedFrom, data, routes.frequentlyAskedQuestionDetail.path, true);
+    setColumns([...newColumns, ...getStaticFields(),ActionsRenderer]);
   };
 
   const fetchFrequentlyAskedQuestionData = async () => {

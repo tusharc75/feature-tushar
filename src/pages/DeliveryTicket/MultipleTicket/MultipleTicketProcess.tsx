@@ -18,7 +18,7 @@ const MultipleTicketProcess = ({ referenceData, ticketType, referenceType }) => 
   const {
     state: { user, selectedEntity }
   }: any = useData();
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
   const toastConfig = useContext(CustomToastContext);
 
   //  Grid Variables - Start
@@ -50,16 +50,8 @@ const MultipleTicketProcess = ({ referenceData, ticketType, referenceType }) => 
       data = response?.data?.data;
     }
     data = data.filter((e) => e?.fieldData?.fieldName !== 'productInventory');
-    let columns = [];
-    data.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.deliveryTicket.path, true);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-      }
-      return o?.fieldData;
-    });
-    columns = [...columns, ...getStaticFields()];
-    setColumns(columns);
+    const newColumns = generateColumns(renderedFrom, data, routes.deliveryTicket.path, true);
+    setColumns([...newColumns, ...getStaticFields()]);
   };
 
   const fetchDeliveryTicket = async () => {
