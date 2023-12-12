@@ -13,7 +13,8 @@ import {
   DELIVERY_FROM_TO_TYPE,
   serializedAsset,
   prepareDataForGrid,
-  ASSET_STATUS
+  ASSET_STATUS,
+  TRANSFER_ASSET_STATUS
 } from 'src/constants/helpers';
 import { isMobile } from 'react-device-detect';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -98,17 +99,15 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       setAssetWithNoTicket(inventoryWithNoTicket);
     }
     if (dataRows?.length) {
-      const inventoryDelivered = dataRows?.filter((asset: any) => asset['loadingTicketStatus'] === 'Delivered');
-      const inventoryLost = dataRows?.filter((asset: any) => asset?.status === 'Lost');
-      if (inventoryDelivered.length > 0) {
+      if (dataRows?.filter((asset: any) => asset['loadingTicketStatus'] === DELIVERY_TICKET_STATUS.delivered).length > 0) {
         setNextStep(true);
       } else {
         setNextStep(false);
       }
       if (transferAssetData?.transferType === 'Internal') {
-        if (inventoryDelivered.length === dataRows?.filter((d) => d.status !== 'Lost').length || inventoryLost.length === dataRows?.length) {
+        if (dataRows?.every((e) => e['loadingTicketStatus'] === DELIVERY_TICKET_STATUS.delivered)) {
           setTransferIsEnded(true);
-          updateTransferStatus('Completed');
+          updateTransferStatus(TRANSFER_ASSET_STATUS.completed);
         } else {
           setTransferIsEnded(false);
         }
@@ -491,7 +490,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                       !canReceive ||
                       selectedRecords.length === 0 ||
                       selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !==
-                        selectedRecords.length
+                      selectedRecords.length
                     }
                     onClick={() => {
                       setShowConfirmBoxReceive(true);
@@ -505,7 +504,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                     disabled={
                       selectedRecords.length === 0 ||
                       selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !==
-                        selectedRecords.length
+                      selectedRecords.length
                     }
                     onClick={() => {
                       const products = [];
@@ -530,9 +529,9 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                   </MenuItem>
 
                   {permissions?.transferAsset?.isUpdate &&
-                  selectedRecords.length &&
-                  selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicket') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)
-                    ?.length === selectedRecords?.length ? (
+                    selectedRecords.length &&
+                    selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicket') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)
+                      ?.length === selectedRecords?.length ? (
                     <MenuItem
                       onClick={() => {
                         setShowConfirmBox(true);
