@@ -78,18 +78,17 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
         Header: 'Type',
         width: 100,
         disabled: true,
-        sticky: 'none',
-        //sticky: isMobile || isTablet ? 'none' : 'left',
+        sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (row.original['type'] ? <h5>{`${startCase(row.original?.type)} `}</h5> : <NoDataCell />)
       },
       {
         accessor: 'detail',
-        Header: ' Details',
+        Header: 'Details',
         disabled: true,
         minWidth: 200,
         width: 200,
-        sticky: 'none',
-        Cell: ({ row, rows }) => (
+        sticky: isMobile || isTablet ? 'none' : 'left',
+        Cell: ({ row, table }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {allowedToEdit ? (
               <h5
@@ -98,7 +97,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
                     open: true,
                     data: row.original,
                     bulkedit: false,
-                    showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
+                    showSaveAndNext: row?.index < table.getRowModel().rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
                   });
                 }}
                 className="link text-truncate"
@@ -161,7 +160,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
       minWidth: 100,
       width: 100,
       sticky: 'right',
-      Cell: ({ row, rows }) => (
+      Cell: ({ row, table }) => (
         <>
           <HtmlTooltip title={allowedToEdit ? 'Edit' : ''}>
             <IconButton
@@ -169,7 +168,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
               aria-label="Details"
               disabled={allowedToEdit ? false : true}
               onClick={() => {
-                onMaterialEdit(row, rows);
+                onMaterialEdit(row, table.getRowModel().rows);
               }}
             >
               <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />

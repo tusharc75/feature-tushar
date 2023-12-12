@@ -83,7 +83,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
         Header: 'Detail',
         minWidth: 300,
         width: 300,
-        Cell: ({ row, rows }) => (
+        Cell: ({ row, table }) => (
           <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'nowrap' }}>
             {allowedToEdit ? (
               <p
@@ -92,7 +92,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
                     open: true,
                     data: row.original,
                     bulkedit: false,
-                    showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
+                    showSaveAndNext: row?.index < table.getRowModel().rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
                   });
                 }}
                 className="link text-truncate"
@@ -158,14 +158,14 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
       disableFilters: true,
       disableSortBy: true,
       canDrag: false,
-      Cell: ({ row, rows }) =>
+      Cell: ({ row, table }) =>
         <Grid container spacing={1}>
           <IconButton
             size="small"
             aria-label="Details"
             disabled={allowedToEdit ? false : true}
             onClick={() => {
-              onMaterialEdit(row, rows);
+              onMaterialEdit(row, table.getRowModel().rows);
             }}
           >
             <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />

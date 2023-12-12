@@ -139,13 +139,13 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
         minWidth: 300,
         width: 300,
         sticky: isMobile || isTablet ? 'none' : 'left',
-        Cell: ({ row, rows }) => (<div style={{ display: 'flex', alignItems: 'center' }}>
+        Cell: ({ row, table }) => (<div style={{ display: 'flex', alignItems: 'center' }}>
           {isOffline || !allowedToEdit || quotationApproved ? (
             <p> {row.original.detail}</p>
           ) : (
             <p
               onClick={() => {
-                openMaterial(row, rows);
+                openMaterial(row, table.getRowModel().rows);
               }}
               className="link text-truncate"
               title={row.original.detail}
@@ -209,7 +209,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
       disableFilters: true,
       disableSortBy: true,
       canDrag: false,
-      Cell: ({ row, rows }) => {
+      Cell: ({ row, table }) => {
         return (
           <>
             <HtmlTooltip title={isOffline || !allowedToEdit || quotationApproved ? '' : 'Edit'}>
@@ -218,7 +218,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
                 aria-label="Details"
                 disabled={isOffline || !allowedToEdit || quotationApproved ? true : false}
                 onClick={() => {
-                  openMaterial(row, rows);
+                  openMaterial(row, table.getRowModel().rows);
                 }}
               >
                 <EditIcon fontSize="small" color={isOffline || !allowedToEdit || quotationApproved ? 'disabled' : 'primary'} />
