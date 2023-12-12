@@ -151,7 +151,7 @@ const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, rende
         minWidth: 200,
         width: 200,
         sticky: isMobile || isTablet ? 'none' : 'left',
-        Cell: ({ row, rows }) => (
+        Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <h5 className="text-truncate">{row.original?.detail}</h5>
             <Box ml={1}>
