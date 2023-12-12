@@ -86,10 +86,14 @@ const CustomReactTable = ({
   const newColumns = useCreateColumns({ columns, expander, fetchChildAttachment, hideSelection, hideAction, dispatch, state, isClientSideGrid });
 
   const columnFilters = React.useMemo(() => {
-    let tempArray = Object.keys(customFilters).map((key, i) => {
-      return { id: key, value: customFilters[key].filter };
-    });
-    return tempArray;
+    const filters = [];
+
+    for (const key of Object.keys(customFilters)) {
+      // in case of complex filters api should porovide filtered value
+      if (typeof customFilters[key].filter !== 'string') continue;
+      filters.push({ id: key, value: customFilters[key].filter });
+    }
+    return filters;
   }, [customFilters]);
 
   const [searchQuery] = useStore((store) => store[SEARCH]);
