@@ -23,7 +23,7 @@ import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceD
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import { startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
+import { flattenArray } from 'src/constants/columns';
 import { ExpandMore } from '@material-ui/icons';
 import ManagePackageDialog from 'src/pages/Packages/ManagePackageDialog';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
@@ -31,8 +31,8 @@ import EditIcon from '@material-ui/icons/Edit';
 import Technicians from './Technicians';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { Autocomplete } from '@material-ui/lab';
-import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import { ownerAndColaborator, quotationApprovedMessage, rentalManagementMessage } from 'src/constants/messageHelpers';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 
 const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, renderedFrom, stepFullScreen, allowedToEdit, quotationApproved }: any) => {
   const toastConfig = useContext(CustomToastContext);
@@ -42,7 +42,6 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
 
   const [isUpdating, setUpdating] = useState(false);
 
-  const [selectedProducts, setSelectedProducts] = useState([]);
   const [isProductEdit, setIsProductEdit] = useState({ open: false, data: null, showSaveAndNext: false });
   const [isSubmitting, setSubmitting] = useState(false);
 
@@ -52,7 +51,6 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
   const [material, setMaterial] = useState([]);
   const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: '', parentId: null });
   const [columns, setColumns] = useState(null);
-  const [rowsData, setRowsData] = useState(null);
   const [allFields, setAllFields] = useState(null);
   const [isRateRequired, setIsRateRequired] = useState(false);
   const [isBulkEdit, setIsBulkEdit] = useState(false);
@@ -64,6 +62,11 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
 
   const { isOffline } = useContext(CustomOfflineContext);
 
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, selectedRecords } = state;
+  const { generateColumns } = useColumns();
+
+
   useEffect(() => {
     fetchFields();
     fetchData();
@@ -71,7 +74,7 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
 
   useEffect(() => {
     if (allFields) {
-      generateColumns();
+      createColumns();
     }
   }, [allFields, allowedToEdit, quotationApproved]);
 
@@ -80,7 +83,7 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
     setAllFields(JSON.parse(JSON.stringify(data)));
   };
 
-  const generateColumns = () => {
+  const createColumns = () => {
     setColumns(null);
     const data = [...allFields]
     if (!allowedToEdit || quotationApproved) {
@@ -88,7 +91,7 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
         e.isColumnEditable = false;
       });
     }
-    const newColumns = generateCustomTableColumns(data, rentalManagementData?.currency, renderedFrom);
+    const newColumns = generateColumns(renderedFrom, data, null, false, rentalManagementData?.currency);
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';
@@ -98,7 +101,7 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
         accessor: 'index',
         Header: 'Index',
         width: 70,
-        sticky: isMobile ? 'none' : 'left',
+        sticky: 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
@@ -107,8 +110,9 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
       {
         accessor: 'type',
         Header: 'Type',
-        sticky: isMobile ? 'none' : 'left',
+        sticky: isMobile || isTablet ? 'none' : 'left',
         disableFilters: true,
+        disabled: true,
         width: 200,
         Cell: ({ row }) =>
           row.original['type'] ? (
@@ -135,15 +139,16 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
         Header: 'Details',
         minWidth: 300,
         width: 300,
-        sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row, rows }) => (
+        disabled: true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
+        Cell: ({ row, table }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {isOffline || !allowedToEdit || quotationApproved ? (
               <p> {row.original.detail}</p>
             ) : (
               <p
                 onClick={() => {
-                  openMaterial(row, rows);
+                  openMaterial(row, table.getRowModel().rows);
                 }}
                 className="link text-truncate"
                 title={row.original.detail}
@@ -205,13 +210,13 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
     column.push({
       accessor: 'action',
       Header: 'Actions',
-      minWidth: 50,
-      width: 50,
+      minWidth: 100,
+      width: 100,
       sticky: 'right',
       disableFilters: true,
       disableSortBy: true,
       canDrag: false,
-      Cell: ({ row, rows }) => {
+      Cell: ({ row, table }) => {
         return (
           <>
             <HtmlTooltip title={isOffline || !allowedToEdit || quotationApproved ? '' : 'Edit'}>
@@ -220,7 +225,7 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
                 aria-label="Details"
                 disabled={isOffline || !allowedToEdit || quotationApproved ? true : false}
                 onClick={() => {
-                  openMaterial(row, rows);
+                  openMaterial(row, table.getRowModel().rows);
                 }}
               >
                 <EditIcon fontSize="small" color={isOffline || !allowedToEdit || quotationApproved ? 'disabled' : 'primary'} />
@@ -264,6 +269,9 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
   }
 
   const fetchData = async () => {
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
+
     setNextStep(false);
     setNextStepToolTip(null)
     try {
@@ -328,8 +336,8 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
       if (rows?.length === 0) {
         setNextStep(true);
       }
-      setRowsData(rows);
-      setSelectedProducts([]);
+      dispatch({ type: 'initialize', data: rows, count: rows?.lenght });
+      dispatch({ type: 'loading', loading: false });
 
       setServiceOption([{ optionLabel: 'All', optionValue: 'All' },
       ...rows?.map((s) => {
@@ -456,8 +464,8 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
         setUpdating(false);
         fetchData();
         if (saveAndNext) {
-          const rowIndex = rowsData?.findIndex((d) => d._id === rows[0]?._id);
-          setIsProductEdit({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false });
+          const rowIndex = dataRows?.findIndex((d) => d._id === rows[0]?._id);
+          setIsProductEdit({ open: true, data: dataRows[rowIndex + 1], showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false });
         } else {
           setIsProductEdit({ open: false, data: null, showSaveAndNext: false });
         }
@@ -506,7 +514,7 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
 
   const handleDeleteMultiple = () => {
     const obj: any = [];
-    const dataToDelete = selectedProducts && selectedProducts.filter((e) => !e.hideSelection);
+    const dataToDelete = selectedRecords && selectedRecords.filter((e) => !e.hideSelection);
     dataToDelete?.forEach((ele) => {
       obj.push({ id: ele._id, type: ele.type, materialId: ele.materialId });
     });
@@ -517,7 +525,7 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
   };
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
-    const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
+    const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
     if (inputField.hasOwnProperty('qtyDisplay')) {
       inputField['qty'] = inputField['qtyDisplay'];
     }
@@ -616,7 +624,7 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
             color="primary"
             size="small"
             onClick={handleClick}
-            disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
+            disabled={!Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length)}
             endIcon={<BiChevronDown />}
             className="new-dropdown-v1"
           >
@@ -632,7 +640,7 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
             }}
             onClose={handleClose}
           >
-            <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
+            <HtmlTooltip title={Boolean(selectedRecords && selectedRecords.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
               <MenuItem
                 onClick={() => {
                   setIsProductEdit({ open: true, data: null, showSaveAndNext: false });
@@ -643,7 +651,7 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
                 Bulk Edit
               </MenuItem>
             </HtmlTooltip>
-            <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
+            <HtmlTooltip title={Boolean(selectedRecords && selectedRecords.length) ? 'Delete selected records' : 'Select records to delete'}>
               <MenuItem
                 disabled={isDeleting}
                 onClick={() => {
@@ -657,18 +665,17 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
           </Menu>
         </Box>
       </Box>
-      {columns && rowsData ? (
+      {columns ? (
         <CustomReactTable
           height={'300px'}
           columns={columns}
-          data={rowsData}
+          state={state}
+          dispatch={dispatch}
+          refreshGrid={fetchData}
           setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-          onSelect={setSelectedProducts}
-          childrenProperty="subRows"
-          uniqueKey="_id"
           hideSelection={isOffline || !allowedToEdit || quotationApproved}
           hideAction={isOffline || !allowedToEdit || quotationApproved}
-          renderedFrom="rental_management_sevices_1"
+          renderedFrom={renderedFrom}
           onSaveEdit={onSaveInlineEdit}
           isClientSideGrid={true}
         />
@@ -745,9 +752,9 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
           isBulkedit={isBulkEdit}
           handleSaveData={handleSaveData}
           rentalManagementData={rentalManagementData}
-          rowData={!isBulkEdit ? isProductEdit.data : selectedProducts}
+          rowData={!isBulkEdit ? isProductEdit.data : selectedRecords}
           material={material}
-          selectedProducts={selectedProducts}
+          selectedProducts={selectedRecords}
           loading={isUpdating}
           from={'service'}
           showSaveAndNext={isProductEdit.showSaveAndNext}

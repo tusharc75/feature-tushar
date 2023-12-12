@@ -112,7 +112,7 @@ const IotChartDetail = () => {
           {tabValue === 0 && <Current assetId={assetId} />}
           {/* {tabValue === 1 && <Analysis assetId={assetId} dataPoints={dataPoints} />} */}
           {tabValue === 2 && <PerformanceAnalysis assetId={assetId} dataPoints={dataPoints} />}
-          {tabValue === 3 && <Alarms deviceTemplate={deviceTemplate} />}
+          {tabValue === 3 && <Alarms deviceTemplate={deviceTemplate} assetId={assetId} />}
           {tabValue === 4 && <Status assetId={assetId} dataPoints={dataPoints} />}
         </Box>
       ) : (
