@@ -6,7 +6,6 @@ import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -25,6 +24,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import { ownerAndColaborator, subleaseMessage } from 'src/constants/messageHelpers';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 
 const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchData, isIssued, renderedFrom, allowedToEdit, stepFullScreen }) => {
 
@@ -32,10 +32,12 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
   const {
     state: { user, permissions }
   }: any = useData();
+  const { generateColumns } = useColumns();
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, selectedRecords } = state;
 
   const [isUpdating, setUpdating] = useState(false);
 
-  const [selectedProducts, setSelectedProducts] = useState([]);
   const [isProductEdit, setIsProductEdit] = useState({ open: false, isBulkedit: false });
 
   const [recordToUpdate, setRecordToUpdate] = useState(null);
@@ -66,7 +68,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
   const fetchFields = async () => {
     var data = await fetch_sublease_product_fields(subleaseData?.currency);
     setAllFields(JSON.parse(JSON.stringify(data)));
-    const newColumns = generateCustomTableColumns(data, subleaseData?.currency, renderedFrom);
+    const newColumns = generateColumns(renderedFrom, data, null, false, subleaseData?.currency);
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';
@@ -76,7 +78,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
         accessor: 'index',
         Header: 'Index',
         width: 70,
-        sticky: isMobile ? 'none' : 'left',
+        sticky: 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
       },
       {
@@ -84,7 +86,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
         Header: 'Detail',
         minWidth: 300,
         width: 300,
-        sticky: isMobile ? 'none' : 'left',
+        sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {!allowedToEdit ? (
@@ -150,8 +152,8 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
     coloum.push({
       accessor: 'action',
       Header: 'Actions',
-      minWidth: 50,
-      width: 50,
+      minWidth: 100,
+      width: 100,
       sticky: 'right',
       disableFilters: true,
       disableSortBy: true,
@@ -203,6 +205,8 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
   };
 
   const fetchProductInventory = async () => {
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
     setNextStep(false);
     setNextStepToolTip(null)
     var data: any = [];
@@ -269,8 +273,8 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
         setNextStepToolTip(null);
       }
     }
-    setRowsData(rows);
-    setSelectedProducts([]);
+    dispatch({ type: 'initialize', data: rows, count: rows?.length });
+    dispatch({ type: 'loading', loading: false });
   };
 
   const handleAdd = async (rows) => {
@@ -514,7 +518,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
           <Box ml={1}>
             <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : 'Actions'}>
               <Button
-                disabled={selectedProducts?.length || !allowedToEdit || (subleaseData.type === SUBLEASE_TYPE.vendor && !isIssued) ? false : true}
+                disabled={selectedRecords?.length || !allowedToEdit || (subleaseData.type === SUBLEASE_TYPE.vendor && !isIssued) ? false : true}
                 variant={'outlined'}
                 color="default"
                 size="small"
@@ -541,7 +545,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
           >
             <MenuItem
               color="primary"
-              disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
+              disabled={!Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length)}
               onClick={() => {
                 setAnchorEl(null);
                 setIsProductEdit({ open: true, isBulkedit: true });
@@ -551,11 +555,11 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
             </MenuItem>
             <MenuItem
               color="primary"
-              disabled={selectedProducts?.length && selectedProducts.every((e) => e.canDelete) ? false : true}
+              disabled={selectedRecords?.length && selectedRecords.every((e) => e.canDelete) ? false : true}
               onClick={() => {
                 const dataToDelete =
-                  selectedProducts &&
-                  selectedProducts
+                  selectedRecords &&
+                  selectedRecords
                     .filter((e) => !e.hideSelection)
                     .map((rec: any) => {
                       const obj: any = {};
@@ -572,20 +576,19 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
           </Menu>
         </Box>
       </Box>
-      {columns && rowsData ? (
+      {columns ? (
         <Box zIndex={5} width={'100%'}>
           <CustomReactTable
             height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
             columns={columns}
-            data={rowsData}
+            state={state}
+            dispatch={dispatch}
+            refreshGrid={fetchProductInventory}
             setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-            onSelect={setSelectedProducts}
-            childrenProperty="subRows"
-            uniqueKey="_id"
             hideSelection={!allowedToEdit}
             onSaveEdit={onSaveInlineEdit}
             hideAction={!allowedToEdit}
-            renderedFrom="sublease_product_package"
+            renderedFrom={renderedFrom}
             isClientSideGrid={true}
           />
         </Box>
@@ -619,7 +622,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
             subleaseData={subleaseData}
             rowData={recordToUpdate}
             material={material}
-            selectedProducts={selectedProducts}
+            selectedProducts={selectedRecords}
             loading={isUpdating}
           />
         )
