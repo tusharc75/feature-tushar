@@ -7,7 +7,7 @@ import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { SERVICE_ORDER_STATUS, fieldServiceOrder } from '../../../constants/helpers';
@@ -16,10 +16,8 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { BiChevronDown } from 'react-icons/bi';
 import { startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmployeeDialog';
 import { fetch_service_order_detail_fields } from 'src/components/ServiceOrder/helper';
-import { generateCustomTableColumns } from 'src/constants/columns';
 
 const Technician = ({
   serviceOrderData,
@@ -36,13 +34,14 @@ const Technician = ({
     state: { user, permissions }
   }: any = useData();
 
-  const [selectedProducts, setSelectedProducts] = useState([]);
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
-
   const [addEmployeeMasterDialog, setAddEmployeeMasterDialog] = useState({ open: false, data: null });
   const [columns, setColumns] = useState(null);
-  const [rowsData, setRowsData] = useState(null);
+
+  const { state, dispatch } = useTableReducer();
+  const { selectedRecords } = state;
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     if (fromInvoice) {
@@ -65,20 +64,21 @@ const Technician = ({
     data?.forEach((e) => {
       e.isColumnEditable = false;
     });
-    var newColumns = generateCustomTableColumns(data, serviceOrderData?.currency, renderedFrom);
+    const newColumns = generateColumns(renderedFrom, data, null, false, serviceOrderData?.currency);
     var column: any = [
       {
         accessor: 'index',
         Header: 'Index',
-        width: 50,
-        sticky: isMobile ? 'none' : 'left',
+        width: 70,
+        sticky: 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
       },
       {
         accessor: 'type',
         Header: 'Type',
         disableFilters: true,
-        sticky: isMobile ? 'none' : 'left',
+        disabled: true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
         width: 100,
         Cell: ({ row }) => (row.original['type'] ? <p>{`${startCase(row.original?.type)} `}</p> : <NoDataCell />)
       },
@@ -86,7 +86,8 @@ const Technician = ({
         accessor: 'detail',
         Header: ' Details',
         width: 250,
-        sticky: isMobile ? 'none' : 'left',
+        disabled: true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {row.original.detail}
@@ -129,8 +130,8 @@ const Technician = ({
     column.push({
       accessor: 'action',
       Header: 'Actions',
-      minWidth: 50,
-      width: 50,
+      minWidth: 100,
+      width: 100,
       sticky: 'right',
       disableFilters: true,
       disableSortBy: true,
@@ -157,6 +158,8 @@ const Technician = ({
   };
 
   const fetchData = async () => {
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
     setNextStep(false);
     var data: any = [];
     const response = await axiosInstance().get(`${fieldServiceOrder.api}/${serviceOrderData._id}/material`);
@@ -172,8 +175,8 @@ const Technician = ({
         parent.type === 'product'
           ? parent?.productDetail?.productName
           : parent.type === 'service'
-            ? parent?.serviceDetail?.serviceName
-            : parent?.packageDetail?.packageName;
+          ? parent?.serviceDetail?.serviceName
+          : parent?.packageDetail?.packageName;
       parent.competencies = parent.type === 'service' ? parent?.serviceDetail?.competencies?.map((e) => e?.optionLabel)?.join(', ') : null;
       parent.competencyType = parent.type === 'service' ? parent?.serviceDetail?.competencyType?.optionLabel : null;
       parent.mainCompetencyType = parent.type === 'service' ? parent?.serviceDetail?.competencyType : {};
@@ -185,8 +188,8 @@ const Technician = ({
       setNextStep(true);
     }
 
-    setRowsData(rows);
-    setSelectedProducts([]);
+    dispatch({ type: 'initialize', data: rows, count: rows?.length });
+    dispatch({ type: 'loading', loading: false });
   };
 
   const generateNestedData = (material, technician, parent) => {
@@ -214,8 +217,8 @@ const Technician = ({
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productName
           : _subRow.type === 'service'
-            ? _subRow?.serviceDetail?.serviceName
-            : _subRow?.packageDetail?.packageName;
+          ? _subRow?.serviceDetail?.serviceName
+          : _subRow?.packageDetail?.packageName;
       _subRow.subRows = generateNestedData(material, technician, _subRow);
     });
 
@@ -226,11 +229,11 @@ const Technician = ({
     const sendData: any = [];
     rows?.forEach((e) => {
       sendData.push({
-        uniqueId: selectedProducts[0]?._id,
-        service: selectedProducts[0]?.materialId,
+        uniqueId: selectedRecords[0]?._id,
+        service: selectedRecords[0]?.materialId,
         technician: e?._id,
-        estimateStartDate: selectedProducts[0]?.estimateStartDate,
-        estimateEndDate: selectedProducts[0]?.estimateEndDate
+        estimateStartDate: selectedRecords[0]?.estimateStartDate,
+        estimateEndDate: selectedRecords[0]?.estimateEndDate
       });
     });
     axiosInstance()
@@ -262,8 +265,8 @@ const Technician = ({
 
   const handleDeleteMultiple = () => {
     const obj: any = [];
-    selectedProducts
-      .filter((e) => e.type === 'technician')
+    selectedRecords
+      ?.filter((e) => e.type === 'technician')
       ?.forEach((ele) => {
         obj.push(ele._id);
       });
@@ -286,9 +289,7 @@ const Technician = ({
       <Grid container spacing={2}>
         <Grid item xs={12} md={12} sm={12}>
           <Box display="flex" justifyContent="space-between" m={1} mb={0}>
-            <Box display="flex">
-
-            </Box>
+            <Box display="flex"></Box>
             {allowedToEdit && (
               <Box display="flex">
                 <Button
@@ -296,9 +297,9 @@ const Technician = ({
                   color="primary"
                   type="button"
                   size="small"
-                  disabled={selectedProducts?.length === 1 ? false : true}
+                  disabled={selectedRecords?.length === 1 ? false : true}
                   onClick={() => {
-                    setAddEmployeeMasterDialog({ open: true, data: selectedProducts[0] });
+                    setAddEmployeeMasterDialog({ open: true, data: selectedRecords[0] });
                   }}
                 >
                   {`Assign Technician`}
@@ -309,7 +310,7 @@ const Technician = ({
                   color="primary"
                   size="small"
                   onClick={handleClick}
-                  disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => e.type === 'technician').length)}
+                  disabled={!Boolean(selectedRecords?.length && selectedRecords?.filter((e) => e.type === 'technician').length)}
                   endIcon={<BiChevronDown />}
                   className="new-dropdown-v1"
                 >
@@ -340,19 +341,19 @@ const Technician = ({
           </Box>
         </Grid>
         <Grid item xs={12} md={12} sm={12}>
-          {columns && rowsData ? (
+          {columns ? (
             <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}>
               <CustomReactTable
                 height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
                 columns={columns}
-                data={rowsData}
-                onSelect={setSelectedProducts}
-                childrenProperty="subRows"
-                uniqueKey="_id"
+                state={state}
+                dispatch={dispatch}
+                refreshGrid={fetchData}
                 hideSelection={!allowedToEdit}
                 hideAction={!allowedToEdit}
-                renderedFrom={`${renderedFrom}_technician`}
+                renderedFrom={renderedFrom}
                 isClientSideGrid={true}
+                expander={true}
               />
             </Box>
           ) : (
