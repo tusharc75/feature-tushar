@@ -32,7 +32,7 @@ export default function DeviceTemplatesAlerts() {
 
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const [columns, setColumns] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -44,15 +44,8 @@ export default function DeviceTemplatesAlerts() {
     axiosInstance()
       .get(`/field?resource=${sidebarResource?.deviceTemplateAlert}`)
       .then(({ data: { data } }) => {
-        let columns = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.deviceTemplateAlertDetail.path, true);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-          }
-        });
-        columns = [...columns, ...getStaticFields(), ActionsRenderer];
-        setColumns([...columns]);
+        const newColumns = generateColumns(renderedFrom, data, routes.deviceTemplateAlertDetail.path, true);
+        setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
       });
   };
 

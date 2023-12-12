@@ -15,15 +15,7 @@ import { camelCase } from 'lodash';
 
 let searchTimeout;
 
-const AssignDynamicDialog = ({
-  onSuccess,
-  handleClose,
-  resource,
-  isSubmitting,
-  ids = [],
-  extraDeepFilter = [],
-  extraFilterById = []
-}) => {
+const AssignDynamicDialog = ({ onSuccess, handleClose, resource, isSubmitting, ids = [], extraDeepFilter = [], extraFilterById = [] }) => {
   const renderedFrom = camelCase(`${routes[resource]?.title || resource}`);
 
   const {
@@ -34,7 +26,7 @@ const AssignDynamicDialog = ({
 
   const { state, dispatch } = useTableReducer();
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const [columns, setColumns] = useState(null);
 
@@ -56,16 +48,8 @@ const AssignDynamicDialog = ({
     axiosInstance()
       .get(`/field?resource=${resource}&view=true`)
       .then(({ data: { data } }) => {
-        let columns = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, `${routes[`${camelCase(resource)}Detail`]?.path}`);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-          }
-          return o?.fieldData;
-        });
-        columns = [...columns, ...getStaticFields()];
-        setColumns(columns);
+        let newColumns = generateColumns(renderedFrom, data, `${routes[`${camelCase(resource)}Detail`]?.path}`, false);
+        setColumns([...newColumns, ...getStaticFields()]);
       });
   };
 

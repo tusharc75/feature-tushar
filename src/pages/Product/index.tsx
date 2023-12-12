@@ -61,7 +61,7 @@ const Product = () => {
   const {
     state: { permissions, selectedEntity }
   }: any = useData();
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
   useEffect(() => {
     if (permissions?.productCategory?.isRead) {
       axiosInstance()
@@ -116,17 +116,8 @@ const Product = () => {
         } else {
           setIsProductType(false);
         }
-        let columns = [];
-        data.forEach((o) => {
-          if (!ignoreField.includes(o?.fieldData.fieldName)) {
-            let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path, true);
-            if (currentColumn !== null) {
-              columns = [...columns, currentColumn?.columnData];
-            }
-          }
-        });
-        columns = [...columns];
-        setProductColumns(columns);
+        const newColumns = generateColumns(renderedFrom, data?.filter(d => !ignoreField.includes(d?.fieldData.fieldName)), routes.productDetail.path, true);
+        setProductColumns([...newColumns]);
       });
   };
 

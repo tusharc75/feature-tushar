@@ -63,7 +63,7 @@ const ServiceOrder = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
 
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchGridColumns();
@@ -73,19 +73,12 @@ const ServiceOrder = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.fieldServiceOrder}`);
     data = response?.data?.data;
-    let columns = [];
-    data.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.fieldServiceOrderDetail.path, true);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-      }
-      return o?.fieldData;
-    });
+    const newColumns = generateColumns(renderedFrom, data, routes.fieldServiceOrderDetail.path, true);
     let staticFields = getStaticFields();
     staticFields.forEach((field) => {
-      columns.push(checkStaticField(renderedFrom, field));
+      newColumns.push(checkStaticField(renderedFrom, field));
     });
-    setColumns([...columns, ActionsRenderer]);
+    setColumns([...newColumns, ActionsRenderer]);
   };
 
   //  Grid Variables - End

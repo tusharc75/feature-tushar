@@ -38,7 +38,7 @@ const InventoryProduct = () => {
   const history = useHistory();
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const {
     state: { user, permissions, selectedEntity }
@@ -150,12 +150,10 @@ const InventoryProduct = () => {
       if (o.fieldData.fieldName === 'expenseItem') {
         setShowExpenseItem(true);
       }
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-      }
     });
 
+    let newColumns = generateColumns(renderedFrom,  productFields?.data?.data, routes.productDetail.path);
+    columns = [...columns, ...newColumns];
     columns?.forEach((e) => {
       if (!['productName', 'serializedProduct'].includes(e?.accessor)) {
         e.show = false;
@@ -163,26 +161,24 @@ const InventoryProduct = () => {
     });
 
     if (!user?.user?.brandPolicy?.hideInventoryCount) {
-      productInventoryFields?.data?.data?.forEach((o) => {
-        let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productInventory.path);
-        if (currentColumn !== null) {
-          if (!['plant', 'product'].includes(currentColumn?.columnData?.accessor)) {
-            if (o.fieldData.type === 'number' && ['minInventory', 'maxInventory'].includes(o.fieldData.fieldName)) {
-              columns.push({
-                ...currentColumn?.columnData,
-                disableFilters: true,
-                editable: plantId === 'All' ? false : permissions?.productInventory?.isUpdate,
-                Cell: ({ row }) => <h5 className="text-truncate">{row?.original[o.fieldData.fieldName] || 0}</h5>
-              });
-            } else if (['inventory'].includes(currentColumn?.columnData?.accessor)) {
-              columns.push({
-                ...currentColumn?.columnData,
-                disableFilters: true,
-                Cell: ({ row }) => <h5 className="text-truncate">{row?.original[o.fieldData.fieldName] || 0}</h5>
-              });
-            } else {
-              columns.push(currentColumn?.columnData);
-            }
+      let newColumns = generateColumns(renderedFrom,  productInventoryFields?.data?.data, routes.productInventory.path);
+      newColumns?.forEach(o => {
+        if (!['plant', 'product'].includes(o?.accessor)) {
+          if (['minInventory', 'maxInventory'].includes(o.accessor) && productInventoryFields?.data?.data?.find(d => d?.fieldData?.fieldName === o?.accessor)?.type === 'number') {
+            columns.push({
+              ...o,
+              disableFilters: true,
+              editable: plantId === 'All' ? false : permissions?.productInventory?.isUpdate,
+              cell: ({ row }) => <h5 className="text-truncate">{row?.original[o.accessor] || 0}</h5>
+            });
+          } else if (['inventory'].includes(o?.accessor)) {
+            columns.push({
+              ...o,
+              disableFilters: true,
+              cell: ({ row }) => <h5 className="text-truncate">{row?.original[o.accessor] || 0}</h5>
+            });
+          } else {
+            columns.push(o);
           }
         }
       });

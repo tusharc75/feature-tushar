@@ -29,7 +29,7 @@ const AssignSerializedAssetDialog = ({
 
   const { state, dispatch } = useTableReducer();
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const {
     state: { permissions, selectedEntity }
@@ -58,15 +58,8 @@ const AssignSerializedAssetDialog = ({
     axiosInstance()
       .get(`/field?resource=${serializedAsset.resource}&view=true`)
       .then(({ data: { data } }) => {
-        let columns = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-          }
-        });
-        columns = [...columns, ...getStaticFields()];
-        setColumns([...columns]);
+        let newColumns = generateColumns(renderedFrom, data, routes.serializedAssetDetail.path);
+        setColumns([...newColumns, ...getStaticFields()]);
       });
   };
 

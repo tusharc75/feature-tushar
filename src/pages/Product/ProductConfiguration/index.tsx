@@ -42,7 +42,7 @@ const ProductConfiguration = (props: ConfigProps) => {
     values: {},
     images: []
   });
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
   const [columns, setColumns] = React.useState([]);
   const { state, dispatch } = useTableReducer();
   const { selectedRecords } = state;
@@ -102,16 +102,8 @@ const ProductConfiguration = (props: ConfigProps) => {
       } = await axiosInstance().get(`${routes.productTemplate.path}/fields/${productData.productTemplate}`);
       const { fields } = data;
       setSpecFields(fields);
-      let columns = [];
-      fields.forEach((o) => {
-        let currentColumn = getColumnData(renderedFrom, o, routes.product.path, true);
-        if (currentColumn !== null) {
-          columns = [...columns, currentColumn?.columnData];
-        }
-        return o?.fieldData;
-      });
-      columns = [...columns, ActionsRenderer];
-      setColumns(columns);
+      const newColumns = generateColumns(renderedFrom, fields, routes.product.path, true);
+      setColumns([...newColumns, ActionsRenderer]);
     } catch (err) {
       setToastConfig(err);
     }

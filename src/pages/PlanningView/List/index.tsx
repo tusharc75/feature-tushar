@@ -14,7 +14,7 @@ function ListView({ resourceList, selectedResource, setSelectedResource }) {
   const {
     state: { user, selectedEntity }
   }: any = useData();
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const { state, dispatch } = useTableReducer();
   const [renderedFrom, setRenderedFrom] = useState('');
@@ -26,15 +26,8 @@ function ListView({ resourceList, selectedResource, setSelectedResource }) {
     axiosInstance()
       .get(`/field?resource=${selectedResource.resource}`)
       .then(({ data: { data } }) => {
-        let columns = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, selectedResource.path);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-          }
-        });
-        columns = [...columns, ...getStaticFields()];
-        setColumns([...columns]);
+        const newColumns = generateColumns(renderedFrom, data, selectedResource.path);      
+        setColumns([...newColumns, ...getStaticFields()]);
       });
   };
 

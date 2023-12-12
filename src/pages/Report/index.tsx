@@ -56,7 +56,7 @@ const Report = () => {
   const [selectedReportView, setSelectedReportView] = React.useState(null);
   const [statusTimeFrame, setStatusTimeFrame] = React.useState<any>('custom');
 
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
   const [columns, setColumns] = React.useState(null);
   const { state, dispatch } = useTableReducer();
   const { loading, page, sorting, search, limit, filters, pageSizes, colState } = state;
@@ -112,17 +112,14 @@ const Report = () => {
       if (o?.fieldData?.fieldName === primaryFields[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]) {
         o.fieldData.primaryField = true;
       }
-      let currentColumn = getColumnData(
-        routes[resourceCamelCase]?.title,
-        o?.fieldData,
-        routes[`${resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase}Detail`].path
-      );
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-      }
     });
 
-    columns = [...columns, ...getStaticFields()];
+    let newColumns = generateColumns(
+      routes[resourceCamelCase]?.title,
+      data,
+      routes[`${resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase}Detail`].path
+    );
+    columns = [...newColumns, ...getStaticFields()];
     if (resourceStartCase === 'Purchase Order') {
       columns.splice(1, 0, {
         accessor: 'poAmount',
@@ -131,9 +128,7 @@ const Report = () => {
         disabled: false,
         Cell: ({ row }) => (
           <>
-            <h5 className="text-truncate">
-              {row.original['poAmount'] ? row.original['poAmount'] : <NoDataCell />}
-            </h5>
+            <h5 className="text-truncate">{row.original['poAmount'] ? row.original['poAmount'] : <NoDataCell />}</h5>
           </>
         )
       });
@@ -146,9 +141,7 @@ const Report = () => {
         disabled: false,
         Cell: ({ row }) => (
           <>
-            <h5 className="text-truncate">
-              {row.original['totalConsumablesCost'] ? row.original['totalConsumablesCost'] : <NoDataCell />}
-            </h5>
+            <h5 className="text-truncate">{row.original['totalConsumablesCost'] ? row.original['totalConsumablesCost'] : <NoDataCell />}</h5>
           </>
         )
       });
@@ -199,7 +192,6 @@ const Report = () => {
       return prevState;
     });
   }, [selectedData, selectedResources]);
-
 
   const fetchResourceData = () => {
     setShowGrid(true);
@@ -339,7 +331,7 @@ const Report = () => {
     });
     let newColumns = columns.map((col) => col.accessor);
     if (colState.length) {
-      newColumns = colState?.filter((col) => col.isVisible).map((col) => col.accessor)
+      newColumns = colState?.filter((col) => col.isVisible).map((col) => col.accessor);
     }
     setExporting(true);
     let filterQuery = getFilter(true);

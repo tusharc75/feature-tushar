@@ -31,7 +31,7 @@ const PurchaseRequisition = () => {
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
@@ -67,16 +67,8 @@ const PurchaseRequisition = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource?.purchaseRequisition}`);
     data = response?.data?.data;
-    let columns = [];
-    data.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.purchaseRequisitionDetail.path, true);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-      }
-      return o?.fieldData;
-    });
-    columns = [...columns, ...getStaticFields(), ActionsRenderer];
-    setColumns(columns);
+    let newColumns = generateColumns(renderedFrom, data, routes.purchaseRequisitionDetail.path, true);
+    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
   const ActionsRenderer = {
@@ -274,7 +266,9 @@ const PurchaseRequisition = () => {
           permissions={permissions?.purchaseRequisition}
           module={routes.purchaseRequisition.title}
           api={routes.purchaseRequisition.path}
-          afterImportCompleted={() => { fetchData() }}
+          afterImportCompleted={() => {
+            fetchData();
+          }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}
@@ -362,9 +356,11 @@ const PurchaseRequisition = () => {
             showFilters={true}
             resource={sidebarResource.purchaseRequisition}
           />
-        ) : <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>}
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
       </CustomContainer>
       {showDeleteConfirmBox && (
         <ConfirmationDialog

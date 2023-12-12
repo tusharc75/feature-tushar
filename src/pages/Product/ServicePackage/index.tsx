@@ -35,7 +35,7 @@ const ServicePackage = ({ renderedFrom, productId }) => {
   const {
     state: { permissions }
   }: any = useData();
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchGridColumns();
@@ -50,14 +50,8 @@ const ServicePackage = ({ renderedFrom, productId }) => {
     axiosInstance()
       .get(`/field?resource=${packages.resource}`)
       .then(({ data: { data } }) => {
-        let columns = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.packagesDetail.path);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-          }
-        });
-        setColumns([...columns, ActionsRenderer]);
+        const newColumns = generateColumns(renderedFrom, data, routes.packagesDetail.path);
+        setColumns([...newColumns, ActionsRenderer]);
       });
   };
 
