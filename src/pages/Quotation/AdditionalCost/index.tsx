@@ -136,7 +136,7 @@ const AdditionalCost = ({ quotationData, setNextStep, renderedFrom, version, all
         parent.index = i + 1;
       });
       setNextStep(true);
-      dispatch({ type: 'initialize', data: rows, count: rows?.lenght });
+      dispatch({ type: 'initialize', data: rows, count: rows?.length });
       dispatch({ type: 'loading', loading: false });
     } catch (error) {
       toastConfig.setToastConfig(error);
