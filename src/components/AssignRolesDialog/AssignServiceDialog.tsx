@@ -163,6 +163,15 @@ const AssignServiceDialog = ({ onSuccess, handleClose, ids = [], extraStaticFilt
         dispatch({ type: 'selection', selectedRecords: [...selectedRecords, editRow] });
       }
     }
+    else {
+      const updatedSelectedRecords = selectedRecords?.map((e) => {
+        if (e?._id === row?._id) {
+          return { ...e, qty: parseInt(data?.qty), isChecked: true };
+        }
+        return e;
+      });
+      dispatch({ type: 'selection', selectedRecords: updatedSelectedRecords });
+    }
     dispatch({ type: 'update', data: rows });
   };
 
@@ -204,7 +213,7 @@ const AssignServiceDialog = ({ onSuccess, handleClose, ids = [], extraStaticFilt
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             onSaveEdit={onSaveEdit}
-            
+
             refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}

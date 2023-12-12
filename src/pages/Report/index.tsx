@@ -13,7 +13,6 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { prepareDataForGrid, gridLoadingTimeout, downloadExcel, primaryFields, sidebarResource, isObjectEmpty } from './../../constants/helpers';
-import Loader from '../../components/Loader';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import ReportFilters from './ReportFilters';
@@ -23,6 +22,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import Dialog from '@material-ui/core/Dialog';
 import CustomReactTable, { useTableReducer, useColumns, getStaticFields } from 'src/components/CustomReactTableNew';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 let cancelTokenSource = null;
 
@@ -204,9 +204,9 @@ const Report = () => {
     cancelTokenSource = axios.CancelToken.source();
     dispatch({ type: 'loading', loading: true });
 
-    let api = null;
+    let api = `/report${routes[resourceCamelCase].path}${filterQuery}`;;
     if (resourceCamelCase === 'quotes') {
-      api = `quote-builder/report${filterQuery}`;
+      api = `/report/quote-builder/${filterQuery}`;
     } else {
       api = `/report${routes[resourceCamelCase].path}${filterQuery}`;
     }
@@ -497,9 +497,9 @@ const Report = () => {
                   setSelectedReportView={setSelectedReportView}
                   selectedReportView={selectedReportView}
                 />
-              ) : (
-                <Loader text={'Loading Data...'} style={{ marginTop: '15vh' }} />
-              )}
+              ) : <Box p={2} height={500}>
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
+              </Box>}
             </div>
           </>
         </CustomContainer>

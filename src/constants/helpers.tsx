@@ -333,6 +333,7 @@ export const sidebarResource = {
   fieldServiceTechnician: `Field Service Technician`,
   rentalPlanningCalendar: `Rental Planning Calendar`,
   resourceLogs: `Resource Logs`,
+  userDownloadRequest: 'User Download Request',
   truckMaster: `Truck Master`,
   job: 'Job',
   fleetDispatch: 'Fleet Dispatch',
@@ -369,6 +370,7 @@ export const primaryFields = {
 
 export const RESOURCE_LABEL = {
   account: 'Supplier Accounts',
+  userDownloadRequest: 'User Download Request',
   warehouse: 'Plants',
   customerAccount: 'Customer Accounts',
   user: 'Users',

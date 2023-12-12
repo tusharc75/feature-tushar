@@ -175,13 +175,22 @@ const AddExistingProductInventory = ({
         dispatch({ type: 'selection', selectedRecords: [...selectedRecords, editRow] });
       }
     }
+    else {
+      const updatedSelectedRecords = selectedRecords?.map((e) => {
+        if (e?._id === row?._id) {
+          return { ...e, qty: parseInt(data?.qty), isChecked: true };
+        }
+        return e;
+      });
+      dispatch({ type: 'selection', selectedRecords: updatedSelectedRecords });
+    }
     dispatch({ type: 'update', data: rows });
   };
 
   return (
     <Fragment>
       <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
-        <CustomDialogHeader title={`Add ${startCase(type)}`} onClose={handleProductInventoryClose}></CustomDialogHeader>
+        <CustomDialogHeader title={`Add ${startCase(type)}`} onClose={handleProductInventoryClose} showRequiredLabel={false}></CustomDialogHeader>
         <div className="listing-grid p-3">
           <Box mb={2}>
             <Grid container>
