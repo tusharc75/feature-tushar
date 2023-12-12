@@ -1,5 +1,5 @@
 import { Box, Button, IconButton, makeStyles, Grid, Menu, MenuItem } from '@material-ui/core';
-import { Add, ExpandMore } from '@material-ui/icons';
+import {  ExpandMore } from '@material-ui/icons';
 import { startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile ,isTablet} from 'react-device-detect';
@@ -12,7 +12,6 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-// import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -33,11 +32,9 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
   const toastConfig = useContext(CustomToastContext);
   const [addDialog, setAddDialog] = useState({ open: false, type: '', parentId: null });
 
-  // const [rowsData, setRowsData] = useState(null);
   const [columns, setColumns] = useState(null);
 
   const [allFields, setAllFields] = useState([]);
-  // const [selectedRecords, setSelectedRecords] = useState([]);
 
   const [materialEdit, setMaterialEdit] = useState({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
 

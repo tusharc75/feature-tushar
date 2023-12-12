@@ -7,7 +7,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import routes from 'src/components/Helpers/Routes';
-import { generateCustomTableColumns, flattenArray } from 'src/constants/columns';
+import {  flattenArray } from 'src/constants/columns';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -51,10 +51,8 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
   const [addAnchorEl, setAddAnchorEl] = useState(null);
   const [assetAssignedProduct, setAssetAssignedProduct] = useState([]);
 
-  
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
-
   const { generateColumns } = useColumns();
 
   useEffect(() => {
@@ -72,9 +70,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
       newColumns[qtyIndex].accessor = 'qtyDisplay';
     }
     let coloum: any = [
-      
       {
-        
         accessor: 'index',
         Header: 'Index',
         width: 80,
