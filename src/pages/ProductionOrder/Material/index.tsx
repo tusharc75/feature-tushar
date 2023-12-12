@@ -97,7 +97,8 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
                     open: true,
                     data: row.original,
                     bulkedit: false,
-                    showSaveAndNext: row?.index < table.getRowModel().rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
+                    showSaveAndNext:
+                      row?.index < table.getRowModel().rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
                   });
                 }}
                 className="link text-truncate"
@@ -233,13 +234,13 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
       parent.detail = parent?.detail
         ? parent?.detail
         : parent.type === MATERIAL_TYPE.product
-          ? parent.productDetail?.productName
-          : parent.packageDetail?.packageName;
+        ? parent.productDetail?.productName
+        : parent.packageDetail?.packageName;
       parent.description = parent?.description
         ? parent?.description
         : parent.type === MATERIAL_TYPE.product
-          ? parent?.productDetail?.productDescription
-          : parent?.packageDetail?.packageDescription;
+        ? parent?.productDetail?.productDescription
+        : parent?.packageDetail?.packageDescription;
       parent.qty = parent.qty;
       parent.qtyDisplay = parent.qty;
       parent.canDelete = parent?.workOrder ? false : true;
@@ -278,13 +279,13 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
       _subRow.detail = _subRow?.detail
         ? _subRow?.detail
         : _subRow.type === MATERIAL_TYPE.product
-          ? _subRow.productDetail?.productName
-          : _subRow.packageDetail?.packageName;
+        ? _subRow.productDetail?.productName
+        : _subRow.packageDetail?.packageName;
       _subRow.description = _subRow?.description
         ? _subRow?.description
         : _subRow.type === MATERIAL_TYPE.product
-          ? _subRow?.productDetail?.productDescription
-          : _subRow?.packageDetail?.packageDescription;
+        ? _subRow?.productDetail?.productDescription
+        : _subRow?.packageDetail?.packageDescription;
       _subRow.qty = _subRow.qty;
       _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
       _subRow.canDelete = _subRow?.workOrder ? false : true;
@@ -439,7 +440,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
               >
                 Add Existing Products
               </MenuItem>
-              {permissions?.product?.isCreate &&
+              {permissions?.product?.isCreate && (
                 <MenuItem
                   onClick={() => {
                     closeAddActions();
@@ -448,7 +449,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
                 >
                   Add New Product
                 </MenuItem>
-              }
+              )}
               {/* <MenuItem
                 onClick={() => {
                   closeAddActions();
@@ -590,7 +591,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
             handleAdd(rows);
           }}
           isSubmitting={isSubmitting}
-          packageType={"product"}
+          packageType={'product'}
         />
       )}
       {materialEdit.open && (

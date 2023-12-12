@@ -40,6 +40,7 @@ export const EditableCell = ({ value: initialValue, row: { index }, column: { id
 
   return <input value={value} onChange={onChange} onBlur={onBlur} />;
 };
+
 export const defaultColumn: Partial<ColumnDef<any>> = {
   cell: ({ getValue, row: { index }, column: { id }, table }) => {
     const initialValue = getValue();
@@ -368,6 +369,7 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({ header, table,
         minWidth: `${colSize}px`,
         maxWidth: `${colSize}px`,
         paddingLeft: columnDef.id === 'expander' ? '8px' : '6px',
+        zIndex: columnDef.sticky === 'left' || columnDef.sticky === 'right' ? 12 : 'unset',
         ...style
       }}
     >
@@ -379,8 +381,9 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({ header, table,
         <div className={`d-flex gap-2 align-items-center ${column.id === 'selection' ? 'justify-center' : 'justify-between'}`}>
           <div className="line-clamp-1">
             <span
-              className={`overflow-hidden overflow-ellipsis whitespace-normal ${header.column.getCanSort() && columnDef.disableSortBy !== true ? 'cursor-pointer' : ''
-                }`}
+              className={`overflow-hidden overflow-ellipsis whitespace-normal ${
+                header.column.getCanSort() && columnDef.disableSortBy !== true ? 'cursor-pointer' : ''
+              }`}
               onClick={header.column.getToggleSortingHandler()}
             >
               {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
@@ -493,7 +496,7 @@ export const CellRenderer = ({
               onChange={(e) => {
                 let value: any = e.target.value;
                 value = parseFloat(parseFloat(value)?.toFixed(cell?.column?.columnDef?.decimalPlaces || 0));
-                setCellValue(value)
+                setCellValue(value);
               }}
             />
           </div>
