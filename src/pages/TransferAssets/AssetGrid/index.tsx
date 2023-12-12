@@ -18,12 +18,11 @@ import {
   TRANSFER_ASSET_STATUS
 } from 'src/constants/helpers';
 import AddSerializedAsset from 'src/pages/RentalManagement/SerializedAsset/AddSerializedAsset';
-import { useColumns } from 'src/components/CustomReactTableNew';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { Delete } from '@material-ui/icons';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 
 interface AssetsGridProps {
   permissions?: any;
@@ -45,15 +44,15 @@ const AssetsGrid: FC<AssetsGridProps> = ({
   stepFullScreen
 }) => {
   const toastConfig = useContext(CustomToastContext);
+  const { generateColumns } = useColumns();
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, selectedRecords } = state;
 
   const [isRemovingAssets, setRemovingAssets] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [removeData, setRemoveData] = useState([]);
   const [columns, setColumns] = useState(null);
-  const [dataRows, setDataRows] = useState(null);
-  const [selectedRecords, setSelectedRecords] = useState([]);
   const [openAddNewAssets, setAddSerializedAssetDialog] = useState(false);
-  const { generateColumns } = useColumns();
 
   const [isAdding, setIsAdding] = useState(false);
 
@@ -101,9 +100,9 @@ const AssetsGrid: FC<AssetsGridProps> = ({
         const newColumns = generateColumns(
           renderedFrom,
           data?.filter((d) => ['assetNumber', 'serialNumber', 'product', 'productDescription', 'status']?.includes(d?.fieldData?.fieldName)),
-          routes.serializedAssetDetail.path
+          null, false, null
         );
-
+        console.log(newColumns)
         newColumns?.forEach((o) => {
           if ((o.accessor = 'assetNumber')) {
             o.width = 300;
@@ -154,7 +153,7 @@ const AssetsGrid: FC<AssetsGridProps> = ({
             accessor: 'index',
             Header: 'Index',
             width: 70,
-            sticky: isMobile ? 'none' : 'left',
+            sticky: 'left',
             Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
             Footer: () => {
               return <>Total</>;
@@ -168,6 +167,8 @@ const AssetsGrid: FC<AssetsGridProps> = ({
 
   const fetchData = async () => {
     try {
+      dispatch({ type: 'loading', loading: true });
+      dispatch({ type: 'selection', selectedRecords: [] });
       const assetResponce = await axiosInstance().get(`${routes.transferAsset.path}/get-asset/${transferAssetData?._id}`);
       let assets = assetResponce?.data?.data?.assets;
 
@@ -192,7 +193,8 @@ const AssetsGrid: FC<AssetsGridProps> = ({
           ...finalObject
         };
       });
-      setDataRows(assets);
+      dispatch({ type: 'initialize', data: assets, count: assets?.length });
+      dispatch({ type: 'loading', loading: false });
       if (assets?.length > 0) {
         setNextStep(true);
       } else {
@@ -264,20 +266,17 @@ const AssetsGrid: FC<AssetsGridProps> = ({
         </Box>
       )}
       <Box mt={1}>
-        {columns && dataRows ? (
+        {columns ? (
           <Box zIndex={5} width={'100%'}>
             <CustomReactTable
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
               columns={columns}
-              data={dataRows}
-              onSelect={setSelectedRecords}
-              childrenProperty="subRows"
-              uniqueKey="_id"
+              state={state}
+              dispatch={dispatch}
               hideSelection={!allowedToEdit}
               hideAction={!allowedToEdit}
               renderedFrom={renderedFrom}
               isClientSideGrid={true}
-              hideExpander={true}
             />
           </Box>
         ) : (

@@ -154,6 +154,7 @@ const SerializedAsset = ({
 
   const fetchRecords = async () => {
     dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
     const response = await axiosInstance().get(`${sublease.api}/${subleaseData._id}/serialized-asset`);
     var isComplate = true;
     let rows = response?.data?.data.map((u) => {
@@ -178,9 +179,7 @@ const SerializedAsset = ({
       setNextStepToolTip(subleaseMessage.subleaseProcessStep);
     }
     dispatch({ type: 'initialize', data: rows, count: rows.length });
-    setTimeout(() => {
-      dispatch({ type: 'loading', loading: false });
-    }, gridLoadingTimeout);
+    dispatch({ type: 'loading', loading: false });
   };
 
   const completeSublease = () => {
@@ -296,9 +295,9 @@ const SerializedAsset = ({
               </Fragment>
             )} */}
             {selectedRecords.length > 0 &&
-            selectedRecords.filter((e) => e.currentOwnerType === INVENTORY_OWNER_TYPE.brand).length === selectedRecords.length &&
-            checkUniqWarehouse() &&
-            currentStep === 1 ? (
+              selectedRecords.filter((e) => e.currentOwnerType === INVENTORY_OWNER_TYPE.brand).length === selectedRecords.length &&
+              checkUniqWarehouse() &&
+              currentStep === 1 ? (
               <Fragment>
                 <Tooltip title="Send to Supplier">
                   <Button
@@ -367,7 +366,7 @@ const SerializedAsset = ({
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
-            refreshGrid={fetchData}
+            refreshGrid={fetchRecords}
           />
         ) : (
           <Box p={2} height={500}>

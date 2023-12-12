@@ -2,30 +2,30 @@ import { Box, Button, Grid, IconButton, Menu, MenuItem } from '@material-ui/core
 import { Delete, ExpandMore } from '@material-ui/icons';
 import { startCase, uniqBy } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react'
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
+import { flattenArray } from 'src/constants/columns';
 import { ASSET_STATUS, sublease, treeToFlatArray } from 'src/constants/helpers';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { fetch_sublease_product_fields } from 'src/components/Sublease/helper';
 import { subleaseMessage } from 'src/constants/messageHelpers';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 
 
 function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowedToEdit, stepFullScreen, renderedFrom }) {
-
     const toastConfig = useContext(CustomToastContext);
+    const { generateColumns } = useColumns();
+    const { state, dispatch } = useTableReducer();
+    const { dataRows, selectedRecords } = state;
 
     const [columns, setColumns] = useState(null);
-    const [rowsData, setRowsData] = useState(null);
-    const [selectedRecords, setSelectedRecords] = useState([]);
     const [anchorActionEl, setAnchorActionEl] = useState(null);
     const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false);
     const [assetAssignedProduct, setAssetAssignedProduct] = useState([]);
@@ -44,13 +44,13 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
         data?.forEach((e) => {
             e.isColumnEditable = false;
         });
-        const newColumns = generateCustomTableColumns(data, subleaseData?.currency, '');
+        const newColumns = generateColumns(renderedFrom, data, null, false, subleaseData?.currency);
         let coloum: any = [
             {
                 accessor: 'index',
                 Header: 'Index',
                 width: 70,
-                sticky: isMobile ? 'none' : 'left',
+                sticky: 'left',
                 Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
                 Footer: () => {
                     return <>Total</>;
@@ -59,7 +59,7 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
             {
                 accessor: 'type',
                 Header: 'Type',
-                sticky: isMobile ? 'none' : 'left',
+                sticky: isMobile || isTablet ? 'none' : 'left',
                 disableFilters: true,
                 width: 200,
                 Cell: ({ row }) =>
@@ -75,7 +75,7 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
                 accessor: 'detail',
                 Header: 'Details',
                 width: 300,
-                sticky: isMobile ? 'none' : 'left',
+                disabled: true,
                 Cell: ({ row }) => (
                     <div className="d-flex gap-2 align-items-center">
                         <p className="text-truncate" title={row.original.detail}>
@@ -183,6 +183,8 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
     }
 
     const fetchRowData = async () => {
+        dispatch({ type: 'loading', loading: true });
+        dispatch({ type: 'selection', selectedRecords: [] });
         setNextStep(false);
         setNextStepToolTip(null);
         try {
@@ -245,7 +247,6 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
                 }
             });
 
-            setRowsData(rows);
             if (rows.every((d) => d.isValid)) {
                 setNextStep(true)
                 setNextStepToolTip(null)
@@ -253,7 +254,8 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
                 setNextStep(false)
                 setNextStepToolTip(subleaseMessage.assignAssets)
             }
-            setSelectedRecords([]);
+            dispatch({ type: 'initialize', data: rows, count: rows?.length });
+            dispatch({ type: 'loading', loading: false });
         } catch (error) {
             toastConfig.setToastConfig(error);
         }
@@ -348,7 +350,7 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
                 .then(({ data }) => {
                     setAddSerializedAssetDialog(false);
                     fetchRowData()
-                    setSelectedRecords([]);
+                    dispatch({ type: 'selection', selectedRecords: [] });
                     setAssetAssignedProduct([]);
                     setAdding(false);
                     toastConfig.setToastConfig({
@@ -457,19 +459,17 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
             )}
             <Grid container spacing={2}>
                 <Grid item xs={12} md={12} sm={12}>
-                    {columns && rowsData ? (
+                    {columns ? (
                         <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}>
                             <CustomReactTable
                                 height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
                                 columns={columns}
-                                data={rowsData}
+                                state={state}
+                                dispatch={dispatch}
                                 setWholeRowsCellColor={(rowData) => {
                                     if (!rowData.isValid) return 'error';
                                     return '';
                                 }}
-                                onSelect={setSelectedRecords}
-                                childrenProperty="subRows"
-                                uniqueKey="_id"
                                 hideSelection={!allowedToEdit}
                                 hideAction={false}
                                 renderedFrom={renderedFrom}
@@ -491,7 +491,7 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
                         setAddSerializedAssetDialog(false);
                         setAssetAssignedProduct([]);
                     }}
-                    ids={flattenArray(rowsData)?.filter((e) => e.type === 'serializedAsset')?.map((e) => e.materialId)}
+                    ids={flattenArray(dataRows)?.filter((e) => e.type === 'serializedAsset')?.map((e) => e.materialId)}
                     handleSucess={(rows) => {
                         handleAssignAssets(rows);
                     }}
