@@ -79,9 +79,8 @@ const ProductBuilder = (props) => {
   const [askSupplierPriceDialog, setAskSupplierPriceDialog] = useState(false);
   const [supplierContactData, setSupplierContactData] = useState([]);
   const [supplierData, setSupplierData] = useState(null);
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
-  const [priceTemplateField, setPriceTemplateField] = useState(null);
   const {
     state: { user }
   }: any = useData();
@@ -112,52 +111,44 @@ const ProductBuilder = (props) => {
             show: true,
             disabled: true,
             cellRenderer: 'productNameRenderer',
-            Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+            Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
           }
         ];
         let priceTemplateField = [];
-        let fields = data.productFields;
+        let fields = data.productFields || [];
 
-        data?.productFields?.forEach((ele) => {
-          let currentColumn = getColumnData(routes.product.title, ele, routes.product.path);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-          }
-        })
-        data.productTemplate?.forEach((ele) => {
+        data?.productTemplate?.forEach((ele) => {
           fields = [...fields, ...ele.fields];
         });
-        data.priceTemplate?.forEach((ele) => {
-          fields = [...fields, ...ele.fields];
-          const customFields = ele.fields.map((item) => {
-            if (item.type === 'converter') {
-              item?.displayUnits.map((unit) => {
-                priceTemplateField.push(`${item.fieldName}_${unit.toLowerCase()}`);
-              });
-            }
-            if (item?.type === 'decimal') {
-              priceTemplateField.push(`${item.fieldName}`);
-            }
+
+        data?.priceTemplate?.forEach((ele) => {
+          ele?.fields?.forEach((item) => {
             if (item.type === 'converter' || item.type === 'currencyAmount' || item.isConverter === true) {
               item.isColumnEditable = true;
             }
             if (item.type === 'currencyAmount' && (item.type === 'converter' || item.isConverter === true)) {
               item.isColumnEditable = true;
             }
-            if (item.type === 'decimal' || item.type === 'percent' || item.type === 'singleLine' || item.type === 'multiLine' || item.type === 'currencyAmount') {
+            if (
+              item.type === 'decimal' ||
+              item.type === 'percent' ||
+              item.type === 'singleLine' ||
+              item.type === 'multiLine' ||
+              item.type === 'currencyAmount'
+            ) {
               item.isColumnEditable = true;
             }
-
-            return item;
           });
-          const newColumns = generateCustomTableColumns(customFields, currency, renderedFrom);
-          columns = [...columns, ...newColumns];
+          fields = [...fields, ...ele.fields];
         });
-        setPriceTemplateField(priceTemplateField);
+
+        let newColumns = generateColumns(routes.product.title, fields, routes.product.path, false, currency);
+        columns = [...columns, ...newColumns];
+
         if (stage && stage === 'product') {
           fields = fields.filter((t) => t.leval === 'product' || t.leval === 'product-custom' || t.leval === 'product-template');
         }
-        columns = columns.filter((column, index, self) => self.findIndex((col) => col.accessor === column.accessor) === index)
+        columns = columns.filter((column, index, self) => self.findIndex((col) => col.accessor === column.accessor) === index);
         columns = sortBy(columns, function (item: any) {
           return levalOrderBy.indexOf(item.leval);
         });
@@ -247,20 +238,18 @@ const ProductBuilder = (props) => {
               <EditIcon fontSize="small" color={permission ? 'primary' : 'disabled'} />
             </IconButton>
           </HtmlTooltip>
-          {
-            row?.original?.isSupplierExist && (
-              <IconButton
-                disabled={row?.original?.isSupplierExist ? false : true}
-                size="small"
-                aria-label="Supplier"
-                onClick={() => {
-                  supplierPriceDialogData(row?.original);
-                }}
-              >
-                <VisibilityIcon fontSize="small" color={row?.original?.isSupplierExist ? 'primary' : 'disabled'} />
-              </IconButton>
-            )
-          }
+          {row?.original?.isSupplierExist && (
+            <IconButton
+              disabled={row?.original?.isSupplierExist ? false : true}
+              size="small"
+              aria-label="Supplier"
+              onClick={() => {
+                supplierPriceDialogData(row?.original);
+              }}
+            >
+              <VisibilityIcon fontSize="small" color={row?.original?.isSupplierExist ? 'primary' : 'disabled'} />
+            </IconButton>
+          )}
           <HtmlTooltip title="Delete">
             <IconButton
               disabled={permission ? false : true}
@@ -277,9 +266,7 @@ const ProductBuilder = (props) => {
         </>
       );
     }
-
-  }
-
+  };
 
   const supplierPriceDialogData = (product) => {
     setOpenSupplierPriceDialog(true);
@@ -423,8 +410,8 @@ const ProductBuilder = (props) => {
   };
 
   const onCellValueChanged = (data, row) => {
-    const col = Object.keys(data)[0]
-    const value = data[col]
+    const col = Object.keys(data)[0];
+    const value = data[col];
     const changeRow: any = productData.product.filter((_p) => _p._id === row._id);
     if (changeRow.length) {
       const productRow: any = changeRow[0];
@@ -518,7 +505,6 @@ const ProductBuilder = (props) => {
       });
   };
 
-
   return (
     <Box pt={0}>
       {Editable && (
@@ -603,8 +589,8 @@ const ProductBuilder = (props) => {
                 isPriceBuilder && fromQuote && permissions?.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice
                   ? false
                   : selectedRecords.length
-                    ? false
-                    : true
+                  ? false
+                  : true
               }
               onClick={openActions}
               endIcon={<ExpandMore />}
@@ -649,7 +635,7 @@ const ProductBuilder = (props) => {
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => { }}
+            onSelect={() => {}}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
