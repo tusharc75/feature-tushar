@@ -18,6 +18,8 @@ import { cloneDisable, deleteDisable, editDisable } from 'src/constants/messageH
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 
+let searchTimeout;
+
 export default function Alerts({ deviceTemplate }) {
   const renderedFrom = `${camelCase(routes?.deviceTemplateAlert.title)}_alerts`;
   const { state, dispatch } = useTableReducer();
@@ -25,7 +27,7 @@ export default function Alerts({ deviceTemplate }) {
   const {
     state: { permissions, selectedEntity }
   }: any = useData();
-  const { page, limit, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { page, limit, filters, sorting, selectedRecords, showFilteredRecordsOnly, search } = state;
   const [columns, setColumns] = useState(null);
   const { generateColumns } = useColumns();
 
@@ -41,6 +43,16 @@ export default function Alerts({ deviceTemplate }) {
   useEffect(() => {
     fetchData();
   }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
+
+  useEffect(() => {
+    let millisec = Object.keys(search).length > 0 ? 600 : 5;
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+    searchTimeout = setTimeout(() => {
+      fetchData();
+    }, millisec);
+  }, [search]);
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -137,6 +149,8 @@ export default function Alerts({ deviceTemplate }) {
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
+      })
+      .finally(() => {
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
@@ -170,6 +184,10 @@ export default function Alerts({ deviceTemplate }) {
 
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+    }
+
+    if (search) {
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
 
     if (showFilteredRecordsOnly) {
