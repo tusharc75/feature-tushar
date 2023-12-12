@@ -21,6 +21,7 @@ import Chart from './Chart';
 import { useAppTheme } from 'src/constants/AppConfig';
 import DashBoardCardShell from 'src/components/DashBoardCardShell';
 import DashboardModal from 'src/components/DashboardModal';
+import { isSectionVisible } from 'src/components/Sidebar/utils';
 
 export const userManual = {
   description: 'View our user manual in just a click.',
@@ -49,6 +50,8 @@ function Dashboard() {
     if (entityData?.resource) {
       allData = entityData.resource;
     }
+    allData = allData?.filter((e) => isSectionVisible(e))
+    console.log(allData)
     allData?.forEach((u) => {
       u['resourceLabel'] = u?.homePageLabel || u?.resourceLabel || u?.name;
       u['sectionNameLowerCase'] = u.sectionName?.toLowerCase();
