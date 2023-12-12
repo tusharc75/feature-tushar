@@ -33,7 +33,6 @@ const SupplierAskPrice = (props) => {
   const toastConfig = useContext(CustomToastContext);
   const { handleClose, supplierData, productBuilderId, onSuccess } = props;
 
-  const { getColumnData } = useColumns();
   const { state, dispatch } = useTableReducer();
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 

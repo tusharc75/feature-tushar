@@ -37,7 +37,7 @@ const User: FC = () => {
 
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const {
     state: { user, permissions }
@@ -134,15 +134,8 @@ const User: FC = () => {
     axiosInstance()
       .get(`/field?resource=User&view=true`)
       .then(({ data: { data } }) => {
-        let columns = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.userDetail.path, true);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-          }
-        });
-        columns = [...columns, ...extraColumns, ...getStaticFields(), ActionsRenderer];
-        setColumns(columns);
+        const newColumns = generateColumns(renderedFrom, data, routes.userDetail.path, true);
+        setColumns([...newColumns, ...extraColumns, ...getStaticFields(), ActionsRenderer]);
       });
   };
 

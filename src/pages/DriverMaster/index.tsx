@@ -31,7 +31,7 @@ const DriverMaster = () => {
 
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const [driverMasterId, setDriverMasterId] = useState(null);
   const [open, setOpen] = useState({ open: false, isClone: false });
@@ -44,16 +44,8 @@ const DriverMaster = () => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource?.driverMaster}`)
       .then(({ data: { data } }) => {
-        let columns = [];
-        let rendererNames = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.driverMasterDetail.path, true);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-          }
-        });
-        columns = [...columns, ...getStaticFields(), ActionsRenderer];
-        setColumns([...columns]);
+        const newColumns = generateColumns(renderedFrom, data, routes.driverMasterDetail.path, true);
+        setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
       });
   };
 

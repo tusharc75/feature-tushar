@@ -26,7 +26,6 @@ import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTab
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 
 const TransferAsset = () => {
-
   const types = [
     {
       key: `My ${routes.transferAsset.title}`,
@@ -55,7 +54,7 @@ const TransferAsset = () => {
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchGridColumns();
@@ -69,15 +68,8 @@ const TransferAsset = () => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource.transferAsset}`)
       .then(({ data: { data } }) => {
-        let columns = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.transferAssetDetail.path, true);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-          }
-        });
-        columns = [...columns, ...getStaticFields(), ActionsRenderer];
-        setColumns([...columns]);
+        const newColumns = generateColumns(renderedFrom, data, routes.transferAssetDetail.path, true);
+        setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
       });
   };
 
@@ -92,7 +84,7 @@ const TransferAsset = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip title={permissions?.transferAsset?.isCreate ? "Clone" : cloneDisable}  >
+        <HtmlTooltip title={permissions?.transferAsset?.isCreate ? 'Clone' : cloneDisable}>
           <span>
             <IconButton
               size="small"
@@ -106,7 +98,7 @@ const TransferAsset = () => {
             </IconButton>
           </span>
         </HtmlTooltip>
-        <HtmlTooltip title={row?.original?.canDelete ? "Delete" : deleteDisable}>
+        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
           <span>
             <IconButton
               size="small"
@@ -129,7 +121,8 @@ const TransferAsset = () => {
     dispatch({ type: 'loading', loading: true });
 
     const queryString = getQueryString();
-    axiosInstance().get(`${transferAsset.api}${queryString}`)
+    axiosInstance()
+      .get(`${transferAsset.api}${queryString}`)
       .then(({ data: { data, count } }) => {
         let rows = data?.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
@@ -266,7 +259,6 @@ const TransferAsset = () => {
         <div className="header-panel">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div className={'d-flex align-items-center gap-1 w-full'}>
-
               <ToggleButtonGroup size="small" value={types[selectedType - 1].key} exclusive onChange={onTypeChange}>
                 {types.map((k, index) => {
                   return (
@@ -279,11 +271,7 @@ const TransferAsset = () => {
               {referenceType && <Chip className="ml-3" color="primary" label={`Rental Job : ${referenceType}`} onDelete={updateQueryParams} />}
             </div>
             <div className="flex flex-wrap gap-[8px]  justify-end">
-              <SearchBox
-                onChange={handleSearch}
-                className={styles.search_box_input}
-                size="small"
-                value={search} />
+              <SearchBox onChange={handleSearch} className={styles.search_box_input} size="small" value={search} />
               <div className="flex gap-[8px] flex-wrap items-center">
                 {permissions?.transferAsset?.isCreate && (
                   <Button
@@ -336,8 +324,9 @@ const TransferAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.transferAsset?.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.transferAssetNumber : ''
-            } ? `}
+          message={`Are you sure you want to delete the ${routes?.transferAsset?.title?.toLowerCase()} ${
+            deleteRecord?._id ? deleteRecord?.transferAssetNumber : ''
+          } ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

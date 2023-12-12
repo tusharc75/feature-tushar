@@ -53,7 +53,7 @@ const AssetsGrid: FC<AssetsGridProps> = ({
   const [dataRows, setDataRows] = useState(null);
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [openAddNewAssets, setAddSerializedAssetDialog] = useState(false);
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const [isAdding, setIsAdding] = useState(false);
 
@@ -98,66 +98,56 @@ const AssetsGrid: FC<AssetsGridProps> = ({
       .get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
         let columns = [];
-        data
-          ?.filter((d) => ['assetNumber', 'serialNumber', 'product', 'productDescription', 'status']?.includes(d?.fieldData?.fieldName))
-          ?.forEach((o) => {
-            let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path);
-            if (currentColumn !== null) {
-              if (o?.fieldData?.fieldName === 'assetNumber') {
-                const assetNumberRenderer = {
-                  accessor: o?.fieldData?.fieldName,
-                  Header: o?.fieldData?.fieldLabel,
-                  width: 300,
-                  Cell: ({ row }) =>
-                    row?.original[o?.fieldData?.fieldName] ? (
-                      <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <p> {row.original[o?.fieldData?.fieldName]}</p>
-                        <Box ml={1}>
-                          <IconButton
-                            size="small"
-                            onClick={() => {
-                              window.open(`${routes.serializedAssetDetail.path}/${row.original?._id}`);
-                            }}
-                          >
-                            <OpenInNewIcon fontSize="small" color="primary" />
-                          </IconButton>
-                        </Box>
-                      </div>
-                    ) : (
-                      <NoDataCell />
-                    )
-                };
-                columns = [...columns, assetNumberRenderer];
-              } else if (o?.fieldData?.fieldName === 'product') {
-                const productTypeRenderer = {
-                  accessor: o?.fieldData?.fieldName,
-                  Header: o?.fieldData?.fieldLabel,
-                  width: 300,
-                  Cell: ({ row }) =>
-                    row?.original[o?.fieldData?.fieldName] ? (
-                      <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <p> {row.original[o?.fieldData?.fieldName]}</p>
-                        <Box ml={1}>
-                          <IconButton
-                            size="small"
-                            onClick={() => {
-                              window.open(`${routes.productDetail.path}/${row.original?.productId}`);
-                            }}
-                          >
-                            <OpenInNewIcon fontSize="small" color="primary" />
-                          </IconButton>
-                        </Box>
-                      </div>
-                    ) : (
-                      <NoDataCell />
-                    )
-                };
-                columns = [...columns, productTypeRenderer];
-              } else {
-                columns = [...columns, currentColumn?.columnData];
-              }
-            }
-          });
+        const newColumns = generateColumns(
+          renderedFrom,
+          data?.filter((d) => ['assetNumber', 'serialNumber', 'product', 'productDescription', 'status']?.includes(d?.fieldData?.fieldName)),
+          routes.serializedAssetDetail.path
+        );
+
+        newColumns?.forEach((o) => {
+          if ((o.accessor = 'assetNumber')) {
+            o.width = 300;
+            o.Cell = ({ row }) =>
+              row?.original?.assetNumber ? (
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <p> {row.original?.assetNumber}</p>
+                  <Box ml={1}>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        window.open(`${routes.serializedAssetDetail.path}/${row.original?._id}`);
+                      }}
+                    >
+                      <OpenInNewIcon fontSize="small" color="primary" />
+                    </IconButton>
+                  </Box>
+                </div>
+              ) : (
+                <NoDataCell />
+              );
+          }
+          if ((o.accessor = 'product')) {
+            o.width = 300;
+            o.Cell = ({ row }) =>
+              row?.original?.product ? (
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <p> {row.original?.product}</p>
+                  <Box ml={1}>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        window.open(`${routes.productDetail.path}/${row.original?.productId}`);
+                      }}
+                    >
+                      <OpenInNewIcon fontSize="small" color="primary" />
+                    </IconButton>
+                  </Box>
+                </div>
+              ) : (
+                <NoDataCell />
+              );
+          }
+        });
 
         setColumns([
           {
@@ -170,7 +160,7 @@ const AssetsGrid: FC<AssetsGridProps> = ({
               return <>Total</>;
             }
           },
-          ...columns,
+          ...newColumns,
           ...ActionsRenderer
         ]);
       });

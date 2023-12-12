@@ -28,7 +28,7 @@ const BOMTable = () => {
 
   const { state, dispatch } = useTableReducer();
   const { page, limit, filters, sorting, selectedRecords } = state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const {
     state: { permissions, selectedEntity }
@@ -63,13 +63,8 @@ const BOMTable = () => {
       .get('/field?resource=Product&view=true')
       .then(({ data: { data } }) => {
         let columns = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-          }
-        });
-        columns = [...columns, ...getStaticFields(), ActionsRenderer];
+        const newColumns = generateColumns(renderedFrom, data, routes.productDetail.path, true)
+        columns = [...newColumns, ...getStaticFields(), ActionsRenderer];
         setColumns([...defaultColumns, ...columns]);
       });
   };

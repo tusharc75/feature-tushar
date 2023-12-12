@@ -13,7 +13,7 @@ import { useData } from '../../../StateProvider/Provider';
 
 const ParentProduct = ({ renderedFrom, productId }) => {
   const toastConfig = useContext(CustomToastContext);
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
   const { state, dispatch } = useTableReducer();
   const [columns, setColumns] = useState(null);
   const {
@@ -56,15 +56,8 @@ const ParentProduct = ({ renderedFrom, productId }) => {
     axiosInstance()
       .get('/field?resource=Product&view=true')
       .then(({ data: { data } }) => {
-        let columns = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-          }
-        });
-        columns = [...columns, ...getStaticFields()];
-        setColumns([...columns]);
+        const newColumns = generateColumns(renderedFrom, data, routes.productDetail.path);
+        setColumns([...newColumns, ...getStaticFields()]);
       });
   };
 

@@ -49,7 +49,7 @@ const Leads = () => {
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
   const [selectedType, setSelectedType] = useState(1);
   const [isOpen, setIsOpen] = useState({ open: false, isClone: false, idToClone: null });
   const [okButtonLoading, setOkButtonLoading] = useState(false);
@@ -81,15 +81,9 @@ const Leads = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.lead}&view=true`);
     data = response?.data?.data;
-    let columns = [];
-    data?.forEach((o) => {
-      let currentColumn = getColumnData(lead.leadResource, o?.fieldData, routes.leadDetail.path, true);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-      }
-    });
-    columns = [
-      ...columns,
+    let newColumns = generateColumns(lead.leadResource, data, routes.leadDetail.path, true);
+    newColumns = [
+      ...newColumns,
       {
         accessor: 'relatedOpportunity', Header: 'Related Opportunity', show: true,
         Cell: ({ row }) => (
@@ -105,7 +99,7 @@ const Leads = () => {
       },
       ...getStaticFields()
     ];
-    setColumns([...columns, ActionsRenderer]);
+    setColumns([...newColumns, ActionsRenderer]);
   };
 
   const ActionsRenderer = {

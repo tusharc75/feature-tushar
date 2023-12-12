@@ -82,7 +82,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
   const [replaceLoading, setReplaceLoading] = useState(false);
   const [columns, setColumns] = useState(null);
 
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     if (transferAssetId) {
@@ -119,87 +119,69 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     axiosInstance()
       .get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
-        let columns = [];
-        data
-          ?.filter((d) => ['assetNumber', 'serialNumber', 'product', 'productDescription', 'status']?.includes(d?.fieldData?.fieldName))
-          ?.forEach((o) => {
-            let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path);
-            if (currentColumn !== null) {
-              if (o?.fieldData?.fieldName === 'assetNumber') {
-                const assetNumberColumn = {
-                  accessor: o?.fieldData?.fieldName,
-                  Header: o?.fieldData?.fieldLabel,
-                  width: 300,
-                  sticky: isMobile ? 'none' : 'left',
-                  primaryField: true,
-                  Cell: ({ row }) =>
-                    row?.original?.assetNumber ? (
-                      <div className="d-flex gap-2 align-items-center">
-                        <p> {row.original[o?.fieldData?.fieldName]}</p>
-                        <Box ml={1}>
-                          <IconButton
-                            size="small"
-                            onClick={() => {
-                              window.open(`${routes.serializedAssetDetail.path}/${row.original?._id}`);
-                            }}
-                          >
-                            <OpenInNewIcon fontSize="small" color="primary" />
-                          </IconButton>
-                        </Box>
-                        {row?.original?.isReplaced && (
-                          <Box>
-                            <HtmlTooltip
-                              enterTouchDelay={0}
-                              title={`Replaced Asset ${row?.original?.replaceAsset} Reason-${row?.original?.replaceReason}`}
-                            >
-                              <InfoIcon fontSize="small" color={'primary'} />
-                            </HtmlTooltip>
-                          </Box>
-                        )}
-                      </div>
-                    ) : (
-                      <NoDataCell />
-                    ),
-                  setCellClassNames: (row) => {
-                    if ([ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(row?.status)) {
-                      return 'error';
-                    }
-                    if (row?.isReplaced) {
-                      return 'isPurchaseOrder';
-                    }
-                  }
-                };
-                columns = [...columns, assetNumberColumn];
-              } else if (o?.fieldData?.fieldName === 'product') {
-                const productTypeColumn = {
-                  accessor: o?.fieldData?.fieldName,
-                  Header: o?.fieldData?.fieldLabel,
-                  width: 300,
-                  Cell: ({ row }) =>
-                    row?.original[o?.fieldData?.fieldName] ? (
-                      <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <p> {row.original[o?.fieldData?.fieldName]}</p>
-                        <Box ml={1}>
-                          <IconButton
-                            size="small"
-                            onClick={() => {
-                              window.open(`${routes.productDetail.path}/${row.original?.productId}`);
-                            }}
-                          >
-                            <OpenInNewIcon fontSize="small" color="primary" />
-                          </IconButton>
-                        </Box>
-                      </div>
-                    ) : (
-                      <NoDataCell />
-                    )
-                };
-                columns = [...columns, productTypeColumn];
-              } else {
-                columns = [...columns, currentColumn?.columnData];
+        const newColumns = generateColumns(
+          renderedFrom,
+          data?.filter((d) => ['assetNumber', 'serialNumber', 'product', 'productDescription', 'status']?.includes(d?.fieldData?.fieldName)),
+          routes.serializedAssetDetail.path
+        );
+        newColumns?.forEach((o) => {
+          if (o?.accessor === 'assetNumber') {
+            o.Cell = ({ row }) =>
+              row?.original?.assetNumber ? (
+                <div className="d-flex gap-2 align-items-center">
+                  <p> {row.original?.assetNumber}</p>
+                  <Box ml={1}>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        window.open(`${routes.serializedAssetDetail.path}/${row.original?._id}`);
+                      }}
+                    >
+                      <OpenInNewIcon fontSize="small" color="primary" />
+                    </IconButton>
+                  </Box>
+                  {row?.original?.isReplaced && (
+                    <Box>
+                      <HtmlTooltip enterTouchDelay={0} title={`Replaced Asset ${row?.original?.replaceAsset} Reason-${row?.original?.replaceReason}`}>
+                        <InfoIcon fontSize="small" color={'primary'} />
+                      </HtmlTooltip>
+                    </Box>
+                  )}
+                </div>
+              ) : (
+                <NoDataCell />
+              );
+            o.setCellClassNames = (row) => {
+              if ([ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(row?.status)) {
+                return 'error';
               }
-            }
-          });
+              if (row?.isReplaced) {
+                return 'isPurchaseOrder';
+              }
+            };
+          }
+          if (o?.accessor === 'product') {
+            o.Cell = ({ row }) =>
+              row?.original?.product ? (
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <p> {row.original?.product}</p>
+                  <Box ml={1}>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        window.open(`${routes.productDetail.path}/${row.original?.productId}`);
+                      }}
+                    >
+                      <OpenInNewIcon fontSize="small" color="primary" />
+                    </IconButton>
+                  </Box>
+                </div>
+              ) : (
+                <NoDataCell />
+              );
+          }
+        });
+
         const column = [
           {
             accessor: 'index',
@@ -208,7 +190,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             sticky: isMobile ? 'none' : 'left',
             Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
           },
-          ...columns,
+          ...newColumns,
           {
             accessor: 'loadingTicket',
             Header: 'Loading Ticket',

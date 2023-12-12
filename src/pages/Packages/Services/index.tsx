@@ -27,7 +27,7 @@ const ServiceTable = ({ packageId, packageData }) => {
   const [showServiceConfirmBox, setShowServiceConfirmBox] = useState(false);
   const [showServiceAssignDialog, setShowServiceAssignDialog] = useState(false);
   const [isRemovingServices, setRemovingServices] = useState(false);
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
   const { state, dispatch } = useTableReducer();
   const [arrangeView, setArrangeView] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
@@ -81,16 +81,8 @@ const ServiceTable = ({ packageId, packageData }) => {
     let data;
     const response = await axiosInstance().get(`/field?resource=Service Master`);
     data = response?.data?.data;
-    let columns = [];
-    data.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serviceMaster.path, true);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-      }
-      return o?.fieldData;
-    });
-    columns = [...defaultColumns, ...columns, ActionsRenderer];
-    setColumns(columns);
+    const newColumns = generateColumns(renderedFrom, data, routes.serviceMaster.path, true);
+    setColumns([...defaultColumns, ...newColumns, ActionsRenderer]);
   };
 
   const ActionsRenderer = {

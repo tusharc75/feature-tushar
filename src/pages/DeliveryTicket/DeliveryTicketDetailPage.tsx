@@ -77,7 +77,7 @@ export default function DeliveryTicketDetail(props) {
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
 
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
   const { tab }: any = queryString.parse(history.location.search);
   const [deliveryTicketData, setDeliveryTicketData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -360,15 +360,8 @@ export default function DeliveryTicketDetail(props) {
         const response = await axiosInstance().get(`/field?resource=${serializedAsset.resource}`);
         data = response?.data?.data;
       }
-      let columns = [];
-      data.forEach((o) => {
-        let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path);
-        if (currentColumn !== null) {
-          columns = [...columns, currentColumn?.columnData];
-        }
-      });
-      columns = [...columns, ...getStaticFields()];
-      setColumns(columns);
+      const newColumns = generateColumns(renderedFrom, data, routes.serializedAssetDetail.path, true);
+      setColumns([...newColumns, ...getStaticFields()]);
     } catch (error) {
       toastConfig.setToastConfig(error);
     }

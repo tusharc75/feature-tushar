@@ -32,7 +32,7 @@ const AssignProductDialog = ({
 
   const { state, dispatch } = useTableReducer();
   const { dataRows, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const {
     state: { user, selectedEntity }
@@ -79,13 +79,8 @@ const AssignProductDialog = ({
           setIsProductType(false);
         }
         let columns = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-          }
-        });
-        columns = [...columns, ...getStaticFields()];
+        let newColumns = generateColumns(renderedFrom, data, routes.productDetail.path);
+        columns = [...newColumns, ...getStaticFields()];
         if (hideQty) {
           setColumns([...columns]);
         } else {

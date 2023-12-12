@@ -45,7 +45,7 @@ const Sublease = () => {
   let { type, referenceId, referenceType }: any = queryString.parse(history.location.search);
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const {
     state: { user, permissions, selectedEntity }
@@ -83,16 +83,8 @@ const Sublease = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=Sublease`);
     data = response?.data?.data;
-    let columns = [];
-    data.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.subleaseDetail.path, true);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-      }
-      return o?.fieldData;
-    });
-    columns = [...columns, ...getStaticFields(), ActionsRenderer];
-    setColumns(columns);
+    let newColumns = generateColumns(renderedFrom, data, routes.subleaseDetail.path, true);
+    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
   const ActionsRenderer = {

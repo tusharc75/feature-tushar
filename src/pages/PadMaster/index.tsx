@@ -36,23 +36,15 @@ const PadMaster = () => {
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [columns, setColumns] = useState(null);
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchGridColumns = async () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource?.padMaster}`);
     data = response?.data?.data;
-    let columns = [];
-    data.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData,  routes.padMasterDetail.path, true);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-      }
-      return o?.fieldData;
-    });
-    columns = [...columns, ...getStaticFields(),ActionsRenderer];
-    setColumns(columns);
+    const newColumns = generateColumns(renderedFrom, data, routes.padMasterDetail.path, true);
+    setColumns([...newColumns, ...getStaticFields(),ActionsRenderer]);
   };
 
   const fetchPadMasterData =async () => {

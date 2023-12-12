@@ -40,7 +40,7 @@ const SerializedAssetsCertification = () => {
   const [columns, setColumns] = useState(null);
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const [assetOptions, setAssetOptions] = useState([]);
   const [selectedAsset, setSelectedAsset] = useState(null);
@@ -97,16 +97,8 @@ const SerializedAssetsCertification = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${serializedAsset.resource}`);
     data = response?.data?.data;
-    let columns = [];
-    data.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path, true);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-      }
-      return o?.fieldData;
-    });
-    columns = [...columns, ...getStaticFields(), ActionsRenderer];
-    setColumns(columns);
+    let newColumns = generateColumns(renderedFrom, data, routes.serializedAssetDetail.path, true);
+    setColumns( [...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
   const fetchData = () => {

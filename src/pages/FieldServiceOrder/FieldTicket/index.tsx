@@ -3,13 +3,7 @@ import { Box, Grid, Button, Menu, MenuItem, IconButton } from '@material-ui/core
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import CustomReactTable, { useColumns, getStaticFields, useTableReducer } from 'src/components/CustomReactTableNew';
 import axiosInstance from 'src/axios/axiosInstance';
-import {
-  FIELD_TICKET_STATUS,
-  SERVICE_ORDER_STATUS,
-  gridLoadingTimeout,
-  prepareDataForGrid,
-  sidebarResource
-} from 'src/constants/helpers';
+import { FIELD_TICKET_STATUS, SERVICE_ORDER_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import routes from 'src/components/Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -29,7 +23,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
 
   const { state, dispatch } = useTableReducer();
   const { selectedRecords } = state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const [openDialog, setOpenDialog] = useState({ open: false, isClone: false, id: null });
   const [anchorActionEl, setAnchorActionEl] = useState(null);
@@ -52,51 +46,37 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
     axiosInstance()
       .get(`/field?resource=${sidebarResource.fieldTicket}`)
       .then(({ data: { data } }) => {
-        let columns = [];
-        data.forEach((o) => {
-          if (o?.fieldData?.fieldName === 'fieldTicketNumber') {
-            columns = [
-              ...columns,
-              {
-                accessor: o?.fieldData?.fieldName,
-                Header: o?.fieldData?.fieldLabel,
-                disabled: true,
-                Cell: ({ row }) =>
-                  row?.original?.fieldTicketNumber ? (
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                      <h5
-                        className="link text-truncate"
-                        onClick={() => {
-                          setOpenDialog({ open: true, isClone: false, id: row?.original?._id });
-                        }}
-                      >
-                        {row?.original?.fieldTicketNumber}
-                      </h5>
-                      <Box ml={1}>
-                        <IconButton
-                          size="small"
-                          onClick={() => {
-                            window.open(`${routes.fieldTicketDetail.path}/${row?.original?._id}`);
-                          }}
-                        >
-                          <OpenInNewIcon fontSize="small" color="primary" />
-                        </IconButton>
-                      </Box>
-                    </div>
-                  ) : (
-                    <NoDataCell />
-                  )
-              }
-            ];
-          } else {
-            let currentColumn = getColumnData(routes.fieldTicket?.title, o?.fieldData, routes.fieldTicketDetail.path);
-            if (currentColumn !== null) {
-              columns = [...columns, currentColumn?.columnData];
-            }
+        const newColumns = generateColumns(routes.fieldTicket?.title, data, routes.fieldTicketDetail.path);
+        newColumns?.forEach((o) => {
+          if (o.accessor === 'fieldTicketNumber') {
+            o.cell = ({ row }) =>
+              row?.original?.fieldTicketNumber ? (
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <h5
+                    className="link text-truncate"
+                    onClick={() => {
+                      setOpenDialog({ open: true, isClone: false, id: row?.original?._id });
+                    }}
+                  >
+                    {row?.original?.fieldTicketNumber}
+                  </h5>
+                  <Box ml={1}>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        window.open(`${routes.fieldTicketDetail.path}/${row?.original?._id}`);
+                      }}
+                    >
+                      <OpenInNewIcon fontSize="small" color="primary" />
+                    </IconButton>
+                  </Box>
+                </div>
+              ) : (
+                <NoDataCell />
+              );
           }
         });
-        columns = [...columns, ...getStaticFields(), ActionsRenderer];
-        setColumns(columns);
+        setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
       });
   };
 

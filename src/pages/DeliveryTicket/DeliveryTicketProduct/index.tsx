@@ -21,7 +21,7 @@ const DeliveryTicketProduct = ({ renderedFrom, deliveryTicketId }) => {
   const {
     state: { user }
   }: any = useData();
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const defaultColumns = [
     {
@@ -84,14 +84,8 @@ const DeliveryTicketProduct = ({ renderedFrom, deliveryTicketId }) => {
       const response = await axiosInstance().get('/field?resource=Product&view=true');
       fields = response?.data?.data;
     }
-    let columns = [];
-    fields.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-      }
-    });
-    setColumns([...defaultColumns, ...columns]);
+    const newColumns = generateColumns(renderedFrom, fields, routes.productDetail.path);
+    setColumns([...defaultColumns, ...newColumns]);
   };
 
   return (

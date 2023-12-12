@@ -42,21 +42,14 @@ const IotDataPoints = () => {
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [columns, setColumns] = useState(null);
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const fetchGridColumns = () => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource?.iotDataPoints}`)
       .then(({ data: { data } }) => {
-        let columns = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.iotDataPointsDetail.path, true);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-          }
-        });
-        columns = [...columns, ...getStaticFields(), ActionsRenderer];
-        setColumns([...columns]);
+        const newColumns = generateColumns(renderedFrom, data, routes.iotDataPointsDetail.path, true);
+        setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
       });
   };
 

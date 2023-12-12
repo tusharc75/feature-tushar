@@ -34,7 +34,7 @@ const IrtTicket = () => {
   const [irtTicketId, setIrtTicketId] = useState(null);
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
@@ -53,16 +53,8 @@ const IrtTicket = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource?.irtTicket}`);
     data = response?.data?.data;
-    let columns = [];
-    data.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.irtTicketDetail.path, true);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-      }
-      return o?.fieldData;
-    });
-    columns = [...columns, ...getStaticFields(), ActionsRenderer];
-    setColumns(columns);
+    const newColumns = generateColumns(renderedFrom, data, routes.irtTicketDetail.path, true);
+    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
 
