@@ -167,8 +167,10 @@ const TableComponent = ({
     );
   };
 
-  const styles = virtualization ? { width: `${columnVirtualizer.getTotalSize()}px`, height: `${rowVirtualizer.getTotalSize()}px` } : {};
-
+  const styles = useMemo(
+    () => (virtualization ? { width: `${columnVirtualizer.getTotalSize()}px`, height: `${rowVirtualizer.getTotalSize()}px` } : {}),
+    [virtualization, columnVirtualizer, rowVirtualizer]
+  );
   return (
     <>
       <div
