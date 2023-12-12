@@ -17,11 +17,7 @@ import MaterialQtyDialog from './MaterialQtyDialog';
 import { fetch_field_ticket_material_fields } from '../helper';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
-<<<<<<< HEAD
 import { calculatePrice, calculateRowsFieldNew } from 'src/components/RentalManagment/helper';
-=======
-import { calculatePrice, calculateRowsField } from 'src/components/RentalManagment/helper';
->>>>>>> 931f1b39b (fix: bug fix)
 import Consumables from './Consumables';
 import { FIELD_TICKET_STATUS, MATERIAL_TYPE, SERVICE_TYPE, fieldTicket } from 'src/constants/helpers';
 import EditIcon from '@material-ui/icons/Edit';
