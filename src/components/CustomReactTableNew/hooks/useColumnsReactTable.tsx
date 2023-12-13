@@ -123,7 +123,9 @@ const getTitle = (data) => {
 };
 
 export default function useColumns() {
-  const { state: { permissions, user } }: any = useData();
+  const {
+    state: { permissions, user }
+  }: any = useData();
 
   const getColumnData = (title, field, detailScreenRoute = null, masterPage = false) => {
     let data = localStorage.getItem('gridMetaData');
@@ -211,7 +213,7 @@ export default function useColumns() {
         };
       } else if (field?.lookup) {
         let joinedFieldName = field?.fieldName.indexOf(' ') > 0 ? camelCase(field?.fieldName) : field?.fieldName;
-        const more = `rest${joinedFieldName}`
+        const more = `rest${joinedFieldName}`;
         let pathName = routes[`${camelCase(field?.lookupResource)}Detail`]?.path
           ? routes[`${camelCase(field?.lookupResource)}Detail`]?.path
           : `${camelCase(field?.lookupResource)}/detail`;
@@ -333,9 +335,11 @@ export default function useColumns() {
         return {
           columnData: {
             ...commonFieldData,
-            cell: ({ row }) => <div>
-              <span>{Boolean(row?.original?.[field?.fieldName]) ? 'Yes' : 'No'}</span>
-            </div>
+            cell: ({ row }) => (
+              <div>
+                <span>{Boolean(row?.original?.[field?.fieldName]) ? 'Yes' : 'No'}</span>
+              </div>
+            )
           }
         };
       } else if (field?.type === 'colorPicker') {
@@ -403,7 +407,6 @@ export default function useColumns() {
 
     const _fields = fields?.map((e) => e?.fieldData || e);
     _fields.forEach((field) => {
-
       let commonFieldData = {
         id: field?.fieldName,
         accessorKey: field?.fieldName,
@@ -413,12 +416,11 @@ export default function useColumns() {
         Header: headerName[field?.fieldName] ?? field?.fieldLabel,
         show: gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide.indexOf(field?.fieldName) >= 0 ? false : true,
         primaryField: field?.primaryField ?? false,
-        decimalPlaces: field?.decimalPlaces || 0,
+        decimalPlaces: field?.decimalPlaces || 0
       };
 
       if (hideColumns.indexOf(field?.fieldName) >= 0) {
-      }
-      else if (field.type === 'converter' || field.type === 'currencyAmount' || field.isConverter === true) {
+      } else if (field.type === 'converter' || field.type === 'currencyAmount' || field.isConverter === true) {
         const currencySymbol = getUniqueCurrencies().find((d) => d.currencyCode === currency)?.symbolNative;
 
         if (field.type !== 'currencyAmount' && (field.type === 'converter' || field.isConverter === true)) {
@@ -475,20 +477,25 @@ export default function useColumns() {
                 );
               },
               Footer: (info) => {
-                const total = info?.rows
+                let rows = info.rows;
+                if (!rows) {
+                  rows = info.table.getExpandedRowModel().rows;
+                }
+                const total = rows
                   ?.filter((f) => !f.original.parentId && f.values.hasOwnProperty(fieldName) && !isNaN(f.values[fieldName]))
                   .reduce((sum, row) => row.values[fieldName] + sum, 0);
                 return (
                   <>
-                    {field?.isHideColumnSum ? '' : `${currencySymbol} ${formatAmountWithCurrency(currency, total)?.amountWithouCurrencyCode ?? total}`}
+                    {field?.isHideColumnSum
+                      ? ''
+                      : `${currencySymbol} ${formatAmountWithCurrency(currency, total)?.amountWithouCurrencyCode ?? total}`}
                   </>
                 );
               }
             });
           });
         }
-      }
-      else if (field?.fieldName === 'firstName' && field?.primaryField === false) {
+      } else if (field?.fieldName === 'firstName' && field?.primaryField === false) {
         let combinedTitle = camelCase(updatedTitle);
         let pathName = detailPagePath[combinedTitle] ? detailPagePath[combinedTitle] : routes.userDetail.path ? routes.userDetail.path : '';
         column.push({
@@ -512,9 +519,8 @@ export default function useColumns() {
               )}
             </span>
           )
-        })
-      }
-      else if (field?.primaryField === true && detailScreenRoute) {
+        });
+      } else if (field?.primaryField === true && detailScreenRoute) {
         const fieldName = field?.fieldName === 'firstName' ? 'concatedName' : field.fieldName;
         column.push({
           lockPosition: true,
@@ -540,21 +546,13 @@ export default function useColumns() {
             ) : (
               <p className="text-truncate">{row?.original?.[fieldName] ? <p>{row?.original?.[fieldName]}</p> : <NoDataCell />}</p>
             )
-        })
-      }
-      else if (field?.lookup) {
+        });
+      } else if (field?.lookup) {
         column.push({
           ...commonFieldData,
-          cell: ({ row }) =>
-            <DropdownCell
-              permissions={permissions}
-              permissionForLinks={permissionForLinks}
-              field={field}
-              original={row?.original}
-            />
-        })
-      }
-      else if (['mobileNumber', 'phone', 'email']?.includes(field?.type)) {
+          cell: ({ row }) => <DropdownCell permissions={permissions} permissionForLinks={permissionForLinks} field={field} original={row?.original} />
+        });
+      } else if (['mobileNumber', 'phone', 'email']?.includes(field?.type)) {
         column.push({
           ...commonFieldData,
           cell: ({ row }) =>
@@ -568,9 +566,8 @@ export default function useColumns() {
             ) : (
               <NoDataCell />
             )
-        })
-      }
-      else if (field?.type === 'imageUpload') {
+        });
+      } else if (field?.type === 'imageUpload') {
         column.push({
           ...commonFieldData,
           disableFilters: true,
@@ -581,10 +578,9 @@ export default function useColumns() {
                 <Image style={{ fontSize: 18 }} />
               </Avatar>
             </div>
-          ),
-        })
-      }
-      else if (field?.type === 'date') {
+          )
+        });
+      } else if (field?.type === 'date') {
         column.push({
           ...commonFieldData,
           cell: ({ row }) => (
@@ -600,9 +596,8 @@ export default function useColumns() {
           ),
           disableFilters: true,
           disableSortBy: true
-        })
-      }
-      else if (field?.type === 'dateTime') {
+        });
+      } else if (field?.type === 'dateTime') {
         column.push({
           ...commonFieldData,
           cell: ({ row }) => (
@@ -618,17 +613,17 @@ export default function useColumns() {
           ),
           disableFilters: true,
           disableSortBy: true
-        })
-      }
-      else if (field?.type === 'checkBox') {
+        });
+      } else if (field?.type === 'checkBox') {
         column.push({
           ...commonFieldData,
-          cell: ({ row }) => <div>
-            <span>{Boolean(row?.original?.[field?.fieldName]) ? 'Yes' : 'No'}</span>
-          </div>
-        })
-      }
-      else if (field?.type === 'colorPicker') {
+          cell: ({ row }) => (
+            <div>
+              <span>{Boolean(row?.original?.[field?.fieldName]) ? 'Yes' : 'No'}</span>
+            </div>
+          )
+        });
+      } else if (field?.type === 'colorPicker') {
         column.push({
           ...commonFieldData,
           disableFilters: true,
@@ -644,9 +639,8 @@ export default function useColumns() {
               )}
             </div>
           )
-        })
-      }
-      else if (field?.type === 'number') {
+        });
+      } else if (field?.type === 'number') {
         column.push({
           ...commonFieldData,
           editable: Boolean(field?.isColumnEditable),
@@ -657,9 +651,8 @@ export default function useColumns() {
               <h5 className="text-truncate">{row.original[field?.fieldName] ? row.original[field?.fieldName] : 0}</h5>
             </div>
           )
-        })
-      }
-      else if (field.type === 'decimal') {
+        });
+      } else if (field.type === 'decimal') {
         column.push({
           ...commonFieldData,
           disableFilters: true,
@@ -667,22 +660,24 @@ export default function useColumns() {
           editable: Boolean(field?.isColumnEditable),
           cell: ({ row }) => (row.original[field.fieldName] ? <p>{row.original[field.fieldName]}</p> : <NoDataCell />),
           Footer: (info) => {
-            const qtyTotal = info.rows
+            let rows = info.rows;
+            if (!rows) {
+              rows = info.table.getExpandedRowModel().rows;
+            }
+            const qtyTotal = rows
               .filter((f) => !f.original.parentId && f.original.hasOwnProperty(field.fieldName) && !isNaN(f.original[field.fieldName]))
               .reduce((sum, row) => row.original[commonFieldData.accessor] + sum, 0);
             return <>{field?.isHideColumnSum ? '' : qtyTotal}</>;
           }
         });
-      }
-      else if (field.type === 'signature') {
+      } else if (field.type === 'signature') {
         column.push({
           ...commonFieldData,
           disableFilters: true,
           disableSortBy: true,
-          cell: ({ row }) => row.original[field.fieldName] ? <SignatureCell base64={row?.original[field.fieldName]} /> : <NoDataCell />
+          cell: ({ row }) => (row.original[field.fieldName] ? <SignatureCell base64={row?.original[field.fieldName]} /> : <NoDataCell />)
         });
-      }
-      else {
+      } else {
         column.push({
           ...commonFieldData,
           cell: ({ row }) => (
@@ -696,11 +691,11 @@ export default function useColumns() {
               )}
             </div>
           )
-        })
+        });
       }
-    })
+    });
     return column;
-  }
+  };
 
   return { getColumnData, generateColumns };
 }
