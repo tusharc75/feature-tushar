@@ -53,7 +53,6 @@ $isAppliedBillDark: #234623;
 
   &.error {
     background: var(--error-bg);
-    border-color: var(--error-border) !important;
   }
 }
 
@@ -325,19 +324,19 @@ $isAppliedBillDark: #234623;
         }
 
         td.dark-gray {
-          background: var(--dark-gray, #FAEAE9);
+          background: var(--dark-gray, #faeae9);
         }
 
         td.dark-gray-1 {
           background: var(--dark-gray, #d3d3d3);
         }
-        
+
         td.dark-green {
-          background: var(--dark-green, #DBF8DB);
+          background: var(--dark-green, #dbf8db);
         }
-        
+
         td.dark-yellow {
-          background: var(--dark-yellow, #FFD580);
+          background: var(--dark-yellow, #ffd580);
         }
       }
 
