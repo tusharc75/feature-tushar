@@ -8,7 +8,6 @@ import routes from 'src/components/Helpers/Routes';
 import { CustomDialogTransition, INVOICE_STATUS, invoice, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -21,15 +20,14 @@ import CreditMemo from '../CreditMemo';
 import CommentDialog from 'src/components/CommentDialog';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
-import { generateCustomTableColumns } from 'src/constants/columns';
 import { useData } from 'src/StateProvider/Provider';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 
 const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = `${camelCase(routes?.invoice.title)}_view`;
 
   const [columns, setColumns] = useState(null);
-  const [rowsData, setRowsData] = useState(null);
   const [commentDialog, setCommentDialog] = useState(false);
 
   const [isDownloadingZip, setIsDownloadingZip] = useState(false);
@@ -38,6 +36,11 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
   const [invoiceData, setInvoiceData] = useState(null);
 
   const [tabValue, setTabValue] = useState(0);
+
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, selectedRecords } = state;
+  const { generateColumns } = useColumns();
+
   const {
     state: { permissions }
   }: any = useData();
@@ -70,7 +73,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
       data?.forEach((e) => {
         e.isColumnEditable = false;
       });
-      const newColumns = generateCustomTableColumns(data, invoiceData.currency ? invoiceData.currency : 'USD', renderedFrom);
+      const newColumns = generateColumns(renderedFrom, data, null, false, invoiceData.currency ? invoiceData.currency : 'USD' );
       let qtyIndex = newColumns?.findIndex((d) => d.accessor === 'qty');
       if (qtyIndex > -1) {
         newColumns[qtyIndex].accessor = 'qtyDisplay';
@@ -80,7 +83,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
           accessor: 'index',
           Header: 'Index',
           width: 70,
-          sticky: isMobile ? 'none' : 'left',
+          sticky: 'left',
           Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
           Footer: () => {
             return <>Total</>;
@@ -89,7 +92,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
         {
           accessor: 'type',
           Header: 'Type',
-          sticky: isMobile ? 'none' : 'left',
+          sticky: isMobile || isTablet ? 'none' : 'left',
           Cell: ({ row }) => (
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <p>{`${startCase(row.original?.type)} `}</p>
@@ -99,6 +102,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
         {
           accessor: 'detail',
           Header: 'Details',
+          disabled : true,
           minWidth: 300,
           width: 300,
           Cell: ({ row }) => (
@@ -140,13 +144,16 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
       ];
       column = [...column, ...newColumns];
       setColumns(column);
-      fetchData();
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
   };
 
   const fetchData = async () => {
+
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
+
     var data: any = [];
 
     const response = await axiosInstance().get(`${invoice.api}/material/${invoiceData?._id}`);
@@ -191,7 +198,9 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
         rows.push(element);
       });
     }
-    setRowsData(rows);
+
+    dispatch({ type: 'initialize', data: rows, count: rows?.length });
+    dispatch({ type: 'loading', loading: false });
   };
 
   const generateNestedData = (material, parent) => {
@@ -296,20 +305,18 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
   const Invoice = () => {
     return (
       <Fragment>
-        {columns && rowsData ? (
+        {columns ? (
           <Box zIndex={5} width={'100%'} height={'calc(100vh - 285px)'} pt={1}>
             <CustomReactTable
               height={'calc(100vh - 200px)'}
               columns={columns}
-              data={rowsData}
-              onSelect={() => {}}
-              childrenProperty="subRows"
-              uniqueKey="_id"
+              state = {state}
+              dispatch = {dispatch}
               hideSelection={true}
               hideAction={true}
               renderedFrom={renderedFrom}
               isClientSideGrid={true}
-              hideExpander={resource === sidebarResource.fieldTicket ? true : false}
+              expander={resource === sidebarResource.fieldTicket ? false : true}
             />
           </Box>
         ) : (
@@ -386,8 +393,8 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
                 </Box>
               )}
               <div className="ml-auto">
-                {rowsData &&
-                  rowsData?.length > 0 &&
+                {dataRows &&
+                  dataRows?.length > 0 &&
                   resource === sidebarResource.fieldTicket &&
                   ![INVOICE_STATUS.closed, INVOICE_STATUS.cancelled]?.includes(invoiceData?.status) && (
                     <DeleteButton mode="light" text="Cancel Invoice" onClick={() => setCommentDialog(true)} />

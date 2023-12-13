@@ -57,7 +57,7 @@ const Invoices = ({ resourceId, resource, invoiceFieldName }) => {
               }}
             >
               <CustomRenderCell value={row.original?.invoiceNumber} />
-            </span>
+            
             <Box ml={1}>
               <IconButton
                 size="small"
@@ -68,6 +68,7 @@ const Invoices = ({ resourceId, resource, invoiceFieldName }) => {
                 <OpenInNewIcon fontSize="small" color="primary" />
               </IconButton>
             </Box>
+            </span>
           </>
         );
       }

@@ -5,12 +5,11 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import axiosInstance from '../../../axios/axiosInstance';
 import { Box, Dialog, IconButton, Menu, MenuItem } from '@material-ui/core';
 import { getNestedSubRows } from 'src/components/RentalManagment/helper';
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
 import { CustomDialogTransition, invoice, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import { Add, Delete, Edit, ExpandMore } from '@material-ui/icons';
@@ -22,7 +21,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import PreviewDownload from 'src/components/PreviewDownload';
-import { generateCustomTableColumns } from 'src/constants/columns';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 
 const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSuccess }) => {
 
@@ -30,15 +29,17 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
 
   const toastConfig = useContext(CustomToastContext);
 
-  const [selectedProducts, setSelectedProducts] = useState([]);
   const [material, setMaterial] = useState([]);
   const [columns, setColumns] = useState(null);
-  const [rowsData, setRowsData] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
 
   const [isLoadingUpdate, setIsLoadingUpdate] = useState(false);
   const [isProductEdit, setIsProductEdit] = useState({ open: false, rowData: null });
   const [viewBillDialogConfirm, setViewBillDialogConfirm] = useState({ open: false, rows: [] });
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, selectedRecords } = state;
+  const { generateColumns } = useColumns();
+
 
   useEffect(() => {
     fetchFields();
@@ -56,7 +57,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
       data?.forEach((e) => {
         e.isColumnEditable = false;
       });
-      const newColumns = generateCustomTableColumns(data, invoiceData?.currency, renderedFrom);
+      const newColumns = generateColumns(renderedFrom, data, null, false, invoiceData?.currency);
       let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
       if (qtyIndex > -1) {
         newColumns[qtyIndex].accessor = 'qtyDisplay';
@@ -66,7 +67,8 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
           accessor: 'index',
           Header: 'Index',
           width: 70,
-          sticky: isMobile ? 'none' : 'left',
+          disableFilter : false,
+          sticky: 'left',
           Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
           Footer: () => {
             return <>Total</>;
@@ -75,7 +77,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
         {
           accessor: 'type',
           Header: 'Type',
-          sticky: isMobile ? 'none' : 'left',
+          sticky:  isMobile || isTablet ? 'none' : 'left',
           width: 200,
           disableFilters: true,
           Cell: ({ row }) =>
@@ -102,6 +104,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
           accessor: 'detail',
           Header: 'Details',
           minWidth: 300,
+          disabled : true,
           width: 300,
           Cell: ({ row }) => (
             <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -188,6 +191,10 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
   };
 
   const fetchData = async () => {
+
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
+
     var data: any = [];
     const response = await axiosInstance().get(`${invoice.api}/material/${invoiceData._id}`);
     data = response?.data?.data;
@@ -231,8 +238,9 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
         rows.push(element);
       });
     }
-    setRowsData(rows);
-    setSelectedProducts([]);
+
+    dispatch({ type: 'initialize', data: rows, count: rows?.length });
+    dispatch({ type: 'loading', loading: false });
   };
 
   const generateNestedData = (material, parent) => {
@@ -332,7 +340,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
                   size="small"
                   onClick={handleClick}
                   aria-controls="action-menu"
-                  disabled={selectedProducts?.length && invoiceData?.isLatestInvoice ? false : true}
+                  disabled={selectedRecords?.length && invoiceData?.isLatestInvoice ? false : true}
                   endIcon={<ExpandMore />}
                   className="new-dropdown-v1"
                 >
@@ -358,10 +366,10 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
                     onClick={() => {
                       setAnchorEl(null);
                       const obj: any = [];
-                      selectedProducts?.forEach((ele) => {
+                      selectedRecords?.forEach((ele) => {
                         obj.push({ id: ele._id, type: ele.type, materialId: ele.materialId });
                       });
-                      selectedProducts?.forEach((ele) => {
+                      selectedRecords?.forEach((ele) => {
                         getNestedSubRows(obj, ele);
                       });
                       setViewBillDialogConfirm({ open: true, rows: obj });
@@ -372,19 +380,19 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
                 </Menu>
               </Box>
             </Box>
-            {columns && rowsData ? (
+            {columns ? (
               <Box zIndex={5} width={'100%'} height={'calc(100vh - 200px)'} p={1}>
                 <CustomReactTable
                   height={'calc(100vh - 200px)'}
                   columns={columns}
-                  data={rowsData}
-                  onSelect={setSelectedProducts}
-                  childrenProperty="subRows"
-                  uniqueKey="_id"
+                  state = {state}
+                  dispatch = {dispatch}
                   hideSelection={false}
                   hideAction={false}
                   renderedFrom={renderedFrom}
                   isClientSideGrid={true}
+                  expander = {true}
+                  refreshGrid = {fetchData}
                 />
               </Box>
             ) : (
@@ -416,7 +424,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
           isBulkedit={false}
           handleSaveData={handleSaveData}
           rentalManagementData={rentalManagementData}
-          rowData={rowsData?.find((d) => d._id === isProductEdit.rowData._id)}
+          rowData={dataRows?.find((d) => d._id === isProductEdit.rowData._id)}
           material={material}
           selectedProducts={[]}
           loading={isLoadingUpdate}
