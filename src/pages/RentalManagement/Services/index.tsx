@@ -678,6 +678,7 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
           renderedFrom={renderedFrom}
           onSaveEdit={onSaveInlineEdit}
           isClientSideGrid={true}
+          expander={true}
         />
       ) : (
         <Box py={2} height={300}>
