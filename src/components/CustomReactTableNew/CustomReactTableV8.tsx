@@ -397,7 +397,7 @@ const CustomReactTable = ({
   });
 
   useEffect(() => {
-    table.setPageSize(limit);
+    table.setPageSize(table.getExpandedRowModel().flatRows?.length);
     if (!isClientSideGrid) return;
     table.setPageIndex(page);
   }, [isClientSideGrid, limit, page, table, data]);
