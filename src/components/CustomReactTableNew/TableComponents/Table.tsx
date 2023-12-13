@@ -174,7 +174,10 @@ const TableComponent = ({
 
   // const footers;
 
-  console.log(table?.getFooterGroups()[0].headers);
+  const footerRowFound = useMemo(() => {
+    const found = table?.getFooterGroups()[0].headers.some((h) => h.column.columnDef.footer);
+    return found;
+  }, [table]);
 
   return (
     <>
@@ -240,7 +243,7 @@ const TableComponent = ({
           >
             {virtualization ? <VirtualTable /> : <NormalTable />}
           </TableBody>
-          {isClientSideGrid && (
+          {isClientSideGrid && footerRowFound && (
             <tfoot>
               {table?.getFooterGroups().map((footerGroup) => (
                 <tr key={footerGroup.id}>

@@ -1,6 +1,6 @@
 import { CircularProgress, Collapse, IconButton } from '@material-ui/core';
 import { Check, Edit, Error } from '@material-ui/icons';
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 import { BsChevronContract, BsChevronExpand } from 'react-icons/bs';
 import { TInitialState } from '../hooks/useTableReducer';
 import HtmlTooltip from '../../CustomTooltipTitle';
@@ -65,6 +65,11 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
   const collapsibleFields: any[] = React.useMemo(() => {
     return otherFields.slice(DEFAULT_DATA_ROWS_VISIBLE, otherFieldsLength) || [];
   }, [otherFields, otherFieldsLength]);
+
+  const footerRowFound = useMemo(() => {
+    const found = table?.getFooterGroups()[0].headers.some((h) => h.column.columnDef.footer);
+    return found;
+  }, [table]);
 
   return (
     <>
@@ -239,7 +244,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                 )}
           </div>
         </div>
-        {dataRows?.length > 0 && table?.getFooterGroups().length > 0 && isClientSideGrid && (
+        {dataRows?.length > 0 && footerRowFound > 0 && isClientSideGrid && (
           <>
             {table?.getFooterGroups().map((group, index) => {
               const indexCol = group?.headers?.find((g) => g.id === 'index');
