@@ -1,7 +1,6 @@
 import { useState, useEffect, Fragment, FC, useContext } from 'react';
 import { Button, Box, IconButton } from '@material-ui/core';
 import routes from 'src/components/Helpers/Routes';
-import GridDeleteIcon from 'src/components/Helpers/GridDeleteIcon';
 import { isMobile, isTablet } from 'react-device-detect';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -14,7 +13,6 @@ import {
   DELIVERY_TICKET_TYPE,
   transferAsset,
   serializedAsset,
-  dateFormat,
   TRANSFER_ASSET_STATUS
 } from 'src/constants/helpers';
 import AddSerializedAsset from 'src/pages/RentalManagement/SerializedAsset/AddSerializedAsset';

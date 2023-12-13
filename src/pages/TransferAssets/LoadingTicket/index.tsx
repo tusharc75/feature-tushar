@@ -1,6 +1,5 @@
-import { useState, useReducer, Fragment, useContext, useEffect, FC } from 'react';
+import { useState, Fragment, useContext, useEffect, FC } from 'react';
 import { Button, Box, MenuItem, Menu, IconButton } from '@material-ui/core';
-import { useHistory } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
