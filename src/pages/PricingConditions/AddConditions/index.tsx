@@ -44,7 +44,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
 
   useEffect(() => {
     fetchCondition();
-  }, [page, limit, pricingConditionId]);
+  }, [page, limit, sorting, pricingConditionId]);
 
   const fetchCondition = () => {
     dispatch({ type: 'loading', loading: true });
