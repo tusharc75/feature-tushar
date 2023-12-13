@@ -5,7 +5,17 @@ import { IndeterminateCheckbox, TColType } from '../TableComponents/TableHelperC
 import { childrenProperty, insertChildRowIntoTable } from '../utils';
 import { fuzzySort } from '../ReactTableHelpers';
 
-export const useCreateColumns = ({ columns, expander, fetchChildAttachment, hideSelection, hideAction, dispatch, state, isClientSideGrid }) => {
+export const useCreateColumns = ({
+  columns,
+  expander,
+  fetchChildAttachment,
+  hideSelection,
+  hideAction,
+  dispatch,
+  state,
+  isClientSideGrid,
+  toggleExpandChange
+}) => {
   const { dataRows: allRows } = state;
 
   const fetchChildAttachmentWrapper = async (row) => {
@@ -27,7 +37,6 @@ export const useCreateColumns = ({ columns, expander, fetchChildAttachment, hide
       header: ({ table }) => (
         <IconButton
           size="small"
-          // style={{ marginLeft: '-5px' }}
           {...{
             onClick: table.getToggleAllRowsExpandedHandler()
           }}
@@ -60,6 +69,7 @@ export const useCreateColumns = ({ columns, expander, fetchChildAttachment, hide
               onClick={async () => {
                 row.getToggleExpandedHandler()();
                 fetchChildAttachmentWrapper(row);
+                toggleExpandChange();
               }}
             >
               {row.getIsExpanded() || row.isExpanded ? <FaAngleDown /> : <FaAngleRight />}
@@ -134,6 +144,7 @@ export const useCreateColumns = ({ columns, expander, fetchChildAttachment, hide
         e.header = e.header ?? e.Header;
         e.accessorKey = e.accessor ?? e.id;
         e.maxSize = e.maxSize ?? e.maxWidth;
+        e.footer = e.footer ?? e.Footer;
 
         e.size = e.size ?? e.width;
         switch (true) {
@@ -159,6 +170,7 @@ export const useCreateColumns = ({ columns, expander, fetchChildAttachment, hide
         disableFilters: true,
         disableSortBy: true,
         canDrag: false,
+        footer: actionColumn?.footer ?? actionColumn.Footer,
         maxSize: actionColumn?.maxWidth ?? 120,
         size: actionColumn?.width ?? 120,
         enableResizing: false,

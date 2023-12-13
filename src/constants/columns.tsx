@@ -126,7 +126,8 @@ export const getCustomColumnData = (title, field) => {
       accessor: field?.fieldName,
       Header: fieldHeaderName,
       show: gridMetaData[title]?.hide && gridMetaData[title]?.hide.indexOf(field?.fieldName) >= 0 ? false : true,
-      disabled: (gridMetaData[title]?.disabled && gridMetaData[title]?.disabled.indexOf(field?.fieldName) >= 0) || field?.stopHideColumn ? true : false,
+      disabled:
+        (gridMetaData[title]?.disabled && gridMetaData[title]?.disabled.indexOf(field?.fieldName) >= 0) || field?.stopHideColumn ? true : false,
       editable: field?.isColumnEditable ?? false,
       isHideColumnSum: field?.isHideColumnSum ?? false,
       decimalPlaces: field?.decimalPlaces,
@@ -197,13 +198,15 @@ export const generateCustomTableColumns = (fields: any[], currency: string, rend
               );
             },
             Footer: (info) => {
-              const total = info?.rows
+              let rows = info.rows;
+              if (!rows) {
+                rows = info?.table?.getRowModel().rows;
+              }
+              const total = rows
                 ?.filter((f) => !f.original.parentId && f.values.hasOwnProperty(fieldName) && !isNaN(f.values[fieldName]))
                 .reduce((sum, row) => row.values[fieldName] + sum, 0);
               return (
-                <>
-                  {ele?.isHideColumnSum ? '' : `${currencySymbol} ${formatAmountWithCurrency(currency, total)?.amountWithouCurrencyCode ?? total}`}
-                </>
+                <>{ele?.isHideColumnSum ? '' : `${currencySymbol} ${formatAmountWithCurrency(currency, total)?.amountWithouCurrencyCode ?? total}`}</>
               );
             }
           });
@@ -239,8 +242,12 @@ export const generateCustomTableColumns = (fields: any[], currency: string, rend
             width: 200,
             Cell: ({ row }) => (row.original[ele.fieldName] ? <p>{row.original[ele.fieldName]}</p> : <NoDataCell />),
             Footer: (info) => {
-              const qtyTotal = info.rows
-                .filter((f) => !f.original.parentId && f.original.hasOwnProperty(ele.fieldName) && !isNaN(f.original[ele.fieldName]))
+              let rows = info.rows;
+              if (!rows) {
+                rows = info?.table?.getRowModel().rows;
+              }
+              const qtyTotal = rows
+                ?.filter((f) => !f.original.parentId && f.original.hasOwnProperty(ele.fieldName) && !isNaN(f.original[ele.fieldName]))
                 .reduce((sum, row) => row.original[currentColumn.accessor] + sum, 0);
               return <>{ele?.isHideColumnSum ? '' : qtyTotal}</>;
             }
@@ -249,7 +256,7 @@ export const generateCustomTableColumns = (fields: any[], currency: string, rend
           column.push({
             ...currentColumn,
             width: 200,
-            Cell: ({ row }) => (<p>{Boolean(row.original[ele.fieldName]) ? 'Yes' : 'No'}</p>)
+            Cell: ({ row }) => <p>{Boolean(row.original[ele.fieldName]) ? 'Yes' : 'No'}</p>
           });
         } else if (ele.type === 'multiSelect') {
           column.push({
@@ -259,12 +266,11 @@ export const generateCustomTableColumns = (fields: any[], currency: string, rend
               row.original[ele.fieldName] ? ele.lookup ? columnData(ele, row) : <p>{row.original[ele.fieldName]}</p> : <NoDataCell />
           });
         } else if (ele.type === 'multiFileUpload') {
-
         } else if (ele.type === 'signature') {
           column.push({
             ...currentColumn,
             width: 200,
-            Cell: ({ row }) => row.original[ele.fieldName] ? <SignatureCell base64={row?.original[ele.fieldName]} /> : <NoDataCell />
+            Cell: ({ row }) => (row.original[ele.fieldName] ? <SignatureCell base64={row?.original[ele.fieldName]} /> : <NoDataCell />)
           });
         } else {
           column.push({
@@ -290,10 +296,9 @@ export const generateCustomTableColumns = (fields: any[], currency: string, rend
 };
 
 const columnData = (ele, row) => {
-
   const path = routes[`${camelCase(ele?.lookupResource)}Detail`]?.path
-  ? routes[`${camelCase(ele?.lookupResource)}Detail`]?.path
-  : `/${camelCase(ele?.lookupResource)}/detail`;
+    ? routes[`${camelCase(ele?.lookupResource)}Detail`]?.path
+    : `/${camelCase(ele?.lookupResource)}/detail`;
 
   if (ele.type === 'multiSelect' && ele.lookup) {
     return (
@@ -303,7 +308,7 @@ const columnData = (ele, row) => {
             {row.original[ele.fieldName]
               ?.map((d) => {
                 return (
-                  <a className={`text-truncate ${path ? 'link' : ''}`} target='_blank' href={`${path}/${d.optionValue}`}>
+                  <a className={`text-truncate ${path ? 'link' : ''}`} target="_blank" href={`${path}/${d.optionValue}`}>
                     {d.optionLabel}
                   </a>
                 );
@@ -320,10 +325,10 @@ const columnData = (ele, row) => {
       <>
         {row.original[ele.fieldName]?.optionLabel ? (
           <div className="d-flex gap-2 align-items-center">
-            <p className='text-truncate' title={row.original[ele.fieldName]?.optionLabel}>
+            <p className="text-truncate" title={row.original[ele.fieldName]?.optionLabel}>
               {row.original[ele.fieldName]?.optionLabel}
             </p>
-            {path &&
+            {path && (
               <IconButton
                 size="small"
                 onClick={() => {
@@ -332,12 +337,12 @@ const columnData = (ele, row) => {
               >
                 <OpenInNewIcon fontSize="small" color="primary" />
               </IconButton>
-            }
+            )}
           </div>
         ) : (
           <NoDataCell />
         )}
-      </ >
+      </>
     );
   } else {
     return row.original[ele.fieldName]?.optionLabel ? (

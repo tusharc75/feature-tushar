@@ -3,7 +3,7 @@ import { Box, CircularProgress, TableBody, TableHead, TableRow } from '@material
 import { CellRenderer, DraggableHeader } from './TableHelperComponents';
 import MaUTable from '@material-ui/core/Table';
 import { TActios, TInitialState } from '../hooks/useTableReducer';
-import { Row, Table } from '@tanstack/react-table';
+import { Row, Table, flexRender } from '@tanstack/react-table';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Error } from '@material-ui/icons';
 
@@ -171,6 +171,7 @@ const TableComponent = ({
     () => (virtualization ? { width: `${columnVirtualizer.getTotalSize()}px`, height: `${rowVirtualizer.getTotalSize()}px` } : {}),
     [virtualization, columnVirtualizer, rowVirtualizer]
   );
+
   return (
     <>
       <div
@@ -235,6 +236,15 @@ const TableComponent = ({
           >
             {virtualization ? <VirtualTable /> : <NormalTable />}
           </TableBody>
+          <tfoot>
+            {table?.getFooterGroups().map((footerGroup) => (
+              <tr key={footerGroup.id}>
+                {footerGroup.headers.map((header) => (
+                  <th key={header.id}>{header.isPlaceholder ? null : flexRender(header.column.columnDef.footer, header.getContext())}</th>
+                ))}
+              </tr>
+            ))}
+          </tfoot>
         </MaUTable>
       </div>
     </>
