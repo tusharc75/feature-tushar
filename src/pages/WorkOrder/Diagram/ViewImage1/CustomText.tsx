@@ -47,7 +47,9 @@ const CustomText = ({ textState, setTextState, onEdit, editingTextRef, onSelect 
       size={{ width: textState.width, height: textState.height }}
       onDrag={(e, d) => handleDrag(textState.id, d)}
       onResize={(e, direction, ref, delta, position) => handleResize(textState.id, direction, ref, delta, position)}
-      style={{ color: 'black' }}
+      style={{
+        border: '1px solid blue',
+      }}
     >
       <div
         ref={textRef}
