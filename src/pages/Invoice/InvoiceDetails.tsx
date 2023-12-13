@@ -122,7 +122,7 @@ const InvoiceDetails = () => {
       let data;
       const response: any = await axiosInstance().get(`${invoice.api}/${id}`);
       data = response?.data?.data;
-      if ([INVOICE_STATUS.invoiced, INVOICE_STATUS.closed, INVOICE_STATUS.cancelled]?.includes(data?.status)) {
+      if ([INVOICE_STATUS.closed, INVOICE_STATUS.cancelled]?.includes(data?.status)) {
         setCurrentStep(invoiceProcessSteps?.length - 1);
       }
       else {

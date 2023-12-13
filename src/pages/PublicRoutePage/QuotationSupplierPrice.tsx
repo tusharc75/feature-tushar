@@ -9,8 +9,7 @@ import { sortBy } from 'lodash';
 import DetailsPage from 'src/components/Shared/DetailsPage';
 import { FaDiceOne } from 'react-icons/fa';
 import axiosInstance from 'src/axios/axiosInstance';
-import { generateCustomTableColumns } from 'src/constants/columns';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 
 let levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
 
@@ -65,6 +64,8 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer();
+  const { generateColumns } = useColumns()
+
   const [columns, setColumns] = useState(null);
   const [productData, setProductData] = useState([]);
   const [productArray, setProductArray] = useState([]);
@@ -204,7 +205,7 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
           })
 
           const filteredFields = ele?.fields?.filter((e) => data?.requiredFields.includes(e.fieldName));
-          const newColumns = generateCustomTableColumns(filteredFields, quotationData.currency, renderedFrom,);
+          const newColumns = generateColumns(renderedFrom, filteredFields, null, false, quotationData.currency);
           columns = [...columns, ...newColumns];
         });
         setRequireFieldArray(data?.requiredFields);

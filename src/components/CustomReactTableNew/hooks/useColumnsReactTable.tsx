@@ -394,6 +394,9 @@ export default function useColumns() {
   };
 
   const generateColumns = (renderedFrom, fields, detailScreenRoute = null, masterPage = false, currency = null) => {
+    if (!currency) {
+      currency = user?.user?.brandCurrency || 'USD'
+    }
     let data = localStorage.getItem('gridMetaData');
     let gridMetaData = data == 'undefined' ? {} : JSON.parse(data);
     if (!gridMetaData) {
@@ -474,13 +477,10 @@ export default function useColumns() {
                 );
               },
               Footer: (info) => {
-                let rows = info.rows;
-                if (!rows) {
-                  rows = info.table.getExpandedRowModel().rows;
-                }
+                let rows = info.table.getExpandedRowModel().rows;
                 const total = rows
-                  ?.filter((f) => !f.original.parentId && f.values.hasOwnProperty(fieldName) && !isNaN(f.values[fieldName]))
-                  .reduce((sum, row) => row.values[fieldName] + sum, 0);
+                  ?.filter((f) => !f.original.parentId && f.original.hasOwnProperty(fieldName) && !isNaN(f.original[fieldName]))
+                  .reduce((sum, row) => row.original[fieldName] + sum, 0);
                 return (
                   <>
                     {field?.isHideColumnSum
@@ -657,10 +657,7 @@ export default function useColumns() {
           editable: Boolean(field?.isColumnEditable),
           cell: ({ row }) => (row.original[field.fieldName] ? <p>{row.original[field.fieldName]}</p> : <NoDataCell />),
           Footer: (info) => {
-            let rows = info.rows;
-            if (!rows) {
-              rows = info.table.getExpandedRowModel().rows;
-            }
+            let rows = info.table.getExpandedRowModel().rows;
             const qtyTotal = rows
               .filter((f) => !f.original.parentId && f.original.hasOwnProperty(field.fieldName) && !isNaN(f.original[field.fieldName]))
               .reduce((sum, row) => row.original[commonFieldData.accessor] + sum, 0);

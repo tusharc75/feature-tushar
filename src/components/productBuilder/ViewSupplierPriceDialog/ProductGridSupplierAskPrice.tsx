@@ -10,7 +10,6 @@ import { prepareDataForGrid } from "../../../constants/helpers";
 import DeleteButton from "src/components/Helpers/DeleteButton";
 import moment from "moment";
 import CustomReactTable, { useColumns, useTableReducer } from "src/components/CustomReactTableNew";
-import { generateCustomTableColumns } from "src/constants/columns";
 
 const displayColumns = ["qty", "productName", "productDescription", "unit", "responseDate", "status"]
 
@@ -28,6 +27,8 @@ const ProductGridSupplierAskPrice = (props) => {
     const { productData, handleAdd, handleReject } = props;
     const renderedFrom = "quoteSupplierPrice" + productData?._id;
     const { state, dispatch } = useTableReducer();
+    const { generateColumns } = useColumns();
+
     const { dataRows, rowCount, loading, page, limit, pageSizes, search,
         filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
@@ -53,7 +54,7 @@ const ProductGridSupplierAskPrice = (props) => {
         let columns = []
         productData?.fields?.forEach((ele) => {
             const filteredFields = ele?.filter((e) => !productData?.requiredFields.includes(e.fieldName));
-            const newColumns = generateCustomTableColumns(filteredFields, '', renderedFrom);
+            const newColumns = generateColumns(renderedFrom, filteredFields);
             columns = [...columns, ...newColumns];
         })
         columns = sortBy([...columns], function (item: any) {

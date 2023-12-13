@@ -66,7 +66,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen, f
   const fetchFields = async () => {
     var data = await fetch_salesOrder_product_fields(salesOrderData?.currency);
     setAllFields(JSON.parse(JSON.stringify(data)));
-    const newColumns = generateColumns(renderedFrom ,data, null, false ,salesOrderData?.currency);
+    const newColumns = generateColumns(renderedFrom, data, null, false, salesOrderData?.currency);
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';
@@ -88,7 +88,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen, f
         accessor: 'type',
         Header: 'Type',
         width: 100,
-        disableFilters : false,
+        disableFilters: false,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -99,24 +99,21 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen, f
       {
         accessor: 'detail',
         Header: 'Detail',
-        disableFilters : false,
+        disableFilters: false,
         sticky: isMobile || isTablet ? 'none' : 'left',
         minWidth: 300,
         width: 300,
         Cell: ({ row, table }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {
-              <p
-                onClick={() => {
-                  handleOpen(row, table.getRowModel().rows);
-                }}
-                className="link text-truncate"
-                title={row.original?.detail}
-              >
-                {row.original?.detail}
-              </p>
-            }
-
+            {<p
+              onClick={() => {
+                handleOpen(row, table.getRowModel().rows);
+              }}
+              className="link text-truncate"
+              title={row.original?.detail}
+            >
+              {row.original?.detail}
+            </p>}
             {row?.original?.type !== MATERIAL_TYPE.service && (
               <Box ml={1} className="d-flex align-items-center">
                 {row.original?.subRows?.length > 0 && (
@@ -548,8 +545,8 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen, f
             <MenuItem
               onClick={() => {
                 const dataToDelete =
-                selectedRecords &&
-                selectedRecords
+                  selectedRecords &&
+                  selectedRecords
                     .filter((e) => !e.hideSelection)
                     .map((rec: any) => {
                       const obj: any = {};
@@ -573,10 +570,10 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen, f
             <CustomReactTable
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
               columns={columns}
-              state = {state}
-              dispatch = {dispatch}
-              expander = {true}
-              refreshGrid = {fetchData}
+              state={state}
+              dispatch={dispatch}
+              expander={true}
+              refreshGrid={fetchData}
               renderedFrom="sales_order_product_package"
               setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
               isClientSideGrid={true}
