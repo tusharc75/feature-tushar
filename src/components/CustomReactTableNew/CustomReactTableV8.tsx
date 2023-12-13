@@ -418,8 +418,8 @@ const CustomReactTable = ({
   });
 
   const isAllRowsExpanded = table.getIsAllRowsExpanded();
+
   const paginationLimit = useMemo(() => {
-    if (!isAllRowsExpanded) return limit;
     const getRowCount = (list: Row<any>[], limit) => {
       let rowLength = limit;
       for (let i = 0; i < limit; i++) {
