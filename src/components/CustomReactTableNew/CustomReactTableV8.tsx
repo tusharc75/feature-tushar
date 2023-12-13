@@ -62,7 +62,8 @@ const CustomReactTable = ({
   selectedReportView = null,
   setSelectedReportView = null,
   reportSave = false,
-  virtualization = false
+  virtualization = false,
+  showArrangeView = true
 }) => {
   const {
     currentEditingCellPosition,
@@ -499,19 +500,21 @@ const CustomReactTable = ({
                     </Button>
                   </HtmlTooltip>
                 )}
-                <ArrangeViewButton
-                  columns={newColumns}
-                  loading={loading}
-                  renderedFrom={renderedFrom}
-                  setHiddenColumns={setHiddenColumns}
-                  // getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
-                  defaultColumns={newColumns}
-                  setColumnOrder={setColumnOrder}
-                  setSelectedReportView={setSelectedReportView}
-                  selectedReportView={selectedReportView}
-                  reportSave={reportSave}
-                  dispatchTable={dispatch}
-                />
+                {showArrangeView && (
+                  <ArrangeViewButton
+                    columns={newColumns}
+                    loading={loading}
+                    renderedFrom={renderedFrom}
+                    setHiddenColumns={setHiddenColumns}
+                    // getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
+                    defaultColumns={newColumns}
+                    setColumnOrder={setColumnOrder}
+                    setSelectedReportView={setSelectedReportView}
+                    selectedReportView={selectedReportView}
+                    reportSave={reportSave}
+                    dispatchTable={dispatch}
+                  />
+                )}
               </>
             }
             startButtons={
