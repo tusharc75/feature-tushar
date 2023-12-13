@@ -2833,7 +2833,7 @@ export const fieldLabelToFieldName = (fieldLabel) => {
 };
 
 export const ATTACHMENT_TYPE = {
-  diagram: 'Diagram',
+  drawing: 'Drawing',
   certificate: 'Certificate',
   mtr: 'MTR'
 };

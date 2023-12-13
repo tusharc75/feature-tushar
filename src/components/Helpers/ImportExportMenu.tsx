@@ -19,6 +19,7 @@ const ImportExportMenu = ({
   total = 0,
   additionalParams = null,
   isDownloadExcel = true,
+  title = '',
   ...others
 }) => {
 
@@ -175,7 +176,7 @@ const ImportExportMenu = ({
         size="small"
         {...others}
       >
-        Import&nbsp;/&nbsp;Export
+        {`Import/Export ${title}`}
       </Button>
       <Menu
         id="import-export-links"
