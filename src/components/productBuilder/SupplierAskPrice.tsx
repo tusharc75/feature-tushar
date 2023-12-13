@@ -15,15 +15,13 @@ import routes from '../../components/Helpers/Routes';
 import { Box, Chip, IconButton, Menu, MenuItem } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import TextField from '@material-ui/core/TextField';
-import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
 import { prepareDataForGrid } from '../../constants/helpers';
 import { CommonRenderer, DateTimeRenderer } from '../AgGridComponents/CustomAgGridCellRenderers';
 import AskSupplierPriceDialog from './AskSupplierPriceDialog';
 import DeleteIcon from '@material-ui/icons/Delete';
 import DeleteButton from '../Helpers/DeleteButton';
 import moment from 'moment';
-import CustomReactTable, { useTableReducer } from '../CustomReactTableNew';
-import { generateCustomTableColumns } from 'src/constants/columns';
+import CustomReactTable, { useColumns, useTableReducer } from '../CustomReactTableNew';
 
 const renderedFrom = 'quoteSupplierPrice';
 const localStorageSelectedRecords = `${renderedFrom}_selected`;
@@ -34,6 +32,7 @@ const SupplierAskPrice = (props) => {
   const { handleClose, supplierData, productBuilderId, onSuccess } = props;
 
   const { state, dispatch } = useTableReducer();
+  const { generateColumns } = useColumns();
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   const [columns, setColumns] = useState(null);
@@ -63,7 +62,7 @@ const SupplierAskPrice = (props) => {
         let columns = [];
         data?.fields?.forEach((ele) => {
           const filteredFields = ele?.fields?.filter((e) => !requiredFields.includes(e.fieldName));
-          const newColumns = generateCustomTableColumns(filteredFields, '', renderedFrom);
+          const newColumns = generateColumns(renderedFrom, filteredFields);
           columns = [...columns, ...newColumns];
         })
         columns = sortBy(

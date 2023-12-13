@@ -94,6 +94,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
         minWidth: 300,
         disabled :true,
         width: 300,
+        sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row, table }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {allowedToEdit ? (

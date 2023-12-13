@@ -33,11 +33,10 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer();
   const { generateColumns } = useColumns();
-  const { dataRows, page, limit, filters, sorting, selectedRecords } = state;
+  const {  selectedRecords } = state;
   const {
     state: { user, permissions }
   }: any = useData();
-  const theme = useTheme();
   const [receiveDialog, setReceiveDialog] = useState(false);
   const [rejectDialog, setRejectDialog] = useState(false);
   const [rejectProductDialog, setRejectProductDialog] = useState(null);
@@ -47,9 +46,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
 
   const [inventoryHistory, setInventoryHistory] = useState([]);
 
-  // const [rowsData, setRowsData] = useState(null);
   const [columns, setColumns] = useState(null);
-  // const [selectedRecords, setSelectedRecords] = useState([]);
   const [addAssetDialog, setAddAssetDialog] = useState({ open: false, product: null })
 
   useEffect(() => {
@@ -92,7 +89,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
     column.push({
       accessor: 'detail',
       Header: 'Detail',
-      width: 300,
+      width: 200,
       disabled: true,
       sticky: isMobile || isTablet ? 'none' : 'left',
       Cell: ({ row }) => (
@@ -439,7 +436,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
               refreshGrid={fetchProduct}
               isClientSideGrid={true}
               hideSelection={[PURCHASE_ORDER_STATUS.closed]?.includes(purchaseOrderData?.status) ? true : false}
-              // expander={true}
+              expander={true}
             />
           </Box>
         ) : (

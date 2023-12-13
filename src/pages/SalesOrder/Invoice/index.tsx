@@ -23,7 +23,7 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, renderedFrom, s
 
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
-  
+
   const { generateColumns } = useColumns();
 
   useEffect(() => {
@@ -38,14 +38,14 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, renderedFrom, s
 
   const fetchFields = async () => {
     var data = await fetch_salesOrder_product_fields(salesOrderData?.currency);
-    const newColumns = generateColumns(renderedFrom,data, null, false, salesOrderData?.currency);
+    const newColumns = generateColumns(renderedFrom, data, null, false, salesOrderData?.currency);
     let coloum: any = [
       {
         accessor: 'index',
         Header: 'Index',
         width: 120,
         sticky: 'left',
-        disableFilters : false,
+        disableFilters: false,
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
@@ -55,7 +55,7 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, renderedFrom, s
         accessor: 'type',
         Header: 'Type',
         width: 100,
-        disableFilters : true,
+        disableFilters: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => {
           return row.original?.type ? (
@@ -71,7 +71,7 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, renderedFrom, s
         accessor: 'detail',
         Header: 'Detail',
         minWidth: 300,
-        disabled : true,
+        disabled: true,
         width: 300,
         Cell: ({ row }) => {
           return row.original?.detail ? (
@@ -192,7 +192,7 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, renderedFrom, s
 
   return (
     <Fragment>
-      <Box p={1}>
+      <Box p={1} >
         <PreviewDownload
           fileName={`${routes.salesOrder.title}-${salesOrderData?.salesOrderNo}`}
           resource={sidebarResource.salesOrder}
@@ -203,22 +203,20 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, renderedFrom, s
       </Box>
       <Grid item xs={12} md={12} sm={12}>
         {columns ? (
-          <>
-            <Box mt={1} zIndex={5} width={'100%'}>
-              <CustomReactTable
-                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
-                columns={columns}
-                state = {state}
-                setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
-                dispatch = {dispatch}
-                renderedFrom = {renderedFrom}
-                isClientSideGrid={true}
-                hideSelection={true}
-                refreshGrid = {fetchData}
-                expander = {true}
-              />
-            </Box>
-          </>
+          <Box zIndex={5} width={'100%'}>
+            <CustomReactTable
+              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
+              columns={columns}
+              state={state}
+              setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
+              dispatch={dispatch}
+              renderedFrom={renderedFrom}
+              isClientSideGrid={true}
+              hideSelection={true}
+              refreshGrid={fetchData}
+              expander={true}
+            />
+          </Box>
         ) : (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
