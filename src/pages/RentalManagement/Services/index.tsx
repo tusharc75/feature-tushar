@@ -11,7 +11,7 @@ import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageD
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { MATERIAL_TYPE, gridLoadingTimeout, rentalManagement } from '../../../constants/helpers';
+import { MATERIAL_TYPE, rentalManagement } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
@@ -336,7 +336,7 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
       if (rows?.length === 0) {
         setNextStep(true);
       }
-      dispatch({ type: 'initialize', data: rows, count: rows?.lenght });
+      dispatch({ type: 'initialize', data: rows, count: rows?.length });
       dispatch({ type: 'loading', loading: false });
 
       setServiceOption([{ optionLabel: 'All', optionValue: 'All' },

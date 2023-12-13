@@ -259,7 +259,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
       parent.subRows = generateNestedData(data.material, parent);
     });
     
-    dispatch({ type: 'initialize', data: rows, count: rows?.lenght });
+    dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
   };
 

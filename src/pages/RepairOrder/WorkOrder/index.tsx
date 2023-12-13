@@ -600,7 +600,7 @@ const WorkOrder = ({
       }
     }
 
-    dispatch({ type: 'initialize', data: rows, count: rows?.lenght });
+    dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
   };
 

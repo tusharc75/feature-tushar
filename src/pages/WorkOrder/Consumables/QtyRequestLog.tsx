@@ -211,7 +211,7 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
           e.processBy = e?.processBy?.optionLabel;
         });
 
-        dispatch({ type: 'initialize', data: filteredData, count: filteredData?.lenght });
+        dispatch({ type: 'initialize', data: filteredData, count: filteredData?.length });
         dispatch({ type: 'loading', loading: false });
       })
       .catch((error) => {

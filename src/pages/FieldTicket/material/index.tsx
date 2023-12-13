@@ -201,7 +201,7 @@ const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, h
       }
     }
 
-    dispatch({ type: 'initialize', data: data, count: data?.lenght });
+    dispatch({ type: 'initialize', data: data, count: data?.length });
     dispatch({ type: 'loading', loading: false });
   };
 

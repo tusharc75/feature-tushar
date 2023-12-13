@@ -209,7 +209,7 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
       parent.qty = parent.qty;
       parent.qtyDisplay = parent.qty;
     });
-    dispatch({ type: 'initialize', data: rows, count: rows?.lenght });
+    dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });  
   };
 

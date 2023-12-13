@@ -121,7 +121,7 @@ function ProcessLogs({ onClose, logsData, productName, product }) {
       e.user = e?.user?.optionLabel;
     });
 
-    dispatch({ type: 'initialize', data: data, count: data?.lenght });
+    dispatch({ type: 'initialize', data: data, count: data?.length });
     dispatch({ type: 'loading', loading: false });
   };
 
