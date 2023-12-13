@@ -10,9 +10,10 @@ import routes from 'src/components/Helpers/Routes';
 import { CustomDialogTransition, invoice, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
-import { Add, Delete, Edit, ExpandMore } from '@material-ui/icons';
+import { Delete, ExpandMore } from '@material-ui/icons';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
@@ -21,10 +22,8 @@ import EditIcon from '@material-ui/icons/Edit';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import PreviewDownload from 'src/components/PreviewDownload';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 
 const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSuccess }) => {
-
   const renderedFrom = `${camelCase(routes?.rentalManagementInvoice.title)}_view_invoice`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -32,7 +31,6 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
   const [material, setMaterial] = useState([]);
   const [columns, setColumns] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
-
   const [isLoadingUpdate, setIsLoadingUpdate] = useState(false);
   const [isProductEdit, setIsProductEdit] = useState({ open: false, rowData: null });
   const [viewBillDialogConfirm, setViewBillDialogConfirm] = useState({ open: false, rows: [] });
@@ -67,7 +65,6 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
           accessor: 'index',
           Header: 'Index',
           width: 70,
-          disableFilter : false,
           sticky: 'left',
           Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
           Footer: () => {
@@ -77,9 +74,10 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
         {
           accessor: 'type',
           Header: 'Type',
-          sticky:  isMobile || isTablet ? 'none' : 'left',
           width: 200,
           disableFilters: true,
+          sticky: isMobile || isTablet ? 'none' : 'left',
+          disabled: true,
           Cell: ({ row }) =>
             row.original['type'] ? (
               <p>
@@ -106,6 +104,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
           minWidth: 300,
           disabled : true,
           width: 300,
+          sticky: isMobile || isTablet ? 'none' : 'left',
           Cell: ({ row }) => (
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <p className="text-truncate" title={row.original?.detail}>
@@ -183,7 +182,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
             </IconButton>
           </Grid>
         )
-      })
+      });
       setColumns(column);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -191,7 +190,6 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
   };
 
   const fetchData = async () => {
-
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
 
@@ -324,7 +322,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
         <CustomDialogContent>
           <Fragment>
             <Box display="flex" justifyContent="space-between" p={1}>
-              {invoiceData &&
+              {invoiceData && (
                 <PreviewDownload
                   fileName={`${routes.invoice.title}-${invoiceData?.invoiceNumber}`}
                   resource={sidebarResource.invoice}
@@ -332,7 +330,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
                   columns={columns}
                   isSendEmail={true}
                 />
-              }
+              )}
               <Box display="flex" alignItems="center">
                 <Button
                   variant="outlined"
@@ -381,20 +379,18 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
               </Box>
             </Box>
             {columns ? (
-              <Box zIndex={5} width={'100%'} height={'calc(100vh - 200px)'} p={1}>
-                <CustomReactTable
-                  height={'calc(100vh - 200px)'}
-                  columns={columns}
-                  state = {state}
-                  dispatch = {dispatch}
-                  hideSelection={false}
-                  hideAction={false}
-                  renderedFrom={renderedFrom}
-                  isClientSideGrid={true}
-                  expander = {true}
-                  refreshGrid = {fetchData}
-                />
-              </Box>
+              <CustomReactTable
+                height={'calc(100vh - 250px)'}
+                columns={columns}
+                state={state}
+                dispatch={dispatch}
+                refreshGrid={fetchData}
+                hideSelection={false}
+                hideAction={false}
+                renderedFrom={renderedFrom}
+                isClientSideGrid={true}
+                expander={true}
+              />
             ) : (
               <Box p={2} height={500}>
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />

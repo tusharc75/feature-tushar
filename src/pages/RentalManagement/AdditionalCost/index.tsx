@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, Fragment, useReducer } from 'react';
+import React, { useState, useEffect, useContext, Fragment } from 'react';
 import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import { useData } from '../../../StateProvider/Provider';
@@ -8,15 +8,14 @@ import { rentalManagement } from '../../../constants/helpers';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
 import AdditionalCostDialog from './AdditionalCostDialog';
-import { isMobile, isTablet } from 'react-device-detect';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { calculateRowsField, fetch_rental_cost_fields } from '../../../components/RentalManagment/helper';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 import { BiChevronDown } from 'react-icons/bi';
-import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
+import { flattenArray } from 'src/constants/columns';
 import { ownerAndColaborator, quotationApprovedMessage } from 'src/constants/messageHelpers';
 import Add from '@material-ui/icons/Add';
 
@@ -27,19 +26,20 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
-  const [rowsData, setRowsData] = useState(null);
   const [showCostDialog, setShowCostDialog] = useState({ open: false, showSaveAndNext: false });
   const [selectedCostData, setSelectedCostData] = useState(null);
   const { isOffline } = useContext(CustomOfflineContext);
   const [isUpdating, setUpdating] = useState(false);
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
-  const [selectedProducts, setSelectedProducts] = useState([]);
   const [isRateRequired, setIsRateRequired] = useState(false);
   const [allFields, setAllFields] = useState(null);
-
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
+
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, selectedRecords } = state;
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchFields();
@@ -48,7 +48,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
 
   useEffect(() => {
     if (allFields) {
-      generateColumns()
+      createColumns();
     }
   }, [allFields, allowedToEdit, quotationApproved]);
 
@@ -65,21 +65,21 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
     setAllFields(fields);
   };
 
-  const generateColumns = () => {
-    setColumns(null)
+  const createColumns = () => {
+    setColumns(null);
     const data = [...allFields];
     if (!allowedToEdit || quotationApproved) {
       data?.forEach((e) => {
         e.isColumnEditable = false;
       });
     }
-    const newColumns = generateCustomTableColumns(data, rentalManagementData?.currency, renderedFrom);
+    const newColumns = generateColumns(renderedFrom, data, null, false, rentalManagementData?.currency);
     let column: any = [
       {
         accessor: 'index',
         Header: 'Index',
         width: 70,
-        sticky: isMobile ? 'none' : 'left',
+        sticky: 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
@@ -92,13 +92,13 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
     column.push({
       accessor: 'action',
       Header: 'Actions',
-      minWidth: 50,
-      width: 50,
+      minWidth: 100,
+      width: 100,
       sticky: 'right',
       disableFilters: true,
       disableSortBy: true,
       canDrag: false,
-      Cell: ({ row, rows }) =>
+      Cell: ({ row, table }) =>
         !isOffline && (
           <Fragment>
             <HtmlTooltip title="Edit">
@@ -106,7 +106,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
                 size="small"
                 aria-label="Clone"
                 onClick={() => {
-                  handleOpen(row, rows);
+                  handleOpen(row, table.getRowModel().rows);
                 }}
               >
                 <EditIcon color="primary" fontSize="small" />
@@ -134,10 +134,13 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
           </Fragment>
         )
     });
-    setColumns(column)
-  }
+    setColumns(column);
+  };
 
   const fetchData = async () => {
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
+
     setNextStep(false);
     try {
       var data: any = [];
@@ -154,7 +157,8 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
         parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
       });
 
-      setRowsData(data);
+      dispatch({ type: 'initialize', data: data, count: data?.length });
+      dispatch({ type: 'loading', loading: false });
       setNextStep(true);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -188,11 +192,11 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
           message: data.message
         });
         if (saveAndNext) {
-          const rowIndex = rowsData.findIndex((d) => d._id === rows[0]?._id);
-          setSelectedCostData(rowsData[rowIndex + 1]);
+          const rowIndex = dataRows?.findIndex((d) => d._id === rows[0]?._id);
+          setSelectedCostData(dataRows[rowIndex + 1]);
           setShowCostDialog({
             open: true,
-            showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false
+            showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
           });
         } else {
           setShowCostDialog({ open: false, showSaveAndNext: false });
@@ -228,9 +232,9 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
   };
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
-    const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
+    const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
+    rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
     handleUpdateCost(rows);
   };
 
@@ -262,7 +266,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
             color="primary"
             size="small"
             onClick={handleClick}
-            disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
+            disabled={!Boolean(selectedRecords?.length && selectedRecords?.filter((e) => !e.hideSelection).length)}
             endIcon={<BiChevronDown />}
             className="new-dropdown-v1"
           >
@@ -278,11 +282,11 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
             }}
             onClose={handleClose}
           >
-            <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
+            <HtmlTooltip title={Boolean(selectedRecords && selectedRecords?.length) ? 'Delete selected records' : 'Select records to delete'}>
               <MenuItem
                 disabled={isDeleting}
                 onClick={() => {
-                  setDeleteData(selectedProducts?.map(({ _id }: any) => _id));
+                  setDeleteData(selectedRecords?.map(({ _id }: any) => _id));
                   handleClose();
                 }}
               >
@@ -292,22 +296,20 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, stepF
           </Menu>
         </Box>
       </Box>
-      {columns && rowsData ? (
-        <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}>
+      {columns ? (
+        <Box zIndex={5}>
           <CustomReactTable
             height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
             columns={columns}
-            data={rowsData}
+            state={state}
+            dispatch={dispatch}
             setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-            onSelect={setSelectedProducts}
-            childrenProperty="subRows"
-            uniqueKey="_id"
+            refreshGrid={fetchData}
             hideSelection={isOffline || !allowedToEdit || quotationApproved}
             hideAction={isOffline || !allowedToEdit || quotationApproved}
-            renderedFrom="rental_management_sevices_1"
+            renderedFrom={renderedFrom}
             onSaveEdit={onSaveInlineEdit}
             isClientSideGrid={true}
-            hideExpander={true}
           />
         </Box>
       ) : (

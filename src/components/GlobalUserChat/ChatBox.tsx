@@ -80,7 +80,7 @@ const ChatBox = ({ user: loggedInUser, isSmallScreen }) => {
   const user = (data: any) => chatUsers.find((_d) => _d?._id === data.userid);
 
   return (
-    <Box height={isSmallScreen ? '100%' : '400px'} className="global-chatbox">
+    <Box height={isSmallScreen ? '100%' : '509px'} className="global-chatbox">
       {selectedChat.chatTitle === 'Equipt User' && (
         <div className="not-found">
           <p>Account Deleted</p>
@@ -96,7 +96,7 @@ const ChatBox = ({ user: loggedInUser, isSmallScreen }) => {
           </div>
         </Box>
       ) : (
-        <Box height={isSmallScreen ? 'calc(100% - 120px)' : '360px'} className="chatbox-container">
+        <Box height={isSmallScreen ? 'calc(100% - 120px)' : '449px'} className="chatbox-container bg-[var(--dark-secondary,white)]">
           {messages &&
             messages.map((data, i) => (
               <div key={i} className={`message-container ${data.userid === currentUser ? 'my-message' : ''}`}>
@@ -125,11 +125,15 @@ const ChatBox = ({ user: loggedInUser, isSmallScreen }) => {
       )}
 
       {!loadingChat && (
-        <form onSubmit={sendMessage} className={isSmallScreen ? 'chatbox-input_mobile' : 'chatbox-input'}>
+        <form
+          onSubmit={sendMessage}
+          className={`h-[60px] grid grid-cols-[1fr_32px] gap-[10px] items-center px-[15px] py-[10px] shadow-[0px_-4px_40px_0px_rgba(0,_0,_0,_0.06)] dark:[border-top:1px_solid_var(--common-border-color)]`}
+        >
           <input
             disabled={selectedChat.chatTitle === 'Equipt User'}
             placeholder="Start Typing..."
             value={messageValue}
+            className="p-[12px_22px] rounded-[26px] bg-[transparent] [border:1px_solid_var(--common-border-color)] text-[var(--primary-text)] text-[13px] [outline-color:transparent] focus-within:[outline:2px_solid_var(--common-border-color)]"
             onChange={(e) => setMessageValue(e.target.value)}
           />
 

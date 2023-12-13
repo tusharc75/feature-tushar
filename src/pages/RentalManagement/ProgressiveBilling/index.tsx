@@ -60,20 +60,19 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, allowCreateInvoice
     columns?.forEach((column) => {
       if (column?.primaryField) {
         column.cell = ({ row }) => (
-          <>
+          <div>
             <Link
               className="link text-truncate"
               onClick={() => {
                 setViewBillDialog({ open: true, invoiceData: row?.original });
               }}
             >
-             {row?.original?.invoiceNumber}
+              {row?.original?.invoiceNumber}
             </Link>
-          </>
+          </div>
         );
       }
     });
-
     setColumns(columns);
   };
 
@@ -89,15 +88,15 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, allowCreateInvoice
     Cell: ({ row }) => (
       <>
         <HtmlTooltip title="View Invoice">
-        <IconButton
-          size="small"
-          onClick={() => {
-            setViewBillDialog({ open: true, invoiceData: row?.original});
-          }}
-        >
-          <VisibilityIcon fontSize="small" color="primary" />
-        </IconButton>
-      </HtmlTooltip>
+          <IconButton
+            size="small"
+            onClick={() => {
+              setViewBillDialog({ open: true, invoiceData: row?.original });
+            }}
+          >
+            <VisibilityIcon fontSize="small" color="primary" />
+          </IconButton>
+        </HtmlTooltip>
 
         <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
           <span>
@@ -211,7 +210,7 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, allowCreateInvoice
         </Box>
       )}
       <Grid item xs={12} md={12} sm={12} className="mt-3">
-      {columns ? (
+        {columns ? (
           <CustomReactTable
             height={'calc(100vh - 250px)'}
             columns={columns}

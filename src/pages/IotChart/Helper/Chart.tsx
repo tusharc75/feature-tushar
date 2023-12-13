@@ -9,6 +9,7 @@ import { ApexOptions } from 'apexcharts';
 import FilterAlertModel from './FilterAlertModel';
 import { useAppTheme } from 'src/constants/AppConfig';
 import moment from 'moment';
+import { dateTimeFormat } from 'src/constants/helpers';
 
 const Chart = ({ dateFilters, assetId, dataPoints }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -63,7 +64,7 @@ const Chart = ({ dateFilters, assetId, dataPoints }) => {
       shared: true,
       x: {
         formatter: function (value) {
-          const formattedDateTime = moment(value).format('D MMM YYYY HH:mm');
+          const formattedDateTime = moment(value).format(dateTimeFormat);
           return formattedDateTime;
         }
       },

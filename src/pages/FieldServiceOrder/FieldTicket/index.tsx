@@ -83,6 +83,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
   const fetchData = () => {
     setNextStep(false);
     dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
 
     const queryString = getQueryString();
     axiosInstance()

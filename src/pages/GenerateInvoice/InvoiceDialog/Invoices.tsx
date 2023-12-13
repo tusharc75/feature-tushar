@@ -49,7 +49,7 @@ const Invoices = ({ resourceId, resource, invoiceFieldName }) => {
         o.disabled = true;
         o.index = 0;
         o.cell = ({ row }) => (
-          <>
+
             <span
               className="link"
               onClick={() => {
@@ -69,7 +69,7 @@ const Invoices = ({ resourceId, resource, invoiceFieldName }) => {
               </IconButton>
             </Box>
             </span>
-          </>
+          
         );
       }
     });

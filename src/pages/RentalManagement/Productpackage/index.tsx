@@ -331,7 +331,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
       setNextStep(true);
       setNextStepToolTip(null)
     }
-    dispatch({ type: 'initialize', data: rows, count: rows?.lenght });
+    dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
   };
 
@@ -579,6 +579,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
     setAddAnchorEl(null);
   };
 
+  console.log(dataRows)
   return (
     <Fragment>
       <Box display="flex" justifyContent="space-between" m={1}>
@@ -718,9 +719,9 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
       </Box>
 
       {columns ? (
-        <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}>
+        <Box zIndex={5}>
           <CustomReactTable
-            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 420px)'}
+            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
             columns={columns}
             state={state}
             dispatch={dispatch}
@@ -731,6 +732,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
             onSaveEdit={onSaveInlineEdit}
+            expander={true}
           />
         </Box>
       ) : (

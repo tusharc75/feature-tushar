@@ -134,8 +134,8 @@ export const useCreateColumns = ({ columns, expander, fetchChildAttachment, hide
         e.header = e.header ?? e.Header;
         e.accessorKey = e.accessor ?? e.id;
         e.maxSize = e.maxSize ?? e.maxWidth;
+        e.size = e.size ?? e.width ?? 200;
 
-        e.size = e.size ?? e.width;
         switch (true) {
           case e.accessor === 'index':
             e.disableFilters = e.disableFilters ?? true;

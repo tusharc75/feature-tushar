@@ -1,35 +1,23 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
-import {
-  Box,
-  Button,
-  Typography,
-  IconButton,
-} from '@material-ui/core';
+import { Box, Button, Typography, IconButton } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import {
-  QUOTATION_STATUS,
-  pricingCondition,
-} from '../../../constants/helpers';
-import { isMobile } from 'react-device-detect';
+import { QUOTATION_STATUS } from '../../../constants/helpers';
+import { isMobile, isTablet } from 'react-device-detect';
 import { FcCancel, FcClock, FcOk } from 'react-icons/fc';
 import { useData } from 'src/StateProvider/Provider';
 import { quotation } from '../../../constants/helpers';
 import Versions from 'src/pages/Quotation/Versions';
-import LeadTimeDialog from 'src/pages/Quotation/Productpackage/LeadTimeDialog';
-import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import QuotationQtyDialog from 'src/pages/Quotation/Productpackage/QuotationQtyDialog';
 import ManualReponseDialog from 'src/pages/Quotation/ManualRespondDialog';
 import QuotationSummeryDialog from 'src/pages/Quotation/QuotationSummeryDialog';
 import { camelCase, orderBy, startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
 import SendEmail from 'src/pages/Quotation/SendEmail';
-import { generateCustomTableColumns } from 'src/constants/columns';
 
 const Quotation = ({
   rentalManagementData,
@@ -42,7 +30,6 @@ const Quotation = ({
   currentVersion,
   setCurrentVersion
 }) => {
-
   const renderedFrom = `${camelCase(routes?.rentalManagement.title)}_quotation`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -51,12 +38,13 @@ const Quotation = ({
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
-  const [rowsData, setRowsData] = useState(null);
   const [customerAcceptable, setCustomerAcceptable] = useState(false);
   const [showQuotationSummaryDialog, setShowQuotationSummaryDialog] = useState(false);
   const [showAllVersionStatus, setShowAllVersionStatus] = useState(false);
   const [material, setMaterial] = useState([]);
-  const [selectedProducts, setSelectedProducts] = useState([]);
+
+  const { state, dispatch } = useTableReducer();
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     if (quotationData && quotationData?.versions[currentVersion]?._id) {
@@ -72,8 +60,10 @@ const Quotation = ({
       fetchFields();
       fetchProductInventory();
     }
-    if (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote
-      || quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice) {
+    if (
+      quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
+      quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice
+    ) {
       setNextStep(false);
     }
     if (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer) {
@@ -81,20 +71,19 @@ const Quotation = ({
     }
   }, [quotationData?.versions[currentVersion]?._id]);
 
-
   const fetchFields = async () => {
     var data = await fetch_quotation_product_fields(rentalManagementData?.currency);
     data?.forEach((e) => {
       e.isColumnEditable = false;
     });
-    let newColumns = generateCustomTableColumns(data, rentalManagementData?.currency, renderedFrom);
+    let newColumns = generateColumns(renderedFrom, data, null, false, rentalManagementData?.currency);
 
     let coloum: any = [
       {
         accessor: 'index',
         Header: 'Index',
         width: 70,
-        sticky: isMobile ? 'none' : 'left',
+        sticky: 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
@@ -103,8 +92,9 @@ const Quotation = ({
       {
         accessor: 'type',
         Header: 'Type',
-        sticky: isMobile ? 'none' : 'left',
         disableFilters: true,
+        disabled: true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
         width: 200,
         Cell: ({ row }) =>
           row.original['type'] ? (
@@ -131,7 +121,8 @@ const Quotation = ({
         Header: 'Details',
         minWidth: 300,
         width: 300,
-        sticky: isMobile ? 'none' : 'left',
+        disabled: true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p title={row.original.detail}>{row.original.detail}</p>
@@ -213,6 +204,8 @@ const Quotation = ({
   };
 
   const fetchProductInventory = async () => {
+    dispatch({ type: 'loading', loading: true });
+
     setNextStep(false);
     var data: any = [];
     var inventory: any = [];
@@ -263,8 +256,9 @@ const Quotation = ({
       parent.assetQty = inventory.filter((e) => e._id === parent._id).length;
       parent.subRows = generateNestedData(data.material, inventory, parent);
     });
-    setRowsData(rows);
-    setSelectedProducts([]);
+
+    dispatch({ type: 'initialize', data: rows, count: rows?.length });
+    dispatch({ type: 'loading', loading: false });
   };
 
   const cloneVersion = () => {
@@ -470,20 +464,19 @@ const Quotation = ({
           </>
         )}
       </Box>
-      {columns && rowsData ? (
-        <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}>
+      {columns ? (
+        <Box zIndex={5}>
           <CustomReactTable
             height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
             columns={columns}
-            data={rowsData}
-            setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
-            onSelect={setSelectedProducts}
-            childrenProperty="subRows"
-            uniqueKey="_id"
+            state={state}
+            dispatch={dispatch}
+            refreshGrid={fetchProductInventory}
             hideSelection={true}
             hideAction={true}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
+            expander={true}
           />
         </Box>
       ) : (

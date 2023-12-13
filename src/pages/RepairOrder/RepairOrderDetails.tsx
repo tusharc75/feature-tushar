@@ -495,7 +495,7 @@ const RepairOrderDetails = () => {
       {showQuotationConfirmBox && (
         <ConfirmationDialog
           open={showQuotationConfirmBox}
-          message={`Are you sure you want to create new version of this quote ?`}
+          message={`Are you sure you want to create new version of this ${routes?.quotation?.title?.toLowerCase()}?`}
           onClose={() => {
             setShowQuotationConfirmBox(false);
             setCurrentStep((prevStep) => {

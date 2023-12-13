@@ -183,10 +183,10 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         Cell: ({ row }) => <div>{row.original['status'] ? <p> {row.original.status}</p> : <NoDataCell />}</div>
       },
       {
-        accessor: 'workOrderStatus',
+        accessor: 'serviceStatus',
         Header: 'Result',
         width: 200,
-        Cell: ({ row }) => <div>{row?.original['workOrderStatus'] ? <h5> {row?.original?.workOrderStatus}</h5> : <NoDataCell />}</div>
+        Cell: ({ row }) => <div>{row?.original['serviceStatus'] ? <h5> {row?.original?.serviceStatus}</h5> : <NoDataCell />}</div>
       },
       {
         accessor: 'assignedUsers',
@@ -369,6 +369,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       if (parent?.workOrder?.status === WORK_ORDER_STATUS.completed) {
         parent.hideSelection = true;
         parent.workOrderStatus = parent?.workOrder?.status;
+        parent.status = parent?.workOrder?.status;
       }
       parent.subRows = generateNestedData(data.material, parent);
       if (parent?.workOrder?.status === WORK_ORDER_STATUS.new) {
@@ -646,6 +647,20 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       <Box display="flex" alignItems="center" justifyContent={'flex-end'} gridColumnGap={8} flex={1} m={1} my={1}>
         {allowedToEdit && (
           <Box display="flex" gridColumnGap={5}>
+            <ImportExportMenu
+              permissions={permissions?.workOrder}
+              module="Work Order Consumables"
+              api={`${workOrder.api}/unknown/consumable`}
+              afterImportCompleted={() => {
+                fetchData();
+              }}
+              isExportAllOrSomeFeature={true}
+              ids={[]}
+              title={'Consumables'}
+              additionalParams={`workOrderIds=${JSON.stringify(selectedRecords?.length ? selectedRecords?.map((e) => e?.workOrder?._id)
+                : dataRows?.map((e) => e?.workOrder?._id))}`}
+            />
+            <Box ml={1}></Box>
             <Button
               variant="outlined"
               color="default"
@@ -809,19 +824,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                 Delete
               </MenuItem>
             </Menu>
-            <Box ml={1}></Box>
-            <ImportExportMenu
-              permissions={permissions?.workOrder}
-              module="consumables"
-              api={`${workOrder.api}/unknown/consumable`}
-              afterImportCompleted={() => {
-                fetchData();
-              }}
-              isExportAllOrSomeFeature={true}
-              ids={[]}
-              disabled={selectedRecords?.length === 0}
-              additionalParams={`workOrderIds=${JSON.stringify(selectedRecords?.map((e) => e?.workOrder?._id) || [])}`}
-            />
+
           </Box>
         )}
       </Box>

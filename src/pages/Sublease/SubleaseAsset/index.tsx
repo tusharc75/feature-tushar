@@ -5,8 +5,7 @@ import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { gridLoadingTimeout, ASSET_STATUS, serializedAsset, sidebarResource } from '../../../constants/helpers';
-import { useHistory } from 'react-router-dom';
+import { ASSET_STATUS, serializedAsset, sidebarResource } from '../../../constants/helpers';
 import {
   prepareDataForGrid,
   DELIVERY_TICKET_REFERENCE_TYPE,
@@ -95,13 +94,11 @@ const SerializedAsset = ({
       .get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
         const newColumns = generateColumns(renderedFrom, data, routes.serializedAssetDetail.path);
-
         newColumns?.forEach((o) => {
           if (data?.find((d) => d?.fieldData?.fieldName === o?.accessor)?.type === 'singleLine' && o?.accessor !== 'assetNumber') {
             o.editable = true;
           }
         });
-
         const extraColoums = [
           {
             accessor: 'rentalJob',
@@ -143,10 +140,9 @@ const SerializedAsset = ({
             accessor: 'remainingJobDays',
             Header: 'Remaining Job Days',
             show: true,
-            Cell: ({ row }) => (row.original?.remainingJobDays ? row.original?.wellName : <NoDataCell />)
+            Cell: ({ row }) => <div>{(row.original?.remainingJobDays ? row.original?.wellName : <NoDataCell />)}</div>
           }
         ];
-
         setColumns([...newColumns.slice(0, 1), ...extraColoums, ...newColumns.slice(1), ...getStaticFields()]);
         fetchRecords();
       });
@@ -154,6 +150,7 @@ const SerializedAsset = ({
 
   const fetchRecords = async () => {
     dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
     const response = await axiosInstance().get(`${sublease.api}/${subleaseData._id}/serialized-asset`);
     var isComplate = true;
     let rows = response?.data?.data.map((u) => {
@@ -178,9 +175,7 @@ const SerializedAsset = ({
       setNextStepToolTip(subleaseMessage.subleaseProcessStep);
     }
     dispatch({ type: 'initialize', data: rows, count: rows.length });
-    setTimeout(() => {
-      dispatch({ type: 'loading', loading: false });
-    }, gridLoadingTimeout);
+    dispatch({ type: 'loading', loading: false });
   };
 
   const completeSublease = () => {
@@ -189,7 +184,6 @@ const SerializedAsset = ({
       .put(`${sublease.api}/${subleaseData._id}/complete-sublease`)
       .then(() => {
         setIsCompleteing(false);
-        dispatch({ type: 'selection', selectedRecords: [] });
         fetchData();
         fetchRecords();
       })
@@ -296,9 +290,9 @@ const SerializedAsset = ({
               </Fragment>
             )} */}
             {selectedRecords.length > 0 &&
-            selectedRecords.filter((e) => e.currentOwnerType === INVENTORY_OWNER_TYPE.brand).length === selectedRecords.length &&
-            checkUniqWarehouse() &&
-            currentStep === 1 ? (
+              selectedRecords.filter((e) => e.currentOwnerType === INVENTORY_OWNER_TYPE.brand).length === selectedRecords.length &&
+              checkUniqWarehouse() &&
+              currentStep === 1 ? (
               <Fragment>
                 <Tooltip title="Send to Supplier">
                   <Button
@@ -367,7 +361,9 @@ const SerializedAsset = ({
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
-            refreshGrid={fetchData}
+            refreshGrid={fetchRecords}
+            expander={true}
+            isClientSideGrid={true}
           />
         ) : (
           <Box p={2} height={500}>
@@ -384,7 +380,6 @@ const SerializedAsset = ({
           onClose={() => setShowTicketDialog({ open: false, data: {} })}
           onSuccess={() => {
             setShowTicketDialog({ open: false, data: {} });
-            dispatch({ type: 'selection', selectedRecords: [] });
             fetchRecords();
           }}
         />

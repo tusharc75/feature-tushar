@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, Typography } from '@material-ui/core';
+import { Box, Button, IconButton } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
@@ -7,28 +7,30 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { MATERIAL_REQUEST_STATUS, RESOURCE_LABEL, dateTimeFormat, sidebarResource } from 'src/constants/helpers';
+import { MATERIAL_REQUEST_STATUS, dateTimeFormat } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
 import ProcessLogs from './ProcessLogs';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import HistoryIcon from '@material-ui/icons/History';
 import QtyWithdrawalDialog from './QtyWithdrawalDialog';
 
 function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productName, product }) {
+  const renderedFrom = 'workOrder_consumables_request';
+
   const [fullScreen, setFullScreen] = useState(true);
   const [columns, setColumns] = useState(null);
   const toastConfig = useContext(CustomToastContext);
-  const [rowsData, setRowsData] = useState([]);
   const [withdrawalQtyDialog, setWithdrawalQtyDialog] = useState({ open: false, data: null });
+  const [openProcessLogs, setOpenProcessLogs] = useState({ open: false, logs: [] });
 
   const {
     state: { user }
   }: any = useData();
 
-  const [openProcessLogs, setOpenProcessLogs] = useState({ open: false, logs: [] });
+  const { state, dispatch } = useTableReducer();
 
   useEffect(() => {
     fetchColumn();
@@ -194,6 +196,8 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
   };
 
   const fetchData = () => {
+    dispatch({ type: 'loading', loading: true });
+
     axiosInstance()
       .get(`/material-handling/request?referenceId=${referenceId}&referenceType=${referenceType}`)
       .then(({ data: { data } }) => {
@@ -206,7 +210,9 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
           e.processById = e?.processBy?.optionValue;
           e.processBy = e?.processBy?.optionLabel;
         });
-        setRowsData(filteredData);
+
+        dispatch({ type: 'initialize', data: filteredData, count: filteredData?.length });
+        dispatch({ type: 'loading', loading: false });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -237,20 +243,18 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
           showManimizeMaximize={true}
         />
         <CustomDialogContent>
-          {rowsData && columns ? (
+          {columns ? (
             <Box p={2}>
               <Box zIndex={5} width={'100%'} height={'calc(100vh - 200px)'}>
                 <CustomReactTable
                   height={'calc(100vh - 200px)'}
                   columns={columns}
-                  data={rowsData}
-                  onSelect={() => {}}
-                  childrenProperty="subRows"
-                  uniqueKey="_id"
+                  state={state}
+                  dispatch={dispatch}
+                  refreshGrid={fetchData}
                   hideSelection={true}
                   hideAction={false}
-                  hideExpander={true}
-                  renderedFrom={'workOrder_consumables_request'}
+                  renderedFrom={renderedFrom}
                   isClientSideGrid={true}
                 />
               </Box>

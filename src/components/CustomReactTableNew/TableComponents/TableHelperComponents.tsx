@@ -274,8 +274,17 @@ interface DraggableHeaderProps {
   dispatch: (action: any) => void;
   isClientSideGrid: boolean;
   reorder: (draggedColumn: string, column: string, columnOrder: string[]) => string[];
+  virtualization: boolean;
 }
-export const DraggableHeader: React.FC<DraggableHeaderProps> = ({ header, table, customFilters, dispatch, isClientSideGrid, reorder }) => {
+export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
+  header,
+  table,
+  customFilters,
+  dispatch,
+  isClientSideGrid,
+  reorder,
+  virtualization
+}) => {
   const { getState, setColumnOrder } = table;
   const { columnOrder } = getState();
   const { column, index } = header;
@@ -370,7 +379,7 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({ header, table,
         maxWidth: `${colSize}px`,
         paddingLeft: columnDef.id === 'expander' ? '8px' : '6px',
         zIndex: columnDef.sticky === 'left' || columnDef.sticky === 'right' ? 12 : 'unset',
-        ...style
+        ...(virtualization ? {} : style)
       }}
     >
       <div
@@ -423,7 +432,7 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({ header, table,
         )}
       </div>
 
-      {column.getCanResize() && (
+      {column.getCanResize() && !virtualization && (
         <div
           {...{
             onMouseDown: header.getResizeHandler(),
@@ -448,7 +457,9 @@ export const CellRenderer = ({
   setCellValue,
   submitInput,
   cellValue,
-  resetField
+  resetField,
+  virtualStyles,
+  virtualization
 }) => {
   const columnDef: TColType = cell.column.columnDef as TColType;
 
@@ -462,11 +473,11 @@ export const CellRenderer = ({
         key={cell.id}
         className={`td p-0 [&>*]:h-[45px] [&>*]:flex [&>*]:items-center [&>*]:p-[5px_8px] h-[45px] overflow-hidden ${className}
         ${columnDef.sticky ? 'bg-[var(--dark-primary,_white)] z-10' : ''} 
-        ${setWholeRowsCellColor ? setWholeRowsCellColor(row.original) : ''} ${stickyClassName}`}
+        ${setWholeRowsCellColor ? setWholeRowsCellColor(row.original) + ' td-color' : ''} ${stickyClassName}`}
         style={{
           minWidth: cell.column.getSize(),
           maxWidth: cell.column.getSize(),
-          ...style
+          ...(virtualization ? { ...virtualStyles } : { ...style })
         }}
         onClick={() => {
           handleCellClick({ cell, dispatch, row, setCellValue });
