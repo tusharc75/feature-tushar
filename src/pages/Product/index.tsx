@@ -27,7 +27,6 @@ import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTab
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { childDisable, cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
-import { generateCustomTableColumns } from 'src/constants/columns';
 
 const ignoreField = ['qty', 'priceTemplate'];
 
@@ -197,7 +196,7 @@ const Product = () => {
         });
         let columns = [...productColumns];
         data.productTemplate?.forEach((ele) => {
-          const newColumns = generateCustomTableColumns(ele.fields, '', renderedFrom);
+          const newColumns = generateColumns(renderedFrom, ele.fields);
           columns = [...columns, ...newColumns];
         });
         columns = columns.filter((item, index, self) => index === self.findIndex((t) => t.accessor === item.accessor));

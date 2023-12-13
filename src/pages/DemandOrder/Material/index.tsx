@@ -17,17 +17,18 @@ import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductD
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import PreviewDownload from 'src/components/PreviewDownload';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
-import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
+import { flattenArray } from 'src/constants/columns';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { CHILD_RESOURCE, gridLoadingTimeout, sidebarResource } from 'src/constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import MaterialDialog from './MaterialDialog';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 
 const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer();
+  const { generateColumns } = useColumns()
 
   const [isUpdating, setUpdating] = useState(false);
   const [materialEdit, setMaterialEdit] = useState({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
@@ -52,7 +53,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
     var data = response?.data?.data;
     data = CURReplaceByCurrencySingle(data, demandOrderData?.currency || 'USD');
     setAllFields(JSON.parse(JSON.stringify(data)));
-    const newColumns = generateCustomTableColumns(data, demandOrderData?.currency || 'USD', renderedFrom);
+    const newColumns = generateColumns(renderedFrom, data, null, false, demandOrderData?.currency || 'USD');
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';

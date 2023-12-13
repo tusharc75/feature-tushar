@@ -9,7 +9,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
 import { fetch_po_product_fields } from '../../../components/PurchaseOrder/helper';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import moment from 'moment';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -26,13 +26,13 @@ import PreviewDownload from 'src/components/PreviewDownload';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import AssetQtyDialog from './AssetQtyDialog';
 import { startCase } from 'lodash';
-import { generateCustomTableColumns } from 'src/constants/columns';
 import { Cancel } from '@material-ui/icons';
 
 
 const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, renderedFrom, checkReceivedProduct, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer();
+  const { generateColumns } = useColumns();
   const { dataRows, page, limit, filters, sorting, selectedRecords } = state;
   const {
     state: { user, permissions }
@@ -68,8 +68,9 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
     column.push({
       accessor: 'index',
       Header: 'Index',
-      width: 50,
+      width: 70,
       primaryField: true,
+      sticky: 'left',
       Cell: ({ row }) => {
         return row.original['index'] ? <p className="text-truncate">{row.original.index}</p> : <NoDataCell />;
       },
@@ -82,6 +83,8 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
       Header: 'Type',
       width: 100,
       primaryField: true,
+      disabled: true,
+      sticky: isMobile || isTablet ? 'none' : 'left',
       Cell: ({ row }) => {
         return row.original['type'] ? <p className="text-truncate">{startCase(row.original.type)}</p> : <NoDataCell />;
       }
@@ -91,6 +94,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
       Header: 'Detail',
       width: 300,
       disabled: true,
+      sticky: isMobile || isTablet ? 'none' : 'left',
       Cell: ({ row }) => (
         <div className="d-flex gap-2 align-items-center">
           <p className="text-truncate">{row.original.detail}</p>
@@ -153,7 +157,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
     fields?.forEach((e) => {
       e.isColumnEditable = false;
     });
-    const newColumns = generateCustomTableColumns(fields, purchaseOrderData?.currency, renderedFrom);
+    const newColumns = generateColumns(renderedFrom, fields, null, false, purchaseOrderData?.currency);
     column = [...column, ...newColumns]
     column.push({
       accessor: 'assetQty',

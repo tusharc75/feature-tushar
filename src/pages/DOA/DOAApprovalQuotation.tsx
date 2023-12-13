@@ -27,13 +27,14 @@ import { isMobile, isTablet } from 'react-device-detect';
 import DOAReasonDialog from './DOAReasonDialog';
 import Loader from '../../components/Loader';
 import ActivityButton from 'src/components/Activity/ActivityButton';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { generateCustomTableColumns } from 'src/constants/columns';
 import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const DoaQuotationApproval = () => {
+
+  const renderedFrom = 'quotation_product_package';
   
   const {
     state: {
@@ -52,7 +53,9 @@ const DoaQuotationApproval = () => {
   const [quoteStatusChangeData, setQuoteStatusChangeData] = useState('');
   const [quoteData, setQuoteData] = useState(null);
   const [columns, setColumns] = useState(null);
-  const [rowsData, setRowsData] = useState(null);
+
+  const { state, dispatch } = useTableReducer();
+  const { generateColumns } = useColumns();
 
   const [quotationSummary, setQuotationSummary] = useState({
     totalProfit: null,
@@ -67,6 +70,7 @@ const DoaQuotationApproval = () => {
   }, [id]);
 
   const fetchQuote = async () => {
+    dispatch({ type: 'loading', loading: true });
     const responseDoaRequest = await axiosInstance().get('/doa-request/get-detail/' + id);
     const doaRequest = responseDoaRequest?.data?.data;
 
@@ -125,7 +129,8 @@ const DoaQuotationApproval = () => {
       parent.isValid = true;
       parent.subRows = generateNestedData(material, parent);
     });
-    setRowsData(rows);
+    dispatch({ type: 'initialize', data: rows, count: rows?.length });
+    dispatch({ type: 'loading', loading: false });
   };
 
   const generateNestedData = (material, parent) => {
@@ -154,7 +159,7 @@ const DoaQuotationApproval = () => {
     data?.forEach((e) => {
       e.isColumnEditable = false;
     });
-    const newColumns = generateCustomTableColumns(data, quotationData?.currency, 'quotation_product_package');
+    const newColumns = generateColumns(renderedFrom, data, null, false, quotationData?.currency);
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';
@@ -164,7 +169,7 @@ const DoaQuotationApproval = () => {
         accessor: 'index',
         Header: 'Index',
         width: 70,
-        sticky: isMobile ? 'none' : 'left',
+        sticky:  'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
@@ -173,7 +178,8 @@ const DoaQuotationApproval = () => {
       {
         accessor: 'type',
         Header: 'Type',
-        sticky: isMobile ? 'none' : 'left',
+        sticky: isMobile || isTablet ? 'none' : 'left',
+        disabled: true,
         width: 100,
         Cell: ({ row }) => (row.original['type'] ? <p>{`${startCase(row.original?.type)} `}</p> : <NoDataCell />)
       },
@@ -182,6 +188,8 @@ const DoaQuotationApproval = () => {
         Header: 'Details',
         minWidth: 300,
         width: 300,
+        sticky: isMobile || isTablet ? 'none' : 'left',
+        disabled: true,
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p>{row.original?.detail}</p>
@@ -328,16 +336,15 @@ const DoaQuotationApproval = () => {
             </Grid>
           </Box>
         )}
-        {columns && rowsData ? (
+        {columns  ? (
           <Box mt={3} zIndex={5} width={'100%'}>
             <CustomReactTable
               height={'calc(100vh - 395px)'}
               columns={columns}
-              data={rowsData}
-              onSelect={() => { }}
-              childrenProperty="subRows"
-              uniqueKey="_id"
-              renderedFrom="quotation_product_package"
+              state={state}
+              dispatch={dispatch}
+              refreshGrid={fetchQuote}
+              renderedFrom={renderedFrom}
               isClientSideGrid={true}
               hideSelection={true}
             />
