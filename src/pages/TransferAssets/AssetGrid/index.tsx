@@ -100,7 +100,6 @@ const AssetsGrid: FC<AssetsGridProps> = ({
           renderedFrom,
           data?.filter((d) => ['assetNumber', 'serialNumber', 'product', 'productDescription', 'status']?.includes(d?.fieldData?.fieldName))
         );
-        console.log(newColumns)
         newColumns?.forEach((o) => {
           if (o.accessor === 'assetNumber') {
             o.cell = ({ row }) =>

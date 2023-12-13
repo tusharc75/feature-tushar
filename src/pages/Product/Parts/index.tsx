@@ -15,7 +15,6 @@ import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import { isMobile, isTablet } from 'react-device-detect';
 import { flattenArray } from 'src/constants/columns';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
-// import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 
