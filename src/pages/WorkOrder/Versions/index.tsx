@@ -3,12 +3,11 @@ import { useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { CHILD_RESOURCE, MATERIAL_TYPE, workOrder } from 'src/constants/helpers';
-import { generateCustomTableColumns } from 'src/constants/columns';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import startCase from 'lodash/startCase';
@@ -16,10 +15,10 @@ import { isMobile } from 'react-device-detect';
 import { camelCase, orderBy } from 'lodash';
 
 const Versions = ({ workOrderId, workOrderData, handleClose }) => {
-
   let renderedFrom = `${camelCase(routes?.workOrder.title)}_version`;
 
   const { state, dispatch } = useTableReducer();
+  const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
   const [selectedVersion, setSelectedVersion] = useState(workOrderData?.versions[workOrderData?.versions?.length - 1]?._id);
 
@@ -39,14 +38,14 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
     let response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.workOrderProduct}`);
     let childFields = response?.data?.data || [];
     childFields = CURReplaceByCurrencySingle(childFields, workOrderData?.currency || 'USD');
-    let newColumns = generateCustomTableColumns(childFields, workOrderData?.currency || 'USD');
+    let newColumns = generateColumns(null, childFields, null, false, workOrderData?.currency || 'USD');
 
     columns = [...columns, ...newColumns];
 
     response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.workOrderService}`);
     childFields = response?.data?.data || [];
     childFields = CURReplaceByCurrencySingle(childFields, workOrderData?.currency || 'USD');
-    newColumns = generateCustomTableColumns(childFields, workOrderData?.currency || 'USD');
+    newColumns = generateColumns(null, childFields, null, false, workOrderData?.currency || 'USD');
 
     columns = [...columns, ...newColumns];
 
@@ -188,8 +187,7 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
           ) : (
             <NoDataCell />
           )
-      },
-
+      }
     ];
     setColumns([...cols, ...columns]);
   };
@@ -207,18 +205,18 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
         parent?.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceName
           : parent?.type === MATERIAL_TYPE.product
-            ? parent?.productDetail?.productName
-            : parent?.type === MATERIAL_TYPE.package
-              ? parent?.packageDetail?.packageName
-              : '';
+          ? parent?.productDetail?.productName
+          : parent?.type === MATERIAL_TYPE.package
+          ? parent?.packageDetail?.packageName
+          : '';
       parent.description =
         parent?.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription
           : parent?.type === MATERIAL_TYPE.product
-            ? parent?.productDetail?.productDescription
-            : parent?.type === MATERIAL_TYPE.package
-              ? parent?.packageDetail?.packageDescription
-              : '';
+          ? parent?.productDetail?.productDescription
+          : parent?.type === MATERIAL_TYPE.package
+          ? parent?.packageDetail?.packageDescription
+          : '';
       parent.subRows = generateNestedData(data, parent);
     });
 
@@ -235,27 +233,30 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
         _subRow?.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceName
           : _subRow?.type === MATERIAL_TYPE.product
-            ? _subRow?.productDetail?.productName
-            : _subRow?.type === MATERIAL_TYPE.package
-              ? _subRow?.packageDetail?.packageName
-              : '';
+          ? _subRow?.productDetail?.productName
+          : _subRow?.type === MATERIAL_TYPE.package
+          ? _subRow?.packageDetail?.packageName
+          : '';
       _subRow.description =
         _subRow?.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription
           : _subRow?.type === MATERIAL_TYPE.product
-            ? _subRow?.productDetail?.productDescription
-            : _subRow?.type === MATERIAL_TYPE.package
-              ? _subRow?.packageDetail?.packageDescription
-              : '';
+          ? _subRow?.productDetail?.productDescription
+          : _subRow?.type === MATERIAL_TYPE.package
+          ? _subRow?.packageDetail?.packageDescription
+          : '';
       _subRow.subRows = generateNestedData(material, _subRow);
     });
     return subRows;
   };
 
-
   return (
     <>
-      <Dialog open fullScreen maxWidth="md" fullWidth
+      <Dialog
+        open
+        fullScreen
+        maxWidth="md"
+        fullWidth
         onClose={(e, reason) => {
           if (reason !== 'backdropClick') {
             handleClose();

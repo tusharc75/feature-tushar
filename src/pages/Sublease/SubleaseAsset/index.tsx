@@ -25,7 +25,6 @@ import { Link } from 'react-router-dom';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { subleaseMessage } from 'src/constants/messageHelpers';
 import { fetch_sublease_product_fields } from 'src/components/Sublease/helper';
-import { generateCustomTableColumns } from 'src/constants/columns';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 
 const SerializedAsset = ({
@@ -67,7 +66,7 @@ const SerializedAsset = ({
 
   const fetchFields = async () => {
     var data = await fetch_sublease_product_fields(subleaseData?.currency);
-    const newColumns = generateCustomTableColumns(data, subleaseData?.currency);
+    const newColumns = generateColumns(null, data, null, false, subleaseData?.currency);
     let coloum: any = [
       {
         accessor: 'index',
