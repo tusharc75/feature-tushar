@@ -379,7 +379,7 @@ const QuoteBuilder = ({
         )}
       </Box>
       {columns ? (
-        <Box zIndex={5} width={'100%'}>
+        <Box zIndex={5} >
           <CustomReactTable
             height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
             columns={columns}
@@ -391,6 +391,7 @@ const QuoteBuilder = ({
             hideSelection={true}
             hideAction={true}
             isClientSideGrid={true}
+            expander={true}
           />
         </Box>
       ) : (

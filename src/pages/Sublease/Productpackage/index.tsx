@@ -589,6 +589,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
             hideAction={!allowedToEdit}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
+            expander={true}
           />
         </Box>
       ) : (

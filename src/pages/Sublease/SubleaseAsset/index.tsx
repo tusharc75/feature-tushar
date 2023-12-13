@@ -5,8 +5,7 @@ import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { gridLoadingTimeout, ASSET_STATUS, serializedAsset, sidebarResource } from '../../../constants/helpers';
-import { useHistory } from 'react-router-dom';
+import { ASSET_STATUS, serializedAsset, sidebarResource } from '../../../constants/helpers';
 import {
   prepareDataForGrid,
   DELIVERY_TICKET_REFERENCE_TYPE,
@@ -363,6 +362,7 @@ const SerializedAsset = ({
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             refreshGrid={fetchRecords}
+            expander={true}
             isClientSideGrid={true}
           />
         ) : (
