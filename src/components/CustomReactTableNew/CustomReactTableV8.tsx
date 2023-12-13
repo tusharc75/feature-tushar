@@ -153,7 +153,8 @@ const CustomReactTable = ({
         } else {
           setColumnOrder(newColumns.map((m) => m?.id ?? m?.accessor));
         }
-      } else {
+      }
+      else {
         let gridMetaData = getDataFromLocalStorage();
         if (gridMetaData && gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide?.length) {
           for (const n of [...gridMetaData[renderedFrom]?.hide]) {
@@ -163,6 +164,9 @@ const CustomReactTable = ({
             hColumns.push(n);
           }
           setHiddenColumns(hColumns);
+        }
+        else {
+          setHiddenColumns(newColumns?.filter((e) => e?.show === false).map((m) => m?.id ?? m?.accessor));
         }
         if (gridMetaData && gridMetaData[renderedFrom]?.order && gridMetaData[renderedFrom]?.order?.length) {
           const colOrder = gridMetaData[renderedFrom]?.order || [];
