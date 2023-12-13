@@ -236,15 +236,17 @@ const TableComponent = ({
           >
             {virtualization ? <VirtualTable /> : <NormalTable />}
           </TableBody>
-          <tfoot>
-            {table?.getFooterGroups().map((footerGroup) => (
-              <tr key={footerGroup.id}>
-                {footerGroup.headers.map((header) => (
-                  <th key={header.id}>{header.isPlaceholder ? null : flexRender(header.column.columnDef.footer, header.getContext())}</th>
-                ))}
-              </tr>
-            ))}
-          </tfoot>
+          {isClientSideGrid && (
+            <tfoot>
+              {table?.getFooterGroups().map((footerGroup) => (
+                <tr key={footerGroup.id}>
+                  {footerGroup.headers.map((header) => (
+                    <th key={header.id}>{header.isPlaceholder ? null : flexRender(header.column.columnDef.footer, header.getContext())}</th>
+                  ))}
+                </tr>
+              ))}
+            </tfoot>
+          )}
         </MaUTable>
       </div>
     </>
