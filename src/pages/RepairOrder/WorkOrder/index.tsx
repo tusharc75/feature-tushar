@@ -260,7 +260,7 @@ const WorkOrder = ({
         Header: 'Assigned Technician',
         disableFilters: true,
         Cell: ({ row }) =>
-          row?.original['assignedUsers'] && row?.original['assignedUsers']?.length ? (
+          <div>{row?.original['assignedUsers'] && row?.original['assignedUsers']?.length ? (
             row?.original['assignedUsers']?.map((e, i) => {
               return i === row?.original['assignedUsers'].length - 1 ? (
                 <a className="link text-truncate" target="_blank" href={`${routes.userDetail.path}/${e.optionValue}`} rel="noreferrer">
@@ -274,7 +274,7 @@ const WorkOrder = ({
             })
           ) : (
             <NoDataCell />
-          )
+          )}</div>
       },
       {
         accessor: 'qty',
@@ -282,43 +282,43 @@ const WorkOrder = ({
         Cell: ({ row }) => (row.original['qty'] ? <p> {row?.original?.qty}</p> : <NoDataCell />)
       }
     ];
-    const workStationColumn = {
-      accessor: 'assignedWorkStations',
-      Header: 'Assigned Work Station',
-      disableFilters: true,
-      Cell: ({ row }) =>
-        row?.original['assignedWorkStations'] && row?.original['assignedWorkStations']?.length ? (
-          row?.original['assignedWorkStations']?.map((e, i) => {
-            return i === row?.original['assignedWorkStations'].length - 1 ? (
-              <a
-                className="link text-truncate [flex-grow:0_!important]"
-                target="_blank"
-                href={`${routes.workStationsDetail.path}/${e.optionValue}`}
-                rel="noreferrer"
-              >
-                {e?.optionLabel}
-              </a>
-            ) : (
-              <>
+
+    if (permissions?.workStations?.isRead) {
+      const workStationColumn = {
+        accessor: 'assignedWorkStations',
+        Header: 'Assigned Work Station',
+        disableFilters: true,
+        Cell: ({ row }) =>
+          <div>{row?.original['assignedWorkStations'] && row?.original['assignedWorkStations']?.length ? (
+            row?.original['assignedWorkStations']?.map((e, i) => {
+              return i === row?.original['assignedWorkStations'].length - 1 ? (
                 <a
                   className="link text-truncate [flex-grow:0_!important]"
                   target="_blank"
                   href={`${routes.workStationsDetail.path}/${e.optionValue}`}
                   rel="noreferrer"
                 >
-                  {e?.optionLabel},
+                  {e?.optionLabel}
                 </a>
-                &nbsp;
-              </>
-            );
-          })
-        ) : (
-          <NoDataCell />
-        )
-    };
-    if (permissions?.workStations?.isRead) {
-      const assignedTechnicianIndex = coloum.findIndex((col) => col.accessor === 'assignedUsers');
-      coloum.splice(assignedTechnicianIndex + 1, 0, workStationColumn);
+              ) : (
+                <>
+                  <a
+                    className="link text-truncate [flex-grow:0_!important]"
+                    target="_blank"
+                    href={`${routes.workStationsDetail.path}/${e.optionValue}`}
+                    rel="noreferrer"
+                  >
+                    {e?.optionLabel},
+                  </a>
+                  &nbsp;
+                </>
+              );
+            })
+          ) : (
+            <NoDataCell />
+          )}</div>
+      };
+      coloum.push(workStationColumn);
     }
     coloum = [...coloum, ...newColumns];
     coloum.push({
@@ -531,37 +531,35 @@ const WorkOrder = ({
     createWorkorderService(rows);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === MATERIAL_TYPE.service
-          ? parent?.serviceDetail?.serviceName
-          : parent.type === MATERIAL_TYPE.product
+      parent.detail = `${parent.type === MATERIAL_TYPE.service
+        ? parent?.serviceDetail?.serviceName
+        : parent.type === MATERIAL_TYPE.product
           ? parent?.productDetail?.productName
           : parent.type === MATERIAL_TYPE.serializedAsset
-          ? parent?.serializedAssetDetail?.assetNumber
-          : parent?.packageDetail?.packageName
-      }`;
+            ? parent?.serializedAssetDetail?.assetNumber
+            : parent?.packageDetail?.packageName
+        }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === MATERIAL_TYPE.product
-          ? parent?.productDetail?.productDescription || ''
-          : parent.type === MATERIAL_TYPE.package
-          ? parent?.packageDetail?.packageDescription || ''
-          : parent.type === MATERIAL_TYPE.serializedAsset
-          ? parent?.serializedAssetDetail?.product?.productDescription || ''
-          : '';
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === MATERIAL_TYPE.package
+              ? parent?.packageDetail?.packageDescription || ''
+              : parent.type === MATERIAL_TYPE.serializedAsset
+                ? parent?.serializedAssetDetail?.product?.productDescription || ''
+                : '';
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qty = parent.qty;
-      parent.status = `${
-        parent.type === MATERIAL_TYPE.service
-          ? parent.serviceDetail?.status
-          : parent.type === MATERIAL_TYPE.product
+      parent.status = `${parent.type === MATERIAL_TYPE.service
+        ? parent.serviceDetail?.status
+        : parent.type === MATERIAL_TYPE.product
           ? parent.productDetail?.status
           : parent.type === MATERIAL_TYPE.serializedAsset
-          ? parent.serializedAssetDetail.status
-          : parent.packageDetail?.status
-      }`;
+            ? parent.serializedAssetDetail.status
+            : parent.packageDetail?.status
+        }`;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
 
       parent.hideSelection = false;
@@ -614,18 +612,18 @@ const WorkOrder = ({
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceName
           : _subRow.type === MATERIAL_TYPE.product
-          ? _subRow?.productDetail?.productName
-          : _subRow.type === MATERIAL_TYPE.serializedAsset
-          ? _subRow?.serializedAsset?.assetNumber
-          : _subRow?.packageDetail?.packageName;
+            ? _subRow?.productDetail?.productName
+            : _subRow.type === MATERIAL_TYPE.serializedAsset
+              ? _subRow?.serializedAsset?.assetNumber
+              : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === MATERIAL_TYPE.product
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === MATERIAL_TYPE.package
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === MATERIAL_TYPE.package
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
       _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
@@ -896,7 +894,7 @@ const WorkOrder = ({
                 <MenuItem
                   disabled={
                     selectedRecords?.filter((d) => [MATERIAL_TYPE.serializedAsset, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0 &&
-                    checkUniqWorkOrder()
+                      checkUniqWorkOrder()
                       ? false
                       : true
                   }
@@ -937,7 +935,7 @@ const WorkOrder = ({
                 }}
                 disabled={
                   selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length &&
-                  selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset && e?.canAutoCompleteWorkOrder)?.length ===
+                    selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset && e?.canAutoCompleteWorkOrder)?.length ===
                     selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length
                     ? false
                     : true

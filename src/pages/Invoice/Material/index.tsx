@@ -1,22 +1,21 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, IconButton, Menu, MenuItem, MenuList, Popover } from '@material-ui/core';
+import { Box, Button, IconButton, Menu, MenuItem, MenuList, Popover } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import Add from '@material-ui/icons/Add';
 import { pricingCondition, invoice, PRICING_SETUP_TYPE } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import DeleteIcon from '@material-ui/icons/Delete';
 import AddIcon from '@material-ui/icons/Add';
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import { ExpandMore, KeyboardArrowDown } from '@material-ui/icons';
 import { startCase } from 'lodash';
 import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
-import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
+import { flattenArray } from 'src/constants/columns';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
@@ -26,6 +25,7 @@ import MaterialDialog from './MaterialDialog';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import EditIcon from '@material-ui/icons/Edit';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 
 const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, fetchInvoiceData }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -33,7 +33,6 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
     state: { user, permissions }
   }: any = useData();
   const [isUpdating, setUpdating] = useState(false);
-  const [selectedProducts, setSelectedProducts] = useState([]);
   const [isAdding, setIsAdding] = useState(false);
   const [materialEdit, setMaterialEdit] = useState({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
   const [deleteData, setDeleteData] = useState(null);
@@ -42,11 +41,14 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
   const [addchildDialog, setAddchildDialog] = useState({ open: false, parentId: null, top: null, bottom: null, isSerializedProduct: false });
   const [columns, setColumns] = useState(null);
   const [addDialog, setAddDialog] = useState({ open: false, type: '', parentId: null });
-  const [rowsData, setRowsData] = useState(null);
   const [allFields, setAllFields] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [assetAssignedProduct, setAssetAssignedProduct] = useState([]);
+
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, selectedRecords } = state;
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchFields();
@@ -60,7 +62,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
       });
     }
     setAllFields(JSON.parse(JSON.stringify(data)));
-    const newColumns = generateCustomTableColumns(data, invoiceData?.currency, renderedFrom);
+    const newColumns = generateColumns(renderedFrom, data, null, false, invoiceData?.currency );
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';
@@ -70,7 +72,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
         accessor: 'index',
         Header: 'Index',
         width: 70,
-        sticky: isMobile ? 'none' : 'left',
+        sticky: 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
@@ -79,7 +81,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
       {
         accessor: 'type',
         Header: 'Type',
-        sticky: isMobile ? 'none' : 'left',
+        sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p>{`${startCase(row.original?.type)} `}</p>
@@ -90,13 +92,15 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
         accessor: 'detail',
         Header: 'Detail',
         minWidth: 300,
+        disabled :true,
         width: 300,
-        Cell: ({ row, rows }) => (
+        sticky: isMobile || isTablet ? 'none' : 'left',
+        Cell: ({ row, table }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {allowedToEdit ? (
               <p
                 onClick={() => {
-                  openMaterial(row, rows);
+                  openMaterial(row, table.getRowModel().rows);
                 }}
                 className="link text-truncate"
                 title={row.original?.detail}
@@ -185,7 +189,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
       disableFilters: true,
       disableSortBy: true,
       canDrag: false,
-      Cell: ({ row, rows }) =>
+      Cell: ({ row, table }) =>
         <>
           <HtmlTooltip title={allowedToEdit ? 'Edit' : ''}>
             <IconButton
@@ -193,7 +197,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
               aria-label="Delete"
               disabled={!allowedToEdit}
               onClick={() => {
-                openMaterial(row, rows);
+                openMaterial(row, table.getRowModel().rows);
               }}
             >
               <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
@@ -220,6 +224,10 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
   };
 
   const fetchData = async () => {
+
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
+
     setNextStep(false);
     var data: any = [];
     let assignedAssets = [];
@@ -258,8 +266,8 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
     if (rows?.length) {
       setNextStep(true);
     }
-    setRowsData(rows);
-    setSelectedProducts([]);
+    dispatch({ type: 'initialize', data: rows, count: rows?.length });
+    dispatch({ type: 'loading', loading: false });
   };
 
   const generateNestedData = (material, parent) => {
@@ -365,12 +373,12 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
           message: data.message
         });
         if (saveAndNext) {
-          const rowIndex = rowsData.findIndex((d) => d._id === rows[0]?._id);
+          const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
           setMaterialEdit({
             open: true,
-            data: rowsData[rowIndex + 1],
+            data: dataRows[rowIndex + 1],
             bulkedit: false,
-            showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false
+            showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
           });
         } else {
           setMaterialEdit({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
@@ -426,12 +434,12 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
   };
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
-    const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
+    const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
     if (inputField.hasOwnProperty('qtyDisplay')) {
       inputField['qty'] = inputField['qtyDisplay'];
     }
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
+    rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
     handleSaveData(rows);
   };
 
@@ -500,13 +508,13 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
           </Menu>
         </Box>
         <Box display="flex">
-          <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
+          <HtmlTooltip title={Boolean(selectedRecords && selectedRecords.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
             <span>
               <Button
                 variant="outlined"
                 color="primary"
                 size="small"
-                disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
+                disabled={!Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length)}
                 onClick={openActions}
                 endIcon={<KeyboardArrowDown fontSize="small" />}
                 className="new-dropdown-v1"
@@ -528,7 +536,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
           >
             <MenuItem
               onClick={() => {
-                setMaterialEdit({ open: true, data: selectedProducts?.filter((e) => !e.hideSelection), bulkedit: true, showSaveAndNext: false });
+                setMaterialEdit({ open: true, data: selectedRecords?.filter((e) => !e.hideSelection), bulkedit: true, showSaveAndNext: false });
                 closeActions();
               }}
             >
@@ -538,8 +546,8 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
             <MenuItem
               onClick={() => {
                 const dataToDelete =
-                  selectedProducts &&
-                  selectedProducts
+                selectedRecords &&
+                selectedRecords
                     .filter((e) => !e.hideSelection)
                     .map((rec: any) => {
                       const obj: any = {};
@@ -557,17 +565,17 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
           </Menu>
         </Box>
       </Box>
-      {columns && rowsData ? (
+      {columns ? (
         <>
           <Box zIndex={5} width={'100%'}>
             <CustomReactTable
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
               columns={columns}
-              data={rowsData}
+              state = {state}
+              dispatch = {dispatch}
               setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
-              onSelect={setSelectedProducts}
-              childrenProperty="subRows"
-              uniqueKey="_id"
+              expander = {true}
+              refreshGrid = {fetchData}
               renderedFrom="invoice_product_package"
               isClientSideGrid={true}
               onSaveEdit={onSaveInlineEdit}
@@ -598,7 +606,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
           handleSaveData={handleSaveData}
           rowData={materialEdit.data}
           material={material}
-          selectedProducts={selectedProducts}
+          selectedProducts={selectedRecords}
           invoiceData={invoiceData}
           loadingEdit={isUpdating}
           showSaveAndNext={materialEdit.showSaveAndNext}
@@ -693,7 +701,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
             setAddDialog({ open: false, type: '', parentId: null });
             setAssetAssignedProduct([]);
           }}
-          ids={flattenArray(rowsData)
+          ids={flattenArray(dataRows)
             ?.filter((e) => e.type === 'serializedAsset')
             ?.map((e) => e.materialId)}
           handleSucess={(rows) => {

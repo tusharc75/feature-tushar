@@ -4,9 +4,7 @@ import { Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
-import { generateCustomTableColumns } from 'src/constants/columns';
 import { prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { Add } from '@material-ui/icons';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -17,6 +15,8 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import ManageCreditMemo from 'src/pages/CreditMemo/ManageCreditMemo';
 import { useData } from 'src/StateProvider/Provider';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+
 
 function CreditMemo({ invoiceData, allowedToEdit }) {
 
@@ -24,16 +24,15 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
   const renderedFrom = `${camelCase(routes?.invoice.title)}_credit_memo`;
 
   const [columns, setColumns] = useState(null);
-  const [rowsData, setRowsData] = useState(null);
-
-  const [selectedRecords, setSelectedRecords] = useState([]);
-
   const [creditMemoDialog, setCreditMemoDialog] = useState({ open: false, id: null });
   const [anchorActionEl, setAnchorActionEl] = useState(null);
 
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState({ open: false, ids: [] });
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, selectedRecords } = state;
+  const { generateColumns } = useColumns();
 
   const {
     state: { user, permissions, selectedEntity }
@@ -50,7 +49,7 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
       data?.forEach((e) => {
         e.isColumnEditable = false;
       });
-      const columns = generateCustomTableColumns(data?.filter((e) => !['invoice']?.includes(e?.fieldData?.fieldName))?.map((e) => e.fieldData), invoiceData?.currency, renderedFrom);
+      const columns = generateColumns(renderedFrom, data?.filter((e) => !['invoice']?.includes(e?.fieldData?.fieldName))?.map((e) => e.fieldData), null, false, invoiceData?.currency);
       columns?.forEach((e) => {
         if (e.accessor === 'creditMemoNumber') {
           e.Cell = ({ row }) =>
@@ -123,6 +122,9 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
   };
 
   const fetchData = async () => {
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
+
     const query = `?filterById=${JSON.stringify([{ field: 'invoice', term: { $in: [invoiceData?._id] } }])}&&filterType=and`
     axiosInstance().get(`${routes?.creditMemo.path}${query}`)
       .then(({ data: { data } }) => {
@@ -130,7 +132,9 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
           let finalObject = prepareDataForGrid(u, user);
           return finalObject;
         })
-        setRowsData(rows)
+
+        dispatch({ type: 'initialize', data: rows, count: rows?.length });
+        dispatch({ type: 'loading', loading: false });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -224,20 +228,18 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
           </MenuItem>
         </Menu>
       </Box>
-      {columns && rowsData ? (
+      {columns ? (
         <Box zIndex={5} width={'100%'} height={'calc(100vh - 200px)'} pt={1}>
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            data={rowsData}
-            onSelect={setSelectedRecords}
-            childrenProperty="subRows"
-            uniqueKey="_id"
+            state = {state}
+            dispatch = {dispatch}
+            refreshGrid = {fetchData}
             hideSelection={allowedToEdit ? false : true}
             hideAction={allowedToEdit ? false : true}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
-            hideExpander={true}
           />
         </Box>
       ) : (

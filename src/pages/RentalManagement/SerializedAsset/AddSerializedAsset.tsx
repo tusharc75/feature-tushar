@@ -662,7 +662,7 @@ const AddSerializedAsset = ({
             <Box>
               {columns ? (
                 <CustomReactTable
-                  height={referenceType === 'Repair Job' ? 'calc(100vh - 350px)' : 'calc(100vh - 250px)'}
+                  height={referenceType === 'Rental Job' ? 'calc(100vh - 350px)' : 'calc(100vh - 250px)'}
                   columns={Number(tabValue) === 2 ? columns : columns?.filter((e: any) => e.accessor !== 'rentalJob')}
                   state={state}
                   setWholeRowsCellColor={getRowStyleScheduled}

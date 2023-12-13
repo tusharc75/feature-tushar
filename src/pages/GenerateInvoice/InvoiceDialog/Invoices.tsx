@@ -49,7 +49,7 @@ const Invoices = ({ resourceId, resource, invoiceFieldName }) => {
         o.disabled = true;
         o.index = 0;
         o.cell = ({ row }) => (
-          <div>
+
             <span
               className="link"
               onClick={() => {
@@ -57,7 +57,7 @@ const Invoices = ({ resourceId, resource, invoiceFieldName }) => {
               }}
             >
               <CustomRenderCell value={row.original?.invoiceNumber} />
-            </span>
+            
             <Box ml={1}>
               <IconButton
                 size="small"
@@ -68,7 +68,8 @@ const Invoices = ({ resourceId, resource, invoiceFieldName }) => {
                 <OpenInNewIcon fontSize="small" color="primary" />
               </IconButton>
             </Box>
-          </div>
+            </span>
+          
         );
       }
     });

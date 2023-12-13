@@ -90,7 +90,7 @@ const GlobalUserChat = () => {
   };
 
   return (
-    <div className="global-chat">
+    <div className={`global-chat ${open ? 'chat-open' : ''}`}>
       <span
         onClick={(e) => {
           if (Boolean(anchorEl)) {

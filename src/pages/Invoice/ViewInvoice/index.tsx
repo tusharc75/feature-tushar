@@ -8,7 +8,6 @@ import routes from 'src/components/Helpers/Routes';
 import { CustomDialogTransition, INVOICE_STATUS, invoice, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -21,15 +20,14 @@ import CreditMemo from '../CreditMemo';
 import CommentDialog from 'src/components/CommentDialog';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
-import { generateCustomTableColumns } from 'src/constants/columns';
 import { useData } from 'src/StateProvider/Provider';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 
 const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = `${camelCase(routes?.invoice.title)}_view`;
 
   const [columns, setColumns] = useState(null);
-  const [rowsData, setRowsData] = useState(null);
   const [commentDialog, setCommentDialog] = useState(false);
 
   const [isDownloadingZip, setIsDownloadingZip] = useState(false);
@@ -38,6 +36,11 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
   const [invoiceData, setInvoiceData] = useState(null);
 
   const [tabValue, setTabValue] = useState(0);
+
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, selectedRecords } = state;
+  const { generateColumns } = useColumns();
+
   const {
     state: { permissions }
   }: any = useData();
@@ -70,7 +73,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
       data?.forEach((e) => {
         e.isColumnEditable = false;
       });
-      const newColumns = generateCustomTableColumns(data, invoiceData.currency ? invoiceData.currency : 'USD', renderedFrom);
+      const newColumns = generateColumns(renderedFrom, data, null, false, invoiceData.currency ? invoiceData.currency : 'USD');
       let qtyIndex = newColumns?.findIndex((d) => d.accessor === 'qty');
       if (qtyIndex > -1) {
         newColumns[qtyIndex].accessor = 'qtyDisplay';
@@ -80,7 +83,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
           accessor: 'index',
           Header: 'Index',
           width: 70,
-          sticky: isMobile ? 'none' : 'left',
+          sticky: 'left',
           Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
           Footer: () => {
             return <>Total</>;
@@ -89,7 +92,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
         {
           accessor: 'type',
           Header: 'Type',
-          sticky: isMobile ? 'none' : 'left',
+          sticky: isMobile || isTablet ? 'none' : 'left',
           Cell: ({ row }) => (
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <p>{`${startCase(row.original?.type)} `}</p>
@@ -99,8 +102,10 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
         {
           accessor: 'detail',
           Header: 'Details',
+          disabled: true,
           minWidth: 300,
           width: 300,
+          sticky: isMobile || isTablet ? 'none' : 'left',
           Cell: ({ row }) => (
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <p className="text-truncate" title={row.original?.detail}>
@@ -140,13 +145,16 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
       ];
       column = [...column, ...newColumns];
       setColumns(column);
-      fetchData();
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
   };
 
   const fetchData = async () => {
+
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
+
     var data: any = [];
 
     const response = await axiosInstance().get(`${invoice.api}/material/${invoiceData?._id}`);
@@ -158,25 +166,24 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
     const rows = data.material.filter((e) => !e.parentId);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === 'product'
-          ? parent.productDetail?.productName
-          : parent.type === 'package'
+      parent.detail = `${parent.type === 'product'
+        ? parent.productDetail?.productName
+        : parent.type === 'package'
           ? parent.packageDetail?.packageName
           : parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail?.assetNumber
-          : parent.serviceDetail?.serviceName
-      }`;
+            ? parent.serializedAssetDetail?.assetNumber
+            : parent.serviceDetail?.serviceName
+        }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDescription || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail?.product?.productDescription || ''
-          : '';
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : parent.type === 'serializedAsset'
+                ? parent.serializedAssetDetail?.product?.productDescription || ''
+                : '';
       parent.qtyDisplay = parent.qty;
       parent.subRows = generateNestedData(data.material, parent);
     });
@@ -191,32 +198,33 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
         rows.push(element);
       });
     }
-    setRowsData(rows);
+
+    dispatch({ type: 'initialize', data: rows, count: rows?.length });
+    dispatch({ type: 'loading', loading: false });
   };
 
   const generateNestedData = (material, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${
-        _subRow?.type === 'product'
-          ? _subRow?.productDetail?.productName
-          : _subRow?.type === 'package'
+      _subRow.detail = `${_subRow?.type === 'product'
+        ? _subRow?.productDetail?.productName
+        : _subRow?.type === 'package'
           ? _subRow?.packageDetail?.packageName
           : _subRow?.type === 'serializedAsset'
-          ? _subRow?.serializedAssetDetail?.assetNumber
-          : _subRow?.serviceDetail?.serviceName
-      }`;
+            ? _subRow?.serializedAssetDetail?.assetNumber
+            : _subRow?.serviceDetail?.serviceName
+        }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : _subRow.type === 'serializedAsset'
-          ? _subRow.serializedAssetDetail?.product?.productDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : _subRow.type === 'serializedAsset'
+                ? _subRow.serializedAssetDetail?.product?.productDescription || ''
+                : '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
@@ -293,34 +301,6 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
       });
   };
 
-  const Invoice = () => {
-    return (
-      <Fragment>
-        {columns && rowsData ? (
-          <Box zIndex={5} width={'100%'} height={'calc(100vh - 285px)'} pt={1}>
-            <CustomReactTable
-              height={'calc(100vh - 200px)'}
-              columns={columns}
-              data={rowsData}
-              onSelect={() => {}}
-              childrenProperty="subRows"
-              uniqueKey="_id"
-              hideSelection={true}
-              hideAction={true}
-              renderedFrom={renderedFrom}
-              isClientSideGrid={true}
-              hideExpander={resource === sidebarResource.fieldTicket ? true : false}
-            />
-          </Box>
-        ) : (
-          <Box p={2} height={500}>
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Box>
-        )}
-      </Fragment>
-    );
-  };
-
   return (
     <Fragment>
       <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
@@ -386,8 +366,8 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
                 </Box>
               )}
               <div className="ml-auto">
-                {rowsData &&
-                  rowsData?.length > 0 &&
+                {dataRows &&
+                  dataRows?.length > 0 &&
                   resource === sidebarResource.fieldTicket &&
                   ![INVOICE_STATUS.closed, INVOICE_STATUS.cancelled]?.includes(invoiceData?.status) && (
                     <DeleteButton mode="light" text="Cancel Invoice" onClick={() => setCommentDialog(true)} />
@@ -424,7 +404,28 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
                     />
                   </Tabs>
                   <TabPanel value={tabValue} index={0}>
-                    <Invoice />
+                    <Fragment>
+                      {columns ? (
+                        <Box zIndex={5} width={'100%'} pt={1}>
+                          <CustomReactTable
+                            height={'calc(100vh - 300px)'}
+                            columns={columns}
+                            state={state}
+                            dispatch={dispatch}
+                            hideSelection={true}
+                            hideAction={true}
+                            renderedFrom={renderedFrom}
+                            refreshGrid={fetchData}
+                            isClientSideGrid={true}
+                            expander={resource === sidebarResource.fieldTicket ? false : true}
+                          />
+                        </Box>
+                      ) : (
+                        <Box p={2} height={500}>
+                          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                        </Box>
+                      )}
+                    </Fragment>
                   </TabPanel>
                   <TabPanel value={tabValue} index={1}>
                     <CreditMemo
@@ -434,7 +435,28 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
                   </TabPanel>
                 </>
               ) : (
-                <Invoice />
+                <Fragment>
+                  {columns ? (
+                    <Box zIndex={5} width={'100%'} pt={1}>
+                      <CustomReactTable
+                        height={'calc(100vh - 250px)'}
+                        columns={columns}
+                        state={state}
+                        dispatch={dispatch}
+                        hideSelection={true}
+                        hideAction={true}
+                        renderedFrom={renderedFrom}
+                        isClientSideGrid={true}
+                        refreshGrid={fetchData}
+                        expander={resource === sidebarResource.fieldTicket ? false : true}
+                      />
+                    </Box>
+                  ) : (
+                    <Box p={2} height={500}>
+                      <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                    </Box>
+                  )}
+                </Fragment>
               )}
             </Box>
           </Fragment>

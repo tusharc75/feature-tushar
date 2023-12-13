@@ -11,11 +11,12 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  Row,
   SortingState,
   useReactTable
 } from '@tanstack/react-table';
 import { debounce } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -85,7 +86,25 @@ const CustomReactTable = ({
   const debouncedSearch = useDebounce(search, 500);
 
   const isMobileView = useMediaQuery('(max-width:768px)');
-  const newColumns = useCreateColumns({ columns, expander, fetchChildAttachment, hideSelection, hideAction, dispatch, state, isClientSideGrid });
+  const [expandedRefChanged, setExpandedRefChanged] = useState(0);
+
+  function toggleExpandChange() {
+    setExpandedRefChanged((prev) => {
+      return prev === 10 ? 0 : (prev += 1);
+    });
+  }
+
+  const newColumns = useCreateColumns({
+    columns,
+    expander,
+    fetchChildAttachment,
+    hideSelection,
+    hideAction,
+    dispatch,
+    state,
+    isClientSideGrid,
+    toggleExpandChange
+  });
 
   const columnFilters = React.useMemo(() => {
     const filters = [];
@@ -163,6 +182,8 @@ const CustomReactTable = ({
             hColumns.push(n);
           }
           setHiddenColumns(hColumns);
+        } else {
+          setHiddenColumns(newColumns?.filter((e) => e?.show === false).map((m) => m?.id ?? m?.accessor));
         }
         if (gridMetaData && gridMetaData[renderedFrom]?.order && gridMetaData[renderedFrom]?.order?.length) {
           const colOrder = gridMetaData[renderedFrom]?.order || [];
@@ -396,11 +417,27 @@ const CustomReactTable = ({
     getFacetedMinMaxValues: getFacetedMinMaxValues()
   });
 
+  const isAllRowsExpanded = table.getIsAllRowsExpanded();
+  const paginationLimit = useMemo(() => {
+    const getRowCount = (list: Row<any>[], limit) => {
+      let rowLength = limit;
+      for (let i = 0; i < limit; i++) {
+        const item = list[i];
+        if (!list[i]) return rowLength;
+        if (!item.subRows.length || !item.getIsExpanded()) continue;
+        rowLength += getRowCount(item.subRows, item.subRows.length);
+      }
+      return rowLength;
+    };
+    let length = getRowCount(table.getExpandedRowModel().rows, limit);
+    return Math.max(length, limit);
+  }, [table, limit, expandedRefChanged, isAllRowsExpanded]);
+
   useEffect(() => {
-    table.setPageSize(table.getExpandedRowModel().flatRows?.length);
+    table.setPageSize(paginationLimit);
     if (!isClientSideGrid) return;
     table.setPageIndex(page);
-  }, [isClientSideGrid, limit, page, table, data]);
+  }, [isClientSideGrid, limit, page, table, data, paginationLimit]);
 
   const { rows } = table.getRowModel();
 
