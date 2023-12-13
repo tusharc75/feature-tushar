@@ -194,8 +194,8 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
       if (element.accessor === 'qtyDisplay') {
         element['Footer'] = (info) => {
           let rows = info.table.getExpandedRowModel().rows;
-          const qtyTotal = rows?.filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
-            .reduce((sum, row) => row.values[element.accessor] + sum, 0);
+          const qtyTotal = rows?.filter((f) => !f.original.parentId && f.original.hasOwnProperty(element.accessor) && !isNaN(f.original[element.accessor]))
+            .reduce((sum, row) => row.original[element.accessor] + sum, 0);
           return <>{qtyTotal}</>;
         };
       }
