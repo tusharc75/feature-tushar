@@ -1,18 +1,26 @@
-import React, { useState, useEffect, useContext, Fragment, useReducer, useMemo } from 'react';
+import { useState, useEffect, useContext, Fragment } from 'react';
 import { Box, Button, Typography, Chip, useMediaQuery, Menu, MenuItem, IconButton } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import { quotation, pricingCondition, repairOrder, QUOTATION_STATUS, REPAIR_ORDER_STATUS, sidebarResource, PRICING_SETUP_TYPE } from '../../../constants/helpers';
+import {
+  quotation,
+  pricingCondition,
+  repairOrder,
+  QUOTATION_STATUS,
+  REPAIR_ORDER_STATUS,
+  sidebarResource,
+  PRICING_SETUP_TYPE
+} from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
 import { ExpandMore } from '@material-ui/icons';
-import { capitalize, orderBy } from 'lodash';
+import { capitalize } from 'lodash';
 import QuotationQtyDialog from 'src/pages/Quotation/Productpackage/QuotationQtyDialog';
 import LeadTimeDialog from 'src/pages/Quotation/Productpackage/LeadTimeDialog';
 import Versions from 'src/pages/Quotation/Versions';
@@ -20,7 +28,6 @@ import { FcCancel, FcClock, FcOk } from 'react-icons/all';
 import ManualReponseDialog from 'src/pages/Quotation/ManualRespondDialog';
 import QuotationSummeryDialog from 'src/pages/Quotation/QuotationSummeryDialog';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
-import { generateCustomTableColumns } from 'src/constants/columns';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import SendEmail from 'src/pages/Quotation/SendEmail';
 import PreviewDownload from 'src/components/PreviewDownload';
@@ -45,18 +52,12 @@ const Quotation = ({
 
   const isMobileScreen = useMediaQuery('(max-width: 767px)');
   const [isUpdating, setUpdating] = useState(false);
-
-  const [selectedProducts, setSelectedProducts] = useState([]);
   const [isProductEdit, setIsProductEdit] = useState({ open: false, isBulkedit: false, showSaveAndNext: false });
-
   const [recordToUpdate, setRecordToUpdate] = useState(null);
-
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
-
   const [material, setMaterial] = useState([]);
   const [columns, setColumns] = useState(null);
-  const [rowsData, setRowsData] = useState(null);
   const [allFields, setAllFields] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [leadTimeDialog, setLeadTimeDialog] = useState({ open: false, data: null });
@@ -69,21 +70,25 @@ const Quotation = ({
   const [isInlineEdit, setIsInlineEdit] = useState(false);
   const [showConfirmationDialog, setShowConfirmationDialog] = useState({ open: false, data: null });
 
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, selectedRecords } = state;
+  const { generateColumns } = useColumns();
+
   useEffect(() => {
     fetchFields();
   }, [repairOrderData]);
 
   useEffect(() => {
-    if (invoiceStep && ![REPAIR_ORDER_STATUS.invoiced, REPAIR_ORDER_STATUS.readyToInvoice,
-    REPAIR_ORDER_STATUS.completed]?.includes(repairOrderData?.status)
+    if (
+      invoiceStep &&
+      ![REPAIR_ORDER_STATUS.invoiced, REPAIR_ORDER_STATUS.readyToInvoice, REPAIR_ORDER_STATUS.completed]?.includes(repairOrderData?.status)
     ) {
       updateOrderStatus(REPAIR_ORDER_STATUS.readyToInvoice);
     }
     if (invoiceStep && repairOrderData?.status === REPAIR_ORDER_STATUS.invoiced) {
-      setPrevStep(false)
-    }
-    else {
-      setPrevStep(true)
+      setPrevStep(false);
+    } else {
+      setPrevStep(true);
     }
   }, [invoiceStep]);
 
@@ -132,7 +137,7 @@ const Quotation = ({
         accessor: 'index',
         Header: 'Index',
         width: 70,
-        sticky: isMobile ? 'none' : 'left',
+        sticky: 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
@@ -141,16 +146,17 @@ const Quotation = ({
       {
         accessor: 'type',
         Header: 'Type',
-        width: 70,
-        sticky: isMobile ? 'none' : 'left',
+        disabled: true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.type === 'serializedAsset' ? 'Asset' : capitalize(row.original.type)}</p>
       },
       {
         accessor: 'detail',
         Header: 'Details',
         width: 250,
-        sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row, rows }) => (
+        disabled: true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
+        Cell: ({ row, table }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {[QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
               quotationInfo?.versions[tempCurrentVersion]?.status
@@ -159,7 +165,7 @@ const Quotation = ({
             ) : (
               <p
                 onClick={() => {
-                  handleOpen(row, rows);
+                  handleOpen(row, table.getRowModel().rows);
                 }}
                 className="link text-truncate"
                 title={row.original?.detail}
@@ -228,7 +234,7 @@ const Quotation = ({
       }
     ];
 
-    const newColumns = generateCustomTableColumns(data, quotationInfo?.currency, renderedFrom);
+    const newColumns = generateColumns(renderedFrom, data, null, false, quotationInfo?.currency);
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';
@@ -243,7 +249,7 @@ const Quotation = ({
       disableFilters: true,
       disableSortBy: true,
       canDrag: false,
-      Cell: ({ row, rows }) => {
+      Cell: ({ row, table }) => {
         return (
           <>
             {allowedToEdit && (
@@ -257,7 +263,7 @@ const Quotation = ({
                   }
                   aria-label="Edit"
                   onClick={() => {
-                    handleOpen(row, rows);
+                    handleOpen(row, table.getRowModel().rows);
                   }}
                 >
                   <EditIcon
@@ -282,6 +288,9 @@ const Quotation = ({
   };
 
   const fetchData = async () => {
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
+
     var data: any = [];
     const response = await axiosInstance().get(
       `${quotation.api}/productpackage/${quotationData._id}/${quotationData?.versions[currentVersion]?._id}`
@@ -304,20 +313,20 @@ const Quotation = ({
         parent.type === 'serializedAsset'
           ? parent.serializedAssetDetail?.assetNumber
           : parent.type === 'product'
-            ? parent.productDetail?.productName
-            : parent.type === 'service'
-              ? parent.serviceDetail?.serviceName
-              : parent.packageDetail?.packageName;
+          ? parent.productDetail?.productName
+          : parent.type === 'service'
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName;
       parent.description =
         parent.type === 'serializedAsset'
           ? parent.serializedAssetDetail?.product?.productDescription
           : parent.type === 'service'
-            ? parent?.serviceDetail?.serviceDescription || ''
-            : parent.type === 'product'
-              ? parent?.productDetail?.productDescription || ''
-              : parent.type === 'package'
-                ? parent?.packageDetail?.packageDescription || ''
-                : '';
+          ? parent?.serviceDetail?.serviceDescription || ''
+          : parent.type === 'product'
+          ? parent?.productDetail?.productDescription || ''
+          : parent.type === 'package'
+          ? parent?.packageDetail?.packageDescription || ''
+          : '';
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
@@ -327,8 +336,9 @@ const Quotation = ({
       parent.hideSelection = false;
       parent.subRows = generateNestedData(data.material, parent);
     });
-    setRowsData(rows);
-    setSelectedProducts([]);
+
+    dispatch({ type: 'initialize', data: rows, count: rows?.lenght });
+    dispatch({ type: 'loading', loading: false });
   };
 
   const generateNestedData = (material, parent) => {
@@ -336,22 +346,23 @@ const Quotation = ({
 
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${_subRow.type === 'serializedAsset'
-        ? _subRow.serializedAssetDetail?.assetNumber
-        : _subRow.type === 'product'
+      _subRow.detail = `${
+        _subRow.type === 'serializedAsset'
+          ? _subRow.serializedAssetDetail?.assetNumber
+          : _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'service'
-            ? _subRow.serviceDetail?.serviceName
-            : _subRow.packageDetail?.packageName
-        }`;
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.packageDetail?.packageName
+      }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === 'package'
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+          ? _subRow?.productDetail?.productDescription || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
       _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
@@ -402,7 +413,7 @@ const Quotation = ({
       .then(() => {
         fetchData();
         if (saveAndNext) {
-          let data = rowsData;
+          let data = dataRows;
           let rowIndex;
           if (rows[0].parentId) {
             data = data?.filter((d) => d._id === rows[0]?.parentId)[0].subRows;
@@ -576,7 +587,8 @@ const Quotation = ({
             resource={sidebarResource.repairOrder}
             referenceId={repairOrderData?._id}
             columns={columns}
-            isSendEmail={true} />
+            isSendEmail={true}
+          />
         </Box>
       ) : (
         <Box
@@ -626,7 +638,7 @@ const Quotation = ({
             <Box display={'flex'} gridGap={8}>
               {repairOrderData?.addQuotationStep &&
                 (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
-                  quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
+                quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
                   <Button
                     disabled={material
                       .filter((e) => e.parentId === null)
@@ -656,8 +668,8 @@ const Quotation = ({
                     Accept / Reject
                   </Button>
                 ) : [QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.acceptByCustomer].includes(
-                  quotationData?.versions[currentVersion]?.status
-                ) ? (
+                    quotationData?.versions[currentVersion]?.status
+                  ) ? (
                   <Button
                     onClick={() => {
                       cloneVersion();
@@ -673,19 +685,19 @@ const Quotation = ({
               {![QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
                 quotationData?.versions[currentVersion]?.status
               ) && (
-                  <Button
-                    variant="outlined"
-                    color="default"
-                    size="small"
-                    onClick={openActions}
-                    aria-controls="action-menu"
-                    disabled={selectedProducts.length === 0}
-                    endIcon={<ExpandMore />}
-                    className="new-dropdown-v1"
-                  >
-                    Actions
-                  </Button>
-                )}
+                <Button
+                  variant="outlined"
+                  color="default"
+                  size="small"
+                  onClick={openActions}
+                  aria-controls="action-menu"
+                  disabled={selectedRecords?.length === 0}
+                  endIcon={<ExpandMore />}
+                  className="new-dropdown-v1"
+                >
+                  Actions
+                </Button>
+              )}
               <Menu
                 anchorEl={anchorEl}
                 keepMounted
@@ -732,21 +744,20 @@ const Quotation = ({
         </Box>
       )}
 
-      {columns && rowsData ? (
+      {columns ? (
         <Box zIndex={5} width={'100%'}>
           <CustomReactTable
             height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
             columns={columns}
-            data={rowsData}
+            state={state}
+            dispatch={dispatch}
             setWholeRowsCellColor={(rowData) => {
               if (rowData.type === 'service') {
                 return 'isService';
               }
               return '';
             }}
-            onSelect={setSelectedProducts}
-            childrenProperty="subRows"
-            uniqueKey="_id"
+            refreshGrid={fetchData}
             hideSelection={
               !allowedToEdit ||
               [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
@@ -757,6 +768,7 @@ const Quotation = ({
             onSaveEdit={onSaveInlineEdit}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
+            expander={true}
           />
         </Box>
       ) : (
@@ -788,7 +800,7 @@ const Quotation = ({
           quotationData={quotationData}
           rowData={recordToUpdate}
           material={material}
-          selectedProducts={selectedProducts}
+          selectedProducts={selectedRecords}
           isInlineEdit={isInlineEdit}
           showSaveAndNext={isProductEdit.showSaveAndNext}
         />

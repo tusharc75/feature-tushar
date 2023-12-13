@@ -5,7 +5,7 @@ import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import {
   repairOrder,
@@ -21,18 +21,18 @@ import {
 } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
-import { Delete, ExpandMore, CheckCircleOutline } from '@material-ui/icons';
+import { Delete, ExpandMore } from '@material-ui/icons';
 import AssignUserDialog from 'src/pages/WorkOrder/Service/AssignUserDialog';
 import AssignWorkStationDialog from 'src/pages/WorkOrder/Service/AssignWorkStationDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import { capitalize, map, orderBy, sortBy, startCase, uniq } from 'lodash';
+import { capitalize, map, orderBy, uniq } from 'lodash';
 import { PreWorkIcon, PostWorkIcon } from 'src/assets/svg/svgIcons';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import UpdateWorkOrderDialog from './UpdateWorkOrderDialog';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
-import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
+import { flattenArray } from 'src/constants/columns';
 import EditIcon from '@material-ui/icons/Edit';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import { AutoCompleteIcon } from 'src/assets/svg/svgIcons';
@@ -50,6 +50,7 @@ const WorkOrder = ({
   setCurrentStep,
   createNewVersionQuote
 }) => {
+  const renderedFrom = 'repair_order_workorder';
   const toastConfig = useContext(CustomToastContext);
   const {
     state: {
@@ -57,10 +58,8 @@ const WorkOrder = ({
       permissions
     }
   } = useData();
-  const [selectedRecords, setSelectedRecords] = useState([]);
 
   const [columns, setColumns] = useState(null);
-  const [rowsData, setRowsData] = useState(null);
   const [deleteData, setDeleteData] = useState(null);
   const [autoCompleteData, setAutoCompleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
@@ -77,12 +76,13 @@ const WorkOrder = ({
   const [allAssignedWorkStations, setAllAssignedWorkStations] = useState([]);
   const [updateDialog, setUpdateDialog] = useState({ open: false, data: null });
   const [isBulkEdit, setIsBulkEdit] = useState(false);
-
   const [consumablesDialog, setConsumablesDialog] = useState({ open: false, ids: [], data: null });
-
   const [isSubmitting, setSubmitting] = useState(false);
-
   const [reviseQuotation, setReviseQuotation] = useState(false);
+
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, selectedRecords } = state;
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchFields();
@@ -113,20 +113,20 @@ const WorkOrder = ({
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.workOrderService}`);
     var data = response?.data?.data;
     data = CURReplaceByCurrencySingle(data, repairOrderData?.currency || 'USD');
-    const newColumns = generateCustomTableColumns(data, repairOrderData?.currency || 'USD');
+    const newColumns = generateColumns(renderedFrom, data, null, false, repairOrderData?.currency || 'USD');
     let coloum: any = [
       {
         accessor: 'index',
         Header: 'Index',
         width: 70,
-        sticky: isMobile ? 'none' : 'left',
+        sticky: 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
       },
       {
         accessor: 'type',
         Header: 'Type',
-        width: 70,
-        sticky: isMobile ? 'none' : 'left',
+        disabled: true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
           <p className="text-truncate">{row.original.type === MATERIAL_TYPE.serializedAsset ? 'Asset' : capitalize(row.original.type)}</p>
         )
@@ -135,7 +135,8 @@ const WorkOrder = ({
         accessor: 'detail',
         Header: 'Detail',
         width: 250,
-        sticky: isMobile ? 'none' : 'left',
+        disabled: true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {row.original.type === 'service' && row?.original?.status !== WORKORDER_SERVICE_STATUS.completed ? (
@@ -323,8 +324,8 @@ const WorkOrder = ({
     coloum.push({
       accessor: 'action',
       Header: 'Actions',
-      minWidth: 70,
-      width: 70,
+      minWidth: 100,
+      width: 100,
       sticky: 'right',
       disableFilters: true,
       disableSortBy: true,
@@ -370,11 +371,11 @@ const WorkOrder = ({
                   onClick={() => {
                     var ids = [];
                     if (row?.original?.type === MATERIAL_TYPE.serializedAsset) {
-                      ids = flattenArray(rowsData)
+                      ids = flattenArray(dataRows)
                         ?.filter((e) => e?.workOrder?._id === row?.original?.workOrder?._id)
                         ?.map((e) => e.materialId);
                     } else {
-                      ids = flattenArray(rowsData)
+                      ids = flattenArray(dataRows)
                         ?.filter((e) => row?.original?._id === e?.parentId)
                         ?.map((e) => e.materialId);
                     }
@@ -517,6 +518,8 @@ const WorkOrder = ({
   };
 
   const fetchData = async () => {
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
     setNextStep(false);
     var data: any = [];
 
@@ -528,37 +531,37 @@ const WorkOrder = ({
     createWorkorderService(rows);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === MATERIAL_TYPE.service
-        ? parent?.serviceDetail?.serviceName
-        : parent.type === MATERIAL_TYPE.product
+      parent.detail = `${
+        parent.type === MATERIAL_TYPE.service
+          ? parent?.serviceDetail?.serviceName
+          : parent.type === MATERIAL_TYPE.product
           ? parent?.productDetail?.productName
           : parent.type === MATERIAL_TYPE.serializedAsset
-            ? parent?.serializedAssetDetail?.assetNumber
-            : parent?.packageDetail?.packageName
-
-        }`;
+          ? parent?.serializedAssetDetail?.assetNumber
+          : parent?.packageDetail?.packageName
+      }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === MATERIAL_TYPE.product
-            ? parent?.productDetail?.productDescription || ''
-            : parent.type === MATERIAL_TYPE.package
-              ? parent?.packageDetail?.packageDescription || ''
-              : parent.type === MATERIAL_TYPE.serializedAsset
-                ? parent?.serializedAssetDetail?.product?.productDescription || ''
-                : '';
+          ? parent?.productDetail?.productDescription || ''
+          : parent.type === MATERIAL_TYPE.package
+          ? parent?.packageDetail?.packageDescription || ''
+          : parent.type === MATERIAL_TYPE.serializedAsset
+          ? parent?.serializedAssetDetail?.product?.productDescription || ''
+          : '';
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qty = parent.qty;
-      parent.status = `${parent.type === MATERIAL_TYPE.service
-        ? parent.serviceDetail?.status
-        : parent.type === MATERIAL_TYPE.product
+      parent.status = `${
+        parent.type === MATERIAL_TYPE.service
+          ? parent.serviceDetail?.status
+          : parent.type === MATERIAL_TYPE.product
           ? parent.productDetail?.status
           : parent.type === MATERIAL_TYPE.serializedAsset
-            ? parent.serializedAssetDetail.status
-            : parent.packageDetail?.status
-
-        }`;
+          ? parent.serializedAssetDetail.status
+          : parent.packageDetail?.status
+      }`;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
 
       parent.hideSelection = false;
@@ -596,8 +599,9 @@ const WorkOrder = ({
         setNextStep(true);
       }
     }
-    setRowsData(rows);
-    setSelectedRecords([]);
+
+    dispatch({ type: 'initialize', data: rows, count: rows?.lenght });
+    dispatch({ type: 'loading', loading: false });
   };
 
   const generateNestedData = (material, parent) => {
@@ -610,18 +614,18 @@ const WorkOrder = ({
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceName
           : _subRow.type === MATERIAL_TYPE.product
-            ? _subRow?.productDetail?.productName
-            : _subRow.type === MATERIAL_TYPE.serializedAsset
-              ? _subRow?.serializedAsset?.assetNumber
-              : _subRow?.packageDetail?.packageName;
+          ? _subRow?.productDetail?.productName
+          : _subRow.type === MATERIAL_TYPE.serializedAsset
+          ? _subRow?.serializedAsset?.assetNumber
+          : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === MATERIAL_TYPE.product
-            ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === MATERIAL_TYPE.package
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+          ? _subRow?.productDetail?.productDescription || ''
+          : _subRow.type === MATERIAL_TYPE.package
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
       _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
@@ -790,8 +794,13 @@ const WorkOrder = ({
     axiosInstance()
       .post(`${workOrder.api}/${workOrderId}/consumable`, data)
       .then(({ data }) => {
-        if (isPostWorkService && repairOrderData?.status === REPAIR_ORDER_STATUS.quoteAccepted && repairOrderData?.addQuotationStep && repairOrderData?.addConsumablesQuotation) {
-          setReviseQuotation(true)
+        if (
+          isPostWorkService &&
+          repairOrderData?.status === REPAIR_ORDER_STATUS.quoteAccepted &&
+          repairOrderData?.addQuotationStep &&
+          repairOrderData?.addConsumablesQuotation
+        ) {
+          setReviseQuotation(true);
         }
         toastConfig.setToastConfig({
           open: true,
@@ -887,7 +896,7 @@ const WorkOrder = ({
                 <MenuItem
                   disabled={
                     selectedRecords?.filter((d) => [MATERIAL_TYPE.serializedAsset, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0 &&
-                      checkUniqWorkOrder()
+                    checkUniqWorkOrder()
                       ? false
                       : true
                   }
@@ -895,12 +904,12 @@ const WorkOrder = ({
                     var ids = [];
                     if (selectedRecords?.find((e) => e.type === MATERIAL_TYPE.serializedAsset)) {
                       const asset = selectedRecords?.find((e) => e.type === MATERIAL_TYPE.serializedAsset);
-                      ids = flattenArray(rowsData)
+                      ids = flattenArray(dataRows)
                         ?.filter((e) => e?.workOrder?._id === asset?.workOrder?._id)
                         ?.map((e) => e.materialId);
                     } else {
                       const serviceIds = selectedRecords?.filter((d) => d?.type === MATERIAL_TYPE.service)?.map((e) => e._id);
-                      ids = flattenArray(rowsData)
+                      ids = flattenArray(dataRows)
                         ?.filter((e) => serviceIds?.includes(e?.parentId))
                         ?.map((e) => e.materialId);
                     }
@@ -928,7 +937,7 @@ const WorkOrder = ({
                 }}
                 disabled={
                   selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length &&
-                    selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset && e?.canAutoCompleteWorkOrder)?.length ===
+                  selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset && e?.canAutoCompleteWorkOrder)?.length ===
                     selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length
                     ? false
                     : true
@@ -965,22 +974,20 @@ const WorkOrder = ({
       </Box>
       <Grid container spacing={2}>
         <Grid item xs={12} md={12} sm={12}>
-          {columns && rowsData ? (
+          {columns ? (
             <Box zIndex={5} width={'100%'}>
               <CustomReactTable
                 height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
                 columns={columns}
-                data={rowsData}
-                onSelect={(data) => {
-                  setSelectedRecords(data?.filter((d) => !d.hideSelection) || []);
-                }}
+                state={state}
+                dispatch={dispatch}
+                refreshGrid={fetchData}
                 setWholeRowsCellColor={(rowData) => (rowData.type === 'service' ? 'isService' : '')}
-                childrenProperty="subRows"
-                uniqueKey="_id"
                 hideSelection={allowedToEdit ? false : isPostWorkService ? false : true}
                 hideAction={allowedToEdit ? false : isPostWorkService ? false : true}
-                renderedFrom="repair_order_workorder"
+                renderedFrom={renderedFrom}
                 isClientSideGrid={true}
+                expander={true}
               />
             </Box>
           ) : (

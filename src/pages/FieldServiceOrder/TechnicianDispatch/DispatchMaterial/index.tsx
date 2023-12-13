@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Button, Dialog, Grid, Box, IconButton } from '@material-ui/core';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -8,27 +8,16 @@ import CustomButton from 'src/components/Helpers/CustomButton';
 import routes from 'src/components/Helpers/Routes';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
 
 const DispatchMaterial = ({ handleClose, data, handleSubmit }) => {
+  const { state, dispatch } = useTableReducer();
+  const { selectedRecords } = state;
+
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [selectedRecords, setSelectedRecords] = useState([]);
-  const [rowsData, setRowsData] = useState(null);
 
   useEffect(() => {
-    if (data?.length) {
-      const rows: any = [];
-      data[0].material?.forEach((e) => {
-        const obj: any = {};
-        obj._id = e._id;
-        obj.detail = e?.productDetail?.productName;
-        obj.productId = e?.productDetail?._id;
-        obj.type = 'Product';
-        obj.qty = e?.qty;
-        rows.push(obj);
-      });
-      setRowsData(rows);
-    }
+    fetchData();
   }, [data]);
 
   const columns: any = [
@@ -36,6 +25,8 @@ const DispatchMaterial = ({ handleClose, data, handleSubmit }) => {
       accessor: 'type',
       Header: 'Type',
       width: 150,
+      disabled: true,
+      sticky: isMobile || isTablet ? 'none' : 'left',
       Cell: ({ row }) => {
         return row.original['type'] ? <p className="text-truncate">{row.original.type}</p> : <NoDataCell />;
       }
@@ -45,6 +36,8 @@ const DispatchMaterial = ({ handleClose, data, handleSubmit }) => {
       Header: 'Detail',
       minWidth: 300,
       width: 300,
+      disabled: true,
+      sticky: isMobile || isTablet ? 'none' : 'left',
       Cell: ({ row }) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           {row.original?.detail}
@@ -70,6 +63,27 @@ const DispatchMaterial = ({ handleClose, data, handleSubmit }) => {
     }
   ];
 
+  const fetchData = () => {
+    if (data?.length) {
+      dispatch({ type: 'loading', loading: true });
+      dispatch({ type: 'selection', selectedRecords: [] });
+
+      const rows: any = [];
+      data[0].material?.forEach((e) => {
+        const obj: any = {};
+        obj._id = e._id;
+        obj.detail = e?.productDetail?.productName;
+        obj.productId = e?.productDetail?._id;
+        obj.type = 'Product';
+        obj.qty = e?.qty;
+        rows.push(obj);
+      });
+
+      dispatch({ type: 'initialize', data: rows, count: rows?.length });
+      dispatch({ type: 'loading', loading: false });
+    }
+  };
+
   return (
     <Dialog maxWidth="md" fullScreen={fullScreen || isMobile || isTablet} aria-labelledby="customized-dialog-title" open={true} fullWidth>
       <CustomDialogHeader
@@ -83,17 +97,15 @@ const DispatchMaterial = ({ handleClose, data, handleSubmit }) => {
         showManimizeMaximize={true}
       ></CustomDialogHeader>
       <CustomDialogContent>
-        {rowsData && (
+        {columns && (
           <CustomReactTable
             columns={columns}
-            data={rowsData}
-            onSelect={setSelectedRecords}
-            childrenProperty="subRows"
-            uniqueKey="_id"
+            state={state}
+            dispatch={dispatch}
+            refreshGrid={fetchData}
             hideAction={true}
             renderedFrom={`product_dispatch_technician`}
             isClientSideGrid={true}
-            hideExpander={true}
           />
         )}
       </CustomDialogContent>

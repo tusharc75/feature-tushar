@@ -1,11 +1,10 @@
 import { Box, Button, IconButton } from '@material-ui/core';
 import { Fragment, useContext, useEffect, useState } from 'react';
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { generateCustomTableColumns } from 'src/constants/columns';
 import routes from 'src/components/Helpers/Routes';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { fetch_field_ticket_material_fields } from '../helper';
@@ -20,243 +19,245 @@ import HistoryIcon from '@material-ui/icons/History';
 import ViewLogs from './ViewLogs';
 
 const Submit = ({ stepFullScreen, fieldTicketData, renderedFrom, allowedToEdit, fetchData }) => {
-    const toastConfig = useContext(CustomToastContext);
-    const [columns, setColumns] = useState(null);
-    const [rowsData, setRowsData] = useState([]);
-    const [submitDialog, setSubmitDialog] = useState(false);
-    const [commentDialog, setCommentDialog] = useState(false)
-    const [viewLogsDialog, setViewLogsDialog] = useState(false)
+  const toastConfig = useContext(CustomToastContext);
+  const [columns, setColumns] = useState(null);
+  const [submitDialog, setSubmitDialog] = useState(false);
+  const [commentDialog, setCommentDialog] = useState(false);
+  const [viewLogsDialog, setViewLogsDialog] = useState(false);
 
-    useEffect(() => {
-        fetchFields();
-        fetchGridData();
-    }, [fieldTicketData]);
+  const { state, dispatch } = useTableReducer();
+  const { generateColumns } = useColumns();
 
-    const fetchFields = async () => {
-        setColumns(null);
-        var fields = await fetch_field_ticket_material_fields(fieldTicketData?.currency);
-        fields?.forEach((e) => {
-            e.isColumnEditable = false;
-        });
-        const newColumns = generateCustomTableColumns(fields, fieldTicketData?.currency, renderedFrom);
-        let column: any = [
-            {
-                accessor: 'index',
-                Header: 'Index',
-                width: 70,
-                sticky: isMobile ? 'none' : 'left',
-                Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
-                Footer: () => {
-                    return <>Total</>;
-                }
-            },
-            {
-                accessor: 'type',
-                Header: 'Type',
-                sticky: isMobile ? 'none' : 'left',
-                Cell: ({ row }) => (
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <p>{`${startCase(row.original?.type)} `}</p>
-                    </div>
-                )
-            },
-            {
-                accessor: 'detail',
-                Header: 'Details',
-                minWidth: 300,
-                width: 300,
-                sticky: isMobile ? 'none' : 'left',
-                Cell: ({ row, rows }) => (
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <p title={row.original.detail}  >
-                            {row.original.detail}
-                        </p>
-                        {['product', 'service'].includes(row.original.type) &&
-                            <Box ml={1}>
-                                <IconButton
-                                    size="small"
-                                    onClick={() => {
-                                        if (row.original.type === 'service') {
-                                            window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                                        } else if (row.original.type === 'product') {
-                                            window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                                        }
-                                    }}
-                                >
-                                    <OpenInNewIcon fontSize="small" color="primary" />
-                                </IconButton>
-                            </Box>}
-                    </div>
-                )
-            },
-            {
-                accessor: 'description',
-                Header: 'Description',
-                width: 200,
-                Cell: ({ row }) => {
-                    return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
-                }
-            }
-        ];
-        column = [...column, ...newColumns];
-        setColumns(column);
-    };
+  useEffect(() => {
+    fetchFields();
+    fetchGridData();
+  }, [fieldTicketData]);
 
-    const fetchGridData = async () => {
-
-        const materialResponse = await axiosInstance().get(`${fieldTicket.api}/${fieldTicketData?._id}/material`);
-        const costResponse = await axiosInstance().get(`${fieldTicket.api}/${fieldTicketData?._id}/cost`)
-
-        const material = materialResponse?.data?.data?.material;
-        const costs = costResponse?.data?.data || [];
-
-        material?.forEach((parent, i) => {
-            parent.index = i + 1;
-            parent.detail = parent?.productDetail?.productName || parent?.serviceDetail?.serviceName || '';
-            parent.description = parent?.productDetail?.productDescription || parent?.serviceDetail?.serviceDescription || '';
-            parent.qty = parent.qty;
-            parent.type = parent.type;
-        });
-        costs?.forEach((ele, i) => {
-            ele.index = (i + 1) + material?.length;
-            ele.detail = ele.description || "";
-            ele.description = ele.description || "";
-            ele.type = 'manualEntry';
-        });
-        setRowsData([...material, ...costs]);
-    };
-
-    const handleReOpen = async (data: any) => {
-        await axiosInstance().patch(`${fieldTicket.api}/status/${fieldTicketData._id}`, {
-            status: FIELD_TICKET_STATUS.inProgress,
-            oldStatus: fieldTicketData?.status,
-            comment: data
-        }).then(({ data }) => {
-            toastConfig.setToastConfig({
-                open: true,
-                type: 'success',
-                message: data?.message
-            });
-            fetchData()
-        }).catch((err) => {
-            toastConfig.setToastConfig(err)
-        })
-    }
-
-
-    return (
-        <>
-            <Box display="flex" justifyContent="space-between" m={1}>
-                <Box display="flex" alignItems="center">
-                    <PreviewDownload
-                        fileName={`${routes.fieldTicket.title}-${fieldTicketData?.fieldTicketNumber}`}
-                        hideDetailButton={true}
-                        resource={sidebarResource.fieldTicket}
-                        referenceId={fieldTicketData?._id}
-                        columns={columns}
-                        isSendEmail={true}
-                        defaultColumns={[
-                            'type',
-                            'detail',
-                            'estimateStartDate',
-                            'estimateEndDate',
-                            'pricingMethod',
-                            'qty',
-                            `price_${fieldTicketData?.currency?.toLowerCase()}`,
-                            `finalPrice_${fieldTicketData?.currency?.toLowerCase()}`
-                        ]}
-                    />
-                </Box>
-                <Box display="flex">
-                    {allowedToEdit &&
-                        <Fragment>
-                            {(fieldTicketData.status === FIELD_TICKET_STATUS.new || fieldTicketData.status === FIELD_TICKET_STATUS.inProgress) && <Button
-                                variant="contained"
-                                color="primary"
-                                size='small'
-                                onClick={() => {
-                                    setSubmitDialog(true);
-                                }}
-                            >
-                                Submit
-                            </Button>}
-                            {fieldTicketData.status === FIELD_TICKET_STATUS.readyToInvoice && <Button
-                                variant="contained"
-                                color="primary"
-                                size='small'
-                                onClick={() => setCommentDialog(true)}
-                            >
-                                Re-Open
-                            </Button>}
-                        </Fragment>}
-                    <Box ml={1}></Box>
-                    <HtmlTooltip title="View Logs">
-                        <IconButton
-                            size="small"
-                            aria-label="Delete"
-                            onClick={() => setViewLogsDialog(true)}
-                        >
-                            <HistoryIcon />
-                        </IconButton>
-                    </HtmlTooltip>
-                </Box>
-            </Box>
-            {columns && rowsData ? (
-                <Box zIndex={5} width={'100%'}>
-                    <CustomReactTable
-                        height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
-                        columns={columns}
-                        data={rowsData}
-                        onSelect={() => { }}
-                        childrenProperty="subRows"
-                        uniqueKey="_id"
-                        hideSelection={true}
-                        hideAction={true}
-                        renderedFrom="field_ticket_submit"
-                        isClientSideGrid={true}
-                        hideExpander={true}
-                    />
-                </Box>
-            ) : (
-                <Box p={2} height={500}>
-                    <CommonSkeleton lenArray={[...Array(3).keys()]} xs={12} sm={12} md={12} lg={12} />
-                </Box>
+  const fetchFields = async () => {
+    setColumns(null);
+    var fields = await fetch_field_ticket_material_fields(fieldTicketData?.currency);
+    fields?.forEach((e) => {
+      e.isColumnEditable = false;
+    });
+    const newColumns = generateColumns(renderedFrom, fields, null, false, fieldTicketData?.currency);
+    let column: any = [
+      {
+        accessor: 'index',
+        Header: 'Index',
+        width: 70,
+        sticky: 'left',
+        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+        Footer: () => {
+          return <>Total</>;
+        }
+      },
+      {
+        accessor: 'type',
+        Header: 'Type',
+        disabled: true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
+        Cell: ({ row }) => (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <p>{`${startCase(row.original?.type)} `}</p>
+          </div>
+        )
+      },
+      {
+        accessor: 'detail',
+        Header: 'Details',
+        minWidth: 300,
+        width: 300,
+        disabled: true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
+        Cell: ({ row }) => (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <p title={row.original.detail}>{row.original.detail}</p>
+            {['product', 'service'].includes(row.original.type) && (
+              <Box ml={1}>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    if (row.original.type === 'service') {
+                      window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                    } else if (row.original.type === 'product') {
+                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                    }
+                  }}
+                >
+                  <OpenInNewIcon fontSize="small" color="primary" />
+                </IconButton>
+              </Box>
             )}
-            {
-                submitDialog && <ManageSubmit
-                    fieldTicketData={fieldTicketData}
-                    onClose={() => {
-                        setSubmitDialog(false);
-                    }}
-                    onSuccess={() => {
-                        setSubmitDialog(false);
-                        fetchData();
-                    }}
-                />
-            }
-            {commentDialog && (
-                <CommentDialog
-                    required={true}
-                    handleSubmit={(data) => {
-                        handleReOpen(data)
-                        setCommentDialog(false)
-                    }}
-                    handleClose={() => {
-                        setCommentDialog(false)
-                    }}
-                />
-            )}
+          </div>
+        )
+      },
+      {
+        accessor: 'description',
+        Header: 'Description',
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
+        }
+      }
+    ];
+    column = [...column, ...newColumns];
+    setColumns(column);
+  };
 
-            {viewLogsDialog && (
-                <ViewLogs
-                    fieldTicketData={fieldTicketData}
-                    handleClose={() => {
-                        setViewLogsDialog(false)
-                    }}
-                />
-            )}
-        </>
-    );
+  const fetchGridData = async () => {
+    dispatch({ type: 'loading', loading: true });
+
+    const materialResponse = await axiosInstance().get(`${fieldTicket.api}/${fieldTicketData?._id}/material`);
+    const costResponse = await axiosInstance().get(`${fieldTicket.api}/${fieldTicketData?._id}/cost`);
+
+    const material = materialResponse?.data?.data?.material;
+    const costs = costResponse?.data?.data || [];
+
+    material?.forEach((parent, i) => {
+      parent.index = i + 1;
+      parent.detail = parent?.productDetail?.productName || parent?.serviceDetail?.serviceName || '';
+      parent.description = parent?.productDetail?.productDescription || parent?.serviceDetail?.serviceDescription || '';
+      parent.qty = parent.qty;
+      parent.type = parent.type;
+    });
+    costs?.forEach((ele, i) => {
+      ele.index = i + 1 + material?.length;
+      ele.detail = ele.description || '';
+      ele.description = ele.description || '';
+      ele.type = 'manualEntry';
+    });
+
+    dispatch({ type: 'initialize', data: [...material, ...costs], count: [...material, ...costs]?.length });
+    dispatch({ type: 'loading', loading: false });
+  };
+
+  const handleReOpen = async (data: any) => {
+    await axiosInstance()
+      .patch(`${fieldTicket.api}/status/${fieldTicketData._id}`, {
+        status: FIELD_TICKET_STATUS.inProgress,
+        oldStatus: fieldTicketData?.status,
+        comment: data
+      })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
+        fetchData();
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  return (
+    <>
+      <Box display="flex" justifyContent="space-between" m={1}>
+        <Box display="flex" alignItems="center">
+          <PreviewDownload
+            fileName={`${routes.fieldTicket.title}-${fieldTicketData?.fieldTicketNumber}`}
+            hideDetailButton={true}
+            resource={sidebarResource.fieldTicket}
+            referenceId={fieldTicketData?._id}
+            columns={columns}
+            isSendEmail={true}
+            defaultColumns={[
+              'type',
+              'detail',
+              'estimateStartDate',
+              'estimateEndDate',
+              'pricingMethod',
+              'qty',
+              `price_${fieldTicketData?.currency?.toLowerCase()}`,
+              `finalPrice_${fieldTicketData?.currency?.toLowerCase()}`
+            ]}
+          />
+        </Box>
+        <Box display="flex">
+          {allowedToEdit && (
+            <Fragment>
+              {(fieldTicketData.status === FIELD_TICKET_STATUS.new || fieldTicketData.status === FIELD_TICKET_STATUS.inProgress) && (
+                <Button
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  onClick={() => {
+                    setSubmitDialog(true);
+                  }}
+                >
+                  Submit
+                </Button>
+              )}
+              {fieldTicketData.status === FIELD_TICKET_STATUS.readyToInvoice && (
+                <Button variant="contained" color="primary" size="small" onClick={() => setCommentDialog(true)}>
+                  Re-Open
+                </Button>
+              )}
+            </Fragment>
+          )}
+          <Box ml={1}></Box>
+          <HtmlTooltip title="View Logs">
+            <IconButton size="small" aria-label="Delete" onClick={() => setViewLogsDialog(true)}>
+              <HistoryIcon />
+            </IconButton>
+          </HtmlTooltip>
+        </Box>
+      </Box>
+      {columns ? (
+        <Box zIndex={5} width={'100%'}>
+          <CustomReactTable
+            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            refreshGrid={fetchGridData}
+            hideSelection={true}
+            hideAction={true}
+            renderedFrom={renderedFrom}
+            isClientSideGrid={true}
+          />
+        </Box>
+      ) : (
+        <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(3).keys()]} xs={12} sm={12} md={12} lg={12} />
+        </Box>
+      )}
+      {submitDialog && (
+        <ManageSubmit
+          fieldTicketData={fieldTicketData}
+          onClose={() => {
+            setSubmitDialog(false);
+          }}
+          onSuccess={() => {
+            setSubmitDialog(false);
+            fetchData();
+          }}
+        />
+      )}
+      {commentDialog && (
+        <CommentDialog
+          required={true}
+          handleSubmit={(data) => {
+            handleReOpen(data);
+            setCommentDialog(false);
+          }}
+          handleClose={() => {
+            setCommentDialog(false);
+          }}
+        />
+      )}
+
+      {viewLogsDialog && (
+        <ViewLogs
+          fieldTicketData={fieldTicketData}
+          handleClose={() => {
+            setViewLogsDialog(false);
+          }}
+        />
+      )}
+    </>
+  );
 };
 
 export default Submit;
