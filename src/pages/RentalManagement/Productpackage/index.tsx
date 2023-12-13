@@ -579,7 +579,6 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
     setAddAnchorEl(null);
   };
 
-  console.log(dataRows)
   return (
     <Fragment>
       <Box display="flex" justifyContent="space-between" m={1}>
