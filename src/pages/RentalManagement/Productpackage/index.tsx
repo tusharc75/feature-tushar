@@ -579,6 +579,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
     setAddAnchorEl(null);
   };
 
+  console.log(dataRows)
   return (
     <Fragment>
       <Box display="flex" justifyContent="space-between" m={1}>
@@ -731,6 +732,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
             onSaveEdit={onSaveInlineEdit}
+            expander={true}
           />
         </Box>
       ) : (
