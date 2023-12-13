@@ -244,7 +244,7 @@ const TableComponent = ({
           >
             {virtualization ? <VirtualTable /> : <NormalTable />}
           </TableBody>
-          {isClientSideGrid && footerRowFound && (
+          {isClientSideGrid && footerRowFound && table.getRowModel().rows.length > 0 && (
             <>
               <tfoot>
                 {table?.getFooterGroups().map((footerGroup) => {
