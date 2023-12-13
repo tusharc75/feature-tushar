@@ -1,10 +1,9 @@
 import { useState, useEffect, useContext } from 'react';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { Box } from '@material-ui/core';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 import { gridLoadingTimeout, prepareDataForGrid } from '../../../constants/helpers';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import { generateCustomTableColumns } from '../../../constants/columns';
 import { useData } from '../../../StateProvider/Provider';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { fetch_rental_cost_fields } from 'src/components/RentalManagment/helper';
@@ -14,6 +13,7 @@ const DeliveryTicketAdditionalCost = ({ renderedFrom, additionalCost }) => {
   const { isOffline } = useContext(CustomOfflineContext);
 
   const { state, dispatch } = useTableReducer();
+  const { generateColumns } = useColumns()
 
   const [columns, setColumns] = useState(null);
   const {
@@ -47,7 +47,7 @@ const DeliveryTicketAdditionalCost = ({ renderedFrom, additionalCost }) => {
 
   const fetchGridColumns = async () => {
     const fields = await fetch_rental_cost_fields('USD', isOffline);
-    let columns = generateCustomTableColumns(fields, 'USD', renderedFrom);
+    let columns = generateColumns(renderedFrom, fields, null, false, 'USD');
     setColumns(columns);
     fetchAdditionalCost();
   };
