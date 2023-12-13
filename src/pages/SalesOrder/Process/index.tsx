@@ -3,12 +3,11 @@ import { Box, IconButton } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 import { salesOrder, sidebarResource } from '../../../constants/helpers';
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import { startCase } from 'lodash';
 import { fetch_salesOrder_product_fields } from 'src/components/SalesOrder/helper';
-import { generateCustomTableColumns } from 'src/constants/columns';
 import routes from 'src/components/Helpers/Routes';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
@@ -17,7 +16,10 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
   const renderedFrom = `${routes.salesOrder.title}_Process`;
 
   const [columns, setColumns] = useState([]);
-  const [rowsData, setRowsData] = useState(null);
+
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, selectedRecords } = state;
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchFields();
@@ -25,13 +27,14 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
 
   const fetchFields = async () => {
     var data = await fetch_salesOrder_product_fields(salesOrderData?.currency);
-    const newColumns = generateCustomTableColumns(data, salesOrderData?.currency, renderedFrom);
+    const newColumns = generateColumns(renderedFrom, data, null,false, salesOrderData?.currency);
     let coloum: any = [
       {
         accessor: 'index',
         Header: 'Index',
-        width: 70,
-        sticky: isMobile ? 'none' : 'left',
+        width: 100,
+        sticky: 'left',
+        disableFilters : false,
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
@@ -40,7 +43,7 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
       {
         accessor: 'type',
         Header: 'Type',
-        sticky: isMobile ? 'none' : 'left',
+        sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p>{`${startCase(row.original?.type)} `}</p>
@@ -50,6 +53,8 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
       {
         accessor: 'detail',
         Header: 'Detail',
+        disabled : true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
         width: 200,
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -129,6 +134,10 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
   };
 
   const fetchData = async () => {
+
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
+
     setNextStep(false);
 
     await axiosInstance().put(`${salesOrder.api}/material-procurement/${salesOrderData._id}`);
@@ -162,7 +171,9 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
       parent.subRows = generateNestedData(material, parent);
     });
     setNextStep(true);
-    setRowsData(rows);
+
+    dispatch({ type: 'initialize', data: rows, count: rows?.length });
+    dispatch({ type: 'loading', loading: false });
   };
 
   const generateNestedData = (material, parent) => {
@@ -193,19 +204,19 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
 
   return (
     <div>
-      {columns && rowsData ? (
+      {columns? (
         <>
           <Box zIndex={5} width={'100%'} mt={3}>
             <CustomReactTable
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
               columns={columns}
-              data={rowsData}
-              onSelect={() => {}}
-              childrenProperty="subRows"
-              uniqueKey="_id"
-              renderedFrom="sales_order_product_package"
+              state = {state}
+              dispatch = {dispatch}
+              expander = {true}
+              renderedFrom={renderedFrom}
               isClientSideGrid={true}
               hideSelection={true}
+              refreshGrid = {fetchData}
             />
           </Box>
         </>

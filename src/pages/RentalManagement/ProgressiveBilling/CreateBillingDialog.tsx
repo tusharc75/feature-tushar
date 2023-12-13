@@ -42,7 +42,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions }
+    state: { user }
   }: any = useData();
 
   const [isUpdating, setUpdating] = useState(false);
@@ -98,7 +98,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         sticky: isMobile || isTablet ? 'none' : 'left',
         disabled: true,
         width: 200,
-        disableFilters: true,
+        disableFilters : true,
         Cell: ({ row }) =>
           row.original['type'] ? (
             <p>
@@ -122,10 +122,10 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
       {
         accessor: 'detail',
         Header: 'Details',
+        disabled : true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
         minWidth: 300,
         width: 300,
-        sticky: isMobile || isTablet ? 'none' : 'left',
-        disabled: true,
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p>{row.original.detail}</p>
@@ -223,6 +223,10 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
   };
 
   const fetchData = async () => {
+
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
+
     let data: any = {};
     let invoicedProducts: any = [];
     let additionalCost: any = [];

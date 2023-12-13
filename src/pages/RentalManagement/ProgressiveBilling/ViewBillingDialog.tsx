@@ -34,10 +34,10 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
   const [isLoadingUpdate, setIsLoadingUpdate] = useState(false);
   const [isProductEdit, setIsProductEdit] = useState({ open: false, rowData: null });
   const [viewBillDialogConfirm, setViewBillDialogConfirm] = useState({ open: false, rows: [] });
-
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
+
 
   useEffect(() => {
     fetchFields();
@@ -102,9 +102,9 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
           accessor: 'detail',
           Header: 'Details',
           minWidth: 300,
+          disabled : true,
           width: 300,
           sticky: isMobile || isTablet ? 'none' : 'left',
-          disabled: true,
           Cell: ({ row }) => (
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <p className="text-truncate" title={row.original?.detail}>

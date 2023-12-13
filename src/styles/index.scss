@@ -3787,6 +3787,16 @@ body {
   }
 }
 
+$isPurchaseOrder: #ffcf78;
+$isSublease: #ffe4c0;
+$isTransferAsset: #ecc19c;
+$isAppliedBill: #a8ec9c;
+
+$isPurchaseOrderDark: #754e07;
+$isSubleaseDark: #826325;
+$isTransferAssetDark: #9b6c44;
+$isAppliedBillDark: #234623;
+
 .react-table-v8 {
   font-family: Poppins, sans-serif, Inter, sans-serif;
   & td *:not(.MuiChip-root):not(svg) {
@@ -3801,6 +3811,17 @@ body {
   th {
     border-bottom: 0px !important;
   }
+
+  .isAppliedBill {
+      background: $isAppliedBill;
+      [data-mode='dark'] & {
+        background-color: $isAppliedBillDark;
+      }
+    }
+  .error {
+      background: var(--error-bg);
+      border-color: var(--error-border) !important;
+    }
 
   .sticky-cell-left:nth-last-child(1 of .sticky-cell-left) {
     &::after {

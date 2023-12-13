@@ -7,22 +7,23 @@ import { CustomDialogTransition, INVOICE_STATUS, invoice, sidebarResource } from
 import axiosInstance from '../../../axios/axiosInstance';
 import { isMobile, isTablet } from 'react-device-detect';
 import { fetch_invoice_product_fields } from '../../../components/Invoice/helper';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
-import { generateCustomTableColumns } from 'src/constants/columns';
 import { startCase } from 'lodash';
 import PreviewDownload from 'src/components/PreviewDownload';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { IconButton } from '@material-ui/core';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import routes from 'src/components/Helpers/Routes';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 
 const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, stepFullScreen, renderedFrom }) => {
 
   const toastConfig = useContext(CustomToastContext);
 
   const [allFields, setAllFields] = useState([]);
-  const [rowsData, setRowsData] = useState(null);
   const [columns, setColumns] = useState(null);
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, selectedRecords } = state;
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     if (statusOptions.findIndex((d) => d.optionLabel === INVOICE_STATUS.readyToInvoice) > statusOptions.findIndex((d) => d.optionLabel === invoiceData?.status)) {
@@ -41,7 +42,7 @@ const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, 
         e.isColumnEditable = false;
       });
       setAllFields(JSON.parse(JSON.stringify(data)));
-      const newColumns = generateCustomTableColumns(data, invoiceData?.currency, renderedFrom);
+      const newColumns = generateColumns(renderedFrom , data, null, false, invoiceData?.currency );
       let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
       if (qtyIndex > -1) {
         newColumns[qtyIndex].accessor = 'qtyDisplay';
@@ -51,7 +52,7 @@ const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, 
           accessor: 'index',
           Header: 'Index',
           width: 70,
-          sticky: isMobile ? 'none' : 'left',
+          sticky: 'left',
           Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
           Footer: () => {
             return <>Total</>;
@@ -60,7 +61,7 @@ const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, 
         {
           accessor: 'type',
           Header: 'Type',
-          sticky: isMobile ? 'none' : 'left',
+          sticky: isMobile || isTablet ? 'none' : 'left',
           Cell: ({ row }) => (
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <p>{startCase(row.original?.type)}</p>
@@ -70,7 +71,9 @@ const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, 
         {
           accessor: 'detail',
           Header: 'Detail',
+          disabled : true,
           minWidth: 300,
+          sticky: isMobile || isTablet ? 'none' : 'left',
           width: 300,
           Cell: ({ row }) =>
             row?.original?.type ? (
@@ -115,6 +118,10 @@ const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, 
   };
 
   const fetchData = async () => {
+
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
+
     var data: any = [];
     const response = await axiosInstance().get(`${invoice.api}/material/${invoiceData._id}`);
     data = response?.data?.data;
@@ -147,7 +154,8 @@ const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, 
     } else {
       setNextStep(true);
     }
-    setRowsData(rows);
+    dispatch({ type: 'initialize', data: rows, count: rows?.length });
+    dispatch({ type: 'loading', loading: false });
   };
 
   const generateNestedData = (material, parent) => {
@@ -204,18 +212,18 @@ const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, 
         />
       </Box>
       <Grid item xs={12} md={12} sm={12}>
-        {columns && rowsData ? (
+        {columns ? (
           <Box zIndex={5}>
             <CustomReactTable
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
               columns={columns}
-              data={rowsData}
+              state = {state}
+              dispatch = {dispatch}
               setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
               hideSelection={true}
               hideAction={true}
-              onSelect={() => { }}
-              childrenProperty="subRows"
-              uniqueKey="_id"
+              expander = {true}
+              refreshGrid = {fetchData}
               renderedFrom="invoice_product_package"
               isClientSideGrid={true}
             />
