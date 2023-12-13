@@ -476,7 +476,7 @@ export default function useColumns() {
               Footer: (info) => {
                 let rows = info.rows;
                 if (!rows) {
-                  rows = info.table.getRowModel().rows;
+                  rows = info.table.getExpandedRowModel().rows;
                 }
                 const total = rows
                   ?.filter((f) => !f.original.parentId && f.values.hasOwnProperty(fieldName) && !isNaN(f.values[fieldName]))
@@ -659,7 +659,7 @@ export default function useColumns() {
           Footer: (info) => {
             let rows = info.rows;
             if (!rows) {
-              rows = info.table.getRowModel().rows;
+              rows = info.table.getExpandedRowModel().rows;
             }
             const qtyTotal = rows
               .filter((f) => !f.original.parentId && f.original.hasOwnProperty(field.fieldName) && !isNaN(f.original[field.fieldName]))

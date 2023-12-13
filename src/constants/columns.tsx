@@ -200,7 +200,7 @@ export const generateCustomTableColumns = (fields: any[], currency: string, rend
             Footer: (info) => {
               let rows = info.rows;
               if (!rows) {
-                rows = info?.table?.getRowModel().rows;
+                rows = info?.table?.getExpandedRowModel().rows;
               }
               const total = rows
                 ?.filter((f) => !f.original.parentId && f.values.hasOwnProperty(fieldName) && !isNaN(f.values[fieldName]))
@@ -244,7 +244,7 @@ export const generateCustomTableColumns = (fields: any[], currency: string, rend
             Footer: (info) => {
               let rows = info.rows;
               if (!rows) {
-                rows = info?.table?.getRowModel().rows;
+                rows = info?.table?.getExpandedRowModel().rows;
               }
               const qtyTotal = rows
                 ?.filter((f) => !f.original.parentId && f.original.hasOwnProperty(ele.fieldName) && !isNaN(f.original[ele.fieldName]))
