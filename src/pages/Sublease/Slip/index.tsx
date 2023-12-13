@@ -57,8 +57,7 @@ function Slip({ subleaseData, stepFullScreen, renderedFrom, statusNames, updateS
                 accessor: 'type',
                 Header: 'Type',
                 sticky: isMobile || isTablet ? 'none' : 'left',
-                disableFilters: true,
-                width: 200,
+                width: 100,
                 Cell: ({ row }) =>
                     row.original['type'] ? (
                         <p>
@@ -71,7 +70,7 @@ function Slip({ subleaseData, stepFullScreen, renderedFrom, statusNames, updateS
             {
                 accessor: 'detail',
                 Header: 'Details',
-                width: 300,
+                width: 200,
                 sticky: isMobile ? 'none' : 'left',
                 Cell: ({ row }) => (
                     <div className="d-flex gap-2 align-items-center">
@@ -185,7 +184,7 @@ function Slip({ subleaseData, stepFullScreen, renderedFrom, statusNames, updateS
             <Grid container spacing={2}>
                 <Grid item xs={12} md={12} sm={12}>
                     {columns ? (
-                        <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}>
+                        <Box zIndex={5}>
                             <CustomReactTable
                                 height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
                                 columns={columns}
@@ -196,6 +195,7 @@ function Slip({ subleaseData, stepFullScreen, renderedFrom, statusNames, updateS
                                 hideAction={true}
                                 renderedFrom={renderedFrom}
                                 isClientSideGrid={true}
+                                expander={true}
                             />
                         </Box>
                     ) : (

@@ -345,7 +345,6 @@ const ServiceMaster = (props: Props) => {
   };
 
   const handleUpdate = (data: any) => {
-    console.log(data)
     axiosInstance()
       .put(`${routes.product.path}/${id}/service-master/update-default`, data)
       .then(({ data }) => {
