@@ -172,6 +172,10 @@ const TableComponent = ({
     [virtualization, columnVirtualizer, rowVirtualizer]
   );
 
+  // const footers;
+
+  console.log(table?.getFooterGroups()[0].headers);
+
   return (
     <>
       <div

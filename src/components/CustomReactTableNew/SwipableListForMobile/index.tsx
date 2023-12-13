@@ -237,27 +237,32 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                     </div>
                   </div>
                 )}
-
-            {/* {dataRows?.length > 0 && footerGroups?.length > 0 && isClientSideGrid && (
-              <>
-                {footerGroups.map((group, index) => (
-                  <div key={index} className="flex justify-between [border-top:1px_solid_var(--common-border-color)] pt-1 items-center mt-4 px-2">
-                    <h6 className="text-[14px]">{group?.headers?.find((g) => g.id === 'index')?.render('Footer')}</h6>
-                    {group.headers.map((column) => {
-                      if (column.Footer.name === 'emptyRenderer2' || column.Footer.name !== 'Footer' || column.id === 'index') return null;
-                      return (
-                        <div key={column.id} className="text-truncate font-weight-bold text-black flex flex-col items-center">
-                          <span>{column.render('Header')}</span>
-                          <span>{column.render('Footer')}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ))}
-              </>
-            )} */}
           </div>
         </div>
+        {dataRows?.length > 0 && table?.getFooterGroups().length > 0 && isClientSideGrid && (
+          <>
+            {table?.getFooterGroups().map((group, index) => {
+              const indexCol = group?.headers?.find((g) => g.id === 'index');
+              return (
+                <div key={index} className="flex justify-between [border-top:1px_solid_var(--common-border-color)] pt-1 items-center mt-4 px-2">
+                  <h6 className="text-[14px]">
+                    {indexCol.isPlaceholder ? null : flexRender(indexCol.column.columnDef.footer, indexCol.getContext())}
+                  </h6>
+
+                  {group?.headers?.map((column) => {
+                    if (!column.column.columnDef.footer || column.id === 'index') return null;
+                    return (
+                      <div key={column.id} className="text-truncate font-weight-bold text-black flex flex-col items-center">
+                        <span>{column.isPlaceholder ? null : flexRender(column.column.columnDef.header, column.getContext())}</span>
+                        <span>{column.isPlaceholder ? null : flexRender(column.column.columnDef.footer, column.getContext())}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </>
+        )}
       </div>
     </>
   );
