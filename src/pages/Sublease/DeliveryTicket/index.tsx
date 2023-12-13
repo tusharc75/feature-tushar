@@ -310,7 +310,7 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
             }
             else if (action === subleaseActions.createReceivingTicket) {
                 if (e.hasOwnProperty('ReceivingTicketId')) {
-                    errorMessages.push({ index: e.index, message: subleaseMessage.loadingAlreadyCreated });
+                    errorMessages.push({ index: e.index, message: subleaseMessage.receivingAlreadyCreated });
                 }
             }
             else if (action === subleaseActions.deliveredToWarehouse) {
