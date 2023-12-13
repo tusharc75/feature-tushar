@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, Fragment, useReducer } from 'react';
+import { useState, useEffect, useContext, Fragment } from 'react';
 import { MenuItem, Grid, Box, Button, IconButton, Menu } from '@material-ui/core';
 import Add from '@material-ui/icons/Add';
 import axiosInstance from '../../../axios/axiosInstance';
@@ -9,7 +9,7 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import { pricingCondition, gridLoadingTimeout, PRICING_TYPE, sidebarResource, MATERIAL_TYPE } from '../../../constants/helpers';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
-import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import ConditionDialog from './ConditionDialog';
 import { camelCase, startCase } from 'lodash';
