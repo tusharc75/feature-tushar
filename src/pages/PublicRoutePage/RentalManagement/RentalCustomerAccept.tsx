@@ -154,8 +154,8 @@ const RJCustomerAccept = ({ openAuthId }) => {
     coloum.forEach((element) => {
       if (element.accessor === 'qtyDisplay') {
         element['Footer'] = (info) => {
-          const qtyTotal = info.rows
-            .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
+          let rows = info.table.getExpandedRowModel().rows;
+          const qtyTotal = rows?.filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
             .reduce((sum, row) => row.values[element.accessor] + sum, 0);
           return <>{qtyTotal}</>;
         };

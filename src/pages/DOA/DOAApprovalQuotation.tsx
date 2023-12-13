@@ -35,7 +35,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 const DoaQuotationApproval = () => {
 
   const renderedFrom = 'quotation_product_package';
-  
+
   const {
     state: {
       user: { user: currentUser, permissions }
@@ -169,7 +169,7 @@ const DoaQuotationApproval = () => {
         accessor: 'index',
         Header: 'Index',
         width: 70,
-        sticky:  'left',
+        sticky: 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
@@ -206,8 +206,8 @@ const DoaQuotationApproval = () => {
         Header: 'Lead Time (Days)',
         Cell: ({ row }) => (row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0),
         Footer: (info) => {
-          const total = info.rows
-            .filter((f) => f.values.hasOwnProperty('leadTime') && !isNaN(f.values['leadTime']))
+          let rows = info.table.getExpandedRowModel().rows;
+          const total = rows?.filter((f) => f.values.hasOwnProperty('leadTime') && !isNaN(f.values['leadTime']))
             .reduce((sum, row) => parseInt(row.values['leadTime']) + sum, 0);
           return <>{total}</>;
         }
@@ -336,7 +336,7 @@ const DoaQuotationApproval = () => {
             </Grid>
           </Box>
         )}
-        {columns  ? (
+        {columns ? (
           <Box mt={3} zIndex={5} width={'100%'}>
             <CustomReactTable
               height={'calc(100vh - 395px)'}

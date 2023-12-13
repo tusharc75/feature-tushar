@@ -478,8 +478,7 @@ export default function useColumns() {
               },
               Footer: (info) => {
                 let rows = info.table.getExpandedRowModel().rows;
-                const total = rows
-                  ?.filter((f) => !f.original.parentId && f.original.hasOwnProperty(fieldName) && !isNaN(f.original[fieldName]))
+                const total = rows?.filter((f) => !f.original.parentId && f.original.hasOwnProperty(fieldName) && !isNaN(f.original[fieldName]))
                   .reduce((sum, row) => row.original[fieldName] + sum, 0);
                 return (
                   <>
@@ -658,10 +657,9 @@ export default function useColumns() {
           cell: ({ row }) => (row.original[field.fieldName] ? <p>{row.original[field.fieldName]}</p> : <NoDataCell />),
           Footer: (info) => {
             let rows = info.table.getExpandedRowModel().rows;
-            const qtyTotal = rows
-              .filter((f) => !f.original.parentId && f.original.hasOwnProperty(field.fieldName) && !isNaN(f.original[field.fieldName]))
+            const total = rows?.filter((f) => !f.original.parentId && f.original.hasOwnProperty(field.fieldName) && !isNaN(f.original[field.fieldName]))
               .reduce((sum, row) => row.original[commonFieldData.accessor] + sum, 0);
-            return <>{field?.isHideColumnSum ? '' : qtyTotal}</>;
+            return <>{field?.isHideColumnSum ? '' : total}</>;
           }
         });
       } else if (field.type === 'signature') {
