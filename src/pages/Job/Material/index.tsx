@@ -6,7 +6,6 @@ import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import { CHILD_RESOURCE } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -15,12 +14,13 @@ import AddIcon from '@material-ui/icons/Add';
 import { isMobile } from 'react-device-detect';
 import { KeyboardArrowDown } from '@material-ui/icons';
 import { startCase } from 'lodash';
-import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
+import { flattenArray } from 'src/constants/columns';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import MaterialDialog from './MaterialDialog';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 
 const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -28,16 +28,17 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
     state: { user, permissions }
   }: any = useData();
   const [isUpdating, setUpdating] = useState(false);
-  const [selectedRecords, setSelectedRecords] = useState([]);
   const [isAdding, setIsAdding] = useState(false);
   const [materialEdit, setMaterialEdit] = useState({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
   const [columns, setColumns] = useState(null);
   const [addDialog, setAddDialog] = useState({ open: false, type: '' });
-  const [rowsData, setRowsData] = useState(null);
   const [allFields, setAllFields] = useState([]);
   const [anchorActionEl, setAnchorActionEl] = useState(null);
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, selectedRecords } = state;
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchFields();
@@ -48,14 +49,15 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
     var data = response?.data?.data;
     data = CURReplaceByCurrencySingle(data, jobData?.currency);
     setAllFields(JSON.parse(JSON.stringify(data)));
-    const newColumns = generateCustomTableColumns(data, jobData?.currency, renderedFrom);
+    const newColumns = generateColumns(renderedFrom , data, null, false, jobData?.currency);
 
     let coloum: any = [
       {
         accessor: 'index',
         Header: 'Index',
-        width: 70,
-        sticky: isMobile ? 'none' : 'left',
+        width: 100,
+        sticky: 'left',
+        disableFilters : false,
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
@@ -65,8 +67,9 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
         accessor: 'detail',
         Header: 'Detail',
         minWidth: 300,
+        disable : true,
         width: 300,
-        Cell: ({ row, rows }) => (
+        Cell: ({ row, table }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p
               onClick={() => {
@@ -74,7 +77,7 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
                   open: true,
                   data: row.original,
                   bulkedit: false,
-                  showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
+                  showSaveAndNext: row?.index < table.getRowModel().rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
                 });
               }}
               className="link text-truncate"
@@ -106,14 +109,14 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
       disableFilters: true,
       disableSortBy: true,
       canDrag: false,
-      Cell: ({ row, rows }) => (
+      Cell: ({ row, table }) => (
         <>
           <IconButton
             size="small"
             aria-label="Details"
             disabled={allowedToEdit ? false : true}
             onClick={() => {
-              onMaterialEdit(row, rows);
+              onMaterialEdit(row, table.getRowModel().rows);
             }}
           >
             <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
@@ -140,6 +143,10 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
   };
 
   const fetchJobData = async () => {
+
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
+
     setNextStep(false);
     var data: any = [];
     const response = await axiosInstance().get(`${routes.job.path}/material/${jobData._id}`);
@@ -156,7 +163,9 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
     } else {
       setNextStep(false);
     }
-    setRowsData(rows);
+
+    dispatch({ type: 'initialize', data: rows, count: rows?.length });
+    dispatch({ type: 'loading', loading: false });
   };
 
   const openActions = (event) => {
@@ -210,12 +219,12 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
           message: data.message
         });
         if (saveAndNext) {
-          const rowIndex = rowsData.findIndex((d) => d._id === rows[0]?._id);
+          const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
           setMaterialEdit({
             open: true,
-            data: rowsData[rowIndex + 1],
+            data: dataRows[rowIndex + 1],
             bulkedit: false,
-            showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false
+            showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
           });
         } else {
           setMaterialEdit({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
@@ -252,9 +261,9 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
   };
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
-    const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
+    const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
+    rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
     handleSaveData(rows);
   };
 
@@ -329,19 +338,17 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
           </Menu>
         </Box>
       </Box>
-      {columns && rowsData ? (
+      {columns ? (
         <Box zIndex={5}>
           <CustomReactTable
             height={'calc(100vh - 395px)'}
             columns={columns}
-            data={rowsData}
+            state = {state}
+            dispatch = {dispatch}
             setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
-            onSelect={setSelectedRecords}
-            childrenProperty="subRows"
-            uniqueKey="_id"
+            refreshGrid = {fetchJobData}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
-            hideExpander={true}
             onSaveEdit={onSaveInlineEdit}
           />
         </Box>
@@ -378,7 +385,7 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
           handleClose={() => {
             setAddDialog({ open: false, type: '' });
           }}
-          ids={flattenArray(rowsData)
+          ids={flattenArray(dataRows)
             ?.filter((e) => e.type === 'serializedAsset')
             ?.map((e) => e.materialId)}
           handleSucess={(rows) => {
