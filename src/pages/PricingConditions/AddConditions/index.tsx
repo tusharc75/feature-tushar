@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, Fragment, useReducer } from 'react';
+import { useState, useEffect, useContext, Fragment } from 'react';
 import { MenuItem, Grid, Box, Button, IconButton, Menu } from '@material-ui/core';
 import Add from '@material-ui/icons/Add';
 import axiosInstance from '../../../axios/axiosInstance';
@@ -31,7 +31,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
   }: any = useData();
 
   const { state, dispatch } = useTableReducer();
-  const { dataRows, rowCount, selectedRecords } = state;
+  const { dataRows, rowCount, page, limit, sorting, selectedRecords } = state;
   const [addMaterialDialog, setAddMaterialDialog] = useState({ open: false, materialType: '' });
   const [condition, setCondition] = useState(null);
   const [showDialog, setShowDialog] = useState({ open: false, isBulkedit: false });
@@ -44,16 +44,18 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
 
   useEffect(() => {
     fetchCondition();
-  }, [pricingConditionId]);
+  }, [page, limit, pricingConditionId]);
 
   const fetchCondition = () => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
 
+    const queryString = getQueryString();
+
     setCondition(null);
     axiosInstance()
-      .get(`${pricingCondition.api}/condition/${pricingConditionId}`)
-      .then(({ data: { data } }) => {
+      .get(`${pricingCondition.api}/condition/${pricingConditionId}${queryString}`)
+      .then(({ data: { data, count } }) => {
         setCondition(JSON.parse(JSON.stringify(data)));
         data.forEach((element) => {
           element.detail = `${
@@ -70,7 +72,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
           element.unit = element.unit?.toString();
           element.pricingMethod = element.pricingMethod?.toString();
         });
-        dispatch({ type: 'initialize', data: data, count: data.length });
+        dispatch({ type: 'initialize', data: data, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
@@ -78,6 +80,15 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
+  };
+
+  const getQueryString = () => {
+    let deepFilter = `?page=${page}&limit=${limit}`;
+
+    if (sorting.length > 0) {
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+    }
+    return deepFilter;
   };
 
   const handleAdd = (rows) => {
@@ -421,7 +432,6 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
             dispatch={dispatch}
             renderedFrom={renderFrom}
             refreshGrid={fetchCondition}
-            isClientSideGrid={true}
           />
         ) : (
           <Box p={2} height={500}>
