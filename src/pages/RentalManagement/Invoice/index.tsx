@@ -1,5 +1,5 @@
 import Box from '@material-ui/core/Box/Box';
-import React, { useState, useEffect, useReducer, useContext, Fragment } from 'react';
+import { useState, useEffect, useContext, Fragment } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import Grid from '@material-ui/core/Grid/Grid';
 import { Button, IconButton } from '@material-ui/core';
@@ -13,11 +13,11 @@ import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/Offl
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import AdditionalCostDialog from '../AdditionalCost/AdditionalCostDialog';
 import { fetch_rental_product_fields, fetch_rental_cost_fields } from '../../../components/RentalManagment/helper';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import PreviewDownload from 'src/components/PreviewDownload';
-import { generateCustomTableColumns } from 'src/constants/columns';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { isMobile, isTablet } from 'react-device-detect';
 
 const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFullScreen, allowedToEdit, renderedFrom }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -27,9 +27,10 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
 
   const { isOffline } = useContext(CustomOfflineContext);
   const [showCostDialog, setShowCostDialog] = useState(false);
-
   const [columns, setColumns] = useState(null);
-  const [rowsData, setRowsData] = useState(null);
+
+  const { state, dispatch } = useTableReducer();
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     if (
@@ -59,7 +60,7 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
       fields?.forEach((e) => {
         e.isColumnEditable = false;
       });
-      const newColumns = generateCustomTableColumns(fields, rentalManagementData?.currency, renderedFrom);
+      const newColumns = generateColumns(renderedFrom, fields, null, false, rentalManagementData?.currency);
       let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
       if (qtyIndex > -1) {
         newColumns[qtyIndex].accessor = 'qtyDisplay';
@@ -69,6 +70,7 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
           accessor: 'index',
           Header: 'Index',
           width: 70,
+          sticky: 'left',
           Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
           Footer: () => {
             return <>Total</>;
@@ -79,6 +81,8 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
           Header: 'Type',
           disableFilters: true,
           width: 200,
+          disabled: true,
+          sticky: isMobile || isTablet ? 'none' : 'left',
           Cell: ({ row }) =>
             row.original['type'] ? (
               <p>
@@ -103,6 +107,8 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
           accessor: 'detail',
           Header: 'Details',
           width: 300,
+          disabled: true,
+          sticky: isMobile || isTablet ? 'none' : 'left',
           Cell: ({ row }) =>
             row.original['type'] ? (
               <div className="d-flex gap-2 align-items-center">
@@ -154,6 +160,8 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
   };
 
   const fetchData = async () => {
+    dispatch({ type: 'loading', loading: true });
+
     let combinedData: any = [];
     let inventory: any = [];
     let material: any = [];
@@ -216,7 +224,8 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
         parent.qty = parent.qty;
         parent.subRows = generateNestedData(material, inventory, parent);
       });
-      setRowsData(rows);
+      dispatch({ type: 'initialize', data: rows, count: rows?.length });
+      dispatch({ type: 'loading', loading: false });
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -321,20 +330,20 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
       </Box>
       <Grid container spacing={2}>
         <Grid item xs={12} md={12} sm={12}>
-          {columns && rowsData ? (
-            <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 350px)'}>
+          {columns ? (
+            <Box zIndex={5} width={'100%'} >
               <CustomReactTable
-                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 365px)'}
+                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
                 columns={columns}
-                data={rowsData}
+                state={state}
+                dispatch={dispatch}
                 setWholeRowsCellColor={() => { }}
-                onSelect={() => { }}
-                childrenProperty="subRows"
-                uniqueKey="_id"
+                refreshGrid={fetchData}
                 hideSelection={true}
                 hideAction={true}
                 renderedFrom={renderedFrom}
                 isClientSideGrid={true}
+                expander={true}
               />
             </Box>
           ) : (

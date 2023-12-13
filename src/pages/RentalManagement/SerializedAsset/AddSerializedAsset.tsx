@@ -651,15 +651,13 @@ const AddSerializedAsset = ({
               </Grid>
             </Grid>
             {['Rental Job'].includes(referenceType) && (
-              <Grid container spacing={2}>
-                <Grid item>
-                  <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-                    <CustomTab value={0} index={0} label={'Assets'} {...a11yProps(0)} />
-                    {permissions?.sublease && <CustomTab className={'tabLayout'} value={1} index={1} label={'Sublease Assets'} {...a11yProps(1)} />}
-                    <CustomTab className={'tabLayout'} value={2} index={2} label={'In Use Assets'} {...a11yProps(2)} />
-                  </CustomTabs>
-                </Grid>
-              </Grid>
+              <Box pt={1}>
+                <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+                  <CustomTab value={0} index={0} label={'Assets'} {...a11yProps(0)} />
+                  {permissions?.sublease && <CustomTab className={'tabLayout'} value={1} index={1} label={'Sublease Assets'} {...a11yProps(1)} />}
+                  <CustomTab className={'tabLayout'} value={2} index={2} label={'In Use Assets'} {...a11yProps(2)} />
+                </CustomTabs>
+              </Box>
             )}
             <Box>
               {columns ? (

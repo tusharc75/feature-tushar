@@ -119,7 +119,7 @@ const QuoteBuilders = () => {
     newColumns?.forEach((o) => {
       if (o.accessor === 'quoteName') {
         o.cell = ({ row }) => (
-          <>
+          <div>
             <Link className="text-truncate link" title={row.original.quoteName} to={`${routes.quoteBuilder.path}/detail/${row.original._id}`}>
               {row.original.quoteName}
             </Link>
@@ -134,7 +134,7 @@ const QuoteBuilders = () => {
                 ({row.original.versionCount})
               </span>
             </HtmlTooltip>
-          </>
+          </div>
         );
       }
     });
@@ -634,7 +634,7 @@ const QuoteBuilders = () => {
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => {}}
+            onSelect={() => { }}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
@@ -715,7 +715,7 @@ const QuoteBuilders = () => {
           quoteId={showVersionsDialog.id}
           quoteData={showVersionsDialog.quoteData}
           quotePermissions={permissions?.quoteBuilder}
-          fetchQuoteData={() => {}}
+          fetchQuoteData={() => { }}
           handleChangeVersionFromAllVersion={(versionNumber) => {
             history.push(`quotes/detail/${showVersionsDialog.id}`, {
               versionNumber: `${versionNumber}`,

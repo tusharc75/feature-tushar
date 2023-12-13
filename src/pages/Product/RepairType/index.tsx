@@ -90,8 +90,8 @@ const ProductRepairType = (props: Props) => {
   const ActionsRenderer = {
     accessor: 'action',
     Header: 'Actions',
-    minWidth: 100,
-    width: 150,
+    minWidth: 70,
+    width: 70,
     sticky: 'right',
     disableFilters: true,
     disableSortBy: true,

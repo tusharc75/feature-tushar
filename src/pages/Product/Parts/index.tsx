@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { Box, Button, Menu, MenuItem } from '@material-ui/core';
 import { product } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
@@ -13,8 +13,8 @@ import { camelCase } from 'lodash';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import { isMobile, isTablet } from 'react-device-detect';
-import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
+import { flattenArray } from 'src/constants/columns';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 
@@ -22,7 +22,7 @@ function Parts({ id }) {
 
   const renderedFrom = `${camelCase(routes?.product.title)}_bom`;
   const {
-    state: { permissions, user, selectedEntity }
+    state: { permissions}
   }: any = useData();
 
   const hasPermissions = permissions && permissions[product.permission]?.isUpdate;
@@ -34,16 +34,18 @@ function Parts({ id }) {
   const [openAssignProductDialog, setOpenAssignProductDialog] = useState(false);
   const [columns, setColumns] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [selectedRecords, setSelectedRecords] = useState([]);
-  const [rowsData, setRowsData] = useState(null);
-
   const [isSubmitting, setSubmitting] = useState(false);
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, selectedRecords } = state;
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchGridColumns();
   }, []);
 
   const fetchBOMData = async () => {
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
     let data: any = [];
     const response = await axiosInstance().get(`/product/${id}/bom`);
     data = response?.data?.data;
@@ -55,8 +57,8 @@ function Parts({ id }) {
         ...i?.childProductDetail
       }
     })
-    setRowsData(rows);
-    setSelectedRecords([]);
+    dispatch({ type: 'initialize', data: rows, count: rows?.length });
+    dispatch({ type: 'loading', loading: false });
   }
 
   const fetchGridColumns = async () => {
@@ -97,8 +99,7 @@ function Parts({ id }) {
         })
       }
     })
-    const newColumns = generateCustomTableColumns(fields?.filter((e) => ['productDescription', 'productNumber', 'productCategory', 'productCategory']?.includes(e?.fieldName))
-      , 'USD', renderedFrom);
+      const newColumns = generateColumns(renderedFrom, fields?.filter((e) => ['productDescription', 'productNumber', 'productCategory', 'productCategory']?.includes(e?.fieldName)), null, false, 'USD');
 
     coloum = [...coloum, ...newColumns, {
       accessor: 'qty',
@@ -110,8 +111,8 @@ function Parts({ id }) {
     coloum.push({
       accessor: 'action',
       Header: 'Actions',
-      minWidth: 50,
-      width: 50,
+      minWidth: 100,
+      width: 100,
       sticky: 'right',
       disableFilters: true,
       disableSortBy: true,
@@ -201,7 +202,7 @@ function Parts({ id }) {
   };
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
-    const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
+    const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
     if (rowData && parseInt(inputField['qty']) > 0) {
       handleSaveData({ _id: rowData._id, qty: parseInt(inputField['qty']) });
     }
@@ -285,19 +286,17 @@ function Parts({ id }) {
           </Box>
         </Box>
       )}
-      {columns && rowsData ? (
+      {columns ? (
         <Box zIndex={5} width={'100%'}>
           <CustomReactTable
-            columns={columns}
             height={'calc(100vh - 345px)'}
-            data={rowsData}
-            setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
-            onSelect={setSelectedRecords}
-            childrenProperty="subRows"
-            uniqueKey="_id"
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            refreshGrid={fetchBOMData}
+            setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
-            hideExpander={true}
             onSaveEdit={onSaveInlineEdit}
           />
         </Box>

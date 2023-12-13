@@ -4,19 +4,19 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { fieldTicket, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { fieldTicket, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Button, IconButton, Menu, MenuItem, Tab, Tabs, TextField } from '@material-ui/core';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import { useData } from 'src/StateProvider/Provider';
 import { BiChevronDown } from 'react-icons/bi';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { isMobile } from 'react-device-detect';
-import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
+import { isMobile, isTablet } from 'react-device-detect';
+import { flattenArray } from 'src/constants/columns';
 import { Autocomplete } from '@material-ui/lab';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import Technicians from './Technicians';
@@ -36,10 +36,8 @@ import { isEmpty } from 'lodash';
 
 const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom }) => {
   const toastConfig = useContext(CustomToastContext);
-  const [dataRows, setDataRows] = useState(null);
   const [columns, setColumns] = useState(null);
   const [allFields, setAllFields] = useState([]);
-  const [selectedRecords, setSelectedRecords] = useState([]);
   const [consumablesDialog, setConsumablesDialog] = useState(false);
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
@@ -54,8 +52,11 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
   const [openConsumablesQtyDialog, setOpenConsumablesQtyDialog] = useState(false);
   const [openLogDialog, setOpenLogDialog] = useState({ open: false, product: '', uniqueId: null, data: null });
   const [historyDialog, setHistoryDialog] = useState({ open: false, _id: '', product: '', productName: '' });
-
   const [isSubmitting, setSubmitting] = useState(false);
+
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, selectedRecords } = state;
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     setServiceOption([{ optionLabel: 'All', optionValue: 'All' },
@@ -70,7 +71,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
       setSelectedServiceOption({ optionLabel: 'All', optionValue: 'All' });
     }
     if (renderCount > 1) {
-      setDataRows(null)
+      dispatch({ type: 'update', data: [] });
     }
     setRenderCount(renderCount + 1)
   }, [services]);
@@ -84,7 +85,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
   }, [fieldTicketData]);
 
   useEffect(() => {
-    if (columns && !dataRows && tabValue === 0) {
+    if (columns && !dataRows?.length && tabValue === 0) {
       var allowRequest = false;
       if (user?.user?.brandPolicy?.workOrderConsumableRequest) {
         if ((fieldTicketData?.warehouse?.manager && fieldTicketData?.warehouse?.manager?.includes(user?.user?._id))
@@ -108,7 +109,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
       });
     }
     setAllFields(JSON.parse(JSON.stringify(fields)));
-    const newColumns = generateCustomTableColumns(fields, fieldTicketData?.currency, renderedFrom);
+    const newColumns = generateColumns(renderedFrom, fields, null, false, fieldTicketData?.currency);
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';
@@ -132,15 +133,17 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
           accessor: e?.fieldName,
           Header: e?.fieldLabel,
           width: 200,
+          disabled: true,
+          sticky: isMobile || isTablet ? 'none' : 'left',
           primaryField: true,
-          Cell: ({ row, rows }) => (
+          Cell: ({ row, table }) => (
             <div style={{ display: 'flex', alignItems: 'center' }}>
               {!allowedToEdit ? (
                 <p>{row.original[e?.fieldName]}</p>
               ) : (
                 <p
                   onClick={() => {
-                    openMaterial(row, rows)
+                    openMaterial(row, table.getRowModel().rows)
                   }}
                   className="link text-truncate"
                   title={row.original[e?.fieldName]}
@@ -222,7 +225,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
         disableFilters: true,
         disableSortBy: true,
         canDrag: false,
-        Cell: ({ row, rows }: any) => (
+        Cell: ({ row, table }: any) => (
           <>
             <HtmlTooltip title={allowedToEdit ? 'Edit' : ''}>
               <IconButton
@@ -230,7 +233,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
                 aria-label="Delete"
                 disabled={!allowedToEdit}
                 onClick={() => {
-                  openMaterial(row, rows)
+                  openMaterial(row, table.getRowModel().rows)
                 }}
               >
                 <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
@@ -289,7 +292,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
         accessor: 'index',
         Header: 'Index',
         width: 70,
-        sticky: isMobile ? 'none' : 'left',
+        sticky: 'left',
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.index}</p>,
         Footer: () => {
           return <>Total</>;
@@ -301,7 +304,9 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
   };
 
   const fetchData = async () => {
-    setDataRows(null);
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
+
     let api = `${fieldTicket.api}/${fieldTicketData?._id}/material?type=product`;
     if (selectedServiceOption && selectedServiceOption?.optionValue !== 'All') {
       api = `${api}&serviceId=${selectedServiceOption?.optionValue}`;
@@ -317,7 +322,8 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
         parent.serviceId = parent?.service?.optionValue;
         parent.service = parent?.service?.optionLabel;
       });
-      setDataRows(consumables);
+      dispatch({ type: 'initialize', data: consumables, count: consumables?.length });
+      dispatch({ type: 'loading', loading: false });
     })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -492,7 +498,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
   };
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
-    setDataRows(null)
+    dispatch({ type: 'update', data: [] });
     setTabValue(newValue);
   };
 
@@ -514,7 +520,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
               if (!val) {
                 value = { optionLabel: 'All', optionValue: 'All' }
               }
-              setDataRows(null)
+              dispatch({ type: 'update', data: [] });
               setSelectedServiceOption(value)
             }}
             renderInput={(params) => <TextField {...params} label={'Select Service'} variant="outlined" />}
@@ -606,20 +612,18 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
           )}
           <Grid container spacing={2}>
             <Grid item xs={12} md={12} sm={12}>
-              {columns && dataRows ? (
+              {columns ? (
                 <CustomReactTable
                   height={'300px'}
                   columns={columns}
-                  data={dataRows}
-                  onSelect={setSelectedRecords}
-                  childrenProperty="subRows"
-                  uniqueKey="_id"
+                  state={state}
+                  dispatch={dispatch}
                   onSaveEdit={onSaveInlineEdit}
-                  renderedFrom={'fieldTicket_consumables'}
+                  renderedFrom={renderedFrom}
                   isClientSideGrid={true}
-                  hideExpander={true}
                   hideSelection={!allowedToEdit}
                   hideAction={!allowedToEdit}
+                  refreshGrid={fetchData}
                 />
               ) : (
                 <Box p={2} height={300}>
@@ -634,7 +638,9 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
         <Technicians
           allowedToEdit={allowedToEdit}
           fieldTicketData={fieldTicketData}
-          selectedService={selectedServiceOption} />
+          selectedService={selectedServiceOption}
+          renderedFrom={`${renderedFrom}_technician`}
+           />
       </TabPanel>
       {consumablesDialog && (
         <AssignProductDialog

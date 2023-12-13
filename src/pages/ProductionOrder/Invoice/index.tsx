@@ -279,6 +279,7 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
             columns={columns}
             isSendEmail={true}
             isAsyncDownload={true}
+            defaultColumns={['index', `detail`, `description`, `workOrder`, `qty`, `unit`, 'weightlb', 'engRef']}
           />
         </Box>
       </Box>
