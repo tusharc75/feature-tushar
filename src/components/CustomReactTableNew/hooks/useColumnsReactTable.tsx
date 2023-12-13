@@ -394,6 +394,9 @@ export default function useColumns() {
   };
 
   const generateColumns = (renderedFrom, fields, detailScreenRoute = null, masterPage = false, currency = null) => {
+    if (!currency) {
+      currency = user?.user?.brandCurrency || 'USD'
+    }
     let data = localStorage.getItem('gridMetaData');
     let gridMetaData = data == 'undefined' ? {} : JSON.parse(data);
     if (!gridMetaData) {

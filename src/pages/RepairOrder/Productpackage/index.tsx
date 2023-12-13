@@ -141,8 +141,8 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
                       row.original.type === 'package'
                         ? `Add Existing Product`
                         : row.subRows?.length !== row.original.qty
-                        ? `Add`
-                        : `Can't add more asset!`
+                          ? `Add`
+                          : `Can't add more asset!`
                     }
                   >
                     <IconButton
@@ -298,23 +298,22 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === MATERIAL_TYPE.package
+      parent.detail = `${parent.type === MATERIAL_TYPE.package
           ? parent.packageDetail?.packageName
           : parent.type === MATERIAL_TYPE.product
-          ? parent.productDetail?.productName
-          : parent.type === MATERIAL_TYPE.serializedAsset
-          ? parent.serializedAssetDetail.assetNumber
-          : ''
-      }`;
+            ? parent.productDetail?.productName
+            : parent.type === MATERIAL_TYPE.serializedAsset
+              ? parent.serializedAssetDetail.assetNumber
+              : ''
+        }`;
       parent.description =
         parent.type === MATERIAL_TYPE.product
           ? parent?.productDetail?.productDescription || ''
           : parent.type === MATERIAL_TYPE.package
-          ? parent?.packageDetail?.packageDescription || ''
-          : parent.type === MATERIAL_TYPE.serializedAsset
-          ? parent?.serializedAssetDetail?.product?.productDescription || ''
-          : '';
+            ? parent?.packageDetail?.packageDescription || ''
+            : parent.type === MATERIAL_TYPE.serializedAsset
+              ? parent?.serializedAssetDetail?.product?.productDescription || ''
+              : '';
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qtyDisplay = parent.qty;
@@ -348,21 +347,20 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
     let canDelete = subRows?.find((e) => e.workOrder) ? false : true;
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${
-        _subRow.type === MATERIAL_TYPE.package
+      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.package
           ? _subRow.packageDetail?.packageName
           : _subRow.type === MATERIAL_TYPE.product
-          ? _subRow.productDetail?.productName
-          : _subRow.type === MATERIAL_TYPE.serializedAsset
-          ? _subRow.serializedAssetDetail.assetNumber
-          : ''
-      }`;
+            ? _subRow.productDetail?.productName
+            : _subRow.type === MATERIAL_TYPE.serializedAsset
+              ? _subRow.serializedAssetDetail.assetNumber
+              : ''
+        }`;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.product
           ? _subRow?.productDetail?.productDescription || ''
           : _subRow.type === MATERIAL_TYPE.package
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.packageDetail?.packageDescription || ''
+            : '';
       _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
       _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
       _subRow.qtyDisplay = _subRow.type === MATERIAL_TYPE.serializedAsset ? 1 : `${parent.qtyDisplay * _subRow.qty}`;
@@ -512,7 +510,6 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
                   onClose={closeAddActions}
                 >
                   <MenuItem
-                    disabled={dataRows?.length ? false : true}
                     onClick={() => {
                       setAddExistingProductDialog({
                         open: true,
@@ -546,7 +543,6 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
                       {repairOrderData?.type === REPAIR_ORDER_TYPE.external ? `Add New Customer Assets` : `Add New ${routes.serializedAsset.title}`}
                     </MenuItem>
                   )}
-
                   {user?.user?.brandPolicy?.repairOrderAddProductPackage && (
                     <>
                       {permissions?.product?.isCreate && (

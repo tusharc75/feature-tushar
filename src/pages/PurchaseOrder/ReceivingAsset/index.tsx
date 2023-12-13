@@ -33,11 +33,10 @@ import { Cancel } from '@material-ui/icons';
 const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, renderedFrom, checkReceivedProduct, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer();
-  const { dataRows, page, limit, filters, sorting, selectedRecords } = state;
+  const { selectedRecords } = state;
   const {
     state: { user, permissions }
   }: any = useData();
-  const theme = useTheme();
   const [receiveDialog, setReceiveDialog] = useState(false);
   const [rejectDialog, setRejectDialog] = useState(false);
   const [rejectProductDialog, setRejectProductDialog] = useState(null);
@@ -47,9 +46,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
 
   const [inventoryHistory, setInventoryHistory] = useState([]);
 
-  // const [rowsData, setRowsData] = useState(null);
   const [columns, setColumns] = useState(null);
-  // const [selectedRecords, setSelectedRecords] = useState([]);
   const [addAssetDialog, setAddAssetDialog] = useState({ open: false, product: null })
 
   useEffect(() => {
@@ -68,8 +65,9 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
     column.push({
       accessor: 'index',
       Header: 'Index',
-      width: 50,
+      width: 70,
       primaryField: true,
+      sticky: 'left',
       Cell: ({ row }) => {
         return row.original['index'] ? <p className="text-truncate">{row.original.index}</p> : <NoDataCell />;
       },
@@ -81,7 +79,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
       accessor: 'type',
       Header: 'Type',
       width: 100,
-      primaryField: true,
+      sticky: isMobile || isTablet ? 'none' : 'left',
       Cell: ({ row }) => {
         return row.original['type'] ? <p className="text-truncate">{startCase(row.original.type)}</p> : <NoDataCell />;
       }
@@ -89,8 +87,9 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
     column.push({
       accessor: 'detail',
       Header: 'Detail',
-      width: 300,
+      width: 200,
       disabled: true,
+      sticky: isMobile || isTablet ? 'none' : 'left',
       Cell: ({ row }) => (
         <div className="d-flex gap-2 align-items-center">
           <p className="text-truncate">{row.original.detail}</p>
@@ -435,7 +434,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
               refreshGrid={fetchProduct}
               isClientSideGrid={true}
               hideSelection={[PURCHASE_ORDER_STATUS.closed]?.includes(purchaseOrderData?.status) ? true : false}
-              // expander={true}
+              expander={true}
             />
           </Box>
         ) : (
