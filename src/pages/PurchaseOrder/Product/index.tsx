@@ -750,7 +750,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
         </Box>
       )}
       {columns  ? (
-        <Box zIndex={5} mt={2} width={'100%'} height={'calc(100vh - 393px)'}>
+        <Box zIndex={5} >
           <CustomReactTable
             height={'calc(100vh - 393px)'}
             columns={columns}
