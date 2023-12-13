@@ -1,11 +1,12 @@
 import React, { Dispatch, useEffect, useMemo } from 'react';
 import { Box, CircularProgress, TableBody, TableHead, TableRow } from '@material-ui/core';
-import { CellRenderer, DraggableHeader } from './TableHelperComponents';
+import { CellRenderer, DraggableHeader, TColType } from './TableHelperComponents';
 import MaUTable from '@material-ui/core/Table';
 import { TActios, TInitialState } from '../hooks/useTableReducer';
 import { Row, Table, flexRender } from '@tanstack/react-table';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Error } from '@material-ui/icons';
+import { getStickyPosition } from '../utils';
 
 type TTableProps = {
   state: TInitialState;
@@ -172,6 +173,13 @@ const TableComponent = ({
     [virtualization, columnVirtualizer, rowVirtualizer]
   );
 
+  // const footers;
+
+  const footerRowFound = useMemo(() => {
+    const found = table?.getFooterGroups()[0].headers.some((h) => h.column.columnDef.footer);
+    return found;
+  }, [table]);
+
   return (
     <>
       <div
@@ -236,15 +244,38 @@ const TableComponent = ({
           >
             {virtualization ? <VirtualTable /> : <NormalTable />}
           </TableBody>
-          <tfoot>
-            {table?.getFooterGroups().map((footerGroup) => (
-              <tr key={footerGroup.id}>
-                {footerGroup.headers.map((header) => (
-                  <th key={header.id}>{header.isPlaceholder ? null : flexRender(header.column.columnDef.footer, header.getContext())}</th>
-                ))}
-              </tr>
-            ))}
-          </tfoot>
+          {isClientSideGrid && footerRowFound && table.getRowModel().rows.length > 0 && (
+            <>
+              <tfoot>
+                {table?.getFooterGroups().map((footerGroup) => {
+                  return (
+                    <tr key={footerGroup.id}>
+                      {footerGroup.headers.map((header, index) => {
+                        const columnDef = header.column.columnDef as TColType;
+                        const { style } = getStickyPosition(columnDef, index, table);
+                        const colSize = header.getSize();
+                        return (
+                          <th
+                            className={`bg-[var(--dark-primary,_white)] sticky bottom-0`}
+                            style={{
+                              ...style,
+                              position: 'sticky',
+                              zIndex: columnDef.sticky === 'left' || columnDef.sticky === 'right' ? 12 : 'unset',
+                              minWidth: colSize,
+                              maxWidth: colSize
+                            }}
+                            key={header.id}
+                          >
+                            {header.isPlaceholder ? null : flexRender(header.column.columnDef.footer, header.getContext())}
+                          </th>
+                        );
+                      })}
+                    </tr>
+                  );
+                })}
+              </tfoot>
+            </>
+          )}
         </MaUTable>
       </div>
     </>
