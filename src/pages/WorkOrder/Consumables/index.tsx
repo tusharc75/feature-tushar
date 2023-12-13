@@ -206,24 +206,24 @@ const Consumables = ({
       },
       ...(user?.user?.brandPolicy?.workOrderConsumableRequest && !user?.user?.brandPolicy?.workOrderConsumableConsumeHide
         ? [
-            {
-              accessor: 'requestedQty',
-              Header: 'Requested Qty',
-              width: 150,
-              Cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
-            }
-          ]
+          {
+            accessor: 'requestedQty',
+            Header: 'Requested Qty',
+            width: 150,
+            Cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
+          }
+        ]
         : []),
       ...(!user?.user?.brandPolicy?.workOrderConsumableConsumeHide
         ? [
-            {
-              accessor: 'consumedQty',
-              Header: 'Consumed Qty',
-              primaryField: true,
-              width: 150,
-              Cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
-            }
-          ]
+          {
+            accessor: 'consumedQty',
+            Header: 'Consumed Qty',
+            primaryField: true,
+            width: 150,
+            Cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
+          }
+        ]
         : [])
     ];
     extracolumns.push({
@@ -348,7 +348,7 @@ const Consumables = ({
           // }
           return res;
         });
-        dispatch({ type: 'initialize', data: rows, count: rows?.lenght });
+        dispatch({ type: 'initialize', data: rows, count: rows?.length });
         dispatch({ type: 'loading', loading: false });
       })
       .catch((error) => {
@@ -393,7 +393,7 @@ const Consumables = ({
   const createNewVersionQuote = async (quoteId, quoteVersionId) => {
     axiosInstance()
       .post(`/quotation/clone-version/${quoteId}/${quoteVersionId}`)
-      .then(() => {})
+      .then(() => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -477,6 +477,18 @@ const Consumables = ({
           )}
           <Box display="flex" ml={'auto'}>
             <Box ml={1}></Box>
+            <ImportExportMenu
+              permissions={permissions?.workOrder}
+              module="consumables"
+              api={`${workOrder.api}/${workOrderId}/consumable`}
+              afterImportCompleted={() => {
+                fetchData();
+              }}
+              isExportAllOrSomeFeature={true}
+              ids={[]}
+              additionalParams={`workOrderIds=${JSON.stringify([workOrderId])}`}
+            />
+            <Box ml={1}></Box>
             {!user?.user?.brandPolicy?.workOrderConsumableConsumeHide && (
               <Button
                 disabled={selectedRecords?.filter((e) => !e?.hideSelection).length === 0}
@@ -523,18 +535,6 @@ const Consumables = ({
                 Delete
               </MenuItem>
             </Menu>
-            <Box ml={1}></Box>
-            <ImportExportMenu
-              permissions={permissions?.workOrder}
-              module="consumables"
-              api={`${workOrder.api}/${workOrderId}/consumable`}
-              afterImportCompleted={() => {
-                fetchData();
-              }}
-              isExportAllOrSomeFeature={true}
-              ids={[]}
-              additionalParams={`workOrderIds=${JSON.stringify([workOrderId])}`}
-            />
           </Box>
         </Box>
       )}

@@ -32,7 +32,6 @@ import ViewSupplierPriceDialog from './ViewSupplierPriceDialog';
 import HtmlTooltip from '../CustomTooltipTitle';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
 import CustomReactTable, { useColumns, useTableReducer } from '../CustomReactTableNew';
-import { generateCustomTableColumns } from 'src/constants/columns';
 
 let levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
 

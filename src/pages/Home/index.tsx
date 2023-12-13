@@ -51,7 +51,6 @@ function Dashboard() {
       allData = entityData.resource;
     }
     allData = allData?.filter((e) => isSectionVisible(e))
-    console.log(allData)
     allData?.forEach((u) => {
       u['resourceLabel'] = u?.homePageLabel || u?.resourceLabel || u?.name;
       u['sectionNameLowerCase'] = u.sectionName?.toLowerCase();

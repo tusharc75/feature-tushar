@@ -8,7 +8,7 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Add from '@material-ui/icons/Add';
-import { quotation, pricingCondition, supplierContact, QUOTATION_TYPE, MATERIAL_TYPE, ASSET_STATUS, SERVICE_TYPE, PRICING_SETUP_TYPE } from '../../../constants/helpers';
+import { quotation, pricingCondition, supplierContact, QUOTATION_TYPE, MATERIAL_TYPE, SERVICE_TYPE, PRICING_SETUP_TYPE } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import QuotationQtyDialog from './QuotationQtyDialog';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
@@ -18,7 +18,7 @@ import { fetch_quotation_product_fields } from 'src/components/Quotation/helper'
 import PriceRequestDialog from './PriceRequestDialog';
 import { ExpandMore } from '@material-ui/icons';
 import AskSupplierPriceDialog from './AskSupplierPriceDialog';
-import { capitalize, startCase, uniqBy } from 'lodash';
+import { capitalize, uniqBy } from 'lodash';
 import LeadTimeDialog from './LeadTimeDialog';
 import DateRangeIcon from '@material-ui/icons/DateRange';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
@@ -745,8 +745,8 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
             refreshGrid={fetchData}
             isClientSideGrid={true}
             onSaveEdit={onSaveInlineEdit}
-          // hideSelection={!allowedToEdit}
-          // expander={true}
+            hideSelection={!allowedToEdit}
+            expander={true}
           />
         </Box>
       ) : (

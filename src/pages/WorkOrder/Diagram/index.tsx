@@ -35,7 +35,7 @@ const Diagram = ({ resource, referenceId }) => {
 
   const fetchData = async () => {
     axiosInstance()
-      .get(`/attachment/resource-attachment-type?resource=${resource}&referenceId=${referenceId}&attachmentType=${ATTACHMENT_TYPE.diagram}`)
+      .get(`/attachment/resource-attachment-type?resource=${resource}&referenceId=${referenceId}&attachmentType=${ATTACHMENT_TYPE.drawing}`)
       .then(({ data: { data } }) => {
         setRowData(data);
         const expend: any = {};
@@ -255,7 +255,7 @@ const Diagram = ({ resource, referenceId }) => {
           fullWidth
         >
           <CustomDialogHeader
-            title={'Show Diagram'}
+            title={'Show Drawing'}
             showManimizeMaximize={false}
             showRequiredLabel={false}
             onClose={() => {
@@ -301,7 +301,7 @@ const Diagram = ({ resource, referenceId }) => {
             }}
             showManimizeMaximize={true}
             fetchData={fetchData}
-            defaultAttachmentType={ATTACHMENT_TYPE.diagram}
+            defaultAttachmentType={ATTACHMENT_TYPE.drawing}
           />
         </Dialog>
       )}

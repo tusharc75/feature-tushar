@@ -310,7 +310,7 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
             }
             else if (action === subleaseActions.createReceivingTicket) {
                 if (e.hasOwnProperty('ReceivingTicketId')) {
-                    errorMessages.push({ index: e.index, message: subleaseMessage.loadingAlreadyCreated });
+                    errorMessages.push({ index: e.index, message: subleaseMessage.receivingAlreadyCreated });
                 }
             }
             else if (action === subleaseActions.deliveredToWarehouse) {
@@ -406,7 +406,7 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
             </Box>
             <Grid item xs={12} md={12} sm={12} className="mt-3">
                 {columns ? (
-                    <Box zIndex={5} width={'100%'}>
+                    <Box zIndex={5}>
                         <CustomReactTable
                             height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
                             columns={columns}

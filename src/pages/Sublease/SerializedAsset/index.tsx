@@ -8,7 +8,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { flattenArray } from 'src/constants/columns';
-import { ASSET_STATUS, sublease, treeToFlatArray } from 'src/constants/helpers';
+import { ASSET_STATUS, DELIVERY_TICKET_REFERENCE_TYPE, DELIVERY_TICKET_TYPE, deliveryTicket, sublease, treeToFlatArray } from 'src/constants/helpers';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -60,8 +60,7 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
                 accessor: 'type',
                 Header: 'Type',
                 sticky: isMobile || isTablet ? 'none' : 'left',
-                disableFilters: true,
-                width: 200,
+                width: 100,
                 Cell: ({ row }) =>
                     row.original['type'] ? (
                         <p>
@@ -74,8 +73,9 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
             {
                 accessor: 'detail',
                 Header: 'Details',
-                width: 300,
+                width: 200,
                 disabled: true,
+                sticky: isMobile || isTablet ? 'none' : 'left',
                 Cell: ({ row }) => (
                     <div className="d-flex gap-2 align-items-center">
                         <p className="text-truncate" title={row.original.detail}>
@@ -113,39 +113,37 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
             {
                 accessor: 'assets',
                 Header: 'Asset Assigned',
-                disableFilters: false,
+                disableFilters: true,
+                disableSortBy: true,
                 Cell: ({ row }) => getAssetAssignedValues(row)
             }
         ];
         coloum = [...coloum, ...newColumns];
         coloum.push({
             accessor: 'action',
-            Header: 'Action',
+            Header: 'Actions',
             sticky: 'right',
             disableFilters: true,
             canDrag: false,
             Cell: ({ row }) => {
                 return <div>
-                    {
-                        row.original?.type === 'asset' && (
-                            <span className="d-flex align-items-center gap-2">
-                                {allowedToEdit && row?.original?.canRemove && (
-                                    <HtmlTooltip title={`Remove`}>
-                                        <IconButton
-                                            size="small"
-                                            disabled={row.original.status !== ASSET_STATUS.reserved}
-                                            onClick={() => {
-                                                setShowConfirmBox(true);
-                                                setDeleteData([row.original.inventory]);
-                                            }}
-                                        >
-                                            <Delete fontSize="small" color={row.original.status !== ASSET_STATUS.reserved ? 'disabled' : 'error'} />
-                                        </IconButton>
-                                    </HtmlTooltip>
-                                )}
-                            </span>
-                        )
-                    }
+                    {row.original?.type === 'asset' && (
+                        <span className="d-flex align-items-center gap-2">
+                            {allowedToEdit && (
+                                <HtmlTooltip title={`Remove`}>
+                                    <IconButton
+                                        size="small"
+                                        disabled={!row?.original?.canDelete}
+                                        onClick={() => {
+                                            setShowConfirmBox(true);
+                                            setDeleteData([row.original.inventory]);
+                                        }}
+                                    >
+                                        <Delete fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
+                                    </IconButton>
+                                </HtmlTooltip>
+                            )}
+                        </span>)}
                 </div>
             }
         });
@@ -155,32 +153,12 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
 
     const getAssetAssignedValues = (row) => {
         if (row?.original?.type === 'asset' || row?.original?.assetQty === 0) {
-            return ' N/A ';
+            return <div>N/A</div>;
         }
         return (
-            <p>
-                {row?.original?.assetAssignedQty} / {row?.original?.assetQty}
-            </p>
+            <div>{row?.original?.assetAssignedQty} / {row?.original?.assetQty}</div>
         );
     };
-
-    const checkProductInside = (item, material) => {
-        if (item?.type === 'product') {
-            return true;
-        }
-        const child = material?.filter(e => e.parentId === item?._id);
-        if (child?.some(e => e?.type === 'product')) {
-            return true;
-        }
-        if (child?.length) {
-            for (var ele in child) {
-                return checkProductInside(child[ele], material)
-            }
-        }
-        else {
-            return false
-        }
-    }
 
     const fetchRowData = async () => {
         dispatch({ type: 'loading', loading: true });
@@ -193,9 +171,14 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
             const response = await axiosInstance().get(`${sublease.api}/productpackage/${subleaseData._id}`);
             data = response?.data?.data;
 
-            const material = data.material;
-            let rows = data.material.filter((e) => e.parentId === null)?.filter((ele) => checkProductInside(ele, material) === true);
-
+            const { data: { data: loadingTicket } } = await axiosInstance().get(
+                `${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.sublease}&referenceId=${subleaseData._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`
+            );
+            var loadingTicketAssets = []
+            loadingTicket?.forEach(element => {
+                loadingTicketAssets = [...loadingTicketAssets, ...element?.productInventory]
+            });
+            let rows = data.material.filter((e) => !e.parentId);
             rows.forEach((parent, i) => {
                 parent.index = i + 1;
                 parent.detail = `${parent.type === 'service'
@@ -217,7 +200,7 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
                 parent.assetAssignedQty = parent.serializedProduct ? data.inventory?.filter((e) => e._id === parent._id).length : 0;
                 parent.realAssetQty = parent.assetQty;
                 parent.realAssetAssignedQty = parent.assetAssignedQty;
-                parent.subRows = generateNestedData(data.material, data.inventory, parent);
+                parent.subRows = generateNestedData(data.material, data.inventory, parent, loadingTicketAssets);
                 parent.assetQty =
                     parent.subRows.filter((d) => d.type !== 'asset').length === 0
                         ? parent.assetQty
@@ -237,7 +220,6 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
                         parent.subRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0) ||
                         parent.subRows.every((d) => d.isValid)
                         : true;
-
                 if (parent.subRows.length && parent.isValid) {
                     if (parent.subRows.every((d) => d.isValid)) {
                         parent.isValid = true;
@@ -261,7 +243,7 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
         }
     };
 
-    const generateNestedData = (material, inventory, parent) => {
+    const generateNestedData = (material, inventory, parent, loadingTicketAssets) => {
         const subRows: any = [];
         const inventory_result = inventory?.filter((e) => e._id === parent._id);
         inventory_result?.forEach((_inventory, k) => {
@@ -278,12 +260,11 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
                 warehouse: _inventory.inventoryDetail?.warehouse,
                 _id: _inventory.inventory,
                 isValid: _inventory.inventoryDetail?.manualStatus === ASSET_STATUS.reserved ? false : true,
-                canRemove: true
+                canDelete: loadingTicketAssets?.find((e) => e.optionValue === _inventory.inventory) ? false : true
             });
         });
 
         const childProduct: any = material.filter((e) => e.parentId === parent._id);
-        var assetQtySUM = 0;
         var assetAssignedQtySUM = 0;
         childProduct.forEach((_subRow, j) => {
             _subRow.index = parent.index + '.' + (j + 1);
@@ -311,7 +292,7 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
             _subRow.assetAssignedQty = _subRow.serializedProduct ? inventory?.filter((e) => e._id === _subRow._id).length : 0;
             _subRow.realAssetQty = _subRow.type === 'product' || _subRow.type === 'package' ? _subRow.qty * parent.realAssetQty : 0;
             _subRow.realAssetAssignedQty = _subRow.assetAssignedQty;
-            let tempSubRows = generateNestedData(material, inventory, _subRow);
+            let tempSubRows = generateNestedData(material, inventory, _subRow, loadingTicketAssets);
             _subRow.subRows = tempSubRows;
             _subRow.assetQty =
                 tempSubRows.filter((d) => d.type !== 'asset').length === 0
@@ -443,6 +424,8 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
                                 onClose={closeActions}
                             >
                                 <MenuItem
+                                    disabled={selectedRecords?.length && selectedRecords?.filter((e) => e.type === 'asset' && e.canDelete)?.length ===
+                                        selectedRecords?.filter((e) => e.type === 'asset')?.length ? false : true}
                                     onClick={() => {
                                         const inventories = uniqBy(flattenArray(selectedRecords), '_id')?.filter((e) => e.type === 'asset')?.map((e) => e.inventory);
                                         setShowConfirmBox(true);
@@ -460,9 +443,9 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
             <Grid container spacing={2}>
                 <Grid item xs={12} md={12} sm={12}>
                     {columns ? (
-                        <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}>
+                        <Box zIndex={5} >
                             <CustomReactTable
-                                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
+                                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
                                 columns={columns}
                                 state={state}
                                 dispatch={dispatch}
@@ -472,9 +455,10 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
                                     return '';
                                 }}
                                 hideSelection={!allowedToEdit}
-                                hideAction={false}
+                                hideAction={!allowedToEdit}
                                 renderedFrom={renderedFrom}
                                 isClientSideGrid={true}
+                                expander={true}
                             />
                         </Box>
                     ) : (
