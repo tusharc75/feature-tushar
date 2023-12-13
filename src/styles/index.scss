@@ -3787,6 +3787,16 @@ body {
   }
 }
 
+$isPurchaseOrder: #ffcf78;
+$isSublease: #ffe4c0;
+$isTransferAsset: #ecc19c;
+$isAppliedBill: #a8ec9c;
+
+$isPurchaseOrderDark: #754e07;
+$isSubleaseDark: #826325;
+$isTransferAssetDark: #9b6c44;
+$isAppliedBillDark: #234623;
+
 .full-height-details-from {
   @media all and (min-width: 960px) {
     .formdata-v1 {

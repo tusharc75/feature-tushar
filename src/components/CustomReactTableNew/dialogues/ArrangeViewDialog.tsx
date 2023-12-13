@@ -72,7 +72,8 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
     try {
       const data = localStorage.getItem('gridMetaData');
       const gridMetaData = JSON.parse(data || '{}');
-      const hiddenCols = gridMetaData[renderedFrom]?.hide || [];
+      const hiddenCols = gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide?.length ?
+        gridMetaData[renderedFrom]?.hide : columns?.filter((e) => e?.show === false)?.map((m) => m?.id ?? m?.accessor);
       var updatedCols = columns.map((col) => ({
         ...col,
         isVisible: !hiddenCols.includes(col.accessor)

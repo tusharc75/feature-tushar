@@ -42,7 +42,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions }
+    state: { user }
   }: any = useData();
 
   const [isUpdating, setUpdating] = useState(false);
@@ -98,7 +98,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         sticky: isMobile || isTablet ? 'none' : 'left',
         disabled: true,
         width: 200,
-        disableFilters: true,
+        disableFilters : true,
         Cell: ({ row }) =>
           row.original['type'] ? (
             <p>
@@ -108,12 +108,12 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                ? row.original?.packageDetail?.packageType === 'Product'
-                  ? '(Product)'
-                  : '(Service)'
-                : row.original.type === 'service'
-                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                : ''}
+                  ? row.original?.packageDetail?.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === 'service'
+                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                    : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -122,10 +122,10 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
       {
         accessor: 'detail',
         Header: 'Details',
+        disabled : true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
         minWidth: 300,
         width: 300,
-        sticky: isMobile || isTablet ? 'none' : 'left',
-        disabled: true,
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p>{row.original.detail}</p>
@@ -223,6 +223,10 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
   };
 
   const fetchData = async () => {
+
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
+
     let data: any = {};
     let invoicedProducts: any = [];
     let additionalCost: any = [];
@@ -389,24 +393,24 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-          ? parent?.serviceDetail?.serviceName
-          : parent.type === 'serializedAsset'
-          ? parent?.inventoryDetail?.assetNumber
-          : parent.type === 'manualEntry'
-          ? parent?.costType
-          : parent.packageDetail?.packageName;
+            ? parent?.serviceDetail?.serviceName
+            : parent.type === 'serializedAsset'
+              ? parent?.inventoryDetail?.assetNumber
+              : parent.type === 'manualEntry'
+                ? parent?.costType
+                : parent.packageDetail?.packageName;
       parent.description =
         parent.type === 'product'
           ? parent?.productDetail?.productDescription || ''
           : parent.type === 'service'
-          ? parent?.serviceDetail?.serviceDescription || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : parent.type === 'serializedAsset'
-          ? parent?.description || ''
-          : parent.type === 'manualEntry'
-          ? parent?.description
-          : '';
+            ? parent?.serviceDetail?.serviceDescription || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : parent.type === 'serializedAsset'
+                ? parent?.description || ''
+                : parent.type === 'manualEntry'
+                  ? parent?.description
+                  : '';
       parent.qtyDisplay = parent.qty;
       parent.isEditable =
         ['Per Day', 'Per Week', 'Per Month'].includes(parent?.pricingMethod) || parent.type === 'serializedAsset' || parent.type === 'manualEntry'
@@ -426,20 +430,20 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow?.serviceDetail?.serviceName
-          : _subRow.type === 'serializedAsset'
-          ? _subRow?.inventoryDetail?.assetNumber
-          : _subRow?.packageDetail?.packageName;
+            ? _subRow?.serviceDetail?.serviceName
+            : _subRow.type === 'serializedAsset'
+              ? _subRow?.inventoryDetail?.assetNumber
+              : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productDescription || ''
           : _subRow.type === 'service'
-          ? _subRow?.serviceDetail?.serviceDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : _subRow.type === 'serializedAsset'
-          ? _subRow?.description || ''
-          : '';
+            ? _subRow?.serviceDetail?.serviceDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : _subRow.type === 'serializedAsset'
+                ? _subRow?.description || ''
+                : '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.isEditable = ['Per Day', 'Per Week', 'Per Month'].includes(_subRow?.pricingMethod) ? false : true;
       _subRow.subRows = generateNestedData(material, _subRow);
@@ -741,9 +745,9 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
               </Grid>
             </MuiPickersUtilsProvider>
             {columns ? (
-              <Box zIndex={5} width={'100%'} height={'calc(100vh - 200px)'} p={1}>
+              <Box zIndex={5} p={1}>
                 <CustomReactTable
-                  height={'calc(100vh - 200px)'}
+                  height={'calc(100vh - 250px)'}
                   columns={columns}
                   state={state}
                   dispatch={dispatch}
@@ -782,8 +786,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
               !appliedDate
                 ? 'Please select items and apply end date'
                 : rowsApplied?.some((d) => d.invalidDate === true)
-                ? 'Please select an appropriate date !'
-                : 'Create Bill'
+                  ? 'Please select an appropriate date !'
+                  : 'Create Bill'
             }
           >
             <span>

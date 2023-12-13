@@ -13,7 +13,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
-import {  Delete, ExpandMore } from '@material-ui/icons';
+import { Delete, ExpandMore } from '@material-ui/icons';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
@@ -34,10 +34,10 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
   const [isLoadingUpdate, setIsLoadingUpdate] = useState(false);
   const [isProductEdit, setIsProductEdit] = useState({ open: false, rowData: null });
   const [viewBillDialogConfirm, setViewBillDialogConfirm] = useState({ open: false, rows: [] });
-
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
+
 
   useEffect(() => {
     fetchFields();
@@ -87,12 +87,12 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
                     ? '(Serialized)'
                     : '(Non-Serialized)'
                   : row.original?.type === 'package'
-                  ? row.original?.packageDetail.packageType === 'Product'
-                    ? '(Product)'
-                    : '(Service)'
-                  : row.original.type === 'service'
-                  ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                  : ''}
+                    ? row.original?.packageDetail.packageType === 'Product'
+                      ? '(Product)'
+                      : '(Service)'
+                    : row.original.type === 'service'
+                      ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                      : ''}
               </p>
             ) : (
               <NoDataCell />
@@ -102,9 +102,9 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
           accessor: 'detail',
           Header: 'Details',
           minWidth: 300,
+          disabled : true,
           width: 300,
           sticky: isMobile || isTablet ? 'none' : 'left',
-          disabled: true,
           Cell: ({ row }) => (
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <p className="text-truncate" title={row.original?.detail}>
@@ -203,25 +203,24 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === 'product'
-          ? parent.productDetail?.productName
-          : parent.type === 'package'
+      parent.detail = `${parent.type === 'product'
+        ? parent.productDetail?.productName
+        : parent.type === 'package'
           ? parent.packageDetail?.packageName
           : parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail?.assetNumber
-          : parent.serviceDetail?.serviceName
-      }`;
+            ? parent.serializedAssetDetail?.assetNumber
+            : parent.serviceDetail?.serviceName
+        }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDescription || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : parent.type === 'serializedAsset'
-          ? `${parent.serializedAssetDetail?.product?.optionLabel}-${parent.serializedAssetDetail?.product?.productDescription || ''}`
-          : '';
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : parent.type === 'serializedAsset'
+                ? `${parent.serializedAssetDetail?.product?.optionLabel}-${parent.serializedAssetDetail?.product?.productDescription || ''}`
+                : '';
       parent.isEditable = ['Per Day', 'Per Week', 'Per Month'].includes(parent?.pricingMethod) ? false : true;
       parent.qtyDisplay = parent.qty;
       parent.subRows = generateNestedData(data.material, parent);
@@ -246,25 +245,24 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${
-        _subRow?.type === 'product'
-          ? _subRow?.productDetail?.productName
-          : _subRow?.type === 'package'
+      _subRow.detail = `${_subRow?.type === 'product'
+        ? _subRow?.productDetail?.productName
+        : _subRow?.type === 'package'
           ? _subRow?.packageDetail?.packageName
           : _subRow?.type === 'serializedAsset'
-          ? _subRow?.serializedAssetDetail?.assetNumber
-          : _subRow?.serviceDetail?.serviceName
-      }`;
+            ? _subRow?.serializedAssetDetail?.assetNumber
+            : _subRow?.serviceDetail?.serviceName
+        }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : _subRow.type === 'serializedAsset'
-          ? _subRow.serializedAssetDetail?.product?.productDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : _subRow.type === 'serializedAsset'
+                ? _subRow.serializedAssetDetail?.product?.productDescription || ''
+                : '';
       _subRow.isEditable = false;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.subRows = generateNestedData(material, _subRow);
@@ -381,20 +379,18 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
               </Box>
             </Box>
             {columns ? (
-              <Box zIndex={5} width={'100%'} height={'calc(100vh - 200px)'} p={1}>
-                <CustomReactTable
-                  height={'calc(100vh - 200px)'}
-                  columns={columns}
-                  state={state}
-                  dispatch={dispatch}
-                  refreshGrid={fetchData}
-                  hideSelection={false}
-                  hideAction={false}
-                  renderedFrom={renderedFrom}
-                  isClientSideGrid={true}
-                  expander={true}
-                />
-              </Box>
+              <CustomReactTable
+                height={'calc(100vh - 250px)'}
+                columns={columns}
+                state={state}
+                dispatch={dispatch}
+                refreshGrid={fetchData}
+                hideSelection={false}
+                hideAction={false}
+                renderedFrom={renderedFrom}
+                isClientSideGrid={true}
+                expander={true}
+              />
             ) : (
               <Box p={2} height={500}>
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />

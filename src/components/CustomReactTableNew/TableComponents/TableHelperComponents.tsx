@@ -21,6 +21,7 @@ export type TColType = {
   primaryField?: undefined | boolean;
   id: string;
   isVisible: undefined | boolean;
+  show: undefined | boolean;
 } & ColumnDef<any>;
 
 // Editable Cell input
@@ -390,9 +391,8 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
         <div className={`d-flex gap-2 align-items-center ${column.id === 'selection' ? 'justify-center' : 'justify-between'}`}>
           <div className="line-clamp-1">
             <span
-              className={`overflow-hidden overflow-ellipsis whitespace-normal ${
-                header.column.getCanSort() && columnDef.disableSortBy !== true ? 'cursor-pointer' : ''
-              }`}
+              className={`overflow-hidden overflow-ellipsis whitespace-normal ${header.column.getCanSort() && columnDef.disableSortBy !== true ? 'cursor-pointer' : ''
+                }`}
               onClick={header.column.getToggleSortingHandler()}
             >
               {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}

@@ -182,6 +182,8 @@ const CustomReactTable = ({
             hColumns.push(n);
           }
           setHiddenColumns(hColumns);
+        } else {
+          setHiddenColumns(newColumns?.filter((e) => e?.show === false).map((m) => m?.id ?? m?.accessor));
         }
         if (gridMetaData && gridMetaData[renderedFrom]?.order && gridMetaData[renderedFrom]?.order?.length) {
           const colOrder = gridMetaData[renderedFrom]?.order || [];

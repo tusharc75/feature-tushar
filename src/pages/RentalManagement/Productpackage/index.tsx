@@ -579,7 +579,6 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
     setAddAnchorEl(null);
   };
 
-  console.log(dataRows)
   return (
     <Fragment>
       <Box display="flex" justifyContent="space-between" m={1}>
@@ -719,9 +718,9 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
       </Box>
 
       {columns ? (
-        <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}>
+        <Box zIndex={5}>
           <CustomReactTable
-            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 420px)'}
+            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
             columns={columns}
             state={state}
             dispatch={dispatch}
