@@ -342,7 +342,7 @@ const Technician = ({
         </Grid>
         <Grid item xs={12} md={12} sm={12}>
           {columns ? (
-            <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}>
+            <Box zIndex={5}>
               <CustomReactTable
                 height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
                 columns={columns}

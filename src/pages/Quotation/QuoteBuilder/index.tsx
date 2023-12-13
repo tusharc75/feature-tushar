@@ -309,7 +309,7 @@ const QuoteBuilder = ({
 
   return (
     <Fragment>
-      <Box m={1} className="flex justify-between flex-wrap gap-2">
+      <Box m={1} mb={0} className="flex justify-between flex-wrap gap-2">
         <Box className="flex md:w-[unset] w-full">
           <SendEmail
             quotationData={quotationData}

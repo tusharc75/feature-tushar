@@ -211,18 +211,18 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
         parent.type === 'product'
           ? parent?.productDetail?.productName
           : parent.type === 'service'
-          ? parent?.serviceDetail?.serviceName
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageName
-          : parent?.description;
+            ? parent?.serviceDetail?.serviceName
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageName
+              : parent?.description;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDescription || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : parent?.description;
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : parent?.description;
       parent.qtyDisplay = parent.qty;
       parent.subRows = generateNestedData(data, parent);
     });
@@ -243,18 +243,18 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow?.serviceDetail?.serviceName
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageName
-          : _subRow?.description;
+            ? _subRow?.serviceDetail?.serviceName
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageName
+              : _subRow?.description;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : _subRow?.description || '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : _subRow?.description || '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty} `;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
@@ -324,7 +324,7 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
     setDeleteData(obj);
   };
 
-  const handleAssignAssets = (data) => {};
+  const handleAssignAssets = (data) => { };
 
   return (
     <Fragment>
@@ -394,7 +394,7 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
         )}
         <Grid item xs={12} md={12} sm={12}>
           {columns ? (
-            <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}>
+            <Box zIndex={5}>
               <CustomReactTable
                 height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
                 columns={columns}
