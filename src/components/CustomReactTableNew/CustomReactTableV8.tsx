@@ -385,7 +385,7 @@ const CustomReactTable = ({
     enablePinning: true,
     autoResetPageIndex,
     enableFilters: true,
-
+    getRowId: (row) => row._id,
     initialState: {
       columnVisibility: getVisibleColumns()
     },
@@ -445,37 +445,25 @@ const CustomReactTable = ({
 
   // For row selection
   useEffect(() => {
-    const selectedRows = table.getSelectedRowModel().flatRows.map((d) => {
+    const selectedRowIds = Object.keys(rowSelection);
+
+    const currentPageSelectedRows = table.getSelectedRowModel().flatRows.map((d) => {
       const { subRows, ...rest } = d.original;
       return { ...rest };
     });
+    const totalSelectedRows = [...currentPageSelectedRows, ...selectedRecords];
+
+    const newData = [];
+    for (const rowId of selectedRowIds) {
+      const data = totalSelectedRows.find((d) => d._id === rowId);
+      newData.push(data);
+    }
+
     dispatch({
       type: 'selection',
-      selectedRecords: selectedRows
+      selectedRecords: [...new Set(newData)]
     });
-  }, [rowSelection, renderedFrom, table]);
-
-  // Row selection effect for parent component;
-  useEffect(() => {
-    const selectedRows = table.getSelectedRowModel().flatRows;
-    const selectedRecordIds = selectedRecords.map((d) => d._id);
-
-    if (selectedRecords.length === 0) {
-      table.resetRowSelection();
-    }
-
-    if (selectedRecords.length !== selectedRows.length) {
-      for (const row of rows) {
-        if (!selectedRecordIds.includes(row.original._id)) {
-          if (row.getIsSelected()) {
-            row.toggleSelected(false);
-          }
-          continue;
-        }
-        row.toggleSelected(true);
-      }
-    }
-  }, [selectedRecords, rows.length]);
+  }, [rowSelection]);
 
   return (
     <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
