@@ -378,15 +378,7 @@ const CustomReactTable = ({
     filterFns: {
       fuzzy: fuzzyFilter
     },
-    defaultColumn: defaultColumn,
-    columnResizeMode: 'onChange',
-    enableHiding: true,
-    enableExpanding: expander,
-    enableRowSelection: !hideSelection,
-    enablePinning: true,
     autoResetPageIndex,
-    enableFilters: true,
-    getRowId: (row) => row._id,
     initialState: {
       columnVisibility: getVisibleColumns()
     },
@@ -399,15 +391,32 @@ const CustomReactTable = ({
       columnVisibility: getVisibleColumns(),
       rowSelection
     },
+    // flags
+    enableExpanding: expander,
+    enableRowSelection: !hideSelection,
+    enableHiding: true,
+    enablePinning: true,
+    enableFilters: true,
+    enableColumnResizing: true,
+    columnResizeMode: 'onChange',
+
+    // custom functions
+    globalFilterFn: fuzzyFilter,
+    defaultColumn: defaultColumn,
+
+    // state setter
     onExpandedChange: setExpanded,
     onRowSelectionChange: setRowSelection,
-    getSubRows: (row) => row[childrenProperty],
-    globalFilterFn: fuzzyFilter,
     onSortingChange: setSorting,
     onColumnOrderChange: setColumnOrder,
     onColumnFiltersChange: setColumnFilters,
     onGlobalFilterChange: setGlobalFilter,
-    enableColumnResizing: true,
+
+    // accessors
+    getRowId: (row) => row._id,
+    getSubRows: (row) => row[childrenProperty],
+
+    // table models
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
