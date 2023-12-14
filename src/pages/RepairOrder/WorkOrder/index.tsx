@@ -446,24 +446,26 @@ const WorkOrder = ({
     if (deleteData?.some((e) => [MATERIAL_TYPE.product, MATERIAL_TYPE.service, MATERIAL_TYPE.package]?.includes(e.type))) {
       setDeleting(true);
 
-      let workOrderId = '';
-      if (deleteData.length > 0) {
-        workOrderId = deleteData[0]?.workOrder?._id;
-      }
-      const products = deleteData?.filter((e) => e.type === MATERIAL_TYPE.product);
-      if (products?.length) {
-        const ids = products?.map((r) => r?._id);
-        await axiosInstance().put(`${workOrder.api}/${workOrderId}/consumable/remove`, { ids: ids || [] });
-      }
-      const servicePackage = deleteData?.filter((e) => [MATERIAL_TYPE.service, MATERIAL_TYPE.package]?.includes(e.type));
-      if (servicePackage?.length) {
-        const ids = servicePackage?.map((e) => e?.uniqueId);
-        await axiosInstance().put(`${workOrder.api}/service/${workOrderId}/remove`, { uniqueIds: ids });
+      const records: any = [];
 
-        if (isPostWorkService && repairOrderData?.type === REPAIR_ORDER_TYPE.external) {
-          setReviseQuotation(true);
+      deleteData?.forEach((data) => {
+        const index = records?.findIndex((d) => d?.workOrder === data?.workOrder?._id);
+        if (index >= 0) {
+          records[index].ids = [...records[index].ids, data?._id];
+        } else {
+          records.push({
+            workOrder: data?.workOrder?._id,
+            ids: [data?._id]
+          });
         }
+      });
+
+      await axiosInstance().put(`${workOrder.api}/remove-work-orders-material`, records);
+
+      if (deleteData?.filter((e) => [MATERIAL_TYPE.service, MATERIAL_TYPE.package]?.includes(e.type))?.length && isPostWorkService && repairOrderData?.type === REPAIR_ORDER_TYPE.external) {
+        setReviseQuotation(true);
       }
+
       setDeleting(false);
       setShowConfirmBox(false);
       fetchData();
@@ -962,7 +964,7 @@ const WorkOrder = ({
                   setShowConfirmBox(true);
                   closeActions();
                 }}
-                disabled={checkUniqWorkOrder() && selectedRecords?.some((e) => e?.canDelete) ? false : true}
+                disabled={selectedRecords?.some((e) => e?.canDelete) ? false : true}
               >
                 Delete
               </MenuItem>
