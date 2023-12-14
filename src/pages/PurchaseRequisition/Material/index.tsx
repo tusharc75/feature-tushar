@@ -1,13 +1,13 @@
 import { Box, Button, IconButton, makeStyles, Grid, Menu, MenuItem } from '@material-ui/core';
-import {  ExpandMore } from '@material-ui/icons';
+import { ExpandMore } from '@material-ui/icons';
 import { startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
-import { isMobile ,isTablet} from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import routes from 'src/components/Helpers/Routes';
-import {  flattenArray } from 'src/constants/columns';
+import { flattenArray } from 'src/constants/columns';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -45,7 +45,7 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
   const [addAnchorEl, setAddAnchorEl] = useState(null);
 
   const [isSubmitting, setSubmitting] = useState(false);
-  
+
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
 
@@ -61,7 +61,7 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
     var data = response?.data?.data;
     data = CURReplaceByCurrencySingle(data, purchaseRequisitionData?.currency);
     setAllFields(data);
-    const newColumns = generateColumns(renderedFrom , data, null , false , purchaseRequisitionData?.currency);
+    const newColumns = generateColumns(renderedFrom, data, null, false, purchaseRequisitionData?.currency);
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';
@@ -93,7 +93,7 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
         accessor: 'detail',
         Header: 'Detail',
         minWidth: 300,
-        // width: 300,
+        width: 300,
         disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row, table }) => (
@@ -105,7 +105,7 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
                     open: true,
                     data: row.original,
                     bulkedit: false,
-                    showSaveAndNext: row?.index < table?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
+                    showSaveAndNext: row?.index < table.getRowModel().rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
                   });
                 }}
                 className="link text-truncate"
@@ -138,21 +138,19 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
       {
         accessor: 'description',
         Header: 'Description',
-        // width: 200,
-        disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => {
           return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
         }
       }
-      
+
     ];
     coloum = [...coloum, ...newColumns];
     coloum.push({
       accessor: 'action',
       Header: 'Actions',
       minWidth: 100,
-      // width: 100,
+      width: 100,
       sticky: 'right',
       disableFilters: true,
       disableSortBy: true,
@@ -162,27 +160,25 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
           <IconButton
             size="small"
             aria-label="Details"
-            disabled={allowedToEdit ? false : true}
+            disabled={!allowedToEdit}
             onClick={() => {
-              onMaterialEdit(row, table);
+              onMaterialEdit(row, table.getRowModel().rows);
             }}
           >
             <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
           </IconButton>
-          {allowedToEdit && (
-            <Grid container spacing={1}>
-              <IconButton
-                size="small"
-                aria-label="Details"
-                onClick={() => {
-                  const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                  setDeleteData(obj);
-                }}
-              >
-                <DeleteIcon fontSize="small" color="error" />
-              </IconButton>
-            </Grid>
-          )}
+          <IconButton
+            size="small"
+            aria-label="Details"
+            disabled={!allowedToEdit}
+
+            onClick={() => {
+              const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+              setDeleteData(obj);
+            }}
+          >
+            <DeleteIcon fontSize="small" color={allowedToEdit ? 'error' : 'disabled'} />
+          </IconButton>
         </>
       )
     });
@@ -210,10 +206,10 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
       parent.qtyDisplay = parent.qty;
     });
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
-    dispatch({ type: 'loading', loading: false });  
+    dispatch({ type: 'loading', loading: false });
   };
 
-  
+
   const onMaterialEdit = (row, rows) => {
     setMaterialEdit({
       open: true,
@@ -357,7 +353,7 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
                   setAddDialog({ open: true, type: 'product', parentId: null });
                 }}
               >
-                Add Products
+                Add Existing Products
               </MenuItem>
               <MenuItem
                 onClick={() => {
@@ -365,7 +361,7 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
                   setAddDialog({ open: true, type: 'service', parentId: null });
                 }}
               >
-                Add Services
+                Add Existing Services
               </MenuItem>
             </Menu>
           </Box>
@@ -429,19 +425,19 @@ const Material = ({ renderedFrom, allowedToEdit, purchaseRequisitionData }) => {
         </Box>
       )}
       {columns ? (
-        <Box p="6px" zIndex={5} width={'100%'} >
+        <Box zIndex={5} >
           <CustomReactTable
-            height={'calc(100vh - 345px)'}
+            height={'calc(100vh - 300px)'}
             columns={columns}
             state={state}
             dispatch={dispatch}
             refreshGrid={fetchData}
-            setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
             hideSelection={!allowedToEdit}
             hideAction={!allowedToEdit}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
             onSaveEdit={onSaveInlineEdit}
+            expander={true}
           />
         </Box>
       ) : (

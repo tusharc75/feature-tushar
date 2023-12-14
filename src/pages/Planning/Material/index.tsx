@@ -7,12 +7,11 @@ import axiosInstance from 'src/axios/axiosInstance';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import routes from 'src/components/Helpers/Routes';
-import {  flattenArray } from 'src/constants/columns';
+import { flattenArray } from 'src/constants/columns';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -64,7 +63,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
     var data = response?.data?.data;
     data = CURReplaceByCurrencySingle(data, planningData?.currency);
     setAllFields(data);
-    const newColumns = generateColumns(renderedFrom ,data,null ,false, planningData?.currency);
+    const newColumns = generateColumns(renderedFrom, data, null, false, planningData?.currency);
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';
@@ -96,12 +95,12 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                ? row.original?.packageDetail?.packageType === 'Product'
-                  ? '(Product)'
-                  : '(Service)'
-                : row.original.type === 'service'
-                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                : ''}
+                  ? row.original?.packageDetail?.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === 'service'
+                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                    : ''}
             </Box>
           </div>
         )
@@ -122,7 +121,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
                     open: true,
                     data: row.original,
                     bulkedit: false,
-                    showSaveAndNext: row?.index < table?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
+                    showSaveAndNext: row?.index < table.getRowModel().rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
                   });
                 }}
                 className="link text-truncate"
@@ -198,27 +197,24 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
           <IconButton
             size="small"
             aria-label="Details"
-            disabled={allowedToEdit ? false : true}
+            disabled={!allowedToEdit}
             onClick={() => {
-              onMaterialEdit(row, table);
+              onMaterialEdit(row, table.getRowModel().rows);
             }}
           >
             <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
           </IconButton>
-          {allowedToEdit && (
-            <Grid container spacing={1}>
-              <IconButton
-                size="small"
-                aria-label="Details"
-                onClick={() => {
-                  const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                  setDeleteData(obj);
-                }}
-              >
-                <DeleteIcon fontSize="small" color="error" />
-              </IconButton>
-            </Grid>
-          )}
+          <IconButton
+            size="small"
+            aria-label="Details"
+            disabled={!allowedToEdit}
+            onClick={() => {
+              const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+              setDeleteData(obj);
+            }}
+          >
+            <DeleteIcon fontSize="small" color={allowedToEdit ? 'error' : 'disabled'} />
+          </IconButton>
         </>
       )
     });
@@ -244,21 +240,21 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
         parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'package'
-          ? parent.packageDetail?.packageName
-          : parent.serviceDetail?.serviceName;
+            ? parent.packageDetail?.packageName
+            : parent.serviceDetail?.serviceName;
       parent.description =
         parent.type === 'product'
           ? parent?.productDetail?.productDescription
           : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription
-          : parent?.serviceDetail?.serviceDescription;
+            ? parent?.packageDetail?.packageDescription
+            : parent?.serviceDetail?.serviceDescription;
       parent.qty = parent.qty;
       parent.qtyDisplay = parent.qty;
       parent.assetQty = data.material?.filter((i) => i.parentId === parent._id && i.type === 'serializedAsset')?.length;
       parent.hideSelection = false;
       parent.subRows = generateNestedData(data.material, parent);
     });
-    
+
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
   };
@@ -280,18 +276,18 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
         _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'package'
-          ? _subRow.packageDetail?.packageName
-          : _subRow.type === 'serializedAsset'
-          ? _subRow.assetDetail.assetNumber
-          : _subRow.serviceDetail?.serviceName;
+            ? _subRow.packageDetail?.packageName
+            : _subRow.type === 'serializedAsset'
+              ? _subRow.assetDetail.assetNumber
+              : _subRow.serviceDetail?.serviceName;
       _subRow.description =
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productDescription
           : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription
-          : _subRow.type === 'serializedAsset'
-          ? parent.description
-          : _subRow?.serviceDetail?.serviceDescription;
+            ? _subRow?.packageDetail?.packageDescription
+            : _subRow.type === 'serializedAsset'
+              ? parent.description
+              : _subRow?.serviceDetail?.serviceDescription;
       _subRow.qty = _subRow.qty;
       _subRow.assetQty = material?.filter((i) => i.parentId === _subRow._id && i.type === 'serializedAsset')?.length;
       _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
@@ -548,19 +544,19 @@ const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
         </Box>
       </Box>
       {columns && dataRows ? (
-        <Box p="6px" zIndex={5} width={'100%'}>
-           <CustomReactTable
-            height={'calc(100vh - 200px)'}
+        <Box zIndex={5} width={'100%'}>
+          <CustomReactTable
+            height={'calc(100vh - 300px)'}
             columns={columns}
             state={state}
             dispatch={dispatch}
             refreshGrid={fetchData}
-            setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
             hideSelection={!allowedToEdit}
             hideAction={!allowedToEdit}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
             onSaveEdit={onSaveInlineEdit}
+            expander={true}
           />
         </Box>
       ) : (
