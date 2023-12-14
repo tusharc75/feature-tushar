@@ -31,7 +31,7 @@ import { fuzzyFilter } from './ReactTableHelpers';
 import { defaultColumn } from './TableComponents/TableHelperComponents';
 import { useCreateColumns } from './hooks/useCreateColumns';
 import type { TInitialState } from './hooks/useTableReducer';
-import { childrenProperty, getDataFromLocalStorage, getStickyColumnNames, updateGridHiddenColumns, useSkipper } from './utils';
+import { childrenProperty, getDataFromLocalStorage, getStickyColumnNames, getUniqueDataByKey, updateGridHiddenColumns, useSkipper } from './utils';
 import TableComponent from './TableComponents/Table';
 
 const CustomReactTable = ({
@@ -58,7 +58,6 @@ const CustomReactTable = ({
   virtualization = false,
   showArrangeView = true
 }) => {
-
   const {
     currentEditingCellPosition,
     dataRows: data,
@@ -136,7 +135,6 @@ const CustomReactTable = ({
       cellPosition: null
     });
   };
-
 
   // For Column Order and hidden columns
   useEffect(() => {
@@ -364,15 +362,7 @@ const CustomReactTable = ({
     filterFns: {
       fuzzy: fuzzyFilter
     },
-    defaultColumn: defaultColumn,
-    columnResizeMode: 'onChange',
-    enableHiding: true,
-    enableExpanding: expander,
-    enableRowSelection: !hideSelection,
-    enablePinning: true,
     autoResetPageIndex,
-    enableFilters: true,
-    getRowId: (row) => row._id,
     initialState: {
       columnVisibility: getVisibleColumns()
     },
@@ -385,15 +375,32 @@ const CustomReactTable = ({
       columnVisibility: getVisibleColumns(),
       rowSelection
     },
+    // flags
+    enableExpanding: expander,
+    enableRowSelection: !hideSelection,
+    enableHiding: true,
+    enablePinning: true,
+    enableFilters: true,
+    enableColumnResizing: true,
+    columnResizeMode: 'onChange',
+
+    // custom functions
+    globalFilterFn: fuzzyFilter,
+    defaultColumn: defaultColumn,
+
+    // state setter
     onExpandedChange: setExpanded,
     onRowSelectionChange: setRowSelection,
-    getSubRows: (row) => row[childrenProperty],
-    globalFilterFn: fuzzyFilter,
     onSortingChange: setSorting,
     onColumnOrderChange: setColumnOrder,
     onColumnFiltersChange: setColumnFilters,
     onGlobalFilterChange: setGlobalFilter,
-    enableColumnResizing: true,
+
+    // accessors
+    getRowId: (row) => row._id,
+    getSubRows: (row) => row[childrenProperty],
+
+    // table models
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -433,17 +440,14 @@ const CustomReactTable = ({
   // For row selection
   useEffect(() => {
     const selectedRowIds = Object.keys(rowSelection);
-
     const currentPageSelectedRows = table.getSelectedRowModel().flatRows.map((d) => {
       const { subRows, ...rest } = d.original;
       return { ...rest };
     });
-    const totalSelectedRows = [...currentPageSelectedRows, ...selectedRecords];
-
+    const testData = getUniqueDataByKey([...currentPageSelectedRows, ...selectedRecords]);
     const newData = [];
-    for (const rowId of selectedRowIds) {
-      const data = totalSelectedRows.find((d) => d._id === rowId);
-      newData.push(data);
+    for (const data of testData) {
+      if (selectedRowIds.includes(data._id)) newData.push(data);
     }
 
     if (onSelect) onSelect(newData);
@@ -499,7 +503,10 @@ const CustomReactTable = ({
             <div className="relative">
               {!loading && !error && rows.length === 0 && (
                 <>
-                  <Box style={{ height: `calc(${height ?? '100%'} - 60px)` }} className="w-full h-full absolute inset-0 top-[46px] flex justify-center items-center -z-10">
+                  <Box
+                    style={{ height: `calc(${height ?? '100%'} - 60px)` }}
+                    className="w-full h-full absolute inset-0 top-[46px] flex justify-center items-center -z-10"
+                  >
                     <div className=" px-10 py-5 rounded-lg text-center">
                       <p>No data found</p>
                     </div>
