@@ -87,6 +87,9 @@ const IssueCertificateDialog = ({ onClose, onSuccess, assetId, certificateExpiry
     if (moment(values.issueDate) > moment(values.expiryDate)) {
       errors['expiryDate'] = 'Expiry date must greater then Issue date';
     }
+    if(certificateExpiryDate && moment(values.issueDate) < moment(certificateExpiryDate)){
+      errors['issueDate'] = 'Issue date must greater then Certificate expiry date';
+    }
     return errors;
   }
 
