@@ -122,9 +122,10 @@ const ProductionOrderDetails = () => {
         if (user?.role?.selectedEntity?.superAdminAccess) {
           isAllowedToEdit = true;
         }
-        if (!data?.customerAccount) {
-          setProductionOrderProcessSteps(productionOrderSteps.filter((o) => o.name !== 'Loading Ticket'));
-        }
+        setProductionOrderProcessSteps(productionOrderSteps.filter((o) => o.name !== 'Loading Ticket'));
+        // if (!data?.customerAccount) {
+        //   setProductionOrderProcessSteps(productionOrderSteps.filter((o) => o.name !== 'Loading Ticket'));
+        // }
         setAllowedToEdit(isAllowedToEdit);
         setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
         setProductionOrderData({ ...data });
