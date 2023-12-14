@@ -6,7 +6,7 @@ import { flatMapDeep } from 'lodash';
 import moment from 'moment';
 import { Box, IconButton } from '@material-ui/core';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import SignatureCell from 'src/components/Helpers/SignatureCell';
+import SignatureCell from 'src/components/CustomReactTableNew/Cells/SignatureCell';
 
 export const headerName = {
   firstName: 'Name'
