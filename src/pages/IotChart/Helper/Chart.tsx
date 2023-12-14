@@ -10,6 +10,17 @@ import FilterAlertModel from './FilterAlertModel';
 import { useAppTheme } from 'src/constants/AppConfig';
 import moment from 'moment';
 import { dateTimeFormat24Hours } from 'src/constants/helpers';
+
+ 
+const downloadIconHTML = `<div>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ico-download">
+<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+<polyline points="7 10 12 15 17 10"></polyline>
+<line x1="12" y1="15" x2="12" y2="3"></line>
+</svg>
+<div/>
+`;
+ 
 const Chart = ({ dateFilters, assetId, dataPoints }) => {
   const toastConfig = useContext(CustomToastContext);
   const [chartData, setChartData] = useState(null);
@@ -18,7 +29,7 @@ const Chart = ({ dateFilters, assetId, dataPoints }) => {
   const [highLowData, setHighLowData] = useState([]);
   const [currentChartTheme, setCurrentChartTheme] = useState('light');
   const [themeColor] = useAppTheme();
-
+ 
   const [options, setOptions] = useState<ApexOptions>({
     theme: {
       mode: 'light',
@@ -37,7 +48,10 @@ const Chart = ({ dateFilters, assetId, dataPoints }) => {
         autoScaleYaxis: true
       },
       toolbar: {
-        autoSelected: 'zoom'
+        autoSelected: 'zoom',
+        tools:{
+          download: downloadIconHTML
+        }
       }
     },
     dataLabels: {
@@ -86,13 +100,13 @@ const Chart = ({ dateFilters, assetId, dataPoints }) => {
       points: []
     }
   });
-
+ 
   useEffect(() => {
     if (!isEmpty(dataPoints)) {
       fetchData();
     }
   }, [assetId, dataPoints, dateFilters]);
-
+ 
   useEffect(() => {
     let data = highLowData;
     if (!showHighLow) data = [];
@@ -104,7 +118,7 @@ const Chart = ({ dateFilters, assetId, dataPoints }) => {
       }
     });
   }, [showHighLow]);
-
+ 
   useEffect(() => {
     setOptions((prevOptions) => {
       const newOptions = { ...prevOptions };
@@ -118,7 +132,7 @@ const Chart = ({ dateFilters, assetId, dataPoints }) => {
     });
     setCurrentChartTheme(themeColor);
   }, [themeColor]);
-
+ 
   const fetchData = () => {
     let api = `/report/iot/data-points`;
     let param = {
@@ -175,7 +189,7 @@ const Chart = ({ dateFilters, assetId, dataPoints }) => {
         toastConfig.setToastConfig(error);
       });
   };
-
+ 
   const fetchAlert = () => {
     if (alert) {
       let api = `/report/iot/asset-error-message?asset=${assetId}&from_date=${new Date(dateFilters.from).toISOString()}&to_date=${new Date(
@@ -248,11 +262,11 @@ const Chart = ({ dateFilters, assetId, dataPoints }) => {
       });
     }
   };
-
+ 
   useEffect(() => {
     fetchAlert();
   }, [alert, assetId, dateFilters]);
-
+ 
   return (
     <>
       {' '}
@@ -275,5 +289,6 @@ const Chart = ({ dateFilters, assetId, dataPoints }) => {
     </>
   );
 };
-
+ 
 export default Chart;
+ 
