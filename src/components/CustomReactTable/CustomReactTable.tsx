@@ -1,4 +1,4 @@
-import { Box, useMediaQuery } from '@material-ui/core';
+import { Box, CircularProgress, useMediaQuery } from '@material-ui/core';
 import {
   ExpandedState,
   getCoreRowModel,
