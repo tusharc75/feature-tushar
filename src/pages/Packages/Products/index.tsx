@@ -11,7 +11,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { camelCase, startCase } from 'lodash';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';

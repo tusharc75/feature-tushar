@@ -1,7 +1,7 @@
 import Box from '@material-ui/core/Box/Box';
 import { useEffect } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
 import { dateFormat, gridLoadingTimeout, productInventory } from 'src/constants/helpers';

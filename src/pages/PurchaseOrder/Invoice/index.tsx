@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
 import { Box, Button, IconButton } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import { purchaseOrder, gridLoadingTimeout, dateTimeFormat } from '../../../constants/helpers';
 import AddInvoice from './AddInvoice';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';

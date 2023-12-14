@@ -21,7 +21,7 @@ import { camelCase } from 'lodash';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ManageServiceOrder from './ManageServiceOrder';
-import CustomReactTable, { checkStaticField, getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { checkStaticField, getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';

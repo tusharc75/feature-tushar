@@ -12,7 +12,7 @@ import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../c
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import { camelCase, startCase } from 'lodash';
-import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
 import ManageCustomReport from './ManageCustomReport';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import { Menu, MenuItem, Box } from '@material-ui/core';

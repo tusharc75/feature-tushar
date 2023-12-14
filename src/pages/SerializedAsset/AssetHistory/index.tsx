@@ -10,7 +10,7 @@ import { dateTimeFormat, isObjectEmpty, sidebarResource } from 'src/constants/he
 import { useData } from 'src/StateProvider/Provider';
 import DurationFilter from 'src/components/DurationFilter';
 import moment from 'moment';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import { camelCase } from 'lodash';
 
 const AssetHistory = ({ id }) => {

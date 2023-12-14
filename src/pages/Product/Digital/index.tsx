@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import { Box, Grid, IconButton, Menu, MenuItem, Button } from '@material-ui/core';
 import axiosInstance from 'src/axios/axiosInstance';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';

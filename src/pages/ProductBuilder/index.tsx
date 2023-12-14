@@ -20,7 +20,7 @@ import CreateNewDialog from './CreateNewDialog';
 import { gridFilterParser } from 'src/constants/useColumns';
 import moment from 'moment';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const ProductBuilder = () => {

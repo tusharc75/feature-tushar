@@ -23,7 +23,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import ProductQtyDialog from './ProductQtyDialog';
 import { deleteDisable } from 'src/constants/messageHelpers';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import { ExpandMore } from '@material-ui/icons';
 import { Menu, MenuItem } from '@material-ui/core';
 

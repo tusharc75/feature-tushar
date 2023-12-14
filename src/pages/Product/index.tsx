@@ -23,7 +23,7 @@ import CreateProduct from '../../components/Product/CreateProduct';
 import ImportExportLinks from '../../components/Product/ImportExportLinks';
 import { gridLoadingTimeout, prepareDataForGrid, product, sidebarResource } from '../../constants/helpers';
 import styles from '../Leads/Header.module.scss';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { childDisable, cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';

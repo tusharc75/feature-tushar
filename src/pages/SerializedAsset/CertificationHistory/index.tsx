@@ -15,7 +15,7 @@ import AttachFileIcon from '@material-ui/icons/AttachFile';
 import ManageAttachment from 'src/components/Activity/Attachments/ManageAttachment';
 import { useData } from 'src/StateProvider/Provider';
 import moment from 'moment';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetDetails = null }) => {
   const toastConfig = useContext(CustomToastContext);

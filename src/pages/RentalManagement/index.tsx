@@ -11,7 +11,7 @@ import CustomReactTable, {
   gridFilterParser,
   useColumns,
   useTableReducer
-} from 'src/components/CustomReactTableNew';
+} from 'src/components/CustomReactTable';
 import routes from 'src/components/Helpers/Routes';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';

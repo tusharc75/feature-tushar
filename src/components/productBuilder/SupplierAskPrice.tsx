@@ -21,7 +21,7 @@ import AskSupplierPriceDialog from './AskSupplierPriceDialog';
 import DeleteIcon from '@material-ui/icons/Delete';
 import DeleteButton from '../Helpers/DeleteButton';
 import moment from 'moment';
-import CustomReactTable, { useColumns, useTableReducer } from '../CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from '../CustomReactTable';
 
 const renderedFrom = 'quoteSupplierPrice';
 const localStorageSelectedRecords = `${renderedFrom}_selected`;

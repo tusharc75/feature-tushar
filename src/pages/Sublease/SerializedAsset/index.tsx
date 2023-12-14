@@ -16,7 +16,7 @@ import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/Assign
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { fetch_sublease_product_fields } from 'src/components/Sublease/helper';
 import { subleaseMessage } from 'src/constants/messageHelpers';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 
 function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowedToEdit, stepFullScreen, renderedFrom }) {

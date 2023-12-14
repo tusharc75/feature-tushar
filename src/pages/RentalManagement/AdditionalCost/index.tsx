@@ -13,7 +13,7 @@ import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/Offl
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { calculateRowsField, fetch_rental_cost_fields } from '../../../components/RentalManagment/helper';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { BiChevronDown } from 'react-icons/bi';
 import { flattenArray } from 'src/constants/columns';
 import { ownerAndColaborator, quotationApprovedMessage } from 'src/constants/messageHelpers';

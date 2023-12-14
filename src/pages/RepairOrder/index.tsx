@@ -16,7 +16,7 @@ import { Button, Chip, IconButton, Menu, MenuItem, Box } from '@material-ui/core
 import SearchBox from 'src/components/Helpers/SearchBox';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import styles from '../Leads/Header.module.scss';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
