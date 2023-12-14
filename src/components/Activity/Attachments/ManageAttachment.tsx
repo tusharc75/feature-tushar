@@ -37,6 +37,7 @@ const FolderSchema = object().shape({
 export default function ManageAttachment({
   relatedTo,
   attachmentId,
+  isClone = false,
   handleClose,
   fetchData = null,
   attachmentData = null,
@@ -129,7 +130,7 @@ export default function ManageAttachment({
     }
     setLoading(true);
     if (type === 'file') {
-      if (attachmentId) {
+      if (attachmentId && !isClone) {
         axiosInstance()
           .put(`/attachment/${attachmentId}`, request)
           .then(({ data }) => {
@@ -165,7 +166,7 @@ export default function ManageAttachment({
           });
       }
     } else {
-      if (attachmentId) {
+      if (attachmentId && !isClone) {
         axiosInstance()
           .put(`/attachment/folder/${attachmentId}`, request)
           .then(({ data }) => {
@@ -223,7 +224,7 @@ export default function ManageAttachment({
                 if (isEqual(initialValues, values)) handleClose();
                 else setShowConfirmDialog(true);
               }}
-              title={`${attachmentId ? 'Edit' : 'New'} ${type === 'file' ? 'Attachment' : 'Folder'}`}
+              title={`${isClone? 'Clone' : attachmentId? 'Edit' : 'New'} ${type === 'file' ? 'Attachment' : 'Folder'}`}
               isMinimized={isMinimized}
               onMinimizeMaximize={onMinimizeMaximize}
               showManimizeMaximize={showManimizeMaximize}

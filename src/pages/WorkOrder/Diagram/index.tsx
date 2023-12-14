@@ -17,13 +17,14 @@ import ViewImage from './ViewImage1';
 import { getFileIcon, getFileNameWithExtension } from './utils';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
+import { FileCopyIcon } from 'src/assets/svg/svgIcons';
 
-const Diagram = ({ resource, referenceId }) => {
+const Diagram = ({ resource, referenceId, currentVersion }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [rowData, setRowData] = useState(null);
   const [expended, setExpended] = useState({});
-  const [attachemntDialog, setAttachemntDialog] = useState({ open: false, id: null });
+  const [attachemntDialog, setAttachemntDialog] = useState({ open: false, id: null, isClone: false });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [selectedFile, setSelectedFile] = useState(null);
   const [selectedAttachment, setSelectedAttachment] = useState(null);
@@ -31,17 +32,23 @@ const Diagram = ({ resource, referenceId }) => {
 
   useEffect(() => {
     fetchData();
-  }, [resource, referenceId]);
+  }, [resource, referenceId, currentVersion]);
 
   const fetchData = async () => {
     axiosInstance()
       .get(`/attachment/resource-attachment-type?resource=${resource}&referenceId=${referenceId}&attachmentType=${ATTACHMENT_TYPE.drawing}`)
       .then(({ data: { data } }) => {
-        setRowData(data);
         const expend: any = {};
         data?.forEach((file) => {
+          const hasMatchingRelatedTo = file?.relatedTo?.some((relatedItem) => {
+            return relatedItem?.version === currentVersion && relatedItem?.type === 'workOrder' && relatedItem?.referenceId === referenceId;
+          });
+          if (!hasMatchingRelatedTo) {
+            file.canEdit = false;
+          }
           expend[file?._id] = true;
         });
+        setRowData(data);
         setExpended(expend);
       })
       .catch((err) => {
@@ -133,7 +140,7 @@ const Diagram = ({ resource, referenceId }) => {
             size="small"
             startIcon={<Add />}
             onClick={() => {
-              setAttachemntDialog({ open: true, id: null });
+              setAttachemntDialog({ open: true, id: null, isClone: false });
             }}
             aria-controls="add-menu"
           >
@@ -174,12 +181,26 @@ const Diagram = ({ resource, referenceId }) => {
                               size="small"
                               color="inherit"
                               aria-label="edit"
+                              disabled={!file?.canEdit}
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setAttachemntDialog({ open: true, id: file?._id });
+                                setAttachemntDialog({ open: true, id: file?._id, isClone: false });
                               }}
                             >
                               <EditIcon style={{ fontSize: '18px' }} />
+                            </IconButton>
+                          </HtmlTooltip>
+                          <HtmlTooltip title="Clone" placement="top" arrow>
+                            <IconButton
+                              size="small"
+                              color="inherit"
+                              aria-label="clone"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setAttachemntDialog({ open: true, id: file?._id, isClone: true });
+                              }}
+                            >
+                              <FileCopyIcon style={{ fontSize: '18px' }} />
                             </IconButton>
                           </HtmlTooltip>
                           <HtmlTooltip title="Delete" placement="top" arrow>
@@ -282,7 +303,7 @@ const Diagram = ({ resource, referenceId }) => {
           maxWidth={'md'}
           onClose={(e, reason) => {
             if (reason !== 'backdropClick') {
-              setAttachemntDialog({ open: false, id: null });
+              setAttachemntDialog({ open: false, id: null, isClone: false });
             }
             setFullScreen(false);
           }}
@@ -290,11 +311,12 @@ const Diagram = ({ resource, referenceId }) => {
         >
           <ManageAttachment
             attachmentId={attachemntDialog.id}
+            isClone={attachemntDialog.isClone}
             handleClose={() => {
-              setAttachemntDialog({ open: false, id: null });
+              setAttachemntDialog({ open: false, id: null, isClone: false });
               setFullScreen(false);
             }}
-            relatedTo={[{ type: resource, referenceId: referenceId, access: true }]}
+            relatedTo={[{ type: resource, referenceId: referenceId, currentVersion, access: true }]}
             isMinimized={!fullScreen}
             onMinimizeMaximize={() => {
               setFullScreen((prevState) => !prevState);
