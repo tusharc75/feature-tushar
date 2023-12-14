@@ -483,8 +483,6 @@ const CustomReactTable = ({
     }
   }, [selectedRecords.length]);
 
-  console.log(selectedRecords);
-
   return (
     <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
       <div className="react-table-v8">
