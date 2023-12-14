@@ -460,11 +460,29 @@ const CustomReactTable = ({
       newData.push(data);
     }
 
+    if (onSelect) onSelect(newData);
     dispatch({
       type: 'selection',
-      selectedRecords: [...new Set(newData)]
+      selectedRecords: newData
     });
   }, [rowSelection]);
+
+  // parent selection effects
+  useEffect(() => {
+    if (selectedRecords.length === 0) {
+      table.resetRowSelection();
+    }
+  }, [selectedRecords.length, table]);
+  useEffect(() => {
+    if (selectedRecords.length !== Object.keys(rowSelection).length) {
+      const selectedRowIds = selectedRecords.map((d) => d._id);
+      for (const row of rows) {
+        if (selectedRowIds.includes(row.original._id) && !row.getIsSelected()) {
+          row.toggleSelected(true);
+        }
+      }
+    }
+  }, [selectedRecords.length]);
 
   return (
     <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
