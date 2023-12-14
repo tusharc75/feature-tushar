@@ -235,3 +235,8 @@ export const getStickyColumnNames = ({
   }
   return { left, right, stickyColumns };
 };
+
+export const getUniqueDataByKey = (rows: any[], key = '_id') => {
+  const arrayUniqueByKey = [...new Map(rows.map((item) => [item[key], item])).values()];
+  return arrayUniqueByKey;
+};

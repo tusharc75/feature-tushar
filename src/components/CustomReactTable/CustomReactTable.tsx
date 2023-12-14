@@ -31,7 +31,7 @@ import { fuzzyFilter } from './ReactTableHelpers';
 import { defaultColumn } from './TableComponents/TableHelperComponents';
 import { useCreateColumns } from './hooks/useCreateColumns';
 import type { TInitialState } from './hooks/useTableReducer';
-import { childrenProperty, getDataFromLocalStorage, getStickyColumnNames, updateGridHiddenColumns, useSkipper } from './utils';
+import { childrenProperty, getDataFromLocalStorage, getStickyColumnNames, getUniqueDataByKey, updateGridHiddenColumns, useSkipper } from './utils';
 import TableComponent from './TableComponents/Table';
 
 const CustomReactTable = ({
@@ -440,17 +440,14 @@ const CustomReactTable = ({
   // For row selection
   useEffect(() => {
     const selectedRowIds = Object.keys(rowSelection);
-
     const currentPageSelectedRows = table.getSelectedRowModel().flatRows.map((d) => {
       const { subRows, ...rest } = d.original;
       return { ...rest };
     });
-    const totalSelectedRows = [...currentPageSelectedRows, ...selectedRecords];
-
+    const testData = getUniqueDataByKey([...currentPageSelectedRows, ...selectedRecords]);
     const newData = [];
-    for (const rowId of selectedRowIds) {
-      const data = totalSelectedRows.find((d) => d._id === rowId);
-      newData.push(data);
+    for (const data of testData) {
+      if (selectedRowIds.includes(data._id)) newData.push(data);
     }
 
     if (onSelect) onSelect(newData);
