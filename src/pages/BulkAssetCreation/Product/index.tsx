@@ -282,9 +282,10 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
     let tempProducts = selectedRecords.map((d) => {
       return {
         bulkAssetCreationId: bulkAssetCreationData?._id,
-        productMaster: d?.productId,
+        productId: d?.productId,
+        _id: d?._id,
         qty: d?.qty,
-        wareHouse: bulkAssetCreationData?.warehouse?.optionValue
+        warehouse: bulkAssetCreationData?.warehouse?.optionValue
       };
     });
     axiosInstance()
