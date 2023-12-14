@@ -27,7 +27,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import DOAReasonDialog from './DOAReasonDialog';
 import Loader from '../../components/Loader';
 import ActivityButton from 'src/components/Activity/ActivityButton';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';

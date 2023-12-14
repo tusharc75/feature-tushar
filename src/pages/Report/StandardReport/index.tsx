@@ -27,7 +27,7 @@ import { useAppTheme } from 'src/constants/AppConfig';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import DialogContent from '@material-ui/core/DialogContent';
 import Dialog from '@material-ui/core/Dialog';
-import CustomReactTable, { useTableReducer, useColumns } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer, useColumns } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import HistoryIcon from '@material-ui/icons/History';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';

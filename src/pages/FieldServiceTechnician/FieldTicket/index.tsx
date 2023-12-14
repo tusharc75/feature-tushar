@@ -17,7 +17,7 @@ import ManageFieldTicket from 'src/pages/FieldTicket/ManageFieldTicket';
 import { deleteOne, findAll, findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import CustomTableWithCard, { CardInterface, createBodyColumns } from 'src/components/CustomTableWithCard';
-import { useTableReducer } from 'src/components/CustomReactTableNew';
+import { useTableReducer } from 'src/components/CustomReactTable';
 
 const FieldTicket = ({ selectedFieldService, fieldRef, fieldRemoveRef }) => {
   

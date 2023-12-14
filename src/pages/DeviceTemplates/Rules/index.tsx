@@ -17,7 +17,7 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import moment from 'moment';
 import { deleteDisable, editDisable } from 'src/constants/messageHelpers';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 
 export default function Rules({ deviceTemplate }) {
   const renderedFrom = `${camelCase(routes?.deviceTemplateAlert.title)}_rules`;

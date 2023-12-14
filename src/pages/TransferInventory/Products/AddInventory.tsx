@@ -11,7 +11,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer, } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer, } from 'src/components/CustomReactTable';
 
 const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, renderedFrom, ignoreIds }) => {
   const toastConfig = useContext(CustomToastContext);

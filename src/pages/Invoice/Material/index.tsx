@@ -25,7 +25,7 @@ import MaterialDialog from './MaterialDialog';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import EditIcon from '@material-ui/icons/Edit';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, fetchInvoiceData }) => {
   const toastConfig = useContext(CustomToastContext);

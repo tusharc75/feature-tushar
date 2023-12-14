@@ -14,7 +14,7 @@ import { ExpandMore } from '@material-ui/icons';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { fetch_po_cost_fields, fetch_po_product_fields, fetch_po_service_fields } from '../../../components/PurchaseOrder/helper';
 import InventoryStatesDialog from './InventoryStatesDialog';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import NoDataCell from 'src/components/Helpers/NoDataCell';

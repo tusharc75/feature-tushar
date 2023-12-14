@@ -29,7 +29,7 @@ import PreviewDownload from 'src/components/PreviewDownload';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import InfoIcon from '@material-ui/icons/Info';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 interface LoadingGridProps {
   permissions: any;

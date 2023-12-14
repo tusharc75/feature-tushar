@@ -5,7 +5,7 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import axiosInstance from '../../../axios/axiosInstance';
 import { Box, CircularProgress } from '@material-ui/core';
 import SearchBox from '../../../components/Helpers/SearchBox';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { gridLoadingTimeout, CustomDialogTransition, isObjectEmpty, prepareDataForGrid, sidebarResource } from '../../../constants/helpers';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import Dialog from '@material-ui/core/Dialog/Dialog';

@@ -20,7 +20,7 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { Delete } from '@material-ui/icons';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 interface AssetsGridProps {
   permissions?: any;

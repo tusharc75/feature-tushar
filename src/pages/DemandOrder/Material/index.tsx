@@ -22,7 +22,7 @@ import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { CHILD_RESOURCE, gridLoadingTimeout, sidebarResource } from 'src/constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import MaterialDialog from './MaterialDialog';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);

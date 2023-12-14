@@ -25,7 +25,7 @@ import CustomReactTable, {
   gridFilterParser,
   useColumns,
   useTableReducer
-} from 'src/components/CustomReactTableNew';
+} from 'src/components/CustomReactTable';
 import { camelCase } from 'lodash';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';

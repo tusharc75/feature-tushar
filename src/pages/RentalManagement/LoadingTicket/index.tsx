@@ -1,7 +1,7 @@
 import Box from '@material-ui/core/Box/Box';
 import { useState, useEffect, useContext, Fragment } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import { Link } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';

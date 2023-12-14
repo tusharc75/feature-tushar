@@ -24,7 +24,7 @@ import { flattenArray } from 'src/constants/columns';
 import AssignStepDialog from './AssignStepDialog/Index';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 interface Props {
   renderedFrom: string;

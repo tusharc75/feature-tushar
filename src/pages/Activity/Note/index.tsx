@@ -29,7 +29,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { Delete as DeleteIcon } from '@material-ui/icons';
 import { deleteDisable } from 'src/constants/messageHelpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import { camelCase } from 'lodash';
 import SearchBox from 'src/components/Helpers/SearchBox';
 

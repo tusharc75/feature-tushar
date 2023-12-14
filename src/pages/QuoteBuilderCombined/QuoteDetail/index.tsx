@@ -55,7 +55,7 @@ import ManageQuoteDialog from '../ManageQuote/ManageQuoteDialog';
 import AllVersionStatus from '../AllVersionStatus';
 import QuoteDetailPage from './QuoteDetailPage';
 import QuoteProcess from './QuoteProcess';
-import { useTableReducer } from 'src/components/CustomReactTableNew';
+import { useTableReducer } from 'src/components/CustomReactTable';
 
 const useStyles = makeStyles((theme) => ({
   reasonDialog: {

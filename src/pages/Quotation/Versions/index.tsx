@@ -3,7 +3,7 @@ import { useContext, useEffect, useState } from 'react';
 import axiosInstance from '../../../axios/axiosInstance';
 import { gridLoadingTimeout } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import CustomRenderCell from '../../../components/Helpers/CustomRenderCell';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';

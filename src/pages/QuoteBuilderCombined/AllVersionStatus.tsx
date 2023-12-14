@@ -12,7 +12,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 
 const DOASteps = [
     {

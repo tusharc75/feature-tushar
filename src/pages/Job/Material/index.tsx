@@ -20,7 +20,7 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import MaterialDialog from './MaterialDialog';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
   const toastConfig = useContext(CustomToastContext);

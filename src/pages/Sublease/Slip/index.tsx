@@ -11,7 +11,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { fetch_sublease_product_fields } from 'src/components/Sublease/helper';
 import PreviewDownload from 'src/components/PreviewDownload';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 
 function Slip({ subleaseData, stepFullScreen, renderedFrom, statusNames, updateStatus }) {

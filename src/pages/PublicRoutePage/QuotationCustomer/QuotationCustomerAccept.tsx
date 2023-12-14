@@ -5,7 +5,7 @@ import { dateFormat, formatAmountWithCurrency, getUniqueCurrencies, quotation } 
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { FaDiceOne } from 'react-icons/fa';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import moment from 'moment';
 import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';

@@ -3,7 +3,7 @@ import { ExpandMore } from '@material-ui/icons';
 import AddIcon from '@material-ui/icons/Add';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import routes from 'src/components/Helpers/Routes';
 import { CHILD_RESOURCE, fieldTicket } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';

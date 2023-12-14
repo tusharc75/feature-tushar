@@ -1,5 +1,5 @@
 import { Dispatch, ReactNode } from 'react';
-import type { TInitialState } from 'src/components/CustomReactTableNew/hooks/useTableReducer';
+import type { TInitialState } from 'src/components/CustomReactTable/hooks/useTableReducer';
 
 export type TSwipableListInputProps = {
   table: any;

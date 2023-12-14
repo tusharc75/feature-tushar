@@ -10,7 +10,7 @@ import { useData } from 'src/StateProvider/Provider';
 import styles from 'src/pages/Leads/Header.module.scss';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
 import routes from '../Helpers/Routes';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { camelCase } from 'lodash';
 
 let searchTimeout;

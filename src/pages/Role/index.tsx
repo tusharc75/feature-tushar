@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
 import AssignRegionalRolesUserDialog from '../../components/AssignRolesDialog/AssignRegionalRolesUserDialog';
 import AssignUserDialog from '../../components/AssignRolesDialog/AssignUserDialog';
 import CustomContainer from '../../components/CustomContainer';

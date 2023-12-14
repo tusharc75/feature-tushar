@@ -19,7 +19,7 @@ import CustomReactTable, {
   gridFilterParser,
   useColumns,
   useTableReducer
-} from 'src/components/CustomReactTableNew';
+} from 'src/components/CustomReactTable';
 import DeleteIcon from '@material-ui/icons/Delete';
 import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
 import CustomContainer from '../../components/CustomContainer';

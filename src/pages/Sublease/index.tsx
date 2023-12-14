@@ -9,7 +9,7 @@ import CustomContainer from 'src/components/CustomContainer';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, sublease } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import SearchBox from 'src/components/Helpers/SearchBox';

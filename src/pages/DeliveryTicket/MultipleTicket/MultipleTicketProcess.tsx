@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { Grid, Box, Button, Tooltip } from '@material-ui/core';
-import CustomReactTable, { useTableReducer, getStaticFields, useColumns } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer, getStaticFields, useColumns } from 'src/components/CustomReactTable';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import { objectStore, findOne, findAll } from '../../../constants/indexdbhelper';
 import axiosInstance from '../../../axios/axiosInstance';

@@ -19,7 +19,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { TouchBackend } from 'react-dnd-touch-backend';
-import SwipableListForMobile from 'src/components/CustomReactTableNew/SwipableListForMobile';
+import SwipableListForMobile from 'src/components/CustomReactTable/SwipableListForMobile';
 import { flattenArray } from 'src/constants/columns';
 import { useDebounce } from 'src/hooks';
 import { SEARCH, useStore } from 'src/StateProvider/fastContext';

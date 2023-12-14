@@ -14,7 +14,7 @@ import CustomReactTable, {
   gridFilterParser,
   useColumns,
   useTableReducer
-} from 'src/components/CustomReactTableNew';
+} from 'src/components/CustomReactTable';
 import axiosInstance from 'src/axios/axiosInstance';
 import { camelCase } from 'lodash';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';

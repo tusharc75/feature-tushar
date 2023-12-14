@@ -2,7 +2,7 @@ import { useEffect, useContext, Fragment } from 'react';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import axiosInstance from 'src/axios/axiosInstance';
 import { Box } from '@material-ui/core';
 import { camelCase } from 'lodash';

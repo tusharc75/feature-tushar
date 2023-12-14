@@ -9,7 +9,7 @@ import { Box, Typography } from "@material-ui/core";
 import { prepareDataForGrid } from "../../../constants/helpers";
 import DeleteButton from "src/components/Helpers/DeleteButton";
 import moment from "moment";
-import CustomReactTable, { useColumns, useTableReducer } from "src/components/CustomReactTableNew";
+import CustomReactTable, { useColumns, useTableReducer } from "src/components/CustomReactTable";
 
 const displayColumns = ["qty", "productName", "productDescription", "unit", "responseDate", "status"]
 

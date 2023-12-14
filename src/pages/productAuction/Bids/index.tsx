@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import { dateTimeFormat, gridLoadingTimeout } from 'src/constants/helpers';
 import { isMobile } from 'react-device-detect';
 import moment from 'moment';
