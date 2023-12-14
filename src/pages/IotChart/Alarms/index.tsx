@@ -17,6 +17,8 @@ const Alarms = ({ deviceTemplate, assetId }) => {
 
   const [alarmOptions, setAlarmOptions] = useState(null);
   const [selectedAlarm, setSelectedAlarm] = useState({ optionValue: 'All', optionLabel: 'All' });
+  const [alertOptions, setAlertOptions] = useState(null);
+  const [selectedAlert, setSelectedAlert] = useState(null);
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
@@ -40,10 +42,12 @@ const Alarms = ({ deviceTemplate, assetId }) => {
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}&asset=${assetId}`;
     if (selectedAlarm?.optionValue === 'All') {
-      deepFilter = deepFilter + `&dataPoints=${alarmOptions?.map((e) => e.optionValue)?.toString()}`
+      deepFilter = deepFilter + `&dataPoints=${alarmOptions?.map((e) => e.optionValue)?.toString()}`;
+    } else {
+      deepFilter = deepFilter + `&dataPoints=${selectedAlarm.optionValue}`;
     }
-    else {
-      deepFilter = deepFilter + `&dataPoints=${selectedAlarm.optionValue}`
+    if(selectedAlert){
+      deepFilter = deepFilter + `&fieldValue=${selectedAlert}`;
     }
     return `${deepFilter}`;
   };
@@ -79,15 +83,15 @@ const Alarms = ({ deviceTemplate, assetId }) => {
       disabled: true,
       disableFilters: true,
       disableSortBy: true,
-      Cell: ({ row }) => row?.original.message ? <div>{row?.original.message}</div> : <NoDataCell />
+      Cell: ({ row }) => (row?.original.message ? <div>{row?.original.message}</div> : <NoDataCell />)
     }
   ];
 
   useEffect(() => {
     if (alarmOptions) {
-      fetchData()
+      fetchData();
     }
-  }, [page, limit, alarmOptions, selectedAlarm])
+  }, [page, limit, alarmOptions, selectedAlarm, selectedAlert]);
 
   useEffect(() => {
     if (deviceTemplate) {
@@ -106,13 +110,19 @@ const Alarms = ({ deviceTemplate, assetId }) => {
             })) || []
           );
         });
+
+      axiosInstance()
+        .get(`${routes?.deviceTemplateAlert?.path}?filterById=${JSON.stringify(query)}&filterType=and`)
+        .then(({ data: { data } }) => {
+          setAlertOptions(data?.map((d) => d?.alertNumber));
+        });
     }
   }, [deviceTemplate]);
 
   return (
     <Box display="flex" flexDirection="column">
-      <Box ml={1}>
-        {alarmOptions &&
+      <Box ml={1} display="flex">
+        {alarmOptions && (
           <Autocomplete
             options={[{ optionValue: 'All', optionLabel: 'All' }, ...alarmOptions]}
             getOptionLabel={(option) => (option && option?.optionLabel) || ''}
@@ -123,13 +133,25 @@ const Alarms = ({ deviceTemplate, assetId }) => {
             }}
             disableClearable
             size="small"
-            renderInput={(params) =>
-              <TextField {...params}
-                label="Select Alarm"
-                size="small"
-                variant="outlined" />}
+            renderInput={(params) => <TextField {...params} label="Select Alarm" size="small" variant="outlined" />}
           />
-        }
+        )}
+
+        <Box ml={1}>
+          {alertOptions && (
+            <Autocomplete
+              options={alertOptions || []}
+              getOptionLabel={(option: any) => option || ''}
+              style={{ width: '350px' }}
+              value={selectedAlert}
+              onChange={(event, newValue: any) => {
+                setSelectedAlert(newValue);
+              }}
+              size="small"
+              renderInput={(params) => <TextField {...params} label="Select Alert" size="small" variant="outlined" />}
+            />
+          )}
+        </Box>
       </Box>
       {columns ? (
         <CustomReactTable
