@@ -73,8 +73,8 @@ const WorkOrderDetails = () => {
     { accessor: 'serviceType', Header: 'Service Type' },
     { accessor: 'assignedTechnician', Header: 'Assigned Technician' },
     { accessor: 'assignedWorkStation', Header: 'Assigned WorkStation' },
-    { accessor: 'startDate', Header: 'Start Date'},
-    { accessor: 'endDate', Header: 'End Date'},
+    { accessor: 'startDate', Header: 'Start Date' },
+    { accessor: 'endDate', Header: 'End Date' },
     { accessor: 'status', Header: 'Status' },
     { accessor: 'serviceStatus', Header: 'Result' }
   ];
@@ -269,7 +269,7 @@ const WorkOrderDetails = () => {
                       </HtmlTooltip>
                     </div>
                   )}
-                {permissions?.workOrder?.isUpdate && allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.completed && (
+                {permissions?.workOrder?.isUpdate && allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.completed && !workOrderData?.deleted && (
                   <Button variant={'contained'} size="small" className={'btn-outline-v1'} onClick={openAddActions} aria-controls="add-menu">
                     {'Create Version'}
                     <ExpandMore fontSize="small" />
