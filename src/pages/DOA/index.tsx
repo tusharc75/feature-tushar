@@ -10,8 +10,6 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import CustomContainer from '../../components/CustomContainer';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import routes from '../../components/Helpers/Routes';
-import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
-import MobileSortDialog from '../../components/MobileSortDialog';
 import { gridLoadingTimeout, sidebarResource } from '../../constants/helpers';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -137,62 +135,6 @@ const DOARequest = () => {
         <CustomBreadCrumbs routes={[routes.DOARequest]} />
       </div>
       <CustomContainer>
-        <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className={'d-flex align-items-center gap-1'}>
-              {isMobile && (
-                <div className="d-flex flex-wrap items-center justify-between w-full">
-                  <div></div>
-                  <div className="flex flex-wrap items-center gap-1 ml-auto">
-                    <IconButton
-                      onClick={handleClickOpen}
-                      id="demo-customized-button"
-                      aria-controls="demo-customized-menu"
-                      aria-haspopup="true"
-                      aria-expanded={'true'}
-                      className={'mobileIconButton secondary'}
-                      size="small"
-                    >
-                      <TbArrowsSort className="rotate-90" size={16} />
-                    </IconButton>
-                    <MobileSortDialog
-                      isOpen={sortOpen}
-                      handleClose={handleClickClose}
-                      contentPart={null}
-                      secHeading={['Sort DOA Requests']}
-                      columns={columns}
-                      dispatch={dispatch}
-                    />
-
-                    <IconButton
-                      id="demo-customized-button"
-                      aria-controls="demo-customized-menu"
-                      aria-haspopup="true"
-                      aria-expanded={'true'}
-                      className={'mobileIconButton secondary'}
-                      size="small"
-                      onClick={handleOpen}
-                    >
-                      <MdOutlineFilterAlt size={16} />
-                    </IconButton>
-
-                    <MobileFilterDialog
-                      isOpen={isOpenDialog}
-                      handleClose={handleFilterClose}
-                      contentPart={null}
-                      columns={columns}
-                      dispatch={dispatch}
-                      title={routes?.DOARequest?.title}
-                      filters={{}}
-                      resource={sidebarResource.DOARequest}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-            <DisplayFiltersForMobile resource={sidebarResource.DOARequest} />
-          </div>
-        </div>
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
