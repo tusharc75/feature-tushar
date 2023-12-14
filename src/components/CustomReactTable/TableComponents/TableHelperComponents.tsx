@@ -1,4 +1,4 @@
-import { Checkbox, CheckboxProps, IconButton, TableCell } from '@material-ui/core';
+import { Checkbox, CheckboxProps, CircularProgress, IconButton, TableCell } from '@material-ui/core';
 import { Check, DragIndicator, Edit, ExpandLess, ExpandMore } from '@material-ui/icons';
 import { Column, ColumnDef, Header, Table, flexRender } from '@tanstack/react-table';
 import { debounce } from 'lodash';
@@ -9,6 +9,7 @@ import { FaAngleDown, FaAngleRight } from 'react-icons/fa';
 import { GrFormClose } from 'react-icons/gr';
 import HtmlTooltip from '../../CustomTooltipTitle';
 import { childrenProperty, getStickyPosition, handleCellClick, handleKeyDown, insertChildRowIntoTable } from '../utils';
+import { LoadingIcon } from 'src/assets/svg/svgIcons';
 
 export type TColType = {
   sticky: undefined | 'left' | 'right';
@@ -391,8 +392,9 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
         <div className={`d-flex gap-2 align-items-center ${column.id === 'selection' ? 'justify-center' : 'justify-between'}`}>
           <div className="line-clamp-1">
             <span
-              className={`overflow-hidden overflow-ellipsis whitespace-normal ${header.column.getCanSort() && columnDef.disableSortBy !== true ? 'cursor-pointer' : ''
-                }`}
+              className={`overflow-hidden overflow-ellipsis whitespace-normal ${
+                header.column.getCanSort() && columnDef.disableSortBy !== true ? 'cursor-pointer' : ''
+              }`}
               onClick={header.column.getToggleSortingHandler()}
             >
               {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
@@ -463,7 +465,7 @@ export const CellRenderer = ({
 }) => {
   const columnDef: TColType = cell.column.columnDef as TColType;
 
-  const { currentEditingCellPosition } = state;
+  const { currentEditingCellPosition, loadingExpanderRowId } = state;
 
   const { style, className: stickyClassName } = getStickyPosition(columnDef, index, table);
 
@@ -492,6 +494,14 @@ export const CellRenderer = ({
   };
 
   switch (true) {
+    case cell?.column.id === 'expander' && loadingExpanderRowId === row.original._id:
+      return (
+        <CellShell>
+          <div className="p-[5px_10px]">
+            <CircularProgress size={14} color="primary" style={{ padding: 0 }} />
+          </div>
+        </CellShell>
+      );
     case !['selection'].includes(cell?.column.id) &&
       currentEditingCellPosition?.rowId === row.original._id &&
       currentEditingCellPosition?.columnName === cell?.column.id:

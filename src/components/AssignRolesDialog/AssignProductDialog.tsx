@@ -26,7 +26,6 @@ const AssignProductDialog = ({
   isSubmitting = false,
   hideQty = false
 }) => {
-
   const renderedFrom = `${camelCase(routes.product?.title)}_Assign`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -197,7 +196,7 @@ const AssignProductDialog = ({
     const rows = [...dataRows];
     rows?.forEach((d) => {
       if (row?._id === d._id) {
-        d.qty = parseInt(data.qty);
+        d.qty = Number(data.qty);
         d.isChecked = true;
       }
     });
@@ -206,8 +205,7 @@ const AssignProductDialog = ({
       if (editRow) {
         dispatch({ type: 'selection', selectedRecords: [...selectedRecords, editRow] });
       }
-    }
-    else {
+    } else {
       const updatedSelectedRecords = selectedRecords?.map((e) => {
         if (e?._id === row?._id) {
           return { ...e, qty: parseInt(data?.qty), isChecked: true };
