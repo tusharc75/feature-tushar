@@ -15,7 +15,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import ManageCreditMemo from 'src/pages/CreditMemo/ManageCreditMemo';
 import { useData } from 'src/StateProvider/Provider';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 
 function CreditMemo({ invoiceData, allowedToEdit }) {

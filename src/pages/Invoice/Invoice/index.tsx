@@ -13,7 +13,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { IconButton } from '@material-ui/core';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import routes from 'src/components/Helpers/Routes';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, stepFullScreen, renderedFrom }) => {
 

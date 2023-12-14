@@ -14,7 +14,7 @@ import styles from '../Leads/Header.module.scss';
 import { customerAccount, gridLoadingTimeout, invoice, prepareDataForGrid, sidebarResource, supplierAccount } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import ManageInvoiceDialog from './ManageInvoiceDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { AddOutlined, Delete, ExpandMore } from '@material-ui/icons';

@@ -14,7 +14,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CustomRenderCell from 'src/components/Helpers/CustomRenderCell';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { camelCase } from 'lodash';
-import CustomReactTable, { checkStaticField, getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { checkStaticField, getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { deleteDisable } from 'src/constants/messageHelpers';
 
 const Invoices = ({ resourceId, resource, invoiceFieldName }) => {

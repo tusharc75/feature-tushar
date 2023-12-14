@@ -17,7 +17,7 @@ import { Add, ExpandMore } from '@material-ui/icons';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import LeadTimeDialog from './LeadTimeDialog';
 import DateRangeIcon from '@material-ui/icons/DateRange';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 const AdditionalCost = ({ quotationData, setNextStep, renderedFrom, version, allowedToEdit, stepFullScreen }) => {
   const toastConfig = useContext(CustomToastContext);

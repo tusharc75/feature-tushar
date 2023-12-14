@@ -8,7 +8,7 @@ import CustomButton from 'src/components/Helpers/CustomButton';
 import routes from 'src/components/Helpers/Routes';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 
 const DispatchMaterial = ({ handleClose, data, handleSubmit }) => {
   const { state, dispatch } = useTableReducer();

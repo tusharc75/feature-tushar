@@ -6,7 +6,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, serializedAsset } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import routes from 'src/components/Helpers/Routes';
-import CustomReactTable, { useColumns, getStaticFields, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import { Grid } from '@material-ui/core';
 

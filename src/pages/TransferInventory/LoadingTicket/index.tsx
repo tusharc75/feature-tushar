@@ -21,7 +21,7 @@ import ReceiveDialog from './ReceiveDialog';
 import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import PreviewDownload from 'src/components/PreviewDownload';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import { ExpandMore } from '@material-ui/icons';
 import { Menu, MenuItem } from '@material-ui/core';
 

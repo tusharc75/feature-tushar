@@ -11,7 +11,7 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import AddSerializedAsset from './AddSerializedAsset';
 import { rentalManagement, sidebarResource, treeToFlatArray, ASSET_STATUS, TRANSFER_ASSET_STATUS } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import ManagePurchaseOrder from '../../PurchaseOrder/ManagePurchaseOrder';
 import ManageBulkAssetCreation from '../../BulkAssetCreation/ManageBulkAssetCreation';
 import ManageSublease from '../../Sublease/ManageSublease';

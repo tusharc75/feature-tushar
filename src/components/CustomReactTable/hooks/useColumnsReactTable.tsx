@@ -9,8 +9,8 @@ import { useData } from 'src/StateProvider/Provider';
 import { Image } from '@material-ui/icons';
 import CopyToClipboard from '../../Helpers/CopyToClipboard';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import SignatureCell from 'src/components/CustomReactTableNew/Cells/SignatureCell';
-import DropdownCell from 'src/components/CustomReactTableNew/Cells/DropdownCell';
+import SignatureCell from 'src/components/CustomReactTable/Cells/SignatureCell';
+import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 
 const permissionForLinks = sidebarResourceObjectFromValues();
 

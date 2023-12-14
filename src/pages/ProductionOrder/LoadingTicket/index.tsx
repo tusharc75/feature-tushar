@@ -23,7 +23,7 @@ import { uniq, map, startCase } from 'lodash';
 import { ExpandMore } from '@material-ui/icons';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { useData } from 'src/StateProvider/Provider';
-import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 
 const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, renderedFrom, allowedToEdit }) => {

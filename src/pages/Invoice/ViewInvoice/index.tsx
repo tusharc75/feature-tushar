@@ -21,7 +21,7 @@ import CommentDialog from 'src/components/CommentDialog';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
 import { useData } from 'src/StateProvider/Provider';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
   const toastConfig = useContext(CustomToastContext);

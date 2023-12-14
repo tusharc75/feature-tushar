@@ -6,7 +6,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import routes from 'src/components/Helpers/Routes';
 import { gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
-import CustomReactTable, { useColumns, getStaticFields, gridFilterParser, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, getStaticFields, gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 function ListView({ resourceList, selectedResource, setSelectedResource }) {

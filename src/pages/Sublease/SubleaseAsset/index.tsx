@@ -25,7 +25,7 @@ import { Link } from 'react-router-dom';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { subleaseMessage } from 'src/constants/messageHelpers';
 import { fetch_sublease_product_fields } from 'src/components/Sublease/helper';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 const SerializedAsset = ({
   subleaseData,

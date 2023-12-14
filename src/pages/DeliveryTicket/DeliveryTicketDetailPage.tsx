@@ -11,7 +11,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ManageDeliveryTicket from './ManageDeliveryTicket';
-import CustomReactTable, { useColumns, getStaticFields, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
 import { serializedAsset, gridLoadingTimeout } from '../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import SignatureDialog from '../../components/Helpers/SignatureDialog';

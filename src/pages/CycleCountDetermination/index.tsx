@@ -7,7 +7,7 @@ import CustomContainer from '../../components/CustomContainer';
 import { isMobile } from 'react-device-detect';
 import axiosInstance from '../../axios/axiosInstance';
 import { useData } from '../../StateProvider/Provider';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import { camelCase } from 'lodash';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';

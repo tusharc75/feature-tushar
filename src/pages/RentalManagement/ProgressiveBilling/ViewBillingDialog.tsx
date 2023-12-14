@@ -10,7 +10,7 @@ import routes from 'src/components/Helpers/Routes';
 import { CustomDialogTransition, invoice, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import { Delete, ExpandMore } from '@material-ui/icons';

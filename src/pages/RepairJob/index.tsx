@@ -23,7 +23,7 @@ import CustomReactTable, {
   gridFilterParser,
   useColumns,
   useTableReducer
-} from 'src/components/CustomReactTableNew';
+} from 'src/components/CustomReactTable';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { AddOutlined } from '@material-ui/icons';
 import SearchBox from 'src/components/Helpers/SearchBox';

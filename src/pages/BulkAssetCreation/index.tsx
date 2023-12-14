@@ -23,7 +23,7 @@ import SearchBox from 'src/components/Helpers/SearchBox';
 import { bulkAssetCreation, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import styles from '../Leads/Header.module.scss';
 import ManageBulkAssetCreation from './ManageBulkAssetCreation';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 
 const BulkAssetCreation = () => {

@@ -13,7 +13,7 @@ import routes from '../../components/Helpers/Routes';
 import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import { gridLoadingTimeout, sidebarResource } from '../../constants/helpers';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const DOARequest = () => {

@@ -15,7 +15,7 @@ import { Box, } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import TextField from '@material-ui/core/TextField';
 import { prepareDataForGrid } from '../../../constants/helpers';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 var levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
 

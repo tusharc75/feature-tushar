@@ -5,7 +5,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import axiosInstance from '../../axios/axiosInstance';
 import { Box, IconButton, TextField } from '@material-ui/core';
 import routes from '../../components/Helpers/Routes';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import {
   serializedAssetsCertification,
   serializedAsset,

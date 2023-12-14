@@ -3,7 +3,7 @@ import Dialog from '@material-ui/core/Dialog/Dialog';
 import { CustomDialogTransition, dateTimeFormat } from 'src/constants/helpers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { Box, IconButton } from '@material-ui/core';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import { camelCase, startCase } from 'lodash';
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';

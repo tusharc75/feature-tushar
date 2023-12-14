@@ -17,7 +17,7 @@ import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicD
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';

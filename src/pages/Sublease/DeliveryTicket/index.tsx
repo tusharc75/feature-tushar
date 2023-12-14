@@ -22,7 +22,7 @@ import { ExpandMore } from '@material-ui/icons';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { subleaseActions, subleaseMessage } from 'src/constants/messageHelpers';
 import CustomMessageDialog from 'src/components/MessageDialog';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 
 const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNextStepToolTip, stepFullScreen, renderedFrom, allowedToEdit }) => {
