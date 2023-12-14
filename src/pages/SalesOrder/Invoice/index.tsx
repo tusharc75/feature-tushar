@@ -13,7 +13,7 @@ import { fetch_salesOrder_product_fields } from '../../../components/SalesOrder/
 import PreviewDownload from 'src/components/PreviewDownload';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { useData } from 'src/StateProvider/Provider';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, renderedFrom, stepFullScreen }) => {
 

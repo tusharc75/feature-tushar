@@ -36,7 +36,7 @@ import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { useData } from 'src/StateProvider/Provider';
 import HelpIcon from '@material-ui/icons/Help';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 
 const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatus, renderedFrom, allowedToEdit, allowUpdateStatus, stepFullScreen }) => {

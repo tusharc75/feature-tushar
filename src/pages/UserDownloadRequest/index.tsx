@@ -2,7 +2,7 @@ import { Box, IconButton, TextField } from '@material-ui/core';
 import { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
 import routes from 'src/components/Helpers/Routes';

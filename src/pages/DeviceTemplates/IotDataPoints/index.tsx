@@ -16,7 +16,7 @@ import { ExpandMore } from '@material-ui/icons';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { cloneDisable, deleteDisable, editDisable } from 'src/constants/messageHelpers';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 let searchTimeout;
 

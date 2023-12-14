@@ -9,7 +9,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
 import { fetch_po_product_fields } from '../../../components/PurchaseOrder/helper';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import moment from 'moment';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';

@@ -8,7 +8,7 @@ import { dateFormat, prepareDataForGrid, serializedAsset } from '../../../consta
 import { camelCase } from 'lodash';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import moment from 'moment';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 
 const DepreciationHistory = ({ id }) => {
 

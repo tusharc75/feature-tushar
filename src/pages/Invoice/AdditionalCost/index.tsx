@@ -13,7 +13,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import AdditionalCostDialog from './AdditionalCostDialog';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 const AdditionalCost = ({ invoiceData, setNextStep, renderedFrom }) => {
   const localStorageSelectedRecords = `${renderedFrom}_selected`;

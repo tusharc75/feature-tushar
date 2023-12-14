@@ -30,7 +30,7 @@ import { ExpandMore } from '@material-ui/icons';
 import ManagePackageDialog from 'src/pages/Packages/ManagePackageDialog';
 import EditIcon from '@material-ui/icons/Edit';
 import { ownerAndColaborator, quotationApprovedMessage, rentalManagementMessage } from 'src/constants/messageHelpers';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip, renderedFrom, stepFullScreen, allowedToEdit, quotationApproved }) => {
   const toastConfig = useContext(CustomToastContext);

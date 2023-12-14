@@ -5,7 +5,7 @@ import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import routes from 'src/components/Helpers/Routes';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { repairType, gridLoadingTimeout, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { useData } from 'src/StateProvider/Provider';

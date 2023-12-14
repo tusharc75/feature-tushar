@@ -10,7 +10,7 @@ import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import { Delete } from '@material-ui/icons';
 import { IconButton } from '@material-ui/core';
 import { useData } from '../../StateProvider/Provider';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import AssignProductDialog from '../../components/AssignRolesDialog/AssignProductDialog';
 import ConfirmationDialogRaw from '../../components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';

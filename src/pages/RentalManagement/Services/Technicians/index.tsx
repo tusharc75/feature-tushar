@@ -10,7 +10,7 @@ import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import { useData } from 'src/StateProvider/Provider';
 import { BiChevronDown } from 'react-icons/bi';
 import ConfirmationDialog from '../../../../components/Helpers/ConfirmationDialog';

@@ -10,25 +10,21 @@ import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, sidebarResource 
 import { camelCase } from 'lodash';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { getFrameworkComponents, getStaticFields } from 'src/constants/useColumns';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import useColumns from 'src/constants/useColumns';
 import ManageFieldTicket from 'src/pages/FieldTicket/ManageFieldTicket';
 import { deleteOne, findAll, findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import CustomTableWithCard, { CardInterface, createBodyColumns } from 'src/components/CustomTableWithCard';
-import { useTableReducer } from 'src/components/CustomReactTableNew';
+import { useTableReducer, useColumns, getStaticFields } from 'src/components/CustomReactTable';
 
 const FieldTicket = ({ selectedFieldService, fieldRef, fieldRemoveRef }) => {
-  
+
   const renderedFrom = camelCase(`${routes.fieldTicket?.title}`);
 
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { permissions, selectedEntity, user }
   }: any = useData();
-
-  const { getColumnData } = useColumns();
 
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [columns, setColumns] = useState([]);
@@ -41,6 +37,8 @@ const FieldTicket = ({ selectedFieldService, fieldRef, fieldRemoveRef }) => {
   const { dataRows, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { isOffline } = useContext(CustomOfflineContext);
   const [accessor, setAccessor] = useState<CardInterface | null>(null);
+
+  const { generateColumns } = useColumns();
 
   useImperativeHandle(fieldRef, () => ({
     triggerChildFunction() {
@@ -86,24 +84,7 @@ const FieldTicket = ({ selectedFieldService, fieldRef, fieldRemoveRef }) => {
           insertUpdate(objectStore.resource, objectStore.fieldTicket, data);
         } catch (ex) { }
       }
-
-      let columns = [];
-      let rendererNames = [];
-      data?.forEach((o) => {
-        let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.fieldTicketDetail.path);
-        if (currentColumn !== null) {
-          columns = [...columns, currentColumn?.columnData];
-          if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-            rendererNames.push(currentColumn?.rendererName);
-          }
-        }
-      });
-      let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-      tempFrameworkComponent = {
-        ...tempFrameworkComponent,
-        actionsRenderer: ActionsRenderer
-      };
-      setFrameWorkComponent({ ...tempFrameworkComponent });
+      var columns = generateColumns(renderedFrom, data, routes.fieldTicketDetail.path);
       columns = [...columns, ...getStaticFields()];
       setColumns([...columns]);
       const bodyColumns: CardInterface['bodyColumns'] = createBodyColumns({

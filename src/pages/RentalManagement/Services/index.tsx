@@ -32,7 +32,7 @@ import Technicians from './Technicians';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { Autocomplete } from '@material-ui/lab';
 import { ownerAndColaborator, quotationApprovedMessage, rentalManagementMessage } from 'src/constants/messageHelpers';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, renderedFrom, stepFullScreen, allowedToEdit, quotationApproved }: any) => {
   const toastConfig = useContext(CustomToastContext);

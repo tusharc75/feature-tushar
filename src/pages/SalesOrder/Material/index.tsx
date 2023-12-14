@@ -26,7 +26,7 @@ import AddIcon from '@material-ui/icons/Add';
 import { ExpandMore, KeyboardArrowDown } from '@material-ui/icons';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { getNestedSubRows } from 'src/components/RentalManagment/helper';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 
 const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen, fetchSalesOrderData, updateJobStatus }) => {

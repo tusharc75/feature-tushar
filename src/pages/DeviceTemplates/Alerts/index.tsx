@@ -16,7 +16,7 @@ import ManageDeviceTemplateAlert from 'src/pages/DeviceTemplatesAlert/ManageDevi
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import { cloneDisable, deleteDisable, editDisable } from 'src/constants/messageHelpers';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 let searchTimeout;
 

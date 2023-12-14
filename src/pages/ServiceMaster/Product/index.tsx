@@ -13,7 +13,7 @@ import { camelCase } from 'lodash';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';

@@ -4,7 +4,7 @@ import React from 'react';
 import { read, utils, writeFile } from 'xlsx';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
-import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
 import CarouselDialog from '../../../components/CarouselDialog';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import DeleteButton from '../../../components/Helpers/DeleteButton';

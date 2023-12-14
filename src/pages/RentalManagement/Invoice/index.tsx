@@ -13,7 +13,7 @@ import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/Offl
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import AdditionalCostDialog from '../AdditionalCost/AdditionalCostDialog';
 import { fetch_rental_product_fields, fetch_rental_cost_fields } from '../../../components/RentalManagment/helper';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import PreviewDownload from 'src/components/PreviewDownload';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';

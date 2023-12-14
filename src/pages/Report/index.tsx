@@ -20,7 +20,7 @@ import ReportFilters from './ReportFilters';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import DialogContent from '@material-ui/core/DialogContent';
 import Dialog from '@material-ui/core/Dialog';
-import CustomReactTable, { useTableReducer, useColumns, getStaticFields } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer, useColumns, getStaticFields } from 'src/components/CustomReactTable';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 

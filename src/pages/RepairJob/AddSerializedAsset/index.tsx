@@ -26,7 +26,7 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, renderedFrom, allowedToEdit, stepFullScreen }) => {
 

@@ -6,7 +6,7 @@ import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { cageManagement, gridLoadingTimeout, isObjectEmpty } from 'src/constants/helpers';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import { prepareDataForGrid } from '../../../constants/helpers';
 import AddToPhotosOutlinedIcon from '@material-ui/icons/AddToPhotosOutlined';

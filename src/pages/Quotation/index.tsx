@@ -29,7 +29,7 @@ import {
   sidebarResource,
   supplierAccount
 } from '../../constants/helpers';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import ManageQuotationDialog from './ManageQuotationDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 

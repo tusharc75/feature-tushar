@@ -6,7 +6,7 @@ import routes from './../../components/Helpers/Routes';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomContainer from '../../components/CustomContainer';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import { gridLoadingTimeout } from '../../constants/helpers';
 import { isMobile } from 'react-device-detect';
 import { Box, Button } from '@material-ui/core';

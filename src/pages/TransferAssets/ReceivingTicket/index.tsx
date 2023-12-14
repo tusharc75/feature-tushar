@@ -20,7 +20,7 @@ import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import PreviewDownload from 'src/components/PreviewDownload';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 interface ReceivingGridProps {
   fetchAssets: any;
   permissions: any;

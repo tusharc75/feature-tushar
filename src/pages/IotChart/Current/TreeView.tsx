@@ -8,7 +8,7 @@ import MuiAccordion from '@material-ui/core/Accordion';
 import MuiAccordionSummary from '@material-ui/core/AccordionSummary';
 import MuiAccordionDetails from '@material-ui/core/AccordionDetails';
 import moment from 'moment';
-import { dateTimeFormat } from 'src/constants/helpers';
+import { dateTimeFormat24Hours } from 'src/constants/helpers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import Chart from '../Helper/Chart';
@@ -111,7 +111,7 @@ export default function TreeView({ expandedAccordition, setExpandedAccordition, 
                     {' '}
                     Last Updated -{' '}
                     <span className="text-gray-500 dark:text-gray-300 text-[12px]">
-                      {moment(currentData?.filter((d) => d?.category?.optionValue === category?._id)[0]?.time).format(dateTimeFormat)}
+                      {moment(currentData?.filter((d) => d?.category?.optionValue === category?._id)[0]?.time).format(dateTimeFormat24Hours)}
                     </span>
                   </Box>
                 ) : null}

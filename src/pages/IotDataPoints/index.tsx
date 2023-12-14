@@ -19,7 +19,7 @@ import {
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ManageIotDataPoints from './ManageIotDataPoints';
 import MessageDialog from '../../components/Helpers/MessageDialog';

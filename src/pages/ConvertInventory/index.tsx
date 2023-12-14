@@ -7,7 +7,7 @@ import { Box, TextField } from '@material-ui/core';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import routes from 'src/components/Helpers/Routes';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { isObjectEmpty, gridLoadingTimeout, convertInventory, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { useData } from 'src/StateProvider/Provider';

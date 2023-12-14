@@ -5,7 +5,7 @@ import { useData } from '../../../StateProvider/Provider';
 import axiosInstance from '../../../axios/axiosInstance';
 import { gridLoadingTimeout, prepareDataForGrid } from '../../../constants/helpers';
 import routes from './../../../components/Helpers/Routes';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { Box } from '@material-ui/core';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';

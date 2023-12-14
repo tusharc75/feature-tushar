@@ -17,7 +17,7 @@ import {
   prepareDataForGrid,
   sidebarResource
 } from 'src/constants/helpers';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import ManageFrequentlyAskedQuestion from './ManageFrequentlyAskedQuestion';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';

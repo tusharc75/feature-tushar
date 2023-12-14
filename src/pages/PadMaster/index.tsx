@@ -11,7 +11,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { useData } from '../../StateProvider/Provider';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { gridLoadingTimeout, prepareDataForGrid,  sidebarResource } from 'src/constants/helpers';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';

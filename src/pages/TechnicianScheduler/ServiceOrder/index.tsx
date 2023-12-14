@@ -2,7 +2,7 @@ import { Box, IconButton, TextField } from '@material-ui/core';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';

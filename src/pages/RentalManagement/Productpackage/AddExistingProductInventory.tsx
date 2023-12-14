@@ -9,7 +9,7 @@ import { gridLoadingTimeout, CustomDialogTransition, packages, isObjectEmpty, pr
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import Dialog from '@material-ui/core/Dialog/Dialog';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { startCase } from 'lodash';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';

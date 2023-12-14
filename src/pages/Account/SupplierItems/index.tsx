@@ -6,7 +6,7 @@ import axiosInstance from '../../../axios/axiosInstance';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../../constants/helpers';
 import routes from './../../../components/Helpers/Routes';
 import { camelCase } from 'lodash';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import { ExpandMore } from '@material-ui/icons';

@@ -212,10 +212,6 @@ export const userType = {
   brandAdmin: 2
 };
 
-export const AgGridHeaderHeight = 45;
-export const AgGridRowHeight = 45;
-export const AgGridFloatingFiltersHeight = 38;
-
 export const gridPageSizes = [25, 50, 75];
 export const gridLoadingTimeout = 500;
 export const processFieldName = 'process';
@@ -1169,6 +1165,7 @@ export const initializeDropdownById = (field, fieldName, id) => {
 export const dateFormat = localStorage.getItem('dateFormat') ?? 'MM/DD/YYYY';
 export const dateTimeFormat = localStorage.getItem('dateTimeFormat') ?? 'MM/DD/YYYY hh:mm A';
 export const cardDateFormat = localStorage.getItem('cardDateFormat') ?? 'MMM DD, YYYY';
+export const dateTimeFormat24Hours = `${dateFormat} HH:mm`;
 
 export const dateFormatForInputControl = localStorage.getItem('dateFormatForInputControl') ?? 'MM/dd/yyyy';
 // export const dateTimeFormat = "MM/dd/yyyy hh:mm A"
@@ -2322,28 +2319,24 @@ export const REPORT_LIST = [
   {
     title: 'Purchase Order Details',
     permission: 'purchaseOrder',
-    // key: 'purchaseOrderType',
     key: 'standardReport',
     type: 'purchaseOrderDetails'
   },
   {
     title: 'Inventory Evaluation',
     permission: 'purchaseOrder',
-    // key: 'purchaseOrderType',
     key: 'standardReport',
     type: 'inventoryEvaluation'
   },
   {
     title: 'Inventory History',
     permission: 'purchaseOrder',
-    // key: 'purchaseOrderType',
     key: 'standardReport',
     type: 'inventoryHistory'
   },
   {
     title: 'Average Price By Supplier',
     permission: 'purchaseOrder',
-    // key: 'purchaseOrderType',
     key: 'standardReport',
     type: 'averagePriceBySupplier'
   },
@@ -2357,21 +2350,18 @@ export const REPORT_LIST = [
   {
     title: 'Asset Utilization',
     permission: 'serializedAsset',
-    // key: 'purchaseOrderType',
     key: 'standardReport',
     type: 'assetUtilization'
   },
   {
     title: 'User Session',
     permission: 'user',
-    // key: 'purchaseOrderType',
     key: 'standardReport',
     type: 'userSession'
   },
   {
     title: 'In Used Serialized Asset',
     permission: 'serializedAsset',
-    // key: 'purchaseOrderType',
     key: 'standardReport',
     type: 'inUsedSerializedAsset'
   }

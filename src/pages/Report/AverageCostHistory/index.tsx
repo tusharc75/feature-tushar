@@ -1,7 +1,7 @@
 import Box from '@material-ui/core/Box/Box';
 import { useEffect } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -45,7 +45,7 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
         query = query + `from=${showPricefilter?.fromDate}&to=${showPricefilter?.toDate}`;
       }
     }
-    const response = await axiosInstance().get(`${productInventory.api}/report/product-price-of-product/${product}${query}`);
+    const response = await axiosInstance().get(`/report/inventory-evaluation-by-product/${product}${query}`);
     data = response?.data?.data;
     let rows = data.map((u) => {
       let finalObject: any = prepareDataForGrid(u, user);

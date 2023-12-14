@@ -1,7 +1,7 @@
 import { Fragment, useState, useEffect, useContext } from 'react';
 import { Box, Grid, Button, Menu, MenuItem, IconButton } from '@material-ui/core';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import CustomReactTable, { useColumns, getStaticFields, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
 import axiosInstance from 'src/axios/axiosInstance';
 import { FIELD_TICKET_STATUS, SERVICE_ORDER_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import routes from 'src/components/Helpers/Routes';

@@ -13,7 +13,7 @@ import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';

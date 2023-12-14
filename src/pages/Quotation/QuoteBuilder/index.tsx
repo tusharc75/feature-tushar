@@ -14,7 +14,7 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { useData } from 'src/StateProvider/Provider';
 import { AiFillEdit } from 'react-icons/ai';
 import { useHistory } from 'react-router-dom';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 const QuoteBuilder = ({
   quotationData,

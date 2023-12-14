@@ -21,7 +21,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import { useData } from '../../StateProvider/Provider';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import axiosInstance from '../../axios/axiosInstance';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CustomContainer from '../../components/CustomContainer';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
 import EntitySelectionsDialog from '../../components/EntitySelections';

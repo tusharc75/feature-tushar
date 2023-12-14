@@ -8,7 +8,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { fieldServiceOrder } from '../../../constants/helpers';

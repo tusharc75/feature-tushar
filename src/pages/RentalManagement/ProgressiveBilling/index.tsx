@@ -6,7 +6,7 @@ import CustomReactTable, {
   useColumns,
   useTableReducer,
   checkStaticField
-} from 'src/components/CustomReactTableNew';
+} from 'src/components/CustomReactTable';
 import routes from 'src/components/Helpers/Routes';
 import { Link } from 'react-router-dom';
 import { gridLoadingTimeout, invoice, isObjectEmpty, prepareDataForGrid } from 'src/constants/helpers';

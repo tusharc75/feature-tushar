@@ -25,7 +25,7 @@ import { CHILD_RESOURCE, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import PreviewDownload from 'src/components/PreviewDownload';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 const Material = ({ renderedFrom, allowedToEdit, planningData }) => {
   const {

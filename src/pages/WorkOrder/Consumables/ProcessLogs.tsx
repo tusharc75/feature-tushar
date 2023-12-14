@@ -8,7 +8,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { dateTimeFormat } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { Autorenew } from '@material-ui/icons';
 import RevertQtyDialog from 'src/pages/ProductInventory/History/RevertQtyDialog';

@@ -9,7 +9,7 @@ import { sortBy } from 'lodash';
 import DetailsPage from 'src/components/Shared/DetailsPage';
 import { FaDiceOne } from 'react-icons/fa';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 let levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
 

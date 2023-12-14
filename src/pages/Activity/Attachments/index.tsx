@@ -31,7 +31,7 @@ import PreviewIcon from '@material-ui/icons/Visibility';
 import _ from 'lodash';
 import mime from 'mime';
 import { CreateEmail } from 'src/components/Activity/Email/CreateEmail';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';

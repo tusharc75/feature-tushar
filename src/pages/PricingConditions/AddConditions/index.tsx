@@ -9,7 +9,7 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import { pricingCondition, gridLoadingTimeout, PRICING_TYPE, sidebarResource, MATERIAL_TYPE } from '../../../constants/helpers';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import ConditionDialog from './ConditionDialog';
 import { camelCase, startCase } from 'lodash';

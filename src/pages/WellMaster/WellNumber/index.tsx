@@ -7,7 +7,7 @@ import axiosInstance from '../../../axios/axiosInstance';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../../constants/helpers';
 import routes from './../../../components/Helpers/Routes';
 import { camelCase } from 'lodash';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import { Menu, MenuItem, Box } from '@material-ui/core';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';

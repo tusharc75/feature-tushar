@@ -29,7 +29,7 @@ import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceD
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import EditIcon from '@material-ui/icons/Edit';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScreen, version, allowedToEdit, updateDOASetup }) => {
   const toastConfig = useContext(CustomToastContext);
