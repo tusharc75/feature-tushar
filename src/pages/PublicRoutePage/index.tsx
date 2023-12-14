@@ -9,7 +9,6 @@ import QuoteSupplierPrice from './QuoteSupplierPrice';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import QuotationSupplierPrice from './QuotationSupplierPrice';
 import QuotationCustomerAccept from './QuotationCustomer/QuotationCustomerAccept';
-import RJCustomerAccept from './RentalManagement/RentalCustomerAccept';
 import IrtTicket from './IrtTicket';
 import { sidebarResource } from 'src/constants/helpers';
 
@@ -179,8 +178,6 @@ const PublicRoutePage = () => {
           <QuotationSupplierPrice quotationData={resourceData} openAuthId={id} />
         ) : resourceData?.referenceIdType === 'QuotationCustomer' ? (
           <QuotationCustomerAccept openAuthId={id} />
-        ) : resourceData?.referenceIdType === 'RentalJob' ? (
-          <RJCustomerAccept openAuthId={id} />
         ) : resourceData?.referenceIdType === sidebarResource.irtTicket ? (
           <IrtTicket openAuthId={id} openAuthData={resourceData?.data} />
         ) : (
