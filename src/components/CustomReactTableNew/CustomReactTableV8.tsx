@@ -386,7 +386,7 @@ const CustomReactTable = ({
     enablePinning: true,
     autoResetPageIndex,
     enableFilters: true,
-
+    getRowId: (row) => row._id,
     initialState: {
       columnVisibility: getVisibleColumns()
     },
@@ -446,37 +446,43 @@ const CustomReactTable = ({
 
   // For row selection
   useEffect(() => {
-    const selectedRows = table.getSelectedRowModel().flatRows.map((d) => {
+    const selectedRowIds = Object.keys(rowSelection);
+
+    const currentPageSelectedRows = table.getSelectedRowModel().flatRows.map((d) => {
       const { subRows, ...rest } = d.original;
       return { ...rest };
     });
+    const totalSelectedRows = [...currentPageSelectedRows, ...selectedRecords];
+
+    const newData = [];
+    for (const rowId of selectedRowIds) {
+      const data = totalSelectedRows.find((d) => d._id === rowId);
+      newData.push(data);
+    }
+
+    if (onSelect) onSelect(newData);
     dispatch({
       type: 'selection',
-      selectedRecords: selectedRows
+      selectedRecords: newData
     });
-  }, [rowSelection, renderedFrom, table]);
+  }, [rowSelection]);
 
-  // Row selection effect for parent component;
+  // parent selection effects
   useEffect(() => {
-    const selectedRows = table.getSelectedRowModel().flatRows;
-    const selectedRecordIds = selectedRecords.map((d) => d._id);
-
     if (selectedRecords.length === 0) {
       table.resetRowSelection();
     }
-
-    if (selectedRecords.length !== selectedRows.length) {
+  }, [selectedRecords.length, table]);
+  useEffect(() => {
+    if (selectedRecords.length !== Object.keys(rowSelection).length) {
+      const selectedRowIds = selectedRecords.map((d) => d._id);
       for (const row of rows) {
-        if (!selectedRecordIds.includes(row.original._id)) {
-          if (row.getIsSelected()) {
-            row.toggleSelected(false);
-          }
-          continue;
+        if (selectedRowIds.includes(row.original._id) && !row.getIsSelected()) {
+          row.toggleSelected(true);
         }
-        row.toggleSelected(true);
       }
     }
-  }, [selectedRecords, rows.length]);
+  }, [selectedRecords.length]);
 
   return (
     <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>

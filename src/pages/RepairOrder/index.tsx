@@ -380,7 +380,7 @@ const RepairOrder = () => {
             <div className="flex flex-wrap gap-[8px] justify-end">
               <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
               <div className="flex gap-[8px] flex-wrap items-center">
-                {permissions?.sublease?.isCreate && (
+                {permissions?.repairOrder?.isCreate && (
                   <Button
                     onClick={() => {
                       setShowManageRepairOrderDialog({ open: true, isClone: false, idToClone: null });
