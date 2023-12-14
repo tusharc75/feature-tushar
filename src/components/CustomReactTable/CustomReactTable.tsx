@@ -377,7 +377,7 @@ const CustomReactTable = ({
     },
     // flags
     enableExpanding: expander,
-    enableRowSelection: !hideSelection,
+    enableRowSelection: (row: Row<any>) => !hideSelection && row.original.hideSelection !== true,
     enableHiding: true,
     enablePinning: true,
     enableFilters: true,
