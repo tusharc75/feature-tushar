@@ -45,7 +45,7 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
         query = query + `from=${showPricefilter?.fromDate}&to=${showPricefilter?.toDate}`;
       }
     }
-    const response = await axiosInstance().get(`${productInventory.api}/report/product-price-of-product/${product}${query}`);
+    const response = await axiosInstance().get(`/report/inventory-evaluation-by-product/${product}${query}`);
     data = response?.data?.data;
     let rows = data.map((u) => {
       let finalObject: any = prepareDataForGrid(u, user);
