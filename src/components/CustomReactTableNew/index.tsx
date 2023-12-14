@@ -1,7 +1,6 @@
 import { useTableReducer } from './hooks/useTableReducer';
 import type { TInitialState, TActios } from './hooks/useTableReducer';
-// import CustomReactTable from './CustomReactTable';
-import CustomReactTable from './CustomReactTableV8';
+import CustomReactTable from './CustomReactTable';
 import Pagination from './TableComponents/Pagination';
 import useColumns, {
   headerName,
@@ -12,7 +11,6 @@ import useColumns, {
   getSortedColumns,
   staticColumns
 } from './hooks/useColumnsReactTable';
-
 export default CustomReactTable;
 export {
   useTableReducer,

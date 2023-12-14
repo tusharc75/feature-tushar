@@ -2,7 +2,7 @@ import DateFnsUtils from '@date-io/date-fns';
 import { Box, TextField } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import { KeyboardDateTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
-import { INTERVALS } from '../../../constants/helpers';
+import { INTERVALS, dateFormatForInputControl } from '../../../constants/helpers';
 import { useEffect, useState } from 'react';
 
 export default function FilterModel({ dateFilters, setDateFilters }) {
@@ -68,7 +68,7 @@ export default function FilterModel({ dateFilters, setDateFilters }) {
             margin="none"
             autoOk
             maxDate={dateFilters.to}
-            format="dd/MM/yyyy HH:mm"
+            format={dateFormatForInputControl + ' HH:mm'}
             label="From"
             views={['year', 'month', 'date', 'hours', 'minutes']}
             value={dateFilters.from}
@@ -84,7 +84,7 @@ export default function FilterModel({ dateFilters, setDateFilters }) {
             margin="none"
             autoOk
             minDate={dateFilters.from}
-            format="dd/MM/yyyy HH:mm"
+            format={dateFormatForInputControl + ' HH:mm'}
             label="To"
             views={['year', 'month', 'date', 'hours', 'minutes']}
             value={dateFilters.to}

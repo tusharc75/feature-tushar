@@ -9,8 +9,7 @@ import { ApexOptions } from 'apexcharts';
 import FilterAlertModel from './FilterAlertModel';
 import { useAppTheme } from 'src/constants/AppConfig';
 import moment from 'moment';
-import { dateTimeFormat } from 'src/constants/helpers';
-
+import { dateTimeFormat24Hours } from 'src/constants/helpers';
 const Chart = ({ dateFilters, assetId, dataPoints }) => {
   const toastConfig = useContext(CustomToastContext);
   const [chartData, setChartData] = useState(null);
@@ -55,7 +54,10 @@ const Chart = ({ dateFilters, assetId, dataPoints }) => {
       size: 0
     },
     xaxis: {
-      type: 'datetime'
+      type: 'datetime',
+      labels:{
+        datetimeUTC: false
+      }
     },
     // yaxis: {
     //     min: 0
@@ -64,7 +66,7 @@ const Chart = ({ dateFilters, assetId, dataPoints }) => {
       shared: true,
       x: {
         formatter: function (value) {
-          const formattedDateTime = moment(value).format(dateTimeFormat);
+          const formattedDateTime = moment(value).format(dateTimeFormat24Hours);
           return formattedDateTime;
         }
       },
