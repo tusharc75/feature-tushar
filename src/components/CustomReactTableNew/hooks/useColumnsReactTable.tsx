@@ -4,14 +4,13 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import moment from 'moment';
 import { Avatar } from '@material-ui/core';
 import { dateFormat, dateTimeFormat, formatAmountWithCurrency, getUniqueCurrencies, sidebarResourceObjectFromValues } from 'src/constants/helpers';
-import { leadDetailPage } from 'src/routes/Lead';
 import routes from '../../Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
 import { Image } from '@material-ui/icons';
 import CopyToClipboard from '../../Helpers/CopyToClipboard';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import SignatureCell from 'src/components/Helpers/SignatureCell';
-import DropdownCell from '../Cells/DropdownCell';
+import SignatureCell from 'src/components/CustomReactTableNew/Cells/SignatureCell';
+import DropdownCell from 'src/components/CustomReactTableNew/Cells/DropdownCell';
 
 const permissionForLinks = sidebarResourceObjectFromValues();
 
@@ -22,7 +21,7 @@ export const headerName = {
 const hideColumns = ['salutation', 'middleName', 'lastName', 'suffix'];
 
 export const detailPagePath = {
-  leads: leadDetailPage.path,
+  leads: routes?.leadDetail?.path,
   owner: routes?.userDetail?.path,
   user: routes?.userDetail?.path,
   collaborator: routes?.userDetail?.path,
@@ -566,6 +565,7 @@ export default function useColumns() {
       } else if (field?.type === 'imageUpload') {
         column.push({
           ...commonFieldData,
+          width: 100,
           disableFilters: true,
           disableSortBy: true,
           cell: ({ row }) => (
