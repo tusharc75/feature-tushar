@@ -4,7 +4,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { fieldTicket, sidebarResource } from 'src/constants/helpers';
+import { MATERIAL_TYPE, fieldTicket, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Button, IconButton, Menu, MenuItem, Tab, Tabs, TextField } from '@material-ui/core';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -332,19 +332,20 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
 
   const handleSubmit = async (rows) => {
     setSubmitting(true)
-    const tax: any = {};
+    var taxCodeData: any = null;
     if (fieldTicketData?.taxCode) {
       const {
         data: { data }
-      } = await axiosInstance().get(`${routes?.taxMaster.path}/by-zipcode?taxCode=${fieldTicketData?.taxCode?.optionValue}`);
-      tax.taxCode = fieldTicketData?.taxCode?.optionValue;
-      tax.taxPercentage = data?.length ? data[0]?.taxRate : 0;
+      } = await axiosInstance().get(`${routes?.taxMaster.path}/by-zipcode?taxCode=${fieldTicketData?.taxCode?.optionValue}&materialType=${MATERIAL_TYPE.product}`);
+      if (data?.length) {
+        taxCodeData = data[0];
+      }
     }
     const material: any = [];
     rows.forEach((d) => {
       const element: any = {};
       element.materialId = d._id;
-      element.type = 'product';
+      element.type = MATERIAL_TYPE.product;
       element.service = selectedServiceOption?.optionValue !== "All" ? selectedServiceOption?.optionValue : null;
       element.qty = d.qty ? parseFloat(d.qty) : 1;
       element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
@@ -356,9 +357,9 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
       if (calValues && calValues['estimateJobDuration']) {
         element.estimateJobDuration = calValues['estimateJobDuration'];
       }
-      if (!isEmpty(tax)) {
-        element.taxCode = tax?.taxCode;
-        element.taxPercentage = tax?.taxPercentage;
+      if (taxCodeData) {
+        element.taxCode = taxCodeData?.optionValue;
+        element.taxPercentage = taxCodeData?.taxRate || 0;
       }
       material.push(element);
     });
@@ -640,7 +641,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
           fieldTicketData={fieldTicketData}
           selectedService={selectedServiceOption}
           renderedFrom={`${renderedFrom}_technician`}
-           />
+        />
       </TabPanel>
       {consumablesDialog && (
         <AssignProductDialog
