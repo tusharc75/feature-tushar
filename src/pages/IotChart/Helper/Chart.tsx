@@ -10,7 +10,7 @@ import FilterAlertModel from './FilterAlertModel';
 import { useAppTheme } from 'src/constants/AppConfig';
 import moment from 'moment';
 import { dateTimeFormat24Hours } from 'src/constants/helpers';
-import { FiDownload } from 'react-icons/fi';
+
  
 const downloadIconHTML = `<div>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ico-download">
