@@ -64,7 +64,7 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer();
-  const { generateColumns } = useColumns()
+  const { generateColumns } = useColumns();
 
   const [columns, setColumns] = useState(null);
   const [productData, setProductData] = useState([]);
@@ -154,24 +154,28 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
         let columns = [];
         columns = [
           {
-            field: 'index',
-            headerName: 'Index',
+            accessor: 'index',
+            Header: 'Index',
             width: 150,
             show: true,
             disabled: true,
-            order: 0,
-            cellRenderer: 'commonRenderer',
-            primaryField: true
+            primaryField: true,
+            Cell: ({ row }) => <p className="text-truncate">{row?.original?.index}</p>,
+            Footer: () => {
+              return <>Total</>;
+            }
           },
           {
-            field: 'detail',
-            headerName: 'Detail',
+            accessor: 'detail',
+            Header: 'Detail',
             width: 150,
             show: true,
             disabled: true,
-            order: 0,
-            cellRenderer: 'commonRenderer',
-            primaryField: true
+            primaryField: true,
+            Cell: ({ row }) => <p className="text-truncate">{row?.original?.detail}</p>,
+            Footer: () => {
+              return <>Total</>;
+            }
           }
         ];
 
@@ -180,10 +184,13 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
         data.products?.forEach((ele) => {
           fields = [...fields, ...ele.fields];
           ele?.fields?.forEach((field) => {
-            const currencyField: any = field?.type === 'currencyAmount' ? {
-              ...ele,
-              fieldName: ele.fieldName + '_' + quotationData.currency.toLowerCase()
-            } : {};
+            const currencyField: any =
+              field?.type === 'currencyAmount'
+                ? {
+                    ...field,
+                    fieldName: field?.fieldName + '_' + quotationData?.currency?.toLowerCase()
+                  }
+                : {};
 
             rows.forEach((data) => {
               if (data[currencyField?.fieldName]) {
@@ -191,7 +198,9 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
                 let tempData = {
                   _id: data?.uniqueId,
                   [currencyField?.fieldName]: parseInt(data[currencyField?.fieldName] === '' ? 0 : data[currencyField?.fieldName]),
-                  [`price_${quotationData?.currency.toLowerCase()}`]: parseInt(data[currencyField?.fieldName] === '' ? 0 : data[currencyField?.fieldName])
+                  [`price_${quotationData?.currency.toLowerCase()}`]: parseInt(
+                    data[currencyField?.fieldName] === '' ? 0 : data[currencyField?.fieldName]
+                  )
                 };
                 if (productIndex === -1) {
                   tempProductData = [...tempProductData, tempData];
@@ -202,7 +211,7 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
                 setProductData(tempProductData);
               }
             });
-          })
+          });
 
           const filteredFields = ele?.fields?.filter((e) => data?.requiredFields.includes(e.fieldName));
           const newColumns = generateColumns(renderedFrom, filteredFields, null, false, quotationData.currency);
@@ -226,8 +235,8 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
   };
 
   const onCellValueChanged = (data, row) => {
-    const col = Object.keys(data)[0]
-    const value = data[col]
+    const col = Object.keys(data)[0];
+    const value = data[col];
     let tempFieldsNumber = [];
     let productIndex = productData.findIndex((d) => d._id === row?.uniqueId);
     let tempData = {
@@ -413,7 +422,7 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
                 <CustomReactTable
                   height={'calc(100vh - 200px)'}
                   columns={columns}
-                  onSelect={() => { }}
+                  onSelect={() => {}}
                   state={state}
                   dispatch={dispatch}
                   renderedFrom={renderedFrom}

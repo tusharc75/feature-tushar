@@ -11,7 +11,7 @@ import MuiAccordionDetails from '@material-ui/core/AccordionDetails';
 import { withStyles } from '@material-ui/core/styles';
 import { Box, Button, Grid, IconButton, TextField, Typography, useMediaQuery } from '@material-ui/core';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTableNew';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import moment from 'moment';
@@ -68,6 +68,8 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
   const [expandSupplierGrid, setExpandSupplierGrid] = useState(0);
   const [comment, setComment] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  const { state, dispatch } = useTableReducer();
 
   const handleChange = (event) => {
     setComment(event.target.value.trimStart());
@@ -251,16 +253,15 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
                           {columns && data.material ? (
                             <CustomReactTable
                               columns={columns}
-                              data={data.material}
-                              onSelect={() => {}}
-                              childrenProperty="subRows"
-                              uniqueKey="_id"
+                              state={{ ...state, dataRows: data.material }}
+                              dispatch={dispatch}
                               renderedFrom="quotation_product_package"
                               isClientSideGrid={true}
                               hideSelection={true}
                               hideAction={true}
-                              displayCustomReactTableHeaderOptions={false}
-                              hideExpander={true}
+                              showArrangeView={false}
+                              // displayCustomReactTableHeaderOptions={false}
+                              // hideExpander={true}
                             />
                           ) : (
                             <Box height={500}>

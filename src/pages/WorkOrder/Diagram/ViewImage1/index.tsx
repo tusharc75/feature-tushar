@@ -193,7 +193,6 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
           {editingText && (
             <textarea
               autoFocus
-              aria-multiline
               ref={inputRef}
               style={{
                 position: 'absolute',
@@ -202,7 +201,7 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
                 // width: editingText.width,
                 overflow: 'hidden',
                 outline: 'none',
-                border: '1px solid black',
+                border: 'none',
                 margin: 0,
                 padding: 0,
                 fontSize: editingText.fontSize,
