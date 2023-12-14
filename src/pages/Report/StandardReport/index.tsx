@@ -83,7 +83,6 @@ const Report = () => {
             let { data: { data: { columnFields, filterFields } } } = await axiosInstance().get(`/report/${type}/column`);
             const customRendererTypes = ['reference', 'creditDebit', 'date', 'creditDebitType'];
             let newColumns = generateColumns(type, columnFields, '');
-
             newColumns?.forEach(o => {
                 const fieldType = columnFields?.find(c => c?.fieldData?.fieldName === o?.accessor)?.type;
                 if (customRendererTypes?.includes(fieldType)) {
@@ -112,9 +111,11 @@ const Report = () => {
                     o.cell = ({ row }) => ProductRenderer(row)
                 }
             });
-
             if (type === 'inventory-evaluation') {
                 columns = [...newColumns, ActionsRenderer]
+            }
+            else {
+                columns = [...newColumns]
             }
             setResourceColumns(filterFields);
             setColumns(columns);
@@ -327,7 +328,6 @@ const Report = () => {
         disableSortBy: true,
         canDrag: false,
         Cell: ({ row }) => (
-
             <HtmlTooltip title={'View History'}>
                 <span>
                     <IconButton
