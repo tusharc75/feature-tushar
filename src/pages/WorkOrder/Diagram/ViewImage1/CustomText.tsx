@@ -17,7 +17,8 @@ const CustomText = ({ textState, setTextState, onEdit, editingTextRef, onSelect 
             width: ref.offsetWidth,
             height: ref.offsetHeight,
             x: position.x,
-            y: position.y
+            y: position.y,
+            fontSize: calculateFontSize(ref.offsetWidth, ref.offsetHeight),
           }
           : text
       )
@@ -40,6 +41,12 @@ const CustomText = ({ textState, setTextState, onEdit, editingTextRef, onSelect 
     onEdit();
   };
 
+  const calculateFontSize = (width, height) => {
+    // Implement your logic to calculate font size based on width and height
+    // Example: return Math.sqrt(parseInt(width) * parseInt(height)) / 10;
+    return Math.min(parseInt(width), parseInt(height)) / 1.5; // Simple example
+  };
+
   return (
     <Rnd
       key={textState.id}
@@ -48,7 +55,13 @@ const CustomText = ({ textState, setTextState, onEdit, editingTextRef, onSelect 
       onDrag={(e, d) => handleDrag(textState.id, d)}
       onResize={(e, direction, ref, delta, position) => handleResize(textState.id, direction, ref, delta, position)}
       style={{
-        border: '1px solid blue',
+        border: '2px solid #007FFF',
+      }}
+      resizeHandleStyles={{
+        topRight: { cursor: 'nesw-resize', position: 'absolute', width: '10px', height: '10px', right: '-5px', top: '-5px', backgroundColor: '#007FFF', borderRadius: '50%' },
+        bottomRight: { cursor: 'nwse-resize', position: 'absolute', width: '10px', height: '10px', right: '-5px', bottom: '-5px', backgroundColor: '#007FFF', borderRadius: '50%' },
+        bottomLeft: { cursor: 'nwsw-resize', position: 'absolute', width: '10px', height: '10px', left: '-5px', bottom: '-5px', backgroundColor: '#007FFF', borderRadius: '50%' },
+        topLeft: { cursor: 'nwse-resize', position: 'absolute', width: '10px', height: '10px', left: '-5px', top: '-5px', backgroundColor: '#007FFF', borderRadius: '50%' }
       }}
     >
       <div
