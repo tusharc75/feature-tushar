@@ -176,6 +176,7 @@ export const handleCellClick = ({ cell, row, dispatch, setCellValue }) => {
 
 export const insertChildRowIntoTable = ({ existingRows, subRowsToInsert, parentId, dispatch }) => {
   const updatedRows = [...existingRows];
+  if (!subRowsToInsert) return;
 
   for (let row of updatedRows) {
     if (row._id === parentId) {

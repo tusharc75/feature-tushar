@@ -20,6 +20,7 @@ export const useCreateColumns = ({
 
   const fetchChildAttachmentWrapper = async (row) => {
     if (!fetchChildAttachment || row.original[childrenProperty]?.length > 0) return;
+    dispatch({ type: 'loadingExpanderRowId', loadingExpanderRowId: row.original._id });
     try {
       const subRows = await fetchChildAttachment(row.original.id);
       if (!subRows) return;
@@ -27,6 +28,8 @@ export const useCreateColumns = ({
       row.toggleExpanded((data) => !data);
     } catch (error) {
       console.error(error);
+    } finally {
+      dispatch({ type: 'loadingExpanderRowId', loadingExpanderRowId: null });
     }
   };
 
