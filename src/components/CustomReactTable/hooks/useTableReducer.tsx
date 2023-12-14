@@ -85,8 +85,13 @@ function reducer(state: TInitialState, action: TActios) {
     case 'updateColumnState':
       return {
         ...state,
-        colState : action.colState
-      }
+        colState: action.colState
+      };
+    case 'loadingExpanderRowId':
+      return {
+        ...state,
+        loadingExpanderRowId: action.loadingExpanderRowId
+      };
     default:
       break;
   }
@@ -108,7 +113,8 @@ const intialState = {
   currentEditingCellPosition: null,
   error: false,
   showFilteredRecordsOnly: false,
-  colState: []
+  colState: [],
+  loadingExpanderRowId: null
 };
 
 export type TInitialState = {
@@ -126,6 +132,7 @@ export type TInitialState = {
   error: boolean;
   showFilteredRecordsOnly: boolean;
   colState: any[];
+  loadingExpanderRowId: string | null;
 };
 
 export type TActios =
@@ -146,6 +153,7 @@ export type TActios =
   | { type: 'columnOrder'; columnOrder: boolean }
   | { type: 'hiddenColumns'; hiddenColumns: boolean }
   | { type: 'updateColumnState'; colState: any[] }
+  | { type: 'loadingExpanderRowId'; loadingExpanderRowId: string | null };
 
 export const useTableReducer = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
