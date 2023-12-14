@@ -223,7 +223,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
         width: 200,
         Cell: ({ row }) => {
           return row.original['qtyDisplay'] ? <p className="text-truncate">{row.original.qtyDisplay}</p> : <NoDataCell />;
-        }
+        },
       },
       {
         accessor: 'description',
@@ -273,9 +273,9 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
     coloum.forEach((element) => {
       if (element.accessor === 'qty') {
         element['Footer'] = (info) => {
-          const qtyTotal = info.rows
-            .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
-            .reduce((sum, row) => row.values[element.accessor] + sum, 0);
+          let rows = info.table.getExpandedRowModel().rows;
+          const qtyTotal = rows?.filter((f) => !f.original.parentId && f.original.hasOwnProperty(element.accessor) && !isNaN(f.original[element.accessor]))
+            .reduce((sum, row) => row.original[element.accessor] + sum, 0);
           return <>{qtyTotal}</>;
         };
       }
@@ -299,12 +299,12 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = `${parent.type === MATERIAL_TYPE.package
-          ? parent.packageDetail?.packageName
-          : parent.type === MATERIAL_TYPE.product
-            ? parent.productDetail?.productName
-            : parent.type === MATERIAL_TYPE.serializedAsset
-              ? parent.serializedAssetDetail.assetNumber
-              : ''
+        ? parent.packageDetail?.packageName
+        : parent.type === MATERIAL_TYPE.product
+          ? parent.productDetail?.productName
+          : parent.type === MATERIAL_TYPE.serializedAsset
+            ? parent.serializedAssetDetail.assetNumber
+            : ''
         }`;
       parent.description =
         parent.type === MATERIAL_TYPE.product
@@ -348,12 +348,12 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
       _subRow.detail = `${_subRow.type === MATERIAL_TYPE.package
-          ? _subRow.packageDetail?.packageName
-          : _subRow.type === MATERIAL_TYPE.product
-            ? _subRow.productDetail?.productName
-            : _subRow.type === MATERIAL_TYPE.serializedAsset
-              ? _subRow.serializedAssetDetail.assetNumber
-              : ''
+        ? _subRow.packageDetail?.packageName
+        : _subRow.type === MATERIAL_TYPE.product
+          ? _subRow.productDetail?.productName
+          : _subRow.type === MATERIAL_TYPE.serializedAsset
+            ? _subRow.serializedAssetDetail.assetNumber
+            : ''
         }`;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.product

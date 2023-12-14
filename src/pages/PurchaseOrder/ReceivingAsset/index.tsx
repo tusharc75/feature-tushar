@@ -33,7 +33,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer();
   const { generateColumns } = useColumns();
-  const {  selectedRecords } = state;
+  const { selectedRecords } = state;
   const {
     state: { user, permissions }
   }: any = useData();
@@ -162,9 +162,9 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
       width: 150,
       Cell: ({ row }) => (row.original['assetQty'] ? <p>{row.original['assetQty']}</p> : <NoDataCell />),
       Footer: (info) => {
-        return info?.rows
-          ?.filter((f) => f.values.hasOwnProperty('assetQty') && !isNaN(f.values['assetQty']))
-          .reduce((sum, row) => row.values['assetQty'] + sum, 0);
+        let rows = info.table.getExpandedRowModel().rows;
+        return rows?.filter((f) => f.original.hasOwnProperty('assetQty') && !isNaN(f.original['assetQty']))
+          .reduce((sum, row) => row.original['assetQty'] + sum, 0);
       }
     });
     column.push({
@@ -173,9 +173,9 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
       width: 150,
       Cell: ({ row }) => (row.original['inventoryQty'] ? <p>{row.original['inventoryQty']}</p> : <NoDataCell />),
       Footer: (info) => {
-        return info?.rows
-          ?.filter((f) => f.values.hasOwnProperty('inventoryQty') && !isNaN(f.values['inventoryQty']))
-          .reduce((sum, row) => row.values['inventoryQty'] + sum, 0);
+        let rows = info.table.getExpandedRowModel().rows;
+        return rows?.filter((f) => f.original.hasOwnProperty('inventoryQty') && !isNaN(f.original['inventoryQty']))
+          .reduce((sum, row) => row.original['inventoryQty'] + sum, 0);
       }
     });
     setColumns([

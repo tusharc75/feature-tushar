@@ -165,9 +165,9 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen, f
             Header: 'Lead Time (Days)',
             Cell: ({ row }) => (row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0),
             Footer: (info) => {
-              const total = info.rows
-                .filter((f) => f.values.hasOwnProperty('leadTime') && !isNaN(f.values['leadTime']))
-                .reduce((sum, row) => parseInt(row.values['leadTime']) + sum, 0);
+              let rows = info.table.getExpandedRowModel().rows;
+              const total = rows?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
+                .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
               return <>{total}</>;
             }
           }
