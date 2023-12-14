@@ -237,15 +237,15 @@ const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, h
 
   const handleAdd = async (rows) => {
     setIsSubmitting(true);
-    const tax: any = {};
+    var taxCodeData: any = null;
     if (fieldTicketData?.taxCode) {
       const {
         data: { data }
-      } = await axiosInstance().get(`${routes?.taxMaster.path}/by-zipcode?taxCode=${fieldTicketData?.taxCode?.optionValue}`);
-      tax.taxCode = fieldTicketData?.taxCode?.optionValue;
-      tax.taxPercentage = data?.length ? data[0]?.taxRate : 0;
+      } = await axiosInstance().get(`${routes?.taxMaster.path}/by-zipcode?taxCode=${fieldTicketData?.taxCode?.optionValue}&materialType=${MATERIAL_TYPE.service}`);
+      if (data?.length) {
+        taxCodeData = data[0];
+      }
     }
-
     const material: any = [];
     rows.forEach((d) => {
       const element: any = {};
@@ -261,9 +261,9 @@ const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, h
       if (calValues && calValues['estimateJobDuration']) {
         element.estimateJobDuration = calValues['estimateJobDuration'];
       }
-      if (!isEmpty(tax)) {
-        element.taxCode = tax?.taxCode;
-        element.taxPercentage = tax?.taxPercentage;
+      if (taxCodeData) {
+        element.taxCode = taxCodeData?.optionValue;
+        element.taxPercentage = taxCodeData?.taxRate || 0;
       }
       material.push(element);
     });

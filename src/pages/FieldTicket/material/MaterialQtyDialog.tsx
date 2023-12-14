@@ -75,8 +75,12 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
     const zipCode = billingAddress?.zipCode;
     const state = billingAddress?.state;
     let materialType;
-    if (isBulkedit) materialType = rowData[0]?.type;
-    else materialType = rowData?.type;
+    if (isBulkedit) {
+      materialType = rowData[0]?.type;
+    }
+    else {
+      materialType = rowData?.type;
+    }
     try {
       const response = await axiosInstance().get(
         `${routes?.taxMaster.path}/by-zipcode?zipCode=${zipCode}&state=${state}&materialType=${materialType}${taxCode && `&taxCode=${taxCode}`}`
