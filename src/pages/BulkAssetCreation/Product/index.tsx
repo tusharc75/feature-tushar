@@ -211,8 +211,8 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
                 fontSize="small"
                 color={
                   (row?.original?.actualReceived === undefined || row?.original?.actualReceived === 0) &&
-                  allowedToEdit &&
-                  permissions?.bulkAssetCreation?.isUpdate
+                    allowedToEdit &&
+                    permissions?.bulkAssetCreation?.isUpdate
                     ? 'error'
                     : 'disabled'
                 }
@@ -399,6 +399,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
           refreshGrid={fetchBulkAssetCreationProduct}
           hideAction={!allowedToEdit}
           hideSelection={!allowedToEdit}
+          isClientSideGrid={true}
         />
       ) : (
         <Box p={2} height={500}>

@@ -652,6 +652,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
             hideAction={!allowedToEdit}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
+            expander={user?.user?.brandPolicy?.repairOrderAddProductPackage ? true : false}
           />
         </Box>
       ) : (
