@@ -156,6 +156,7 @@ export const useCreateColumns = ({
         }
         if (e.disableSortBy !== true && !isClientSideGrid) {
           e.sortingFn = serverSort;
+          e.sortable = true;
         }
 
         if (e.disableFilters !== true && isClientSideGrid) {
