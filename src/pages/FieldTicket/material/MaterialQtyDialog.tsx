@@ -18,7 +18,7 @@ import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { uniq, map, orderBy, isEqual } from 'lodash';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import moment from 'moment';
-import { calculatePrice, calculateRowsField } from '../../../components/RentalManagment/helper';
+import { bulkUpdate, calculatePrice, calculateRowsField } from '../../../components/RentalManagment/helper';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { fetch_field_ticket_material_fields } from '../helper';
@@ -126,7 +126,6 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
         if (element.fieldName === 'pricingMethod') {
           element.option = pricingMethodOptions;
         }
-
         element.required = false;
         element.isFormula = false;
         element.isMulitFormula = false;
@@ -137,8 +136,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
         values: {
           ...getObjKeys('', data),
           estimateStartDate: '',
-          estimateEndDate: '',
-          estimateJobDuration: ''
+          estimateEndDate: ''
         }
       });
       setFetchingData(false);
@@ -231,51 +229,8 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
 
   const handleSubmit = async (values) => {
     if (isBulkedit) {
-      for (const x in values) {
-        if (values[x] === '' || (Array.isArray(values[x]) && values[x].length === 0) || values[x] === 0) {
-          delete values[x];
-        }
-      }
-      let rows: any = [];
-      let priceData: any = [];
-      const priceFieldName = `price_${fieldTicketData?.currency?.toLowerCase()}`;
-
-      if ((values['unit'] || values['pricingMethod']) && !values[priceFieldName]) {
-        const material: any = [];
-        selectedServices.forEach((d) => {
-          const element: any = {};
-          element.materialId = d.materialId;
-          element.type = d.type;
-          element.unit = values['unit'] || d.unit;
-          element.pricingMethod = values['pricingMethod'] || d.pricingMethod;
-          element.qty = d.qty;
-          material.push(element);
-        });
-        priceData = await calculatePrice(fieldTicketData, material);
-      }
-
-      selectedServices.forEach((element) => {
-        const rateResult = priceData?.filter(
-          (e) =>
-            e.materialId === element.materialId &&
-            e.materialType === element.type &&
-            e.unit === (values['unit'] || element.unit) &&
-            e.pricingMethod === (values['pricingMethod'] || element.pricingMethod)
-        );
-
-        const tempRate = {};
-        if (rateResult.length && rateResult[0].mrp) {
-          tempRate[priceFieldName] = rateResult[0].mrp;
-        }
-
-        const calValues = autoCalculateSpecificFields(values, { ...element, ...values, ...tempRate }, allFields);
-        rows.push({ _id: element._id, ...calValues });
-      });
-      let updatedRows: any = [];
-      rows = rows?.forEach((e: any) => {
-        updatedRows.push({ _id: e._id, ...getObjKeysWithValues(e, allFields) });
-      })
-      handleSaveData(updatedRows);
+      const rows = bulkUpdate(values, selectedServices, material, allFields, fieldTicketData?.currency);
+      handleSaveData(rows);
     } else {
       const rows = await calculateRowsField(material, values, allFields, rowData);
       handleSaveData(rows, saveAndNext);
