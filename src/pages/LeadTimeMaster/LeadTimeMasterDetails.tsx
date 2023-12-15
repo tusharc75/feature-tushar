@@ -1,23 +1,20 @@
-import { useState, useEffect, useContext } from 'react';
-import { Grid, Box, Button, Paper, Tab, Tabs, useMediaQuery, Typography, IconButton } from '@material-ui/core';
-import { Skeleton } from '@material-ui/lab';
-import { useParams, useHistory } from 'react-router-dom';
-import axiosInstance from 'src/axios/axiosInstance';
-import routes from 'src/components/Helpers/Routes';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import DetailsPageHeader from 'src/components/DetailsPageHeader';
-import DetailsPage from 'src/components/Shared/DetailsPage';
-import { useData } from 'src/StateProvider/Provider';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { sidebarResource, serializedAsset, leadTimeMaster } from 'src/constants/helpers';
-import ManageLeadTimeMaster from './ManageLeadTimeMaster';
+import { Box, Button, Grid, Typography } from '@material-ui/core';
 import queryString from 'query-string';
-import { BiEdit } from 'react-icons/bi';
-import DeleteButton from 'src/components/Helpers/DeleteButton';
-import { camelCase } from 'lodash';
+import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
+import { BiEdit } from 'react-icons/bi';
+import { useHistory, useParams } from 'react-router-dom';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import DeleteButton from 'src/components/Helpers/DeleteButton';
+import routes from 'src/components/Helpers/Routes';
+import DetailsPage from 'src/components/Shared/DetailsPage';
+import { leadTimeMaster, serializedAsset, sidebarResource } from 'src/constants/helpers';
+import ManageLeadTimeMaster from './ManageLeadTimeMaster';
 
 const LeadTimeMasterDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -153,24 +150,6 @@ const LeadTimeMasterDetails = () => {
         <Grid container spacing={3}>
           <Grid item xs={12} sm={12} md={8}>
             <Box style={{ minHeight: '80vh' }}>
-              {leadTimeMasterData ? (
-                <DetailsPageHeader heading={leadTimeMasterData?.leadTimeName} mainPoints={null} showHeading={true}>
-                  {permissions?.leadTimeMaster?.isUpdate && (
-                    <Button
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      color="primary"
-                      size="small"
-                      onClick={handleOpenUpdateDialog}
-                      className={'btn-outline-v1'}
-                    >
-                      {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                    </Button>
-                  )}
-                  {permissions?.leadTimeMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-                </DetailsPageHeader>
-              ) : (
-                <Skeleton variant="text" width="150px" height="40px" />
-              )}
               <Box>
                 {' '}
                 {leadTimeMasterData && lTMFields.length ? (
