@@ -138,9 +138,12 @@ const InventoryProduct = () => {
     });
     if (!user?.user?.brandPolicy?.hideInventoryCount) {
       let newColumns = generateColumns(renderedFrom, productInventoryFields?.data?.data, routes.productInventory.path);
-      newColumns?.forEach(o => {
+      newColumns?.forEach((o) => {
         if (!['plant', 'product'].includes(o?.accessor)) {
-          if (['minInventory', 'maxInventory'].includes(o.accessor) && productInventoryFields?.data?.data?.find(d => d?.fieldData?.fieldName === o?.accessor)?.type === 'number') {
+          if (
+            ['minInventory', 'maxInventory'].includes(o.accessor) &&
+            productInventoryFields?.data?.data?.find((d) => d?.fieldData?.fieldName === o?.accessor)?.type === 'number'
+          ) {
             columns.push({
               ...o,
               disableFilters: true,
@@ -162,41 +165,41 @@ const InventoryProduct = () => {
     const defaultColumns = [
       ...(!user?.user?.brandPolicy?.hideInventoryCount
         ? [
-          {
-            accessor: 'availableInventory',
-            Header: 'Available Inventory',
-            disableFilters: true,
-            disableSortBy: true,
-            show: true,
-            Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.availableInventory || 0}</h5>
-          },
-          {
-            accessor: 'softHold',
-            Header: 'Soft Hold',
-            disableFilters: true,
-            disableSortBy: true,
-            show: true,
-            Cell: ({ row }) =>
-              row?.original?.softHold ? (
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <h5 className="text-truncate">{row?.original?.softHold}</h5>
-                  <HtmlTooltip title={`Soft Hold History`}>
-                    <InfoIcon className="ml-1 cursor-pointer" fontSize="small" color="primary" onClick={() => infoHandler(row?.original)} />
-                  </HtmlTooltip>
-                </div>
-              ) : (
-                <h5 className="text-truncate">0</h5>
-              )
-          },
-          {
-            accessor: 'purchaseOrderQty',
-            Header: 'On PO',
-            disableFilters: true,
-            disableSortBy: true,
-            show: true,
-            Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.purchaseOrderQty || 0}</h5>
-          }
-        ]
+            {
+              accessor: 'availableInventory',
+              Header: 'Available Inventory',
+              disableFilters: true,
+              disableSortBy: true,
+              show: true,
+              Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.availableInventory || 0}</h5>
+            },
+            {
+              accessor: 'softHold',
+              Header: 'Soft Hold',
+              disableFilters: true,
+              disableSortBy: true,
+              show: true,
+              Cell: ({ row }) =>
+                row?.original?.softHold ? (
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <h5 className="text-truncate">{row?.original?.softHold}</h5>
+                    <HtmlTooltip title={`Soft Hold History`}>
+                      <InfoIcon className="ml-1 cursor-pointer" fontSize="small" color="primary" onClick={() => infoHandler(row?.original)} />
+                    </HtmlTooltip>
+                  </div>
+                ) : (
+                  <h5 className="text-truncate">0</h5>
+                )
+            },
+            {
+              accessor: 'purchaseOrderQty',
+              Header: 'On PO',
+              disableFilters: true,
+              disableSortBy: true,
+              show: true,
+              Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.purchaseOrderQty || 0}</h5>
+            }
+          ]
         : [])
     ];
     setColumns([...columns, ...defaultColumns, ActionsRenderer]);
@@ -236,12 +239,12 @@ const InventoryProduct = () => {
               !permissions?.productInventory?.isUpdate
                 ? TOOLTIP_MESSAGE.remove
                 : row?.original?.plantId === 'All'
-                  ? 'Select Plant'
-                  : user?.user?.brandPolicy?.allowNegativeInventory
-                    ? 'Remove'
-                    : !row?.original?.availableInventory
-                      ? 'Inventory not available'
-                      : 'Remove'
+                ? 'Select Plant'
+                : user?.user?.brandPolicy?.allowNegativeInventory
+                ? 'Remove'
+                : !row?.original?.availableInventory
+                ? 'Inventory not available'
+                : 'Remove'
             }
           >
             <span>
@@ -253,8 +256,8 @@ const InventoryProduct = () => {
                     ? user?.user?.brandPolicy?.allowNegativeInventory
                       ? false
                       : row?.original?.availableInventory
-                        ? false
-                        : true
+                      ? false
+                      : true
                     : true
                 }
                 onClick={() => {
@@ -268,8 +271,8 @@ const InventoryProduct = () => {
                       ? user?.user?.brandPolicy?.allowNegativeInventory
                         ? 'error'
                         : row?.original?.availableInventory
-                          ? 'error'
-                          : 'disabled'
+                        ? 'error'
+                        : 'disabled'
                       : 'disabled'
                   }
                 />
@@ -346,9 +349,9 @@ const InventoryProduct = () => {
     let tempPlantId =
       plantId === 'All'
         ? plantOptions
-          .filter((d) => d.optionValue !== 'All')
-          .map((d) => d.optionValue)
-          .toString()
+            .filter((d) => d.optionValue !== 'All')
+            .map((d) => d.optionValue)
+            .toString()
         : plantId;
 
     let deepFilter = '';
@@ -425,7 +428,7 @@ const InventoryProduct = () => {
     }
     axiosInstance()
       .get(api)
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -494,11 +497,12 @@ const InventoryProduct = () => {
       <CustomContainer>
         <div className="header-panel">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-center">
-            <div className={'flex justify-between align-items-center gap-1 w-full'}>
+            <div className={'flex align-items-center gap-2 w-full flex-wrap'}>
               <Autocomplete
                 style={{ minWidth: '200px', flexGrow: 1 }}
                 className="md:max-w-[250px]"
                 options={plantOptions}
+                fullWidth
                 getOptionLabel={(option: any) => option.optionLabel}
                 disableClearable
                 getOptionSelected={(option: any, val) => option.optionValue === val}
@@ -687,9 +691,9 @@ const InventoryProduct = () => {
           warehouse={
             plantId === 'All'
               ? plantOptions
-                .filter((d) => d.optionValue !== 'All')
-                .map((d) => d.optionValue)
-                .toString()
+                  .filter((d) => d.optionValue !== 'All')
+                  .map((d) => d.optionValue)
+                  .toString()
               : plantId
           }
         />
@@ -705,9 +709,9 @@ const InventoryProduct = () => {
           warehouse={
             plantId === 'All'
               ? plantOptions
-                .filter((d) => d.optionValue !== 'All')
-                .map((d) => d.optionValue)
-                .toString()
+                  .filter((d) => d.optionValue !== 'All')
+                  .map((d) => d.optionValue)
+                  .toString()
               : plantId
           }
           storageLocation={storageLocationId}
@@ -723,9 +727,9 @@ const InventoryProduct = () => {
           warehouse={
             plantId === 'All'
               ? plantOptions
-                .filter((d) => d.optionValue !== 'All')
-                .map((d) => d.optionValue)
-                .toString()
+                  .filter((d) => d.optionValue !== 'All')
+                  .map((d) => d.optionValue)
+                  .toString()
               : plantId
           }
         />
