@@ -163,13 +163,7 @@ export const useCreateColumns = ({
           e.filterFn = 'fuzzy';
         }
 
-        if (!isClientSideGrid) {
-          // for serverside, if no data found width accessorKey from row data. Sorting function will not work properly in table.
-          e.accessorKey = '_id';
-        } else {
-          // and for client side accessorKey has to be exact to sort rows.
-          e.accessorKey = e.accessor ?? e.id;
-        }
+        e.accessorKey = e.accessor ?? e.id;
 
         switch (true) {
           case e.accessor === 'index':
