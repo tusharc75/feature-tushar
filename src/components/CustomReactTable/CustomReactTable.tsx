@@ -371,6 +371,10 @@ const CustomReactTable = ({
 
   const paginationLimit = useMemo(() => {
     if (!expander) return limit;
+    if (isAllRowsExpanded) {
+      if (isClientSideGrid) return table.getRowModel().flatRows.length;
+      else return table.getExpandedRowModel().flatRows.length;
+    }
     const getRowCount = (list: Row<any>[], limit) => {
       let rowLength = limit;
       for (let i = 0; i < limit; i++) {
@@ -383,7 +387,7 @@ const CustomReactTable = ({
     };
     let length = getRowCount(table.getExpandedRowModel().rows, limit);
     return Math.max(length, limit);
-  }, [table, limit, expandedRefChanged, isAllRowsExpanded]);
+  }, [table, limit, expandedRefChanged, isAllRowsExpanded, isClientSideGrid, expander]);
 
   useEffect(() => {
     table.setPageSize(paginationLimit);
@@ -443,7 +447,6 @@ const CustomReactTable = ({
         loading: isClientSideGrid ? false : true
       });
     }
-
     // set new sorting Column
     sortBy?.forEach((v) => {
       dispatch({
