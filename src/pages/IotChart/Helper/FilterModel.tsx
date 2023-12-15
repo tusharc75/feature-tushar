@@ -100,6 +100,11 @@ export default function FilterModel({ dateFilters, setDateFilters }) {
             onClose={() => {
               setDateFilters({ ...dateFilters, to: dateFilter?.to });
             }}
+            onInput={() => {
+              setTimeout(() => {
+                setInputFromKeyBoard(true);
+              }, 1000);
+            }}
           />
           <Autocomplete
             id={`interval`}
