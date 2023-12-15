@@ -145,7 +145,7 @@ export const useCreateColumns = ({
         e.id = e.id ?? e.accessor;
         e.cell = e.cell ?? e.Cell;
         e.header = e.header ?? e.Header;
-        e.accessorKey = e.accessor ?? e.id;
+
         e.maxSize = e.maxSize ?? e.maxWidth;
         e.size = e.size ?? e.width ?? 200;
         e.footer = e.footer ?? e.Footer;
@@ -156,10 +156,19 @@ export const useCreateColumns = ({
         }
         if (e.disableSortBy !== true && !isClientSideGrid) {
           e.sortingFn = serverSort;
+          e.sortable = true;
         }
 
         if (e.disableFilters !== true && isClientSideGrid) {
           e.filterFn = 'fuzzy';
+        }
+
+        if (!isClientSideGrid) {
+          // for serverside, if no data found width accessorKey from row data. Sorting function will not work properly in table.
+          e.accessorKey = '_id';
+        } else {
+          // and for client side accessorKey has to be exact to sort rows.
+          e.accessorKey = e.accessor ?? e.id;
         }
 
         switch (true) {
