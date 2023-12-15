@@ -18,8 +18,6 @@ import {
   repairOrderSteps,
   REPAIR_ORDER_TYPE,
   QUOTATION_STATUS,
-  WORKORDER_SERVICE_STATUS,
-  MATERIAL_TYPE
 } from 'src/constants/helpers';
 import ManageRepairOrder from './ManageRepairOrder';
 import queryString from 'query-string';
@@ -40,6 +38,7 @@ import LoadingTicket from './LoadingTicket';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import EditIcon from '@material-ui/icons/Edit';
 import ButtonWithPulse from 'src/components/ButtonWithPulse';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 function a11yProps(index: any) {
   return {
@@ -148,7 +147,7 @@ const RepairOrderDetails = () => {
           steps = steps?.filter((e) => !['Loading Ticket']?.includes(e.name));
         }
         if (!user?.user?.brandPolicy?.repairOrderPrice && !data?.addQuotationStep) {
-          steps = steps?.filter((e) => !['Quotation', 'Execute', 'Invoice']?.includes(e.name));
+          steps = steps?.filter((e) => !['Quotation', 'Execute']?.includes(e.name));
         }
         if (!data?.addQuotationStep) {
           steps = steps?.map((e) => {
@@ -259,6 +258,19 @@ const RepairOrderDetails = () => {
           <Box className="control-buttons-v1 ">
             {repairOrderData ? (
               <>
+                {permissions?.repairOrder?.isUpdate && [REPAIR_ORDER_STATUS.completed].includes(repairOrderData?.status) &&
+                  <HtmlTooltip title={allowedToEdit ? '' : `Owner or Collaborator can reopen ${routes.repairOrder.title}`}  >
+                    <span>
+                      <Button
+                        variant={'contained'}
+                        className={'btn-outline-v1'}
+                        onClick={() => updateOrderStatus(repairOrderData?.invoice?.optionValue ? REPAIR_ORDER_STATUS.invoiced : REPAIR_ORDER_STATUS.readyToInvoice)}
+                        disabled={permissions?.repairOrder?.isUpdate && allowedToEdit ? false : true}
+                      >
+                        {'Reopen'}
+                      </Button>
+                    </span>
+                  </HtmlTooltip>}
                 {permissions?.repairOrder?.isUpdate && allowedToEdit && repairOrderData?.canComplete && (
                   <ButtonWithPulse
                     variant={'outlined'}
@@ -461,7 +473,7 @@ const RepairOrderDetails = () => {
                 allowedToEdit={allowedToEdit}
               />
             )}
-            {stepNames[currentStep] === 'Invoice' && repairOrderData && (
+            {stepNames[currentStep] === 'Slip' && repairOrderData && (
               <Quotation
                 repairOrderData={repairOrderData}
                 setNextStep={setNextStep}
