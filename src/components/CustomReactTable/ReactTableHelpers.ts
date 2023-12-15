@@ -28,10 +28,13 @@ export const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
     itemRank
   });
 
-  //   const nestedExist = itemRank.passed || (Array.isArray(row[childrenProperty]) && !!columnFilter(row[childrenProperty], columnIds, filterValue).length);
-
   // Return if the item should be filtered in/out
   return itemRank.passed;
+};
+
+// To prevent table from filtering on server side,
+export const serverFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
+  return true;
 };
 
 export const fuzzySort: SortingFn<any> = (rowA, rowB, columnId) => {
@@ -44,4 +47,9 @@ export const fuzzySort: SortingFn<any> = (rowA, rowB, columnId) => {
 
   // Provide an alphanumeric fallback for when the item ranks are equal
   return dir === 0 ? sortingFns.alphanumeric(rowA, rowB, columnId) : dir;
+};
+
+// To prevent table from ranking rows in server side table,
+export const serverSort = (rowA, rowB, columnId) => {
+  return 0;
 };

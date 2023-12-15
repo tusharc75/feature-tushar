@@ -25,23 +25,6 @@ export type TColType = {
   show: undefined | boolean;
 } & ColumnDef<any>;
 
-// Editable Cell input
-export const EditableCell = ({ value: initialValue, row: { index }, column: { id }, updateData }) => {
-  const [value, setValue] = React.useState(initialValue);
-  const onChange = (e) => {
-    setValue(e.target.value);
-  };
-
-  const onBlur = () => {
-    updateData(index, id, value);
-  };
-
-  React.useEffect(() => {
-    setValue(initialValue);
-  }, [initialValue]);
-
-  return <input value={value} onChange={onChange} onBlur={onBlur} />;
-};
 
 export const defaultColumn: Partial<ColumnDef<any>> = {
   cell: ({ getValue, row: { index }, column: { id }, table }) => {
@@ -389,14 +372,13 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
         style={{ opacity: isDragging ? 0.5 : 1 }}
         className={`flex items-center pos-rel flex-grow  ${column.id === 'selection' ? 'justify-center' : 'justify-between pr-[16px]'}`}
       >
-        <div className={`d-flex gap-2 align-items-center ${column.id === 'selection' ? 'justify-center' : 'justify-between'}`}>
+        <div
+          className={`d-flex gap-2 align-items-center ${column.id === 'selection' ? 'justify-center' : 'justify-between'} ${header.column.getCanSort() && columnDef.disableSortBy !== true ? 'cursor-pointer' : ''
+            }`}
+          onClick={columnDef.disableSortBy !== true ? header.column.getToggleSortingHandler() : null}
+        >
           <div className="line-clamp-1">
-            <span
-              className={`overflow-hidden overflow-ellipsis whitespace-normal ${
-                header.column.getCanSort() && columnDef.disableSortBy !== true ? 'cursor-pointer' : ''
-              }`}
-              onClick={header.column.getToggleSortingHandler()}
-            >
+            <span className={`overflow-hidden overflow-ellipsis whitespace-normal `}>
               {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
             </span>
           </div>
@@ -511,6 +493,7 @@ export const CellRenderer = ({
             <input
               autoFocus
               type="number"
+              min='0'
               onBlur={() => (cell.getValue() !== cellValue ? submitInput() : resetField())}
               value={cellValue}
               className="dark:text-[white] appearance-none w-full focus-within:outline-[var(--new-theme-color)] bg-[transparent] outline-[transparent] shadow-0 border-[0] px-[2px] py-[4px] [border-bottom:1px_solid_var(--common-border-color)_!important]"

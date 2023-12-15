@@ -641,15 +641,6 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
             <MenuItem
               onClick={() => {
                 closeAddActions();
-                setAddExistingAssets(true)
-                // setAddExistingProductDialog({ open: true, type: 'asset', parentId: null });
-              }}
-            >
-              Add Existing Assets
-            </MenuItem>
-            <MenuItem
-              onClick={() => {
-                closeAddActions();
                 setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
               }}
             >
@@ -662,6 +653,14 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
               }}
             >
               Add New Product Package
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                closeAddActions();
+                setAddExistingAssets(true)
+              }}
+            >
+              {`Add Existing ${routes.serializedAsset.title}`}
             </MenuItem>
           </Menu>
         </Box>
@@ -817,14 +816,12 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
       )}
       {addExistingAssets && (
         <AssignSerializedAssetDialog
-          reference={null}
-          referenceData={rentalManagementData}
+          reference={'rentalJob'}
+          referenceData={{ warehouse: rentalManagementData?.warehouse?.optionValue }}
           isAssigning={isAddingProducts}
           handleClose={() => setAddExistingAssets(false)}
-          ids={[]}
-          selectedProducts={[]}
-          extraStaticFilter={[{ field: "status", term: ["New", "Available"] }]}
           handleSucess={handleAddAsset}
+          ids={[]}
         />
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type !== 'newPackage' && (

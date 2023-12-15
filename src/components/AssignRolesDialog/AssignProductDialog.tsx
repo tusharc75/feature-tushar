@@ -196,7 +196,7 @@ const AssignProductDialog = ({
     const rows = [...dataRows];
     rows?.forEach((d) => {
       if (row?._id === d._id) {
-        d.qty = Number(data.qty);
+        d.qty = data.qty;
         d.isChecked = true;
       }
     });

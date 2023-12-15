@@ -83,7 +83,6 @@ const AssignSerializedAssetDialog = ({
         let rows = data.data.map((u) => {
           let finalObject = prepareDataForGrid(u);
           finalObject['isChecked'] = false;
-          finalObject['id'] = u._id;
           return {
             ...finalObject
           };
@@ -134,6 +133,12 @@ const AssignSerializedAssetDialog = ({
     }
     if (reference === 'sublease') {
       deepFilter = `${deepFilter}&masterSubleaseAsset=true&subleaseAsset=0`;
+      if (referenceData?.warehouse) {
+        deepFilter = `${deepFilter}&plant=${referenceData?.warehouse}`;
+      }
+    }
+    if (reference === 'rentalJob') {
+      deepFilter = `${deepFilter}&rental=true&subleaseAsset=0`;
       if (referenceData?.warehouse) {
         deepFilter = `${deepFilter}&plant=${referenceData?.warehouse}`;
       }
