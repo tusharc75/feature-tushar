@@ -20,7 +20,7 @@ import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BiChevronDown } from 'react-icons/bi';
 import { calculateRowsField, fetch_rental_product_fields, getNestedSubRows } from '../../../components/RentalManagment/helper';
-import { startCase } from 'lodash';
+import { set, startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import CalculatePriceDialog from 'src/components/RentalManagment/CalculatePriceDialog';
 import { flattenArray } from 'src/constants/columns';
@@ -31,6 +31,7 @@ import ManagePackageDialog from 'src/pages/Packages/ManagePackageDialog';
 import EditIcon from '@material-ui/icons/Edit';
 import { ownerAndColaborator, quotationApprovedMessage, rentalManagementMessage } from 'src/constants/messageHelpers';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 
 const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip, renderedFrom, stepFullScreen, allowedToEdit, quotationApproved }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -63,6 +64,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
   const { dataRows, selectedRecords } = state;
 
   const { generateColumns } = useColumns();
+  const [addExistingAssets, setAddExistingAssets] = useState(false);
 
   const { isOffline } = useContext(CustomOfflineContext);
 
@@ -404,6 +406,24 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
     }
   };
 
+  const handleAddAsset = async (rows) => {
+    setAddingProducts(true);
+    const assetIds = rows?.map((item) => item._id);
+    axiosInstance()
+      .post(`${rentalManagement.api}/productpackage/${rentalManagementData._id}/assets`, {
+        ids: assetIds,
+      })
+      .then(() => {
+        setAddExistingAssets(false);
+        setAddingProducts(false);
+        fetchData();
+      })
+      .catch((error) => {
+        setAddingProducts(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   const AddMaterial = async (material, priceData) => {
     const tempMaterial = [...material];
     if (priceData) {
@@ -634,6 +654,14 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
             >
               Add New Product Package
             </MenuItem>
+            <MenuItem
+              onClick={() => {
+                closeAddActions();
+                setAddExistingAssets(true)
+              }}
+            >
+              {`Add Existing ${routes.serializedAsset.title}`}
+            </MenuItem>
           </Menu>
         </Box>
         <Box display="flex" ml={1}>
@@ -784,6 +812,16 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
             setAddExistingProductDialog({ open: false, type: '', parentId: null });
           }}
           isRedirectToDetailPage={false}
+        />
+      )}
+      {addExistingAssets && (
+        <AssignSerializedAssetDialog
+          reference={'rentalJob'}
+          referenceData={{ warehouse: rentalManagementData?.warehouse?.optionValue }}
+          isAssigning={isAddingProducts}
+          handleClose={() => setAddExistingAssets(false)}
+          handleSucess={handleAddAsset}
+          ids={[]}
         />
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type !== 'newPackage' && (

@@ -83,7 +83,6 @@ const AssignSerializedAssetDialog = ({
         let rows = data.data.map((u) => {
           let finalObject = prepareDataForGrid(u);
           finalObject['isChecked'] = false;
-          finalObject['id'] = u._id;
           return {
             ...finalObject
           };
@@ -134,6 +133,12 @@ const AssignSerializedAssetDialog = ({
     }
     if (reference === 'sublease') {
       deepFilter = `${deepFilter}&masterSubleaseAsset=true&subleaseAsset=0`;
+      if (referenceData?.warehouse) {
+        deepFilter = `${deepFilter}&plant=${referenceData?.warehouse}`;
+      }
+    }
+    if (reference === 'rentalJob') {
+      deepFilter = `${deepFilter}&rental=true&subleaseAsset=0`;
       if (referenceData?.warehouse) {
         deepFilter = `${deepFilter}&plant=${referenceData?.warehouse}`;
       }
@@ -202,32 +207,31 @@ const AssignSerializedAssetDialog = ({
               <Box style={{ display: 'inline' }}>
                 {products.length > 0
                   ? products?.map((d) => (
-                      <Box
-                        m={0.5}
-                        p={1}
-                        border={1}
-                        className={`cursor-pointer rounded-sm ${
-                          selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'dark:text-gray-300'
+                    <Box
+                      m={0.5}
+                      p={1}
+                      border={1}
+                      className={`cursor-pointer rounded-sm ${selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'dark:text-gray-300'
                         }`}
-                        borderColor="var(--common-border-color)"
-                        onClick={() => {
-                          if (selectedProduct === d.id) {
-                            setSelectedProduct(null);
-                          } else {
-                            setSelectedProduct(d.id);
-                          }
-                        }}
-                        style={{ display: 'inline-block' }}
-                      >
-                        {d?.qty < 0 ? (
-                          <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
-                        ) : d?.qty === 0 ? (
-                          <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
-                        ) : (
-                          <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
-                        )}
-                      </Box>
-                    ))
+                      borderColor="var(--common-border-color)"
+                      onClick={() => {
+                        if (selectedProduct === d.id) {
+                          setSelectedProduct(null);
+                        } else {
+                          setSelectedProduct(d.id);
+                        }
+                      }}
+                      style={{ display: 'inline-block' }}
+                    >
+                      {d?.qty < 0 ? (
+                        <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                      ) : d?.qty === 0 ? (
+                        <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
+                      ) : (
+                        <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
+                      )}
+                    </Box>
+                  ))
                   : null}
               </Box>
             </Grid>
