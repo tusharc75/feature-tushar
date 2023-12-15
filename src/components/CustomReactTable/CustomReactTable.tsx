@@ -27,7 +27,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { gridPageSizes } from '../../constants/helpers';
 import GridHeader from './GridHeader';
 import Pagination from './TableComponents/Pagination';
-import { fuzzyFilter } from './ReactTableHelpers';
+import { fuzzyFilter, serverFilter } from './ReactTableHelpers';
 import { defaultColumn } from './TableComponents/TableHelperComponents';
 import { useCreateColumns } from './hooks/useCreateColumns';
 import type { TInitialState } from './hooks/useTableReducer';
@@ -367,7 +367,7 @@ const CustomReactTable = ({
     data,
     columns: newColumns,
     filterFns: {
-      fuzzy: fuzzyFilter
+      fuzzy: isClientSideGrid ? fuzzyFilter : serverFilter
     },
     autoResetPageIndex,
     initialState: {
@@ -392,7 +392,7 @@ const CustomReactTable = ({
     columnResizeMode: 'onChange',
 
     // custom functions
-    globalFilterFn: fuzzyFilter,
+    globalFilterFn: isClientSideGrid ? fuzzyFilter : serverFilter,
     defaultColumn: defaultColumn,
 
     // state setter
@@ -482,6 +482,7 @@ const CustomReactTable = ({
   }, [selectedRecords.length]);
 
   // sorging effect
+
   useEffect(() => {
     const sortBy: SortingState = getsorting;
 
