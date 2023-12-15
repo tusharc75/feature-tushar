@@ -1,38 +1,35 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { Grid, Box, Button, Paper, Typography, Tab, Tabs, useMediaQuery, IconButton, FormControlLabel, Checkbox } from '@material-ui/core';
-import { Skeleton } from '@material-ui/lab';
-import { useParams, useHistory } from 'react-router-dom';
-import axiosInstance from '../../axios/axiosInstance';
-import routes from '../../components/Helpers/Routes';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPageHeader from '../../components/DetailsPageHeader';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import { useData } from '../../StateProvider/Provider';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { serializedAsset, ASSET_STATUS, repairJob, INVENTORY_OWNER_TYPE, INVENTORY_HISTORY_TYPE, sidebarResource } from '../../constants/helpers';
-import ManageSerializedAsset from './ManageSerializedAsset';
-import ExpandMore from '@material-ui/icons/ExpandMore';
-import MenuItem from '@material-ui/core/MenuItem';
+import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
 import Menu from '@material-ui/core/Menu';
-import ReasonDialog from './ReasonDialog';
-import { ACTIVITY_RESOURCE } from '../../constants/helpers';
-import ManageRepairJob from '../RepairJob/ManageRepairJob';
-import { isMobile, isTablet } from 'react-device-detect';
-import { GiAutoRepair } from 'react-icons/all';
-import { MdEdit } from 'react-icons/md';
+import MenuItem from '@material-ui/core/MenuItem';
+import BuildIcon from '@material-ui/icons/Build';
+import ExpandMore from '@material-ui/icons/ExpandMore';
+import { Skeleton } from '@material-ui/lab';
 import { startCase } from 'lodash';
 import moment from 'moment';
-import ActivityButton from 'src/components/Activity/ActivityButton';
-import CertificationHistory from './CertificationHistory';
-import AssetHistory from './AssetHistory';
 import queryString from 'query-string';
-import TabPanel from 'src/components/TabPanel';
-import SyncIcon from '@material-ui/icons/Sync';
-import BuildIcon from '@material-ui/icons/Build';
+import React, { useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { MdEdit } from 'react-icons/md';
 import { RiExchangeBoxFill } from 'react-icons/ri';
+import { useHistory, useParams } from 'react-router-dom';
+import ActivityButton from 'src/components/Activity/ActivityButton';
+import TabPanel from 'src/components/TabPanel';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import DetailsPageHeader from '../../components/DetailsPageHeader';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import routes from '../../components/Helpers/Routes';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import { ACTIVITY_RESOURCE, ASSET_STATUS, INVENTORY_HISTORY_TYPE, INVENTORY_OWNER_TYPE, repairJob, serializedAsset, sidebarResource } from '../../constants/helpers';
+import ManageRepairJob from '../RepairJob/ManageRepairJob';
+import AssetHistory from './AssetHistory';
+import CertificationHistory from './CertificationHistory';
 import DepreciationHistory from './DepreciationHistory';
+import ManageSerializedAsset from './ManageSerializedAsset';
+import ReasonDialog from './ReasonDialog';
 
 const SerializedAssetDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -408,7 +405,7 @@ const SerializedAssetDetailsPage = () => {
           )}
         </Tabs>
         <TabPanel value={tabValue} index={0}>
-          {assetDetails && <DetailsPageHeader heading={headingLbl} mainPoints={mainPoints} showHeading={true}></DetailsPageHeader>}
+          {assetDetails && <DetailsPageHeader  mainPoints={mainPoints} />}
           <Box>
             {loading || !fields.length ? (
               <Grid container spacing={2} style={{ padding: '8px' }}>

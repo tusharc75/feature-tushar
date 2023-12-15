@@ -151,7 +151,7 @@ export const repairOrderSteps: stepInterface[] = [
   { name: 'Quotation', title: 'Quotation', icon: 'quote' },
   { name: 'Execute', title: 'Execute', icon: 'postWork' },
   { name: 'Loading Ticket', title: 'Loading', icon: 'dispatch' },
-  { name: 'Invoice', title: 'Invoice', icon: 'invoice' }
+  { name: 'Slip', title: 'Slip', icon: 'invoice' }
 ];
 
 export const assetsReceivingSteps: stepInterface[] = [

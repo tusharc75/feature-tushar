@@ -66,7 +66,7 @@ export default function TreeView({ expandedAccordition, setExpandedAccordition, 
   const [dateFilters, setDateFilters] = useState({
     from: new Date(moment().subtract(8, 'days').format('MM/DD/YYYY')),
     to: new Date(),
-    intervals: '1hour'
+    intervals: '1day'
   });
   const [dataPoint, setDataPoint] = useState(null);
 
@@ -74,7 +74,7 @@ export default function TreeView({ expandedAccordition, setExpandedAccordition, 
     setDateFilters({
       from: new Date(moment().subtract(8, 'days').format('MM/DD/YYYY')),
       to: new Date(),
-      intervals: '1hour'
+      intervals: '1day'
     });
     setDataPoint(null);
   };

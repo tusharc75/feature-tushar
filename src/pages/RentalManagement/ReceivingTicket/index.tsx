@@ -876,7 +876,7 @@ const ReceivingTicket = ({
     }
   ];
 
-  const handleTicketDialog = (ticketType, deliveryToType) => {
+  const handleTicketDialog = (ticketType, deliveryToType, open = true) => {
     const data = {};
     data['ticketName'] = rentalManagementData.rentalJobName;
     data['referenceId'] = rentalManagementData._id;
@@ -914,7 +914,7 @@ const ReceivingTicket = ({
     }
     data['status'] = DELIVERY_TICKET_STATUS.indTransit;
 
-    setShowTicketDialog({ open: ticketType === DELIVERY_TICKET_TYPE.receiving ? true : false, ticketType: ticketType, data: data });
+    setShowTicketDialog({ open: open, ticketType: ticketType, data: data });
     closeActions();
   };
 
@@ -1581,8 +1581,13 @@ const ReceivingTicket = ({
             <MenuItem
               onClick={() => {
                 if (!validateAction(rentalManagementActions.createReturnTicket)) {
-                  setShowQtyDialog({ open: true, data: null });
-                  handleTicketDialog(DELIVERY_TICKET_TYPE.return, DELIVERY_FROM_TO_TYPE.plant);
+                  if (selectedRecords?.every((e) => e.type === 'Asset')) {
+                    handleTicketDialog(DELIVERY_TICKET_TYPE.return, DELIVERY_FROM_TO_TYPE.plant);
+                  }
+                  else {
+                    setShowQtyDialog({ open: true, data: null });
+                    handleTicketDialog(DELIVERY_TICKET_TYPE.return, DELIVERY_FROM_TO_TYPE.plant, false);
+                  }
                 }
                 closeActions();
               }}

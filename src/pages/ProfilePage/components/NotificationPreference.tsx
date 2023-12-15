@@ -9,7 +9,6 @@ import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import { BsEnvelopeOpen, BsDisplay } from 'react-icons/bs';
 import styles from '../profilePage.module.scss';
-import DetailsPageHeader from '../../../components/DetailsPageHeader';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
 
@@ -114,7 +113,6 @@ export default function NotificationPreference({ notificationPreferenceData, use
       _id: user,
       notificationPref: rows
     };
-
     axiosInstance()
       .put(`/user/notification`, dataObj)
       .then(({ data }) => {
@@ -136,11 +134,6 @@ export default function NotificationPreference({ notificationPreferenceData, use
     <>
       <div className={styles.preferenceHeader}>
         <Typography variant="h5">Your Notification Preference</Typography>
-        {/* <Tooltip title="Save">
-                <IconButton>
-                    <SaveButton color="primary" variant="contained" onClick={handleSubmit}>Save</SaveButton>
-                </IconButton>
-            </Tooltip> */}
       </div>
       <Box style={{ padding: '8px' }}>
         <Box className={styles.preferenceOptionsBox}>
@@ -156,19 +149,22 @@ export default function NotificationPreference({ notificationPreferenceData, use
             ))}
           </Grid>
         </Box>
-        <DetailsPageHeader heading={''} showHeading={true}>
-          <Button
-            disabled={isUpdating}
-            variant="contained"
-            color="primary"
-            size="small"
-            onClick={() => {
-              updateNotificationPref();
-            }}
-          >
-            {isUpdating ? <CircularProgress size={22} /> : 'Update'}
-          </Button>
-        </DetailsPageHeader>
+        <div className="header-panel">
+          <div className="flex flex-wrap gap-[8px] justify-end">
+            <Button
+              disabled={isUpdating}
+              variant="contained"
+              color="primary"
+              size="small"
+              onClick={() => {
+                updateNotificationPref();
+              }}
+            >
+              {isUpdating && <CircularProgress size={22} />}
+              Update
+            </Button>
+          </div>
+        </div>
         <TableContainer component={Paper}>
           <Table>
             <TableRow>
