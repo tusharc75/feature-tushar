@@ -227,57 +227,6 @@ const CustomReactTable = ({
 
   const sortingRef = useRef(null);
 
-  // const setSorting = useCallback(
-  //   (getSortBy) => {
-  //     const sortBy: SortingState = getSortBy();
-
-  //     console.log(sortBy[0].desc);
-
-  //     let tempArray = sorting.map((d) => {
-  //       return { id: d.colId, desc: d.sort === 'asc' ? false : true };
-  //     });
-
-  //     // console.log(tempArray);
-
-  //     // if (JSON.stringify(sortBy) === JSON.stringify(tempArray)) {
-  //     //   sortBy?.forEach((v) => {
-  //     //     dispatch({
-  //     //       type: 'sort',
-  //     //       sorting: [{ colId: v.id, sort: 'desc' }],
-  //     //       loading: isClientSideGrid ? false : true
-  //     //     });
-  //     //   });
-  //     //   return;
-  //     // }
-
-  //     sortBy?.forEach((v) => {
-  //       // reset sorted Column
-  //       // if (tempArray.find((t) => t.id === v.id && t.desc)) {
-  //       //   dispatch({
-  //       //     type: 'sort',
-  //       //     sorting: [],
-  //       //     loading: isClientSideGrid ? false : true
-  //       //   });
-  //       //   return;
-  //       // }
-  //       // set new sorting Column
-  //       dispatch({
-  //         type: 'sort',
-  //         sorting: [{ colId: v.id, sort: v.desc ? 'desc' : 'asc' }],
-  //         loading: isClientSideGrid ? false : true
-  //       });
-  //     });
-  //   },
-  //   [sorting, isClientSideGrid]
-  // );
-
-  // const getSorting = useMemo(() => {
-  //   let tempArray = sorting.map((d) => {
-  //     return { id: d.colId, desc: d.sort === 'asc' ? false : true };
-  //   });
-  //   return tempArray;
-  // }, [sorting]);
-
   const setColumnFilters = (filtersfn) => {
     const MINIMUM_SEARCH_DELAY = 600;
 
