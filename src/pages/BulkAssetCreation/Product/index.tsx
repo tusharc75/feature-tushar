@@ -38,6 +38,8 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
   const [isBulkEdit, setIsBulkEdit] = useState(false);
   const [loadingButton, setLoadingButton] = useState(false);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
+  const [showCreateConfirmBox, setShowCreateConfirmBox] = useState(false);
+
   const [deleteBulkAssetCreationProduct, setDeleteBulkAssetCreationProduct] = useState([]);
 
   const { generateColumns } = useColumns();
@@ -291,6 +293,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
     axiosInstance()
       .post(`${bulkAssetCreation.api}/create-assets`, { bulkAssetCreation: tempProducts })
       .then(({ data }) => {
+        setShowCreateConfirmBox(false)
         fetchBulkAssetCreationProduct();
         fetchData();
         setLoadingButton(false);
@@ -301,6 +304,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
         });
       })
       .catch((error) => {
+        setLoadingButton(true);
         toastConfig.setToastConfig(error);
       });
   };
@@ -380,7 +384,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
                 color="primary"
                 disabled={selectedRecords.length === 0 || loadingButton}
                 onClick={() => {
-                  createAsset();
+                  setShowCreateConfirmBox(true)
                   closeActions();
                 }}
               >
@@ -434,9 +438,18 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete  ? `}
+          message={`Are you sure you want to delete?`}
           onClose={() => setShowDeleteConfirmBox(false)}
           onOk={handleDelete}
+        />
+      )}
+      {showCreateConfirmBox && (
+        <ConfirmationDialog
+          open={showCreateConfirmBox}
+          message={`Are you sure you want to create assets?`}
+          onClose={() => setShowCreateConfirmBox(false)}
+          okBtnLoading={loadingButton}
+          onOk={createAsset}
         />
       )}
     </Fragment>

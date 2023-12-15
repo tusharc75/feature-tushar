@@ -321,7 +321,7 @@ const AssetsGrid: FC<AssetsGridProps> = ({
         <ConfirmationDialog
           okBtnLoading={isRemovingAssets}
           open={showConfirmBox}
-          message={`Are you sure you want to remove asset(s)?`}
+          message={transferAssetData?.rentalJob ? 'Are you sure you want to remove asset(s)?. In order to free the assets, please remove from the rental job as well.' : `Are you sure you want to remove asset(s)?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}
