@@ -494,7 +494,7 @@ const InventoryProduct = () => {
       <CustomContainer>
         <div className="header-panel">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-center">
-            <div className={'flex justify-between align-items-center gap-1 w-full'}>
+            <div className={'flex  align-items-center gap-2 w-full'}>
               <Autocomplete
                 style={{ minWidth: '200px', flexGrow: 1 }}
                 className="md:max-w-[250px]"
