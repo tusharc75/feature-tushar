@@ -389,14 +389,14 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
         style={{ opacity: isDragging ? 0.5 : 1 }}
         className={`flex items-center pos-rel flex-grow  ${column.id === 'selection' ? 'justify-center' : 'justify-between pr-[16px]'}`}
       >
-        <div className={`d-flex gap-2 align-items-center ${column.id === 'selection' ? 'justify-center' : 'justify-between'}`}>
+        <div
+          className={`d-flex gap-2 align-items-center ${column.id === 'selection' ? 'justify-center' : 'justify-between'} ${
+            header.column.getCanSort() && columnDef.disableSortBy !== true ? 'cursor-pointer' : ''
+          }`}
+          onClick={columnDef.disableSortBy !== true ? header.column.getToggleSortingHandler() : null}
+        >
           <div className="line-clamp-1">
-            <span
-              className={`overflow-hidden overflow-ellipsis whitespace-normal ${
-                header.column.getCanSort() && columnDef.disableSortBy !== true ? 'cursor-pointer' : ''
-              }`}
-              onClick={header.column.getToggleSortingHandler()}
-            >
+            <span className={`overflow-hidden overflow-ellipsis whitespace-normal `}>
               {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
             </span>
           </div>
