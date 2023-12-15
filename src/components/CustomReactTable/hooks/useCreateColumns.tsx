@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import { FaAngleDown, FaAngleRight } from 'react-icons/fa';
 import { IndeterminateCheckbox, TColType } from '../TableComponents/TableHelperComponents';
 import { childrenProperty, insertChildRowIntoTable } from '../utils';
-import { fuzzySort } from '../ReactTableHelpers';
+import { fuzzySort, serverSort } from '../ReactTableHelpers';
 
 export const useCreateColumns = ({
   columns,
@@ -145,17 +145,25 @@ export const useCreateColumns = ({
         e.id = e.id ?? e.accessor;
         e.cell = e.cell ?? e.Cell;
         e.header = e.header ?? e.Header;
-        e.accessorKey = e.accessor ?? e.id;
+
         e.maxSize = e.maxSize ?? e.maxWidth;
         e.size = e.size ?? e.width ?? 200;
         e.footer = e.footer ?? e.Footer;
 
         if (e.disableSortBy !== true && isClientSideGrid) {
           e.sortingFn = fuzzySort;
+          e.sortable = true;
         }
+        if (e.disableSortBy !== true && !isClientSideGrid) {
+          e.sortingFn = serverSort;
+          e.sortable = true;
+        }
+
         if (e.disableFilters !== true && isClientSideGrid) {
           e.filterFn = 'fuzzy';
         }
+
+        e.accessorKey = e.accessor ?? e.id;
 
         switch (true) {
           case e.accessor === 'index':
