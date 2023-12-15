@@ -95,6 +95,7 @@ export default function FilterModel({ dateFilters, setDateFilters }) {
             views={['year', 'month', 'date', 'hours', 'minutes']}
             value={dateFilter.to}
             onChange={(date) => {
+              setInputFromKeyBoard(false);
               setDateFilter({ ...dateFilter, to: date });
             }}
             onClose={() => {
