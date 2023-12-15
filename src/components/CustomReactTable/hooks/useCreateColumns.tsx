@@ -150,17 +150,18 @@ export const useCreateColumns = ({
         e.size = e.size ?? e.width ?? 200;
         e.footer = e.footer ?? e.Footer;
 
+        if (e.disableSortBy !== true && isClientSideGrid) {
+          e.sortingFn = fuzzySort;
+        }
+        if (e.disableFilters !== true && isClientSideGrid) {
+          e.filterFn = 'fuzzy';
+        }
+
         switch (true) {
           case e.accessor === 'index':
             e.disableFilters = e.disableFilters ?? true;
             e.disableSortBy = e.disableSortBy ?? true;
             e.enableResizing = false;
-            break;
-          case e.disableFilters !== true && isClientSideGrid:
-            e.filterFn = 'fuzzy';
-            break;
-          case e.disableSortBy !== true && isClientSideGrid:
-            e.sortingFn = fuzzySort;
             break;
         }
         updatedColumn.push(e);
