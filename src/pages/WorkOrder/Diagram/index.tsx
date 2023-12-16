@@ -39,16 +39,10 @@ const Diagram = ({ resource, referenceId, currentVersion }) => {
       .get(`/attachment/resource-attachment-type?resource=${resource}&referenceId=${referenceId}&attachmentType=${ATTACHMENT_TYPE.drawing}`)
       .then(({ data: { data } }) => {
         const expend: any = {};
+        setRowData(data);
         data?.forEach((file) => {
-          const hasMatchingRelatedTo = file?.relatedTo?.some((relatedItem) => {
-            return relatedItem?.version === currentVersion && relatedItem?.type === 'workOrder' && relatedItem?.referenceId === referenceId;
-          });
-          if (!hasMatchingRelatedTo) {
-            file.canEdit = false;
-          }
           expend[file?._id] = true;
         });
-        setRowData(data);
         setExpended(expend);
       })
       .catch((err) => {

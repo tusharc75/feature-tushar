@@ -239,7 +239,7 @@ export default function ManageAttachment({
                         type="text"
                         label={type === 'file' ? 'Name' : 'Folder Name'}
                         required={true}
-                        disabled={!canEdit}
+                        disabled={!canEdit && !isClone}
                         name="name"
                         fullWidth
                         margin="dense"
@@ -288,7 +288,7 @@ export default function ManageAttachment({
                                   required={true}
                                   type="fileUpload"
                                   values={values}
-                                  canEdit={canEdit}
+                                  canEdit={canEdit || isClone}
                                   errors={errors}
                                   touched={touched}
                                   size="small"
@@ -314,7 +314,7 @@ export default function ManageAttachment({
                           </div>
                         </Grid>
                         <Grid item xs={12}>
-                          <AttachmentThumbnail attachments={otherAttachments} handleDeleteAttachment={handleDeleteAttachment} canEdit={canEdit} />
+                          <AttachmentThumbnail attachments={otherAttachments} handleDeleteAttachment={handleDeleteAttachment} canEdit={canEdit || isClone} />
                         </Grid>
                       </Grid>
                     )}
@@ -333,7 +333,7 @@ export default function ManageAttachment({
               >
                 Cancel
               </Button>
-              {canEdit && (
+              {(canEdit || isClone) && (
                 <CustomButton
                   type="button"
                   color="primary"
