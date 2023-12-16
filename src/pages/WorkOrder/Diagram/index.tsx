@@ -310,7 +310,7 @@ const Diagram = ({ resource, referenceId, currentVersion }) => {
               setAttachemntDialog({ open: false, id: null, isClone: false });
               setFullScreen(false);
             }}
-            relatedTo={[{ type: resource, referenceId: referenceId, currentVersion, access: true }]}
+            relatedTo={[{ type: resource, referenceId: referenceId, version: currentVersion, access: true }]}
             isMinimized={!fullScreen}
             onMinimizeMaximize={() => {
               setFullScreen((prevState) => !prevState);
