@@ -52,7 +52,6 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
 
     const queryString = getQueryString();
 
-    setCondition(null);
     axiosInstance()
       .get(`${pricingCondition.api}/condition/${pricingConditionId}${queryString}`)
       .then(({ data: { data, count } }) => {

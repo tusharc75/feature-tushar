@@ -1,4 +1,4 @@
-import React, { Dispatch, useEffect, useMemo } from 'react';
+import React, { Dispatch, memo, useEffect, useMemo } from 'react';
 import { Box, CircularProgress, TableBody, TableHead, TableRow } from '@material-ui/core';
 import { CellRenderer, DraggableHeader, TColType } from './TableHelperComponents';
 import MaUTable from '@material-ui/core/Table';
@@ -7,6 +7,8 @@ import { Row, Table, flexRender } from '@tanstack/react-table';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Error } from '@material-ui/icons';
 import { getStickyPosition } from '../utils';
+
+const MemoizedCellRenderer = memo(CellRenderer);
 
 type TTableProps = {
   state: TInitialState;
@@ -99,7 +101,7 @@ const TableComponent = ({
               {columnVirtualizer.getVirtualItems().map((virtualCell, index) => {
                 const cell = row.getVisibleCells()[virtualCell.index];
                 return (
-                  <CellRenderer
+                  <MemoizedCellRenderer
                     key={cell.id}
                     virtualStyles={{
                       position: 'absolute',
@@ -141,7 +143,7 @@ const TableComponent = ({
             <TableRow key={row.id} className={`tr`}>
               {row.getVisibleCells().map((cell, index) => {
                 return (
-                  <CellRenderer
+                  <MemoizedCellRenderer
                     key={cell.id}
                     virtualStyles={{}}
                     {...{

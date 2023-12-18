@@ -16,6 +16,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const AddCost = ({ fieldTicketData, setNextStep, renderedFrom, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -69,25 +70,29 @@ const AddCost = ({ fieldTicketData, setNextStep, renderedFrom, allowedToEdit }) 
           canDrag: false,
           Cell: ({ row }) => (
             <Grid container spacing={1}>
-              <IconButton
-                size="small"
-                aria-label="Details"
-                onClick={() => {
-                  setAddDialog({ open: true, data: row.original });
-                }}
-              >
-                <EditIcon fontSize="small" color="primary" />
-              </IconButton>
-              <IconButton
-                size="small"
-                aria-label="Details"
-                onClick={() => {
-                  setDeleteRecord(row.original);
-                  setShowDeleteConfirmBox(true);
-                }}
-              >
-                <DeleteIcon fontSize="small" color="error" />
-              </IconButton>
+              <HtmlTooltip title='Edit'>
+                <IconButton
+                  size="small"
+                  aria-label="Details"
+                  onClick={() => {
+                    setAddDialog({ open: true, data: row.original });
+                  }}
+                >
+                  <EditIcon fontSize="small" color="primary" />
+                </IconButton>
+              </HtmlTooltip>
+              <HtmlTooltip title='Delete'>
+                <IconButton
+                  size="small"
+                  aria-label="Details"
+                  onClick={() => {
+                    setDeleteRecord(row.original);
+                    setShowDeleteConfirmBox(true);
+                  }}
+                >
+                  <DeleteIcon fontSize="small" color="error" />
+                </IconButton>
+              </HtmlTooltip>
             </Grid>
           )
         });
