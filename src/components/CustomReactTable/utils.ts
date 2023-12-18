@@ -171,7 +171,7 @@ export const handleCellClick = ({ cell, row, dispatch, setCellValue }) => {
     }
   });
 
-  setCellValue(cell?.getValue() || null);
+  setCellValue(getCellValue(cell) || null);
 };
 
 export const insertChildRowIntoTable = ({ existingRows, subRowsToInsert, parentId, dispatch }) => {
@@ -240,4 +240,9 @@ export const getStickyColumnNames = ({
 export const getUniqueDataByKey = (rows: any[], key = '_id') => {
   const arrayUniqueByKey = [...new Map(rows.map((item) => [item[key], item])).values()];
   return arrayUniqueByKey;
+};
+
+export const getCellValue = (cell) => {
+  const { row, column } = cell;
+  return row.original[column.id];
 };

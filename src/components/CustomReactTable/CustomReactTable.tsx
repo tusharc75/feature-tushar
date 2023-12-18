@@ -1,5 +1,6 @@
 import { Box, CircularProgress, useMediaQuery } from '@material-ui/core';
 import {
+  ColumnDef,
   ExpandedState,
   getCoreRowModel,
   getExpandedRowModel,
@@ -28,7 +29,6 @@ import { gridPageSizes } from '../../constants/helpers';
 import GridHeader from './GridHeader';
 import Pagination from './TableComponents/Pagination';
 import { fuzzyFilter, serverFilter } from './ReactTableHelpers';
-import { defaultColumn } from './TableComponents/TableHelperComponents';
 import { useCreateColumns } from './hooks/useCreateColumns';
 import type { TInitialState } from './hooks/useTableReducer';
 import { childrenProperty, getDataFromLocalStorage, getStickyColumnNames, getUniqueDataByKey, updateGridHiddenColumns, useSkipper } from './utils';
@@ -129,13 +129,6 @@ const CustomReactTable = ({
       setBaseColumns(newColumns);
     }
   }, [newColumns]);
-
-  const resetField = () => {
-    dispatch({
-      type: 'currentEditingCellPosition',
-      cellPosition: null
-    });
-  };
 
   // For Column Order and hidden columns
   useEffect(() => {
@@ -285,7 +278,16 @@ const CustomReactTable = ({
     [isClientSideGrid, dispatch]
   );
 
-  const submitInput = () => {
+  // Editing cell functions
+  const resetField = () => {
+    dispatch({
+      type: 'currentEditingCellPosition',
+      cellPosition: null
+    });
+  };
+
+  const submitInput = useCallback(() => {
+    skipAutoResetPageIndex();
     if (!currentEditingCellPosition) return;
     const updatedData = flattenArray(data)?.find((row) => row?._id === currentEditingCellPosition.rowId);
     updatedData[currentEditingCellPosition.columnName] = cellValue;
@@ -297,7 +299,7 @@ const CustomReactTable = ({
       type: 'currentEditingCellPosition',
       cellPosition: null
     });
-  };
+  }, [cellValue, currentEditingCellPosition, data, onSaveEdit]);
 
   const getVisibleColumns = React.useCallback(() => {
     const obj = {};
@@ -326,8 +328,8 @@ const CustomReactTable = ({
       expanded,
       columnOrder,
       sorting: getsorting,
-      globalFilter: debouncedSearch.trim(),
-      columnFilters: columnFilters,
+      globalFilter: isClientSideGrid ? debouncedSearch.trim() : '',
+      columnFilters: isClientSideGrid ? columnFilters : [],
       columnVisibility: getVisibleColumns(),
       rowSelection
     },
@@ -342,7 +344,6 @@ const CustomReactTable = ({
 
     // custom functions
     globalFilterFn: isClientSideGrid ? fuzzyFilter : serverFilter,
-    defaultColumn: defaultColumn,
 
     // state setter
     onExpandedChange: setExpanded,
@@ -435,7 +436,6 @@ const CustomReactTable = ({
   }, [selectedRecords.length]);
 
   // sorging effect
-
   useEffect(() => {
     const sortBy: SortingState = getsorting;
 

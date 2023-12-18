@@ -2,14 +2,12 @@ import { Checkbox, CheckboxProps, CircularProgress, IconButton, TableCell } from
 import { Check, DragIndicator, Edit, ExpandLess, ExpandMore } from '@material-ui/icons';
 import { Column, ColumnDef, Header, Table, flexRender } from '@tanstack/react-table';
 import { debounce } from 'lodash';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 import { CgSearch } from 'react-icons/cg';
-import { FaAngleDown, FaAngleRight } from 'react-icons/fa';
 import { GrFormClose } from 'react-icons/gr';
 import HtmlTooltip from '../../CustomTooltipTitle';
-import { childrenProperty, getStickyPosition, handleCellClick, handleKeyDown, insertChildRowIntoTable } from '../utils';
-import { LoadingIcon } from 'src/assets/svg/svgIcons';
+import { getCellValue, getStickyPosition, handleCellClick, handleKeyDown } from '../utils';
 
 export type TColType = {
   sticky: undefined | 'left' | 'right';
@@ -24,27 +22,6 @@ export type TColType = {
   isVisible: undefined | boolean;
   show: undefined | boolean;
 } & ColumnDef<any>;
-
-
-export const defaultColumn: Partial<ColumnDef<any>> = {
-  cell: ({ getValue, row: { index }, column: { id }, table }) => {
-    const initialValue = getValue();
-    // We need to keep and update the state of the cell normally
-    const [value, setValue] = useState(initialValue);
-
-    // When the input is blurred, we'll call our table meta's updateData function
-    const onBlur = () => {
-      table.options.meta?.updateData(index, id, value);
-    };
-
-    // If the initialValue is changed external, sync it up with our state
-    useEffect(() => {
-      setValue(initialValue);
-    }, [initialValue]);
-
-    return <input value={value as string} onChange={(e) => setValue(e.target.value)} onBlur={onBlur} />;
-  }
-};
 
 const DebouncedInput = React.forwardRef(
   (
@@ -348,7 +325,7 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
   const colSize = header.getSize();
 
   const { style } = getStickyPosition(columnDef, index, table);
-  
+
   return (
     <TableCell
       {...{
@@ -373,8 +350,9 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
         className={`flex items-center pos-rel flex-grow  ${column.id === 'selection' ? 'justify-center' : 'justify-between pr-[16px]'}`}
       >
         <div
-          className={`d-flex gap-2 align-items-center ${column.id === 'selection' ? 'justify-center' : 'justify-between'} ${header.column.getCanSort() && columnDef.disableSortBy !== true ? 'cursor-pointer' : ''
-            }`}
+          className={`d-flex gap-2 align-items-center ${column.id === 'selection' ? 'justify-center' : 'justify-between'} ${
+            header.column.getCanSort() && columnDef.disableSortBy !== true ? 'cursor-pointer' : ''
+          }`}
           onClick={columnDef.disableSortBy !== true ? header.column.getToggleSortingHandler() : null}
         >
           <div className="line-clamp-1">
@@ -451,7 +429,7 @@ export const CellRenderer = ({
 
   const { style, className: stickyClassName } = getStickyPosition(columnDef, index, table);
 
-  const CellShell = ({ children, className = '' }) => {
+  const CellShell = ({ children, className = '', ...others }) => {
     return (
       <TableCell
         key={cell.id}
@@ -466,9 +444,7 @@ export const CellRenderer = ({
         onClick={() => {
           handleCellClick({ cell, dispatch, row, setCellValue });
         }}
-        onKeyDown={(e) => {
-          handleKeyDown({ currentEditingCellPosition, e, submitInput });
-        }}
+        {...others}
       >
         {children}
       </TableCell>
@@ -493,9 +469,17 @@ export const CellRenderer = ({
             <input
               autoFocus
               type="number"
-              min='0'
-              onBlur={() => (cell.getValue() !== cellValue ? submitInput() : resetField())}
+              min="0"
+              onBlur={() => (getCellValue(cell) !== cellValue ? submitInput() : resetField())}
               value={cellValue}
+              onKeyDown={(e) => {
+                const target = e.target as HTMLInputElement;
+                if (!currentEditingCellPosition) return;
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  target.blur();
+                }
+              }}
               className="dark:text-[white] appearance-none w-full focus-within:outline-[var(--new-theme-color)] bg-[transparent] outline-[transparent] shadow-0 border-[0] px-[2px] py-[4px] [border-bottom:1px_solid_var(--common-border-color)_!important]"
               onChange={(e) => {
                 let value: any = e.target.value;
