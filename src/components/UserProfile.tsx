@@ -57,6 +57,16 @@ export default function UserProfile(props) {
                   </MenuList>
                 </ClickAwayListener>
               ) : null}
+                <ClickAwayListener onClickAway={onClose}>
+                  <MenuList autoFocusItem={open} id="menu-list-grow" onKeyDown={onListKeyDown}>
+                    <MenuItem onClick={(e) => onClose(e, { supportTicket: true })}>
+                      <ListItemIcon style={{ minWidth: '30px' }}>
+                        <FiSettings />
+                      </ListItemIcon>
+                      <Typography>Support Ticket</Typography>
+                    </MenuItem>
+                  </MenuList>
+                </ClickAwayListener>
               <ClickAwayListener onClickAway={onClose}>
                 <MenuList autoFocusItem={open} id="menu-list-grow" onKeyDown={onListKeyDown}>
                   <MenuItem onClick={(e) => onClose(e, { logout: true })}>
