@@ -348,7 +348,7 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
   const colSize = header.getSize();
 
   const { style } = getStickyPosition(columnDef, index, table);
-
+  
   return (
     <TableCell
       {...{
