@@ -7,7 +7,7 @@ import HtmlTooltip from '../../CustomTooltipTitle';
 import type { TSwipableListInputProps } from './types';
 import { IndeterminateCheckbox, TColType } from '../TableComponents/TableHelperComponents';
 import { flexRender } from '@tanstack/react-table';
-import { handleCellClick, handleKeyDown } from '../utils';
+import { getCellValue, handleCellClick, handleKeyDown } from '../utils';
 
 const DEFAULT_DATA_ROWS_VISIBLE = 3; // This number will change how many rows will be visible by default
 
@@ -136,7 +136,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                         <div className="flex-grow">
                           <div className="flex gap-2 justify-between items-center">
                             {primaryField && (
-                              <h4 className="quote-name line-clamp-1 [&>*]:line-clamp-1 [&>*]:[font-weight:700_!important] [&>*]:[white-space:unset_!important]">
+                              <h4 className="quote-name line-clamp-1 [&>*]:[font-weight:700_!important] [&_*]:[white-space:unset_!important]">
                                 {primaryField.cell({ row })}
                               </h4>
                             )}
@@ -470,7 +470,7 @@ const RenderCellWithHeader = ({ field, row, submitInput, cellValue, setCellValue
             <input
               title={`Edit-${cell.id}`}
               autoFocus
-              onBlur={() => (cell.getValue() !== cellValue ? submitInput() : resetField())}
+              onBlur={() => (getCellValue(cell) !== cellValue ? submitInput() : resetField())}
               value={cellValue}
               className="dark:text-[white]  appearance-none w-full focus-within:outline-[var(--new-theme-color)] bg-[transparent] outline-[transparent] shadow-0 border-[0] px-[2px] py-[4px] [border-bottom:1px_solid_var(--common-border-color)_!important]"
               onChange={(e) => setCellValue(e.target.value)}
@@ -494,50 +494,6 @@ const RenderCellWithHeader = ({ field, row, submitInput, cellValue, setCellValue
     default:
       return <CellShell>{flexRender(cell.column.columnDef.cell, cell.getContext())}</CellShell>;
   }
-  //   <h6 className=" text-[12px] grid grid-cols-[5fr_6fr] justify-between gap-2 max-w-full">
-  //     <span className="">{field.header}: </span>
-  //     <span
-  //       onKeyDown={(e) => {
-  //         handleKeyDown(e);
-  //       }}
-  //       onClick={() => {
-  //         handleCellClick(cell, row);
-  //       }}
-  //       className="text-[12px_!important] text-right [&>*]:text-right [&>*]:justify-end line-clamp-1 break-all [&>*]:[flex-wrap:wrap] [&>*]:[font-weight:500_!important] [&>*]:[font-size:12px_!important] [&>*]:line-clamp-1 [&>*]:[white-space:unset_!important] [&>div]:[flex-wrap:wrap_!important] "
-  //     >
-  //       {!['selection'].includes(cell?.column.id) &&
-  //       currentEditingCellPosition?.rowId === row.original._id &&
-  //       currentEditingCellPosition?.columnName === cell?.column.id ? (
-  //         <input
-  //           title={`Edit-${cell.id}`}
-  //           autoFocus
-  //           onBlur={() => (cell.value !== cellValue ? submitInput() : resetField())}
-  //           value={cellValue}
-  //           className={` dark:text-[white] appearance-none w-full focus-within:outline-[var(--new-theme-color)] bg-[transparent] outline-[transparent] shadow-0 border-[0] px-[2px] py-[4px] [border-bottom:1px_solid_var(--common-border-color)_!important]`}
-  //           onChange={(e) => setCellValue(e.target.value)}
-  //         />
-  //       ) : currentEditingCellPosition?.rowId === row.original._id && cell?.column.id === 'action' ? (
-  //         <HtmlTooltip title="Save">
-  //           <IconButton size="small" aria-label="Save" onClick={submitInput}>
-  //             <Check color="primary" />
-  //           </IconButton>
-  //         </HtmlTooltip>
-  //       ) : cell.column?.editable && cell?.value ? (
-  //         <div
-  //           className="[display:flex_!important] gap-[20px] justify-end ml-auto cursor-pointer max-w-[max-content]"
-  //           style={{ borderBottom: '1px dashed #8a8a8a' }}
-  //         >
-  //           <p>{cell?.value}</p>
-  //           <span>
-  //             <Edit className="text-[rgba(0,0,0,0.3)] dark:text-[rgba(255,255,255,0.9)]" fontSize="small" />
-  //           </span>
-  //         </div>
-  //       ) : (
-  //         field.cell({ row })
-  //       )}
-  //     </span>
-  //   </h6>
-  // );
 };
 
 export type { TSwipableListInputProps };
