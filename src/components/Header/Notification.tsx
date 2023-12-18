@@ -10,7 +10,6 @@ import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import axiosInstance from '../../axios/axiosInstance';
 import { displayCardDate } from '../../constants/helpers';
 
-
 import styles from './Header.module.scss';
 
 import NotificationsNoneIcon from '@material-ui/icons/NotificationsNone';
@@ -125,22 +124,31 @@ const Notification = () => {
       axiosInstance()
         .put('/user/notification/read', {
           toggle: true,
-          notificationId: d.notificationId
+          notificationId: d.notificationId || d._id
         })
         .then(() => {})
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
     }
+
     handleNotificationClose();
+    const resourcePath = returnResourcePath(d?.resourceId, d?.resourcePath);
     if (d?.entity) {
-      handleRedirect(d?.entity, d?.resourceId, d?.resourcePath);
+      handleRedirect(d?.entity, d?.resourceId, resourcePath);
     } else {
-      history.push(d?.resourceId ? `${d?.resourcePath}/${d?.resourceId}` : d?.resourcePath, { data: d?.of ? d?.of : null });
+      history.push(d?.resourceId ? `${resourcePath}/${d?.resourceId}` : resourcePath, { data: d?.of ? d?.of : null });
     }
   };
 
-
+  const returnResourcePath = (resourceId, resourcePath) => {
+    const splittedPath = resourcePath.split('/');
+    if (splittedPath[splittedPath.length - 1] === resourceId) {
+      splittedPath.pop();
+      return splittedPath.join('/');
+    }
+    return resourcePath;
+  };
 
   return (
     <>
