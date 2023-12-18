@@ -50,14 +50,14 @@ const Invoices = ({ resourceId, resource, invoiceFieldName }) => {
         o.index = 0;
         o.cell = ({ row }) => (
 
-            <span
-              className="link"
-              onClick={() => {
-                setViewInvoiceDialog({ open: true, invoice: row.original?._id });
-              }}
-            >
-              <CustomRenderCell value={row.original?.invoiceNumber} />
-            
+          <span
+            className="link"
+            onClick={() => {
+              setViewInvoiceDialog({ open: true, invoice: row.original?._id });
+            }}
+          >
+            <CustomRenderCell value={row.original?.invoiceNumber} />
+
             <Box ml={1}>
               <IconButton
                 size="small"
@@ -68,8 +68,8 @@ const Invoices = ({ resourceId, resource, invoiceFieldName }) => {
                 <OpenInNewIcon fontSize="small" color="primary" />
               </IconButton>
             </Box>
-            </span>
-          
+          </span>
+
         );
       }
     });
@@ -207,7 +207,7 @@ const Invoices = ({ resourceId, resource, invoiceFieldName }) => {
   };
 
   return (
-    <>
+    <Box>
       <Grid item xs={12} md={12} sm={12} className="mt-3">
         {columns ? (
           <CustomReactTable
@@ -232,6 +232,7 @@ const Invoices = ({ resourceId, resource, invoiceFieldName }) => {
           }}
           onSuccess={() => {
             setViewInvoiceDialog({ open: false, invoice: null });
+            fetchData();
           }}
           resource={resource}
         />
@@ -248,7 +249,7 @@ const Invoices = ({ resourceId, resource, invoiceFieldName }) => {
           onOk={handleDeleteInvoice}
         />
       ) : null}
-    </>
+    </Box>
   );
 };
 export default Invoices;
