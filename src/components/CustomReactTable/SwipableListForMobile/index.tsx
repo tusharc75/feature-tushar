@@ -7,7 +7,7 @@ import HtmlTooltip from '../../CustomTooltipTitle';
 import type { TSwipableListInputProps } from './types';
 import { IndeterminateCheckbox, TColType } from '../TableComponents/TableHelperComponents';
 import { flexRender } from '@tanstack/react-table';
-import { handleCellClick, handleKeyDown } from '../utils';
+import { getCellValue, handleCellClick, handleKeyDown } from '../utils';
 
 const DEFAULT_DATA_ROWS_VISIBLE = 3; // This number will change how many rows will be visible by default
 
@@ -470,7 +470,7 @@ const RenderCellWithHeader = ({ field, row, submitInput, cellValue, setCellValue
             <input
               title={`Edit-${cell.id}`}
               autoFocus
-              onBlur={() => (cell.getValue() !== cellValue ? submitInput() : resetField())}
+              onBlur={() => (getCellValue(cell) !== cellValue ? submitInput() : resetField())}
               value={cellValue}
               className="dark:text-[white]  appearance-none w-full focus-within:outline-[var(--new-theme-color)] bg-[transparent] outline-[transparent] shadow-0 border-[0] px-[2px] py-[4px] [border-bottom:1px_solid_var(--common-border-color)_!important]"
               onChange={(e) => setCellValue(e.target.value)}

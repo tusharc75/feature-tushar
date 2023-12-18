@@ -28,7 +28,6 @@ import { gridPageSizes } from '../../constants/helpers';
 import GridHeader from './GridHeader';
 import Pagination from './TableComponents/Pagination';
 import { fuzzyFilter, serverFilter } from './ReactTableHelpers';
-import { defaultColumn } from './TableComponents/TableHelperComponents';
 import { useCreateColumns } from './hooks/useCreateColumns';
 import type { TInitialState } from './hooks/useTableReducer';
 import { childrenProperty, getDataFromLocalStorage, getStickyColumnNames, getUniqueDataByKey, updateGridHiddenColumns, useSkipper } from './utils';
@@ -326,8 +325,8 @@ const CustomReactTable = ({
       expanded,
       columnOrder,
       sorting: getsorting,
-      globalFilter: debouncedSearch.trim(),
-      columnFilters: columnFilters,
+      globalFilter: isClientSideGrid ? debouncedSearch.trim() : '',
+      columnFilters: isClientSideGrid ? columnFilters : [],
       columnVisibility: getVisibleColumns(),
       rowSelection
     },
@@ -342,7 +341,6 @@ const CustomReactTable = ({
 
     // custom functions
     globalFilterFn: isClientSideGrid ? fuzzyFilter : serverFilter,
-    defaultColumn: defaultColumn,
 
     // state setter
     onExpandedChange: setExpanded,
