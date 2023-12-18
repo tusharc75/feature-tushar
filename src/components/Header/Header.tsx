@@ -203,6 +203,11 @@ const Header = () => {
         pathname: routes.brandConfiguration.path
       });
     }
+    if (option && option.supportTicket) {
+      history.push({
+        pathname: routes.supportTicket.path
+      });
+    }
     setOpen(false);
   };
 

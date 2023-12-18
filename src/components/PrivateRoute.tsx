@@ -49,6 +49,7 @@ const ProtectedRoute = ({ children, ...rest }) => {
         'currency-converter',
         'profile',
         'brand-configuration',
+        'support-ticket',
         'doa-request',
         'quote-pdf-template',
         'equiptment-rental-master',
