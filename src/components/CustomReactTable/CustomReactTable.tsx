@@ -1,5 +1,6 @@
 import { Box, CircularProgress, useMediaQuery } from '@material-ui/core';
 import {
+  ColumnDef,
   ExpandedState,
   getCoreRowModel,
   getExpandedRowModel,
@@ -128,13 +129,6 @@ const CustomReactTable = ({
       setBaseColumns(newColumns);
     }
   }, [newColumns]);
-
-  const resetField = () => {
-    dispatch({
-      type: 'currentEditingCellPosition',
-      cellPosition: null
-    });
-  };
 
   // For Column Order and hidden columns
   useEffect(() => {
@@ -284,7 +278,16 @@ const CustomReactTable = ({
     [isClientSideGrid, dispatch]
   );
 
-  const submitInput = () => {
+  // Editing cell functions
+  const resetField = () => {
+    dispatch({
+      type: 'currentEditingCellPosition',
+      cellPosition: null
+    });
+  };
+
+  const submitInput = useCallback(() => {
+    skipAutoResetPageIndex();
     if (!currentEditingCellPosition) return;
     const updatedData = flattenArray(data)?.find((row) => row?._id === currentEditingCellPosition.rowId);
     updatedData[currentEditingCellPosition.columnName] = cellValue;
@@ -296,7 +299,7 @@ const CustomReactTable = ({
       type: 'currentEditingCellPosition',
       cellPosition: null
     });
-  };
+  }, [cellValue, currentEditingCellPosition, data, onSaveEdit]);
 
   const getVisibleColumns = React.useCallback(() => {
     const obj = {};

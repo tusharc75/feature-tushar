@@ -2,14 +2,12 @@ import { Checkbox, CheckboxProps, CircularProgress, IconButton, TableCell } from
 import { Check, DragIndicator, Edit, ExpandLess, ExpandMore } from '@material-ui/icons';
 import { Column, ColumnDef, Header, Table, flexRender } from '@tanstack/react-table';
 import { debounce } from 'lodash';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 import { CgSearch } from 'react-icons/cg';
-import { FaAngleDown, FaAngleRight } from 'react-icons/fa';
 import { GrFormClose } from 'react-icons/gr';
 import HtmlTooltip from '../../CustomTooltipTitle';
-import { childrenProperty, getCellValue, getStickyPosition, handleCellClick, handleKeyDown, insertChildRowIntoTable } from '../utils';
-import { LoadingIcon } from 'src/assets/svg/svgIcons';
+import { getCellValue, getStickyPosition, handleCellClick, handleKeyDown } from '../utils';
 
 export type TColType = {
   sticky: undefined | 'left' | 'right';
@@ -431,7 +429,7 @@ export const CellRenderer = ({
 
   const { style, className: stickyClassName } = getStickyPosition(columnDef, index, table);
 
-  const CellShell = ({ children, className = '' }) => {
+  const CellShell = ({ children, className = '', ...others }) => {
     return (
       <TableCell
         key={cell.id}
@@ -446,9 +444,7 @@ export const CellRenderer = ({
         onClick={() => {
           handleCellClick({ cell, dispatch, row, setCellValue });
         }}
-        onKeyDown={(e) => {
-          handleKeyDown({ currentEditingCellPosition, e, submitInput });
-        }}
+        {...others}
       >
         {children}
       </TableCell>
@@ -476,6 +472,14 @@ export const CellRenderer = ({
               min="0"
               onBlur={() => (getCellValue(cell) !== cellValue ? submitInput() : resetField())}
               value={cellValue}
+              onKeyDown={(e) => {
+                const target = e.target as HTMLInputElement;
+                if (!currentEditingCellPosition) return;
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  target.blur();
+                }
+              }}
               className="dark:text-[white] appearance-none w-full focus-within:outline-[var(--new-theme-color)] bg-[transparent] outline-[transparent] shadow-0 border-[0] px-[2px] py-[4px] [border-bottom:1px_solid_var(--common-border-color)_!important]"
               onChange={(e) => {
                 let value: any = e.target.value;
