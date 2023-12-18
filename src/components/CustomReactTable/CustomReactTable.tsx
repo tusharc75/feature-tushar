@@ -433,7 +433,6 @@ const CustomReactTable = ({
   }, [selectedRecords.length]);
 
   // sorging effect
-
   useEffect(() => {
     const sortBy: SortingState = getsorting;
 
