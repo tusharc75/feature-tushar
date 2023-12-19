@@ -35,7 +35,7 @@ const IotChartDetail = () => {
       const query = [{ field: 'deviceTemplate', term: deviceTemplate }];
       const deepFilter = [{ field: 'active', term: 'yes' }, { field: 'alarm', term: 'no' }];
       axiosInstance()
-        .get(`${routes.iotDataPoints.path}?filterById=${JSON.stringify(query)}&deepFilter=${JSON.stringify(deepFilter)}&filterType=and`)
+        .get(`${routes.iotDataPoints.path}?filterById=${JSON.stringify(query)}&deepFilter=${JSON.stringify(deepFilter)}&sortBy=order&orderBy=asc&filterType=and`)
         .then(({ data: { data } }) => {
           setDataPoints(data?.data);
         });

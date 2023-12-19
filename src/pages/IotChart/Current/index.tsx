@@ -28,7 +28,7 @@ export default function Current({ assetId }) {
 
   const fetchCategory = async () => {
     axiosInstance()
-      .get(`/dynamic-form`, {
+      .get(`/dynamic-form?sortBy=order&orderBy=asc`, {
         headers: {
           Resource: 'Iot Data Points Category'
         }
