@@ -5,7 +5,7 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import { groupBy, unionBy } from 'lodash';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, yupSchema, SUBLEASE_TYPE } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, arrayToDropwdownOption } from '..//../../constants/helpers';
 import { Formik, Form } from 'formik';
@@ -126,6 +126,13 @@ const QtyDialog: FC<EditDialogProps> = ({
       });
       if (rowData.actualStartDate === '' || rowData.actualEndDate === '') {
         data = data.filter((e) => !['actualStartDate', 'actualEndDate', 'actualJobDuration'].includes(e.fieldName));
+      }
+      if (subleaseData?.type === SUBLEASE_TYPE.vendor && rowData?.assetQty) {
+        data?.forEach((e) => {
+          if (e?.fieldName === 'qty') {
+            e.isUneditable = true;
+          }
+        })
       }
       setInitialData({
         fields: data,

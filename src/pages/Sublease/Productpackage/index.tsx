@@ -67,6 +67,11 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
   const fetchFields = async () => {
     var data = await fetch_sublease_product_fields(subleaseData?.currency);
     setAllFields(JSON.parse(JSON.stringify(data)));
+    data?.forEach((e) => {
+      if (!allowedToEdit || isIssued) {
+        e.isColumnEditable = false;
+      }
+    });
     const newColumns = generateColumns(renderedFrom, data, null, false, subleaseData?.currency);
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
@@ -162,12 +167,12 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
             <IconButton
               size="small"
               aria-label="Delete"
-              disabled={!allowedToEdit || (subleaseData.type === SUBLEASE_TYPE.vendor && isIssued)}
+              disabled={!allowedToEdit}
               onClick={() => {
                 openMaterial(row.original);
               }}
             >
-              <EditIcon fontSize="small" color={!allowedToEdit || (subleaseData.type === SUBLEASE_TYPE.vendor && isIssued) ? 'disabled' : 'primary'} />
+              <EditIcon fontSize="small" color={!allowedToEdit ? 'disabled' : 'primary'} />
             </IconButton>
           </HtmlTooltip>
 
@@ -190,16 +195,6 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
         </>
       )
     });
-    coloum.forEach((element) => {
-      if (element.accessor === 'qtyDisplay') {
-        element['Footer'] = (info) => {
-          let rows = info.table.getExpandedRowModel().rows;
-          const qtyTotal = rows?.filter((f) => !f.original.parentId && f.original.hasOwnProperty(element.accessor) && !isNaN(f.original[element.accessor]))
-            .reduce((sum, row) => row.original[element.accessor] + sum, 0);
-          return <>{qtyTotal}</>;
-        };
-      }
-    });
     setColumns(coloum);
   };
 
@@ -221,7 +216,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
       parent.description = parent.type === 'product' ? parent.productDetail?.productDescription : parent.packageDetail?.packageDescription;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + subleaseData?.currency?.toLowerCase()] ? true : !isRateRequired;
-      parent.assetQty = subleaseData.type === SUBLEASE_TYPE.vendor ? inventory?.filter((e) => e?.inventoryDetail?.product === parent.materialId).length :
+      parent.assetQty = subleaseData.type === SUBLEASE_TYPE.vendor ? parent?.assetQty || inventory?.filter((e) => e?.inventoryDetail?.product === parent.materialId).length :
         inventory?.filter((e) => e._id === parent._id).length
       parent.hideSelection = parent.assetQty > 0 ? true : false;
       parent.canDelete = parent.assetQty === 0 && allowedToEdit ? true : false;
@@ -234,7 +229,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
           _subRow.description = _subRow.productDetail?.productDescription;
           _subRow.qtyDisplay = `${parent.qty * _subRow.qty}`;
           _subRow.isValid = _subRow['finalPrice_' + subleaseData?.currency?.toLowerCase()] ? true : !isRateRequired;
-          _subRow.assetQty = subleaseData.type === SUBLEASE_TYPE.vendor ? inventory?.filter((e) => e?.inventoryDetail?.product === _subRow.materialId).length :
+          _subRow.assetQty = subleaseData.type === SUBLEASE_TYPE.vendor ? _subRow?.assetQty || inventory?.filter((e) => e?.inventoryDetail?.product === _subRow.materialId).length :
             inventory?.filter((e) => e._id === _subRow._id).length
           _subRow.canDelete = _subRow.assetQty === 0 && allowedToEdit ? true : false;
           if (!_subRow.canDelete) {
