@@ -1376,7 +1376,7 @@ const ReceivingTicket = ({
         } else if (e.subleaseAsset) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.notSubleaseAsset });
         } else if (
-          ![ASSET_STATUS.underReview, ASSET_STATUS.scrap, ASSET_STATUS.available, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair].includes(e.status)
+          ![ASSET_STATUS.underReview, ASSET_STATUS.scrap, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair].includes(e.status)
         ) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.repairCanForThisAsset });
         } else if (!checkUniqWarehouse()) {
