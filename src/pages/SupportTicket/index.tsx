@@ -90,15 +90,17 @@ const SupportTicket = () => {
           if (o?.accessor === 'supportTicketNumber') {
             o.cell = ({ row }) =>
               row?.original?.supportTicketNumber ? (
-                <Link
-                  className="link text-truncate"
-                  title={row?.original?.supportTicketNumber}
-                  to={`${routes.supportTicketDetail.path}/${row?.original?._id}`}
-                  target={'_self'}
-                  rel="noopener noreferrer"
-                >
-                  {row?.original?.supportTicketNumber}
-                </Link>
+                <div>
+                  <Link
+                    className="link text-truncate"
+                    title={row?.original?.supportTicketNumber}
+                    to={`${routes.supportTicketDetail.path}/${row?.original?._id}`}
+                    target={'_self'}
+                    rel="noopener noreferrer"
+                  >
+                    {row?.original?.supportTicketNumber}
+                  </Link>
+                </div>
               ) : (
                 <NoDataCell />
               );
@@ -133,7 +135,7 @@ const SupportTicket = () => {
             <FileCopyIcon fontSize="small" color="primary" />
           </IconButton>
         </HtmlTooltip>
-        
+
         {row?.original?.canDelete && (
           <HtmlTooltip title="Delete">
             <IconButton
@@ -153,7 +155,7 @@ const SupportTicket = () => {
   };
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = `?page=${page}&limit=${limit}`;
+    let deepFilter = `?page=${page}&limit=${limit}&brand=${user?.user?.brand}`;
     if (isExport) {
       deepFilter = `?`;
     }
