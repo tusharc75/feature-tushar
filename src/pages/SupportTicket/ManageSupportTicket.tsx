@@ -35,7 +35,7 @@ const ManageSupportTicket = ({ onClose, onSuccess, isClone = false, id = null })
   const fetchFields = async () => {
     try {
       let data;
-      const response = await axiosInstance().get(`${routes.supportTicket.path}/fields`);
+      const response = await axiosInstance().get(`${routes.supportTicket.path}/fields?brand=${user?.user?.brand}`);
       data = response?.data?.data;
       const fieldsDataForCreate = data
         .filter((obj) => obj?.isCreate && obj?.fieldData?.sectionName !== 'Internal Information')
