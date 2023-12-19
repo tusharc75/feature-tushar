@@ -33,7 +33,7 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
 
   const fetchCategory = async () => {
     axiosInstance()
-      .get(`/dynamic-form`, {
+      .get(`/dynamic-form?sortBy=order&orderBy=asc`, {
         headers: {
           Resource: 'Iot Data Points Category'
         }
