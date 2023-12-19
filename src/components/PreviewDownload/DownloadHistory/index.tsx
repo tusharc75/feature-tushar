@@ -96,6 +96,7 @@ const DownloadHistory = ({ referenceId, resource, loadingType }) => {
                         <TableHead>
                             <TableRow>
                                 <TableCell>Date</TableCell>
+                                <TableCell>Pdf Type</TableCell>
                                 <TableCell>Status</TableCell>
                                 <TableCell>Actions</TableCell>
                             </TableRow>
@@ -104,6 +105,9 @@ const DownloadHistory = ({ referenceId, resource, loadingType }) => {
                             {historyData?.map((row) => (
                                 <TableRow key={row._id}>
                                     <TableCell>{moment(row?.createdBy?.date).format(dateTimeFormat)}</TableCell>
+                                    <TableCell>
+                                        <Typography variant="inherit">{row?.pdfType}</Typography>
+                                    </TableCell>
                                     <TableCell>
                                         <Typography variant="inherit">{row?.status}</Typography>
                                     </TableCell>
