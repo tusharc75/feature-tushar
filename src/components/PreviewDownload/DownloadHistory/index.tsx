@@ -96,7 +96,7 @@ const DownloadHistory = ({ referenceId, resource, loadingType }) => {
                         <TableHead>
                             <TableRow>
                                 <TableCell>Date</TableCell>
-                                <TableCell>Pdf Type</TableCell>
+                                <TableCell>Type</TableCell>
                                 <TableCell>Status</TableCell>
                                 <TableCell>Actions</TableCell>
                             </TableRow>
