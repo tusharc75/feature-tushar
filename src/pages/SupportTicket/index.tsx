@@ -83,7 +83,7 @@ const SupportTicket = () => {
 
   const fetchGridColumns = async () => {
     axiosInstance()
-      .get(`${routes.supportTicket.path}/fields`)
+      .get(`${routes.supportTicket.path}/fields?brand=${user?.user?.brand}`)
       .then(({ data: { data } }) => {
         const newColumns = generateColumns(renderedFrom, data, routes.supportTicketDetail.path, true);
         newColumns?.forEach((o) => {

@@ -127,23 +127,21 @@ const Leads = () => {
           </span>
         </HtmlTooltip>
         {hasPermissionToConvertInOpportunity && generateLeadToOpportunityButton(row?.original)}
-        <Box ml={1}>
-          <HtmlTooltip title={row?.original?.canDelete && !row?.original?.convertedToOpportunity ? "Delete" : deleteDisable}>
-            <span>
-              <IconButton
-                size="small"
-                aria-label="Delete"
-                disabled={row?.original?.canDelete && !row?.original?.convertedToOpportunity ? false : true}
-                onClick={() => {
-                  setDeleteRecord(row?.original);
-                  setIsConformDialogVisible(true);
-                }}
-              >
-                <DeleteIcon fontSize="small" color={row?.original?.canDelete && !row?.original?.convertedToOpportunity ? 'error' : 'disabled'} />
-              </IconButton>
-            </span>
-          </HtmlTooltip>
-        </Box>
+        <HtmlTooltip title={row?.original?.canDelete && !row?.original?.convertedToOpportunity ? "Delete" : deleteDisable}>
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              disabled={row?.original?.canDelete && !row?.original?.convertedToOpportunity ? false : true}
+              onClick={() => {
+                setDeleteRecord(row?.original);
+                setIsConformDialogVisible(true);
+              }}
+            >
+              <DeleteIcon fontSize="small" color={row?.original?.canDelete && !row?.original?.convertedToOpportunity ? 'error' : 'disabled'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
       </>
     )
   }
