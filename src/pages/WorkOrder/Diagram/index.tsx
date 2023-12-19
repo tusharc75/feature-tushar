@@ -13,7 +13,7 @@ import ManageAttachment from 'src/components/Activity/Attachments/ManageAttachme
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { ATTACHMENT_TYPE, CustomDialogTransition } from 'src/constants/helpers';
-import ViewImage from './ViewImage2';
+import ViewImage from './ViewImage';
 import { getFileIcon, getFileNameWithExtension } from './utils';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -150,8 +150,8 @@ const Diagram = ({ resource, referenceId, currentVersion }) => {
                     <div key={file._id} className="shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
                       <div
                         className={`head flex items-center justify-between cursor-pointer w-full p-[8px_15px] ${expended[file?._id]
-                            ? 'bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)] rounded-[4px_4px_0_0]'
-                            : 'bg-[var(--accordion-summary-bg,#fff)] rounded-[4px]'
+                          ? 'bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)] rounded-[4px_4px_0_0]'
+                          : 'bg-[var(--accordion-summary-bg,#fff)] rounded-[4px]'
                           }`}
                         onClick={() => {
                           setExpended((prev) => ({
