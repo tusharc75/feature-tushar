@@ -37,8 +37,12 @@ const ManageSupportTicket = ({ onClose, onSuccess, isClone = false, id = null })
       let data;
       const response = await axiosInstance().get(`${routes.supportTicket.path}/fields`);
       data = response?.data?.data;
-      const fieldsDataForCreate = data.filter((obj) => obj?.isCreate).map((d: any) => d?.fieldData);
-      const fieldsDataForUpdate = data.filter((obj) => obj?.isUpdate).map((d: any) => d?.fieldData);
+      const fieldsDataForCreate = data
+        .filter((obj) => obj?.isCreate && obj?.fieldData?.sectionName !== 'Internal Information')
+        .map((d: any) => d?.fieldData);
+      const fieldsDataForUpdate = data
+        .filter((obj) => obj?.isUpdate && obj?.fieldData?.sectionName !== 'Internal Information')
+        .map((d: any) => d?.fieldData);
 
       if (id) {
         axiosInstance()
@@ -96,7 +100,7 @@ const ManageSupportTicket = ({ onClose, onSuccess, isClone = false, id = null })
         });
     } else {
       axiosInstance()
-        .post(`/support-ticket`, values)
+        .post(`/support-ticket`, {...values, brand: user?.user?.brand})
         .then(({ data }) => {
           setLoading(false);
           onSuccess(data.data);

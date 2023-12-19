@@ -117,12 +117,13 @@ const ProductionOrderDetails = () => {
     axiosInstance()
       .get(`${routes.productionOrder.path}/${id}`)
       .then(({ data: { data } }) => {
-        setCurrentStep(getIndex(data?.processStatus, productionOrderProcessSteps));
+        const tempStepList = productionOrderSteps.filter((o) => o.name !== 'Loading Ticket')
+        setCurrentStep(getIndex(data?.processStatus, tempStepList));
         var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
         if (user?.role?.selectedEntity?.superAdminAccess) {
           isAllowedToEdit = true;
         }
-        setProductionOrderProcessSteps(productionOrderSteps.filter((o) => o.name !== 'Loading Ticket'));
+        setProductionOrderProcessSteps(tempStepList);
         // if (!data?.customerAccount) {
         //   setProductionOrderProcessSteps(productionOrderSteps.filter((o) => o.name !== 'Loading Ticket'));
         // }

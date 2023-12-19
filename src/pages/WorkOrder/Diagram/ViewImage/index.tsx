@@ -1,334 +1,220 @@
-import { Box, Button } from '@material-ui/core';
-import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { Stage, Layer, Rect } from 'react-konva';
-import CustomImage from './CustomImage';
-import { useAppTheme } from 'src/constants/AppConfig';
-import CustomText from './CustomText';
+import { useContext, useEffect, useRef, useState } from 'react';
+import { fabric } from 'fabric';
 import axiosInstance from 'src/axios/axiosInstance';
-import Loader from 'src/components/Loader';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { b64toBlob } from 'src/constants/helpers';
+import { Box, Button, FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
 import CustomButton from 'src/components/Helpers/CustomButton';
-import axios from 'axios';
+import { capitalize } from 'lodash';
+import DeleteButton from 'src/components/Helpers/DeleteButton';
 
-type TextType = {
-  fontSize: number;
-  fill: string;
-  text: string;
-  id: number;
-  isDragging: boolean;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-};
+fabric.IText.prototype.initHiddenTextarea = (function (initHiddenTextarea) {
+    return function () {
+        var result = initHiddenTextarea.apply(this);
+        fabric.document.body.removeChild(this.hiddenTextarea);
+        this.canvas.wrapperEl.appendChild(this.hiddenTextarea);
+        return result;
+    };
+})(fabric.IText.prototype.initHiddenTextarea);
+
+
+const COLOR_LIST = ['black', 'red', 'green', 'yellow', 'blue']
 
 const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
-  const toastConfig = useContext(CustomToastContext);
-  const [themeColor] = useAppTheme();
-  const stageRef = useRef(null);
-  const layerRef = useRef(null);
-  const editingTextRef = useRef(null);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
-  const [imageState, setImageState] = useState(null);
-  const [texts, setTexts] = useState<TextType[]>([]);
-  const [selectedText, selectText] = useState(null);
-  const [editingText, setEditingText] = useState<TextType>(null);
-  const [transformImage, setTransformImage] = useState(false);
-  const [url, setUrl] = useState();
-  const [widthHeight, setWidthHeight] = useState({
-    width: window.innerWidth - 700,
-    height: window.innerHeight - 250
-  });
-  const [loading, setLoading] = useState(true);
-  const [isSubmitting, setSubmitting] = useState(false);
 
-  const containerRef = useRef<HTMLDivElement>(null);
+    const toastConfig = useContext(CustomToastContext);
+    const [canvas, setCanvas] = useState(null);
+    const canvasRef = useRef(null);
+    const [isSubmitting, setSubmitting] = useState(false);
 
-  const stageColor = useMemo(() => {
-    if (themeColor === 'light') {
-      return 'white';
-    } else {
-      return '#0e0e23';
-    }
-  }, [themeColor]);
+    const [selectedObject, setSelectedObject] = useState(null);
 
-  const textColor = useMemo(() => {
-    if (themeColor === 'light') {
-      return '#000';
-    } else {
-      return '#fff';
-    }
-  }, [themeColor]);
+    useEffect(() => {
+        const fabricCanvas = new fabric.Canvas(canvasRef.current, {
+            preserveObjectStacking: true,
+        });
+        fabric.Object.prototype.transparentCorners = false;
+        fabric.Object.prototype.cornerStyle = 'circle';
+        fabricCanvas.on({
+            'selection:updated': onObjectSelected,
+            'selection:created': onObjectSelected,
+            'selection:cleared': onObjectSelected
+        });
+        setCanvas(fabricCanvas);
+        loadImage(fabricCanvas);
+        return () => fabricCanvas.dispose();
+    }, [data]);
 
-  const getImageScale = (url: string, canvasSize: { width: number; height: number }, maxSize: number | false = 400) => {
-    const image = new Image();
-    image.src = url;
-    image.onload = function () {
-      scaleToFit(this);
+    const loadImage = (fabricCanvas) => {
+        axiosInstance()
+            .get('/user/download?fileName=' + data?.url, {
+                responseType: 'blob'
+            })
+            .then(({ data }) => {
+                const imageType = 'image/png'; // or 'image/png'
+                const file = new Blob([data], { type: imageType });
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onloadend = function () {
+                    fabric.Image.fromURL(reader.result, (img) => {
+                        fabricCanvas.setDimensions({ width: img.width, height: img.height });
+                        fabricCanvas.setBackgroundImage(img, fabricCanvas.renderAll.bind(fabricCanvas));
+                    });
+                };
+            })
+            .catch((err) => {
+                toastConfig.setToastConfig(err);
+            });
     };
-    function scaleToFit(img) {
-      let scale = 0;
-      if (maxSize) {
-        scale = Math.min(canvasSize.width / img.width, canvasSize.height / img.height, maxSize / img.height, maxSize / img.width);
-      } else {
-        scale = Math.min(canvasSize.width / img.width, canvasSize.height / img.height);
-      }
 
-      const imgWidth = img.width * scale;
-      const imgHeight = img.height * scale;
-
-      // get the top left position of the image
-      const x = canvasSize.width / 2 - imgWidth / 2;
-      const y = canvasSize.height / 2 - imgHeight / 2;
-
-      setImageState({
-        name: data?.name,
-        x,
-        y,
-        isDragging: false,
-        width: imgWidth,
-        height: imgHeight
-      });
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    setLoading(true);
-    const source = axios.CancelToken.source();
-
-    // setImageState({
-    //   name: data?.name,
-    //   x: 0,
-    //   y: 0,
-    //   isDragging: false,
-    //   width: widthHeight.width + 20,
-    //   height: widthHeight.height + 48
-    // });
-    axiosInstance()
-      .get('/user/download?fileName=' + data?.url, {
-        responseType: 'blob',
-        cancelToken: source.token
-      })
-      .then(({ data }) => {
-        const file = new Blob([data], { type: 'application/pdf' });
-        var reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onloadend = function () {
-          let base64data: any = reader.result;
-          setUrl(base64data);
-          getImageScale(base64data, widthHeight, false);
-          setLoading(false);
-        };
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
-
-    return () => {
-      source.cancel();
+    const handleAddText = () => {
+        const id = new Date().getMilliseconds();
+        const newText = new fabric.IText('New Text', {
+            left: 100,
+            top: 100,
+            fill: 'black',
+            id: id,
+            editable: true,
+        });
+        canvas.add(newText);
     };
-  }, [data?.url]);
 
-  useEffect(() => {
-    if (!layerRef.current) return;
-    layerRef.current.getCanvas()._canvas.id = 'canvas_layer';
-  }, [layerRef.current]);
+    const handleAddLine = () => {
+        const id = new Date().getMilliseconds();
+        const newLine = new fabric.Line([50, 100, 200, 200], {
+            left: 100,
+            top: 100,
+            stroke: 'black',
+            id: id,
+        });
+        canvas.add(newLine);
+    };
 
-  const handleAddText = () => {
-    const defaultTextConfig = { fontSize: 16, fill: 'black', text: '', id: 1, isDragging: false, x: 50, y: 80, width: 100, height: 20 };
-    setTexts((state) => {
-      return [...state, { ...defaultTextConfig, id: texts.length + 1, text: `New Text - ${state.length + 1}` }];
-    });
-  };
-
-  const watchContainerSize = React.useCallback(() => {
-    if (containerRef.current) {
-      setWidthHeight({
-        width: containerRef.current.clientWidth,
-        height: containerRef.current.clientHeight - 38
-      });
+    const handleRemove = () => {
+        canvas.remove(selectedObject);
     }
-  }, []);
 
-  useEffect(() => {
-    watchContainerSize();
-    window.addEventListener('resize', watchContainerSize);
-    return () => window.removeEventListener('resize', watchContainerSize);
-  }, [watchContainerSize]);
+    const handleSave = async () => {
+        setSubmitting(true);
+        const imgURL = canvas.toDataURL();
+        const blob: any = b64toBlob(imgURL);
+        const type = `image/${data?.url?.split('.')[1]}`;
+        const file: any = new File([blob], data?.name, { type });
+        let formData = new FormData();
+        formData.append('file', file);
+        const res = await axiosInstance().post('/user/upload', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        axiosInstance()
+            .put(`/attachment/replace/${data?.attachmentId}`, { oldUrl: data?.url, url: res?.data?.fileName })
+            .then(({ data }) => {
+                setSelectedAttachment(null);
+                fetchData();
+                setSubmitting(false);
+            })
+            .catch((err) => {
+                toastConfig.setToastConfig(err);
+                setSubmitting(false);
+            });
+    };
 
-  const handleSave = async () => {
-    setSubmitting(true);
-    const canvasElement: any = document.getElementById('canvas_layer');
-    const imgURL = canvasElement?.toDataURL();
-    const blob: any = b64toBlob(imgURL);
-    const type = `image/${data?.url?.split('.')[1]}`;
-    const file: any = new File([blob], data?.name, { type });
-    let formData = new FormData();
-    formData.append('file', file);
-    const res = await axiosInstance().post('/user/upload', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
-    axiosInstance()
-      .put(`/attachment/replace/${data?.attachmentId}`, { oldUrl: data?.url, url: res?.data?.fileName })
-      .then(({ data }) => {
-        setTexts([]);
-        setSelectedAttachment(null);
-        fetchData();
-        setSubmitting(false);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        setSubmitting(false);
-      });
-  };
+    const handleDownload = () => {
+        const imgURL = canvas.toDataURL();
+        const link = document.createElement('a');
+        link.href = imgURL;
+        link.setAttribute('download', data?.url);
+        document.body.appendChild(link);
+        link.click();
+    }
 
-  return (
-    <div className="absolute inset-2" ref={containerRef}>
-      <Box mb={1} display="flex" justifyContent="space-between" alignItems="center">
+    const onObjectSelected = (obj) => {
+        if (obj.selected && obj.selected?.length) {
+            setSelectedObject(obj.selected[0])
+        }
+        else {
+            setSelectedObject(null)
+        }
+    }
+
+    return (
         <Box>
-          <Button size="small" variant="outlined" color="primary" onClick={handleAddText}>
-            Add Text
-          </Button>
-          {selectedText && !editingText && (
-            <Button
-              size="small"
-              variant="outlined"
-              color="primary"
-              onClick={() => {
-                setTexts((state) => state.filter((s) => s.id !== selectedText));
-                if (selectedText) selectText(null);
-                if (editingText) setEditingText(null);
-                if (!editingTextRef) {
-                  editingTextRef.current.textRef.show();
-                  editingTextRef.current.transformRef.show();
-                  editingTextRef.current.transformRef.forceUpdate();
-                  editingTextRef.current = null;
-                }
-              }}
-            >
-              Remove Text
-            </Button>
-          )}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className={'flex gap-2 w-full'}>
+                    <Button
+                        variant="outlined"
+                        color="primary"
+                        size="small"
+                        onClick={handleAddText}
+                    >
+                        Add Text
+                    </Button>
+                    <Button
+                        variant="outlined"
+                        color="primary"
+                        size="small"
+                        onClick={handleAddLine}
+                    >
+                        Add Line
+                    </Button>
+                    {selectedObject &&
+                        <Box>
+                            <FormControl size="small" variant="outlined" style={{ width: 120 }} >
+                                <InputLabel margin="dense" id="demo-simple-select-outlined-label">Color</InputLabel>
+                                <Select
+                                    labelId="demo-simple-select-outlined-label"
+                                    id="demo-simple-select-outlined"
+                                    margin="dense"
+                                    label="Color"
+                                    value={canvas.getActiveObject().get('type') === 'line' ? canvas.getActiveObject().get("stroke") :
+                                        canvas.getActiveObject().get("fill")}
+                                    name="color"
+                                    onChange={(event: any) => {
+                                        if (canvas.getActiveObject().get('type') === 'line') {
+                                            canvas.getActiveObject().set("stroke", event.target.value);
+                                        }
+                                        else {
+                                            canvas.getActiveObject().set("fill", event.target.value);
+                                        }
+                                        canvas.renderAll();
+                                    }}
+                                >
+                                    {COLOR_LIST.map((color, index) => (
+                                        <MenuItem key={index} value={color}>
+                                            {capitalize(color)}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                            <DeleteButton text="Remove" size='small' onClick={handleRemove} />
+                        </Box>
+                    }
+                </div>
+                <div className="flex flex-wrap gap-[8px]  justify-end">
+                    <CustomButton
+                        disabled={isSubmitting}
+                        loading={isSubmitting}
+                        variant="contained"
+                        color="primary"
+                        type="submit"
+                        onClick={(e) => {
+                            handleSave();
+                        }}
+                    >
+                        Save
+                    </CustomButton>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        onClick={handleDownload}
+                    >
+                        Download
+                    </Button>
+                </div>
+            </div>
+            <canvas ref={canvasRef} />
         </Box>
-        {texts?.length > 0 && (
-          <CustomButton
-            disabled={isSubmitting}
-            loading={isSubmitting}
-            variant="contained"
-            color="primary"
-            type="submit"
-            onClick={(e) => {
-              handleSave();
-            }}
-          >
-            Save
-          </CustomButton>
-        )}
-      </Box>
-      {!loading ? (
-        <Stage
-          ref={(node) => {
-            stageRef.current = node;
-          }}
-          style={{ backgroundColor: 'transparent' }}
-          width={widthHeight.width}
-          height={widthHeight.height}
-          onClick={(e) => {
-            if (!e.target.attrs.hasOwnProperty('id') || e.target.attrs.id !== 'image') {
-              setTransformImage(false);
-            }
-            if ((!e.target.attrs.hasOwnProperty('id') || e.target.attrs.id !== 'canvasText') && !editingText) {
-              selectText(null);
-              setEditingText(null);
-              if (editingTextRef.current) {
-                editingTextRef.current.textRef.show();
-                editingTextRef.current.transformRef.show();
-                editingTextRef.current.transformRef.forceUpdate();
-                editingTextRef.current = null;
-              }
-            }
-          }}
-        >
-          <Layer ref={layerRef}>
-            <Rect x={0} y={0} width={stageRef.current?.width()} height={stageRef.current?.height()} fill={stageColor} />
-            {imageState && (
-              <CustomImage
-                url={url}
-                setImageState={setImageState}
-                imageState={imageState}
-                transformImage={transformImage}
-                onTransformImage={() => {
-                  setTransformImage(true);
-                }}
-                textProps={{
-                  fill: textColor
-                }}
-              />
-            )}
-            {texts.length > 0 &&
-              texts?.map((text) => (
-                <CustomText
-                  fill={textColor}
-                  key={text.id}
-                  onSelect={() => selectText(text.id)}
-                  onEdit={() => setEditingText(text)}
-                  textState={text}
-                  setTextState={setTexts}
-                  selectedId={selectedText === text.id}
-                  editingText={editingText}
-                  editingTextRef={editingTextRef}
-                />
-              ))}
-          </Layer>
-        </Stage>
-      ) : (
-        <Loader style={{ minHeight: 500 }} text="Loading..." />
-      )}
-      {editingText && (
-        <textarea
-          autoFocus
-          ref={inputRef}
-          style={{
-            position: 'absolute',
-            top: `${stageRef.current?.container().offsetTop + editingText.y}px`,
-            left: `${stageRef.current?.container().offsetLeft + editingText.x}px`,
-            width: editingText.width,
-            overflow: 'hidden',
-            resize: 'none',
-            outline: 'none',
-            border: 'none',
-            margin: 0,
-            padding: 0,
-            fontSize: editingText.fontSize,
-            background: 'none',
-            color: editingText.fill
-          }}
-          onKeyDown={(e) => {
-            if (e?.keyCode === 13) {
-              setTexts((state) =>
-                state.map((s) => ({
-                  ...s,
-                  text: editingText.id === s.id ? editingText.text : s.text
-                }))
-              );
-              setEditingText(null);
-              editingTextRef.current.textRef.show();
-              editingTextRef.current.transformRef.show();
-              editingTextRef.current.transformRef.forceUpdate();
-              editingTextRef.current = null;
-            }
-          }}
-          value={editingText.text}
-          onChange={(e) => {
-            const val = e.target.value;
-            setEditingText((pState) => ({ ...pState, text: val }));
-          }}
-        />
-      )}
-    </div>
-  );
+    );
 };
 
 export default ViewImage;

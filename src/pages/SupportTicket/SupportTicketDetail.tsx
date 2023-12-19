@@ -48,7 +48,7 @@ const SupportTicketDetail = () => {
     axiosInstance()
       .get(`${routes.supportTicket.path}/fields`)
       .then(({ data: { data } }) => {
-        setFields(data?.filter((field) => field.isRead));
+        setFields(data?.filter((field) => field.isRead && field?.fieldData?.sectionName !== 'Internal Information'));
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);

@@ -292,6 +292,24 @@ const CustomReactTable = ({
     const updatedData = flattenArray(data)?.find((row) => row?._id === currentEditingCellPosition.rowId);
     updatedData[currentEditingCellPosition.columnName] = cellValue;
     const inputField = { [`${currentEditingCellPosition.columnName}`]: cellValue };
+
+    const updateData = (data: any[], rowId: string) => {
+      const newData = [];
+      for (const row of data) {
+        if (row._id === currentEditingCellPosition.rowId) {
+          newData.push(updatedData);
+        } else {
+          newData.push(row);
+        }
+        if (row.subRows?.length) {
+          row['subRows'] = updateData(row.subRows, rowId);
+        }
+      }
+      return newData;
+    };
+    // Optimistic update before api call
+    dispatch({ type: 'initialize', data: updateData(data, currentEditingCellPosition.rowId), count: rowCount });
+
     if (onSaveEdit && ![undefined, null].includes(cellValue)) {
       onSaveEdit(inputField, updatedData);
     }
@@ -535,7 +553,7 @@ const CustomReactTable = ({
               isClientSideGrid={isClientSideGrid}
             />
           ) : null}
-          {(!isClientSideGrid || data.length > 25) && (
+          {(!isClientSideGrid || data?.length > 25) && (
             <Pagination
               count={isClientSideGrid ? table.getExpandedRowModel().rows.length : rowCount ?? data.length}
               page={page}
