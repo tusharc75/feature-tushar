@@ -81,7 +81,7 @@ export const useCreateColumns = ({
         </div>
       )
     };
-  }, [allRows.length > 0]);
+  }, [allRows?.length > 0]);
 
   const selectionColumn = useMemo(
     () => ({
