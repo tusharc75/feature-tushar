@@ -308,8 +308,8 @@ const CustomReactTable = ({
       return newData;
     };
     // Optimistic update before api call
-    dispatch({ type: 'initialize', data: updateData(data, currentEditingCellPosition.rowId), rowCount: rowCount });
-    
+    dispatch({ type: 'initialize', data: updateData(data, currentEditingCellPosition.rowId), count: rowCount });
+
     if (onSaveEdit && ![undefined, null].includes(cellValue)) {
       onSaveEdit(inputField, updatedData);
     }
