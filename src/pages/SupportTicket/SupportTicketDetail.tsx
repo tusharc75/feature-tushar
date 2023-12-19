@@ -46,7 +46,7 @@ const SupportTicketDetail = () => {
 
   const fetchFields = async () => {
     axiosInstance()
-      .get(`${routes.supportTicket.path}/fields`)
+      .get(`${routes.supportTicket.path}/fields?brand=${user?.user?.brand}`)
       .then(({ data: { data } }) => {
         setFields(data?.filter((field) => field.isRead && field?.fieldData?.sectionName !== 'Internal Information'));
       })
