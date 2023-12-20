@@ -5,13 +5,7 @@ import { useHistory, Link } from 'react-router-dom';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import CustomReactTable, {
-  checkStaticField,
-  getStaticFields,
-  gridFilterParser,
-  useColumns,
-  useTableReducer
-} from 'src/components/CustomReactTable';
+import CustomReactTable, { checkStaticField, getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import routes from 'src/components/Helpers/Routes';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
@@ -108,9 +102,7 @@ const RentalManagement = () => {
       width: 100,
       disableFilters: true,
       disableSortBy: true,
-      Cell: ({ row }) => <div>
-        {row?.original?.subleaseAssets ? 'Yes' : 'No'}
-      </div>
+      Cell: ({ row }) => <div>{row?.original?.subleaseAssets ? 'Yes' : 'No'}</div>
     }
   ];
 
@@ -150,13 +142,15 @@ const RentalManagement = () => {
 
     let newColumns = generateColumns(renderedFrom, data, routes.rentalManagementDetail.path, true);
 
-    newColumns?.forEach(o => {
-      if(o.accessor === 'rentalJobName'){
-        o.cell= ({ row }) => (
+    newColumns?.forEach((o) => {
+      if (o.accessor === 'rentalJobName') {
+        o.cell = ({ row }) => (
           <div>
-            <Link className="link text-truncate"
+            <Link
+              className="link text-truncate"
               title={row?.original?.rentalJobName}
-              to={`${routes.rentalManagement.path}/detail/${row?.original?._id}`}>
+              to={`${routes.rentalManagement.path}/detail/${row?.original?._id}`}
+            >
               {row?.original?.rentalJobName}
             </Link>
             {row?.original?.assetsNotReceivedInPo && (
@@ -167,8 +161,8 @@ const RentalManagement = () => {
               </Box>
             )}
           </div>
-        )
-      } else{
+        );
+      } else {
         if (isOffline) {
           o['disableFilters'] = true;
           o['disableSortBy'] = true;
@@ -296,9 +290,10 @@ const RentalManagement = () => {
     } catch (error) {
       toastConfig.setToastConfig(error);
     } finally {
-      setTimeout(() => {
+      const timeout = setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
       }, gridLoadingTimeout);
+      return () => clearTimeout(timeout);
     }
   };
 
@@ -608,8 +603,9 @@ const RentalManagement = () => {
         {singleRentalManagementDelete.show && (
           <ConfirmationDialog
             open={singleRentalManagementDelete.show}
-            message={`Are you sure you want to delete this ${routes.rentalManagement.title.toLowerCase()} ${singleRentalManagementDelete ? (singleRentalManagementDelete?.id ? singleRentalManagementDelete?.rentalJobName : '') : ''
-              }?`}
+            message={`Are you sure you want to delete this ${routes.rentalManagement.title.toLowerCase()} ${
+              singleRentalManagementDelete ? (singleRentalManagementDelete?.id ? singleRentalManagementDelete?.rentalJobName : '') : ''
+            }?`}
             onClose={() =>
               setSingleRentalManagementDelete({
                 id: null,
