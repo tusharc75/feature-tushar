@@ -3,9 +3,8 @@ import { fabric } from 'fabric';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { b64toBlob } from 'src/constants/helpers';
-import { Box, Button, FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
+import { Box, Button, FormControl } from '@material-ui/core';
 import CustomButton from 'src/components/Helpers/CustomButton';
-import { capitalize } from 'lodash';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 
 fabric.IText.prototype.initHiddenTextarea = (function (initHiddenTextarea) {
@@ -17,15 +16,14 @@ fabric.IText.prototype.initHiddenTextarea = (function (initHiddenTextarea) {
   };
 })(fabric.IText.prototype.initHiddenTextarea);
 
-const COLOR_LIST = ['black', 'red', 'green', 'yellow', 'blue'];
-
 const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
   const toastConfig = useContext(CustomToastContext);
   const [canvas, setCanvas] = useState(null);
   const canvasRef = useRef(null);
   const [isSubmitting, setSubmitting] = useState(false);
-
+  const [loading, setLoading] = useState(false);
   const [selectedObject, setSelectedObject] = useState(null);
+  const [isDrawingMode, setIsDrawingMode] = useState(false);
 
   useEffect(() => {
     const fabricCanvas = new fabric.Canvas(canvasRef.current, {
@@ -44,6 +42,7 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
   }, [data]);
 
   const loadImage = (fabricCanvas) => {
+    setLoading(true);
     axiosInstance()
       .get('/user/download?fileName=' + data?.url, {
         responseType: 'blob'
@@ -57,11 +56,13 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
           fabric.Image.fromURL(reader.result, (img) => {
             fabricCanvas.setDimensions({ width: img.width, height: img.height });
             fabricCanvas.setBackgroundImage(img, fabricCanvas.renderAll.bind(fabricCanvas));
+            setLoading(false);
           });
         };
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
+        setLoading(false);
       });
   };
 
@@ -88,8 +89,42 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
     canvas.add(newLine);
   };
 
+  const handleAddRectangle = () => {
+    const id = new Date().getMilliseconds();
+    const newRectangle = new fabric.Rect({
+      left: 100,
+      top: 100,
+      fill: 'black',
+      id: id,
+      width: 50,
+      height: 50
+    });
+    canvas.add(newRectangle);
+  };
+
+  const handleAddCircle = () => {
+    const id = new Date().getMilliseconds();
+    const newCircle = new fabric.Circle({
+      left: 100,
+      top: 100,
+      fill: 'black',
+      id: id,
+      radius: 20
+    });
+    canvas.add(newCircle);
+  };
+
+
   const handleRemove = () => {
-    canvas.remove(selectedObject);
+    const activeObject = canvas.getActiveObject();
+    if (activeObject.type === 'activeSelection') {
+      activeObject.forEachObject((obj) => {
+        canvas.remove(obj);
+      });
+    } else {
+      canvas.remove(activeObject);
+    }
+    canvas.discardActiveObject();
   };
 
   const handleSave = async () => {
@@ -133,53 +168,98 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
     }
   };
 
+  const handleColorChange = (event) => {
+    const newColor = event.target.value;
+    const activeObject = canvas.getActiveObject();
+
+    if (activeObject) {
+      if (activeObject.type === 'activeSelection') {
+        activeObject.forEachObject((obj) => {
+          if (obj.type === 'line' || obj.type === 'path') {
+            obj.set('stroke', newColor);
+          } else {
+            obj.set('fill', newColor);
+          }
+        });
+      } else {
+        if (activeObject.type === 'line' || activeObject.type === 'path') {
+          activeObject.set('stroke', newColor);
+        } else {
+          activeObject.set('fill', newColor);
+        }
+      }
+      canvas.requestRenderAll(); // Re-render the canvas to show the color change
+    }
+  }
+
+  const getSelectedColor = () => {
+    const activeObject = canvas.getActiveObject();
+    if (!activeObject) {
+      return null;
+    }
+
+    if (activeObject.type === 'activeSelection') {
+      const objects = activeObject.getObjects();
+      if (objects.length === 0) return null;
+      return objects[0].type === 'line' || objects[0].type === 'path' ? objects[0].stroke : objects[0].fill;
+    } else {
+      return activeObject.type === 'line' || activeObject.type === 'path' ? activeObject.stroke : activeObject.fill;
+    }
+  };
+
+  const toggleDrawingMode = () => {
+    setIsDrawingMode(!isDrawingMode);
+    if (!isDrawingMode) {
+      canvas.isDrawingMode = true;
+      setCanvas(canvas);
+    } else {
+      canvas.isDrawingMode = false;
+      setCanvas(canvas);
+    }
+  };
+
   return (
     <Box>
       <div className="flex flex-wrap items-center justify-between gap-2 min-h-[40px] my-2">
         <div className={'flex gap-2 flex-wrap'}>
-          <Button variant="outlined" color="primary" size="small" onClick={handleAddText}>
+          <Button disabled={loading || isDrawingMode} variant="outlined" color="primary" size="small" onClick={handleAddText}>
             Add Text
           </Button>
-          <Button variant="outlined" color="primary" size="small" onClick={handleAddLine}>
+          <Button disabled={loading || isDrawingMode} variant="outlined" color="primary" size="small" onClick={handleAddLine}>
             Add Line
+          </Button>
+          <Button disabled={loading || isDrawingMode} variant="outlined" color="primary" size="small" onClick={handleAddRectangle}>
+            Add Rectangle
+          </Button>
+          <Button disabled={loading || isDrawingMode} variant="outlined" color="primary" size="small" onClick={handleAddCircle}>
+            Add Circle
+          </Button>
+          <Button
+            disabled={loading}
+            variant="outlined"
+            color="primary"
+            size="small"
+            onClick={toggleDrawingMode}
+          >
+            {isDrawingMode ? 'Exit Drawing Mode' : 'Enter Drawing Mode'}
           </Button>
         </div>
         {selectedObject && (
           <Box className="flex items-center gap-2">
-            <FormControl size="small" margin='none' variant="outlined" style={{ width: 120 }}>
-              <InputLabel margin="dense" id="demo-simple-select-outlined-label">
-                Color
-              </InputLabel>
-              <Select
-                labelId="demo-simple-select-outlined-label"
-                id="demo-simple-select-outlined"
-                label="Color"
-                value={
-                  canvas.getActiveObject().get('type') === 'line' ? canvas.getActiveObject().get('stroke') : canvas.getActiveObject().get('fill')
-                }
-                name="color"
-                onChange={(event: any) => {
-                  if (canvas.getActiveObject().get('type') === 'line') {
-                    canvas.getActiveObject().set('stroke', event.target.value);
-                  } else {
-                    canvas.getActiveObject().set('fill', event.target.value);
-                  }
-                  canvas.renderAll();
-                }}
-              >
-                {COLOR_LIST.map((color, index) => (
-                  <MenuItem key={index} value={color}>
-                    {capitalize(color)}
-                  </MenuItem>
-                ))}
-              </Select>
+            <FormControl size="small" margin='none' variant="outlined">
+              <input
+                type="color"
+                value={getSelectedColor()}
+                onChange={handleColorChange}
+                style={{ marginLeft: '10px' }}
+              />
             </FormControl>
             <DeleteButton mode='light' text="Remove" size="small" onClick={handleRemove} />
           </Box>
         )}
         <div className="flex flex-wrap gap-2 items-center">
           <CustomButton
-            disabled={isSubmitting}
+            disabled={isSubmitting || loading}
             loading={isSubmitting}
             variant="contained"
             color="primary"
@@ -190,7 +270,7 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
           >
             Save
           </CustomButton>
-          <Button variant="contained" color="primary" size="small" onClick={handleDownload}>
+          <Button disabled={loading} variant="contained" color="primary" size="small" onClick={handleDownload}>
             Download
           </Button>
         </div>
