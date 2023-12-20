@@ -74,7 +74,7 @@ const ChatNotification = () => {
       .then(({ data: { data } }) => {
         setNotificationList(data);
 
-        const nData = { [tabOptions[0]]: data, [tabOptions[1]]: data.filter((d) => !d.read), [tabOptions[2]]: chatList };
+        const nData = { [tabOptions[0]]: data as any[], [tabOptions[1]]: data.filter((d) => !d.read) as any[], [tabOptions[2]]: chatList as any[] };
         setNotificationData(nData);
         notification.setCount(0);
       })
@@ -127,7 +127,7 @@ const ChatNotification = () => {
       axiosInstance()
         .put('/user/user-notification/read', {
           toggle: true,
-          notificationId: d.notificationId || d.userId || d._id
+          notificationId: d.notificationId || d._id
         })
         .then(() => {})
         .catch((error) => {

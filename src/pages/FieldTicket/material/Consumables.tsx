@@ -32,9 +32,12 @@ import ConsumablesQtyDialog from 'src/pages/WorkOrder/Consumables/ConsumablesQty
 import History from '../../ProductInventory/LedgerHistory';
 import QtyRequestLog from 'src/pages/WorkOrder/Consumables/QtyRequestLog';
 import { Add } from '@material-ui/icons';
-import { isEmpty } from 'lodash';
+import { camelCase, isEmpty } from 'lodash';
 
-const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom }) => {
+const Consumables = ({ allowedToEdit, services, fieldTicketData }) => {
+
+  const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Consumables`;
+
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState(null);
   const [allFields, setAllFields] = useState([]);
@@ -115,7 +118,17 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
       newColumns[qtyIndex].accessor = 'qtyDisplay';
     }
 
-    const column = [];
+    const column: any = [{
+      accessor: 'index',
+      Header: 'Index',
+      width: 70,
+      sticky: 'left',
+      cell: ({ row }) => <p className="text-truncate">{row?.original?.index}</p>,
+      Footer: () => {
+        return <>Total</>;
+      }
+    }];
+
     const {
       data: { data }
     } = await axiosInstance().put(`/field/find-field-labels`, {
@@ -136,19 +149,19 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
           disabled: true,
           sticky: isMobile || isTablet ? 'none' : 'left',
           primaryField: true,
-          Cell: ({ row, table }) => (
+          cell: ({ row, table }) => (
             <div style={{ display: 'flex', alignItems: 'center' }}>
               {!allowedToEdit ? (
-                <p>{row.original[e?.fieldName]}</p>
+                <p>{row?.original[e?.fieldName]}</p>
               ) : (
                 <p
                   onClick={() => {
                     openMaterial(row, table.getRowModel().rows)
                   }}
                   className="link text-truncate"
-                  title={row.original[e?.fieldName]}
+                  title={row?.original[e?.fieldName]}
                 >
-                  {row.original[e?.fieldName]}
+                  {row?.original[e?.fieldName]}
                 </p>
               )}
               <Box ml={1}>
@@ -169,7 +182,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
           accessor: e?.fieldName,
           Header: e?.fieldLabel,
           width: 200,
-          Cell: ({ row }) => {
+          cell: ({ row }) => {
             return row.original[e?.fieldName] ? <p className="text-truncate">{row.original[e?.fieldName]}</p> : <NoDataCell />;
           }
         });
@@ -181,7 +194,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
         accessor: 'service',
         Header: 'Service',
         width: 200,
-        Cell: ({ row }) => (
+        cell: ({ row }) => (
           row?.original?.service ? (
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <p> {row.original?.service}</p>
@@ -207,14 +220,14 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
         accessor: 'requestedQty',
         Header: 'Requested Qty',
         width: 150,
-        Cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
+        cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
       },
       {
         accessor: 'consumedQty',
         Header: 'Consumed Qty',
         primaryField: true,
         width: 150,
-        Cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
+        cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
       },
       {
         accessor: 'action',
@@ -225,7 +238,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
         disableFilters: true,
         disableSortBy: true,
         canDrag: false,
-        Cell: ({ row, table }: any) => (
+        cell: ({ row, table }: any) => (
           <>
             <HtmlTooltip title={allowedToEdit ? 'Edit' : ''}>
               <IconButton
@@ -287,20 +300,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
       }
     ];
 
-    setColumns([
-      {
-        accessor: 'index',
-        Header: 'Index',
-        width: 70,
-        sticky: 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row?.original?.index}</p>,
-        Footer: () => {
-          return <>Total</>;
-        }
-      },
-      ...column,
-      ...extracolumns
-    ]);
+    setColumns([...column, ...extracolumns]);
   };
 
   const fetchData = async () => {
@@ -640,7 +640,6 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
           allowedToEdit={allowedToEdit}
           fieldTicketData={fieldTicketData}
           selectedService={selectedServiceOption}
-          renderedFrom={`${renderedFrom}_technician`}
         />
       </TabPanel>
       {consumablesDialog && (
