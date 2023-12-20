@@ -592,7 +592,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
 
   const getAssetAssignedValues = (row) => {
     if (row?.original?.type === 'asset' || row?.original?.assetQty === 0) {
-      return ' N/A ';
+      return <div>N/A</div>;
     }
     // if (!row?.original?.serializedProduct && row?.original?.assetAssignedQty === 0) {
     //   return <p>---</p>;
