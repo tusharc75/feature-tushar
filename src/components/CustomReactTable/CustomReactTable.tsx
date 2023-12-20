@@ -477,7 +477,7 @@ const CustomReactTable = ({
 
   return (
     <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
-      <div className="react-table-v8 bg-[var(--dark-primary,_white)]">
+      <div className="react-table-v8 ">
         <div className="table-container-v1" style={{ position: 'relative' }}>
           <GridHeader
             resource={resource}
@@ -502,18 +502,6 @@ const CustomReactTable = ({
           />
           {!isMobileView && (
             <div className="relative">
-              {!loading && !error && rows.length === 0 && data && (
-                <>
-                  <Box
-                    style={{ height: `calc(${height ?? '100%'} - 60px)` }}
-                    className="w-full h-full absolute inset-0 top-[46px] flex justify-center items-center -z-10"
-                  >
-                    <div className=" px-10 py-5 rounded-lg text-center">
-                      <p>No data found</p>
-                    </div>
-                  </Box>
-                </>
-              )}
               <TableComponent
                 virtualization={virtualization}
                 state={state}
