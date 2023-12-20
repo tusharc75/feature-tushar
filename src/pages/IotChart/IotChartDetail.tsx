@@ -119,9 +119,9 @@ const IotChartDetail = () => {
             <Tab className={'tabLayout'} value={3} label={<div className="d-flex align-items-center tab-font">Alarms</div>} {...a11yProps(3)} />
             <Tab className={'tabLayout'} value={4} label={<div className="d-flex align-items-center tab-font">Status</div>} {...a11yProps(4)} />
           </Tabs>
-          {tabValue === 0 && <Current assetId={assetId} />}
+          {tabValue === 0 && <Current deviceTemplate={deviceTemplate} assetId={assetId} />}
           {/* {tabValue === 1 && <Analysis assetId={assetId} dataPoints={dataPoints} />} */}
-          {tabValue === 2 && <PerformanceAnalysis assetId={assetId} dataPoints={dataPoints} />}
+          {tabValue === 2 && <PerformanceAnalysis deviceTemplate={deviceTemplate} assetId={assetId} dataPoints={dataPoints} />}
           {tabValue === 3 && <Alarms deviceTemplate={deviceTemplate} assetId={assetId} />}
           {tabValue === 4 && <Status assetId={assetId} dataPoints={dataPoints} />}
         </Box>
