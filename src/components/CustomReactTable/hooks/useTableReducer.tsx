@@ -100,7 +100,7 @@ function reducer(state: TInitialState, action: TActios) {
 }
 
 const intialState = {
-  dataRows: [],
+  dataRows: null,
   rowCount: 0,
   loading: false,
   page: 0,
@@ -118,7 +118,7 @@ const intialState = {
 };
 
 export type TInitialState = {
-  dataRows: any[];
+  dataRows: any[] | null;
   rowCount: number;
   loading: boolean;
   page: number;

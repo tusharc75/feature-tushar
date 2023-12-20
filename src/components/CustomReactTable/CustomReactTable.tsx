@@ -333,7 +333,7 @@ const CustomReactTable = ({
   }, [searchQuery, setGlobalFilter]);
 
   const table = useReactTable({
-    data,
+    data: data || [],
     columns: newColumns,
     filterFns: {
       fuzzy: isClientSideGrid ? fuzzyFilter : serverFilter
@@ -502,7 +502,7 @@ const CustomReactTable = ({
           />
           {!isMobileView && (
             <div className="relative">
-              {!loading && !error && rows.length === 0 && (
+              {!loading && !error && rows.length === 0 && data && (
                 <>
                   <Box
                     style={{ height: `calc(${height ?? '100%'} - 60px)` }}
@@ -516,21 +516,19 @@ const CustomReactTable = ({
               )}
               <TableComponent
                 virtualization={virtualization}
-                {...{
-                  state,
-                  setWholeRowsCellColor,
-                  table,
-                  dispatch,
-                  setCellValue,
-                  submitInput,
-                  cellValue,
-                  resetField,
-                  isClientSideGrid,
-                  reorder,
-                  loading,
-                  error,
-                  height
-                }}
+                state={state}
+                setWholeRowsCellColor={setWholeRowsCellColor}
+                table={table}
+                dispatch={dispatch}
+                setCellValue={setCellValue}
+                submitInput={submitInput}
+                cellValue={cellValue}
+                resetField={resetField}
+                isClientSideGrid={isClientSideGrid}
+                reorder={reorder}
+                loading={loading}
+                error={error}
+                height={height}
               />
             </div>
           )}
