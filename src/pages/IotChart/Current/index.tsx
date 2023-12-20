@@ -11,7 +11,7 @@ import RefreshIcon from '@material-ui/icons/Refresh';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import SearchBox from 'src/components/Helpers/SearchBox';
 
-export default function Current({ assetId }) {
+export default function Current({ deviceTemplate, assetId }) {
   const toastConfig = useContext(CustomToastContext);
 
   const [errorData, setErrorData] = useState(null);
@@ -124,6 +124,7 @@ export default function Current({ assetId }) {
                         : currentData?.filter((e) => e?.fieldLabel?.toLowerCase()?.includes(searchValue?.trim()?.toLowerCase()))
                     }
                     assetId={assetId}
+                    deviceTemplate={deviceTemplate}
                   />
                 ))}
               </div>

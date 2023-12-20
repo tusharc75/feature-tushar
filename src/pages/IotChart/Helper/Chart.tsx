@@ -10,8 +10,8 @@ import FilterAlertModel from './FilterAlertModel';
 import { useAppTheme } from 'src/constants/AppConfig';
 import moment from 'moment';
 import { dateTimeFormat24Hours } from 'src/constants/helpers';
+import routes from 'src/components/Helpers/Routes';
 
- 
 const downloadIconHTML = `<div>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ico-download">
 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -20,16 +20,19 @@ const downloadIconHTML = `<div>
 </svg>
 <div/>
 `;
- 
-const Chart = ({ dateFilters, assetId, dataPoints }) => {
+
+const Chart = ({ deviceTemplate = null, dateFilters, assetId, dataPoints }) => {
   const toastConfig = useContext(CustomToastContext);
   const [chartData, setChartData] = useState(null);
   const [alert, setAlert] = useState(null);
+  const [alertOptions, setAlertOptions] = useState([]);
+  const [alarm, setalarm] = useState(null);
+  const [alarmOptions, setAlarmOptions] = useState([]);
   const [showHighLow, setShowHighLow] = useState(false);
   const [highLowData, setHighLowData] = useState([]);
   const [currentChartTheme, setCurrentChartTheme] = useState('light');
   const [themeColor] = useAppTheme();
- 
+
   const [options, setOptions] = useState<ApexOptions>({
     theme: {
       mode: 'light',
@@ -49,7 +52,7 @@ const Chart = ({ dateFilters, assetId, dataPoints }) => {
       },
       toolbar: {
         autoSelected: 'zoom',
-        tools:{
+        tools: {
           download: downloadIconHTML
         }
       }
@@ -69,7 +72,7 @@ const Chart = ({ dateFilters, assetId, dataPoints }) => {
     },
     xaxis: {
       type: 'datetime',
-      labels:{
+      labels: {
         datetimeUTC: false
       }
     },
@@ -100,13 +103,13 @@ const Chart = ({ dateFilters, assetId, dataPoints }) => {
       points: []
     }
   });
- 
+
   useEffect(() => {
     if (!isEmpty(dataPoints)) {
       fetchData();
     }
   }, [assetId, dataPoints, dateFilters]);
- 
+
   useEffect(() => {
     let data = highLowData;
     if (!showHighLow) data = [];
@@ -118,7 +121,7 @@ const Chart = ({ dateFilters, assetId, dataPoints }) => {
       }
     });
   }, [showHighLow]);
- 
+
   useEffect(() => {
     setOptions((prevOptions) => {
       const newOptions = { ...prevOptions };
@@ -132,7 +135,7 @@ const Chart = ({ dateFilters, assetId, dataPoints }) => {
     });
     setCurrentChartTheme(themeColor);
   }, [themeColor]);
- 
+
   const fetchData = () => {
     let api = `/report/iot/data-points`;
     let param = {
@@ -189,15 +192,52 @@ const Chart = ({ dateFilters, assetId, dataPoints }) => {
         toastConfig.setToastConfig(error);
       });
   };
- 
+
+  useEffect(() => {
+    if (deviceTemplate && chartData) {
+      const query = [{ field: 'deviceTemplate', term: deviceTemplate }];
+      const deepFilter = [
+        { field: 'active', term: 'yes' },
+        { field: 'alarm', term: 'yes' }
+      ];
+      axiosInstance()
+        .get(`${routes.iotDataPoints.path}?filterById=${JSON.stringify(query)}&deepFilter=${JSON.stringify(deepFilter)}&filterType=and`)
+        .then(({ data: { data } }) => {
+          setAlarmOptions(
+            data?.data?.map((d) => ({
+              optionValue: d?._id,
+              optionLabel: d?.fieldLabel
+            })) || []
+          );
+        });
+
+      axiosInstance()
+        .get(`${routes?.deviceTemplateAlert?.path}?filterById=${JSON.stringify(query)}&filterType=and`)
+        .then(({ data: { data } }) => {
+          setAlertOptions(data?.map((d) => d?.alertNumber));
+        });
+    }
+  }, [assetId, deviceTemplate, chartData]);
+
   const fetchAlert = () => {
-    if (alert) {
-      let api = `/report/iot/asset-error-message?asset=${assetId}&from_date=${new Date(dateFilters.from).toISOString()}&to_date=${new Date(
+    if (alarm) {
+      let api = `/report/iot/alerts?asset=${assetId}&from_date=${new Date(dateFilters.from).toISOString()}&to_date=${new Date(
         dateFilters.to
       ).toISOString()}`;
-      if (alert?.optionValue !== 'All') {
-        api = `${api}&deviceTemplateAlert=${alert?.optionValue}`;
+
+      if (alarm) {
+        let dataPoints = alarm?.optionValue;
+        if (alarm?.optionValue === 'All') {
+          console.log('aaaaaaaaaaaa', alarmOptions);
+          dataPoints = alarmOptions?.map((alarm) => alarm?.optionValue)?.toString();
+        }
+        api = api + `&dataPoints=${dataPoints}`;
       }
+
+      if (alert) {
+        api = api + `&fieldValue=${alert}`;
+      }
+
       axiosInstance()
         .get(api)
         .then(({ data: { data } }) => {
@@ -262,20 +302,23 @@ const Chart = ({ dateFilters, assetId, dataPoints }) => {
       });
     }
   };
- 
+
   useEffect(() => {
     fetchAlert();
-  }, [alert, assetId, dateFilters]);
- 
+  }, [alert, alarm, assetId, dateFilters]);
+
   return (
     <>
       {' '}
       {chartData ? (
         <>
           <FilterAlertModel
-            assetId={assetId}
+            alertOptions={alertOptions}
             selectedAlert={alert}
             setSelectedAlert={setAlert}
+            alarmOptions={alarmOptions}
+            selectedAlarm={alarm}
+            setSelectedAlarm={setalarm}
             showHighLow={showHighLow}
             setShowHighLow={setShowHighLow}
           />
@@ -289,6 +332,5 @@ const Chart = ({ dateFilters, assetId, dataPoints }) => {
     </>
   );
 };
- 
+
 export default Chart;
- 
