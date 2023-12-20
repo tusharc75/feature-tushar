@@ -3,9 +3,8 @@ import { fabric } from 'fabric';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { b64toBlob } from 'src/constants/helpers';
-import { Box, Button, FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
+import { Box, Button, FormControl } from '@material-ui/core';
 import CustomButton from 'src/components/Helpers/CustomButton';
-import { capitalize } from 'lodash';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 
 fabric.IText.prototype.initHiddenTextarea = (function (initHiddenTextarea) {
@@ -16,8 +15,6 @@ fabric.IText.prototype.initHiddenTextarea = (function (initHiddenTextarea) {
     return result;
   };
 })(fabric.IText.prototype.initHiddenTextarea);
-
-const COLOR_LIST = ['black', 'red', 'green', 'yellow', 'blue'];
 
 const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -91,6 +88,32 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
     });
     canvas.add(newLine);
   };
+
+  const handleAddRectangle = () => {
+    const id = new Date().getMilliseconds();
+    const newRectangle = new fabric.Rect({
+      left: 100,
+      top: 100,
+      fill: 'black',
+      id: id,
+      width: 50,
+      height: 50
+    });
+    canvas.add(newRectangle);
+  };
+
+  const handleAddCircle = () => {
+    const id = new Date().getMilliseconds();
+    const newCircle = new fabric.Circle({
+      left: 100,
+      top: 100,
+      fill: 'black',
+      id: id,
+      radius: 20
+    });
+    canvas.add(newCircle);
+  };
+
 
   const handleRemove = () => {
     const activeObject = canvas.getActiveObject();
@@ -169,14 +192,26 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
     }
   }
 
+  const getSelectedColor = () => {
+    const activeObject = canvas.getActiveObject();
+    if (!activeObject) {
+      return null;
+    }
+
+    if (activeObject.type === 'activeSelection') {
+      const objects = activeObject.getObjects();
+      if (objects.length === 0) return null;
+      return objects[0].type === 'line' || objects[0].type === 'path' ? objects[0].stroke : objects[0].fill;
+    } else {
+      return activeObject.type === 'line' || activeObject.type === 'path' ? activeObject.stroke : activeObject.fill;
+    }
+  };
+
   const toggleDrawingMode = () => {
     setIsDrawingMode(!isDrawingMode);
     if (!isDrawingMode) {
       canvas.isDrawingMode = true;
       setCanvas(canvas);
-      // canvasRef.isDrawingMode = true;
-      // canvasRef.current.freeDrawingBrush.width = 5;
-      // canvasRef.current.freeDrawingBrush.color = 'black';
     } else {
       canvas.isDrawingMode = false;
       setCanvas(canvas);
@@ -193,6 +228,12 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
           <Button disabled={loading || isDrawingMode} variant="outlined" color="primary" size="small" onClick={handleAddLine}>
             Add Line
           </Button>
+          <Button disabled={loading || isDrawingMode} variant="outlined" color="primary" size="small" onClick={handleAddRectangle}>
+            Add Rectangle
+          </Button>
+          <Button disabled={loading || isDrawingMode} variant="outlined" color="primary" size="small" onClick={handleAddCircle}>
+            Add Circle
+          </Button>
           <Button
             disabled={loading}
             variant="outlined"
@@ -205,26 +246,13 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
         </div>
         {selectedObject && (
           <Box className="flex items-center gap-2">
-            <FormControl size="small" margin='none' variant="outlined" style={{ width: 120 }}>
-              <InputLabel margin="dense" id="demo-simple-select-outlined-label">
-                Color
-              </InputLabel>
-              <Select
-                labelId="demo-simple-select-outlined-label"
-                id="demo-simple-select-outlined"
-                label="Color"
-                value={
-                  canvas.getActiveObject().get('type') === 'line' ? canvas.getActiveObject().get('stroke') : canvas.getActiveObject().get('type') === 'path' ? canvas.getActiveObject().get('stroke') : canvas.getActiveObject().get('fill')
-                }
-                name="color"
+            <FormControl size="small" margin='none' variant="outlined">
+              <input
+                type="color"
+                value={getSelectedColor()}
                 onChange={handleColorChange}
-              >
-                {COLOR_LIST.map((color, index) => (
-                  <MenuItem key={index} value={color}>
-                    {capitalize(color)}
-                  </MenuItem>
-                ))}
-              </Select>
+                style={{ marginLeft: '10px' }}
+              />
             </FormControl>
             <DeleteButton mode='light' text="Remove" size="small" onClick={handleRemove} />
           </Box>
