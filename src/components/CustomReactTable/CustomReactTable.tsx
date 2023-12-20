@@ -477,7 +477,7 @@ const CustomReactTable = ({
 
   return (
     <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
-      <div className="react-table-v8">
+      <div className="react-table-v8 bg-[var(--dark-primary,_white)]">
         <div className="table-container-v1" style={{ position: 'relative' }}>
           <GridHeader
             resource={resource}
