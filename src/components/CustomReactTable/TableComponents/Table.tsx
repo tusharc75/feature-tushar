@@ -43,7 +43,7 @@ const TableComponent = ({
   height,
   virtualization = false
 }: TTableProps) => {
-  const { filters: customFilters }: TInitialState = state;
+  const { filters: customFilters, dataRows }: TInitialState = state;
   const columns = table.getAllColumns();
   const { columnVisibility } = table.getState();
 
@@ -193,7 +193,7 @@ const TableComponent = ({
         className="border z-10"
         ref={virtualization ? parentRef : undefined}
       >
-        {(loading || error) && (
+        {(loading || error || !dataRows) && (
           <Box className="bg-[rgba(255,255,255,0.2)] dark:bg-[rgba(0,0,0,0.1)] w-full h-full z-50 absolute inset-0 flex justify-center items-center">
             <div className="bg-[white] dark:bg-[var(--dark-secondary)] px-10 py-5 rounded-lg text-center shadow-md">
               {error ? (
@@ -201,7 +201,7 @@ const TableComponent = ({
                   <Error className="mx-auto mb-2" />
                   <p>Something Went Wrong</p>
                 </>
-              ) : loading ? (
+              ) : loading || !dataRows ? (
                 <>
                   <CircularProgress />
                   <p>Loading...</p>
@@ -242,7 +242,7 @@ const TableComponent = ({
             style={{
               overflow: 'hidden'
             }}
-            className="body relative"
+            className={`body relative ${footerRowFound ? 'with-footer' : ''}`}
           >
             {virtualization ? <VirtualTable /> : <NormalTable />}
           </TableBody>
