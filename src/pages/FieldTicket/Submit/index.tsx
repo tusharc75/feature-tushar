@@ -10,7 +10,7 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { fetch_field_ticket_material_fields } from '../helper';
 import { FIELD_TICKET_STATUS, fieldTicket, sidebarResource } from 'src/constants/helpers';
 import PreviewDownload from 'src/components/PreviewDownload';
-import { set, startCase } from 'lodash';
+import { camelCase, set, startCase } from 'lodash';
 import ManageSubmit from './ManageSubmit';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CommentDialog from 'src/components/CommentDialog';
@@ -18,7 +18,10 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import HistoryIcon from '@material-ui/icons/History';
 import ViewLogs from './ViewLogs';
 
-const Submit = ({ stepFullScreen, fieldTicketData, renderedFrom, allowedToEdit, fetchData }) => {
+const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData }) => {
+
+  const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Submit`;
+
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState(null);
   const [submitDialog, setSubmitDialog] = useState(false);

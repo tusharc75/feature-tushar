@@ -17,8 +17,12 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { camelCase } from 'lodash';
 
-const AddCost = ({ fieldTicketData, setNextStep, renderedFrom, allowedToEdit }) => {
+const AddCost = ({ fieldTicketData, setNextStep, allowedToEdit }) => {
+
+  const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Cost`;
+
   const toastConfig = useContext(CustomToastContext);
 
   const [anchorEl, setAnchorEl] = useState(null);
