@@ -228,7 +228,6 @@ const Chart = ({ deviceTemplate = null, dateFilters, assetId, dataPoints }) => {
       if (alarm) {
         let dataPoints = alarm?.optionValue;
         if (alarm?.optionValue === 'All') {
-          console.log('aaaaaaaaaaaa', alarmOptions);
           dataPoints = alarmOptions?.map((alarm) => alarm?.optionValue)?.toString();
         }
         api = api + `&dataPoints=${dataPoints}`;
