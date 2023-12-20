@@ -24,9 +24,12 @@ import EditIcon from '@material-ui/icons/Edit';
 import { Add, ExpandMore } from '@material-ui/icons';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 import { useData } from 'src/StateProvider/Provider';
-import { isEmpty } from 'lodash';
+import { camelCase, isEmpty } from 'lodash';
 
-const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, handleChangeStatus }) => {
+const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeStatus }) => {
+
+  const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Material`;
+
   const toastConfig = useContext(CustomToastContext);
 
   const [columns, setColumns] = useState(null);
@@ -504,7 +507,7 @@ const Material = ({ fieldTicketData, renderedFrom, allowedToEdit, setNextStep, h
         </Box>
       )}
       <Box mt={3}>
-        <Consumables allowedToEdit={allowedToEdit} services={dataRows} fieldTicketData={fieldTicketData} renderedFrom={`${renderedFrom}_1`} />
+        <Consumables allowedToEdit={allowedToEdit} services={dataRows} fieldTicketData={fieldTicketData} />
       </Box>
       {serviceDialog?.open && serviceDialog?.type === 'service' && (
         <AssignServiceDialog
