@@ -3,9 +3,8 @@ import { fabric } from 'fabric';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { b64toBlob } from 'src/constants/helpers';
-import { Box, Button, FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
+import { Box, Button, FormControl } from '@material-ui/core';
 import CustomButton from 'src/components/Helpers/CustomButton';
-import { capitalize } from 'lodash';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 
 fabric.IText.prototype.initHiddenTextarea = (function (initHiddenTextarea) {
@@ -16,8 +15,6 @@ fabric.IText.prototype.initHiddenTextarea = (function (initHiddenTextarea) {
     return result;
   };
 })(fabric.IText.prototype.initHiddenTextarea);
-
-const COLOR_LIST = ['black', 'red', 'green', 'yellow', 'blue'];
 
 const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
   const toastConfig = useContext(CustomToastContext);
