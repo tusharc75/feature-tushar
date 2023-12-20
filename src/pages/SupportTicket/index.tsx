@@ -24,6 +24,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
+import { deleteDisable } from 'src/constants/messageHelpers';
 
 let searchTimeout;
 
@@ -124,32 +125,21 @@ const SupportTicket = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip title="Clone">
-          <IconButton
-            size="small"
-            aria-label="Clone"
-            onClick={() => {
-              setShowManageDialog({ open: true, isClone: true, idToClone: row.original._id });
-            }}
-          >
-            <FileCopyIcon fontSize="small" color="primary" />
-          </IconButton>
-        </HtmlTooltip>
-
-        {row?.original?.canDelete && (
-          <HtmlTooltip title="Delete">
+        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
+          <span>
             <IconButton
               size="small"
               aria-label="Delete"
+              disabled={!row?.original?.canDelete}
               onClick={() => {
                 setDeleteRecord(row.original);
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" />
+              <DeleteIcon fontSize='small' color={row?.original?.canDelete ? 'error' : 'disabled'} />
             </IconButton>
-          </HtmlTooltip>
-        )}
+          </span>
+        </HtmlTooltip>
       </>
     )
   };
@@ -269,7 +259,7 @@ const SupportTicket = () => {
           onExportToExcelSuccess={() => {
             fetchData();
           }}
-          additionalParams={getQueryString(true)}
+          additionalParams={`${getQueryString(true)}&ignoreInternalFields=${true}`}
           onlyExport={true}
         />
       </div>
