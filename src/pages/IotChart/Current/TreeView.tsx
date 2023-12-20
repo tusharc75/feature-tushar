@@ -62,7 +62,7 @@ const AccordionDetails = withStyles((theme) => ({
   }
 }))(MuiAccordionDetails);
 
-export default function TreeView({ expandedAccordition, setExpandedAccordition, category, currentData, assetId }) {
+export default function TreeView({ expandedAccordition, setExpandedAccordition, category, currentData, assetId, deviceTemplate = null }) {
   const [dateFilters, setDateFilters] = useState({
     from: new Date(moment().subtract(8, 'days').format('MM/DD/YYYY')),
     to: new Date(),
@@ -153,6 +153,7 @@ export default function TreeView({ expandedAccordition, setExpandedAccordition, 
               <div className="grid gap-3">
                 {category?.child?.map((child: any) => (
                   <TreeView
+                    deviceTemplate={deviceTemplate}
                     expandedAccordition={expandedAccordition}
                     setExpandedAccordition={setExpandedAccordition}
                     category={child}
@@ -166,19 +167,8 @@ export default function TreeView({ expandedAccordition, setExpandedAccordition, 
         </AccordionDetails>
       </Accordion>
       {dataPoint && (
-        <Dialog
-          fullWidth
-          maxWidth="md"
-          open
-          onClose={handleClose}
-          fullScreen
-          aria-labelledby="assign-roles-dialog"
-        >
-          <CustomDialogHeader
-            title={`${dataPoint?.fieldLabel}`}
-            showRequiredLabel={false}
-            onClose={handleClose}
-          />
+        <Dialog fullWidth maxWidth="md" open onClose={handleClose} fullScreen aria-labelledby="assign-roles-dialog">
+          <CustomDialogHeader title={`${dataPoint?.fieldLabel}`} showRequiredLabel={false} onClose={handleClose} />
           <CustomDialogContent>
             <Box mt={2}>
               <Grid direction="row" justifyContent="flex-end" alignItems="center" container spacing={2}>
@@ -188,7 +178,7 @@ export default function TreeView({ expandedAccordition, setExpandedAccordition, 
               </Grid>
               <Box mt={2}>
                 <div>
-                  <Chart dateFilters={dateFilters} assetId={assetId} dataPoints={[dataPoint]} />
+                  <Chart deviceTemplate={deviceTemplate} dateFilters={dateFilters} assetId={assetId} dataPoints={[dataPoint]} />
                 </div>
               </Box>
             </Box>
