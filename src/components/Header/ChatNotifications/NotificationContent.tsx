@@ -16,6 +16,15 @@ const NotificationContent = ({ handleMarkAllRead, handleClearAll, handleReadSing
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [tab, setTab] = useState<TabOptions>(tabOptions[0]);
 
+  const unreadMessages = useMemo(() => {
+    let count = 0;
+    if (!data[tabOptions[tabOptions.length - 1]]) return '';
+    for (const notification of data[tabOptions[tabOptions.length - 1]]) {
+      count += notification.unseen;
+    }
+    return `${count === 0 ? '' : count}`;
+  }, [data]);
+
   const notificationList = useMemo(() => {
     return data[tab];
   }, [tab, data]);
@@ -86,9 +95,9 @@ const NotificationContent = ({ handleMarkAllRead, handleClearAll, handleReadSing
                   <span
                     className={`text-[#D3E0FF] px-2 py-[1px] block rounded-[5px] ml-2 bg-[#2A3042] text-[12px] font-semibold ${
                       isLoading || tab === tabItem ? 'grayscale dark:opacity-50 opacity-70' : ''
-                    }`}
+                    } ${tabItem === tabOptions[tabOptions.length - 1] && !Boolean(unreadMessages) ? 'sr-only' : ''}`}
                   >
-                    {data[tabItem]?.length || 0}
+                    {tabItem === tabOptions[tabOptions.length - 1] ? unreadMessages : data[tabItem]?.length || 0}
                   </span>
                 </Button>
               </>
