@@ -190,9 +190,18 @@ const TableComponent = ({
           overflow: loading ? 'hidden' : 'auto',
           height: height ?? '100%'
         }}
-        className="border z-10"
+        className="border z-10 bg-[var(--dark-primary,_white)] isolate"
         ref={virtualization ? parentRef : undefined}
       >
+        {!loading && !error && rows.length === 0 && dataRows && (
+          <>
+            <Box className=" w-fit h-fit absolute m-auto inset-0 top-[46px] flex justify-center items-center -z-10 select-none">
+              <div className=" px-10 py-5 rounded-lg text-center">
+                <p>No data found</p>
+              </div>
+            </Box>
+          </>
+        )}
         {(loading || error || !dataRows) && (
           <Box className="bg-[rgba(255,255,255,0.2)] dark:bg-[rgba(0,0,0,0.1)] w-full h-full z-50 absolute inset-0 flex justify-center items-center">
             <div className="bg-[white] dark:bg-[var(--dark-secondary)] px-10 py-5 rounded-lg text-center shadow-md">
