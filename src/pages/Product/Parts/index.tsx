@@ -22,7 +22,7 @@ function Parts({ id }) {
 
   const renderedFrom = `${camelCase(routes?.product.title)}_bom`;
   const {
-    state: { permissions}
+    state: { permissions }
   }: any = useData();
 
   const hasPermissions = permissions && permissions[product.permission]?.isUpdate;
@@ -32,7 +32,7 @@ function Parts({ id }) {
   const [showConfirmBox, setShowConfirmBox] = useState({ open: false, data: null });
   const [isDeleting, setIsDeleting] = useState(false);
   const [openAssignProductDialog, setOpenAssignProductDialog] = useState(false);
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const [isSubmitting, setSubmitting] = useState(false);
   const { state, dispatch } = useTableReducer();
@@ -99,7 +99,7 @@ function Parts({ id }) {
         })
       }
     })
-      const newColumns = generateColumns(renderedFrom, fields?.filter((e) => ['productDescription', 'productNumber', 'productCategory', 'productCategory']?.includes(e?.fieldName)), null, false, 'USD');
+    const newColumns = generateColumns(renderedFrom, fields?.filter((e) => ['productDescription', 'productNumber', 'productCategory', 'productCategory']?.includes(e?.fieldName)), null, false, 'USD');
 
     coloum = [...coloum, ...newColumns, {
       accessor: 'qty',

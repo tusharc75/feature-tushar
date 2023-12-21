@@ -12,13 +12,11 @@ import routes from 'src/components/Helpers/Routes';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
 const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
-  const toastConfig = useContext(CustomToastContext);
   const renderedFrom = `${routes.salesOrder.title}_Process`;
 
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
 
   const { state, dispatch } = useTableReducer();
-  const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
 
   useEffect(() => {
@@ -27,14 +25,14 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
 
   const fetchFields = async () => {
     var data = await fetch_salesOrder_product_fields(salesOrderData?.currency);
-    const newColumns = generateColumns(renderedFrom, data, null,false, salesOrderData?.currency);
+    const newColumns = generateColumns(renderedFrom, data, null, false, salesOrderData?.currency);
     let coloum: any = [
       {
         accessor: 'index',
         Header: 'Index',
         width: 100,
         sticky: 'left',
-        disableFilters : false,
+        disableFilters: false,
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
@@ -53,29 +51,29 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
       {
         accessor: 'detail',
         Header: 'Detail',
-        disabled : true,
+        disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         width: 200,
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-          {<p title={row.original?.detail}>{row.original?.detail}</p>}
-          <Box ml={1}>
-            <IconButton
-              size="small"
-              onClick={() => {
-                if (row.original.type === 'service') {
-                  window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                } else if (row.original.type === 'product') {
-                  window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                } else {
-                  window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                }
-              }}
-            >
-              <OpenInNewIcon fontSize="small" color="primary" />
-            </IconButton>
-          </Box>
-        </div>
+            {<p title={row.original?.detail}>{row.original?.detail}</p>}
+            <Box ml={1}>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  if (row.original.type === 'service') {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'product') {
+                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                  } else {
+                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  }
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
+            </Box>
+          </div>
         )
       },
       {
@@ -149,19 +147,18 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
     const rows = material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === 'product'
+      parent.detail = `${parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
-      }`;
+            ? parent.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName
+        }`;
       parent.description =
         parent.type === 'product'
           ? parent?.productDetail?.productDescription
           : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription
-          : parent?.serviceDetail?.serviceDescription;
+            ? parent?.packageDetail?.packageDescription
+            : parent?.serviceDetail?.serviceDescription;
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qty = parent.qty;
@@ -179,19 +176,18 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
   const generateNestedData = (material, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
-      _subRow.detail = `${
-        _subRow.type === 'product'
+      _subRow.detail = `${_subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.packageDetail?.packageName
-      }`;
+            ? _subRow.serviceDetail?.serviceName
+            : _subRow.packageDetail?.packageName
+        }`;
       _subRow.description =
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productDescription
           : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription
-          : _subRow?.serviceDetail?.serviceDescription;
+            ? _subRow?.packageDetail?.packageDescription
+            : _subRow?.serviceDetail?.serviceDescription;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qty = `${parent.qty * _subRow.qty} `;
@@ -204,19 +200,19 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
 
   return (
     <div>
-      {columns? (
+      {columns ? (
         <>
           <Box zIndex={5} width={'100%'} mt={3}>
             <CustomReactTable
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
               columns={columns}
-              state = {state}
-              dispatch = {dispatch}
-              expander = {true}
+              state={state}
+              dispatch={dispatch}
+              expander={true}
               renderedFrom={renderedFrom}
               isClientSideGrid={true}
               hideSelection={true}
-              refreshGrid = {fetchData}
+              refreshGrid={fetchData}
             />
           </Box>
         </>

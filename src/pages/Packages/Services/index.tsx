@@ -23,7 +23,7 @@ const ServiceTable = ({ packageId, packageData }) => {
     state: { permissions, user }
   }: any = useData();
 
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
   const [showServiceConfirmBox, setShowServiceConfirmBox] = useState(false);
   const [showServiceAssignDialog, setShowServiceAssignDialog] = useState(false);
   const [isRemovingServices, setRemovingServices] = useState(false);
@@ -47,7 +47,7 @@ const ServiceTable = ({ packageId, packageData }) => {
       .then(({ data: { data } }) => {
         let rows = data.map((u) => {
           let res = {
-            ...prepareDataForGrid(u,user),
+            ...prepareDataForGrid(u, user),
             inventoryCount: u?.qty,
             warehouses: u.warehouse?.map((w) => w.warehouseName).join(', '),
             productCategoryChipColor: u.productCategory?.chipColour
@@ -99,7 +99,7 @@ const ServiceTable = ({ packageId, packageData }) => {
     Cell: ({ row }) => (row.original?.qty ? <div>{row.original?.qty}</div> : <NoDataCell />)
   };
 
-  const handleUpdateQuantity = (data,row) => {
+  const handleUpdateQuantity = (data, row) => {
     axiosInstance()
       .put(`${packages.api}/${packageId}/services`, {
         ids: [row?._id],
@@ -256,19 +256,19 @@ const ServiceTable = ({ packageId, packageData }) => {
         </Box>
       </Box>
       {columns ? (
-          <CustomReactTable
-            height={'calc(100vh - 393px)'}
-            columns={columns}
-            state={state}
-            dispatch={dispatch}
-            renderedFrom={renderedFrom}
-            isClientSideGrid={true}
-            refreshGrid={fetchData}
-            onSaveEdit={handleUpdateQuantity}
-          />
-        ) : <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>}
+        <CustomReactTable
+          height={'calc(100vh - 393px)'}
+          columns={columns}
+          state={state}
+          dispatch={dispatch}
+          renderedFrom={renderedFrom}
+          isClientSideGrid={true}
+          refreshGrid={fetchData}
+          onSaveEdit={handleUpdateQuantity}
+        />
+      ) : <Box p={2} height={500}>
+        <CommonSkeleton lenArray={[...Array(10).keys()]} />
+      </Box>}
       {showServiceAssignDialog && (
         <AssignServiceDialog
           handleClose={() => setShowServiceAssignDialog(false)}

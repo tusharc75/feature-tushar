@@ -28,7 +28,7 @@ const Products = ({ packageId, packageData }) => {
     state: { permissions }
   }: any = useData();
 
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
   const [showProductConfirmBox, setShowProductConfirmBox] = useState({ open: false, data: null });
   const [showProductAssignDialog, setShowProductAssignDialog] = useState(false);
   const [isRemovingProducts, setRemovingProducts] = useState(false);
@@ -68,8 +68,8 @@ const Products = ({ packageId, packageData }) => {
           parent.assetQty = assets?.filter((i) => i.product === parent._id)?.length;
           parent.subRows = generateNestedData(assets, parent);
         });
-      dispatch({ type: 'initialize', data: rows, count: rows?.length });
-      dispatch({ type: 'loading', loading: false });
+        dispatch({ type: 'initialize', data: rows, count: rows?.length });
+        dispatch({ type: 'loading', loading: false });
       })
       .catch((err) => {
         setToastConfig(err);
@@ -224,7 +224,7 @@ const Products = ({ packageId, packageData }) => {
           ids: [row._id],
           qty: Number(row.qty)
         })
-        .then(({data}) => {
+        .then(({ data }) => {
           setToastConfig({
             open: true,
             type: 'success',
@@ -257,7 +257,7 @@ const Products = ({ packageId, packageData }) => {
     if (productIds?.length) {
       axiosInstance()
         .put(`${packages.api}/${packageId}/products/remove`, { ids: productIds })
-        .then(({data}) => {
+        .then(({ data }) => {
           setRemovingProducts(false);
           setShowProductConfirmBox({ open: false, data: null });
           fetchData();
@@ -276,7 +276,7 @@ const Products = ({ packageId, packageData }) => {
     if (assetIds?.length) {
       axiosInstance()
         .put(`${packages.api}/${packageId}/products/asset/remove`, { ids: assetIds })
-        .then(({data}) => {
+        .then(({ data }) => {
           setRemovingProducts(false);
           setShowProductConfirmBox({ open: false, data: null });
           fetchData();
@@ -423,19 +423,19 @@ const Products = ({ packageId, packageData }) => {
           />
         </Box>
       </Box>
-      {columns  ? (
-         <CustomReactTable
-         height={'calc(100vh - 393px)'}
-         columns={columns}
-         state={state}
-         dispatch={dispatch}
-         refreshGrid={fetchData}
-         setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-         renderedFrom={renderedFrom}
-         isClientSideGrid={true}
-         onSaveEdit={onSaveInlineEdit}
-         expander = {true}
-       />
+      {columns ? (
+        <CustomReactTable
+          height={'calc(100vh - 393px)'}
+          columns={columns}
+          state={state}
+          dispatch={dispatch}
+          refreshGrid={fetchData}
+          setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
+          renderedFrom={renderedFrom}
+          isClientSideGrid={true}
+          onSaveEdit={onSaveInlineEdit}
+          expander={true}
+        />
       ) : (
         <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />

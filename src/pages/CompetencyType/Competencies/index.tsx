@@ -28,7 +28,7 @@ const Competencies = ({ competencyType }) => {
   }: any = useData();
   const { state, dispatch } = useTableReducer();
   const {page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
   const { generateColumns } = useColumns();
 
   useEffect(() => {

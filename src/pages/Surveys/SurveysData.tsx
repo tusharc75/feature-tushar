@@ -16,7 +16,7 @@ const SurveysData = ({ surveyId }) => {
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer();
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState({ open: false, ids: null });
   const {
     state: { permissions, selectedEntity }
@@ -34,7 +34,7 @@ const SurveysData = ({ surveyId }) => {
   const fetchGridColumns = async () => {
     let data;
     const response = await axiosInstance().get(`surveys/fields/${surveyId}`);
-    data = response?.data?.data;    
+    data = response?.data?.data;
     const newColumns = generateColumns(renderedFrom, data, routes.surveysDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
@@ -82,7 +82,7 @@ const SurveysData = ({ surveyId }) => {
     )
   };
 
-  const handleDelete = () => {};
+  const handleDelete = () => { };
 
   return (
     <div>
