@@ -7,13 +7,13 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import Add from '@material-ui/icons/Add';
-import { pricingCondition, invoice, PRICING_SETUP_TYPE } from '../../../constants/helpers';
+import { pricingCondition, invoice, PRICING_SETUP_TYPE, MATERIAL_TYPE } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import DeleteIcon from '@material-ui/icons/Delete';
 import AddIcon from '@material-ui/icons/Add';
 import { isMobile, isTablet } from 'react-device-detect';
 import { ExpandMore, KeyboardArrowDown } from '@material-ui/icons';
-import { startCase } from 'lodash';
+import { camelCase, startCase } from 'lodash';
 import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
 import { flattenArray } from 'src/constants/columns';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
@@ -27,7 +27,10 @@ import EditIcon from '@material-ui/icons/Edit';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
-const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, fetchInvoiceData }) => {
+const Material = ({ invoiceData, setNextStep, stepFullScreen, allowedToEdit }) => {
+
+  const renderedFrom = `${camelCase(routes?.invoice.title)}_Material`;
+
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -45,6 +48,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
   const [anchorEl, setAnchorEl] = useState(null);
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [assetAssignedProduct, setAssetAssignedProduct] = useState([]);
+  const [isRateRequired, setIsRateRequired] = useState(false);
 
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
@@ -54,6 +58,11 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
     fetchFields();
   }, []);
 
+  useEffect(() => {
+    fetchData();
+  }, [columns]);
+
+
   const fetchFields = async () => {
     let data = await fetch_invoice_product_fields(invoiceData?.currency);
     if (!allowedToEdit) {
@@ -62,11 +71,13 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
       });
     }
     setAllFields(JSON.parse(JSON.stringify(data)));
-    const newColumns = generateColumns(renderedFrom, data, null, false, invoiceData?.currency );
+    const newColumns = generateColumns(renderedFrom, data, null, false, invoiceData?.currency);
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';
     }
+    const isPriceRequired = data.filter((el) => el.fieldName === 'price' && el.required).length > 0;
+    setIsRateRequired(isPriceRequired);
     let coloum: any = [
       {
         accessor: 'index',
@@ -92,7 +103,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
         accessor: 'detail',
         Header: 'Detail',
         minWidth: 300,
-        disabled :true,
+        disabled: true,
         width: 300,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row, table }) => (
@@ -220,7 +231,6 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
         </>
     });
     setColumns(coloum);
-    fetchData();
   };
 
   const fetchData = async () => {
@@ -257,13 +267,12 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
       parent.qty = parent.qty;
       parent.qtyDisplay = parent.qty;
       parent.assetQty = assignedAssets.filter((i) => i.parentId === parent._id).length;
+      parent.isValid = parent['finalPrice_' + invoiceData?.currency?.toLowerCase()] ? true : !isRateRequired;
       parent.subRows = generateNestedData(data.material, parent);
     });
-    fetchInvoiceData()
-    // if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
-    //   setNextStep(true);
-    // }
-    if (rows?.length) {
+    if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
+      setNextStep(false);
+    } else {
       setNextStep(true);
     }
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
@@ -292,8 +301,12 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
               : _subRow?.serviceDetail?.serviceDescription;
       _subRow.qty = _subRow.qty;
       _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
+      _subRow.isValid = _subRow['finalPrice_' + invoiceData?.currency?.toLowerCase()] ? true : false;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
+    if (subRows.length === 0 && parent.type === MATERIAL_TYPE.package) {
+      parent.isValid = false;
+    }
     return subRows;
   };
 
@@ -389,6 +402,7 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
         toastConfig.setToastConfig(error);
       });
   };
+
   const handleDelete = (rows) => {
     setDeleting(true);
     axiosInstance()
@@ -546,8 +560,8 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
             <MenuItem
               onClick={() => {
                 const dataToDelete =
-                selectedRecords &&
-                selectedRecords
+                  selectedRecords &&
+                  selectedRecords
                     .filter((e) => !e.hideSelection)
                     .map((rec: any) => {
                       const obj: any = {};
@@ -571,12 +585,12 @@ const Material = ({ invoiceData, setNextStep, renderedFrom, stepFullScreen, allo
             <CustomReactTable
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
               columns={columns}
-              state = {state}
-              dispatch = {dispatch}
-              setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
-              expander = {true}
-              refreshGrid = {fetchData}
-              renderedFrom="invoice_product_package"
+              state={state}
+              dispatch={dispatch}
+              setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
+              expander={true}
+              refreshGrid={fetchData}
+              renderedFrom={renderedFrom}
               isClientSideGrid={true}
               onSaveEdit={onSaveInlineEdit}
             />

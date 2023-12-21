@@ -18,15 +18,20 @@ import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { ExpandMore } from '@material-ui/icons';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import { camelCase } from 'lodash';
+import routes from 'src/components/Helpers/Routes';
 
-const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom, allowedToEdit }) => {
+const AdditionalCost = ({ salesOrderData, setNextStep, stepFullScreen, allowedToEdit }) => {
+
+  const renderedFrom = `${camelCase(routes?.salesOrder.title)}_Cost`;
+
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
   }: any = useData();
 
   const [isUpdating, setUpdating] = useState(false);
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
   const [showCostDialog, setShowCostDialog] = useState({ open: false, showSaveAndNext: false });
   const [selectedCostData, setSelectedCostData] = useState(null);
   const [allFields, setAllFields] = useState([]);
@@ -61,9 +66,8 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom, allowedToEd
       {
         accessor: 'index',
         Header: 'Index',
-        width: 120,
+        width: 100,
         sticky: 'left',
-        disableFilters : false,
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
@@ -272,12 +276,11 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom, allowedToEd
       {columns ? (
         <Box zIndex={5}>
           <CustomReactTable
-            height={'calc(100vh - 395px)'}
+            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
             columns={columns}
-            state = {state}
-            dispatch = {dispatch}
-            setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
-            refreshGrid = {fetchAdditionalCost}
+            state={state}
+            dispatch={dispatch}
+            refreshGrid={fetchAdditionalCost}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
             onSaveEdit={onSaveInlineEdit}

@@ -4,7 +4,7 @@ import AddIcon from '@material-ui/icons/Add';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
-import { CHILD_RESOURCE, removeLocalStorage, sidebarResource } from 'src/constants/helpers';
+import { CHILD_RESOURCE, } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
@@ -14,23 +14,23 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import AdditionalCostDialog from './AdditionalCostDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import { camelCase } from 'lodash';
 
-const AdditionalCost = ({ invoiceData, setNextStep, renderedFrom }) => {
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
+const AdditionalCost = ({ invoiceData, stepFullScreen, setNextStep }) => {
+
+  const renderedFrom = `${camelCase(routes?.invoice.title)}_Cost`;
 
   const toastConfig = useContext(CustomToastContext);
 
   const [anchorEl, setAnchorEl] = useState(null);
-  const {
-    state: { permissions }
-  }: any = useData();
+
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
   const [addDialog, setAddDialog] = useState({ open: false, data: null });
 
   const { state, dispatch } = useTableReducer();
-  const { dataRows, selectedRecords } = state;
+  const { selectedRecords } = state;
   const { generateColumns } = useColumns();
 
 
@@ -43,7 +43,7 @@ const AdditionalCost = ({ invoiceData, setNextStep, renderedFrom }) => {
       .get(`/field/child?resource=${CHILD_RESOURCE.invoiceCost}`)
       .then(({ data: { data } }) => {
         data = CURReplaceByCurrencySingle(data, invoiceData?.currency || 'USD');
-        const newColumns = generateColumns(renderedFrom, data, null, false, invoiceData?.currency || 'USD' );
+        const newColumns = generateColumns(renderedFrom, data, null, false, invoiceData?.currency || 'USD');
         let columns: any = [
           {
             accessor: 'index',
@@ -91,15 +91,13 @@ const AdditionalCost = ({ invoiceData, setNextStep, renderedFrom }) => {
           )
         });
         setColumns(columns);
-        fetchCostData();
+        fetchData();
       });
   };
 
-  const fetchCostData = () => {
-
+  const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
-
     axiosInstance()
       .get(`${routes.invoice.path}/${invoiceData._id}/additional-cost`)
       .then(({ data: { data } }) => {
@@ -109,12 +107,9 @@ const AdditionalCost = ({ invoiceData, setNextStep, renderedFrom }) => {
             return { index: index + 1, ...i };
           });
         }
-
         dispatch({ type: 'initialize', data: rows, count: rows?.length });
         dispatch({ type: 'loading', loading: false });
-
-        setNextStep(true);
-       
+        setNextStep(true)
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -139,8 +134,7 @@ const AdditionalCost = ({ invoiceData, setNextStep, renderedFrom }) => {
     axiosInstance()
       .put(`${routes?.invoice?.path}/${invoiceData._id}/additional-cost/remove`, { ids: ids })
       .then(({ data }) => {
-        removeLocalStorage(localStorageSelectedRecords);
-        fetchCostData();
+        fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
         toastConfig.setToastConfig({
@@ -210,17 +204,15 @@ const AdditionalCost = ({ invoiceData, setNextStep, renderedFrom }) => {
         </Box>
       </Box>
       {columns ? (
-        <Box p="6px" zIndex={5} width={'100%'}>
+        <Box zIndex={5} width={'100%'}>
           <CustomReactTable
-            height={'calc(100vh - 345px)'}
+            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
             columns={columns}
-            state = {state}
-            dispatch = {dispatch}
-            setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
-            refreshGrid = {fetchCostData}
+            state={state}
+            dispatch={dispatch}
+            refreshGrid={fetchData}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
-            expander = {true}
           />
         </Box>
       ) : (
@@ -244,7 +236,7 @@ const AdditionalCost = ({ invoiceData, setNextStep, renderedFrom }) => {
           onClose={() => setAddDialog({ open: false, data: null })}
           onSuccess={() => {
             setAddDialog({ open: false, data: null });
-            fetchCostData();
+            fetchData();
           }}
           invoiceData={invoiceData}
           costData={addDialog.data}

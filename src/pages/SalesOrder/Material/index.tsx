@@ -13,7 +13,7 @@ import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import { isMobile, isTablet } from 'react-device-detect';
-import { startCase } from 'lodash';
+import { camelCase, startCase } from 'lodash';
 import DateRangeIcon from '@material-ui/icons/DateRange';
 import SalesOrderQtyDialog from './SalesOrderQtyDialog';
 import { fetch_salesOrder_product_fields } from 'src/components/SalesOrder/helper';
@@ -29,7 +29,10 @@ import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 
-const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen, fetchSalesOrderData, updateJobStatus }) => {
+const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrderData, updateJobStatus }) => {
+
+  const renderedFrom = `${camelCase(routes?.salesOrder.title)}_Material`;
+
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -163,7 +166,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen, f
           {
             accessor: 'leadTime',
             Header: 'Lead Time (Days)',
-            Cell: ({ row }) => (row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0),
+            Cell: ({ row }) => <div>{(row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0)}</div>,
             Footer: (info) => {
               let rows = info.table.getExpandedRowModel().rows;
               const total = rows?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
@@ -185,47 +188,46 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen, f
       disableSortBy: true,
       canDrag: false,
       Cell: ({ row, table }) =>
-        !row.original.hideSelection && (
-          <>
-            <HtmlTooltip title={'Edit'} placement="top" enterTouchDelay={0} arrow>
-              <IconButton
-                size="small"
-                aria-label="Details"
-                onClick={() => {
-                  handleOpen(row, table.getRowModel().rows);
-                }}
-              >
-                <EditIcon fontSize="small" color="primary" />
-              </IconButton>
-            </HtmlTooltip>
-            {permissions?.leadTimeMaster && (
-              <HtmlTooltip title={'Lead Time'} placement="top" enterTouchDelay={0} arrow>
-                <IconButton
-                  size="small"
-                  aria-label="Details"
-                  onClick={() => {
-                    setLeadTimeDialog({ open: true, data: row.original });
-                  }}
-                >
-                  <DateRangeIcon fontSize="small" color="primary" />
-                </IconButton>
-              </HtmlTooltip>
-            )}
-            <HtmlTooltip title={'Delete'} placement="top" enterTouchDelay={0} arrow>
-              <IconButton
-                size="small"
-                aria-label="Details"
-                onClick={() => {
-                  const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                  getNestedSubRows(obj, row.original);
-                  setDeleteData(obj);
-                }}
-              >
-                <DeleteIcon fontSize="small" color="error" />
-              </IconButton>
-            </HtmlTooltip>
-          </>
-        )
+      (<>
+        <HtmlTooltip title={'Edit'} placement="top" enterTouchDelay={0} arrow>
+          <IconButton
+            size="small"
+            aria-label="Details"
+            onClick={() => {
+              handleOpen(row, table.getRowModel().rows);
+            }}
+          >
+            <EditIcon fontSize="small" color="primary" />
+          </IconButton>
+        </HtmlTooltip>
+        {permissions?.leadTimeMaster && (
+          <HtmlTooltip title={'Lead Time'} placement="top" enterTouchDelay={0} arrow>
+            <IconButton
+              size="small"
+              aria-label="Details"
+              onClick={() => {
+                setLeadTimeDialog({ open: true, data: row.original });
+              }}
+            >
+              <DateRangeIcon fontSize="small" color="primary" />
+            </IconButton>
+          </HtmlTooltip>
+        )}
+        <HtmlTooltip title={'Delete'} placement="top" enterTouchDelay={0} arrow>
+          <IconButton
+            size="small"
+            aria-label="Details"
+            onClick={() => {
+              const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+              getNestedSubRows(obj, row.original);
+              setDeleteData(obj);
+            }}
+          >
+            <DeleteIcon fontSize="small" color="error" />
+          </IconButton>
+        </HtmlTooltip>
+      </>
+      )
     });
     setColumns(coloum);
   };
@@ -574,7 +576,7 @@ const Material = ({ salesOrderData, setNextStep, renderedFrom, stepFullScreen, f
               dispatch={dispatch}
               expander={true}
               refreshGrid={fetchData}
-              renderedFrom="sales_order_product_package"
+              renderedFrom={renderedFrom}
               setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
               isClientSideGrid={true}
             />
