@@ -808,7 +808,7 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
                 return { ...d, _id: d?.asset, qty: 1 };
               });
               handleAdd([...dataToAddFormat]);
-            } else if (addDialog.parentId && products?.length !== 0) {
+            } else if (addDialog.parentId && products?.length === 0) {
               handleAdd([...rows?.map((d) => ({ ...d, _id: d?.id, qty: 1 }))]);
             } else {
               toastConfig.setToastConfig({
