@@ -289,7 +289,6 @@ const FieldTicketDetail = () => {
             {currentStep === 0 && fieldTicketData && (
               <Material
                 fieldTicketData={fieldTicketData}
-                renderedFrom={`${renderedFrom}_grid-1`}
                 allowedToEdit={allowedToEdit}
                 setNextStep={setNextStep}
                 handleChangeStatus={handleChangeStatus}
@@ -298,7 +297,6 @@ const FieldTicketDetail = () => {
             {currentStep === 1 && fieldTicketData && (
               <AddCost
                 fieldTicketData={fieldTicketData}
-                renderedFrom={`${renderedFrom}_grid-2`}
                 allowedToEdit={allowedToEdit}
                 setNextStep={setNextStep} />
             )}
@@ -306,7 +304,6 @@ const FieldTicketDetail = () => {
               <Submit
                 stepFullScreen={stepFullScreen}
                 fieldTicketData={fieldTicketData}
-                renderedFrom={`${renderedFrom}_grid-3`}
                 allowedToEdit={allowedToEdit}
                 fetchData={fetchData}
               />

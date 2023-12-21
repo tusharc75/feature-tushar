@@ -117,6 +117,7 @@ export default function TreeView({ expandedAccordition, setExpandedAccordition, 
                 ) : null}
                 {currentData
                   ?.filter((d) => d?.category?.optionValue === category?._id)
+                  ?.sort((a, b) => parseInt(a?.order) - parseInt(b?.order))
                   ?.map((data) => {
                     return (
                       <Grid item xs={12} sm={6} lg={4} md={4}>

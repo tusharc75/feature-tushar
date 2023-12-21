@@ -71,10 +71,10 @@ const useStyles = makeStyles((theme) => ({
     // position:"static",
 
     borderRadius: '5px !important',
-    border: '1px solid #808080 !important',
+    border: '1px solid var(--common-border-color) !important',
     marginLeft: '10px',
     marginRight: '10px',
-    backgroundColor: '#fff !important',
+    backgroundColor: 'var(--dark-secondary, #fff) !important',
     rippleVisible: {
       animation: 'none !important'
     },
@@ -434,7 +434,7 @@ const CustomerAccounts = (props) => {
             }
           }}
           contactResource={customerContact.contactResource}
-          referenceData={{ 'accountName': accId }}
+          referenceData={{ accountName: accId }}
           contactApi={customerContact.contactApi}
           isClone={false}
           contactId={null}
@@ -582,7 +582,7 @@ const CustomerAccounts = (props) => {
                         id={`vertical-tab-${i}`}
                         className={classes.tabProject}
 
-                      // icon={<AiFillCaretRight size={18}/>}
+                        // icon={<AiFillCaretRight size={18}/>}
                       />
                     ))}
                   </Tabs>
@@ -727,8 +727,8 @@ const CustomerAccounts = (props) => {
             accountDeleteRec
               ? 'Are you sure about removing this account from project?'
               : contactDeleteRec
-                ? `Are you sure about removing this "${contactDeleteRec.firstName} ${contactDeleteRec.lastName}" contact from project?`
-                : null
+              ? `Are you sure about removing this "${contactDeleteRec.firstName} ${contactDeleteRec.lastName}" contact from project?`
+              : null
           }
           onClose={() => {
             setShowConfirmBox(false);

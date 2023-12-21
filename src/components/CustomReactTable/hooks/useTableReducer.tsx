@@ -13,7 +13,8 @@ function reducer(state: TInitialState, action: TActios) {
         ...state,
         error: false,
         dataRows: action.data,
-        rowCount: action.count
+        rowCount: action.count,
+        initialDataLoaded: true,
       };
     case 'selection':
       return {
@@ -100,7 +101,7 @@ function reducer(state: TInitialState, action: TActios) {
 }
 
 const intialState = {
-  dataRows: null,
+  dataRows: [],
   rowCount: 0,
   loading: false,
   page: 0,
@@ -114,7 +115,8 @@ const intialState = {
   error: false,
   showFilteredRecordsOnly: false,
   colState: [],
-  loadingExpanderRowId: null
+  loadingExpanderRowId: null,
+  initialDataLoaded: false
 };
 
 export type TInitialState = {
@@ -133,6 +135,7 @@ export type TInitialState = {
   showFilteredRecordsOnly: boolean;
   colState: any[];
   loadingExpanderRowId: string | null;
+  initialDataLoaded: boolean;
 };
 
 export type TActios =

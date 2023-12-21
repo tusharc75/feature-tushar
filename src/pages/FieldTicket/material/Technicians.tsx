@@ -17,8 +17,12 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmployeeDialog';
 import { displayDate } from 'src/constants/helpers';
 import { Add } from '@material-ui/icons';
+import { camelCase } from 'lodash';
 
-const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, renderedFrom }) => {
+const Technicians = ({ allowedToEdit, fieldTicketData, selectedService }) => {
+
+  const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Technicians`;
+
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState(null);
   const [deleteData, setDeleteData] = useState(null);
