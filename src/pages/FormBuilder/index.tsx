@@ -21,11 +21,14 @@ const FormBuilder = () => {
   const toastConfig = useContext(CustomToastContext);
   const [arrangeViewOpen, setArrangeViewOpen] = useState(false);
   const [resource, setResource] = useState([]);
-  const [columns, setColumns] = useState(null);
+  const [columns, setColumns] = useState([]);
+  const { state, dispatch } = useTableReducer();
 
   useEffect(() => {
     fetchGridColumns();
   }, []);
+
+  
 
   const fetchGridColumns = () => {
     const columns = [
