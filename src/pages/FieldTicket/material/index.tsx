@@ -276,7 +276,8 @@ const Material = ({ fieldTicketData, allowedToEdit, setNextStep, handleChangeSta
         material,
         priceData?.filter((e) => e.conditionId === fieldTicketData?.pricingCondition?.optionValue)
       );
-    } else {
+    }
+    else {
       AddMaterial(material, null);
     }
   };
