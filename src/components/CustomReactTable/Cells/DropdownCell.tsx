@@ -58,7 +58,7 @@ function DropdownCell({ permissions, permissionForLinks, field, original }) {
                         </h5>
                     }
                     {more?.length > 0 && (
-                        <HtmlTooltip title={getTitle(more)}>
+                        <HtmlTooltip title={getTitle(more)} enterTouchDelay={0}>
                             <span className="createdAtTime badge-date">{`+${more?.length} more..`}</span>
                         </HtmlTooltip>
                     )}

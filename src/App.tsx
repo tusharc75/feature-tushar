@@ -242,7 +242,7 @@ import FlashDetailsPage from './pages/Flash/FlashDetailsPage';
 import CreditMemo from './pages/CreditMemo';
 import CreditMemoDetail from './pages/CreditMemo/CreditMemoDetail';
 import GenerateInvoice from './pages/GenerateInvoice';
-import StandardReportView from './pages/Report/StandardReport'
+import StandardReportView from './pages/Report/StandardReport';
 import UserDownloadRequest from './pages/UserDownloadRequest';
 
 var notificationInterval: any = null;
@@ -298,7 +298,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) { }
+    } catch (e) {}
   }, [isOffline]);
 
   const getNotification = async () => {
