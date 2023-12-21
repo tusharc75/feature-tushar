@@ -64,7 +64,6 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
     {
       accessor: 'date',
       Header: 'Date',
-      show: true,
       disableFilters: true,
       disableSortBy: false,
       Cell: ({ row }) =>
@@ -79,7 +78,6 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
     {
       accessor: 'referenceType',
       Header: 'Reference Type',
-      show: true,
       Cell: ({ row }) =>
         row?.original?.referenceType ? (
           <h5 className="text-truncate" title={row?.original?.referenceType}>
@@ -92,7 +90,6 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
     {
       accessor: 'reference',
       Header: 'Reference',
-      show: true,
       disableFilters: true,
       disableSortBy: false,
       Cell: ({ row }) =>
@@ -181,7 +178,6 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
     {
       accessor: 'type',
       Header: 'Type',
-      show: true,
       Cell: ({ row }) =>
         row?.original?.type ? (
           <h5 className="text-truncate" title={row?.original?.type}>
@@ -194,7 +190,6 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
     {
       accessor: 'qty',
       Header: 'Quantity',
-      show: true,
       disableFilters: true,
       disableSortBy: false,
       Cell: ({ row }) =>
@@ -226,7 +221,6 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
     {
       accessor: 'price',
       Header: `Cost ${curr}`,
-      show: true,
       disableFilters: true,
       disableSortBy: false,
       Cell: ({ row }) =>
@@ -241,7 +235,6 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
     {
       accessor: 'totalPrice',
       Header: `Amount ${curr}`,
-      show: true,
       disableFilters: true,
       disableSortBy: false,
       Cell: ({ row }) =>
@@ -273,7 +266,6 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
     {
       accessor: 'warehouse',
       Header: routes.warehouse.title,
-      show: true,
       Cell: ({ row }) =>
         row?.original?.warehouse ? (
           <h5 className="text-truncate" title={row?.original?.warehouse}>
@@ -286,7 +278,7 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
     {
       accessor: 'transactionDate',
       Header: 'Actual Transaction Date',
-      show: true,
+      show: false,
       disableFilters: true,
       disableSortBy: false,
       Cell: ({ row }) =>

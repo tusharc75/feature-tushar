@@ -112,6 +112,12 @@ const Report = () => {
                 }
             });
             if (type === 'inventory-evaluation') {
+                newColumns?.forEach((e) => {
+                    if (!['productName', 'productDescription', 'productNumber', 'productCategory', 'totalQty',
+                        'averagePrice', 'totalPrice', 'margin']?.includes(e.accessor)) {
+                        e.show = false;
+                    }
+                })
                 columns = [...newColumns, ActionsRenderer]
             }
             else {
