@@ -31,7 +31,7 @@ export default function Version({ onClose, quotationId, handleChangeVersion, ref
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showManageQuotationDialog, setShowManageQuotationDialog] = useState({ open: false, isClone: false, idToClone: null, versionId: null });
 
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
 
   useEffect(() => {
     fetchGridColumns();
