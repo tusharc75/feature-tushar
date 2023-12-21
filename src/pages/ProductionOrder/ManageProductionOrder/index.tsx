@@ -73,7 +73,7 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
             setCloneHeading(productionOrderNumber);
             setInitialData({
               fields: fieldsDataForCreate,
-              values: getObjKeysWithValues(rest, fieldsDataForCreate)
+              values: getObjKeysWithValues(rest, fieldsDataForCreate, true)
             });
             setLoading(false);
           } else {
@@ -237,8 +237,8 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
                                       imageOrFileUploadCompletePercentage={
                                         ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                           ? (completePercentage) => {
-                                              setUploadingImageOrFileProgress(completePercentage);
-                                            }
+                                            setUploadingImageOrFileProgress(completePercentage);
+                                          }
                                           : null
                                       }
                                     />

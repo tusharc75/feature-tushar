@@ -1,81 +1,63 @@
-import { Dialog, IconButton, Tooltip } from '@material-ui/core';
+import { Box, Button, Dialog, IconButton, Menu, MenuItem, Tooltip } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import DeleteIcon from '@material-ui/icons/Delete';
 import { camelCase } from 'lodash';
-import { FC, useContext, useEffect, useReducer, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
-import { BsCurrencyExchange, FaAddressCard, FaSuitcase, FaUser, IoCreate } from 'react-icons/all';
-import { useHistory } from 'react-router-dom';
+import { FC, useContext, useEffect, useState } from 'react';
+import { FaUser } from 'react-icons/all';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
 import CustomContainer from '../../components/CustomContainer';
-import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import ResourceTransferDialog from '../../components/ResourceTransferDialog';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { entity, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
-import useColumns, { getFrameworkComponents, getStaticFields } from '../../constants/useColumns';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
-import EntityHeader from './Header';
 import ManageEntity from './ManageEntity';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { cloneDisable } from 'src/constants/messageHelpers';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import styles from '../Leads/Header.module.scss';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
 
-let entityTimeout;
+let searchTimeout;
 
 const Entity: FC = () => {
-  const toastConfig = useContext(CustomToastContext);
-  const history = useHistory();
-
   const renderedFrom = camelCase(routes?.entity.title);
+  const toastConfig = useContext(CustomToastContext);
+
+  const { state, dispatch } = useTableReducer();
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { generateColumns } = useColumns();
 
   const {
-    state: { permissions, user }
+    state: { user, permissions }
   }: any = useData();
 
-  const { getColumnData } = useColumns();
   const [isOpen, setIsOpen] = useState({ open: false, isClone: false, entityId: null });
   const [renderCount, setRenderCount] = useState(0);
   const [usersDialogOpen, setUsersDialogOpen] = useState(false);
   const [usersDialogLoding, setUsersDialogLoding] = useState(false);
   const [users, setUsers] = useState([]);
   const [selectedEntity, setSelectedEntity] = useState(null);
-  const [columns, setColumns] = useState([]);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
+  const [columns, setColumns] = useState(null);
   const [deleteEntity, setDeleteEntity] = useState<any>({});
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const [roleAccessOfLoggedInUser, setRoleAccessOfLoggedInUser] = useState([]);
-
-  //  Grid Variables - Start
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
-    state;
-
-  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
-
-  if (columnState) {
-    columns.map((item) => {
-      columnState.map((d) => {
-        if (d.colId === item.field) {
-          item.show = !d.hide;
-        }
-      });
-    });
-  }
-  //  Grid Variables - End
+  const [anchorEl, setAnchorEl] = useState(null);
 
   const { entityResource, entityApi } = entity;
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (entityTimeout) {
-      clearTimeout(entityTimeout);
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
     }
 
-    entityTimeout = setTimeout(() => {
+    searchTimeout = setTimeout(() => {
       fetchEntity();
     }, millisec);
   }, [search]);
@@ -111,7 +93,7 @@ const Entity: FC = () => {
   }, [page, limit, filters, sorting, showFilteredRecordsOnly]);
 
   useEffect(() => {
-    if (selectedRecords.length === 1) {
+    if (selectedRecords?.length === 1) {
       fetchEntityUser(selectedRecords[0].id);
     } else {
       setUsers([]);
@@ -126,27 +108,88 @@ const Entity: FC = () => {
     axiosInstance()
       .get('/field?resource=Entity')
       .then(({ data: { data } }) => {
-        let columns = [];
-        let rendererNames = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.entityDetail.path, true);
-
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName);
-            }
-          }
-        });
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent,
-          actionsRenderer: ActionsRenderer
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
-        columns = [...columns, ...getStaticFields()];
-        setColumns([...columns]);
+        const newColumns = generateColumns(renderedFrom, data, routes.entityDetail.path, true);
+        setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
       });
+  };
+
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 130,
+    width: 140,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        <HtmlTooltip title={permissions[entityResource]?.isCreate ? 'Clone' : cloneDisable}>
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Clone"
+              disabled={!permissions[entityResource]?.isCreate}
+              onClick={() => {
+                setIsOpen({ open: true, isClone: true, entityId: row?.original?._id });
+              }}
+            >
+              <FileCopyIcon fontSize="small" color={permissions[entityResource]?.isCreate ? 'primary' : 'inherit'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+
+        <HtmlTooltip
+          title={
+            permissions[entityResource]?.isUpdate && permissions?.role.isRead && permissions?.user.isRead
+              ? 'Assign users'
+              : `You don't have permission to update this entity`
+          }
+        >
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              disabled={!(permissions[entityResource]?.isUpdate && permissions?.role.isRead && permissions?.user.isRead)}
+              onClick={() => {
+                fetchEntityUser(row?.original?._id);
+                setSelectedEntity(row?.original?._id);
+                setUsersDialogOpen(true);
+              }}
+            >
+              <FaUser className="dark:text-white" />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+
+        <HtmlTooltip
+          title={
+            !permissions[entityResource]?.isDelete
+              ? `You do not have permission to delete entity`
+              : row?.original?.createdById === user?.user?._id
+              ? 'Delete'
+              : `You must be the owner of this entity to get the delete functionality`
+          }
+        >
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              disabled={!(permissions[entityResource]?.isDelete && row?.original?.createdById === user?.user?._id)}
+              onClick={() => {
+                setDeleteEntity(row?.original);
+                setShowDeleteDialog(true);
+              }}
+            >
+              <DeleteIcon
+                fontSize="small"
+                color={permissions[entityResource]?.isDelete && row?.original?.createdById === user?.user?._id ? 'error' : 'disabled'}
+              />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+      </>
+    )
   };
 
   const fetchEntityUser = async (entityId) => {
@@ -162,59 +205,6 @@ const Entity: FC = () => {
         setUsersDialogLoding(false);
       });
   };
-
-  const ActionsRenderer = (params) => (
-    <>
-      <Tooltip
-        className={permissions[entityResource]?.isCreate ? '' : 'cursor-stop'}
-        title={permissions[entityResource]?.isCreate ? 'Clone' : 'You do not have permission to clone/create'}
-      >
-        <span>
-          <IconButton
-            size="small"
-            aria-label="Clone"
-            disabled={!permissions[entityResource]?.isCreate}
-            onClick={() => {
-              setIsOpen({ open: true, isClone: true, entityId: params.data._id });
-            }}
-          >
-            <FileCopyIcon fontSize="small" color={permissions[entityResource]?.isCreate ? 'primary' : 'inherit'} />
-          </IconButton>
-        </span>
-      </Tooltip>
-      {permissions[entityResource]?.isUpdate && permissions?.role.isRead && permissions?.user.isRead ? (
-        <Tooltip title="Assign users">
-          <IconButton
-            size="small"
-            aria-label="Assign users"
-            onClick={() => {
-              fetchEntityUser(params.data._id);
-              setSelectedEntity(params.data._id);
-              setUsersDialogOpen(true);
-            }}
-          >
-            <FaUser className="dark:text-white" />
-          </IconButton>
-        </Tooltip>
-      ) : (
-        <Tooltip className="cursor-stop" title={`You don't have permission to update this entity`}>
-          <IconButton size="small" aria-label="Assign users" className="dark:text-white">
-            <FaUser className="dark:text-white" />
-          </IconButton>
-        </Tooltip>
-      )}
-      <GridDeleteIcon
-        hasDeletePermission={permissions[entityResource]?.isDelete}
-        ownerId={params.data.createdById}
-        userId={user?.user?._id}
-        onDelete={() => {
-          setDeleteEntity(params?.data);
-          setShowDeleteDialog(true);
-        }}
-        entity="entity"
-      />
-    </>
-  );
 
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
@@ -239,19 +229,14 @@ const Entity: FC = () => {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
     }
     return deepFilter;
   };
 
   const fetchEntity = () => {
-    const queryString = getQueryString();
     dispatch({ type: 'loading', loading: true });
-
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
+    const queryString = getQueryString();
 
     axiosInstance()
       .get(`${entityApi}${queryString}`)
@@ -259,24 +244,10 @@ const Entity: FC = () => {
         let rows = data.map((u) => {
           return prepareDataForGrid(u);
         });
-        if (appendRows) {
-          dispatch({
-            type: 'initialize',
-            data: [...dataRows, ...rows],
-            count: count
-          });
-        } else {
-          dispatch({
-            type: 'initialize',
-            data: rows,
-            count: count
-          });
-        }
-        // dispatch({ type: 'initialize', data: rows, count: count });
+        dispatch({ type: 'initialize', data: rows, count: count });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        dispatch({ type: 'loading', loading: false });
       })
       .finally(() => {
         setTimeout(() => {
@@ -289,19 +260,20 @@ const Entity: FC = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-  const handleCreate = () => {
-    setIsOpen({ open: true, isClone: false, entityId: null });
-  };
-
   const handleClose = () => {
     setIsOpen({ open: false, isClone: false, entityId: null });
-  };
-  const handleOpenDialog = () => {
-    setUsersDialogOpen(true);
   };
 
   const handleCloseDialog = () => {
     setUsersDialogOpen(false);
+  };
+
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
   };
 
   return (
@@ -320,157 +292,149 @@ const Entity: FC = () => {
           recordsToExport={selectedRecords.length}
           ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
           onExportToExcelSuccess={() => {
-            if (gridApi) gridApi.deselectAll();
-            else fetchEntity();
+            fetchEntity();
           }}
         />
       </div>
 
       <CustomContainer>
         <div className="header-panel">
-          <EntityHeader
-            onSearch={handleSearch}
-            searchVal={search}
-            entityPermissions={permissions[entityResource]}
-            onCreate={handleCreate}
-            selectedRecords={selectedRecords}
-            canDelete={selectedRecords[0] && selectedRecords[0].createdById === user?.user?._id}
-            manageDeleteEntity={() => {
-              if (selectedRecords[0] && selectedRecords[0]?._id) {
-                setDeleteEntity(selectedRecords[0]);
-                setShowDeleteDialog(true);
-              }
-            }}
-            dispatch={dispatch}
-            columns={columns}
-            openUserDialog={handleOpenDialog}
-            anyEntitySelected={selectedRecords.length > 0} //single select entity can assign user
-            filters={filters}
-            resource={sidebarResource.entity}
-          />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className={'flex justify-between align-items-center gap-1 w-full'}></div>
+            <div className="flex flex-wrap gap-[8px] justify-end">
+              <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
+              <div className="flex gap-[8px] flex-wrap items-center">
+                <Button
+                  variant={'contained'}
+                  color="primary"
+                  size="small"
+                  className={`no-shadow`}
+                  disabled={!permissions[entityResource].isCreate}
+                  onClick={() => {
+                    setIsOpen({ open: true, isClone: false, entityId: null });
+                  }}
+                  startIcon={<AddOutlined />}
+                >
+                  Add
+                </Button>
+                <Button
+                  variant={'outlined'}
+                  color="default"
+                  size="small"
+                  onClick={openActions}
+                  className={`new-dropdown-v1`}
+                  aria-controls="action-menu"
+                  endIcon={<ExpandMore />}
+                  disabled={selectedRecords?.length === 0}
+                >
+                  Actions
+                </Button>
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  id="action-menu"
+                  open={Boolean(anchorEl)}
+                  onClose={closeActions}
+                >
+                  <MenuItem
+                    disabled={
+                      permissions[entityResource]?.isDelete && selectedRecords.length > 1
+                        ? true
+                        : Boolean(!(selectedRecords[0] && selectedRecords[0].createdById === user?.user?._id))
+                        ? true
+                        : false
+                    }
+                    onClick={() => {
+                      if (selectedRecords[0] && selectedRecords[0]?._id) {
+                        setDeleteEntity(selectedRecords[0]);
+                        setShowDeleteDialog(true);
+                      }
+                      closeActions();
+                    }}
+                  >
+                    Delete
+                  </MenuItem>
+                  <MenuItem
+                    disabled={!(permissions[entityResource]?.isUpdate && selectedRecords?.length)}
+                    onClick={() => {
+                      setUsersDialogOpen(true);
+                      closeActions();
+                    }}
+                  >
+                    Assign User
+                  </MenuItem>
+                </Menu>
+              </div>
+            </div>
+          </div>
         </div>
-        {isMobile && !isTablet ? (
-          <CustomSwipableList
-            allowSelection={true}
-            allowSwipe={true}
-            permissions={permissions.entity}
-            primaryField={columns?.find((d) => d.field === 'entityName')}
-            onClick={(d) => {
-              history.push(`${routes.entityDetail.path}/${d._id}`);
-            }}
-            dataRows={dataRows}
-            selectedRecords={selectedRecords}
-            dispatch={dispatch}
-            onEdit={(d) => {
-              history.push(`${routes.entityDetail.path}/${d._id}`);
-            }}
-            extraParamsToCheckDelete={false}
-            onDelete={(d) => {}}
-            rowCount={rowCount}
-            page={page}
-            loading={loading}
-            actionCol={(data) => {
-              const params = { data };
-              return <ActionsRenderer {...params} />;
-            }}
-            additionalDetails={[
-              {
-                icon: <FaSuitcase />,
-                field: 'parentEntity'
-              }
-            ]}
-            chips={[
-              {
-                icon: <BsCurrencyExchange />,
-                label: 'Currency: ',
-                field: 'currency'
-              },
-              {
-                icon: <FaAddressCard />,
-                label: 'Address: ',
-                field: 'address'
-              },
-              {
-                icon: <IoCreate />,
-                label: 'Created By: ',
-                field: 'createdBy'
-              }
-            ]}
-            owerCollaboratorInitialsOrImages=""
-            onCreate={false}
-            showClone={false}
-            onClone={() => {}}
-            renderedFrom={renderedFrom}
-          />
-        ) : Object.keys(frameWorkComponent).length > 0 ? (
-          <CustomAgGrid
+
+        {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
             columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameWorkComponent}
-            setGridApi={setGridApi}
+            state={state}
             dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            actionWidth={150}
-            loading={loading}
             renderedFrom={renderedFrom}
             refreshGrid={fetchEntity}
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
             resource={sidebarResource.entity}
           />
-        ) : null}
-
-        {isOpen?.open && (
-          <ManageEntity
-            open={isOpen}
-            close={handleClose}
-            fetchData={fetchEntity}
-            isNew={true}
-            entityId={isOpen?.entityId}
-            isClone={isOpen?.isClone}
-          />
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
         )}
-        {usersDialogOpen && !usersDialogLoding && (
-          <Dialog fullWidth maxWidth="sm" open={usersDialogOpen} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
-            <AssignEntityDialog
-              entitiesDialogOpen={usersDialogOpen}
-              handleCloseDialog={handleCloseDialog}
-              type="user"
-              ids={selectedEntity ? [selectedEntity] : selectedRecords.map((rec) => rec._id)}
-              assignedEntity={users}
-              regionalRole={false}
-              onSuccess={() => {
-                setSelectedEntity(null);
-                handleCloseDialog();
-              }}
-              roleAccessIds={roleAccessOfLoggedInUser}
-            />
-          </Dialog>
-        )}
-        {showDeleteDialog ? (
-          <ResourceTransferDialog
-            open={true}
-            fromResource={{ ...deleteEntity, name: deleteEntity.entityName ?? '' }}
-            allResourceData={user?.entity
-              ?.filter((entity) => entity._id !== deleteEntity?._id)
-              .map((e) => ({ ...e, optionLabel: e?.entityName, optionValue: e?._id }))}
-            onClose={() => {
-              setDeleteEntity({});
-              setShowDeleteDialog(false);
-            }}
-            handleDelete={() => {
-              setDeleteEntity({});
-              setShowDeleteDialog(false);
-              fetchEntity();
-            }}
-            resource="Entity"
-            selectedRecords={selectedRecords}
-          />
-        ) : null}
       </CustomContainer>
+
+      {isOpen?.open && (
+        <ManageEntity open={isOpen} close={handleClose} fetchData={fetchEntity} isNew={true} entityId={isOpen?.entityId} isClone={isOpen?.isClone} />
+      )}
+
+      {usersDialogOpen && !usersDialogLoding && (
+        <Dialog fullWidth maxWidth="sm" open={usersDialogOpen} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
+          <AssignEntityDialog
+            entitiesDialogOpen={usersDialogOpen}
+            handleCloseDialog={handleCloseDialog}
+            type="user"
+            ids={selectedEntity ? [selectedEntity] : selectedRecords.map((rec) => rec._id)}
+            assignedEntity={users}
+            regionalRole={false}
+            onSuccess={() => {
+              setSelectedEntity(null);
+              handleCloseDialog();
+            }}
+            roleAccessIds={roleAccessOfLoggedInUser}
+          />
+        </Dialog>
+      )}
+
+      {showDeleteDialog ? (
+        <ResourceTransferDialog
+          open={true}
+          fromResource={{ ...deleteEntity, name: deleteEntity.entityName ?? '' }}
+          allResourceData={user?.entity
+            ?.filter((entity) => entity._id !== deleteEntity?._id)
+            .map((e) => ({ ...e, optionLabel: e?.entityName, optionValue: e?._id }))}
+          onClose={() => {
+            setDeleteEntity({});
+            setShowDeleteDialog(false);
+          }}
+          handleDelete={() => {
+            setDeleteEntity({});
+            setShowDeleteDialog(false);
+            fetchEntity();
+          }}
+          resource="Entity"
+          selectedRecords={selectedRecords}
+        />
+      ) : null}
     </section>
   );
 };

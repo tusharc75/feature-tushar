@@ -1,130 +1,123 @@
-import { Button, IconButton, Menu, MenuItem, Tooltip } from '@material-ui/core';
-import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import CustomContainer from 'src/components/CustomContainer';
-import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
-import routes from 'src/components/Helpers/Routes';
-import SearchBox from 'src/components/Helpers/SearchBox';
-import { camelCase } from 'lodash';
-import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
-import { useData } from 'src/StateProvider/Provider';
-import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import { MdAdd, MdOutlineFilterAlt } from 'react-icons/md';
-import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
-import axiosInstance from 'src/axios/axiosInstance';
-import { getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, removeLocalStorage, sidebarResource } from 'src/constants/helpers';
-import { useHistory } from 'react-router-dom';
-import DeleteIcon from '@material-ui/icons/Delete';
+import { Button, IconButton } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { useContext, useEffect, useState } from 'react';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
+import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import routes from './../../components/Helpers/Routes';
+import { camelCase } from 'lodash';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import ManageAccountsReceivable from './ManageAccountsReceivable';
+import SearchBox from 'src/components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
-import queryString from 'query-string';
-import ManageAccountsReceivale from './ManageAccountsReceivable';
-import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
-import MobileFilterDialog, { DisplayFiltersForMobile } from 'src/components/MobileFilterDialog';
-import MobileSortDialog from 'src/components/MobileSortDialog';
-import { TbArrowsSort } from 'react-icons/tb';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import { Menu, MenuItem, Box } from '@material-ui/core';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import DeleteIcon from '@material-ui/icons/Delete';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+
+let searchTimeout;
 
 const AccountsReceivable = () => {
   const renderedFrom = camelCase(routes?.accountsReceivable.title);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
-
   const toastConfig = useContext(CustomToastContext);
+  const { state, dispatch } = useTableReducer();
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { generateColumns } = useColumns();
+
   const {
-    state: { permissions, selectedEntity, user }
+    state: { user, permissions, selectedEntity }
   }: any = useData();
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
-    state;
-  const [accountReceivableId, setAccountReceivableId] = useState(null);
-  const [open, setOpen] = useState({ open: false, isClone: false });
-  const [anchorEl, setAnchorEl] = useState(null);
-  const history = useHistory();
-  const { type }: any = queryString.parse(history.location.search);
-  const [deleteRecord, setDeleteRecord] = useState(null);
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
-  const [columns, setColumns] = useState([]);
-  const [gridApi, setGridApi] = useState(null);
-  const { getColumnData } = useColumns();
-  const { isOffline } = useContext(CustomOfflineContext);
+  const [deleteRecord, setDeleteRecord] = useState(null);
+  const [columns, setColumns] = useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  useEffect(() => {
+    fetchGridColumns();
+  }, []);
+
+  useEffect(() => {
+    let millisec = Object.keys(search).length > 0 ? 600 : 5;
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+    searchTimeout = setTimeout(() => {
+      fetchData();
+    }, millisec);
+  }, [search]);
+
+  useEffect(() => {
+    fetchData();
+  }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
     let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource?.accountsReceivable}`);
+    const response = await axiosInstance().get(`/field?resource=${sidebarResource.accountsReceivable}`);
     data = response?.data?.data;
-    let columns = [];
-    let rendererNames = [];
-    data.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.accountsReceivable.path, true);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-          rendererNames.push(currentColumn?.rendererName);
-        }
-      }
-    });
-    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-    tempFrameworkComponent = {
-      ...tempFrameworkComponent,
-      actionsRenderer: ActionsRenderer
-    };
-    setFrameWorkComponent({ ...tempFrameworkComponent });
-    columns = [...columns, ...getStaticFields()];
-    setColumns([...columns]);
+    const newColumns = generateColumns(renderedFrom, data, routes.accountsReceivable.path, true)
+    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
-  const fetchData = async () => {
-    dispatch({ type: 'loading', loading: true });
-    const queryString = getQueryString();
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
-    axiosInstance()
-      .get(`${routes?.accountsReceivable.path}${queryString}`)
-      .then(({ data: { data, count } }) => {
-        let rows = data?.map((u: any) => {
-          let finalObject: any = prepareDataForGrid(u);
-          finalObject['canDelete'] = permissions?.fieldTicket?.isDelete && u?.canDelete;
-          finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions?.accountsReceivable?.isUpdate;
-          return {
-            ...finalObject
-          };
-        });
-        if (appendRows) {
-          dispatch({
-            type: 'initialize',
-            data: [...dataRows, ...rows],
-            count: count
-            // selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
-          });
-        } else {
-          dispatch({
-            type: 'initialize',
-            data: rows,
-            count: count
-            // selectedRecords: rows.filter((f) => f.isChecked === true)
-          });
-        }
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
-      });
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 110,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        <HtmlTooltip title={permissions?.accountsReceivable?.isCreate ? 'Clone' : cloneDisable}>
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Clone"
+              disabled={permissions?.accountsReceivable?.isCreate ? false : true}
+              onClick={() => {
+                setShowManageDialog({ open: true, isClone: true, idToClone: row.original._id });
+              }}
+            >
+              <FileCopyIcon fontSize="small" color={permissions?.accountsReceivable?.isCreate ? 'primary' : 'disabled'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              disabled={row?.original?.canDelete ? false : true}
+              onClick={() => {
+                setDeleteRecord(row.original);
+                setShowDeleteConfirmBox(true);
+              }}
+            >
+              <DeleteIcon color={row?.original?.canDelete ? 'error' : 'disabled'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+      </>
+    )
   };
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
-
-    if (selectedEntity) {
-      deepFilter = `${deepFilter}&entity=${selectedEntity}`;
+    let deepFilter = `?page=${page}&limit=${limit}`;
+    if (isExport) {
+      deepFilter = `?`;
     }
-
     const { filterByIds, deepFilters } = gridFilterParser(filters);
-
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
@@ -134,19 +127,69 @@ const AccountsReceivable = () => {
     if (filterByIds?.length || deepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
     }
-
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
-
     if (search) {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
     }
     return deepFilter;
+  };
+
+  const fetchData = async () => {
+    dispatch({ type: 'loading', loading: true });
+    const queryString = getQueryString();
+    axiosInstance()
+      .get(`${routes?.accountsReceivable.path}${queryString}`)
+      .then(({ data: { data, count } }) => {
+        let rows = data.map((u) => {
+          let finalObject = prepareDataForGrid(u, user);
+          finalObject['canDelete'] = permissions?.fieldTicket?.isDelete && u?.canDelete;
+          finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
+          finalObject['allowedToEdit'] = permissions?.accountsReceivable?.isUpdate;
+          return finalObject;
+        });
+        dispatch({ type: 'initialize', data: rows, count: count });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      })
+      .finally(() => {
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
+      });
+  };
+
+  const handleSearch = (e) => {
+    dispatch({ type: 'search', search: e.target.value });
+  };
+
+  const handleDelete = () => {
+    setIsSubmitting(true);
+    let ids = [];
+    if (deleteRecord) {
+      ids.push(deleteRecord._id);
+    } else {
+      ids = selectedRecords?.map((d) => d._id);
+    }
+    axiosInstance()
+      .put(`${routes?.accountsReceivable.path}/remove`, { ids: ids })
+      .then(() => {
+        dispatch({ type: 'selection', selectedRecords: [] });
+        fetchData();
+        setShowDeleteConfirmBox(false);
+        setDeleteRecord(null);
+        setAnchorEl(null);
+        setIsSubmitting(false);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setIsSubmitting(false);
+      });
   };
 
   const openActions = (event) => {
@@ -157,120 +200,23 @@ const AccountsReceivable = () => {
     setAnchorEl(null);
   };
 
-  const handleSearch = (e) => {
-    dispatch({ type: 'search', search: e.target.value });
-  };
-
-  const ActionsRenderer = (params) => (
-    <Fragment>
-      <Tooltip title="Clone">
-        <IconButton
-          size="small"
-          aria-label="Clone"
-          onClick={() => {
-            setAccountReceivableId(params.data.id);
-            setOpen({ open: true, isClone: true });
-          }}
-        >
-          <FileCopyIcon fontSize="small" color="primary" />
-        </IconButton>
-      </Tooltip>
-
-      {params?.data?.canDelete ? (
-        <Tooltip title="Delete">
-          <IconButton
-            aria-label="Delete"
-            onClick={() => {
-              setDeleteRecord(params.data);
-              setShowDeleteConfirmBox(true);
-            }}
-          >
-            <DeleteIcon fontSize="small" color="error" />
-          </IconButton>
-        </Tooltip>
-      ) : (
-        <Tooltip className="cursor-stop" title="You do not have permission to delete">
-          <IconButton aria-label="Delete">
-            <DeleteIcon fontSize="small" color="disabled" />
-          </IconButton>
-        </Tooltip>
-      )}
-    </Fragment>
-  );
-
-  const handleDelete = async () => {
-    let ids = [];
-    if (deleteRecord) {
-      ids.push(deleteRecord._id);
-    } else {
-      ids = selectedRecords.map((m) => m._id);
-    }
-
-    axiosInstance()
-      .put(`${routes?.accountsReceivable?.path}/remove`, { ids: ids })
-      .then(({ data }) => {
-        removeLocalStorage(localStorageSelectedRecords);
-        fetchData();
-        setShowDeleteConfirmBox(false);
-        setDeleteRecord(null);
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data?.message
-        });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  };
-
-  useEffect(() => {
-    fetchGridColumns();
-  }, []);
-
-  useEffect(() => {
-    fetchData();
-  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, isOffline]);
-
-  const [isOpenDialog, setisOpenDialog] = useState(false);
-  const [openSort, setOpenSort] = useState(false);
-
-  const handleOpen = () => {
-    setisOpenDialog(true);
-  };
-
-  const handleClose = () => {
-    setisOpenDialog(false);
-  };
-
-  const handleClickOpen = () => {
-    setOpenSort(true);
-  };
-
-  const handleClickClose = () => {
-    setOpenSort(false);
-  };
-
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: routes.accountsReceivable.title }]} />
+        <CustomBreadCrumbs routes={[routes.accountsReceivable]} />
         <ImportExportLinks
-          permissions={permissions.accountsReceivable}
-          module="accountsReceivable"
-          api={'accounts-receivable'}
-          afterImportCompleted={fetchData}
+          permissions={permissions?.accountsReceivable}
+          module={routes.accountsReceivable.title}
+          api={routes?.accountsReceivable.path}
+          afterImportCompleted={() => {
+            fetchData();
+          }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
-          recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-          ids={
-            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-              ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-              : []
-          }
+          recordsToExport={selectedRecords?.length}
+          ids={selectedRecords?.map((obj) => obj._id)}
           onExportToExcelSuccess={() => {
-            if (gridApi) gridApi.deselectAll();
-            else fetchData();
+            fetchData();
           }}
           additionalParams={getQueryString(true)}
         />
@@ -278,68 +224,19 @@ const AccountsReceivable = () => {
       <CustomContainer>
         <div className="header-panel">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className={'flex justify-between align-items-center gap-1 w-full'}>
-              {isMobile && !isTablet && (
-                <div className="flex flex-wrap items-center gap-1 justify-end">
-                  <IconButton
-                    size="small"
-                    className={'mobileIconButton secondary'}
-                    onClick={handleClickOpen}
-                    id="demo-customized-button"
-                    aria-controls="demo-customized-menu"
-                    aria-haspopup="true"
-                    aria-expanded={open ? 'true' : undefined}
-                    style={isTablet ? { marginLeft: '50px' } : {}}
-                  >
-                    <TbArrowsSort className="rotate-90" size={16} />
-                  </IconButton>
-
-                  <MobileSortDialog
-                    isOpen={openSort}
-                    handleClose={handleClickClose}
-                    contentPart={''}
-                    secHeading={['Sort Repair Job']}
-                    columns={columns}
-                    dispatch={dispatch}
-                  />
-
-                  <IconButton
-                    size="small"
-                    onClick={handleOpen}
-                    id="demo-customized-button"
-                    aria-controls="demo-customized-menu"
-                    aria-haspopup="true"
-                    aria-expanded={open ? 'true' : undefined}
-                    className={'mobileIconButton secondary'}
-                  >
-                    <MdOutlineFilterAlt size={16} />
-                  </IconButton>
-                  <MobileFilterDialog
-                    isOpen={isOpenDialog}
-                    handleClose={handleClose}
-                    contentPart={''}
-                    columns={columns}
-                    dispatch={dispatch}
-                    title={routes?.repairJob?.title}
-                    filters={filters}
-                    resource={sidebarResource.accountsReceivable}
-                  />
-                </div>
-              )}
-            </div>
-            <div className="flex flex-wrap gap-[8px]  justify-end">
-              <SearchBox onChange={handleSearch} className={styles.search_box_input} size="small" value={search} />
+            <div className={'flex justify-between align-items-center gap-1 w-full'}></div>
+            <div className="flex flex-wrap gap-[8px] justify-end">
+              <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
               <div className="flex gap-[8px] flex-wrap items-center">
-                {permissions?.accountsReceivable.isCreate && (
+                {permissions?.accountsReceivable?.isCreate && (
                   <Button
+                    variant={'contained'}
+                    color="primary"
+                    size="small"
                     className={`no-shadow`}
                     onClick={() => {
-                      setAccountReceivableId(null);
-                      setOpen({ open: true, isClone: false });
+                      setShowManageDialog({ open: true, isClone: false, idToClone: null });
                     }}
-                    variant={'contained'}
-                    size="small"
-                    color="primary"
                     startIcon={<AddOutlined />}
                   >
                     Add
@@ -352,10 +249,10 @@ const AccountsReceivable = () => {
                       color="default"
                       size="small"
                       onClick={openActions}
-                      disabled={selectedRecords.length ? false : true}
+                      className={`new-dropdown-v1`}
                       aria-controls="action-menu"
-                      className={` new-dropdown-v1`}
                       endIcon={<ExpandMore />}
+                      disabled={selectedRecords?.length ? false : true}
                     >
                       Actions
                     </Button>
@@ -385,96 +282,56 @@ const AccountsReceivable = () => {
                           setShowDeleteConfirmBox(true);
                         }}
                       >
-                        Delete
+                        {`Delete (${selectedRecords?.length})`}
                       </MenuItem>
                     </Menu>
                   </>
                 )}
               </div>
             </div>
-            <DisplayFiltersForMobile resource={sidebarResource.accountsReceivable} />
           </div>
         </div>
-        {Object.keys(frameWorkComponent).length > 0 ? (
-          isMobile && !isTablet ? (
-            <CustomSwipableList
-              allowSelection={true}
-              allowSwipe={true}
-              permissions={permissions.accountsReceivable}
-              primaryField={columns?.find((d) => d.primaryField)}
-              onClick={(data) => {
-                history.push(`${routes.accountsReceivable.path}/${data.id}`);
-              }}
-              dataRows={dataRows}
-              selectedRecords={selectedRecords}
-              dispatch={dispatch}
-              onEdit={(data) => {
-                setAccountReceivableId(data.id);
-                setOpen({ open: true, isClone: false });
-              }}
-              extraParamsToCheckDelete={true}
-              onDelete={(data) => {
-                setDeleteRecord(data);
-                setShowDeleteConfirmBox(true);
-              }}
-              rowCount={rowCount}
-              page={page}
-              loading={loading}
-              additionalDetails={[]}
-              owerCollaboratorInitialsOrImages=""
-              onCreate={false}
-              showClone={true}
-              onClone={(data) => {
-                setAccountReceivableId(data.id);
-                setOpen({ open: true, isClone: true });
-              }}
-              chips={[]}
-              renderedFrom={renderedFrom}
-            />
-          ) : (
-            <CustomAgGrid
-              columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameWorkComponent}
-              setGridApi={setGridApi}
-              dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              allowAction={true}
-              loading={loading}
-              renderedFrom={renderedFrom}
-              refreshGrid={fetchData}
-              showOnlyShowFilteredRecordSwitch={true}
-              showFilters={true}
-              resource={sidebarResource.accountsReceivable}
-            />
-          )
-        ) : null}
-        {showDeleteConfirmBox && (
-          <ConfirmationDialog
-            open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete Account Receivable  ${deleteRecord?.arNumber || ''} ?`}
-            onClose={() => {
-              setDeleteRecord(null);
-              setShowDeleteConfirmBox(false);
-            }}
-            onOk={handleDelete}
+        {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            refreshGrid={fetchData}
+            showOnlyShowFilteredRecordSwitch={true}
+            showFilters={true}
+            resource={sidebarResource.accountsReceivable}
           />
-        )}
-        {open?.open && (
-          <ManageAccountsReceivale
-            id={accountReceivableId}
-            isClone={open?.isClone}
-            onClose={() => setOpen({ open: false, isClone: false })}
-            onSuccess={() => {
-              setOpen({ open: false, isClone: false });
-              fetchData();
-            }}
-          />
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
         )}
       </CustomContainer>
+      {showDeleteConfirmBox && (
+        <ConfirmationDialog
+          open={showDeleteConfirmBox}
+          message={`Are you sure you want to delete ${routes?.accountsReceivable?.title} ${deleteRecord?.arNumber || ''} ?`}
+          onClose={() => {
+            setDeleteRecord(null);
+            setShowDeleteConfirmBox(false);
+          }}
+          okBtnLoading={isSubmitting}
+          onOk={handleDelete}
+        />
+      )}
+      {showManageDialog.open && (
+        <ManageAccountsReceivable
+          isClone={showManageDialog.isClone}
+          id={showManageDialog.idToClone}
+          onClose={() => setShowManageDialog({ open: false, isClone: false, idToClone: null })}
+          onSuccess={() => {
+            fetchData();
+            setShowManageDialog({ open: false, isClone: false, idToClone: null });
+          }}
+        />
+      )}
     </section>
   );
 };

@@ -3,21 +3,21 @@ import { Box, IconButton } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { salesOrder, sidebarResource } from '../../../constants/helpers';
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import { startCase } from 'lodash';
 import { fetch_salesOrder_product_fields } from 'src/components/SalesOrder/helper';
-import { generateCustomTableColumns } from 'src/constants/columns';
 import routes from 'src/components/Helpers/Routes';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
 const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
-  const toastConfig = useContext(CustomToastContext);
   const renderedFrom = `${routes.salesOrder.title}_Process`;
 
-  const [columns, setColumns] = useState([]);
-  const [rowsData, setRowsData] = useState(null);
+  const [columns, setColumns] = useState(null);
+
+  const { state, dispatch } = useTableReducer();
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchFields();
@@ -25,13 +25,14 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
 
   const fetchFields = async () => {
     var data = await fetch_salesOrder_product_fields(salesOrderData?.currency);
-    const newColumns = generateCustomTableColumns(data, salesOrderData?.currency, renderedFrom);
+    const newColumns = generateColumns(renderedFrom, data, null, false, salesOrderData?.currency);
     let coloum: any = [
       {
         accessor: 'index',
         Header: 'Index',
-        width: 70,
-        sticky: isMobile ? 'none' : 'left',
+        width: 100,
+        sticky: 'left',
+        disableFilters: false,
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
@@ -40,7 +41,7 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
       {
         accessor: 'type',
         Header: 'Type',
-        sticky: isMobile ? 'none' : 'left',
+        sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p>{`${startCase(row.original?.type)} `}</p>
@@ -50,27 +51,29 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
       {
         accessor: 'detail',
         Header: 'Detail',
+        disabled: true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
         width: 200,
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-          {<p title={row.original?.detail}>{row.original?.detail}</p>}
-          <Box ml={1}>
-            <IconButton
-              size="small"
-              onClick={() => {
-                if (row.original.type === 'service') {
-                  window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                } else if (row.original.type === 'product') {
-                  window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                } else {
-                  window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                }
-              }}
-            >
-              <OpenInNewIcon fontSize="small" color="primary" />
-            </IconButton>
-          </Box>
-        </div>
+            {<p title={row.original?.detail}>{row.original?.detail}</p>}
+            <Box ml={1}>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  if (row.original.type === 'service') {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'product') {
+                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                  } else {
+                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  }
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
+            </Box>
+          </div>
         )
       },
       {
@@ -116,9 +119,9 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
         Header: 'Lead Time (Days)',
         Cell: ({ row }) => (row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0),
         Footer: (info) => {
-          const total = info.rows
-            .filter((f) => f.values.hasOwnProperty('leadTime') && !isNaN(f.values['leadTime']))
-            .reduce((sum, row) => parseInt(row.values['leadTime']) + sum, 0);
+          let rows = info.table.getExpandedRowModel().rows;
+          const total = rows?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
+            .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
           return <>{total}</>;
         }
       }
@@ -129,6 +132,10 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
   };
 
   const fetchData = async () => {
+
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
+
     setNextStep(false);
 
     await axiosInstance().put(`${salesOrder.api}/material-procurement/${salesOrderData._id}`);
@@ -140,19 +147,18 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
     const rows = material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === 'product'
+      parent.detail = `${parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
-      }`;
+            ? parent.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName
+        }`;
       parent.description =
         parent.type === 'product'
           ? parent?.productDetail?.productDescription
           : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription
-          : parent?.serviceDetail?.serviceDescription;
+            ? parent?.packageDetail?.packageDescription
+            : parent?.serviceDetail?.serviceDescription;
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qty = parent.qty;
@@ -162,25 +168,26 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
       parent.subRows = generateNestedData(material, parent);
     });
     setNextStep(true);
-    setRowsData(rows);
+
+    dispatch({ type: 'initialize', data: rows, count: rows?.length });
+    dispatch({ type: 'loading', loading: false });
   };
 
   const generateNestedData = (material, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
-      _subRow.detail = `${
-        _subRow.type === 'product'
+      _subRow.detail = `${_subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.packageDetail?.packageName
-      }`;
+            ? _subRow.serviceDetail?.serviceName
+            : _subRow.packageDetail?.packageName
+        }`;
       _subRow.description =
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productDescription
           : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription
-          : _subRow?.serviceDetail?.serviceDescription;
+            ? _subRow?.packageDetail?.packageDescription
+            : _subRow?.serviceDetail?.serviceDescription;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qty = `${parent.qty * _subRow.qty} `;
@@ -193,19 +200,19 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
 
   return (
     <div>
-      {columns && rowsData ? (
+      {columns ? (
         <>
           <Box zIndex={5} width={'100%'} mt={3}>
             <CustomReactTable
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
               columns={columns}
-              data={rowsData}
-              onSelect={() => {}}
-              childrenProperty="subRows"
-              uniqueKey="_id"
-              renderedFrom="sales_order_product_package"
+              state={state}
+              dispatch={dispatch}
+              expander={true}
+              renderedFrom={renderedFrom}
               isClientSideGrid={true}
               hideSelection={true}
+              refreshGrid={fetchData}
             />
           </Box>
         </>

@@ -37,6 +37,9 @@ import EditIcon from '@material-ui/icons/Edit';
 import CloseIcon from '@material-ui/icons/Close';
 import { RiFileShredFill } from 'react-icons/ri';
 import Diagram from './Diagram';
+import { ExpandMore } from '@material-ui/icons';
+import { VscVersions } from 'react-icons/vsc';
+import Versions from './Versions';
 
 const WorkOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -56,16 +59,22 @@ const WorkOrderDetails = () => {
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [locationKeys, setLocationKeys] = useState([]);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [statusOptions, setStatusOptions] = useState([]);
   const [completed, setCompleted] = useState(false);
 
   const [showConfirmBoxScrap, setShowConfirmBoxScrap] = useState(false);
+  const [addAnchorEl, setAddAnchorEl] = useState(null);
+
+  const [showConfirmVersion, setShowConfirmVersion] = useState({ open: false, withData: 0 });
+  const [versionDialog, setVersionDialog] = useState(false);
 
   const columns = [
+    { accessor: 'index', Header: 'Index' },
     { accessor: 'serviceName', Header: 'Service' },
     { accessor: 'serviceType', Header: 'Service Type' },
     { accessor: 'assignedTechnician', Header: 'Assigned Technician' },
+    { accessor: 'assignedWorkStation', Header: 'Assigned WorkStation' },
+    { accessor: 'startDate', Header: 'Start Date' },
+    { accessor: 'endDate', Header: 'End Date' },
     { accessor: 'status', Header: 'Status' },
     { accessor: 'serviceStatus', Header: 'Result' }
   ];
@@ -121,12 +130,6 @@ const WorkOrderDetails = () => {
           }
         ];
         setWorkOrderFields(adjustedData);
-        adjustedData?.some((o) => {
-          if (o?.fieldData?.fieldName === 'status') {
-            setStatusOptions([...o.fieldData.option?.filter((e) => e.optionValue !== 'Deleted')]);
-            return true;
-          }
-        });
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -155,7 +158,7 @@ const WorkOrderDetails = () => {
       .put(`${workOrder.api}/remove`, { ids: [id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.push(`${routes.workOrder.path}`)
+        history.push(`${routes.workOrder.path}`);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -191,26 +194,36 @@ const WorkOrderDetails = () => {
       });
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
-
-  const handleStatusChange = (o) => {
-    if (o.optionValue && workOrderData?.status !== o.optionValue) {
-      updateJobStatus(o.optionValue);
-    }
-  };
-
   function a11yProps(index: any) {
     return {
       id: `main-tab-${index}`,
       'aria-controls': `main-tabpanel-${index}`
     };
   }
+
+  const openAddActions = (event) => {
+    setAddAnchorEl(event.currentTarget);
+  };
+
+  const closeAddActions = () => {
+    setAddAnchorEl(null);
+  };
+
+  const createVersion = (withData) => {
+    axiosInstance()
+      .put(`${workOrder.api}/${id}/version`, { withData })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        fetchWorkOrderData();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
 
   return (
     <Box className="main-container-v1">
@@ -256,6 +269,56 @@ const WorkOrderDetails = () => {
                       </HtmlTooltip>
                     </div>
                   )}
+                {permissions?.workOrder?.isUpdate && allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.completed && !workOrderData?.deleted && (
+                  <Button variant={'contained'} size="small" className={'btn-outline-v1'} onClick={openAddActions} aria-controls="add-menu">
+                    {'Create Version'}
+                    <ExpandMore fontSize="small" />
+                  </Button>
+                )}
+                {workOrderData?.versions?.length && (
+                  <Button
+                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                    color="primary"
+                    size="small"
+                    className={'btn-outline-v1'}
+                    onClick={() => {
+                      setVersionDialog(true);
+                    }}
+                    style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                    startIcon={isMobile && !isTablet ? null : <VscVersions />}
+                  >
+                    {isMobile && !isTablet ? <VscVersions size={20} /> : `Versions : ${workOrderData?.versions?.length + 1}`}
+                  </Button>
+                )}
+                <Menu
+                  anchorEl={addAnchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  id="add-menu"
+                  open={Boolean(addAnchorEl)}
+                  onClose={closeAddActions}
+                >
+                  <MenuItem
+                    onClick={() => {
+                      closeAddActions();
+                      setShowConfirmVersion({ open: true, withData: 0 });
+                    }}
+                  >
+                    Without Existing Data
+                  </MenuItem>
+                  <MenuItem
+                    onClick={() => {
+                      closeAddActions();
+                      setShowConfirmVersion({ open: true, withData: 1 });
+                    }}
+                  >
+                    With Existing Data
+                  </MenuItem>
+                </Menu>
                 <PreviewDownload
                   fileName={`${routes.workOrder.title}-${workOrderData?.workOrderNumber}`}
                   resource={sidebarResource.workOrder}
@@ -286,7 +349,7 @@ const WorkOrderDetails = () => {
               resourceLabel={workOrderData?.workOrderNumber}
               extraRelatedTo={{
                 referenceId: workOrderData?.repairOrder?.optionValue,
-                resource: ACTIVITY_RESOURCE.repairOrder,
+                resource: ACTIVITY_RESOURCE.repairOrder
               }}
             />
           </Box>
@@ -305,14 +368,14 @@ const WorkOrderDetails = () => {
               <BiFoodMenu className="mr-1" fontSize="inherit" /> Products/Consumables
             </CustomTab>
           )}
-          {workOrderData?.type === WORK_ORDER_TYPE.productionOrder && (
+          {user?.user?.brandPolicy?.workOrderBom && (
             <CustomTab index={3} value={3} className={'tabLayout'} {...a11yProps(3)}>
               <BiFoodMenu className="mr-1" fontSize="inherit" /> BOM
             </CustomTab>
           )}
           {workOrderData?.type === WORK_ORDER_TYPE.productionOrder && (
             <CustomTab index={4} value={4} className={'tabLayout'} {...a11yProps(4)}>
-              <BiFoodMenu className="mr-1" fontSize="inherit" /> Diagram
+              <BiFoodMenu className="mr-1" fontSize="inherit" /> Drawing
             </CustomTab>
           )}
           {!(isMobile && !isTablet) && (
@@ -374,7 +437,7 @@ const WorkOrderDetails = () => {
           )}
         </TabPanel>
         <TabPanel value={tabValue} index={4}>
-          {workOrderData && <Diagram resource={'workOrder'} referenceId={id} />}
+          {workOrderData && <Diagram resource={'workOrder'} referenceId={id} currentVersion={(workOrderData?.versions?.length + 1) || 1} />}
         </TabPanel>
         <TabPanel value={tabValue} index={5}>
           <Box>
@@ -406,6 +469,21 @@ const WorkOrderDetails = () => {
           }}
         />
       )}
+
+      {showConfirmVersion.open && (
+        <ConfirmationDialog
+          open={showConfirmVersion.open}
+          message={`Are you sure you want to new version ?`}
+          onClose={() => {
+            setShowConfirmVersion({ open: false, withData: 0 });
+          }}
+          onOk={() => {
+            createVersion(showConfirmVersion.withData);
+            setShowConfirmVersion({ open: false, withData: 0 });
+          }}
+        />
+      )}
+
       {openUpdateDialog && (
         <ManageWorkOrder
           workOrderId={id}
@@ -415,6 +493,15 @@ const WorkOrderDetails = () => {
           onSuccess={() => {
             fetchWorkOrderData();
             setOpenUpdateDialog(false);
+          }}
+        />
+      )}
+      {versionDialog && (
+        <Versions
+          workOrderId={id}
+          workOrderData={workOrderData}
+          handleClose={() => {
+            setVersionDialog(false);
           }}
         />
       )}

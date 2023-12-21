@@ -8,7 +8,6 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import AddExistingProductInventory from './AddExistingProductInventory';
-import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -20,19 +19,21 @@ import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/Offl
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BiChevronDown } from 'react-icons/bi';
-import { calculateRowsFieldNew, fetch_rental_product_fields, getNestedSubRows } from '../../../components/RentalManagment/helper';
-import { startCase } from 'lodash';
+import { calculateRowsField, fetch_rental_product_fields, getNestedSubRows } from '../../../components/RentalManagment/helper';
+import { set, startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import CalculatePriceDialog from 'src/components/RentalManagment/CalculatePriceDialog';
-import { generateCustomTableColumns, flattenArray } from 'src/constants/columns';
+import { flattenArray } from 'src/constants/columns';
 import AssetAvailability from '../AssetAvailability';
 import { AssetAvailabilityIcon } from 'src/assets/svg/svgIcons';
 import { ExpandMore } from '@material-ui/icons';
 import ManagePackageDialog from 'src/pages/Packages/ManagePackageDialog';
 import EditIcon from '@material-ui/icons/Edit';
-import { ownerAndColaborator, rentalManagementMessage } from 'src/constants/messageHelpers';
+import { ownerAndColaborator, quotationApprovedMessage, rentalManagementMessage } from 'src/constants/messageHelpers';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 
-const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip, renderedFrom, stepFullScreen, allowedToEdit }) => {
+const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip, renderedFrom, stepFullScreen, allowedToEdit, quotationApproved }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -40,7 +41,6 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
 
   const [isUpdating, setUpdating] = useState(false);
 
-  const [selectedProducts, setSelectedProducts] = useState([]);
   const [isProductEdit, setIsProductEdit] = useState({ open: false, data: null, showSaveAndNext: false });
   const [isAddingProducts, setAddingProducts] = useState(false);
 
@@ -51,8 +51,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
   const [isInlineEdit, setIsInlineEdit] = useState(false);
   const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: '', parentId: null });
   const [columns, setColumns] = useState(null);
-  const [rowsData, setRowsData] = useState(null);
-  const [allFields, setAllFields] = useState([]);
+  const [allFields, setAllFields] = useState(null);
   const [isRateRequired, setIsRateRequired] = useState(false);
   const [addchildDialog, setAddchildDialog] = useState({ open: false, parentId: null, top: null, bottom: null });
   const [showConfirmationDialog, setShowConfirmationDialog] = useState({ open: false, data: null });
@@ -61,26 +60,39 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
   const [openAssetAvailibility, setOpenAssetAvailibility] = useState(false);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
 
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, selectedRecords } = state;
+
+  const { generateColumns } = useColumns();
+  const [addExistingAssets, setAddExistingAssets] = useState(false);
+
   const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
     fetchFields();
-  }, [allowedToEdit]);
+    fetchData();
+  }, []);
 
   useEffect(() => {
-    fetchData();
-  }, [columns]);
+    if (allFields) {
+      createColumns();
+    }
+  }, [allFields, allowedToEdit, quotationApproved]);
 
   const fetchFields = async () => {
-    setColumns(null);
     var data = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
-    if (!allowedToEdit) {
+    setAllFields(JSON.parse(JSON.stringify(data)));
+  };
+
+  const createColumns = () => {
+    setColumns(null);
+    const data = [...allFields]
+    if (!allowedToEdit || quotationApproved) {
       data?.forEach((e) => {
         e.isColumnEditable = false;
       });
     }
-    setAllFields(JSON.parse(JSON.stringify(data)));
-    const newColumns = generateCustomTableColumns(data, rentalManagementData?.currency, renderedFrom);
+    const newColumns = generateColumns(renderedFrom, data, null, false, rentalManagementData?.currency);
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';
@@ -90,7 +102,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
         accessor: 'index',
         Header: 'Index',
         width: 70,
-        sticky: isMobile ? 'none' : 'left',
+        sticky: 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
@@ -100,7 +112,8 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
         accessor: 'type',
         Header: 'Type',
         disableFilters: true,
-        sticky: isMobile ? 'none' : 'left',
+        disabled: true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
         width: 200,
         Cell: ({ row }) =>
           row.original['type'] ? (
@@ -127,59 +140,56 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
         Header: 'Details',
         minWidth: 300,
         width: 300,
-        sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row, rows }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            {isOffline || !allowedToEdit ? (
-              <p> {row.original.detail}</p>
-            ) : (
-              <p
-                onClick={() => {
-                  openMaterial(row, rows);
-                }}
-                className="link text-truncate"
-                title={row.original.detail}
-              >
-                {row.original.detail}
-              </p>
+        disabled: true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
+        Cell: ({ row, table }) => (<div style={{ display: 'flex', alignItems: 'center' }}>
+          {isOffline || !allowedToEdit || quotationApproved ? (
+            <p> {row.original.detail}</p>
+          ) : (
+            <p
+              onClick={() => {
+                openMaterial(row, table.getRowModel().rows);
+              }}
+              className="link text-truncate"
+              title={row.original.detail}
+            >
+              {row.original.detail}
+            </p>
+          )}
+          {<Box ml={1} className="d-flex align-items-center">
+            <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
+              {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
+            </span>
+            {!isOffline && allowedToEdit && !quotationApproved && (
+              <HtmlTooltip title="Add ">
+                <IconButton
+                  onClick={(event) => setAddchildDialog({ open: true, parentId: row.original?._id, top: event.clientY, bottom: event.clientX })}
+                  size="small"
+                >
+                  <Add color="disabled" fontSize="small" />
+                </IconButton>
+              </HtmlTooltip>
             )}
-            {
-              <Box ml={1} className="d-flex align-items-center">
-                <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
-                  {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
-                </span>
-                {!isOffline && allowedToEdit && (
-                  <HtmlTooltip title="Add ">
-                    <IconButton
-                      onClick={(event) => setAddchildDialog({ open: true, parentId: row.original?._id, top: event.clientY, bottom: event.clientX })}
-                      size="small"
-                    >
-                      <Add color="disabled" fontSize="small" />
-                    </IconButton>
-                  </HtmlTooltip>
-                )}
-              </Box>
-            }
-            {!isOffline && (
-              <IconButton
-                size="small"
-                onClick={() => {
-                  if (row.original.type === 'service') {
-                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === 'product') {
-                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === 'serializedAsset') {
-                    window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
-                  } else {
-                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                  }
-                }}
-              >
-                <OpenInNewIcon fontSize="small" color="primary" />
-              </IconButton>
-            )}
-          </div>
-        )
+          </Box>}
+          {!isOffline && (
+            <IconButton
+              size="small"
+              onClick={() => {
+                if (row.original.type === 'service') {
+                  window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                } else if (row.original.type === 'product') {
+                  window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                } else if (row.original.type === 'serializedAsset') {
+                  window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
+                } else {
+                  window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                }
+              }}
+            >
+              <OpenInNewIcon fontSize="small" color="primary" />
+            </IconButton>
+          )}
+        </div>)
       },
       {
         accessor: 'description',
@@ -196,28 +206,28 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
     column.push({
       accessor: 'action',
       Header: 'Actions',
-      minWidth: 50,
-      width: 50,
+      minWidth: 100,
+      width: 100,
       sticky: 'right',
       disableFilters: true,
       disableSortBy: true,
       canDrag: false,
-      Cell: ({ row, rows }) => {
+      Cell: ({ row, table }) => {
         return (
           <>
-            <HtmlTooltip title={isOffline || !allowedToEdit ? '' : 'Edit'}>
+            <HtmlTooltip title={isOffline || !allowedToEdit || quotationApproved ? '' : 'Edit'}>
               <IconButton
                 size="small"
                 aria-label="Details"
-                disabled={isOffline || !allowedToEdit ? true : false}
+                disabled={isOffline || !allowedToEdit || quotationApproved ? true : false}
                 onClick={() => {
-                  openMaterial(row, rows);
+                  openMaterial(row, table.getRowModel().rows);
                 }}
               >
-                <EditIcon fontSize="small" color={isOffline || !allowedToEdit ? 'disabled' : 'primary'} />
+                <EditIcon fontSize="small" color={isOffline || !allowedToEdit || quotationApproved ? 'disabled' : 'primary'} />
               </IconButton>
             </HtmlTooltip>
-            {allowedToEdit ? (
+            {allowedToEdit || !quotationApproved ? (
               row.original.hideSelection ? (
                 <HtmlTooltip title={row.original.assetQty ? 'Asset is already assigned' :
                   row.original?.status ? rentalManagementMessage.loadingAlreadyCreated : ''}>
@@ -252,9 +262,12 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
       }
     });
     setColumns(column);
-  };
+  }
 
   const fetchData = async () => {
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
+
     setNextStep(false);
     setNextStepToolTip(null)
     var data: any = [];
@@ -320,8 +333,8 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
       setNextStep(true);
       setNextStepToolTip(null)
     }
-    setRowsData(rows);
-    setSelectedProducts([]);
+    dispatch({ type: 'initialize', data: rows, count: rows?.length });
+    dispatch({ type: 'loading', loading: false });
   };
 
   const generateNestedData = (material, inventory, nonSerializeAsset, parent) => {
@@ -393,6 +406,24 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
     }
   };
 
+  const handleAddAsset = async (rows) => {
+    setAddingProducts(true);
+    const assetIds = rows?.map((item) => item._id);
+    axiosInstance()
+      .post(`${rentalManagement.api}/productpackage/${rentalManagementData._id}/assets`, {
+        ids: assetIds,
+      })
+      .then(() => {
+        setAddExistingAssets(false);
+        setAddingProducts(false);
+        fetchData();
+      })
+      .catch((error) => {
+        setAddingProducts(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   const AddMaterial = async (material, priceData) => {
     const tempMaterial = [...material];
     if (priceData) {
@@ -438,8 +469,8 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
       .then(() => {
         fetchData();
         if (saveAndNext) {
-          const rowIndex = rowsData?.findIndex((d) => d._id === rows[0]?._id);
-          setIsProductEdit({ open: true, data: rowsData[rowIndex + 1], showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false });
+          const rowIndex = dataRows?.findIndex((d) => d._id === rows[0]?._id);
+          setIsProductEdit({ open: true, data: dataRows[rowIndex + 1], showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false });
         } else {
           setIsProductEdit({ open: false, data: null, showSaveAndNext: false });
         }
@@ -495,7 +526,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
 
   const handleDeleteMultiple = () => {
     const obj: any = [];
-    const dataToDelete = selectedProducts && selectedProducts.filter((e) => !e.hideSelection);
+    const dataToDelete = selectedRecords && selectedRecords.filter((e) => !e.hideSelection);
     dataToDelete?.forEach((ele) => {
       obj.push({ id: ele._id, type: ele.type, materialId: ele.materialId });
     });
@@ -531,7 +562,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
   };
 
   const onConfirmSave = async (inputField, updatedData) => {
-    const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
+    const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
     if (rowData.parentId && !showConfirmationDialog.open) {
       setShowConfirmationDialog({
         open: true,
@@ -554,7 +585,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
         }
       }
       let rows: any = [{ ...rowData, ...updatedData }];
-      rows = await calculateRowsFieldNew(material, inputField, allFields, updatedData);
+      rows = await calculateRowsField(material, inputField, allFields, updatedData);
       handleSaveData(rows);
       setShowConfirmationDialog({ open: false, data: {} });
     }
@@ -572,7 +603,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
     <Fragment>
       <Box display="flex" justifyContent="space-between" m={1}>
         <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
-          <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : ``}>
+          <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : quotationApproved ? quotationApprovedMessage : ``}>
             <span>
               <Button
                 variant={'outlined'}
@@ -580,7 +611,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
                 size="small"
                 startIcon={<Add />}
                 onClick={openAddActions}
-                disabled={!allowedToEdit}
+                disabled={!allowedToEdit || quotationApproved}
                 aria-controls="add-menu">
                 {'Add'}
                 <ExpandMore fontSize="small" />
@@ -623,10 +654,18 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
             >
               Add New Product Package
             </MenuItem>
+            <MenuItem
+              onClick={() => {
+                closeAddActions();
+                setAddExistingAssets(true)
+              }}
+            >
+              {`Add Existing ${routes.serializedAsset.title}`}
+            </MenuItem>
           </Menu>
         </Box>
         <Box display="flex" ml={1}>
-          {flattenArray(rowsData)?.filter((e) => e?.serializedProduct)?.length > 0 && (
+          {flattenArray(dataRows)?.filter((e) => e?.serializedProduct)?.length > 0 && (
             <Box mr={1}>
               <HtmlTooltip title="Check Assets Availability" arrow placement="top">
                 <IconButton
@@ -647,7 +686,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
             size="small"
             id="demo-positioned-button"
             onClick={handleClick}
-            disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
+            disabled={!Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length)}
             endIcon={<BiChevronDown />}
             className="new-dropdown-v1"
           >
@@ -670,7 +709,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
           >
             <HtmlTooltip
               title={
-                Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)
+                Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length)
                   ? 'Bulk edit selected records'
                   : 'Select records to edit'
               }
@@ -687,7 +726,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
             </HtmlTooltip>
             <HtmlTooltip
               title={
-                Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)
+                Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length)
                   ? 'Delete selected records'
                   : 'Select records to delete'
               }
@@ -706,21 +745,21 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
         </Box>
       </Box>
 
-      {columns && rowsData ? (
-        <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}>
+      {columns ? (
+        <Box zIndex={5}>
           <CustomReactTable
             height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
             columns={columns}
-            data={rowsData}
+            state={state}
+            dispatch={dispatch}
+            refreshGrid={fetchData}
             setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-            onSelect={setSelectedProducts}
-            childrenProperty="subRows"
-            uniqueKey="_id"
-            hideSelection={isOffline || !allowedToEdit}
-            hideAction={isOffline || !allowedToEdit}
-            renderedFrom="rental_management_product_package"
+            hideSelection={isOffline || !allowedToEdit || quotationApproved}
+            hideAction={isOffline || !allowedToEdit || quotationApproved}
+            renderedFrom={renderedFrom}
             isClientSideGrid={true}
             onSaveEdit={onSaveInlineEdit}
+            expander={true}
           />
         </Box>
       ) : (
@@ -749,9 +788,9 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
           isBulkedit={isBulkEdit}
           handleSaveData={handleSaveData}
           rentalManagementData={rentalManagementData}
-          rowData={!isBulkEdit ? isProductEdit.data : selectedProducts}
+          rowData={!isBulkEdit ? isProductEdit.data : selectedRecords}
           material={material}
-          selectedProducts={selectedProducts.filter((e) => !e.hideSelection)}
+          selectedProducts={selectedRecords.filter((e) => !e.hideSelection)}
           loading={isUpdating}
           showSaveAndNext={isProductEdit.showSaveAndNext}
           from={'product'}
@@ -773,6 +812,16 @@ const Productpackage = ({ rentalManagementData, setNextStep, setNextStepToolTip,
             setAddExistingProductDialog({ open: false, type: '', parentId: null });
           }}
           isRedirectToDetailPage={false}
+        />
+      )}
+      {addExistingAssets && (
+        <AssignSerializedAssetDialog
+          reference={'rentalJob'}
+          referenceData={{ warehouse: rentalManagementData?.warehouse?.optionValue }}
+          isAssigning={isAddingProducts}
+          handleClose={() => setAddExistingAssets(false)}
+          handleSucess={handleAddAsset}
+          ids={[]}
         />
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type !== 'newPackage' && (

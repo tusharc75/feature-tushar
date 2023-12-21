@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useState, useReducer, Fragment } from 'react';
+import { useContext, useEffect, useState, Fragment } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { Box, Grid, Button, IconButton, Tooltip, Tabs, Tab } from '@material-ui/core';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
@@ -11,7 +11,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ManageDeliveryTicket from './ManageDeliveryTicket';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
+import CustomReactTable, { useColumns, getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
 import { serializedAsset, gridLoadingTimeout } from '../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import SignatureDialog from '../../components/Helpers/SignatureDialog';
@@ -32,8 +32,6 @@ import {
   DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_FROM_TO_TYPE
 } from '../../constants/helpers';
-import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import { objectStore, findOne, findAll } from '../../constants/indexdbhelper';
@@ -44,21 +42,8 @@ import DeliveryTicketAdditionalCost from './DeliveryTicketAdditionalCost';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import DateDialog from '../RentalManagement/LoadingTicket/DateDialog';
 import PreviewDownload from 'src/components/PreviewDownload';
-
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: any;
-  value: any;
-}
-
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-  return (
-    <div role="tabpanel" hidden={value !== index} id={`main-tabpanel-${index}`} aria-labelledby={`main-tab-${index}`} {...other}>
-      {children}
-    </div>
-  );
-}
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
 
 function a11yProps(index: any) {
   return {
@@ -75,6 +60,11 @@ export default function DeliveryTicketDetail(props) {
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
+
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, selectedRecords } = state;
+
+  const { generateColumns } = useColumns();
   const { tab }: any = queryString.parse(history.location.search);
   const [deliveryTicketData, setDeliveryTicketData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -85,14 +75,10 @@ export default function DeliveryTicketDetail(props) {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [deliveryTicketFields, setDeliveryTicketFields] = useState([]);
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
   const [okBtnLoading, setOkBtnLoading] = useState(false);
   const [showRemoveAssetFromLoadingTicketDialog, setShowRemoveAssetFromLoadingTicketDialog] = useState(false);
-  const { dataRows, rowCount, page, limit, pageSizes, selectedRecords } = state;
-  const { getColumnData } = useColumns();
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
-  const [columns, setColumns] = useState([]);
+  const [serializedAssetColumns, setSerializedAssetColumns] = useState([]);
+  const [productColumns, setProductColumns] = useState([]);
   const [canEdit, setCanEdit] = useState(false);
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false);
 
@@ -313,10 +299,7 @@ export default function DeliveryTicketDetail(props) {
 
   const fetchDeliveryTicketData = async () => {
     try {
-      if (gridApi) {
-        gridApi.deselectAll();
-      }
-      localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
+      dispatch({ type: 'selection', selectedRecords: [] });
       if (selectedEntity) {
         setLoading(true);
         let data;
@@ -356,33 +339,34 @@ export default function DeliveryTicketDetail(props) {
     fetchGridColumns();
   }, []);
 
+  const defaultColumns = [
+    {
+      accessor: 'qty',
+      Header: 'Qty',
+      width:100,
+      minWidth:100,
+      order: 1,
+      disabled: true,
+      Cell: ({ row }) => (row?.original?.qty ? <div>{row?.original?.qty}</div> : <NoDataCell />)
+    }
+  ];
+
   const fetchGridColumns = async () => {
     try {
-      let data;
+      let assetData, productData;
       if (isOffline) {
-        data = await findOne(objectStore.resource, 'serializedAsset');
+        assetData = await findOne(objectStore.resource, 'serializedAsset');
+        productData = await findOne(objectStore.resource, 'Product');
       } else {
-        const response = await axiosInstance().get(`/field?resource=${serializedAsset.resource}`);
-        data = response?.data?.data;
+        const assetResponse = await axiosInstance().get(`/field?resource=${serializedAsset.resource}&view=true`);
+        const productResponse = await axiosInstance().get('/field?resource=Product&view=true');
+        assetData = assetResponse?.data?.data;
+        productData = productResponse?.data?.data;
       }
-      let columns = [];
-      let rendererNames = [];
-      data.forEach((o) => {
-        let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serializedAssetDetail.path);
-        if (currentColumn !== null) {
-          columns = [...columns, currentColumn?.columnData];
-          if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-            rendererNames.push(currentColumn?.rendererName);
-          }
-        }
-      });
-      let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-      tempFrameworkComponent = {
-        ...tempFrameworkComponent
-      };
-      setFrameWorkComponent({ ...tempFrameworkComponent });
-      columns = [...columns, ...getStaticFields()];
-      setColumns([...columns]);
+      const newAssetColumns = generateColumns(renderedFrom, assetData, routes.serializedAssetDetail.path, true);
+      const newProductColumns = generateColumns(renderedFrom, productData, routes.productDetail.path);
+      setSerializedAssetColumns([...newAssetColumns, ...getStaticFields()]);
+      setProductColumns([...defaultColumns, ...newProductColumns]);
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -394,9 +378,7 @@ export default function DeliveryTicketDetail(props) {
     }
     try {
       dispatch({ type: 'loading', loading: true });
-      if (gridApi) {
-        gridApi.setRowData([]);
-      }
+
       let data;
       if (isOffline) {
         const deliveryTicket = await findOne(objectStore.deliveryTicket, id);
@@ -651,7 +633,10 @@ export default function DeliveryTicketDetail(props) {
                 referenceId={deliveryTicketData?._id}
                 hideDetailButton={true}
                 fileName={`${routes.deliveryTicket.title}-${deliveryTicketData?.ticketName}`}
-                columns={columns?.filter((e) => ['assetNumber', 'product', 'productDescription'].includes(e.field))}
+                columns={[
+                  ...serializedAssetColumns?.filter((e) => ['assetNumber'].includes(e.accessor)),
+                  ...productColumns?.filter((e) => ['productName', 'productDescription'].includes(e.accessor))
+                ]}
               />
               <ActivityButton
                 referenceId={deliveryTicketData?._id}
@@ -662,56 +647,24 @@ export default function DeliveryTicketDetail(props) {
           </Box>
         </Box>
         <Box className={`detail-container-v1`}>
-          <Tabs
-            className="new-tab-container-v1"
-            value={tabValue}
-            onChange={handleMainTabChange}
-            textColor="primary"
-            TabIndicatorProps={{
-              style: {
-                display: 'none'
-              }
-            }}
-          >
-            <Tab
-              className={'tabLayout'}
-              label={
-                <div className="d-flex align-items-center tab-font">
-                  <FaWpforms className="mr-1" fontSize="inherit" /> Header
-                </div>
-              }
-              {...a11yProps(0)}
-            />
-            <Tab
-              className={'tabLayout'}
-              label={
-                <div className="d-flex align-items-center tab-font">
-                  <BiFoodMenu className="mr-1" fontSize="inherit" /> Serialized Assets
-                </div>
-              }
-              {...a11yProps(1)}
-            />
-            <Tab
-              className={'tabLayout'}
-              label={
-                <div className="d-flex align-items-center tab-font">
-                  <BiFoodMenu className="mr-1" fontSize="inherit" /> Additional Products
-                </div>
-              }
-              {...a11yProps(0)}
-            />
-            {deliveryTicketData?.additionalCost?.length > 0 && (
-              <Tab
-                className={'tabLayout'}
-                label={
-                  <div className="d-flex align-items-center tab-font">
-                    <BiFoodMenu className="mr-1" fontSize="inherit" /> Add-On
-                  </div>
-                }
-                {...a11yProps(0)}
-              />
+          <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+            <CustomTab index={0} value={0} className={'tabLayout'} {...a11yProps(0)} >
+            <FaWpforms className="mr-1" fontSize="inherit" /> Header
+              </CustomTab>
+            {permissions?.serializedAsset?.isRead && (
+              <CustomTab index={1} value={1} className={'tabLayout'} {...a11yProps(1)} >
+                <BiFoodMenu className="mr-1" fontSize="inherit" /> Serialized Assets
+              </CustomTab >
             )}
-          </Tabs>
+            <CustomTab index={2} value={2} className={'tabLayout'} {...a11yProps(2)} >
+            <BiFoodMenu className="mr-1" fontSize="inherit" /> Additional Products
+            </CustomTab>
+            {deliveryTicketData?.additionalCost?.length > 0 && (
+              <CustomTab index={3} value={3} className={'tabLayout'} {...a11yProps(3)}>
+                <BiFoodMenu className="mr-1" fontSize="inherit" /> Add-On
+              </CustomTab>
+            )}
+          </CustomTabs>
           <TabPanel value={tabValue} index={0}>
             {deliveryTicketData && deliveryTicketFields.length > 0 && !loading ? (
               <DetailsPage
@@ -756,100 +709,68 @@ export default function DeliveryTicketDetail(props) {
               </Grid>
             )}
           </TabPanel>
-          <TabPanel value={tabValue} index={1}>
-            <Grid container spacing={1} className="p-2">
-              <Grid item xs={12} className="mt-2 d-flex gap-2">
-                {deliveryTicketData?.status === 'New' && (
-                  <IconButton
-                    onClick={() => {
-                      setAddSerializedAssetDialog(true);
-                    }}
-                    disabled={isOffline}
-                    color="primary"
-                    size="small"
-                  >
-                    <Tooltip title="Add More Serialized Assets">
-                      <AddBoxRoundedIcon />
-                    </Tooltip>
-                  </IconButton>
-                )}
-                {deliveryTicketData?.status === 'New' && (
-                  <IconButton
-                    disabled={selectedRecords.length === 0 || isOffline}
-                    onClick={() => {
-                      setShowRemoveAssetFromLoadingTicketDialog(true);
-                    }}
-                    color="primary"
-                    size="small"
-                  >
-                    <Tooltip title="Remove Serialized Assets">
-                      <RemoveCircleRoundedIcon />
-                    </Tooltip>
-                  </IconButton>
-                )}
-                <Box mx={1} />
+          {permissions?.serializedAsset?.isRead && (
+            <TabPanel value={tabValue} index={1}>
+              <Grid container spacing={1} className="p-2">
+                <Grid item xs={12} className="mt-2 d-flex gap-2">
+                  {deliveryTicketData?.status === 'New' && (
+                    <IconButton
+                      onClick={() => {
+                        setAddSerializedAssetDialog(true);
+                      }}
+                      disabled={isOffline}
+                      color="primary"
+                      size="small"
+                    >
+                      <Tooltip title="Add More Serialized Assets">
+                        <AddBoxRoundedIcon />
+                      </Tooltip>
+                    </IconButton>
+                  )}
+                  {deliveryTicketData?.status === 'New' && (
+                    <IconButton
+                      disabled={selectedRecords.length === 0 || isOffline}
+                      onClick={() => {
+                        setShowRemoveAssetFromLoadingTicketDialog(true);
+                      }}
+                      color="primary"
+                      size="small"
+                    >
+                      <Tooltip title="Remove Serialized Assets">
+                        <RemoveCircleRoundedIcon />
+                      </Tooltip>
+                    </IconButton>
+                  )}
+                  <Box mx={1} />
+                </Grid>
+                <Grid item xs={12}>
+                  {serializedAssetColumns ? (
+                    <CustomReactTable
+                      height={'calc(100vh - 150px)'}
+                      columns={serializedAssetColumns}
+                      state={state}
+                      dispatch={dispatch}
+                      renderedFrom={renderedFrom}
+                      refreshGrid={fetchProductInventory}
+                      hideSelection={!(deliveryTicketData?.status === 'New')}
+                      hideAction={true}
+                      isClientSideGrid={true}
+                    />
+                  ) : (
+                    <Box p={2} height={500}>
+                      <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                    </Box>
+                  )}
+                </Grid>
               </Grid>
-              <Grid item xs={12}>
-                {isMobile && !isTablet ? (
-                  <CustomSwipableList
-                    allowSelection={false}
-                    allowSwipe={true}
-                    permissions={permissions}
-                    primaryField={columns?.find((d) => d.field === 'assetNumber')}
-                    onClick={(data) => {
-                      history.push(`${routes.serializedAssetDetail.path}/${data._id}`);
-                    }}
-                    dataRows={dataRows}
-                    selectedRecords={selectedRecords}
-                    dispatch={dispatch}
-                    onEdit={() => {}}
-                    extraParamsToCheckDelete={true}
-                    onDelete={() => {}}
-                    rowCount={rowCount}
-                    page={page}
-                    loading={loading}
-                    chips={[
-                      {
-                        label: `Product Description: `,
-                        field: 'productName',
-                        forceShow: true
-                      }
-                    ]}
-                    onCreate={null}
-                    showClone={false}
-                    fullHeight={true}
-                    renderedFrom={renderedFrom}
-                    onClone={() => {}}
-                  />
-                ) : Object.keys(frameWorkComponent).length > 0 ? (
-                  <CustomAgGrid
-                    isClientSideGrid={true}
-                    allowSelection={deliveryTicketData?.status === 'New'}
-                    allowAction={false}
-                    columns={columns}
-                    dataRows={dataRows}
-                    frameworkComponents={frameWorkComponent}
-                    setGridApi={setGridApi}
-                    dispatch={dispatch}
-                    rowCount={rowCount}
-                    limit={limit}
-                    pageSizes={pageSizes}
-                    page={page}
-                    actionWidth={150}
-                    loading={false}
-                    renderedFrom={renderedFrom}
-                    refreshGrid={fetchProductInventory}
-                  />
-                ) : (
-                  <Box p={2} height={500}>
-                    <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                  </Box>
-                )}
-              </Grid>
-            </Grid>
-          </TabPanel>
+            </TabPanel>
+          )}
           <TabPanel value={tabValue} index={2}>
-            <DeliveryTicketProduct renderedFrom={`${camelCase(routes?.deliveryTicket.title)}_grid-2`} deliveryTicketId={id} />
+            <DeliveryTicketProduct
+              renderedFrom={`${camelCase(routes?.deliveryTicket.title)}_grid-2`}
+              deliveryTicketId={id}
+              columns={productColumns}
+            />
           </TabPanel>
           {deliveryTicketData?.additionalCost?.length > 0 && (
             <TabPanel value={tabValue} index={3}>

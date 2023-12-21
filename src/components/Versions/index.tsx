@@ -3,13 +3,12 @@ import { useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { fieldTicket } from 'src/constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
-import { generateCustomTableColumns } from 'src/constants/columns';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
@@ -17,8 +16,10 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 function Versions({ id, label, childResource, resource, referenceData, versions, renderedFrom, handleClose }) {
   const [fullScreen, setFullScreen] = useState(true);
   const [columns, setColumns] = useState(null);
-  const [rowsData, setRowsData] = useState(null);
   const [selectedVersion, setSelectedVersion] = useState(versions[0]?._id);
+
+  const { state, dispatch } = useTableReducer();
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchFields();
@@ -37,13 +38,13 @@ function Versions({ id, label, childResource, resource, referenceData, versions,
     data?.forEach((e) => {
       e.isColumnEditable = false;
     });
-    const newColumns = generateCustomTableColumns(data, referenceData?.currency, renderedFrom);
+    const newColumns = generateColumns(renderedFrom, data, null, false, referenceData?.currency);
     let column: any = [
       {
         accessor: 'index',
         Header: 'Index',
         width: 70,
-        sticky: isMobile ? 'none' : 'left',
+        sticky: 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
@@ -52,7 +53,8 @@ function Versions({ id, label, childResource, resource, referenceData, versions,
       {
         accessor: 'type',
         Header: 'Type',
-        sticky: isMobile ? 'none' : 'left',
+        sticky: isMobile || isTablet ? 'none' : 'left',
+        disabled: true,
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p>{`${startCase(row.original?.type)} `}</p>
@@ -64,8 +66,9 @@ function Versions({ id, label, childResource, resource, referenceData, versions,
         Header: 'Details',
         minWidth: 300,
         width: 300,
-        sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row, rows }) => (
+        sticky: isMobile || isTablet ? 'none' : 'left',
+        disabled: true,
+        Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p title={row.original.detail}>{row.original.detail}</p>
             {['product', 'service'].includes(row.original.type) && (
@@ -96,11 +99,11 @@ function Versions({ id, label, childResource, resource, referenceData, versions,
         }
       }
     ];
-    column = [...column, ...newColumns];
-    setColumns(column);
+    setColumns([...column, ...newColumns]);
   };
 
   const fetchData = async () => {
+    dispatch({ type: 'loading', loading: true });
     let data = [];
 
     const version = await axiosInstance().get(`${fieldTicket.api}/${selectedVersion}/version?resource=${resource}&id=${id}`);
@@ -117,8 +120,8 @@ function Versions({ id, label, childResource, resource, referenceData, versions,
         parent?.type === 'service'
           ? parent?.serviceDetail?.serviceDescription
           : parent?.type === 'product'
-          ? parent?.productDetail?.productDescription
-          : '';
+            ? parent?.productDetail?.productDescription
+            : '';
     });
 
     cost?.forEach((ele, i) => {
@@ -128,7 +131,9 @@ function Versions({ id, label, childResource, resource, referenceData, versions,
     });
 
     data = [...material, ...cost];
-    setRowsData(data);
+
+    dispatch({ type: 'initialize', data: data, count: data?.length });
+    dispatch({ type: 'loading', loading: false });
   };
 
   return (
@@ -166,7 +171,6 @@ function Versions({ id, label, childResource, resource, referenceData, versions,
                   borderColor="var(--common-border-color)"
                   onClick={() => {
                     if (selectedVersion !== v?._id) {
-                      setRowsData(null);
                       setSelectedVersion(v?._id);
                     }
                   }}
@@ -178,20 +182,18 @@ function Versions({ id, label, childResource, resource, referenceData, versions,
                 </Box>
               ))}
           </Box>
-          {rowsData && columns ? (
+          {columns ? (
             <Box zIndex={5} width={'100%'} mt={2}>
               <CustomReactTable
                 height={'calc(100vh - 200px)'}
                 columns={columns}
-                data={rowsData}
-                onSelect={() => {}}
-                childrenProperty="subRows"
-                uniqueKey="_id"
+                state={state}
+                dispatch={dispatch}
+                refreshGrid={fetchData}
                 hideSelection={true}
                 hideAction={true}
                 renderedFrom={renderedFrom}
                 isClientSideGrid={true}
-                hideExpander={true}
               />
             </Box>
           ) : (

@@ -1,21 +1,21 @@
-import { useState, useEffect, useContext, useMemo, Fragment } from 'react';
+import { useState, useEffect, useContext, Fragment } from 'react';
 import Box from '@material-ui/core/Box/Box';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
-import { Button, Chip, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, ButtonGroup, Tooltip } from '@material-ui/core';
+import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
 import { Delete } from '@material-ui/icons';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import AddSerializedAsset from './AddSerializedAsset';
 import { rentalManagement, sidebarResource, treeToFlatArray, ASSET_STATUS, TRANSFER_ASSET_STATUS } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import ManagePurchaseOrder from '../../PurchaseOrder/ManagePurchaseOrder';
 import ManageBulkAssetCreation from '../../BulkAssetCreation/ManageBulkAssetCreation';
 import ManageSublease from '../../Sublease/ManageSublease';
-import { uniqBy, uniq, startCase } from 'lodash';
+import { uniqBy, startCase } from 'lodash';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
@@ -31,11 +31,12 @@ import { ExpandMore } from '@material-ui/icons';
 import AddNonSerializeAssets from './AddNonSerializeAssets';
 import { removeAssetsInRental } from '../rentalOfflineHelper';
 import WarningIcon from '@material-ui/icons/Warning';
-import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
+import { flattenArray } from 'src/constants/columns';
 import { ownerAndColaborator, rentalManagementMessage } from 'src/constants/messageHelpers';
 
 const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip, stepFullScreen, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
+  const renderedFrom = 'rental_management_serialized_asset';
   const history = useHistory();
 
   const [deleting, setDeleting] = useState(false);
@@ -43,20 +44,13 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState({ open: false });
   const [addNonSerializedAssetDialog, setAddNonSerializedAssetDialog] = useState(false);
-  const [selectedRecords, setSelectedRecords] = useState([]);
-
   const [assetAssignedProduct, setAssetAssignedProduct] = useState([]);
   const [nonSerializedAssetProduct, setNonSerializedAssetProduct] = useState([]);
-
   const [deleteData, setDeleteData] = useState([]);
-
   const [columns, setColumns] = useState(null);
-  const [rowsData, setRowsData] = useState(null);
   const [showOrderDialog, setOrderDialog] = useState({ open: false, products: [], type: '' });
-
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [anchorLinkActionEl, setAnchorLinkActionEl] = useState(null);
-
   const [purchaseOrderCount, setPurchaseOrderCount] = useState(0);
   const [subleaseCount, setSubleaseCount] = useState(0);
   const [transferAssetCount, setTransferAssetCount] = useState(0);
@@ -65,6 +59,10 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, selectedRecords } = state;
+  const { generateColumns } = useColumns();
+
   const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
@@ -81,13 +79,13 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
     data?.forEach((e) => {
       e.isColumnEditable = false;
     });
-    const newColumns = generateCustomTableColumns(data, rentalManagementData?.currency, '');
+    const newColumns = generateColumns(renderedFrom, data, null, false, rentalManagementData?.currency);
     let coloum: any = [
       {
         accessor: 'index',
         Header: 'Index',
         width: 70,
-        sticky: isMobile ? 'none' : 'left',
+        sticky: 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
@@ -96,9 +94,10 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
       {
         accessor: 'type',
         Header: 'Type',
-        sticky: isMobile ? 'none' : 'left',
         disableFilters: true,
         width: 200,
+        disabled: true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) =>
           row.original['type'] ? (
             <p>
@@ -123,13 +122,34 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         accessor: 'detail',
         Header: 'Details',
         width: 300,
-        sticky: isMobile ? 'none' : 'left',
+        disabled: true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
           <div className="d-flex gap-2 align-items-center">
             <p className="text-truncate" title={row.original.detail}>
               {row.original.detail}
             </p>
-            {!isOffline && row.original.isPurchaseOrder ? (
+
+            {row.original?.type === 'asset' && row.original?.isNonSerializeAsset ? null : (
+              <IconButton
+                size="small"
+                onClick={() => {
+                  if (row.original.type === 'service') {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'product') {
+                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'asset') {
+                    window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
+                  } else {
+                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  }
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
+            )}
+
+            {!isOffline && row.original.isPurchaseOrder && (
               <HtmlTooltip title={`${routes.purchaseOrder.title}`}>
                 <IconButton
                   size="small"
@@ -137,28 +157,11 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                     OpenInNewWindow(routes.purchaseOrder.path);
                   }}
                 >
-                  <OpenInNewIcon fontSize="small" color={'primary'} />
+                  <LibraryBooksIcon fontSize="small" color={'primary'} />
                 </IconButton>
               </HtmlTooltip>
-            ) : (
-              row.original?.type === 'asset' && row.original?.isNonSerializeAsset ? null :
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    if (row.original.type === 'service') {
-                      window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                    } else if (row.original.type === 'product') {
-                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                    } else if (row.original.type === 'asset') {
-                      window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
-                    } else {
-                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                    }
-                  }}
-                >
-                  <OpenInNewIcon fontSize="small" color="primary" />
-                </IconButton>
             )}
+
             {row.original.isBulkAssetCreation && (
               <HtmlTooltip title={`${routes.bulkAssetCreation.title}`}>
                 <IconButton
@@ -285,6 +288,9 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
   };
 
   const fetchData = async () => {
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
+
     setNextStep(false);
     setNextStepToolTip(null);
     try {
@@ -343,10 +349,10 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
       rows.forEach((parent, i) => {
         parent.index = i + 1;
         parent.detail = `${parent.type === 'service'
-          ? parent?.serviceDetail?.serviceName
-          : parent.type === 'product'
-            ? parent?.productDetail?.productName
-            : parent?.packageDetail?.packageName
+            ? parent?.serviceDetail?.serviceName
+            : parent.type === 'product'
+              ? parent?.productDetail?.productName
+              : parent?.packageDetail?.packageName
           }`;
         parent.description =
           parent.type === 'service'
@@ -418,8 +424,9 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         setNextStep(true);
         setNextStepToolTip(null);
       }
-      setRowsData(rows);
-      setSelectedRecords([]);
+
+      dispatch({ type: 'initialize', data: rows, count: rows?.length });
+      dispatch({ type: 'loading', loading: false });
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -461,7 +468,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
       }
       subRows.push({
         ..._inventory,
-        index: `${parent.index}.${k + 1}`,
+        index: `${parent.index}.${subRows?.length + 1}`,
         detail: _inventory?.assetNumber ? _inventory?.assetNumber : _inventory.inventoryDetail?.assetNumber,
         description: parent?.description,
         type: 'asset',
@@ -486,7 +493,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         _id: _inventory.id,
         uniqueId: _inventory.id,
         inventory: _inventory.id,
-        index: `${parent.index}.${k + 1}`,
+        index: `${parent.index}.${subRows?.length + 1}`,
         detail: _inventory?.assetNumber,
         description: parent?.description,
         type: 'asset',
@@ -502,7 +509,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
     var assetQtySUM = 0;
     var assetAssignedQtySUM = 0;
     childProduct.forEach((_subRow, j) => {
-      _subRow.index = parent.index + '.' + (j + 1);
+      _subRow.index = parent.index + '.' + (subRows?.length + 1);
       _subRow.detail =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceName
@@ -585,7 +592,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
 
   const getAssetAssignedValues = (row) => {
     if (row?.original?.type === 'asset' || row?.original?.assetQty === 0) {
-      return ' N/A ';
+      return <div>N/A</div>;
     }
     // if (!row?.original?.serializedProduct && row?.original?.assetAssignedQty === 0) {
     //   return <p>---</p>;
@@ -627,7 +634,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         .then(({ data }) => {
           setAddSerializedAssetDialog({ open: false });
           fetchData();
-          setSelectedRecords([]);
           setAssetAssignedProduct([]);
           setAdding(false);
           toastConfig.setToastConfig({
@@ -972,25 +978,25 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
       </Box>
       <Grid container spacing={2}>
         <Grid item xs={12} md={12} sm={12}>
-          {columns && rowsData ? (
-            <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}>
+          {columns ? (
+            <Box zIndex={5}>
               <CustomReactTable
                 height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
                 columns={columns}
-                data={rowsData}
+                state={state}
+                dispatch={dispatch}
                 setWholeRowsCellColor={(rowData) => {
                   if (!rowData.isValid) return 'error';
                   //if (rowData.isPurchaseOrder) return "isPurchaseOrder";
                   //if (rowData.isBulkAssetCreation) return "isPurchaseOrder";
                   return '';
                 }}
-                onSelect={setSelectedRecords}
-                childrenProperty="subRows"
-                uniqueKey="_id"
+                refreshGrid={fetchData}
                 hideSelection={!allowedToEdit}
                 hideAction={!allowedToEdit}
-                renderedFrom="rental_management_serialized_asset"
+                renderedFrom={renderedFrom}
                 isClientSideGrid={true}
+                expander={true}
               />
             </Box>
           ) : (
@@ -1026,7 +1032,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           handleSuccess={() => {
             setAddSerializedAssetDialog({ open: false });
             fetchData();
-            setSelectedRecords([]);
             setAssetAssignedProduct([]);
             setAdding(false);
           }}
@@ -1036,7 +1041,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         <AddNonSerializeAssets
           closeDialog={() => {
             setAddNonSerializedAssetDialog(false);
-            setSelectedRecords([]);
             fetchData();
           }}
           products={isOffline ? [...assetAssignedProduct, ...nonSerializedAssetProduct] : nonSerializedAssetProduct}
@@ -1063,7 +1067,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           onClose={() => setOrderDialog((prevState) => ({ ...prevState, open: false, type: '' }))}
           onSuccess={() => {
             setOrderDialog({ open: false, products: [], type: '' });
-            setSelectedRecords([]);
             fetchData();
             toastConfig.setToastConfig({
               open: true,
@@ -1090,7 +1093,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           onClose={() => setOrderDialog((prevState) => ({ ...prevState, open: false, type: '' }))}
           onSuccess={() => {
             setOrderDialog({ open: false, products: [], type: '' });
-            setSelectedRecords([]);
             fetchData();
             toastConfig.setToastConfig({
               open: true,
@@ -1122,7 +1124,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           onClose={() => setOrderDialog((prevState) => ({ ...prevState, open: false, type: '' }))}
           onSuccess={() => {
             setOrderDialog({ open: false, products: [], type: '' });
-            setSelectedRecords([]);
             fetchData();
             toastConfig.setToastConfig({
               open: true,

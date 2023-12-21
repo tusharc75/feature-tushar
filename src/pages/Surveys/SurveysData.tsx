@@ -1,13 +1,11 @@
 import { Box, IconButton } from '@material-ui/core';
 import { camelCase } from 'lodash';
-import React, { useContext, useReducer, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import useColumns from 'src/constants/useColumns';
-import { getFrameworkComponents } from 'src/constants/useColumns';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -16,51 +14,29 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 const SurveysData = ({ surveyId }) => {
   const renderedFrom = camelCase(routes?.surveys.title);
   const toastConfig = useContext(CustomToastContext);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
-  const [columns, setColumns] = useState([]);
-  const [gridApi, setGridApi] = useState(null);
+  const { state, dispatch } = useTableReducer();
+  const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const [columns, setColumns] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState({ open: false, ids: null });
   const {
-    state: { permissions }
+    state: { permissions, selectedEntity }
   }: any = useData();
-  const { dataRows, rowCount, loading, page, pageSizes, search, filters, sorting, selectedRecords, limit, appendRows } = state;
-
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   React.useEffect(() => {
     fetchGridColumns();
-    fetchData();
   }, []);
 
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get(`surveys/fields/${surveyId}`)
-      .then(({ data: { data } }) => {
-        let columns = [];
-        let rendererNames = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o, routes.surveysDetail.path);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName);
-            }
-          }
-        });
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent,
-          nameRenderer: NameRenderer,
-          actionsRenderer: ActionsRenderer
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
-        columns = [...columns];
-        setColumns([...columns]);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+  useEffect(() => {
+    fetchData();
+  }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
+
+  const fetchGridColumns = async () => {
+    let data;
+    const response = await axiosInstance().get(`surveys/fields/${surveyId}`);
+    data = response?.data?.data;
+    const newColumns = generateColumns(renderedFrom, data, routes.surveysDetail.path, true);
+    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
   const fetchData = () => {
@@ -80,52 +56,45 @@ const SurveysData = ({ surveyId }) => {
       });
   };
 
-  const NameRenderer = (params) => {
-    return <span className=" d-flex gap-2 align-items-center">{params.value}</span>;
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 110,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        <HtmlTooltip title="Delete">
+          <IconButton
+            size="small"
+            aria-label="Delete"
+            onClick={() => {
+              setShowConfirmBox({ open: true, ids: [row?.original?._id] });
+            }}
+          >
+            <DeleteIcon color="error" />
+          </IconButton>
+        </HtmlTooltip>
+      </>
+    )
   };
 
-  const ActionsRenderer = (params) => (
-    <>
-      {permissions?.surveys?.isDelete && (
-        <>
-          <HtmlTooltip title="Delete">
-            <IconButton
-              size="small"
-              aria-label="Clone"
-              onClick={() => {
-                setShowConfirmBox({ open: true, ids: [params?.data?._id] });
-              }}
-            >
-              <DeleteIcon color="error" fontSize="small" />
-            </IconButton>
-          </HtmlTooltip>
-        </>
-      )}
-    </>
-  );
-
-  const handleDelete = () => {};
+  const handleDelete = () => { };
 
   return (
     <div>
-      {columns && frameWorkComponent ? (
-        <CustomAgGrid
-          allowSelection={permissions?.surveys?.isUpdate}
-          allowAction={permissions?.surveys?.isUpdate}
+      {columns ? (
+        <CustomReactTable
+          height={'calc(100vh - 200px)'}
           columns={columns}
-          dataRows={dataRows}
-          isClientSideGrid={true}
-          frameworkComponents={frameWorkComponent}
-          setGridApi={setGridApi}
+          state={state}
           dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          actionWidth={150}
-          loading={loading}
           renderedFrom={renderedFrom}
           refreshGrid={fetchData}
+          showOnlyShowFilteredRecordSwitch={true}
         />
       ) : (
         <Box p={2} height={500}>

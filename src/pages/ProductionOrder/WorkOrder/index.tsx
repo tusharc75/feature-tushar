@@ -1,10 +1,10 @@
 import { useState, useEffect, Fragment, useContext } from 'react';
-import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { Box, Button, IconButton, Menu, MenuItem, Typography } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
+import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import {
   CHILD_RESOURCE,
@@ -17,9 +17,9 @@ import {
 } from '../../../constants/helpers';
 import { flatMap, map, orderBy, startCase, uniq } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
+import { flattenArray } from 'src/constants/columns';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import { CheckCircle, Delete, ExpandMore } from '@material-ui/icons';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
@@ -32,15 +32,24 @@ import { AutoCompleteIcon } from 'src/assets/svg/svgIcons';
 import AssignWorkStationDialog from 'src/pages/WorkOrder/Service/AssignWorkStationDialog';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AttachmentDialog from 'src/pages/WorkOrder/Service/AttachmentDialog';
+import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
+import SyncIcon from '@material-ui/icons/Sync';
+
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
+var apiCallInterval: any = null;
+
 const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, setCurrentStep }) => {
+
   const {
     state: { user, permissions }
   }: any = useData();
+
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, page, limit, filters, sorting, selectedRecords } = state;
+
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState(null);
-  const [rowsData, setRowsData] = useState(null);
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [addServicesDialog, setAddServicesDialog] = useState({ open: false, new: false });
   const [userAssignDialog, setUserAssignDialog] = useState({ open: false, assignedUsers: [] });
@@ -56,32 +65,49 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   const [consumablesDialog, setConsumablesDialog] = useState({ open: false, ids: [], data: null });
   const [attachmentsDialog, setAttachmentsDialog] = useState({ open: false, workOrderId: null, uniqueServiceId: null, serviceName: null });
 
-  const [selectedRecords, setSelectedRecords] = useState([]);
+
+  const [isAutoCreating, setIsAutoCreating] = useState(true);
+  const { generateColumns } = useColumns();
+
+  useEffect(() => {
+    autoCreateWorkOrder();
+  }, []);
+
+  const autoCreateWorkOrder = async () => {
+    try {
+      apiCallInterval = setInterval(async () => {
+        await fetchData();
+      }, 30000);
+      await axiosInstance().post(`${productionOrder.api}/${productionOrderData._id}/work-order`);
+      if (apiCallInterval) {
+        clearInterval(apiCallInterval);
+      }
+      setIsAutoCreating(false)
+    } catch (error) {
+      setIsAutoCreating(false)
+      toastConfig.setToastConfig(error);
+    }
+  }
 
   useEffect(() => {
     fetchFields();
   }, [productionOrderData]);
 
   const fetchFields = async () => {
-    try {
-      await axiosInstance().post(`${productionOrder.api}/${productionOrderData._id}/work-order`);
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.productionOrderDetail}`);
     var data = response?.data?.data?.filter((e) => !['detail', 'description', 'workOrderNumber']?.includes(e?.fieldName));
     data = CURReplaceByCurrencySingle(data, productionOrderData?.currency || 'USD');
     data?.forEach((e) => {
       e.isColumnEditable = false;
     });
-    const newColumns = generateCustomTableColumns(data, productionOrderData?.currency || 'USD', renderedFrom);
+    const newColumns = generateColumns(renderedFrom, data, null, false, productionOrderData?.currency || 'USD');
     let coloum: any = [
       {
         accessor: 'index',
         Header: 'Index',
         width: 70,
-        sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+        sticky: 'left',
+        Cell: ({ row }) => <h5 className="text-truncate">{row.original.index}</h5>,
         Footer: () => {
           return <>Total</>;
         }
@@ -89,20 +115,19 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       {
         accessor: 'type',
         Header: 'Type',
-        disableFilters: true,
-        sticky: isMobile ? 'none' : 'left',
         width: 100,
-        Cell: ({ row }) => (row.original['type'] ? <p>{`${startCase(row.original?.type)} `}</p> : <NoDataCell />)
+        sticky: isMobile || isTablet ? 'none' : 'left',
+        Cell: ({ row }) => (row.original['type'] ? <h5>{`${startCase(row.original?.type)} `}</h5> : <NoDataCell />)
       },
       {
         accessor: 'detail',
         Header: ' Details',
         minWidth: 200,
         width: 200,
-        sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row, rows }) => (
+        sticky: isMobile || isTablet ? 'none' : 'left',
+        Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <p className="text-truncate">{row.original?.detail}</p>
+            <h5 className="text-truncate">{row.original?.detail}</h5>
             <Box ml={1}>
               <IconButton
                 size="small"
@@ -127,7 +152,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         Header: 'Description',
         width: 200,
         Cell: ({ row }) => {
-          return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
+          return row.original['description'] ? <h5 className="text-truncate">{row.original.description}</h5> : <NoDataCell />;
         }
       },
       {
@@ -137,7 +162,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         Cell: ({ row }) =>
           row.original.workOrder ? (
             <div className="d-flex gap-2 align-items-center">
-              <p className="text-truncate">{row.original.workOrderNumber}</p>
+              <h5 className="text-truncate">{row.original.workOrderNumber}</h5>
               <IconButton
                 size="small"
                 onClick={() => {
@@ -152,18 +177,23 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
           )
       },
       {
-        accessor: 'workOrderStatus',
+        accessor: 'status',
+        Header: 'Status',
+        width: 200,
+        Cell: ({ row }) => <div>{row.original['status'] ? <p> {row.original.status}</p> : <NoDataCell />}</div>
+      },
+      {
+        accessor: 'serviceStatus',
         Header: 'Result',
         width: 200,
-        Cell: ({ row }) => (row?.original['workOrderStatus'] ? <p> {row?.original?.workOrderStatus}</p> : <NoDataCell />)
+        Cell: ({ row }) => <div>{row?.original['serviceStatus'] ? <h5> {row?.original?.serviceStatus}</h5> : <NoDataCell />}</div>
       },
       {
         accessor: 'assignedUsers',
         Header: 'Assigned Technician',
         width: 200,
-        disableFilters: true,
         Cell: ({ row }) =>
-          row?.original['assignedUsers'] && row?.original['assignedUsers']?.length ? (
+          <div>{row?.original['assignedUsers'] && row?.original['assignedUsers']?.length ? (
             row?.original['assignedUsers']?.map((e, i) => {
               return i === row?.original['assignedUsers'].length - 1 ? (
                 <a
@@ -190,56 +220,54 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
             })
           ) : (
             <NoDataCell />
-          )
+          )}</div>
       }
     ];
     if (permissions?.workStations?.isRead) {
       coloum.push({
         accessor: 'assignedWorkStations',
         Header: 'Assigned Work Station',
-        disableFilters: true,
         width: 200,
         Cell: ({ row }) =>
-          row?.original['assignedWorkStations'] && row?.original['assignedWorkStations']?.length ? (
-            row?.original['assignedWorkStations']?.map((e, i) => {
-              return i === row?.original['assignedWorkStations'].length - 1 ? (
-                <a
-                  className="link text-truncate [flex-grow:0_!important]"
-                  target="_blank"
-                  href={`${routes.workStationsDetail.path}/${e.optionValue}`}
-                  rel="noreferrer"
-                >
-                  {e?.optionLabel}
-                </a>
-              ) : (
-                <>
+          <div>
+            {row?.original['assignedWorkStations'] && row?.original['assignedWorkStations']?.length ? (
+              row?.original['assignedWorkStations']?.map((e, i) => {
+                return i === row?.original['assignedWorkStations'].length - 1 ? (
                   <a
                     className="link text-truncate [flex-grow:0_!important]"
                     target="_blank"
                     href={`${routes.workStationsDetail.path}/${e.optionValue}`}
                     rel="noreferrer"
                   >
-                    {e?.optionLabel},
+                    {e?.optionLabel}
                   </a>
-                  &nbsp;
-                </>
-              );
-            })
-          ) : (
-            <NoDataCell />
-          )
+                ) : (
+                  <>
+                    <a
+                      className="link text-truncate [flex-grow:0_!important]"
+                      target="_blank"
+                      href={`${routes.workStationsDetail.path}/${e.optionValue}`}
+                      rel="noreferrer"
+                    >
+                      {e?.optionLabel},
+                    </a>
+                    &nbsp;
+                  </>
+                );
+              })
+            ) : (
+              <NoDataCell />
+            )}
+          </div>
       });
     }
     coloum = [...coloum, ...newColumns];
     coloum.push({
       accessor: 'action',
       Header: 'Actions',
-      minWidth: 70,
-      width: 70,
+      minWidth: 100,
+      width: 100,
       sticky: 'right',
-      disableFilters: true,
-      disableSortBy: true,
-      canDrag: false,
       Cell: ({ row }) => {
         return (
           <>
@@ -282,35 +310,66 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       }
     });
     setColumns(coloum);
+  };
+
+  useEffect(() => {
     fetchData();
+  }, [page, limit, filters, sorting, isAutoCreating]);
+
+  const getQueryString = (isExport = false) => {
+    let deepFilter = `?page=${page}&limit=${limit}`;
+    if (isExport) {
+      deepFilter = `?`;
+    }
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
+
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    }
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
+    }
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
+    }
+    if (sorting.length > 0) {
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+    }
+    return deepFilter;
   };
 
   const fetchData = async () => {
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
+
+    const queryString = getQueryString();
     setNextStep(false);
-    var data: any = [];
-    const response = await axiosInstance().get(`${productionOrder.api}/${productionOrderData._id}/work-order/service`);
-    data = response?.data?.data;
+    const {
+      data: { data, count }
+    } = await axiosInstance().get(`${productionOrder.api}/${productionOrderData._id}/work-order/service${queryString}`);
     let rows = data.material.filter((e) => e.type === MATERIAL_TYPE.product && e?.parentId === null);
+    const totalPrev = page * limit;
     rows.forEach((parent, i) => {
-      parent.index = i + 1;
+      parent.index = i + 1 + totalPrev;
       parent.detail = parent.detail
         ? parent.detail
         : parent.type === MATERIAL_TYPE.service
-        ? parent?.serviceDetail?.serviceName
-        : parent.type === MATERIAL_TYPE.product
-        ? parent.productDetail?.productName
-        : parent.packageDetail?.packageName;
+          ? parent?.serviceDetail?.serviceName
+          : parent.type === MATERIAL_TYPE.product
+            ? parent.productDetail?.productName
+            : parent.packageDetail?.packageName;
       parent.description = parent.description
         ? parent.description
         : parent.type === MATERIAL_TYPE.product
-        ? parent?.productDetail?.productDescription
-        : parent?.packageDetail?.packageDescription;
+          ? parent?.productDetail?.productDescription
+          : parent?.packageDetail?.packageDescription;
       parent.qty = parent.qty;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
       parent.hideSelection = false;
       if (parent?.workOrder?.status === WORK_ORDER_STATUS.completed) {
         parent.hideSelection = true;
         parent.workOrderStatus = parent?.workOrder?.status;
+        parent.status = parent?.workOrder?.status;
       }
       parent.subRows = generateNestedData(data.material, parent);
       if (parent?.workOrder?.status === WORK_ORDER_STATUS.new) {
@@ -324,7 +383,8 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     if (rows.filter((e) => e?.workOrderStatus === WORK_ORDER_STATUS.completed)?.length === rows?.length) {
       setNextStep(true);
     }
-    setRowsData(rows);
+    dispatch({ type: 'initialize', data: rows, count: count });
+    dispatch({ type: 'loading', loading: false });
   };
 
   const generateNestedData = (material, parent) => {
@@ -337,17 +397,17 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       _subRow.detail = _subRow.detail
         ? _subRow.detail
         : _subRow.type === MATERIAL_TYPE.service
-        ? _subRow?.serviceDetail?.serviceName
-        : _subRow.type === MATERIAL_TYPE.product
-        ? _subRow.productDetail?.productName
-        : _subRow.packageDetail?.packageName;
+          ? _subRow?.serviceDetail?.serviceName
+          : _subRow.type === MATERIAL_TYPE.product
+            ? _subRow.productDetail?.productName
+            : _subRow.packageDetail?.packageName;
       _subRow.description = _subRow.description
         ? _subRow.description
         : _subRow.type === MATERIAL_TYPE.service
-        ? _subRow?.serviceDetail?.serviceDescription
-        : _subRow.type === MATERIAL_TYPE.product
-        ? _subRow?.productDetail?.productDescription
-        : _subRow?.packageDetail?.packageDescription;
+          ? _subRow?.serviceDetail?.serviceDescription
+          : _subRow.type === MATERIAL_TYPE.product
+            ? _subRow?.productDetail?.productDescription
+            : _subRow?.packageDetail?.packageDescription;
       _subRow.qty = _subRow.qty;
       _subRow.workOrder = parent?.workOrder;
       _subRow.workOrderNumber = parent?.workOrder?.workOrderNumber;
@@ -406,20 +466,21 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     ) {
       setDeleting(true);
 
-      let workOrderId = '';
-      if (deleteData.length > 0) {
-        workOrderId = deleteData[0]?.workOrder?._id;
-      }
-      const products = deleteData?.filter((e) => e.type === MATERIAL_TYPE.product);
-      if (products?.length) {
-        const ids = products?.map((r) => r?._id);
-        await axiosInstance().put(`${workOrder.api}/${workOrderId}/consumable/remove`, { ids: ids || [] });
-      }
-      const servicePackage = deleteData?.filter((e) => [MATERIAL_TYPE.service, MATERIAL_TYPE.package]?.includes(e.type));
-      if (servicePackage?.length) {
-        const ids = servicePackage?.map((e) => e?.uniqueId);
-        await axiosInstance().put(`${workOrder.api}/service/${workOrderId}/remove`, { uniqueIds: ids });
-      }
+      const records: any = [];
+
+      deleteData?.forEach((data) => {
+        const index = records?.findIndex((d) => d?.workOrder === data?.workOrder?._id);
+        if (index >= 0) {
+          records[index].ids = [...records[index].ids, data?._id];
+        } else {
+          records.push({
+            workOrder: data?.workOrder?._id,
+            ids: [data?._id]
+          });
+        }
+      });
+
+      await axiosInstance().put(`${workOrder.api}/remove-work-orders-material`, records);
       setDeleting(false);
       setShowConfirmBox(false);
       fetchData();
@@ -503,7 +564,6 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
             type: 'success',
             message: data?.message
           });
-          fetchData();
         })
         .catch((err) => {
           setCompleteConfirmBox(false);
@@ -581,9 +641,27 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
 
   return (
     <Fragment>
+      {isAutoCreating &&
+        <Box p={1} display="flex" alignItems="center">
+          <SyncIcon className="rotate" /> <Typography variant='subtitle2' >Work order Auto Creation in Progress</Typography>
+        </Box>}
       <Box display="flex" alignItems="center" justifyContent={'flex-end'} gridColumnGap={8} flex={1} m={1} my={1}>
         {allowedToEdit && (
           <Box display="flex" gridColumnGap={5}>
+            <ImportExportMenu
+              permissions={permissions?.workOrder}
+              module="Work Order Consumables"
+              api={`${workOrder.api}/unknown/consumable`}
+              afterImportCompleted={() => {
+                fetchData();
+              }}
+              isExportAllOrSomeFeature={true}
+              ids={[]}
+              title={'Consumables'}
+              additionalParams={`workOrderIds=${JSON.stringify(selectedRecords?.length ? selectedRecords?.map((e) => e?.workOrder?._id)
+                : dataRows?.map((e) => e?.workOrder?._id))}`}
+            />
+            <Box ml={1}></Box>
             <Button
               variant="outlined"
               color="default"
@@ -660,7 +738,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                 <MenuItem
                   disabled={
                     selectedRecords?.filter((d) => [MATERIAL_TYPE.product, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0 &&
-                    checkUniqWorkOrder()
+                      checkUniqWorkOrder()
                       ? false
                       : true
                   }
@@ -668,12 +746,12 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                     var ids = [];
                     if (selectedRecords?.find((e) => e.type === MATERIAL_TYPE.product)) {
                       const product = selectedRecords?.find((e) => e.type === MATERIAL_TYPE.product);
-                      ids = flattenArray(rowsData)
+                      ids = flattenArray(dataRows)
                         ?.filter((e) => e?.workOrder?._id === product?.workOrder?._id)
                         ?.map((e) => e.materialId);
                     } else {
                       const serviceIds = selectedRecords?.filter((d) => d?.type === MATERIAL_TYPE.service)?.map((e) => e._id);
-                      ids = flattenArray(rowsData)
+                      ids = flattenArray(dataRows)
                         ?.filter((e) => serviceIds?.includes(e?.parentId))
                         ?.map((e) => e.materialId);
                     }
@@ -708,8 +786,8 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
               <MenuItem
                 disabled={
                   checkUniqWorkOrder() &&
-                  (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
-                    selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.length === 1)
+                    (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
+                      selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.length === 1)
                     ? false
                     : true
                 }
@@ -742,7 +820,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                   setShowConfirmBox(true);
                   closeActions();
                 }}
-                disabled={checkUniqWorkOrder() && selectedRecords?.some((e) => e?.canDelete) ? false : true}
+                disabled={selectedRecords?.some((e) => e?.canDelete) ? false : true}
               >
                 Delete
               </MenuItem>
@@ -750,22 +828,19 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
           </Box>
         )}
       </Box>
-      {columns && rowsData ? (
+      {columns ? (
         <>
           <Box zIndex={5} width={'100%'}>
             <CustomReactTable
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
+              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
               columns={columns}
-              data={rowsData}
-              onSelect={(data) => {
-                setSelectedRecords(data?.filter((d) => !d.hideSelection) || []);
-              }}
+              state={state}
               setWholeRowsCellColor={(rowData) => (rowData.type === 'service' ? 'isService' : '')}
-              childrenProperty="subRows"
-              uniqueKey="_id"
+              dispatch={dispatch}
               renderedFrom={renderedFrom}
-              isClientSideGrid={true}
+              refreshGrid={fetchData}
               hideSelection={!allowedToEdit}
+              expander={true}
             />
           </Box>
         </>
@@ -774,7 +849,6 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
-
       {addServicesDialog.open && !addServicesDialog.new && (
         <AssignServiceDialog
           handleClose={() => setAddServicesDialog({ open: false, new: false })}
@@ -786,6 +860,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
             );
           }}
           isSubmitting={isSubmitting}
+          hideQty={true}
         />
       )}
       {addServicesDialog.open && addServicesDialog.new && (

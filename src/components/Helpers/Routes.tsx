@@ -1111,6 +1111,10 @@ const routes = {
       : RESOURCE_LABEL.creditMemo,
     path: '/credit-memo'
   },
+  userDownloadRequest: {
+    title: RESOURCE_LABEL.userDownloadRequest,
+    path: '/user-download-request'
+  },
   creditMemoDetail: {
     title:
       storedRoutes && storedRoutes.creditMemo && storedRoutes.creditMemo.title

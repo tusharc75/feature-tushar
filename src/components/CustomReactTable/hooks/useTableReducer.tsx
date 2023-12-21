@@ -1,0 +1,165 @@
+import { useReducer } from 'react';
+import { gridPageSizes } from 'src/constants/helpers';
+
+function reducer(state: TInitialState, action: TActios) {
+  switch (action.type) {
+    case 'loading':
+      return {
+        ...state,
+        loading: action.loading
+      };
+    case 'initialize':
+      return {
+        ...state,
+        error: false,
+        dataRows: action.data,
+        rowCount: action.count,
+        initialDataLoaded: true,
+      };
+    case 'selection':
+      return {
+        ...state,
+        selectedRecords: action.selectedRecords
+      };
+    case 'update':
+      return {
+        ...state,
+        dataRows: action.data,
+        loading: false
+      };
+    case 'onlyFilter':
+      return {
+        ...state,
+        filters: action.filters
+      };
+    case 'filter':
+      return {
+        ...state,
+        loading: action.loading ?? true,
+        filters: action.filters,
+        page: 0
+      };
+    case 'sort':
+      return {
+        ...state,
+        sorting: action.sorting,
+        loading: action.loading ?? true
+      };
+    case 'search':
+      return {
+        ...state,
+        search: action.search,
+        loading: action.loading ?? true
+      };
+    case 'pageChange':
+      return {
+        ...state,
+        page: action.page
+      };
+    case 'pageSizeChange':
+      return {
+        ...state,
+        limit: action.limit,
+        page: 0,
+        loading: action.loading ?? true
+      };
+    case 'error':
+      return {
+        ...state,
+        error: action.error
+      };
+    case 'complete':
+      return {
+        ...state,
+        loading: false
+      };
+    case 'currentEditingCellPosition':
+      return {
+        ...state,
+        currentEditingCellPosition: action.cellPosition
+      };
+    case 'showFilteredRecordsOnly':
+      return {
+        ...state,
+        showFilteredRecordsOnly: !state.showFilteredRecordsOnly
+      };
+    case 'updateColumnState':
+      return {
+        ...state,
+        colState: action.colState
+      };
+    case 'loadingExpanderRowId':
+      return {
+        ...state,
+        loadingExpanderRowId: action.loadingExpanderRowId
+      };
+    default:
+      break;
+  }
+
+  return state;
+}
+
+const intialState = {
+  dataRows: [],
+  rowCount: 0,
+  loading: false,
+  page: 0,
+  limit: 25,
+  pageSizes: gridPageSizes,
+  search: '',
+  filters: {},
+  sorting: [],
+  selectedRecords: [],
+  currentEditingCellPosition: null,
+  error: false,
+  showFilteredRecordsOnly: false,
+  colState: [],
+  loadingExpanderRowId: null,
+  initialDataLoaded: false
+};
+
+export type TInitialState = {
+  dataRows: any[] | null;
+  rowCount: number;
+  loading: boolean;
+  page: number;
+  limit: number;
+  pageSizes: number[];
+  search: string;
+  filters: any;
+  sorting: any[];
+  selectedRecords: any[];
+  currentEditingCellPosition: { rowId: string; columnName: string } | null;
+  error: boolean;
+  showFilteredRecordsOnly: boolean;
+  colState: any[];
+  loadingExpanderRowId: string | null;
+  initialDataLoaded: boolean;
+};
+
+export type TActios =
+  | { type: 'loading'; loading: boolean }
+  | { type: 'initialize'; data: any[]; count: number }
+  | { type: 'selection'; selectedRecords: any[] }
+  | { type: 'update'; data: any[] }
+  | { type: 'onlyFilter'; filters: any }
+  | { type: 'filter'; filters: any; loading?: boolean }
+  | { type: 'sort'; sorting: any[]; loading?: boolean }
+  | { type: 'search'; search: string; loading?: boolean }
+  | { type: 'pageChange'; page: number }
+  | { type: 'pageSizeChange'; limit: number; loading?: boolean }
+  | { type: 'complete' }
+  | { type: 'currentEditingCellPosition'; cellPosition: { rowId: string; columnName: string } | null }
+  | { type: 'error'; error: boolean }
+  | { type: 'showFilteredRecordsOnly' }
+  | { type: 'columnOrder'; columnOrder: boolean }
+  | { type: 'hiddenColumns'; hiddenColumns: boolean }
+  | { type: 'updateColumnState'; colState: any[] }
+  | { type: 'loadingExpanderRowId'; loadingExpanderRowId: string | null };
+
+export const useTableReducer = () => {
+  const [state, dispatch] = useReducer(reducer, intialState);
+
+  return { state, dispatch };
+};

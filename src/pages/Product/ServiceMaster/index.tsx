@@ -18,14 +18,13 @@ import { GrDrag } from 'react-icons/gr';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import { ExpandMore } from '@material-ui/icons';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { flattenArray } from 'src/constants/columns';
 import AssignStepDialog from './AssignStepDialog/Index';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
-
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 interface Props {
   renderedFrom: string;
@@ -47,8 +46,9 @@ const ServiceMaster = (props: Props) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [isAssigning, setIsAssigning] = useState(false);
   const [orignalData, setOrignalData] = useState([]);
-  const [selectedRecords, setSelectedRecords] = useState([]);
-  const [dataRows, setDataRows] = useState([]);
+
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, selectedRecords } = state;
 
   const [assignProductDialog, setAssignProductDialog] = useState({ open: false, products: null, service: null, uniqueId: null, steps: null });
 
@@ -89,7 +89,9 @@ const ServiceMaster = (props: Props) => {
         accessor: 'type',
         Header: 'Type',
         width: 80,
-        sticky: isMobile ? 'none' : 'left',
+        disableFilters: true,
+        disabled: true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p>{`${row.original?.type || <NoDataCell />} `}</p>
@@ -100,9 +102,11 @@ const ServiceMaster = (props: Props) => {
         accessor: 'detail',
         Header: 'Detail',
         minWidth: 200,
-        sticky: isMobile ? 'none' : 'left',
+        width: 200,
+        disabled: true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) =>
-          row?.original?.type ? (
+          row?.original?.detail ? (
             <div className="d-flex gap-2 align-items-center">
               <p className="text-truncate">{row.original.detail}</p>
               <IconButton
@@ -165,7 +169,7 @@ const ServiceMaster = (props: Props) => {
       columns.push({
         accessor: 'preWork',
         Header: 'Pre Work',
-        width: 70,
+        width: 100,
         Cell: ({ row }) => (row.original?.preWork ? <p className="text-truncate">{row.original?.preWork}</p> : <NoDataCell />)
       });
     }
@@ -192,7 +196,7 @@ const ServiceMaster = (props: Props) => {
       canDrag: false,
       Cell: ({ row }: any) => (
         <div style={{ display: 'flex', justifyContent: 'end' }}>
-          {permissions?.product?.isUpdate && row.original?.type === 'Service' && (
+          {permissions?.product?.isUpdate && row?.original?.type === 'Service' && (
             <HtmlTooltip title="Add Consumables">
               <IconButton
                 size="small"
@@ -214,8 +218,8 @@ const ServiceMaster = (props: Props) => {
             </HtmlTooltip>
           )}
           {permissions?.product?.isUpdate &&
-            row.original?.type === 'Service' &&
-            (row.original?.default ? (
+            row?.original?.type === 'Service' &&
+            (row?.original?.default ? (
               <HtmlTooltip title={'Remove Default'}>
                 <IconButton
                   aria-label={'Default'}
@@ -268,6 +272,8 @@ const ServiceMaster = (props: Props) => {
   };
 
   const fetchData = async () => {
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
     try {
       const services = await axiosInstance().get(`${routes.product.path}/${id}/service-master`);
       const consumables = await axiosInstance().get(`${routes.product.path}/${id}/service-master/consumables`);
@@ -293,7 +299,8 @@ const ServiceMaster = (props: Props) => {
             return c;
           });
       });
-      setDataRows([...serviceData]);
+      dispatch({ type: 'initialize', data: serviceData, count: serviceData?.length });
+      dispatch({ type: 'loading', loading: false });
     } catch (e) {
       toastConfig.setToastConfig(e);
     }
@@ -539,19 +546,32 @@ const ServiceMaster = (props: Props) => {
           </div>
         </Box>
       )}
-      {columns && dataRows ? (
-        <CustomReactTable
-          height={'calc(100vh - 345px)'}
-          columns={columns}
-          data={dataRows}
-          setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
-          onSelect={setSelectedRecords}
-          childrenProperty="subRows"
-          uniqueKey="_id"
-          onSaveEdit={onSaveInlineEdit}
-          renderedFrom={renderedFrom}
-          isClientSideGrid={true}
-        />
+      {columns ? (
+         <CustomReactTable
+         height={'calc(100vh - 345px)'}
+         columns={columns}
+         state={state}
+         dispatch={dispatch}
+         refreshGrid={fetchData}
+         setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
+         onSaveEdit={onSaveInlineEdit}
+         expander = {true}
+         renderedFrom={renderedFrom}
+         isClientSideGrid={true}
+       />
+
+        // <CustomReactTable
+        //   height={'calc(100vh - 345px)'}
+        //   columns={columns}
+        //   data={dataRows}
+        //   setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
+        //   onSelect={setSelectedRecords}
+        //   childrenProperty="subRows"
+        //   uniqueKey="_id"
+        //   onSaveEdit={onSaveInlineEdit}
+        //   renderedFrom={renderedFrom}
+        //   isClientSideGrid={true}
+        // />
       ) : (
         <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />

@@ -6,7 +6,6 @@ import axiosInstance from '../../axios/axiosInstance';
 import routes from '../../components/Helpers/Routes';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPageHeader from '../../components/DetailsPageHeader';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -171,38 +170,36 @@ const RentalManagementDetailsPage = () => {
   };
 
   const fetchQuotationData = (versionNumber = null, createIfNotExits = false) => {
-    if ((rentalManagementData && rentalManagementData?.addQuotationStep) || user?.user?.brandPolicy?.rentalQuotation) {
-      axiosInstance()
-        .get(
-          createIfNotExits
-            ? `${rentalManagement.api}/${rentalManagementData._id}/quotation?createIfNotExits=1`
-            : `${rentalManagement.api}/${id}/quotation`
-        )
-        .then(({ data: { data } }) => {
-          if (data?.versions) {
-            setQuotationData(data);
-            let keys = Object.keys(data.versions);
-            setCurrentVersion(versionNumber ? versionNumber : parseInt(keys[keys.length - 1]));
-            const lastQuoteVersion = data?.versions[versionNumber ? versionNumber : parseInt(keys[keys.length - 1])];
-            if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer].includes(lastQuoteVersion?.status)) {
-              setVersionNotClonned(true);
-            } else {
-              setVersionNotClonned(false);
-            }
+    axiosInstance()
+      .get(
+        createIfNotExits
+          ? `${rentalManagement.api}/${rentalManagementData._id}/quotation?createIfNotExits=1`
+          : `${rentalManagement.api}/${id}/quotation`
+      )
+      .then(({ data: { data } }) => {
+        if (data?.versions) {
+          setQuotationData(data);
+          let keys = Object.keys(data.versions);
+          setCurrentVersion(versionNumber ? versionNumber : parseInt(keys[keys.length - 1]));
+          const lastQuoteVersion = data?.versions[versionNumber ? versionNumber : parseInt(keys[keys.length - 1])];
+          if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer].includes(lastQuoteVersion?.status)) {
+            setVersionNotClonned(true);
+          } else {
+            setVersionNotClonned(false);
+          }
 
-            for (let i = 0; i < keys.length; i++) {
-              if (
-                [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                  data?.versions[keys[i]]?.status
-                )
-              ) {
-                setIsDisableCustomerAccount(true);
-                break;
-              }
+          for (let i = 0; i < keys.length; i++) {
+            if (
+              [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                data?.versions[keys[i]]?.status
+              )
+            ) {
+              setIsDisableCustomerAccount(true);
+              break;
             }
           }
-        });
-    }
+        }
+      });
   };
 
   const fetchAssetStatusRights = () => {
@@ -442,21 +439,22 @@ const RentalManagementDetailsPage = () => {
                   >
                     {isMobile && !isTablet ? <IoMdDownload size={20} /> : isDownloading ? 'Please wait...' : 'Download'}
                   </Button>
-                  {['Add Products', 'Add Services', 'Add-on'].includes(rentalSteps[currentStep]?.name) && versionNotClonned && (
-                    <Button
-                      disabled={!versionNotClonned}
-                      className="buttonStyleBigScreen"
-                      variant="contained"
-                      color="primary"
-                      size="small"
-                      onClick={() => {
-                        setVersionNotClonned(false);
-                        cloneVersion();
-                      }}
-                    >
-                      Create New Version
-                    </Button>
-                  )}
+                  {['Add Products', 'Add Services', 'Add-on'].includes(rentalSteps[currentStep]?.name) && versionNotClonned &&
+                    rentalManagementData?.addQuotationStep && (
+                      <Button
+                        disabled={!versionNotClonned}
+                        className="buttonStyleBigScreen"
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        onClick={() => {
+                          setVersionNotClonned(false);
+                          cloneVersion();
+                        }}
+                      >
+                        Create New Version
+                      </Button>
+                    )}
                   {permissions?.rentalManagement?.isUpdate &&
                     !isOffline &&
                     [RENTAL_STATUS.readyToInvoice, RENTAL_STATUS.invoiced].includes(rentalManagementData?.status) &&
@@ -469,43 +467,6 @@ const RentalManagementDetailsPage = () => {
                         >
                           {isMobile && !isTablet ? <CloseIcon /> : 'Close'}
                         </Button>
-                        {/* <Button
-                          variant="outlined"
-                          color="default"
-                          size="small"
-                          onClick={openActions}
-                          aria-controls="action-menu"
-                          endIcon={isMobile ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
-                        >
-                          {isMobile ? <GrStatusInfo size={20} /> : 'Change Status'}
-                        </Button>
-                        <Menu
-                          anchorEl={anchorEl}
-                          keepMounted
-                          getContentAnchorEl={null}
-                          anchorOrigin={{
-                            vertical: 'bottom',
-                            horizontal: 'left'
-                          }}
-                          id="action-menu"
-                          open={Boolean(anchorEl)}
-                          onClose={closeActions}
-                        >
-                          {statusOptions?.map((o, index) => {
-                            return (
-                              <MenuItem
-                                disabled={index <= statusOptions.findIndex((d) => d.optionLabel === rentalManagementData?.status)}
-                                onClick={() => {
-                                  closeActions();
-                                  handleStatusChange(o);
-                                }}
-                                value={o}
-                              >
-                                {o?.optionLabel}
-                              </MenuItem>
-                            );
-                          })}
-                        </Menu> */}
                       </Fragment>
                     )}
                   {user?.role?.selectedEntity?.policy?.isRentalReopen && rentalManagementData?.status === RENTAL_STATUS.closed && (
@@ -654,16 +615,13 @@ const RentalManagementDetailsPage = () => {
                   setNextStepToolTip={setNextStepToolTip}
                   renderedFrom={`${renderedFrom}_grid-1`}
                   stepFullScreen={stepFullScreen}
-                  allowedToEdit={
-                    [
-                      QUOTATION_STATUS.acceptByCustomer,
-                      QUOTATION_STATUS.rejectByCustomer,
-                      QUOTATION_STATUS.sentToCustomer,
-                      QUOTATION_STATUS.waitingForSupplierPrice
-                    ].includes(quotationData?.versions[currentVersion]?.status)
-                      ? false
-                      : allowedToEdit
-                  }
+                  allowedToEdit={allowedToEdit}
+                  quotationApproved={quotationData && [
+                    QUOTATION_STATUS.acceptByCustomer,
+                    QUOTATION_STATUS.rejectByCustomer,
+                    QUOTATION_STATUS.sentToCustomer,
+                    QUOTATION_STATUS.waitingForSupplierPrice
+                  ].includes(quotationData?.versions[currentVersion]?.status) ? true : false}
                 />
               )}
               {rentalSteps[currentStep]?.name === 'Add Services' && rentalManagementData && (
@@ -673,35 +631,28 @@ const RentalManagementDetailsPage = () => {
                   setNextStepToolTip={setNextStepToolTip}
                   renderedFrom={`${renderedFrom}_grid-1`}
                   stepFullScreen={stepFullScreen}
-                  allowedToEdit={
-                    [
-                      QUOTATION_STATUS.acceptByCustomer,
-                      QUOTATION_STATUS.rejectByCustomer,
-                      QUOTATION_STATUS.sentToCustomer,
-                      QUOTATION_STATUS.waitingForSupplierPrice
-                    ].includes(quotationData?.versions[currentVersion]?.status)
-                      ? false
-                      : allowedToEdit
-                  }
+                  allowedToEdit={allowedToEdit}
+                  quotationApproved={quotationData && [
+                    QUOTATION_STATUS.acceptByCustomer,
+                    QUOTATION_STATUS.rejectByCustomer,
+                    QUOTATION_STATUS.sentToCustomer,
+                    QUOTATION_STATUS.waitingForSupplierPrice
+                  ].includes(quotationData?.versions[currentVersion]?.status) ? true : false}
                 />
               )}
-
               {rentalSteps[currentStep]?.name === 'Add-on' && rentalManagementData && (
                 <AdditionalCost
                   rentalManagementData={rentalManagementData}
                   setNextStep={setNextStep}
                   renderedFrom={`${renderedFrom}_grid-2`}
                   stepFullScreen={stepFullScreen}
-                  allowedToEdit={
-                    [
-                      QUOTATION_STATUS.acceptByCustomer,
-                      QUOTATION_STATUS.rejectByCustomer,
-                      QUOTATION_STATUS.sentToCustomer,
-                      QUOTATION_STATUS.waitingForSupplierPrice
-                    ].includes(quotationData?.versions[currentVersion]?.status)
-                      ? false
-                      : allowedToEdit
-                  }
+                  allowedToEdit={allowedToEdit}
+                  quotationApproved={quotationData && [
+                    QUOTATION_STATUS.acceptByCustomer,
+                    QUOTATION_STATUS.rejectByCustomer,
+                    QUOTATION_STATUS.sentToCustomer,
+                    QUOTATION_STATUS.waitingForSupplierPrice
+                  ].includes(quotationData?.versions[currentVersion]?.status) ? true : false}
                 />
               )}
               {rentalSteps[currentStep]?.name === 'Quotation' && rentalManagementData && (
@@ -737,6 +688,7 @@ const RentalManagementDetailsPage = () => {
                   allowedToEdit={allowedToEdit}
                   isProcessor={isProcessor}
                   allowUpdateStatus={allowUpdateStatus}
+                  stepFullScreen={stepFullScreen}
                   checkProgressiveBilling={checkProgressiveBilling}
                 />
               )}
@@ -750,6 +702,7 @@ const RentalManagementDetailsPage = () => {
                   renderedFrom={`${renderedFrom}_grid-4`}
                   allowedToEdit={allowedToEdit}
                   isProcessor={isProcessor}
+                  stepFullScreen={stepFullScreen}
                   allowUpdateStatus={allowUpdateStatus}
                 />
               )}
@@ -800,7 +753,7 @@ const RentalManagementDetailsPage = () => {
             open={showCancelConfirmBox.open}
             message={
               showCancelConfirmBox.isQuote
-                ? 'Do you want to create a new version of the quote?'
+                ? `Do you want to create a new version of the ${routes?.quotation?.title?.toLowerCase()}?`
                 : `Are you sure you want to cancel this ${routes.rentalManagement.title.toLowerCase()} ?`
             }
             onClose={() => {

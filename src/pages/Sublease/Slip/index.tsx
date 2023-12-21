@@ -1,26 +1,25 @@
 import { Box, Grid, IconButton } from '@material-ui/core';
 import { startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react'
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { generateCustomTableColumns } from 'src/constants/columns';
 import { MATERIAL_TYPE, SUBLEASE_STATUS, sidebarResource, sublease } from 'src/constants/helpers';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { fetch_sublease_product_fields } from 'src/components/Sublease/helper';
 import PreviewDownload from 'src/components/PreviewDownload';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 
 function Slip({ subleaseData, stepFullScreen, renderedFrom, statusNames, updateStatus }) {
 
     const toastConfig = useContext(CustomToastContext);
-
+    const { generateColumns } = useColumns();
+    const { state, dispatch } = useTableReducer();
     const [columns, setColumns] = useState(null);
-    const [rowsData, setRowsData] = useState(null);
 
     useEffect(() => {
         if (
@@ -42,13 +41,13 @@ function Slip({ subleaseData, stepFullScreen, renderedFrom, statusNames, updateS
         data?.forEach((e) => {
             e.isColumnEditable = false;
         });
-        const newColumns = generateCustomTableColumns(data, subleaseData?.currency, '');
+        const newColumns = generateColumns(renderedFrom, data, null, false, subleaseData?.currency);
         let coloum: any = [
             {
                 accessor: 'index',
                 Header: 'Index',
                 width: 70,
-                sticky: isMobile ? 'none' : 'left',
+                sticky: 'left',
                 Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
                 Footer: () => {
                     return <>Total</>;
@@ -57,9 +56,8 @@ function Slip({ subleaseData, stepFullScreen, renderedFrom, statusNames, updateS
             {
                 accessor: 'type',
                 Header: 'Type',
-                sticky: isMobile ? 'none' : 'left',
-                disableFilters: true,
-                width: 200,
+                sticky: isMobile || isTablet ? 'none' : 'left',
+                width: 100,
                 Cell: ({ row }) =>
                     row.original['type'] ? (
                         <p>
@@ -72,7 +70,7 @@ function Slip({ subleaseData, stepFullScreen, renderedFrom, statusNames, updateS
             {
                 accessor: 'detail',
                 Header: 'Details',
-                width: 300,
+                width: 200,
                 sticky: isMobile ? 'none' : 'left',
                 Cell: ({ row }) => (
                     <div className="d-flex gap-2 align-items-center">
@@ -112,6 +110,8 @@ function Slip({ subleaseData, stepFullScreen, renderedFrom, statusNames, updateS
 
     const fetchRowData = async () => {
         try {
+            dispatch({ type: 'loading', loading: true });
+            dispatch({ type: 'selection', selectedRecords: [] });
             var data: any = [];
             const response = await axiosInstance().get(`${sublease.api}/productpackage/${subleaseData._id}`);
             data = response?.data?.data;
@@ -129,7 +129,8 @@ function Slip({ subleaseData, stepFullScreen, renderedFrom, statusNames, updateS
                         : '';
                 parent.subRows = generateNestedData(data.material, data.inventory, parent);
             });
-            setRowsData(rows);
+            dispatch({ type: 'initialize', data: rows, count: rows?.length });
+            dispatch({ type: 'loading', loading: false });
         } catch (error) {
             toastConfig.setToastConfig(error);
         }
@@ -182,19 +183,19 @@ function Slip({ subleaseData, stepFullScreen, renderedFrom, statusNames, updateS
             </Box>
             <Grid container spacing={2}>
                 <Grid item xs={12} md={12} sm={12}>
-                    {columns && rowsData ? (
-                        <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}>
+                    {columns ? (
+                        <Box zIndex={5}>
                             <CustomReactTable
                                 height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
                                 columns={columns}
-                                data={rowsData}
-                                onSelect={() => { }}
-                                childrenProperty="subRows"
-                                uniqueKey="_id"
+                                state={state}
+                                dispatch={dispatch}
+                                refreshGrid={fetchRowData}
                                 hideSelection={true}
                                 hideAction={true}
                                 renderedFrom={renderedFrom}
                                 isClientSideGrid={true}
+                                expander={true}
                             />
                         </Box>
                     ) : (

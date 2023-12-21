@@ -6,28 +6,32 @@ import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
+import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import { CHILD_RESOURCE, MATERIAL_TYPE, PRODUCTION_ORDER_STATUS, asyncForEach, productionOrder, sidebarResource } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import { ExpandMore } from '@material-ui/icons';
 import { startCase } from 'lodash';
-import { calculateRowsFieldNew } from 'src/components/RentalManagment/helper';
+import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import MaterialDialog from './MaterialDialog';
 import Add from '@material-ui/icons/Add';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
-import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
+import { flattenArray } from 'src/constants/columns';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import CreateProduct from 'src/components/Product/CreateProduct';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 
 const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, allowedToDelete, updateOrderStatus }) => {
   const toastConfig = useContext(CustomToastContext);
+
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, page, limit, filters, sorting, selectedRecords } = state;
+
   const {
     state: { user, permissions }
   }: any = useData();
@@ -39,12 +43,10 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
   const [materialEdit, setMaterialEdit] = useState({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
   const [anchorEl, setAnchorEl] = useState(null);
   const [columns, setColumns] = useState(null);
-  const [rowsData, setRowsData] = useState(null);
-  const [selectedRecords, setSelectedRecords] = useState([]);
   const [allFields, setAllFields] = useState([]);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
-
   const [isSubmitting, setSubmitting] = useState(false);
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchFields();
@@ -55,7 +57,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
     var data = response?.data?.data?.filter((e) => !['detail', 'description']?.includes(e?.fieldName));
     data = CURReplaceByCurrencySingle(data, productionOrderData?.currency || 'USD');
     setAllFields(JSON.parse(JSON.stringify(data)));
-    let newColumns = generateCustomTableColumns(data, productionOrderData?.currency || 'USD', renderedFrom)
+    let newColumns = generateColumns(renderedFrom, data, null, false, productionOrderData?.currency || 'USD');
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';
@@ -65,8 +67,8 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
         accessor: 'index',
         Header: 'Index',
         width: 70,
-        sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+        sticky: 'left',
+        Cell: ({ row }) => <h5 className="text-truncate">{row.original.index}</h5>,
         Footer: () => {
           return <>Total</>;
         }
@@ -74,36 +76,38 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
       {
         accessor: 'type',
         Header: 'Type',
-        disableFilters: true,
-        sticky: isMobile ? 'none' : 'left',
-        width: 200,
-        Cell: ({ row }) => (row.original['type'] ? <p>{`${startCase(row.original?.type)} `}</p> : <NoDataCell />)
+        width: 100,
+        disabled: true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
+        Cell: ({ row }) => (row.original['type'] ? <h5>{`${startCase(row.original?.type)} `}</h5> : <NoDataCell />)
       },
       {
         accessor: 'detail',
-        Header: ' Details',
-        minWidth: 300,
-        width: 300,
-        sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row, rows }) => (
+        Header: 'Details',
+        disabled: true,
+        minWidth: 200,
+        width: 200,
+        sticky: isMobile || isTablet ? 'none' : 'left',
+        Cell: ({ row, table }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {allowedToEdit ? (
-              <p
+              <h5
                 onClick={() => {
                   setMaterialEdit({
                     open: true,
                     data: row.original,
                     bulkedit: false,
-                    showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
+                    showSaveAndNext:
+                      row?.index < table.getRowModel().rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
                   });
                 }}
                 className="link text-truncate"
                 title={row.original?.detail}
               >
                 {row.original?.detail}
-              </p>
+              </h5>
             ) : (
-              <p className="text-truncate">{row.original?.detail}</p>
+              <h5 className="text-truncate">{row.original?.detail}</h5>
             )}
             {allowedToEdit && row.original.type === MATERIAL_TYPE.package && (
               <>
@@ -146,7 +150,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
         Header: 'Description',
         width: 200,
         Cell: ({ row }) => {
-          return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
+          return row.original['description'] ? <h5 className="text-truncate">{row.original.description}</h5> : <NoDataCell />;
         }
       }
     ];
@@ -154,13 +158,10 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
     coloum.push({
       accessor: 'action',
       Header: 'Actions',
-      minWidth: 70,
-      width: 70,
+      minWidth: 100,
+      width: 100,
       sticky: 'right',
-      disableFilters: true,
-      disableSortBy: true,
-      canDrag: false,
-      Cell: ({ row, rows }) => (
+      Cell: ({ row, table }) => (
         <>
           <HtmlTooltip title={allowedToEdit ? 'Edit' : ''}>
             <IconButton
@@ -168,13 +169,12 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
               aria-label="Details"
               disabled={allowedToEdit ? false : true}
               onClick={() => {
-                onMaterialEdit(row, rows);
+                onMaterialEdit(row, table.getRowModel().rows);
               }}
             >
               <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
             </IconButton>
           </HtmlTooltip>
-
           <HtmlTooltip title={allowedToDelete && row.original?.canDelete ? 'Delete' : 'Work Order is already assigned'}>
             <IconButton
               size="small"
@@ -192,23 +192,61 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
       )
     });
     setColumns(coloum);
+  };
+
+  useEffect(() => {
     fetchData();
+  }, [page, limit, filters, sorting]);
+
+  const getQueryString = (isExport = false) => {
+    let deepFilter = `?page=${page}&limit=${limit}`;
+    if (isExport) {
+      deepFilter = `?`;
+    }
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
+
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    }
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
+    }
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
+    }
+    if (sorting.length > 0) {
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+    }
+    return deepFilter;
   };
 
   const fetchData = async () => {
+    dispatch({ type: 'loading', loading: true });
     setNextStep(false);
-    var data: any = [];
-    const response = await axiosInstance().get(`${productionOrder.api}/material/${productionOrderData._id}`);
-    data = response?.data?.data;
-    let rows = data.material.filter((e) => e.parentId === null);
+    const queryString = getQueryString();
+    const {
+      data: { data, count }
+    } = await axiosInstance().get(`${productionOrder.api}/material/${productionOrderData._id}${queryString}`);
+    let rows = data?.material?.filter((e) => e.parentId === null);
+    const totalPrev = page * limit;
     rows.forEach((parent, i) => {
-      parent.index = i + 1;
-      parent.detail = parent?.detail ? parent?.detail : parent.type === MATERIAL_TYPE.product ? parent.productDetail?.productName : parent.packageDetail?.packageName;
-      parent.description = parent?.description ? parent?.description :
-        parent.type === MATERIAL_TYPE.product ? parent?.productDetail?.productDescription : parent?.packageDetail?.packageDescription;
+      parent.index = i + 1 + totalPrev;
+      parent.detail = parent?.detail
+        ? parent?.detail
+        : parent.type === MATERIAL_TYPE.product
+        ? parent.productDetail?.productName
+        : parent.packageDetail?.packageName;
+      parent.description = parent?.description
+        ? parent?.description
+        : parent.type === MATERIAL_TYPE.product
+        ? parent?.productDetail?.productDescription
+        : parent?.packageDetail?.packageDescription;
       parent.qty = parent.qty;
       parent.qtyDisplay = parent.qty;
       parent.canDelete = parent?.workOrder ? false : true;
+      if (parent?.workOrder) {
+        parent.workOrderNumber = parent?.workOrder?.optionLabel;
+      }
       parent.subRows = generateNestedData(data.material, parent);
     });
 
@@ -221,8 +259,8 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
     } else {
       setNextStep(false);
     }
-    setRowsData(rows);
-    setSelectedRecords([]);
+    dispatch({ type: 'initialize', data: rows, count: count });
+    dispatch({ type: 'loading', loading: false });
   };
 
   const onMaterialEdit = (row, rows) => {
@@ -238,12 +276,22 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = _subRow?.detail ? _subRow?.detail : _subRow.type === MATERIAL_TYPE.product ? _subRow.productDetail?.productName : _subRow.packageDetail?.packageName;
-      _subRow.description = _subRow?.description ? _subRow?.description :
-        _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productDescription : _subRow?.packageDetail?.packageDescription;
+      _subRow.detail = _subRow?.detail
+        ? _subRow?.detail
+        : _subRow.type === MATERIAL_TYPE.product
+        ? _subRow.productDetail?.productName
+        : _subRow.packageDetail?.packageName;
+      _subRow.description = _subRow?.description
+        ? _subRow?.description
+        : _subRow.type === MATERIAL_TYPE.product
+        ? _subRow?.productDetail?.productDescription
+        : _subRow?.packageDetail?.packageDescription;
       _subRow.qty = _subRow.qty;
       _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
       _subRow.canDelete = _subRow?.workOrder ? false : true;
+      if (_subRow?.workOrder) {
+        _subRow.workOrderNumber = _subRow?.workOrder?.optionLabel;
+      }
       _subRow.subRows = generateNestedData(material, _subRow);
     });
     return subRows;
@@ -262,8 +310,8 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
         element.qty = 1;
         element.parentId = addDialog.parentId;
         material.push(element);
-      })
-    })
+      });
+    });
     axiosInstance()
       .post(`${productionOrder.api}/material/${productionOrderData._id}`, { material })
       .then(({ data }) => {
@@ -290,6 +338,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
     axiosInstance()
       .put(`${productionOrder.api}/material/${productionOrderData?._id}/delete`, { ids: rows })
       .then(({ data }) => {
+        dispatch({ type: 'selection', selectedRecords: [] });
         setDeleting(false);
         toastConfig.setToastConfig({
           open: true,
@@ -307,12 +356,12 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
   };
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
-    const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
+    const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
     if (inputField.hasOwnProperty('qtyDisplay')) {
       inputField['qty'] = inputField['qtyDisplay'];
     }
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsFieldNew(flattenArray(rowsData), inputField, allFields, updatedData);
+    rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
     handleSaveData(rows);
   };
 
@@ -329,12 +378,12 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
           message: data.message
         });
         if (saveAndNext) {
-          const rowIndex = rowsData.findIndex((d) => d._id === rows[0]?._id);
+          const rowIndex = dataRows?.findIndex((d) => d._id === rows[0]?._id);
           setMaterialEdit({
             open: true,
-            data: rowsData[rowIndex + 1],
+            data: dataRows[rowIndex + 1],
             bulkedit: false,
-            showSaveAndNext: rowIndex + 1 < rowsData?.length - 1 ? true : false
+            showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
           });
         } else {
           setMaterialEdit({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
@@ -391,22 +440,24 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
               >
                 Add Existing Products
               </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  closeAddActions();
-                  setAddDialog({ open: true, type: 'newProduct', parentId: null });
-                }}
-              >
-                Add New Product
-              </MenuItem>
-              <MenuItem
+              {permissions?.product?.isCreate && (
+                <MenuItem
+                  onClick={() => {
+                    closeAddActions();
+                    setAddDialog({ open: true, type: 'newProduct', parentId: null });
+                  }}
+                >
+                  Add New Product
+                </MenuItem>
+              )}
+              {/* <MenuItem
                 onClick={() => {
                   closeAddActions();
                   setAddDialog({ open: true, type: MATERIAL_TYPE.package, parentId: null });
                 }}
               >
                 Add Existing Packages
-              </MenuItem>
+              </MenuItem> */}
             </Menu>
           </Box>
           <Box display="flex">
@@ -418,10 +469,11 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
                 fetchData();
               }}
               isExportAllOrSomeFeature={true}
-              ids={[]}
+              // ids={[]}
+              recordsToExport={selectedRecords.length}
+              ids={selectedRecords?.length ? selectedRecords?.map((obj) => obj._id) : []}
             />
             <Box ml={1} />
-
             <Button
               disabled={selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true}
               variant={isMobile ? 'text' : 'outlined'}
@@ -476,19 +528,17 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
           </Box>
         </Box>
       )}
-      {columns && rowsData ? (
+      {columns ? (
         <>
           <Box zIndex={5} width={'100%'}>
             <CustomReactTable
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
               columns={columns}
-              data={rowsData}
+              state={state}
               setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
-              onSelect={setSelectedRecords}
-              childrenProperty="subRows"
-              uniqueKey="_id"
+              dispatch={dispatch}
               renderedFrom={renderedFrom}
-              isClientSideGrid={true}
+              refreshGrid={fetchData}
               onSaveEdit={onSaveInlineEdit}
               hideSelection={!allowedToEdit}
               hideAction={!allowedToEdit}
@@ -543,6 +593,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
             handleAdd(rows);
           }}
           isSubmitting={isSubmitting}
+          packageType={'product'}
         />
       )}
       {materialEdit.open && (

@@ -9,7 +9,6 @@ import axiosInstance from '../../axios/axiosInstance';
 import routes from '../../components/Helpers/Routes';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import DetailsPageHeader from '../../components/DetailsPageHeader';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
@@ -21,9 +20,6 @@ import DeleteButton from '../../components/Helpers/DeleteButton';
 import ManageSerializedAsset from '../SerializedAsset/ManageSerializedAsset';
 import { extractFieldsForDisplay } from '../../constants/formulaUtility';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
-import NoDataCell from '../../components/Helpers/NoDataCell';
 import queryString from 'query-string';
 import ProductConfiguration from './ProductConfiguration';
 import { camelCase } from 'lodash';
@@ -665,7 +661,7 @@ const ProductDetailsPage = () => {
               />
             )}
             {tabValue === 6 && <Package renderedFrom={`${renderedFrom}_grid-6`} productId={id} />}
-            {tabValue === 7 && <ParentProduct renderedFrom={`${renderedFrom}_grid-6`} productId={id} />}
+            {tabValue === 7 && <ParentProduct renderedFrom={`${renderedFrom}_grid-7`} productId={id} />}
             {tabValue === 8 && <InventoryHistory id={id} />}
             {tabValue === 9 && <Digital renderedFrom={`${renderedFrom}_grid-8`} productId={id} />}
           </Grid>

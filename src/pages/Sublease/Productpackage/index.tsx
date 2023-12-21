@@ -6,7 +6,6 @@ import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -18,13 +17,14 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { MdDelete } from 'react-icons/md';
 import { fetch_sublease_product_fields } from '../../../components/Sublease/helper';
 import { ExpandMore } from '@material-ui/icons';
-import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
+import { flattenArray } from 'src/constants/columns';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import EditIcon from '@material-ui/icons/Edit';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import { ownerAndColaborator, subleaseMessage } from 'src/constants/messageHelpers';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
 const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchData, isIssued, renderedFrom, allowedToEdit, stepFullScreen }) => {
 
@@ -32,10 +32,12 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
   const {
     state: { user, permissions }
   }: any = useData();
+  const { generateColumns } = useColumns();
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, selectedRecords } = state;
 
   const [isUpdating, setUpdating] = useState(false);
 
-  const [selectedProducts, setSelectedProducts] = useState([]);
   const [isProductEdit, setIsProductEdit] = useState({ open: false, isBulkedit: false });
 
   const [recordToUpdate, setRecordToUpdate] = useState(null);
@@ -47,7 +49,6 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
   const [material, setMaterial] = useState([]);
   const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: '', parentId: null });
   const [columns, setColumns] = useState(null);
-  const [rowsData, setRowsData] = useState(null);
   const [allFields, setAllFields] = useState([]);
   const [isRateRequired, setIsRateRequired] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -66,7 +67,12 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
   const fetchFields = async () => {
     var data = await fetch_sublease_product_fields(subleaseData?.currency);
     setAllFields(JSON.parse(JSON.stringify(data)));
-    const newColumns = generateCustomTableColumns(data, subleaseData?.currency, renderedFrom);
+    data?.forEach((e) => {
+      if (!allowedToEdit || isIssued) {
+        e.isColumnEditable = false;
+      }
+    });
+    const newColumns = generateColumns(renderedFrom, data, null, false, subleaseData?.currency);
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';
@@ -76,7 +82,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
         accessor: 'index',
         Header: 'Index',
         width: 70,
-        sticky: isMobile ? 'none' : 'left',
+        sticky: 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
       },
       {
@@ -84,7 +90,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
         Header: 'Detail',
         minWidth: 300,
         width: 300,
-        sticky: isMobile ? 'none' : 'left',
+        sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {!allowedToEdit ? (
@@ -150,8 +156,8 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
     coloum.push({
       accessor: 'action',
       Header: 'Actions',
-      minWidth: 50,
-      width: 50,
+      minWidth: 100,
+      width: 100,
       sticky: 'right',
       disableFilters: true,
       disableSortBy: true,
@@ -161,19 +167,19 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
             <IconButton
               size="small"
               aria-label="Delete"
-              disabled={!allowedToEdit || (subleaseData.type === SUBLEASE_TYPE.vendor && isIssued)}
+              disabled={!allowedToEdit}
               onClick={() => {
                 openMaterial(row.original);
               }}
             >
-              <EditIcon fontSize="small" color={!allowedToEdit || (subleaseData.type === SUBLEASE_TYPE.vendor && isIssued) ? 'disabled' : 'primary'} />
+              <EditIcon fontSize="small" color={!allowedToEdit ? 'disabled' : 'primary'} />
             </IconButton>
           </HtmlTooltip>
 
           <IconButton
             size="small"
             aria-label="Details"
-            disabled={row.original.hideSelection || !allowedToEdit || row.original?.assetQty > 0 || (subleaseData.type === SUBLEASE_TYPE.vendor && isIssued)}
+            disabled={row.original.canDelete ? false : true}
             onClick={() => {
               const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
               if (row.original?.type === 'package' && row.original?.subRows?.length) {
@@ -184,26 +190,17 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
               setDeleteData(obj);
             }}
           >
-            <DeleteIcon fontSize="small" color={row.original.hideSelection || !allowedToEdit || row.original?.assetQty > 0 || (subleaseData.type === SUBLEASE_TYPE.vendor && isIssued) ? "disabled" : "error"} />
+            <DeleteIcon fontSize="small" color={row.original.canDelete ? "error" : "disabled"} />
           </IconButton>
-
         </>
       )
-    });
-    coloum.forEach((element) => {
-      if (element.accessor === 'qtyDisplay') {
-        element['Footer'] = (info) => {
-          const qtyTotal = info.rows
-            .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
-            .reduce((sum, row) => row.values[element.accessor] + sum, 0);
-          return <>{qtyTotal}</>;
-        };
-      }
     });
     setColumns(coloum);
   };
 
   const fetchProductInventory = async () => {
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
     setNextStep(false);
     setNextStepToolTip(null)
     var data: any = [];
@@ -219,8 +216,10 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
       parent.description = parent.type === 'product' ? parent.productDetail?.productDescription : parent.packageDetail?.packageDescription;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + subleaseData?.currency?.toLowerCase()] ? true : !isRateRequired;
+      parent.assetQty = subleaseData.type === SUBLEASE_TYPE.vendor ? parent?.assetQty || inventory?.filter((e) => e?.inventoryDetail?.product === parent.materialId).length :
+        inventory?.filter((e) => e._id === parent._id).length
       parent.hideSelection = parent.assetQty > 0 ? true : false;
-      parent.assetQty = inventory?.filter((e) => e._id === parent._id).length
+      parent.canDelete = parent.assetQty === 0 && allowedToEdit ? true : false;
       if (parent.type === 'package') {
         const subRows: any = data.material.filter((e) => e.parentId === parent._id);
         var assetQty = 0;
@@ -230,8 +229,13 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
           _subRow.description = _subRow.productDetail?.productDescription;
           _subRow.qtyDisplay = `${parent.qty * _subRow.qty}`;
           _subRow.isValid = _subRow['finalPrice_' + subleaseData?.currency?.toLowerCase()] ? true : !isRateRequired;
+          _subRow.assetQty = subleaseData.type === SUBLEASE_TYPE.vendor ? _subRow?.assetQty || inventory?.filter((e) => e?.inventoryDetail?.product === _subRow.materialId).length :
+            inventory?.filter((e) => e._id === _subRow._id).length
+          _subRow.canDelete = _subRow.assetQty === 0 && allowedToEdit ? true : false;
+          if (!_subRow.canDelete) {
+            parent.canDelete = false
+          }
           _subRow.hideSelection = _subRow.assetQty > 0 ? true : false;
-          _subRow.assetQty = inventory?.filter((e) => e._id === _subRow._id).length
           assetQty += _subRow.assetQty;
         });
         if (subRows.length === 0) {
@@ -263,8 +267,8 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
         setNextStepToolTip(null);
       }
     }
-    setRowsData(rows);
-    setSelectedProducts([]);
+    dispatch({ type: 'initialize', data: rows, count: rows?.length });
+    dispatch({ type: 'loading', loading: false });
   };
 
   const handleAdd = async (rows) => {
@@ -282,7 +286,6 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
       element.actualStartDate = '';
       element.actualEndDate = '';
       element.actualJobDuration = '';
-      element.assetQty = 0;
       element.parentId = addExistingProductDialog.parentId;
       const calValues = autoCalculateSpecificFields({ estimateEndDate: element.estimateEndDate }, element, allFields);
       element.estimateJobDuration = 1;
@@ -324,17 +327,6 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
   };
 
   const handleSaveData = async (rows: any) => {
-    rows.forEach((element) => {
-      delete element.index;
-      delete element.detail;
-      delete element.qtyDisplay;
-      delete element.isValid;
-      delete element.hideSelection;
-      delete element.productDetail;
-      delete element.packageDetail;
-      delete element.subRows;
-      delete element.description;
-    });
     setUpdating(true);
     axiosInstance()
       .put(`${sublease.api}/productpackage/${subleaseData._id}`, { material: rows })
@@ -351,8 +343,9 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
 
   const handleDelete = (rows) => {
     setDeleting(true);
+    const ids = rows.map((e) => e.id);
     axiosInstance()
-      .put(`${sublease.api}/productpackage/${subleaseData?._id}/delete`, { ids: rows })
+      .put(`${sublease.api}/productpackage/${subleaseData?._id}/delete`, { ids })
       .then(() => {
         setDeleting(false);
         fetchProductInventory();
@@ -421,7 +414,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
   };
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
-    const rowData = flattenArray(rowsData)?.find((d) => d._id === updatedData._id);
+    const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
     if (inputField.hasOwnProperty('qtyDisplay')) {
       inputField['qty'] = inputField['qtyDisplay'];
     }
@@ -434,7 +427,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
       return;
     }
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(flattenArray(rowsData), inputField, allFields, updatedData);
+    rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
     handleSaveData(rows);
   };
 
@@ -498,7 +491,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
           </Menu>
         </Box>
         <Box display="flex">
-          {material?.length && rowsData?.length && !isIssued && !rowsData?.some((f) => !f.isValid) && subleaseData?.type !== SUBLEASE_TYPE.interCompany ? (
+          {material?.length && dataRows?.length && !isIssued && !dataRows?.some((f) => !f.isValid) && subleaseData?.type !== SUBLEASE_TYPE.interCompany ? (
             <Box ml={1}>
               <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : 'Start Sublease'}>
                 <Button
@@ -519,7 +512,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
           <Box ml={1}>
             <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : 'Actions'}>
               <Button
-                disabled={selectedProducts?.length || !allowedToEdit || (subleaseData.type === SUBLEASE_TYPE.vendor && !isIssued) ? false : true}
+                disabled={selectedRecords?.length || !allowedToEdit || (subleaseData.type === SUBLEASE_TYPE.vendor && !isIssued) ? false : true}
                 variant={'outlined'}
                 color="default"
                 size="small"
@@ -546,7 +539,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
           >
             <MenuItem
               color="primary"
-              disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
+              disabled={!Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length)}
               onClick={() => {
                 setAnchorEl(null);
                 setIsProductEdit({ open: true, isBulkedit: true });
@@ -556,11 +549,11 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
             </MenuItem>
             <MenuItem
               color="primary"
-              disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
+              disabled={selectedRecords?.length && selectedRecords.every((e) => e.canDelete) ? false : true}
               onClick={() => {
                 const dataToDelete =
-                  selectedProducts &&
-                  selectedProducts
+                  selectedRecords &&
+                  selectedRecords
                     .filter((e) => !e.hideSelection)
                     .map((rec: any) => {
                       const obj: any = {};
@@ -577,21 +570,21 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
           </Menu>
         </Box>
       </Box>
-      {columns && rowsData ? (
+      {columns ? (
         <Box zIndex={5} width={'100%'}>
           <CustomReactTable
             height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
             columns={columns}
-            data={rowsData}
+            state={state}
+            dispatch={dispatch}
+            refreshGrid={fetchProductInventory}
             setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-            onSelect={setSelectedProducts}
-            childrenProperty="subRows"
-            uniqueKey="_id"
             hideSelection={!allowedToEdit}
             onSaveEdit={onSaveInlineEdit}
             hideAction={!allowedToEdit}
-            renderedFrom="sublease_product_package"
+            renderedFrom={renderedFrom}
             isClientSideGrid={true}
+            expander={true}
           />
         </Box>
       ) : (
@@ -621,10 +614,10 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
             }}
             isBulkedit={isProductEdit.isBulkedit}
             handleSaveData={handleSaveData}
-            rentalManagementData={subleaseData}
+            subleaseData={subleaseData}
             rowData={recordToUpdate}
             material={material}
-            selectedProducts={selectedProducts}
+            selectedProducts={selectedRecords}
             loading={isUpdating}
           />
         )

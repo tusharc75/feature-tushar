@@ -51,7 +51,8 @@ const MaterialDialog = ({ onClose, materialData, productionOrderData, handleUpda
         element.isFormula = false;
         element.isMulitFormula = false;
       });
-      data = data.filter((e: any) => !e.isUneditable && !e.disableOnEdit);
+      data = data.filter((e: any) => (!e.isUneditable && !e.disableOnEdit));
+      data = data.filter((e: any) => e.fieldName !== 'workOrderNumber');
       setInitialData({
         fields: data,
         values: getObjKeys('', data)
@@ -64,6 +65,9 @@ const MaterialDialog = ({ onClose, materialData, productionOrderData, handleUpda
       data.forEach((element) => {
         if (element.fieldName === 'unit') {
           element.option = unitOptions;
+        }
+        if (['workOrderNumber']?.includes(element.fieldName) && !materialData?.canDelete) {
+          element.isUneditable = true;
         }
       });
       setAllFields(JSON.parse(JSON.stringify(data)));

@@ -1,52 +1,53 @@
-import { Chip, Tooltip } from '@material-ui/core';
+import { Box, Button, Chip, Menu, MenuItem } from '@material-ui/core';
 import IconButton from '@material-ui/core/IconButton';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useReducer, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
-import { AiFillFileMarkdown, BiDollar, CiUser, GoVersions, SiMarketo, SiStatuspage } from 'react-icons/all';
-import { GiHiveMind } from 'react-icons/gi';
+import { isMobile } from 'react-device-detect';
 import { Link, useHistory } from 'react-router-dom';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
 import TransferEntityDialog from '../../components/AssignRolesDialog/TransferEntityDialog';
 import CustomContainer from '../../components/CustomContainer';
-import CustomDialogComponent from '../../components/CustomDialog/CustomDialogComponent';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import NoDataCell from '../../components/Helpers/NoDataCell';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import {
   customerAccount,
   customerContact,
   formatAmountWithCurrency,
-  getLocalStorageArrayData,
   gridLoadingTimeout,
   prepareDataForGrid,
-  quote,
   quoteBuilder,
-  quoteStepColors,
-  removeLocalStorage,
   sidebarResource,
   supplierAccount,
   supplierContact
 } from '../../constants/helpers';
-import useColumns, { checkStaticField, getFrameworkComponents, getStaticFields, gridFilterParser } from '../../constants/useColumns';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageQuoteDialog from './ManageQuote/ManageQuoteDialog';
-import QuoteHeader from './QuoteHeader';
-import VersionStatus from './VersionStatus';
 import './style.scss';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import CustomReactTable, {
+  checkStaticField,
+  getStaticFields,
+  gridFilterParser,
+  useColumns,
+  useTableReducer
+} from 'src/components/CustomReactTable';
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import styles from '../Leads/Header.module.scss';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import DeleteIcon from '@material-ui/icons/Delete';
+import AllVersionStatus from './AllVersionStatus';
 
-let quoteTimeout;
-const QuoteType = [
+const types = [
   {
     key: 'My Quotes',
     value: 1
@@ -59,6 +60,8 @@ const QuoteType = [
 const arr = [...Array(9).keys()];
 
 const QuoteBuilders = () => {
+  const { state, dispatch } = useTableReducer();
+
   const history = useHistory();
   const { type }: any = queryString.parse(history.location.search);
   const renderedFrom = camelCase(routes?.quoteBuilder.title);
@@ -66,29 +69,15 @@ const QuoteBuilders = () => {
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
-  const { getColumnData } = useColumns();
-  const { quoteResource } = quote;
+  const { generateColumns } = useColumns();
   const [selectedType, setSelectedType] = useState(1);
-  const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState<any>({});
-  const [loadingVersions, setLoadingVersions] = useState(false);
-  const [quotePermissions, setQuotePermissions] = useState({
-    isCreate: permissions?.quoteBuilder?.isCreate,
-    isUpdate: permissions?.quoteBuilder?.isUpdate,
-    isRead: permissions?.quoteBuilder?.isRead,
-    isDelete: permissions?.quoteBuilder?.isDelete
-  });
   const [showCreateQuoteDialog, setshowCreateQuoteDialog] = useState(false);
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [isClone, setIsClone] = useState(false);
-  const [singleQuoteDelete, setSingleQuoteDelete] = useState({
-    id: null,
-    show: false,
-    quoteName: ''
-  });
   const [accountDetails, setAccountDetails] = useState({
     accountId: history.location?.state?.accountId,
     accountName: history.location?.state?.accountName,
@@ -104,11 +93,8 @@ const QuoteBuilders = () => {
     opportunityId: history.location?.state?.opportunityId,
     opportunityName: history.location?.state?.opportunityName
   });
-  const [showVersionsDialog, setShowVersionsDialog] = useState(false);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
-  const [columns, setColumns] = useState([]);
-  const [isAllChecked, setIsAllChecked] = useState(false);
-  const [doa, setDoa] = useState([]);
+  const [showVersionsDialog, setShowVersionsDialog] = useState({ open: false, id: null, quoteData: null });
+  const [columns, setColumns] = useState(null);
   const [clonedData, setClonedData] = useState([]);
   const [clonedId, setClonedId] = useState(null);
 
@@ -116,112 +102,134 @@ const QuoteBuilders = () => {
   const [cloneQuoteWithVersionNumber, setCloneQuoteWithVersionNumber] = useState(0);
 
   const { qbApi } = quoteBuilder;
-
-  //  Grid Variables - Start
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
-    state;
-
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const [anchorEl, setAnchorEl] = useState(null);
 
   useEffect(() => {
     fetchGridColumns();
   }, []);
 
   const fetchGridColumns = async () => {
-    const response = await axiosInstance().get(`/field?resource=Quotes&entity=${selectedEntity}&view=true`);
+    const response = await axiosInstance().get(`/field?resource=${sidebarResource.quoteBuilder}&entity=${selectedEntity}&view=true`);
 
     let data = response?.data?.data;
 
     let columns = [];
-    let rendererNames = [];
-    data.forEach((o) => {
-      if (['quoteName'].find((d) => d === o?.fieldData?.fieldName)) {
-        columns = [
-          ...columns,
-          {
-            disabled: true,
-            field: 'quoteName',
-            headerName: 'Quote Number',
-            pivotIndex: 0,
-            show: true,
-            cellRenderer: 'quoteNameRenderer',
-            primaryField: true
-          }
-        ];
-      } else {
-        let currentColumn = getColumnData(renderedFrom, o?.fieldData, `${routes.quoteBuilder.path}/detail`);
-        if (currentColumn !== null) {
-          columns = [...columns, currentColumn?.columnData];
-          if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-            rendererNames.push(currentColumn?.rendererName);
-          }
-        }
+    let newColumns = generateColumns(routes.quoteBuilder.title, data, `${routes.quoteBuilder.path}/detail`);
+    newColumns?.forEach((o) => {
+      if (o.accessor === 'quoteName') {
+        o.cell = ({ row }) => (
+          <div>
+            <Link className="text-truncate link" title={row.original.quoteName} to={`${routes.quoteBuilder.path}/detail/${row.original._id}`}>
+              {row.original.quoteName}
+            </Link>
+            <HtmlTooltip title="Versions">
+              <span
+                className="cursor-pointer link ml-1"
+                onClick={() => {
+                  setShowVersionsDialog({ open: true, id: row.original._id, quoteData: row.original });
+                  // getVersionStatus(row.original._id, row.original.currency);
+                }}
+              >
+                ({row.original.versionCount})
+              </span>
+            </HtmlTooltip>
+          </div>
+        );
       }
     });
-
-    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-    tempFrameworkComponent = {
-      ...tempFrameworkComponent,
-      quoteNameRenderer: QuoteNameRenderer,
-      relatedOpportunityRenderer: RelatedOpportunityRenderer,
-      actionsRenderer: ActionsRenderer
-    };
     columns = [
-      ...columns,
+      ...newColumns,
       {
-        field: 'relatedOpportunity',
-        headerName: 'Related Opportunity',
+        accessor: 'relatedOpportunity',
+        Header: 'Related Opportunity',
         show: true,
-        cellRenderer: 'relatedOpportunityRenderer'
+        Cell: ({ row }) => (
+          <>
+            {row.original?.relatedOpportunity ? (
+              <Link
+                className="link"
+                to={`${routes.opportunityDetail.path}/${row.original.relatedOpportunityId}`}
+                title={row.original?.relatedOpportunity}
+              >
+                {row.original?.relatedOpportunity}
+              </Link>
+            ) : (
+              <NoDataCell />
+            )}
+          </>
+        )
       }
     ];
-    setFrameWorkComponent({ ...tempFrameworkComponent });
     let staticFields = getStaticFields();
     staticFields.forEach((field) => {
       columns.push(checkStaticField(routes.projectSales.title, field));
     });
-    setColumns([...columns]);
+    setColumns([...columns, ActionsRenderer]);
+  };
+
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 100,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        <HtmlTooltip title={permissions?.quoteBuilder?.isCreate ? 'Clone' : cloneDisable}>
+          <span>
+            <IconButton
+              disabled={permissions?.quoteBuilder?.isCreate ? false : true}
+              size="small"
+              aria-label="Clone"
+              onClick={() => {
+                handleShowCloneQuoteDialog();
+                setClonedId(row?.original?._id);
+              }}
+            >
+              <FileCopyIcon fontSize="small" color={permissions?.quoteBuilder?.isCreate ? 'primary' : 'disabled'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+        <HtmlTooltip title={permissions?.quoteBuilder.isDelete && row?.original?.canDelete ? 'Delete' : deleteDisable}>
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              disabled={permissions?.quoteBuilder.isDelete && row?.original?.canDelete ? false : true}
+              onClick={() => {
+                setDeleteRecord(row?.original);
+                setIsConformDialogVisible(true);
+              }}
+            >
+              <DeleteIcon fontSize="small" color={permissions?.quoteBuilder.isDelete && row?.original?.canDelete ? 'error' : 'disabled'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+      </>
+    )
   };
 
   useEffect(() => {
-    if (permissions && permissions.quoteBuilder) {
-      setQuotePermissions(permissions.quoteBuilder);
-    }
-
-    return () => {
-      setQuotePermissions(null);
-    };
-  }, [permissions]);
-
-  useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (quoteTimeout) {
-      clearTimeout(quoteTimeout);
-    }
-
-    quoteTimeout = setTimeout(() => {
-      fetchQuoteBuilder();
-    }, millisec);
-  }, [search]);
-
-  useEffect(() => {
-    if (renderCount > 0) {
-      fetchQuoteBuilder();
-    } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting, selectedEntity, accountDetails, contactDetails, opportunityDetails, showFilteredRecordsOnly]);
+    fetchData();
+  }, [
+    search,
+    page,
+    limit,
+    selectedType,
+    filters,
+    sorting,
+    selectedEntity,
+    accountDetails,
+    contactDetails,
+    opportunityDetails,
+    showFilteredRecordsOnly
+  ]);
 
   const getVersionStatus = (id, currency) => {
-    // setAllVersionStatusButtonText(gettingVersionStatusText);
-    // if(event){
-    //   toastConfig.setToastConfig({
-    //     open: true,
-    //     type: "info",
-    //     message: `Please wait...`,
-    // });
-    // }
-    setLoadingVersions(true);
     axiosInstance()
       .get(`/quote-builder/quote-hierarchy/${id}`)
       .then(({ data: { data } }) => {
@@ -238,114 +246,16 @@ const QuoteBuilders = () => {
         });
 
         setVersionStatusData(newData);
-        setLoadingVersions(false);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        setLoadingVersions(false);
       });
   };
 
-  const handleSingleDeleteQuote = async () => {
-    dispatch({ type: 'loading', loading: true });
-
-    const savedIds = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-    localStorage.setItem(localStorageSelectedRecords, JSON.stringify(savedIds.filter((f) => f !== singleQuoteDelete.id)));
-    dispatch({ type: 'selection', selectedRecords: selectedRecords.filter((f) => f._id !== singleQuoteDelete.id) });
-
-    axiosInstance()
-      .put(`${qbApi}/remove?entity=${selectedEntity}`, {
-        ids: [singleQuoteDelete.id]
-      })
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-        fetchQuoteBuilder();
-        dispatch({ type: 'loading', loading: false });
-        setSingleQuoteDelete({ id: null, show: false, quoteName: '' });
-      })
-      .catch((error) => {
-        dispatch({ type: 'loading', loading: false });
-        toastConfig.setToastConfig(error);
-      });
-  };
   const handleShowCloneQuoteDialog = () => {
     setIsClone(true);
     setshowCreateQuoteDialog(true);
   };
-
-  const QuoteNameRenderer = (params) => (
-    <>
-      <Link className="text-truncate link" title={params.value} to={`${routes.quoteBuilder.path}/detail/${params.data._id}`}>
-        {params.value}
-      </Link>
-      <Tooltip title="Versions">
-        <span
-          className="cursor-pointer link ml-1"
-          onClick={() => {
-            setShowVersionsDialog(true);
-            getVersionStatus(params.data._id, params.data.currency);
-          }}
-        >
-          ({params.data.versionCount})
-        </span>
-      </Tooltip>
-    </>
-  );
-
-  const RelatedOpportunityRenderer = (params) => (
-    <>
-      {params.value ? (
-        <Link className="link" to={`${routes.opportunityDetail.path}/${params.data.relatedOpportunityId}`} title={params.value}>
-          {params.value}
-        </Link>
-      ) : (
-        <NoDataCell />
-      )}
-    </>
-  );
-
-  const ActionsRenderer = (params) => (
-    <>
-      {quotePermissions?.isCreate ? (
-        <Tooltip title={'Clone'}>
-          <IconButton
-            size="small"
-            aria-label="Clone"
-            onClick={() => {
-              handleShowCloneQuoteDialog();
-              setClonedId(params.data?._id);
-            }}
-          >
-            <FileCopyIcon fontSize="small" color="primary" />
-          </IconButton>
-        </Tooltip>
-      ) : (
-        <Tooltip className="cursor-stop" title="You do not have permission to clone/create">
-          <IconButton aria-label="Clone" size="small">
-            <FileCopyIcon />
-          </IconButton>
-        </Tooltip>
-      )}
-
-      <GridDeleteIcon
-        hasDeletePermission={quotePermissions.isDelete}
-        ownerId={params.data.ownerId}
-        userId={user?.user?._id}
-        onDelete={() =>
-          setSingleQuoteDelete({
-            show: true,
-            id: params.data._id,
-            quoteName: `${params.data.quoteName}`
-          })
-        }
-        entity="quote"
-      />
-    </>
-  );
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
@@ -362,8 +272,7 @@ const QuoteBuilders = () => {
     }
 
     if (showFilteredRecordsOnly) {
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(selectedRecords.map((m) => m._id))}`;
     }
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
@@ -425,14 +334,10 @@ const QuoteBuilders = () => {
     return deepFilter;
   };
 
-  const fetchQuoteBuilder = async () => {
+  const fetchData = async () => {
     if (selectedEntity) {
       dispatch({ type: 'loading', loading: true });
       const queryString = getQueryString();
-
-      if (gridApi) {
-        gridApi.setRowData([]);
-      }
 
       axiosInstance()
         .get(`${qbApi}${queryString}`)
@@ -455,11 +360,7 @@ const QuoteBuilders = () => {
             if (updatedVersion) {
               tempStatus = updatedVersion.status;
             }
-
-            //  Dynamic grid code - start
             let finalObject = prepareDataForGrid(u, user);
-
-            //  Custom props which are required
             finalObject['relatedOpportunity'] = u.opportunity?.optionLabel;
             finalObject['relatedOpportunityId'] = u.opportunity?.optionValue;
             finalObject['id'] = u._id;
@@ -475,63 +376,10 @@ const QuoteBuilders = () => {
             finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
             finalObject['allowedToEdit'] = [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id);
 
-            finalObject['owerCollaboratorInitialsOrImages'] = [];
-            if (finalObject['owner']) finalObject['owerCollaboratorInitialsOrImages'].push({ initials: finalObject['owner'] });
-            if (finalObject['collaborator']) finalObject['owerCollaboratorInitialsOrImages'].push({ initials: finalObject['collaborator'] });
-            if (finalObject['restcollaborator']?.length > 0) {
-              finalObject['restcollaborator'].forEach((m: any) => {
-                finalObject['owerCollaboratorInitialsOrImages'].push({ initials: m.optionLabel });
-              });
-            }
-
-            finalObject['owerCollaboratorInitialsOrImages'].forEach((f) => {
-              if (f.initials) {
-                f.initials = f.initials
-                  .split(' ')
-                  .map((i) => i[0])
-                  .join('');
-              }
-            });
-
             return finalObject;
           });
-
-          //  Dynamic grid code - end
-
-          setIsAllChecked(false);
           setClonedData(data);
-
-          if (appendRows) {
-            dispatch({
-              type: 'initialize',
-              data: [...dataRows, ...rows],
-              count: count,
-              selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
-            });
-          } else {
-            dispatch({
-              type: 'initialize',
-              data: rows,
-              count: count,
-              selectedRecords: rows.filter((f) => f.isChecked === true)
-            });
-          }
-
-          if (gridApi) {
-            try {
-              let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords)
-                ? JSON.parse(localStorage.getItem(localStorageSelectedRecords))
-                : [];
-              if (oldSelectedRecords.length > 0) {
-                gridApi.forEachNode(function (node) {
-                  node.setSelected(oldSelectedRecords.some((o) => o === node.data._id));
-                });
-              }
-            } catch (ex) {
-              console.error('Error in getting selected records from local storage');
-            }
-          }
-
+          dispatch({ type: 'initialize', data: rows, count: count });
           setTimeout(() => {
             dispatch({ type: 'loading', loading: false });
           }, gridLoadingTimeout);
@@ -548,7 +396,7 @@ const QuoteBuilders = () => {
   };
 
   const handleQuoteBuilderTypeSel = (filterValues) => {
-    dispatch({ type: 'setPage', page: 0 });
+    dispatch({ type: 'pageChange', page: 0 });
     setSelectedType(filterValues);
     history.push(`?type=${filterValues}`);
   };
@@ -559,71 +407,39 @@ const QuoteBuilders = () => {
   const onSuccess = () => {
     setshowCreateQuoteDialog(false);
     setIsClone(false);
-    fetchQuoteBuilder();
+    fetchData();
   };
 
-  const handleTransferEntityDialog = () => {
-    setShowTransferEntityDialog(true);
-  };
-
-  const showConfirmBox = (row) => {
-    if (row) {
-      setIsConformDialogVisible(true);
-      if (row && row._id) {
-        setDeleteRecord(row);
-      }
-    } else {
-      if (selectedRecords.find((d) => d.canDelete === false)) {
-        setShowDeleteWarningConfirmBox(true);
-      } else {
-        setIsConformDialogVisible(true);
-      }
-    }
-  };
-
-  const clickCreateNew = () => {
-    setshowCreateQuoteDialog(true);
-  };
-
-  const handleDeleteQuote = async () => {
+  const handleDelete = async () => {
     setDeleteLoading(true);
-    let recordsToDelete = [];
+    let ids = [];
     if (deleteRecord?._id) {
-      recordsToDelete.push(deleteRecord?._id);
+      ids.push(deleteRecord?._id);
     } else {
-      recordsToDelete = selectedRecords.map((o) => o._id);
+      ids = selectedRecords.map((o) => o._id);
     }
-    if (recordsToDelete.length > 0) {
-      axiosInstance()
-        .put(`${qbApi}/remove?entity=${selectedEntity}`, {
-          ids: recordsToDelete
-        })
-        .then(({ data }) => {
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
 
-          let storedSelectedIds = localStorage.getItem(localStorageSelectedRecords)
-            ? JSON.parse(localStorage.getItem(localStorageSelectedRecords))
-            : [];
-          recordsToDelete.forEach((idToDeleteFromLocalStorage) => {
-            storedSelectedIds = storedSelectedIds.filter((id) => id !== idToDeleteFromLocalStorage);
-          });
-          localStorage.setItem(localStorageSelectedRecords, JSON.stringify(storedSelectedIds));
-          removeLocalStorage(localStorageSelectedRecords);
-          setIsConformDialogVisible(false);
-          setDeleteLoading(false);
-          if (deleteRecord) setDeleteRecord({});
-          fetchQuoteBuilder();
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-          setIsConformDialogVisible(false);
-          setDeleteLoading(false);
+    axiosInstance()
+      .put(`${qbApi}/remove?entity=${selectedEntity}`, {
+        ids
+      })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
         });
-    }
+        dispatch({ type: 'selection', selectedRecords: [] });
+        setIsConformDialogVisible(false);
+        setDeleteLoading(false);
+        setDeleteRecord(null);
+        fetchData();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setIsConformDialogVisible(false);
+        setDeleteLoading(false);
+      });
   };
 
   const handleCloneQuoteWithVersionFromAllVersion = (quoteId, versionNumber) => {
@@ -631,7 +447,21 @@ const QuoteBuilders = () => {
     setshowCreateQuoteDialog(true);
     setIsClone(true);
     setClonedId(quoteId);
-    setShowVersionsDialog(false);
+    setShowVersionsDialog({ open: false, id: null, quoteData: null });
+  };
+
+  const handleFilter = (event, newFilter) => {
+    if (newFilter != null) {
+      handleQuoteBuilderTypeSel(types.find((d) => d.key === newFilter).value);
+    }
+  };
+
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
   };
 
   return (
@@ -639,193 +469,193 @@ const QuoteBuilders = () => {
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[routes.quoteBuilder]} />
         <ImportExportLinks
-          permissions={quotePermissions}
-          module="quotes"
+          permissions={permissions?.quoteBuilder}
+          module={routes.quoteBuilder.title}
           api={qbApi}
           afterImportCompleted={() => {
-            fetchQuoteBuilder();
+            fetchData();
           }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
-          recordsToExport={getLocalStorageArrayData(localStorageSelectedRecords).length}
-          ids={getLocalStorageArrayData(localStorageSelectedRecords)?.map((m) => m._id)}
+          recordsToExport={selectedRecords?.length}
+          ids={selectedRecords?.map((obj) => obj._id)}
           onExportToExcelSuccess={() => {
-            if (gridApi) gridApi.deselectAll();
-            else fetchQuoteBuilder();
+            fetchData();
           }}
           additionalParams={getQueryString(true)}
         />
       </div>
-
-      {/* Tables Begins Here */}
       <CustomContainer>
         <div className="header-panel">
-          <QuoteHeader
-            selectedRecords={selectedRecords}
-            onTypeChange={handleQuoteBuilderTypeSel}
-            options={QuoteType}
-            onSearch={handleSearch}
-            searchVal={search}
-            QuotePermissions={quotePermissions}
-            onCreate={clickCreateNew}
-            showConfirmBox={showConfirmBox}
-            canDelete={selectedRecords.length === 0}
-            icon={<GiHiveMind className="headerLogo" />}
-            heading={routes.quoteBuilder.title}
-            showTransferEntityDialog={handleTransferEntityDialog}
-            showCloneQuoteDialog={() => {
-              handleShowCloneQuoteDialog();
-            }}
-            columns={columns}
-            dispatch={dispatch}
-            filters={filters}
-            selectedType={selectedType}
-            resource={sidebarResource.quoteBuilder}
-          >
-            {accountDetails.accountId && (
-              <Chip
-                className="ml-3"
-                color="primary"
-                label={`Account: ${accountDetails.accountName}`}
-                onDelete={() => {
-                  setAccountDetails({
-                    accountId: null,
-                    accountName: null,
-                    resource: null
-                  });
-                }}
-              />
-            )}
-            {contactDetails.contactId && (
-              <Chip
-                className="ml-3"
-                color="primary"
-                label={`Contact: ${contactDetails.contactName}`}
-                onDelete={() => {
-                  setContactDetails({
-                    contactId: null,
-                    contactName: null,
-                    resource: null
-                  });
-                }}
-              />
-            )}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+            <div className={'d-flex flex-wrap align-items-center gap-2'}>
+              <div className={`flex flex-wrap items-center gap-2 `}>
+                {types && (
+                  <ToggleButtonGroup size="small" className="ml-2" value={types[selectedType - 1].key} exclusive onChange={handleFilter}>
+                    {types.map((k, index) => {
+                      return (
+                        <ToggleButton value={k.key} key={index}>
+                          {k.key}
+                        </ToggleButton>
+                      );
+                    })}
+                  </ToggleButtonGroup>
+                )}
+                {accountDetails.accountId && (
+                  <Chip
+                    className="ml-3"
+                    color="primary"
+                    label={`Account: ${accountDetails.accountName}`}
+                    onDelete={() => {
+                      setAccountDetails({
+                        accountId: null,
+                        accountName: null,
+                        resource: null
+                      });
+                    }}
+                  />
+                )}
+                {contactDetails.contactId && (
+                  <Chip
+                    className="ml-3"
+                    color="primary"
+                    label={`Contact: ${contactDetails.contactName}`}
+                    onDelete={() => {
+                      setContactDetails({
+                        contactId: null,
+                        contactName: null,
+                        resource: null
+                      });
+                    }}
+                  />
+                )}
 
-            {opportunityDetails.opportunityId && (
-              <Chip
-                className="ml-3"
-                color="primary"
-                label={`Opportunity: ${opportunityDetails.opportunityName}`}
-                onDelete={() => {
-                  setOpportunityDetails({
-                    opportunityId: null,
-                    opportunityName: null
-                  });
-                }}
+                {opportunityDetails.opportunityId && (
+                  <Chip
+                    className="ml-3"
+                    color="primary"
+                    label={`Opportunity: ${opportunityDetails.opportunityName}`}
+                    onDelete={() => {
+                      setOpportunityDetails({
+                        opportunityId: null,
+                        opportunityName: null
+                      });
+                    }}
+                  />
+                )}
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-[8px]  justify-end">
+              <SearchBox
+                onChange={handleSearch}
+                className={isMobile ? styles.search_box_input : ''}
+                width="242px"
+                size="small"
+                value={search}
+                style={isMobile ? { flex: 1 } : {}}
               />
-            )}
-          </QuoteHeader>
+              <div className="flex gap-[8px] flex-wrap items-center">
+                {permissions?.quoteBuilder?.isCreate && (
+                  <Button
+                    onClick={() => {
+                      setshowCreateQuoteDialog(true);
+                    }}
+                    variant={'contained'}
+                    size="small"
+                    color="primary"
+                    className={`no-shadow`}
+                    startIcon={<AddOutlined />}
+                  >
+                    Add
+                  </Button>
+                )}
+                <HtmlTooltip title={!selectedRecords.length ? 'Please select some quotes' : ''}>
+                  <span>
+                    <Button
+                      variant={'outlined'}
+                      color="default"
+                      size="small"
+                      onClick={openActions}
+                      disabled={selectedRecords.length ? false : true}
+                      aria-controls="action-menu"
+                      className={`new-dropdown-v1`}
+                      endIcon={<ExpandMore />}
+                    >
+                      Actions
+                    </Button>
+                  </span>
+                </HtmlTooltip>
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  id="action-menu"
+                  open={Boolean(anchorEl)}
+                  onClose={closeActions}
+                >
+                  <MenuItem
+                    disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
+                    onClick={() => {
+                      closeActions();
+                      setIsConformDialogVisible(true);
+                    }}
+                  >
+                    {`Delete (${selectedRecords.length})`}
+                  </MenuItem>
+                  <MenuItem
+                    disabled={selectedRecords.find((d) => d.canDelete === false)}
+                    onClick={() => {
+                      closeActions();
+                      setShowTransferEntityDialog(true);
+                    }}
+                  >
+                    {`Transfer Entity (${selectedRecords.length})`}
+                  </MenuItem>
+                  <MenuItem
+                    disabled={selectedRecords.length !== 1}
+                    onClick={() => {
+                      closeActions();
+                      setIsClone(true);
+                      setshowCreateQuoteDialog(true);
+                    }}
+                  >
+                    {`Clone (${selectedRecords.length})`}
+                  </MenuItem>
+                </Menu>
+              </div>
+            </div>
+          </div>
         </div>
-        {isMobile && !isTablet ? (
-          <CustomSwipableList
-            key={selectedType}
-            allowSelection={true}
-            allowSwipe={true}
-            permissions={permissions.quoteBuilder}
-            primaryField={columns?.find((d) => d.primaryField)}
-            onClick={(data) => {
-              history.push(`${routes.quoteBuilderDetail.path}/${data._id}`);
-            }}
-            dataRows={dataRows}
-            selectedRecords={selectedRecords}
-            dispatch={dispatch}
-            onEdit={(data) => {
-              history.push(`${routes.quoteBuilderDetail.path}/${data._id}`);
-            }}
-            extraParamsToCheckDelete={true}
-            onDelete={(data) => {
-              setSingleQuoteDelete({
-                show: true,
-                id: data._id,
-                quoteName: `${data.quoteName}`
-              });
-            }}
-            rowCount={rowCount}
-            page={page}
-            loading={loading}
-            additionalDetails={[
-              {
-                icon: <CiUser size={18} />,
-                field: 'customerAccountName'
-              },
-              {
-                icon: <BiDollar size={18} />,
-                field: 'estimatedAmount'
-              }
-            ]}
-            chips={[
-              {
-                icon: <GoVersions />,
-                label: 'Version(s): ',
-                field: 'versionCount',
-                onClick: (data) => {
-                  setShowVersionsDialog(true);
-                  getVersionStatus(data._id, data.currency);
-                }
-              },
-              {
-                icon: <SiStatuspage />,
-                label: 'Status: ',
-                field: 'status',
-                chipColorVariable: quoteStepColors
-              },
-              {
-                icon: <AiFillFileMarkdown />,
-                label: 'Market:',
-                field: 'marketSegment'
-              },
-              {
-                icon: <SiMarketo />,
-                label: 'Sub-Market:',
-                field: 'subMarketSegment'
-              }
-            ]}
-            owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-            onCreate={false}
-            showClone={false}
-            onClone={() => {}}
-            renderedFrom={renderedFrom}
-          />
-        ) : Object.keys(frameWorkComponent).length > 0 ? (
-          <CustomAgGrid
+        {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
             columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameWorkComponent}
-            setGridApi={setGridApi}
+            onSelect={() => { }}
+            state={state}
             dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            actionWidth={100}
-            loading={loading}
             renderedFrom={renderedFrom}
-            refreshGrid={fetchQuoteBuilder}
+            refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={true}
-            rowClassRules={{
-              'light-red-data-row': function (params) {
-                const versions = params.data?.versions;
-                if (versions && versions.length > 0) {
-                  const lastVersion = versions[versions.length - 1];
-                  if (lastVersion?.status === 'Building Quote') {
-                    return true;
-                  }
-                }
-                return false;
+            showFilters={true}
+            setWholeRowsCellColor={(rowData) => {
+              const versions = rowData?.versions;
+              if (versions && versions.length > 0 && versions[versions.length - 1].status === 'Building Quote') {
+                return 'error';
+              } else {
+                return '';
               }
             }}
+            resource={sidebarResource.quoteBuilder}
           />
-        ) : null}
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
 
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
@@ -837,28 +667,13 @@ const QuoteBuilders = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.quoteName ? 'Quote' : 'Quotes'}   ${deleteRecord.quoteName || ''}?`}
+            message={`Are you sure you want to delete ${routes.quoteBuilder.title}   ${deleteRecord?.quoteName || ''}?`}
             onClose={() => {
-              if (deleteRecord) setDeleteRecord({});
+              setDeleteRecord(null);
               setIsConformDialogVisible(false);
             }}
             okBtnLoading={deleteLoading}
-            onOk={handleDeleteQuote}
-          />
-        ) : null}
-
-        {singleQuoteDelete.show ? (
-          <ConfirmationDialog
-            open={singleQuoteDelete.show}
-            message={`Are you sure you want to delete Quote: ${singleQuoteDelete.quoteName}?`}
-            onClose={() =>
-              setSingleQuoteDelete({
-                id: null,
-                show: false,
-                quoteName: ''
-              })
-            }
-            onOk={handleSingleDeleteQuote}
+            onOk={handleDelete}
           />
         ) : null}
       </CustomContainer>
@@ -887,30 +702,30 @@ const QuoteBuilders = () => {
           opportunityId={null}
           disableOwnerDropDown={true}
           contacts={null}
-          doaCollaboratorResources={doa}
+          doaCollaboratorResources={[]}
           isRenderedFromOpportunity={false}
           cloneQuoteWithVersionNumber={cloneQuoteWithVersionNumber}
         />
       )}
 
-      {showVersionsDialog && (
-        <CustomDialogComponent
-          title="All Version Status"
-          open={showVersionsDialog}
-          onClose={() => {
-            setShowVersionsDialog(false);
-            setVersionStatusData([]);
+      {showVersionsDialog.open && (
+        <AllVersionStatus
+          open={showVersionsDialog.open}
+          onClose={() => setShowVersionsDialog({ open: false, id: null, quoteData: null })}
+          quoteId={showVersionsDialog.id}
+          quoteData={showVersionsDialog.quoteData}
+          quotePermissions={permissions?.quoteBuilder}
+          fetchQuoteData={() => { }}
+          handleChangeVersionFromAllVersion={(versionNumber) => {
+            history.push(`quotes/detail/${showVersionsDialog.id}`, {
+              versionNumber: `${versionNumber}`,
+              tabValue: 1
+            });
           }}
-        >
-          {versionStatusData.length === 0 ? (
-            <CommonSkeleton lenArray={arr} />
-          ) : (
-            <VersionStatus
-              handleCloneQuoteWithVersionFromAllVersion={handleCloneQuoteWithVersionFromAllVersion}
-              versionStatusData={versionStatusData}
-            />
-          )}
-        </CustomDialogComponent>
+          handleCloneQuoteWithVersionFromAllVersion={(versionNumber) => {
+            handleCloneQuoteWithVersionFromAllVersion(showVersionsDialog.id, versionNumber);
+          }}
+        />
       )}
       {showTransferEntityDialog && (
         <TransferEntityDialog

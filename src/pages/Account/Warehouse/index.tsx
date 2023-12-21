@@ -1,138 +1,130 @@
-import Box from '@material-ui/core/Box/Box';
-import { useState, useEffect, useReducer, useContext } from 'react';
+import { Button, Grid, IconButton } from '@material-ui/core';
+import { useContext, useEffect, useState } from 'react';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../../StateProvider/Provider';
+import axiosInstance from '../../../axios/axiosInstance';
+import { gridLoadingTimeout, prepareDataForGrid } from '../../../constants/helpers';
+import routes from './../../../components/Helpers/Routes';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import { Box } from '@material-ui/core';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import DeleteIcon from '@material-ui/icons/Delete';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
-import axiosInstance from 'src/axios/axiosInstance';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { getLocalStorageArrayData, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, warehouse } from 'src/constants/helpers';
-import { useData } from 'src/StateProvider/Provider';
-import { isMobile, isTablet } from 'react-device-detect';
-import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
-import routes from 'src/components/Helpers/Routes';
-import { useHistory } from 'react-router-dom';
-import useColumns, { getFrameworkComponents, getStaticFields } from 'src/constants/useColumns';
-import { Button, Grid, IconButton, Menu, MenuItem, Tooltip } from '@material-ui/core';
-import { AddOutlined, Delete, ExpandMore } from '@material-ui/icons';
-import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
+import ConfirmationDialogRaw from '../../../components/Helpers/ConfirmationDialog';
 import WarhouseList from './WarhouseList';
 import { camelCase } from 'lodash';
 
 const Warehouse = ({ reference, api, id, accountId = '' }) => {
-  const toastConfig = useContext(CustomToastContext);
   const renderedFrom = camelCase(routes?.warehouse.title);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
+  const toastConfig = useContext(CustomToastContext);
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, page, limit, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions }
+    state: { user, permissions, selectedEntity }
   }: any = useData();
-  const history = useHistory();
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, filters, sorting, selectedRecords } = state;
-  const [gridApi, setGridApi] = useState(null);
-  const [columns, setColumns] = useState(null);
-  const [frameWorkComponent, setFrameWorkComponent] = useState(null);
-  const { getColumnData } = useColumns();
-  const [showConfirmBox, setShowConfirmBox] = useState({ open: false, data: null });
-  const [isDeleting, setIsDeleting] = useState(false);
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
+  const [deleteRecord, setDeleteRecord] = useState(null);
   const [openAssignWarehouse, setOpenAssignWarehouse] = useState(false);
   const [isAddingWarehouse, setAddingWarehouse] = useState(false);
   const [warehouseArray, setWarehouseArray] = useState([]);
+  const [columns, setColumns] = useState(null);
 
   useEffect(() => {
-    fetchColumns();
+    fetchGridColumns();
   }, []);
 
   useEffect(() => {
-    const timeout = setTimeout(fetchAccountWarehouse, 500);
-    return () => clearTimeout(timeout);
-  }, [page, limit, filters, sorting]);
+    fetchData();
+  }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
-  const ActionsRenderer = (params) => (
-    <Tooltip title="Delete">
-      <IconButton
-        onClick={() => {
-          setShowConfirmBox({ open: true, data: [params.data] });
-        }}
-      >
-        <Delete fontSize="small" color="error" />
-      </IconButton>
-    </Tooltip>
-  );
-
-  const fetchColumns = () => {
-    axiosInstance()
-      .get(`/field?resource=Warehouse`)
-      .then(({ data: { data } }) => {
-        let columns = [];
-        let rendererNames = [];
-        data.forEach((o) => {
-          let currentColumn: any = getColumnData(renderedFrom, o?.fieldData, routes.warehouseDetail.path);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName);
-            }
-          }
-        });
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent,
-          actionsRenderer: ActionsRenderer
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
-        columns = [...columns, ...getStaticFields()];
-        setColumns([...columns]);
-      });
+  const fetchGridColumns = async () => {
+    let data;
+    const response = await axiosInstance().get(`/field?resource=Warehouse`);
+    data = response?.data?.data;
+    const newColumns = generateColumns(renderedFrom, data, routes.warehouseDetail.path, true)
+    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
-  const fetchAccountWarehouse = () => {
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 110,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        <HtmlTooltip title="Delete">
+          <IconButton
+            size="small"
+            aria-label="Delete"
+            onClick={() => {
+              setDeleteRecord(row.original);
+              setShowDeleteConfirmBox(true);
+            }}
+          >
+            <DeleteIcon color="error" />
+          </IconButton>
+        </HtmlTooltip>
+      </>
+    )
+  };
+
+  const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
     axiosInstance()
       .get(`/${api}/${id}/warehouse`)
-      .then(({ data }) => {
-        setWarehouseArray(data.data);
-        let rows = data.data?.map((u, user) => {
+      .then(({ data: { data } }) => {
+        setWarehouseArray(data);
+        let rows = data?.map((u) => {
           let finalObject = prepareDataForGrid(u?.warehouseDetail);
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u?.warehouseDetail._id);
-          return {
-            ...finalObject
-          };
+          return finalObject;
         });
-        dispatch({
-          type: 'initialize',
-          data: rows,
-          count: rows.length,
-          selectedRecords: rows.filter((f) => f.isChecked === true)
-        });
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
+        dispatch({ type: 'initialize', data: rows, count: rows?.length });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        dispatch({ type: 'loading', loading: false });
+      })
+      .finally(() => {
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
       });
   };
 
-  const handleRemove = () => {
-    setIsDeleting(true);
-    const { data } = showConfirmBox;
-    let tempArray = warehouseArray.filter((obj) => data.some((d) => d._id === obj.warehouse)).map((d) => d._id);
+  const handleDelete = () => {
+    setIsSubmitting(true);
+    let ids = [];
+    if (deleteRecord) {
+      ids.push(deleteRecord._id);
+    } else {
+      ids = selectedRecords?.map((d) => d._id);
+    }
+    let tempArray = warehouseArray.filter((obj) => ids.some((d) => d === obj.warehouse)).map((d) => d._id);
     axiosInstance()
-      .put(`/${api}/${id}/warehouse/remove`, {
-        ids: tempArray
+      .put(`/${api}/${id}/warehouse/remove`, { ids: tempArray })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        dispatch({ type: 'selection', selectedRecords: [] });
+        fetchData();
+        setShowDeleteConfirmBox(false);
+        setDeleteRecord(null);
+        setIsSubmitting(false);
       })
-      .then(() => {
-        setIsDeleting(false);
-        setShowConfirmBox({ open: false, data: null });
-        fetchAccountWarehouse();
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        setIsDeleting(false);
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setIsSubmitting(false);
       });
   };
 
@@ -142,7 +134,7 @@ const Warehouse = ({ reference, api, id, accountId = '' }) => {
       .post(`/${api}/${id}/warehouse`, { warehouse: rows.map((d) => d._id) })
       .then(() => {
         setOpenAssignWarehouse(false);
-        fetchAccountWarehouse();
+        fetchData();
         setAddingWarehouse(false);
       })
       .catch((error) => {
@@ -173,9 +165,9 @@ const Warehouse = ({ reference, api, id, accountId = '' }) => {
               variant="contained"
               color="primary"
               size="small"
-              disabled={selectedRecords.length === 0 || isDeleting}
+              disabled={selectedRecords.length === 0}
               onClick={() => {
-                setShowConfirmBox({ open: true, data: selectedRecords });
+                setShowDeleteConfirmBox(true);
               }}
             >
               Delete
@@ -186,74 +178,31 @@ const Warehouse = ({ reference, api, id, accountId = '' }) => {
       ) : null}
       <Grid item xs={12} md={12} sm={12} className="mt-3">
         {columns ? (
-          isMobile && !isTablet ? (
-            <CustomSwipableList
-              allowSelection={true}
-              allowSwipe={true}
-              permissions={permissions.warehouse}
-              primaryField={columns?.find((d) => d.field)}
-              onClick={(d) => {
-                history.push(`${routes.warehouseDetail.path}/${d._id}`);
-              }}
-              dataRows={dataRows}
-              selectedRecords={selectedRecords}
-              dispatch={dispatch}
-              onEdit={(d) => {
-                history.push(`${routes.warehouseDetail.path}/${d._id}`);
-              }}
-              extraParamsToCheckDelete={false}
-              onDelete={() => {}}
-              rowCount={rowCount}
-              page={page}
-              loading={loading}
-              additionalDetails={[]}
-              chips={[
-                {
-                  label: 'Storage Type',
-                  field: 'storageType'
-                }
-              ]}
-              owerCollaboratorInitialsOrImages=""
-              onCreate={false}
-              showClone={true}
-              onClone={() => {}}
-              renderedFrom={renderedFrom}
-            />
-          ) : Object.keys(frameWorkComponent).length > 0 ? (
-            <CustomAgGrid
-              columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameWorkComponent}
-              setGridApi={setGridApi}
-              dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              actionWidth={100}
-              page={page}
-              loading={loading}
-              allowSelection={true}
-              allowAction={true}
-              renderedFrom={renderedFrom}
-              refreshGrid={fetchAccountWarehouse}
-              isClientSideGrid={true}
-            />
-          ) : null
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            refreshGrid={fetchData}
+            showOnlyShowFilteredRecordSwitch={false}
+          />
         ) : (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
       </Grid>
-      {showConfirmBox.open && (
+      {showDeleteConfirmBox && (
         <ConfirmationDialogRaw
           open={true}
           message={`Are you sure you want to delete this ${routes.warehouse.title}?`}
-          okBtnLoading={isDeleting}
+          okBtnLoading={isSubmitting}
           onClose={() => {
-            setShowConfirmBox({ open: false, data: null });
+            setDeleteRecord(null);
+            setShowDeleteConfirmBox(false);
           }}
-          onOk={handleRemove}
+          onOk={handleDelete}
         />
       )}
       {openAssignWarehouse && (

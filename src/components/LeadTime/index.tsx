@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react';
 import { Box, Grid, IconButton, Paper, Typography } from '@material-ui/core';
 import axiosInstance from '../../axios/axiosInstance';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
-import LeadTimeAddDialog from './CustomLeadTimeDialog';
+import AssignDynamicDialog from '../AssignRolesDialog/AssignDynamicDialog';
+import { sidebarResource } from 'src/constants/helpers';
 
 const LeadTimeMaster = ({ Id, type, className = '', minHeight = null }) => {
+  
   const [loadingPLT, setLoadingPLT] = useState(false);
   const [leadTimeData, setLeadTimeData] = useState(null);
   const [leadTimeDialogOpen, setLeadTimeDialogOpen] = useState(false);
@@ -24,9 +26,9 @@ const LeadTimeMaster = ({ Id, type, className = '', minHeight = null }) => {
         return 'packages';
     }
   };
+
   const fetchLeadTimeData = async () => {
     setLoadingPLT(true);
-
     axiosInstance()
       .get(`${apiMain(type)}/lead-time/${Id}`)
       .then(({ data: { data } }) => {
@@ -155,13 +157,17 @@ const LeadTimeMaster = ({ Id, type, className = '', minHeight = null }) => {
         </Box>
       </Box>
       {leadTimeDialogOpen && (
-        <LeadTimeAddDialog
-          title={'Assign Lead Time'}
-          onClose={() => {
+        <AssignDynamicDialog
+          onSuccess={(rows) => {
+            if (rows?.length) {
+              handleAddLeadTime(rows[0]?._id)
+            }
+          }}
+          handleClose={() => {
             setLeadTimeDialogOpen(false);
           }}
-          handleAddLeadTime={handleAddLeadTime}
-          isAssigning={isAssigning}
+          resource={sidebarResource?.leadTimeMaster}
+          isSubmitting={isAssigning}
         />
       )}
     </>

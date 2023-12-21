@@ -117,14 +117,16 @@ const ProductionOrderDetails = () => {
     axiosInstance()
       .get(`${routes.productionOrder.path}/${id}`)
       .then(({ data: { data } }) => {
-        setCurrentStep(getIndex(data?.processStatus, productionOrderProcessSteps));
+        const tempStepList = productionOrderSteps.filter((o) => o.name !== 'Loading Ticket')
+        setCurrentStep(getIndex(data?.processStatus, tempStepList));
         var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
         if (user?.role?.selectedEntity?.superAdminAccess) {
           isAllowedToEdit = true;
         }
-        if (!data?.customerAccount) {
-          setProductionOrderProcessSteps(productionOrderSteps.filter((o) => o.name !== 'Loading Ticket'));
-        }
+        setProductionOrderProcessSteps(tempStepList);
+        // if (!data?.customerAccount) {
+        //   setProductionOrderProcessSteps(productionOrderSteps.filter((o) => o.name !== 'Loading Ticket'));
+        // }
         setAllowedToEdit(isAllowedToEdit);
         setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
         setProductionOrderData({ ...data });
@@ -161,7 +163,7 @@ const ProductionOrderDetails = () => {
       .then(({ data }) => {
         fetchProductionOrderData();
       })
-      .catch((error) => { });
+      .catch((error) => {});
   };
 
   const updateOrderStatus = (status) => {
@@ -190,18 +192,22 @@ const ProductionOrderDetails = () => {
           <Box className="control-buttons-v1">
             {productionOrderData ? (
               <>
-                {permissions?.productionOrder?.isUpdate && allowedToEdit && productionOrderData?.status !== PRODUCTION_ORDER_STATUS.completed &&
-                  productionOrderData?.processStatus === productionOrderProcessStepsNames[productionOrderProcessStepsNames?.length - 1] &&
-                  (<ButtonWithPulse
-                    variant="outlined"
-                    color="default"
-                    size="small"
-                    onClick={() => { updateOrderStatus(PRODUCTION_ORDER_STATUS.completed) }}
-                    aria-controls="action-menu"
-                    className="btn-outline-v1"
-                  >
-                    Close
-                  </ButtonWithPulse>
+                {permissions?.productionOrder?.isUpdate &&
+                  allowedToEdit &&
+                  productionOrderData?.status !== PRODUCTION_ORDER_STATUS.completed &&
+                  productionOrderData?.processStatus === productionOrderProcessStepsNames[productionOrderProcessStepsNames?.length - 1] && (
+                    <ButtonWithPulse
+                      variant="outlined"
+                      color="default"
+                      size="small"
+                      onClick={() => {
+                        updateOrderStatus(PRODUCTION_ORDER_STATUS.completed);
+                      }}
+                      aria-controls="action-menu"
+                      className="btn-outline-v1"
+                    >
+                      Close
+                    </ButtonWithPulse>
                   )}
                 {permissions?.productionOrder?.isUpdate && allowedToEdit && productionOrderData?.status !== PRODUCTION_ORDER_STATUS.completed && (
                   <Button
@@ -279,6 +285,25 @@ const ProductionOrderDetails = () => {
             setCurrentStep={setCurrentStep}
             isStepEnded={[PRODUCTION_ORDER_STATUS.completed].includes(productionOrderData?.status)}
             setStepFullScreen={() => setStepFullScreen(true)}
+            handleNext={
+              productionOrderProcessStepsNames[currentStep] === 'Add'
+                ? () => {
+                    axiosInstance()
+                      .get(`/production-order/${productionOrderData?._id}/work-order/validate-work-order`)
+                      .then(({ data: { data } }) => {
+                        if (data) {
+                          setCurrentStep((prevStep) => {
+                            const newStep = prevStep + 1;
+                            return newStep;
+                          });
+                        }
+                      })
+                      .catch((err) => {
+                        toastConfig.setToastConfig(err);
+                      });
+                  }
+                : null
+            }
           />
           <ContentFullScreen title={productionOrderProcessStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
             {productionOrderProcessStepsNames[currentStep] === 'Add' && productionOrderData && (
@@ -312,13 +337,8 @@ const ProductionOrderDetails = () => {
               />
             )}
             {productionOrderProcessStepsNames[currentStep] === 'Final Slip' && productionOrderData && (
-              <Invoice
-                productionOrderData={productionOrderData}
-                renderedFrom={`${renderedFrom}_grid-2`}
-                stepFullScreen={stepFullScreen}
-              />
+              <Invoice productionOrderData={productionOrderData} renderedFrom={`${renderedFrom}_grid-2`} stepFullScreen={stepFullScreen} />
             )}
-
           </ContentFullScreen>
         </TabPanel>
       </Box>

@@ -1,44 +1,39 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import { Link, useHistory } from 'react-router-dom';
-import { Chip, Grid, IconButton, Tooltip, Fab } from '@material-ui/core';
+import { useHistory } from 'react-router-dom';
+import { IconButton, Box, Button, Menu, MenuItem } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { FaRegistered } from 'react-icons/fa';
 import queryString from 'query-string';
 import {
-  isObjectEmpty,
-  customerAccount,
-  supplierAccount,
   gridLoadingTimeout,
   fieldServiceOrder,
   prepareDataForGrid,
-  getLocalStorageArrayData,
-  removeLocalStorage,
   sidebarResource
 } from '../../constants/helpers';
-import CustomContainer from '../../components/CustomContainer';
 import routes from '../../components/Helpers/Routes';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import MessageDialog from '../../components/Helpers/MessageDialog';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import { isMobile, isTablet } from 'react-device-detect';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField, gridFilterParser } from '../../constants/useColumns';
+import { isMobile } from 'react-device-detect';
 import { camelCase } from 'lodash';
-import { SiStatuspage } from 'react-icons/all';
-import ServiceOrderHeader from './FieldServiceOrderHeader';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ManageServiceOrder from './ManageServiceOrder';
+import CustomReactTable, { checkStaticField, getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import styles from '../Leads/Header.module.scss';
+import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 
 let serviceOrderTimeout;
 
 const ServiceOrder = () => {
-  const ServiceOrderType = [
+
+  const types = [
     {
       key: `My ${routes.fieldServiceOrder.title}`,
       value: 1
@@ -50,7 +45,6 @@ const ServiceOrder = () => {
   ];
 
   const renderedFrom = camelCase(routes?.fieldServiceOrder.title);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -60,26 +54,16 @@ const ServiceOrder = () => {
   const { type }: any = queryString.parse(history.location.search);
   const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
   const [renderCount, setRenderCount] = useState(0);
-  const [deleteLoading, setDeleteLoading] = useState(false);
-  const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
-  const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState<any>({});
-  const [showManageServiceOrderDialog, setShowManageServiceOrderDialog] = useState({ open: false, isClone: false, idToClone: null });
-  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
-  const [singleServiceOrderDelete, setSingleServiceOrderDelete] = useState({
-    id: null,
-    show: false,
-    fieldServiceOrderNumber: ''
-  });
+  const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
+  const { state, dispatch } = useTableReducer();
 
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
-    state;
-  const [frameworkComponents, setFrameworkComponents] = useState({});
-  const [columns, setColumns] = useState([]);
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const [columns, setColumns] = useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
 
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchGridColumns();
@@ -89,29 +73,12 @@ const ServiceOrder = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.fieldServiceOrder}`);
     data = response?.data?.data;
-    let columns = [];
-    let rendererNames = [];
-    data.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.fieldServiceOrderDetail.path, true);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-          rendererNames.push(currentColumn?.rendererName);
-        }
-      }
-      return o?.fieldData;
-    });
-    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-    tempFrameworkComponent = {
-      ...tempFrameworkComponent,
-      actionsRenderer: ActionsRenderer
-    };
-    setFrameworkComponents({ ...tempFrameworkComponent });
+    const newColumns = generateColumns(renderedFrom, data, routes.fieldServiceOrderDetail.path, true);
     let staticFields = getStaticFields();
     staticFields.forEach((field) => {
-      columns.push(checkStaticField(renderedFrom, field));
+      newColumns.push(checkStaticField(renderedFrom, field));
     });
-    setColumns([...columns]);
+    setColumns([...newColumns, ActionsRenderer]);
   };
 
   //  Grid Variables - End
@@ -142,21 +109,26 @@ const ServiceOrder = () => {
       clearTimeout(serviceOrderTimeout);
     }
     serviceOrderTimeout = setTimeout(() => {
-      fetchServiceOrders();
+      fetchData();
     }, millisec);
   }, [search]);
 
   useEffect(() => {
     if (renderCount > 0) {
-      fetchServiceOrders();
+      fetchData();
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
-  const handleSingleDeleteServiceOrder = async () => {
-    dispatch({ type: 'loading', loading: true });
+  const handleDelete = async () => {
+    let ids = [];
+    if (deleteRecord) {
+      ids.push(deleteRecord._id);
+    } else {
+      ids = selectedRecords.map((d) => d._id);
+    }
     axiosInstance()
       .put(`${fieldServiceOrder.api}/remove`, {
-        ids: [singleServiceOrderDelete.id]
+        ids
       })
       .then(({ data }) => {
         toastConfig.setToastConfig({
@@ -164,9 +136,11 @@ const ServiceOrder = () => {
           type: 'success',
           message: data.message
         });
-        fetchServiceOrders();
-        dispatch({ type: 'loading', loading: false });
-        setSingleServiceOrderDelete({ id: null, show: false, fieldServiceOrderNumber: '' });
+        dispatch({ type: 'selection', selectedRecords: [] });
+        fetchData();
+        setShowDeleteConfirmBox(false);
+        setDeleteRecord(null);
+        setAnchorEl(null);
       })
       .catch((error) => {
         dispatch({ type: 'loading', loading: false });
@@ -174,52 +148,49 @@ const ServiceOrder = () => {
       });
   };
 
-  const ActionsRenderer = (params) => (
-    <>
-      {permissions?.fieldServiceOrder?.isCreate ? (
-        <Tooltip title="Clone">
-          <IconButton
-            size="small"
-            aria-label="Clone"
-            onClick={() => {
-              setShowManageServiceOrderDialog({ open: true, isClone: true, idToClone: params.data._id });
-            }}
-          >
-            <FileCopyIcon fontSize="small" color="primary" />
-          </IconButton>
-        </Tooltip>
-      ) : (
-        <Tooltip className="cursor-stop" title="You do not have permission to clone/create">
-          <IconButton aria-label="Clone" size="small">
-            <FileCopyIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      )}
-      {params?.data?.canDelete ? (
-        <HtmlTooltip title="Delete">
-          <IconButton
-            size="small"
-            aria-label="Delete"
-            onClick={() => {
-              setSingleServiceOrderDelete({
-                show: true,
-                id: params.data._id,
-                fieldServiceOrderNumber: `${params.data.fieldServiceOrderNumber}`
-              });
-            }}
-          >
-            <DeleteIcon color="error" />
-          </IconButton>
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 100,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        <HtmlTooltip title={permissions?.fieldServiceOrder?.isCreate ? "Clone" : cloneDisable}  >
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Clone"
+              disabled={permissions?.fieldServiceOrder?.isCreate ? false : true}
+              onClick={() => {
+                setShowManageDialog({ open: true, isClone: true, idToClone: row?.original._id });
+              }}
+            >
+              <FileCopyIcon fontSize="small" color={permissions?.fieldServiceOrder?.isCreate ? 'primary' : 'disabled'} />
+            </IconButton>
+          </span>
         </HtmlTooltip>
-      ) : (
-        <HtmlTooltip className="cursor-stop" title="You do not have permission to delete">
-          <IconButton size="small" aria-label="Delete">
-            <DeleteIcon color="disabled" />
-          </IconButton>
+        <HtmlTooltip title={row?.original?.canDelete ? "Delete" : deleteDisable}>
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              disabled={row?.original?.canDelete ? false : true}
+              onClick={() => {
+                setDeleteRecord(row.original);
+                setShowDeleteConfirmBox(true);
+              }}
+            >
+              <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
+            </IconButton>
+          </span>
         </HtmlTooltip>
-      )}
-    </>
-  );
+      </>
+    )
+  };
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
@@ -251,109 +222,51 @@ const ServiceOrder = () => {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(getLocalStorageArrayData(localStorageSelectedRecords)?.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || [])?.map((m) => m._id))}`;
     }
     return deepFilter;
   };
 
-  const fetchServiceOrders = async () => {
+  const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
-    try {
-      let data: any = [],
-        count;
-      const response: any = await axiosInstance().get(`${fieldServiceOrder.api}${queryString}`);
-      data = response?.data?.data;
-      count = response?.data?.count;
-      let rows = data.map((u) => {
-        const ownerAndColaborators = [u?.owner, ...u?.collaborator]?.map((o) => o?.optionValue);
-        let finalObject: any = prepareDataForGrid(u, user);
-        finalObject['isChecked'] = false;
-        finalObject['allowedToEdit'] = permissions?.fieldServiceOrder?.isUpdate;
-        finalObject['canDelete'] = permissions?.fieldServiceOrder?.isDelete && ownerAndColaborators.includes(user?.user?._id) && u?.canDelete;
-        return finalObject;
-      });
-      if (appendRows) {
-        dispatch({ type: 'initialize', data: [...dataRows, ...rows], count: count });
-      } else {
+    axiosInstance()
+      .get(`${fieldServiceOrder.api}${queryString}`)
+      .then(({ data: { data, count } }) => {
+        let rows = data?.map((u) => {
+          let finalObject: any = prepareDataForGrid(u);
+          finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
+          finalObject['canDelete'] = permissions?.fieldServiceOrder?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;
+          return finalObject;
+        });
         dispatch({ type: 'initialize', data: rows, count: count });
-      }
-      setTimeout(() => {
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
         dispatch({ type: 'loading', loading: false });
-      }, gridLoadingTimeout);
-    } catch (error) {
-      dispatch({ type: 'loading', loading: false });
-      toastConfig.setToastConfig(error);
-    }
+      });
   };
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-  const handleServiceOrderTypeSel = (filterValues) => {
-    dispatch({ type: 'setPage', page: 0 });
-    setSelectedType(filterValues);
-    history.push(`?type=${filterValues}`);
+  const onTypeChange = (event, type) => {
+    dispatch({ type: 'pageChange', page: 0 });
+    const value = types.find((d) => d.key === type).value;
+    setSelectedType(value);
+    history.push(`?type=${value}`);
   };
 
-  const handleTransferEntityDialog = () => {
-    setShowTransferEntityDialog(true);
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
   };
 
-  const showConfirmBox = (row) => {
-    if (row) {
-      setIsConformDialogVisible(true);
-      if (row && row._id) {
-        setDeleteRecord(row);
-      }
-    } else {
-      if (getLocalStorageArrayData(localStorageSelectedRecords)?.find((d) => d.canDelete === false)) {
-        setShowDeleteWarningConfirmBox(true);
-      } else {
-        setIsConformDialogVisible(true);
-      }
-    }
-  };
-
-  const clickCreateNew = () => {
-    setShowManageServiceOrderDialog({ open: true, isClone: false, idToClone: null });
-  };
-
-  const handleDeleteServiceOrder = async () => {
-    setDeleteLoading(true);
-    let recordsToDelete = [];
-    if (deleteRecord?._id) {
-      recordsToDelete.push(deleteRecord?._id);
-    } else {
-      recordsToDelete = getLocalStorageArrayData(localStorageSelectedRecords)?.map((o) => o._id);
-    }
-    if (recordsToDelete.length > 0) {
-      axiosInstance()
-        .put(`${fieldServiceOrder.api}/remove`, {
-          ids: recordsToDelete
-        })
-        .then(({ data }) => {
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-          removeLocalStorage(localStorageSelectedRecords);
-          setIsConformDialogVisible(false);
-          setDeleteLoading(false);
-          if (deleteRecord) setDeleteRecord({});
-          fetchServiceOrders();
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-          setIsConformDialogVisible(false);
-          setDeleteLoading(false);
-        });
-    }
+  const closeActions = () => {
+    setAnchorEl(null);
   };
 
   return (
@@ -365,159 +278,149 @@ const ServiceOrder = () => {
           module="fieldServiceOrder"
           api={fieldServiceOrder.api}
           afterImportCompleted={() => {
-            fetchServiceOrders();
+            fetchData();
           }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
-          recordsToExport={getLocalStorageArrayData(localStorageSelectedRecords)?.length}
-          ids={
-            getLocalStorageArrayData(localStorageSelectedRecords)?.length
-              ? getLocalStorageArrayData(localStorageSelectedRecords)?.map((obj) => obj._id)
-              : []
-          }
+          recordsToExport={selectedRecords?.length}
+          ids={selectedRecords?.map((obj) => obj._id)}
           onExportToExcelSuccess={() => {
-            if (gridApi) gridApi.deselectAll();
-            else fetchServiceOrders();
+            fetchData();
           }}
           additionalParams={getQueryString(true)}
         />
       </div>
-      <CustomContainer>
+      <div className="main-container">
         <div className="header-panel">
-          <ServiceOrderHeader
-            selectedType={selectedType}
-            selectedRecords={getLocalStorageArrayData(localStorageSelectedRecords)}
-            onTypeChange={handleServiceOrderTypeSel}
-            options={ServiceOrderType}
-            onSearch={handleSearch}
-            columns={columns}
-            dispatch={dispatch}
-            searchVal={search}
-            ServiceOrderPermissions={permissions?.fieldServiceOrder}
-            onCreate={clickCreateNew}
-            showConfirmBox={showConfirmBox}
-            canDelete={getLocalStorageArrayData(localStorageSelectedRecords)?.length === 0}
-            icon={<FaRegistered className="headerLogo" />}
-            heading={routes.fieldServiceOrder.title}
-            showTransferEntityDialog={handleTransferEntityDialog}
-            filters={filters}
-            resource={sidebarResource.fieldServiceOrder}
-            // showCloneServiceOrderDialog={() => {
-            //   handleShowCloneServiceOrderDialog()
-            // }}
-          ></ServiceOrderHeader>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+            <div className={'d-flex flex-wrap align-items-center gap-2'}>
+              <div className={`flex flex-wrap items-center gap-2 `}>
+                {types && (
+                  <ToggleButtonGroup
+                    size="small"
+                    className="ml-2"
+                    value={types[selectedType - 1].key}
+                    exclusive
+                    onChange={onTypeChange}
+                  >
+                    {types.map((k, index) => {
+                      return (
+                        <ToggleButton value={k.key} key={index}>
+                          {k.key}
+                        </ToggleButton>
+                      );
+                    })}
+                  </ToggleButtonGroup>
+                )}
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-[8px]  justify-end">
+              <SearchBox
+                onChange={handleSearch}
+                className={isMobile ? styles.search_box_input : ''}
+                width="242px"
+                size="small"
+                value={search}
+                style={isMobile ? { flex: 1 } : {}}
+              />
+              <div className="flex gap-[8px] flex-wrap items-center">
+                {permissions?.fieldServiceOrder?.isCreate && (
+                  <Button
+                    onClick={() => {
+                      setShowManageDialog({ open: true, isClone: false, idToClone: null });
+                    }}
+                    variant={'contained'}
+                    size="small"
+                    color="primary"
+                    className={`no-shadow`}
+                    startIcon={<AddOutlined />}
+                  >
+                    Add
+                  </Button>
+                )}
+                <Button
+                  variant={'outlined'}
+                  color="default"
+                  size="small"
+                  onClick={openActions}
+                  disabled={selectedRecords.length ? false : true}
+                  aria-controls="action-menu"
+                  className={`new-dropdown-v1`}
+                  endIcon={<ExpandMore />}
+                >
+                  Actions
+                </Button>
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  id="action-menu"
+                  open={Boolean(anchorEl)}
+                  onClose={closeActions}
+                >
+                  <MenuItem
+                    disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
+                    onClick={() => {
+                      closeActions();
+                      setShowDeleteConfirmBox(true);
+                    }}
+                  >
+                    {`Delete (${selectedRecords.length})`}
+                  </MenuItem>
+                </Menu>
+              </div>
+            </div>
+          </div>
         </div>
-        {Object.keys(frameworkComponents).length > 0 ? (
-          isMobile && !isTablet ? (
-            <CustomSwipableList
-              key={selectedType}
-              allowSelection={true}
-              allowSwipe={true}
-              permissions={permissions?.fieldServiceOrder}
-              primaryField={columns?.find((d) => d.primaryField)}
-              onClick={(data) => {
-                history.push(`${routes.fieldServiceOrderDetail.path}/${data._id}`);
-              }}
-              dataRows={dataRows}
-              selectedRecords={getLocalStorageArrayData(localStorageSelectedRecords)}
-              dispatch={dispatch}
-              onEdit={(data) => {
-                history.push(`${routes.fieldServiceOrderDetail.path}/${data._id}`);
-              }}
-              extraParamsToCheckDelete={true}
-              onDelete={(data) => {
-                setDeleteRecord(data._id);
-                setIsConformDialogVisible(true);
-              }}
-              rowCount={rowCount}
-              page={page}
-              loading={loading}
-              chips={[
-                {
-                  icon: <SiStatuspage />,
-                  label: 'Status: ',
-                  field: 'status'
-                }
-              ]}
-              onCreate={false}
-              showClone={true}
-              onClone={(data) => {
-                setShowManageServiceOrderDialog({ open: true, isClone: true, idToClone: data._id });
-              }}
-              renderedFrom={renderedFrom}
-            />
-          ) : (
-            <CustomAgGrid
-              columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameworkComponents}
-              setGridApi={setGridApi}
-              dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              actionWidth={100}
-              loading={loading}
-              renderedFrom={renderedFrom}
-              refreshGrid={fetchServiceOrders}
-              showOnlyShowFilteredRecordSwitch={true}
-              showFilters={true}
-              resource={sidebarResource.fieldServiceOrder}
-            />
-          )
-        ) : null}
-
-        {showDeleteWarningConfirmBox ? (
-          <MessageDialog
-            open={showDeleteWarningConfirmBox}
-            message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
-            onClose={() => setShowDeleteWarningConfirmBox(false)}
+        {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            refreshGrid={fetchData}
+            showOnlyShowFilteredRecordSwitch={true}
+            showFilters={true}
+            resource={sidebarResource.fieldServiceOrder}
           />
-        ) : null}
-        {isConfirmDialogVisible ? (
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
+
+        {showDeleteConfirmBox && (
           <ConfirmationDialog
-            open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.fieldServiceOrderNumber ? 'Service Order' : 'Service Orders'}   ${
-              deleteRecord.fieldServiceOrderNumber || ''
-            }?`}
+            open={showDeleteConfirmBox}
+            message={`Are you sure you want to delete the ${routes?.fieldServiceOrder.title?.toLowerCase()}${selectedRecords.length ? "s" : ""} ${deleteRecord?.fieldServiceOrderNumber || ''} ? `}
             onClose={() => {
-              if (deleteRecord) setDeleteRecord({});
-              setIsConformDialogVisible(false);
+              setDeleteRecord(null);
+              setShowDeleteConfirmBox(false);
             }}
-            okBtnLoading={deleteLoading}
-            onOk={handleDeleteServiceOrder}
+            onOk={handleDelete}
           />
-        ) : null}
-
-        {singleServiceOrderDelete.show ? (
-          <ConfirmationDialog
-            open={singleServiceOrderDelete.show}
-            message={`Are you sure you want to delete : ${singleServiceOrderDelete.fieldServiceOrderNumber}?`}
-            onClose={() =>
-              setSingleServiceOrderDelete({
-                id: null,
-                show: false,
-                fieldServiceOrderNumber: ''
-              })
-            }
-            onOk={handleSingleDeleteServiceOrder}
+        )}
+      </div>
+      {
+        showManageDialog.open && (
+          <ManageServiceOrder
+            isClone={showManageDialog.isClone}
+            serviceOrderId={showManageDialog.idToClone}
+            onClose={() => setShowManageDialog({ open: false, isClone: false, idToClone: null })}
+            onSuccess={(data) => {
+              history.push(`${routes.fieldServiceOrderDetail.path}/${data._id}`);
+              setShowManageDialog({ open: false, isClone: false, idToClone: null });
+            }}
+            open={showManageDialog.open}
           />
-        ) : null}
-      </CustomContainer>
-      {showManageServiceOrderDialog.open && (
-        <ManageServiceOrder
-          isClone={showManageServiceOrderDialog.isClone}
-          serviceOrderId={showManageServiceOrderDialog.idToClone}
-          onClose={() => setShowManageServiceOrderDialog({ open: false, isClone: false, idToClone: null })}
-          onSuccess={(data) => {
-            history.push(`${routes.fieldServiceOrderDetail.path}/${data._id}`);
-            setShowManageServiceOrderDialog({ open: false, isClone: false, idToClone: null });
-          }}
-          open={showManageServiceOrderDialog.open}
-        />
-      )}
-    </section>
+        )
+      }
+    </section >
   );
 };
 

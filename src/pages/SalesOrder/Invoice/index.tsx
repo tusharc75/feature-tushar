@@ -5,23 +5,27 @@ import Grid from '@material-ui/core/Grid/Grid';
 import { IconButton } from '@material-ui/core';
 import { MATERIAL_TYPE, SALES_ORDER_STATUS, salesOrder, sidebarResource } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import routes from '../../../components/Helpers/Routes';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
-import { startCase } from 'lodash';
+import { camelCase, startCase } from 'lodash';
 import { fetch_salesOrder_product_fields } from '../../../components/SalesOrder/helper';
-import { generateCustomTableColumns } from 'src/constants/columns';
 import PreviewDownload from 'src/components/PreviewDownload';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { useData } from 'src/StateProvider/Provider';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
-const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, renderedFrom, stepFullScreen }) => {
+const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, stepFullScreen }) => {
+
+  const renderedFrom = `${camelCase(routes?.salesOrder.title)}_Invoice`;
 
   const { state: { permissions } }: any = useData();
 
-  const [rowsData, setRowsData] = useState(null);
   const [columns, setColumns] = useState(null);
+
+  const { state, dispatch } = useTableReducer();
+
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     if ([SALES_ORDER_STATUS.new, SALES_ORDER_STATUS.inProgress]?.includes(salesOrderData?.status)) {
@@ -35,13 +39,13 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, renderedFrom, s
 
   const fetchFields = async () => {
     var data = await fetch_salesOrder_product_fields(salesOrderData?.currency);
-    const newColumns = generateCustomTableColumns(data, salesOrderData?.currency, renderedFrom);
+    const newColumns = generateColumns(renderedFrom, data, null, false, salesOrderData?.currency);
     let coloum: any = [
       {
         accessor: 'index',
         Header: 'Index',
-        width: 70,
-        sticky: isMobile ? 'none' : 'left',
+        width: 100,
+        sticky: 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
@@ -51,7 +55,7 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, renderedFrom, s
         accessor: 'type',
         Header: 'Type',
         width: 100,
-        sticky: isMobile ? 'none' : 'left',
+        sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => {
           return row.original?.type ? (
             <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -65,8 +69,8 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, renderedFrom, s
       {
         accessor: 'detail',
         Header: 'Detail',
-        minWidth: 300,
         width: 300,
+        sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => {
           return row.original?.detail ? (
             <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -108,11 +112,11 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, renderedFrom, s
           {
             accessor: 'leadTime',
             Header: 'Lead Time (Days)',
-            Cell: ({ row }) => (row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0),
+            Cell: ({ row }) => <div>{(row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0)}</div>,
             Footer: (info) => {
-              const total = info.rows
-                .filter((f) => f.values.hasOwnProperty('leadTime') && !isNaN(f.values['leadTime']))
-                .reduce((sum, row) => parseInt(row.values['leadTime']) + sum, 0);
+              let rows = info.table.getExpandedRowModel().rows;
+              const total = rows?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
+                .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
               return <>{total}</>;
             }
           }
@@ -125,6 +129,10 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, renderedFrom, s
   };
 
   const fetchData = async () => {
+
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
+
     setNextStep(false);
     var data: any = [];
     const response = await axiosInstance().get(`${salesOrder.api}/material/${salesOrderData._id}`);
@@ -150,15 +158,17 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, renderedFrom, s
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qty = parent.qty;
-      parent.isValid = true;
       parent.subRows = generateNestedData(data.material, parent);
     });
-    setRowsData(rows);
+
+    dispatch({ type: 'initialize', data: rows, count: rows?.length });
+    dispatch({ type: 'loading', loading: false });
   };
 
   const generateNestedData = (material, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
-    subRows.forEach((_subRow, j) => {
+    subRows.forEach((_subRow, index) => {
+      _subRow.index = parent.index + '.' + `${index + 1}`;
       _subRow.detail = _subRow.type === MATERIAL_TYPE.product ? _subRow.productDetail?.productName
         : _subRow.type === MATERIAL_TYPE.service ? _subRow.serviceDetail?.serviceName
           : _subRow.packageDetail?.packageName
@@ -172,7 +182,6 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, renderedFrom, s
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qty = `${parent.qty * _subRow.qty} `;
-      _subRow.isValid = true;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
     return subRows;
@@ -180,7 +189,7 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, renderedFrom, s
 
   return (
     <Fragment>
-      <Box p={1}>
+      <Box p={1} >
         <PreviewDownload
           fileName={`${routes.salesOrder.title}-${salesOrderData?.salesOrderNo}`}
           resource={sidebarResource.salesOrder}
@@ -190,23 +199,20 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, renderedFrom, s
         />
       </Box>
       <Grid item xs={12} md={12} sm={12}>
-        {columns && rowsData ? (
-          <>
-            <Box mt={1} zIndex={5} width={'100%'}>
-              <CustomReactTable
-                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
-                columns={columns}
-                data={rowsData}
-                setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
-                onSelect={() => { }}
-                childrenProperty="subRows"
-                uniqueKey="_id"
-                renderedFrom="sales_order_product_package"
-                isClientSideGrid={true}
-                hideSelection={true}
-              />
-            </Box>
-          </>
+        {columns ? (
+          <Box zIndex={5} width={'100%'}>
+            <CustomReactTable
+              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
+              columns={columns}
+              state={state}
+              dispatch={dispatch}
+              renderedFrom={renderedFrom}
+              isClientSideGrid={true}
+              hideSelection={true}
+              refreshGrid={fetchData}
+              expander={true}
+            />
+          </Box>
         ) : (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />

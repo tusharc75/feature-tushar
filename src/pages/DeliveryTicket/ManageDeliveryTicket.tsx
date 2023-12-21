@@ -277,10 +277,7 @@ const ManageDeliveryTicket = ({
 
         if ((productInventory || products) && referenceType && referenceData) {
           if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.transferInventory) {
-          } else if (
-            referenceType === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob &&
-            products?.length &&
-            user?.user?.brandPolicy?.storageLocation &&
+          } else if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob && user?.user?.brandPolicy?.storageLocation &&
             user?.user?.brandPolicy?.rentalInventoryDebit
           ) {
             if (ticketType === DELIVERY_TICKET_TYPE.loading) {
@@ -312,7 +309,13 @@ const ManageDeliveryTicket = ({
           tempInitialData['productInventory'] = productInventory?.map((d) => d?._id);
           tempInitialData['products'] = [];
           products?.forEach((ele) => {
-            tempInitialData['products'].push({ product: ele._id, qty: ele.qty });
+            const obj: any = {}
+            obj.product = ele._id;
+            obj.qty = ele.qty;
+            if (ele?.uniqueId) {
+              obj.uniqueId = ele.uniqueId;
+            }
+            tempInitialData['products'].push(obj);
           });
           tempInitialData['serialNumber'] = [];
           if (serialNumber) {

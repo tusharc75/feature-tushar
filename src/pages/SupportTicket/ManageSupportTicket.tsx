@@ -14,6 +14,7 @@ import { CustomDialogTransition, GenerateResourceLineNumber } from 'src/constant
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
+import routes from 'src/components/Helpers/Routes';
 
 const ManageSupportTicket = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const {
@@ -34,10 +35,14 @@ const ManageSupportTicket = ({ onClose, onSuccess, isClone = false, id = null })
   const fetchFields = async () => {
     try {
       let data;
-      const response = await axiosInstance().get('/field?resource=Support Ticket');
+      const response = await axiosInstance().get(`${routes.supportTicket.path}/fields?brand=${user?.user?.brand}`);
       data = response?.data?.data;
-      const fieldsDataForCreate = data.filter((obj) => obj?.isCreate && obj?.fieldData?.sectionName !== "Internal Information").map((d: any) => d?.fieldData);
-      const fieldsDataForUpdate = data.filter((obj) => obj?.isUpdate && obj?.fieldData?.sectionName !== "Internal Information").map((d: any) => d?.fieldData);
+      const fieldsDataForCreate = data
+        .filter((obj) => obj?.isCreate && obj?.fieldData?.sectionName !== 'Internal Information')
+        .map((d: any) => d?.fieldData);
+      const fieldsDataForUpdate = data
+        .filter((obj) => obj?.isUpdate && obj?.fieldData?.sectionName !== 'Internal Information')
+        .map((d: any) => d?.fieldData);
 
       if (id) {
         axiosInstance()
@@ -95,7 +100,7 @@ const ManageSupportTicket = ({ onClose, onSuccess, isClone = false, id = null })
         });
     } else {
       axiosInstance()
-        .post(`/support-ticket`, values)
+        .post(`/support-ticket`, {...values, brand: user?.user?.brand})
         .then(({ data }) => {
           setLoading(false);
           onSuccess(data.data);

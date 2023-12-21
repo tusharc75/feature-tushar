@@ -1,44 +1,36 @@
-import { useContext, useEffect, useReducer, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
-import { useHistory } from 'react-router-dom';
+import { useContext, useEffect, useState } from 'react';
 import { Box, Button, Menu, MenuItem } from '@material-ui/core';
-import CustomAgGrid from 'src/components/AgGridComponents/CustomAgGridEditable';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { prepareDataForGrid, packages } from 'src/constants/helpers';
-import useColumns, { getFrameworkComponents } from 'src/constants/useColumns';
-import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import { useData } from 'src/StateProvider/Provider';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import DeleteButton from 'src/components/Helpers/DeleteButton';
-import Loader from 'src/components/Loader';
 import { camelCase } from 'lodash';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
 
 const PackagesTable = ({ packageId, packageData }) => {
   const renderedFrom = `${camelCase(routes?.packages.title)}_${packageData?.packageType || 'product'}`;
 
   const { setToastConfig } = useContext(CustomToastContext);
-  const history = useHistory();
   const {
-    state: { permissions }
+    state: { permissions, user }
   }: any = useData();
 
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
   const [showProductConfirmBox, setShowProductConfirmBox] = useState(false);
-  const [gridApi, setGridApi] = useState(null);
   const [showProductAssignDialog, setShowProductAssignDialog] = useState(false);
   const [showServiceAssignDialog, setShowServiceAssignDialog] = useState(false);
   const [isRemovingProducts, setRemovingProducts] = useState(false);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
-  const { getColumnData } = useColumns();
-  const [state, dispatch] = useReducer(reducer, intialState);
+  const { generateColumns } = useColumns();
+  const { state, dispatch } = useTableReducer();
   const [anchorActionEl, setAnchorActionEl] = useState(null);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
+  const { dataRows, selectedRecords } = state;
 
   const [isSubmitting, setSubmitting] = useState(false);
 
@@ -49,15 +41,13 @@ const PackagesTable = ({ packageId, packageData }) => {
 
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
+    dispatch({ type: 'selection', selectedRecords: [] });
     axiosInstance()
       .get(`${packages.api}/${packageId}/package`)
       .then(({ data: { data } }) => {
         let rows = data.map((u) => {
           let res = {
-            ...prepareDataForGrid(u),
+            ...prepareDataForGrid(u,user),
             inventoryCount: u?.qty,
             warehouses: u.warehouse?.map((w) => w.warehouseName).join(', '),
             productCategoryChipColor: u.productCategory?.chipColour
@@ -78,39 +68,20 @@ const PackagesTable = ({ packageId, packageData }) => {
       });
   };
 
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get(`/field?resource=Packages`)
-      .then(({ data: { data } }) => {
-        let columns = [];
-        let rendererNames = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(routes.packages.title, o?.fieldData, routes.packagesDetail.path);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName);
-            }
-          }
-        });
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent
-        };
-        setFrameWorkComponent({
-          ...tempFrameworkComponent,
-          actionsRenderer: ActionsRenderer
-        });
-        setColumns([...columns]);
-      });
+  const fetchGridColumns = async () => {
+    let data;
+    const response = await axiosInstance().get(`/field?resource=Packages`);
+    data = response?.data?.data;
+    const newColumns = generateColumns(renderedFrom, data, routes.packagesDetail.path, true);
+    setColumns([...newColumns, ActionsRenderer]);
   };
 
-  const handleUpdateQuantity = (row) => {
-    if (Number(row.data.qty) > 0) {
+  const handleUpdateQuantity = (data, row) => {
+    if (Number(row?.qty) > 0) {
       axiosInstance()
         .put(`${packages.api}/${packageId}/package`, {
-          ids: [row.data._id],
-          qty: Number(row.data.qty)
+          ids: [row?._id],
+          qty: Number(data?.qty)
         })
         .then(() => {
           fetchData();
@@ -138,10 +109,22 @@ const PackagesTable = ({ packageId, packageData }) => {
       });
   };
 
-  const ActionsRenderer = (params) => <span>{params?.data?.qty}</span>;
+  const ActionsRenderer = {
+    accessor: 'qty',
+    Header: 'Qty',
+    minWidth: 100,
+    width: 100,
+    sticky: 'right',
+    editable: permissions?.packages?.isUpdate,
+    cellEditor: 'numericCellEditor',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (row.original?.qty ? <div>{row.original?.qty}</div> : <NoDataCell />)
+  };
 
   const handleAssignPackage = (rows) => {
-    setSubmitting(true)
+    setSubmitting(true);
     axiosInstance()
       .post(`${packages.api}/${packageId}/package`, {
         ids: [packageId],
@@ -151,10 +134,10 @@ const PackagesTable = ({ packageId, packageData }) => {
         setShowProductAssignDialog(false);
         setShowServiceAssignDialog(false);
         fetchData();
-        setSubmitting(false)
+        setSubmitting(false);
       })
       .catch((err) => {
-        setSubmitting(false)
+        setSubmitting(false);
         setToastConfig(err);
       });
   };
@@ -241,63 +224,20 @@ const PackagesTable = ({ packageId, packageData }) => {
           />
         </Box>
       </Box>
-      {isMobile && !isTablet ? (
-        <CustomSwipableList
-          allowSelection={permissions?.packages?.isUpdate}
-          allowSwipe={permissions?.packages?.isUpdate}
-          permissions={permissions?.packages}
-          primaryField={columns?.find((d) => d.primaryField)}
-          onClick={(data) => {
-            history.push(`${routes.productDetail.path}/${data._id}`);
-          }}
-          dataRows={dataRows}
-          selectedRecords={[]}
-          dispatch={dispatch}
-          onEdit={(data) => {}}
-          extraParamsToCheckDelete={true}
-          onDelete={(data) => {}}
-          rowCount={rowCount}
-          page={page}
-          loading={loading}
-          additionalDetails={[]}
-          chips={[
-            {
-              label: 'Quantity : ',
-              field: 'qty'
-            }
-          ]}
-          owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-          onCreate={() => {
-            setShowProductAssignDialog(true);
-          }}
-          showClone={true}
-          onClone={(data) => {}}
-          renderedFrom={renderedFrom}
-        />
-      ) : Object.keys(frameWorkComponent).length > 0 ? (
-        <CustomAgGrid
-          columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameWorkComponent}
-          setGridApi={setGridApi}
-          dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          isClientSideGrid={true}
-          actionWidth={150}
-          loading={loading}
-          allowSelection={permissions?.packages?.isUpdate}
-          actionLabel="Qty"
-          renderedFrom={renderedFrom}
-          actionEditable={permissions?.packages?.isUpdate}
-          onCellValueChanged={handleUpdateQuantity}
-          refreshGrid={fetchData}
-        />
-      ) : (
-        <Loader noLoader={false} minHeight={'400px'} text="Loading..." />
-      )}
+      {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 393px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            isClientSideGrid={true}
+            refreshGrid={fetchData}
+            onSaveEdit={handleUpdateQuantity}
+          />
+        ) : <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>}
       {showProductAssignDialog && (
         <AssignPackageDialog
           handleClose={() => setShowProductAssignDialog(false)}

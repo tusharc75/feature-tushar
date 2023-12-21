@@ -25,7 +25,7 @@ import CustomButton from '../../components/Helpers/CustomButton';
 import routes from 'src/components/Helpers/Routes';
 import { useHistory } from 'react-router-dom';
 
-const disabledFieldArray = ['type', 'product', 'serializedAsset', 'repairJob', 'productionOrder', 'status'];
+const disabledFieldArray = ['type', 'product', 'warehouse', 'serializedAsset', 'status'];
 
 const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = null }) => {
   const {
@@ -51,6 +51,9 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
       let data;
       const response = await axiosInstance().get(`/field?resource=${sidebarResource['workOrder']}`);
       data = response?.data?.data;
+
+      data = data?.filter((e) => !['productionOrder', 'repairOrder'].includes(e?.fieldData?.fieldName));
+
 
       let serializedAssetFieldIndex = data.findIndex((obj) => obj?.fieldData.fieldName === 'serializedAsset');
       if (serializedAssetFieldIndex > -1) {

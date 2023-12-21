@@ -1,84 +1,116 @@
-import { useState, useEffect, useContext, Fragment, useReducer } from 'react';
+import { useState, useEffect, useContext, Fragment } from 'react';
 import { Box, Button, IconButton } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
-import { useData } from '../../../StateProvider/Provider';
-import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridComponents/CustomAgGrid';
-import { purchaseOrder, gridLoadingTimeout } from '../../../constants/helpers';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
+import { purchaseOrder, gridLoadingTimeout, dateTimeFormat } from '../../../constants/helpers';
 import AddInvoice from './AddInvoice';
-import { CommonRenderer, DateRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import moment from 'moment';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const toastConfig = useContext(CustomToastContext);
+
+  const { state, dispatch } = useTableReducer();
   const [addOpen, setAddOpen] = useState({ open: false, invoiceData: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteData, setDeleteData] = useState(null);
-  const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
     fetchData();
   }, [purchaseOrderData]);
 
-  let columns = [
+  const columns = [
     {
-      field: 'invoiceNumber',
-      headerName: 'Invoice Number',
-      show: true,
-      cellRenderer: 'commonRenderer',
-      primaryField: true
+      accessor: 'invoiceNumber',
+      Header: 'Invoice Number',
+      minWidth: 150,
+      width: 150,
+      primaryField: true,
+      Cell: ({ row }) => (
+        <>
+          {row?.original?.invoiceNumber ? (
+            <h5 className="text-truncate" title={row?.original?.invoiceNumber}>
+              {row?.original?.invoiceNumber}
+            </h5>
+          ) : (
+            <NoDataCell />
+          )}
+        </>
+      )
     },
     {
-      field: 'invoiceDate',
-      headerName: 'Invoice Date',
-      filter: false,
-      show: true,
-      cellRenderer: 'dateRenderer',
-      primaryField: true
+      accessor: 'invoiceDate',
+      Header: 'Invoice Date',
+      minWidth: 150,
+      width: 150,
+      disabledFilters: true,
+      Cell: ({ row }) => (
+        <>
+          {row?.original?.invoiceDate ? (
+            <h5 className="text-truncate" title={moment(row?.original?.invoiceDate)?.format(dateTimeFormat)}>
+              {moment(row?.original?.invoiceDate)?.format(dateTimeFormat)}
+            </h5>
+          ) : (
+            <NoDataCell />
+          )}
+        </>
+      )
+    },
+    {
+      accessor: 'action',
+      Header: 'Actions',
+      minWidth: 100,
+      width: 110,
+      sticky: 'right',
+      disableFilters: true,
+      disableSortBy: true,
+      canDrag: false,
+      Cell: ({ row }) => (
+        <>
+          <HtmlTooltip title={'Edit'}>
+            <IconButton
+              size="small"
+              aria-label="Edit"
+              onClick={() => {
+                setAddOpen({ open: true, invoiceData: row?.original });
+              }}
+            >
+              <EditIcon fontSize="small" color={'primary'} />
+            </IconButton>
+          </HtmlTooltip>
+
+          <HtmlTooltip title={'Delete'}>
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              onClick={() => {
+                setShowDeleteConfirmBox(true);
+                setDeleteData([row.original?._id]);
+              }}
+            >
+              <DeleteIcon fontSize="small" color={'error'} />
+            </IconButton>
+          </HtmlTooltip>
+        </>
+      )
     }
   ];
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
     let res = await axiosInstance().get(`${purchaseOrder.api}/invoice/${purchaseOrderData?._id}`);
     dispatch({ type: 'initialize', data: res?.data?.data, count: res?.data?.data?.length });
     setTimeout(() => {
       dispatch({ type: 'loading', loading: false });
     }, gridLoadingTimeout);
   };
-
-  const ActionsRenderer = (params) => (
-    <>
-      <HtmlTooltip title="Edit">
-        <IconButton
-          size="small"
-          aria-label="Clone"
-          onClick={() => {
-            setAddOpen({ open: true, invoiceData: params.data });
-          }}
-        >
-          <EditIcon color="primary" />
-        </IconButton>
-      </HtmlTooltip>
-      <HtmlTooltip title="Edit">
-        <IconButton
-          size="small"
-          aria-label="Clone"
-          onClick={() => {
-            setShowDeleteConfirmBox(true);
-            setDeleteData([params.data?._id]);
-          }}
-        >
-          <DeleteIcon color="error" />
-        </IconButton>
-      </HtmlTooltip>
-    </>
-  );
 
   const handleDelete = async () => {
     if (deleteData) {
@@ -100,12 +132,6 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
     }
   };
 
-  const frameworkComponents = {
-    commonRenderer: CommonRenderer,
-    dateRenderer: DateRenderer,
-    actionsRenderer: ActionsRenderer
-  };
-
   return (
     <Fragment>
       {allowedToEdit && (
@@ -124,24 +150,24 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
           </Box>
         </Box>
       )}
-      <CustomAgGrid
-        columns={columns}
-        dataRows={dataRows}
-        frameworkComponents={frameworkComponents}
-        setGridApi={setGridApi}
-        dispatch={dispatch}
-        rowCount={rowCount}
-        limit={limit}
-        pageSizes={pageSizes}
-        page={page}
-        actionWidth={150}
-        allowAction={true}
-        isClientSideGrid={true}
-        loading={loading}
-        renderedFrom={'po_invoice'}
-        refreshGrid={fetchData}
-        showOnlyShowFilteredRecordSwitch={false}
-      />
+      <Box>
+        {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={`po_invoice`}
+            isClientSideGrid={true}
+            refreshGrid={fetchData}
+          />
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
+      </Box>
+
       {addOpen?.open && (
         <AddInvoice
           purchaseOrderId={purchaseOrderData?._id}

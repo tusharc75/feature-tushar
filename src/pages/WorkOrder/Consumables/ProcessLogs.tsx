@@ -8,17 +8,19 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { dateTimeFormat } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { Autorenew } from '@material-ui/icons';
 import RevertQtyDialog from 'src/pages/ProductInventory/History/RevertQtyDialog';
 
 function ProcessLogs({ onClose, logsData, productName, product }) {
+  const renderedFrom = 'workOrder_consumables_request_process_logs';
+
   const [fullScreen, setFullScreen] = useState(true);
   const [columns, setColumns] = useState(null);
-  const [rowsData, setRowsData] = useState([]);
-
   const [revertQtyDialog, setRevertQtyDialog] = useState({ open: false, qty: 0, revertedQty: 0, ledgerId: '' });
+
+  const { state, dispatch } = useTableReducer();
 
   useEffect(() => {
     fetchColumn();
@@ -79,8 +81,8 @@ function ProcessLogs({ onClose, logsData, productName, product }) {
     column.push({
       accessor: 'action',
       Header: 'Actions',
-      minWidth: 80,
-      width: 80,
+      minWidth: 100,
+      width: 100,
       sticky: 'right',
       disableFilters: true,
       disableSortBy: true,
@@ -111,12 +113,16 @@ function ProcessLogs({ onClose, logsData, productName, product }) {
   };
 
   const fetchData = () => {
+    dispatch({ type: 'loading', loading: true });
+
     const data = JSON.parse(JSON.stringify(logsData));
     data?.forEach((e) => {
       e.userId = e?.user?.optionValue;
       e.user = e?.user?.optionLabel;
     });
-    setRowsData(data);
+
+    dispatch({ type: 'initialize', data: data, count: data?.length });
+    dispatch({ type: 'loading', loading: false });
   };
 
   return (
@@ -142,19 +148,17 @@ function ProcessLogs({ onClose, logsData, productName, product }) {
         showManimizeMaximize={true}
       />
       <CustomDialogContent>
-        {rowsData && columns ? (
+        {columns ? (
           <Box p={2}>
             <Box zIndex={5} width={'100%'} height={'calc(100vh - 200px)'}>
               <CustomReactTable
                 height={'calc(100vh - 200px)'}
                 columns={columns}
-                data={rowsData}
-                onSelect={() => {}}
-                childrenProperty="subRows"
-                uniqueKey="_id"
+                state={state}
+                dispatch={dispatch}
+                refreshGrid={fetchData}
                 hideSelection={true}
-                hideExpander={true}
-                renderedFrom={'workOrder_consumables_request_process_logs'}
+                renderedFrom={renderedFrom}
                 isClientSideGrid={true}
               />
             </Box>

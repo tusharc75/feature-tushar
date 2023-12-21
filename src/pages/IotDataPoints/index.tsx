@@ -1,6 +1,5 @@
-import { Box, Button, Grid, IconButton, Menu, MenuItem, Tooltip } from '@material-ui/core';
-import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
+import { Button, IconButton, Menu, MenuItem, Box } from '@material-ui/core';
+import { useContext, useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
@@ -8,81 +7,56 @@ import routes from 'src/components/Helpers/Routes';
 import styles from '../Leads/Header.module.scss';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import { camelCase } from 'lodash';
-import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
 import { useData } from 'src/StateProvider/Provider';
-import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import { MdAdd } from 'react-icons/md';
-import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
+import { AddOutlined, Delete, ExpandMore } from '@material-ui/icons';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import axiosInstance from 'src/axios/axiosInstance';
 import {
-  getLocalStorageArrayData,
   gridLoadingTimeout,
-  isObjectEmpty,
   prepareDataForGrid,
-  removeLocalStorage,
-  sidebarResource
+  sidebarResource,
 } from 'src/constants/helpers';
-import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ManageIotDataPoints from './ManageIotDataPoints';
+import MessageDialog from '../../components/Helpers/MessageDialog';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+
+let searchTimeout;
 
 const IotDataPoints = () => {
   const renderedFrom = camelCase(routes?.iotDataPoints.title);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
-
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { permissions, selectedEntity, user }
   }: any = useData();
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
-    state;
-  const [iotDataPointsId, setIotDataPointsId] = useState(null);
-  const [open, setOpen] = useState({ open: false, isClone: false });
+  const { state, dispatch } = useTableReducer();
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [anchorEl, setAnchorEl] = useState(null);
   const [deleteRecord, setDeleteRecord] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
-  const [columns, setColumns] = useState([]);
-  const [gridApi, setGridApi] = useState(null);
-  const { getColumnData } = useColumns();
+  const [columns, setColumns] = useState(null);
+  const { generateColumns } = useColumns();
 
   const fetchGridColumns = () => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource?.iotDataPoints}`)
       .then(({ data: { data } }) => {
-        let columns = [];
-        let rendererNames = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.iotDataPointsDetail.path, true);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName);
-            }
-          }
-        });
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent,
-          actionsRenderer: ActionsRenderer
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
-        columns = [...columns, ...getStaticFields()];
-        setColumns([...columns]);
+        const newColumns = generateColumns(renderedFrom, data, routes.iotDataPointsDetail.path, true);
+        setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
       });
   };
 
-  const fetchIotDataPointsData = () => {
+  const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
 
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
     axiosInstance()
       .get(`${routes?.iotDataPoints?.path}${queryString}`)
       .then(({ data: { data } }) => {
@@ -91,31 +65,18 @@ const IotDataPoints = () => {
           let finalObject: any = prepareDataForGrid(u);
           finalObject['canDelete'] = permissions?.iotDataPoints?.isDelete;
           finalObject['isChecked'] = selectedRecords?.some((s) => s?._id === u?._id);
-          finalObject['allowedToEdit'] = permissions?.iotDataPoints?.isUpdate;
-
           return {
             ...finalObject
           };
         });
-        if (appendRows) {
-          dispatch({
-            type: 'initialize',
-            data: [...dataRows, ...rows],
-            count: count,
-            selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
-          });
-        } else {
-          dispatch({
-            type: 'initialize',
-            data: rows,
-            count: count,
-            selectedRecords: rows.filter((f) => f.isChecked === true)
-          });
-        }
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
+      })
+      .catch((error) => {
+        dispatch({ type: 'loading', loading: false });
+        toastConfig.setToastConfig(error);
       });
   };
 
@@ -151,8 +112,7 @@ const IotDataPoints = () => {
     }
 
     if (showFilteredRecordsOnly) {
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || [])?.map((m) => m._id))}`;
     }
 
     return deepFilter;
@@ -170,51 +130,59 @@ const IotDataPoints = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-  const ActionsRenderer = (params) => (
-    <Fragment>
-      {permissions?.iotDataPoints?.isCreate ? (
-        <Tooltip title="Clone">
-          <IconButton
-            aria-label="Clone"
-            onClick={() => {
-              setIotDataPointsId(params.data.id);
-              setOpen({ open: true, isClone: true });
-            }}
-          >
-            <FileCopyIcon fontSize="small" color="primary" />
-          </IconButton>
-        </Tooltip>
-      ) : (
-        <Tooltip className="cursor-stop" title="You do not have permission to clone/create">
-          <IconButton aria-label="Clone" size="small">
-            <FileCopyIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      )}
+  const showConfirmBox = () => {
+    if (selectedRecords?.find((d) => d.canDelete === false)) {
+      setShowDeleteWarningConfirmBox(true);
+    } else {
+      setShowDeleteConfirmBox(true);
+    }
+  };
 
-      {params?.data?.canDelete ? (
-        <Tooltip title="Delete">
-          <IconButton
-            aria-label="Delete"
-            onClick={() => {
-              setDeleteRecord(params.data);
-              setShowDeleteConfirmBox(true);
-            }}
-          >
-            <DeleteIcon fontSize="small" color="error" />
-          </IconButton>
-        </Tooltip>
-      ) : (
-        <Tooltip className="cursor-stop" title="You do not have permission to delete">
-          <IconButton aria-label="Delete" size="small">
-            <DeleteIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      )}
-    </Fragment>
-  );
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 110,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        <HtmlTooltip title={permissions?.iotDataPoints?.isCreate ? 'Clone' : cloneDisable}>
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Clone"
+              onClick={() => {
+                setShowManageDialog({ open: true, isClone: true, idToClone: row.original._id });
+              }}
+            >
+              <FileCopyIcon fontSize="small" color={permissions?.iotDataPoints?.isCreate ? 'primary' : 'disabled'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              disabled={row?.original?.canDelete ? false : true}
+              onClick={() => {
+                setDeleteRecord(row.original);
+                setShowDeleteConfirmBox(true);
+              }}
+            >
+              <Delete fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+      </>
+    )
+  };
 
   const handleDelete = () => {
+    setIsSubmitting(true);
     let ids = [];
     if (deleteRecord) {
       ids.push(deleteRecord._id);
@@ -224,15 +192,17 @@ const IotDataPoints = () => {
     axiosInstance()
       .put(`${routes?.iotDataPoints?.path}/remove`, { ids: ids })
       .then(({ data }) => {
-        removeLocalStorage(localStorageSelectedRecords);
-        fetchIotDataPointsData();
-        setShowDeleteConfirmBox(false);
-        setDeleteRecord(null);
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: data?.message
+          message: data.message
         });
+        dispatch({ type: 'selection', selectedRecords: [] });
+        fetchData();
+        setShowDeleteConfirmBox(false);
+        setDeleteRecord(null);
+        setAnchorEl(null);
+        setIsSubmitting(false);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -244,8 +214,19 @@ const IotDataPoints = () => {
   }, []);
 
   useEffect(() => {
-    fetchIotDataPointsData();
+    fetchData();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
+
+  useEffect(() => {
+    let millisec = Object.keys(search).length > 0 ? 600 : 5;
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+
+    searchTimeout = setTimeout(() => {
+      fetchData();
+    }, millisec);
+  }, [search]);
 
   return (
     <section className="main-container-v1">
@@ -256,20 +237,13 @@ const IotDataPoints = () => {
           module="iotDataPoints"
           api={'iot-data-points'}
           afterImportCompleted={() => {
-            fetchIotDataPointsData();
+            fetchData();
           }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
-          recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-          ids={
-            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-              ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-              : []
-          }
-          onExportToExcelSuccess={() => {
-            if (gridApi) gridApi.deselectAll();
-            else fetchIotDataPointsData();
-          }}
+          recordsToExport={selectedRecords?.length}
+          ids={selectedRecords?.map((obj) => obj._id)}
+          onExportToExcelSuccess={fetchData}
           additionalParams={getQueryString(true)}
         />
       </div>
@@ -284,8 +258,7 @@ const IotDataPoints = () => {
                   <Button
                     className={`no-shadow`}
                     onClick={() => {
-                      setIotDataPointsId(null);
-                      setOpen({ open: true, isClone: false });
+                      setShowManageDialog({ open: true, isClone: false, idToClone: null });
                     }}
                     variant={'contained'}
                     size="small"
@@ -322,21 +295,12 @@ const IotDataPoints = () => {
                       onClose={closeActions}
                     >
                       <MenuItem
-                        disabled={
-                          !(
-                            (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length
-                          )
-                        }
                         onClick={() => {
                           closeActions();
-                          // eslint-disable-next-line no-lone-blocks
-                          {
-                            selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
-                          }
-                          setShowDeleteConfirmBox(true);
+                          showConfirmBox();
                         }}
                       >
-                        Delete
+                        {`Delete (${selectedRecords?.length})`}
                       </MenuItem>
                     </Menu>
                   </>
@@ -345,63 +309,27 @@ const IotDataPoints = () => {
             </div>
           </div>
         </div>
-        {Object.keys(frameWorkComponent).length > 0 ? (
-          isMobile && !isTablet ? (
-            <CustomSwipableList
-              allowSelection={true}
-              allowSwipe={true}
-              permissions={permissions.iotDataPoints}
-              primaryField={columns?.find((d) => d.primaryField)}
-              onClick={(data) => {
-                setIotDataPointsId(data.id);
-                setOpen({ open: true, isClone: false });
-              }}
-              dataRows={dataRows}
-              selectedRecords={selectedRecords}
-              dispatch={dispatch}
-              onEdit={(data) => {
-                setIotDataPointsId(data.id);
-                setOpen({ open: true, isClone: false });
-              }}
-              extraParamsToCheckDelete={true}
-              onDelete={(data) => {
-                setDeleteRecord(data);
-                setShowDeleteConfirmBox(true);
-              }}
-              rowCount={rowCount}
-              page={page}
-              loading={loading}
-              additionalDetails={[]}
-              owerCollaboratorInitialsOrImages=""
-              onCreate={false}
-              showClone={true}
-              onClone={(data) => {
-                setIotDataPointsId(data.id);
-                setOpen({ open: true, isClone: true });
-              }}
-              chips={[]}
-              renderedFrom={renderedFrom}
-            />
-          ) : (
-            <CustomAgGrid
-              columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameWorkComponent}
-              setGridApi={setGridApi}
-              dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              page={page}
-              allowAction={true}
-              loading={loading}
-              renderedFrom={renderedFrom}
-              refreshGrid={fetchIotDataPointsData}
-              showOnlyShowFilteredRecordSwitch={true}
-              showFilters={true}
-              resource={sidebarResource.iotDataPoints}
-            />
-          )
+        {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            refreshGrid={fetchData}
+            showOnlyShowFilteredRecordSwitch={true}
+            showFilters={true}
+            resource={sidebarResource.iotDataPoints}
+          />
+        ) : <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>}
+        {showDeleteWarningConfirmBox ? (
+          <MessageDialog
+            open={showDeleteWarningConfirmBox}
+            message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
+            onClose={() => setShowDeleteWarningConfirmBox(false)}
+          />
         ) : null}
         {showDeleteConfirmBox && (
           <ConfirmationDialog
@@ -411,17 +339,18 @@ const IotDataPoints = () => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
             }}
+            okBtnLoading={isSubmitting}
             onOk={handleDelete}
           />
         )}
-        {open?.open && (
+        {showManageDialog.open && (
           <ManageIotDataPoints
-            id={iotDataPointsId}
-            isClone={open?.isClone}
-            onClose={() => setOpen({ open: false, isClone: false })}
+            id={showManageDialog.idToClone}
+            isClone={showManageDialog.isClone}
+            onClose={() => setShowManageDialog({ open: false, isClone: false, idToClone: null })}
             onSuccess={() => {
-              setOpen({ open: false, isClone: false });
-              fetchIotDataPointsData();
+              fetchData();
+              setShowManageDialog({ open: false, isClone: false, idToClone: null });
             }}
           />
         )}

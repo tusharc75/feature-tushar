@@ -1,7 +1,17 @@
 import routes from "src/components/Helpers/Routes";
 
 export const ownerAndColaborator = 'You have to be either owner or collaborator to perform this action';
+
+export const entityDisable = 'You do not have permission to update entity';
+
 export const actionSelection = 'Select at least one line item to enable this button';
+
+export const cloneDisable = 'You do not have permission to Clone/Create';
+export const deleteDisable = 'You do not have permission to Delete';
+export const editDisable = 'You do not have permission to Edit';
+export const childDisable = 'You do not have permission to View Child';
+
+export const quotationApprovedMessage = 'Quotation Approved you can not perform this action';
 
 export const rentalManagementActions = {
     createLoadingTicket: 'Create Loading Ticket',
@@ -13,8 +23,8 @@ export const rentalManagementActions = {
     createReturnTicket: 'Create Return Ticket',
     receiveItems: 'Receive Items',
     createSupplierDeliveryTicket: 'Create Supplier Delivery Ticket',
-    cancelInTransitReceivingTicket: 'Cancel In-Transit Receiving Ticket',
-    cancelDeliveredReceivingTicket: 'Cancel Delivered Receiving Ticket',
+    cancelInTransitTicket: 'Cancel In-Transit Receiving Ticket',
+    cancelDeliveredTicket: 'Cancel Delivered Ticket',
     createRepairJob: 'Create Repair Job',
     createRepairOrder: 'Create Repair Order',
     transferToAnotherRental: 'Transfer to another Rental'
@@ -33,9 +43,9 @@ export const rentalManagementMessage = {
     loadingAlreadyDelivered: 'Loading Ticket is already delivered',
     loadingNotDelivered: 'Loading Ticket is not delivered',
     receivingAlreadyCreated: 'Receiving Ticket is already created',
-    receivingNotCreated: 'Receiving Ticket is not created',
+    receivingReturnNotCreated: 'Receiving/Return Ticket is not created',
     receivingAlreadyDelivered: 'Receiving Ticket is already delivered',
-    receivingNotDeliverd: 'Receiving Ticket is not delivered',
+    receivingReturnNotDeliverd: 'Receiving/Return Ticket is not delivered',
     returnAlreadyCreated: 'Return Ticket is already created',
     returnAlreadyDelivered: 'Return Ticket is already delivered',
     receivingOrReturnNotCreated: 'Receiving or Return Ticket is not created',

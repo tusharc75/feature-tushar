@@ -1,51 +1,45 @@
-import { Box, Button, Chip, Collapse, Dialog, Grid, Menu, MenuItem } from '@material-ui/core';
+import { Box, Button, Chip, Dialog, Grid, Menu, MenuItem } from '@material-ui/core';
 import IconButton from '@material-ui/core/IconButton';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import { camelCase } from 'lodash';
-import { useContext, useEffect, useReducer, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
+import { useContext, useEffect, useState } from 'react';
 import { AiOutlineDeploymentUnit } from 'react-icons/ai';
-import { CiUser, FaSuitcase, TbArrowsSort } from 'react-icons/all';
-import { MdOutlineFilterAlt } from 'react-icons/md';
 import { Link, useHistory } from 'react-router-dom';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import axiosInstance from '../../axios/axiosInstance';
-import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
+import CustomReactTable, {
+  getStaticFields,
+  checkStaticField,
+  gridFilterParser,
+  useColumns,
+  useTableReducer
+} from 'src/components/CustomReactTable';
+import DeleteIcon from '@material-ui/icons/Delete';
 import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
 import CustomContainer from '../../components/CustomContainer';
 import EntitySelectionsDialog from '../../components/EntitySelections';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
-import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import SearchBox from '../../components/Helpers/SearchBox';
-import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
-import MobileSortDialog from '../../components/MobileSortDialog';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import {
-  getLocalStorageArrayData,
-  gridLoadingTimeout,
-  prepareDataForGrid,
-  removeLocalStorage,
-  sidebarResource,
-  userType
-} from '../../constants/helpers';
-import useColumns, { checkStaticField, getFrameworkComponents, getStaticFields, gridFilterParser } from '../../constants/useColumns';
+import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, userType } from '../../constants/helpers';
 import WarhouseList from '../Account/Warehouse/WarhouseList';
 import styles from '../Leads/Header.module.scss';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageContactDialog from './ManageContact';
+import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
-const ContactTypes = [
+const types = [
   {
     key: 'All Contacts',
     value: 1
@@ -68,13 +62,9 @@ export default function Contact(props) {
     account
   } = props;
   const [selectedType, setSelectedType] = useState(1);
-  const [open, setOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [contactId, setContactId] = useState('');
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
-  const [renderCount, setRenderCount] = useState(0);
-  const [sortOpen, setSortOpen] = useState(false);
-  const [isOpenDialog, setisOpenDialog] = useState(false);
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState({ show: false, isDelete: false });
   const [showCreateContactDialog, setShowCreateContactDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [singleContactDelete, setSingleContactDelete] = useState({
@@ -96,22 +86,17 @@ export default function Contact(props) {
   const [showEntityDialog, setShowEntityDialog] = useState(false);
   const [openAddPlantsDialog, setOpenAddPlantsDialog] = useState(false);
   const [isAddingWarehouse, setAddingWarehouse] = useState(false);
-  const [filter, setFilter] = useState('All Contacts');
   const [entities, setEntities] = useState([]);
-  const [columns, setColumns] = useState([]);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
-  const { getColumnData } = useColumns();
-  //  Grid Variables - Start
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
-    state;
-  const columnState = JSON.parse(localStorage.getItem(contactResource));
+  const [columns, setColumns] = useState(null);
+  const { generateColumns } = useColumns();
+
+  const { state, dispatch } = useTableReducer();
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+
   const [showAssignEntityDialog, setShowAssignEntityDialog] = useState(false);
   const [entityAccess, setEntityAccess] = useState([]);
   const [roleAccessOfLoggedInUser, setRoleAccessOfLoggedInUser] = useState([]);
   let renderedFrom = camelCase(contactResource);
-  const localStorageSelectedRecords = `${contactResource}_selected`;
 
   useEffect(() => {
     fetchGridColumns();
@@ -121,59 +106,54 @@ export default function Contact(props) {
 
   const fetchGridColumns = async () => {
     const response = await axiosInstance().get(`/field?resource=${sidebarResource[contactResource]}`);
-
     let data = response?.data?.data;
 
-    let columns = [];
-    let rendererNames = [];
-    data.forEach((o) => {
-      let currentColumn = getColumnData(contactResource, o?.fieldData, `/${contactRoute}/detail`, true);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-          rendererNames.push(currentColumn?.rendererName);
-        }
-        return o?.fieldData;
-      }
-      return o?.fieldData;
-    });
-    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-    tempFrameworkComponent = {
-      ...tempFrameworkComponent,
-      relatedLeadRenderer: RelatedLeadRenderer,
-      actionsRenderer: ActionsRenderer
-    };
+    let newColumns = generateColumns(contactResource, data, `/${contactRoute}/detail`, true);
     if (contactResource.includes('customer')) {
-      columns = [...columns, { field: 'relatedLead', headerName: 'Related Lead', show: true, cellRenderer: 'relatedLeadRenderer' }];
+      newColumns = [
+        ...newColumns,
+        {
+          accessor: 'relatedLead',
+          Header: 'Related Lead',
+          minWidth: 150,
+          width: 150,
+          Cell: ({ row }) =>
+            row?.original?.relatedLead ? (
+              row?.original?.relatedLeadEntity === selectedEntity ? (
+                <Link className="link" to={`${routes.leadDetail.path}/${row?.original?.relatedLeadId}`} title={row?.original?.relatedLead}>
+                  {row?.original?.relatedLead}
+                </Link>
+              ) : hasAccessToEntity(row?.original?.relatedLeadEntity) ? (
+                <span
+                  className="link"
+                  onClick={() => {
+                    handleEntityChange(row?.original?.relatedLeadEntity);
+                    history.replace(`${routes.leadDetail.path}/${row?.original?.relatedLeadId}`);
+                  }}
+                  title={row?.original?.relatedLead}
+                >
+                  {row?.original?.relatedLead}
+                </span>
+              ) : (
+                <span title={row?.original?.relatedLead}>
+                  <CustomRenderCell value={row?.original?.relatedLead} />
+                </span>
+              )
+            ) : (
+              <NoDataCell />
+            )
+        }
+      ];
     }
-    setFrameWorkComponent({ ...tempFrameworkComponent });
     let staticFields = getStaticFields();
     staticFields.forEach((field) => {
-      columns.push(checkStaticField(routes.projectSales.title, field));
+      newColumns.push(checkStaticField(routes.projectSales.title, field));
     });
-    setColumns([...columns]);
-  };
-  //  Grid Variables - End
-  if (columnState) {
-    columns.map((item) => {
-      columnState.map((d) => {
-        if (d.colId == item.field) {
-          item.show = !d.hide;
-        }
-      });
-    });
-  }
-
-  const handleFilter = (event, newFilter) => {
-    if (newFilter !== null) {
-      setFilter(newFilter);
-      handleContactSelect(ContactTypes.find((d) => d.key === newFilter).value);
-    }
+    setColumns([...newColumns, ActionsRenderer]);
   };
 
   useEffect(() => {
     const data = user?.role?.sideBar;
-
     if (data) {
       const hasContactPermission = data.find((d) => d.name === contactPermission);
       if (hasContactPermission) {
@@ -229,103 +209,87 @@ export default function Contact(props) {
     setEntityAccess(entityIds);
   };
 
-  const RelatedLeadRenderer = (params) =>
-    params.value ? (
-      params?.data?.relatedLeadEntity === selectedEntity ? (
-        <Link className="link" to={`${routes.leadDetail.path}/${params.data.relatedLeadId}`} title={params.value}>
-          {params.value}
-        </Link>
-      ) : hasAccessToEntity(params?.data?.relatedLeadEntity) ? (
-        <span
-          className="link"
-          onClick={() => {
-            handleEntityChange(params.data?.relatedLeadEntity);
-            history.push(`${routes.leadDetail.path}/${params.data.relatedLeadId}`);
-          }}
-          title={params.value}
-        >
-          {params.value}
-        </span>
-      ) : (
-        <span title={params.value}>
-          <CustomRenderCell value={params.value} />
-        </span>
-      )
-    ) : (
-      <NoDataCell />
-    );
-
-  const ActionsRenderer = (params) => (
-    <>
-      {contactPermissions?.isCreate ? (
-        <HtmlTooltip title="Clone">
-          <IconButton
-            size="small"
-            aria-label="Clone"
-            onClick={() => {
-              setShowCreateContactDialog({ open: true, isClone: true, idToClone: params.data._id });
-            }}
-          >
-            <FileCopyIcon fontSize="small" color="primary" />
-          </IconButton>
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 120,
+    width: 120,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        <HtmlTooltip title={contactPermissions?.isCreate ? 'Clone' : cloneDisable}>
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Clone"
+              disabled={contactPermissions?.isCreate ? false : true}
+              onClick={() => {
+                setShowCreateContactDialog({ open: true, isClone: true, idToClone: row?.original?._id });
+              }}
+            >
+              <FileCopyIcon fontSize="small" color={contactPermissions?.isCreate ? 'primary' : 'disabled'} />
+            </IconButton>
+          </span>
         </HtmlTooltip>
-      ) : (
-        <HtmlTooltip className="cursor-stop" title="You do not have permission to clone/create">
-          <IconButton size="small" aria-label="Clone">
-            <FileCopyIcon fontSize="small" color="disabled" />
-          </IconButton>
+        <HtmlTooltip title={contactPermissions?.isDelete && row?.original?.ownerId === user?.user?._id ? 'Delete' : deleteDisable}>
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Clone"
+              disabled={contactPermissions?.isDelete && row?.original?.ownerId === user?.user?._id ? false : true}
+              onClick={() => {
+                setSingleContactDelete({
+                  show: true,
+                  id: row?.original?._id,
+                  contactedName: row?.original?.concatedName
+                });
+              }}
+            >
+              <DeleteIcon
+                fontSize="small"
+                color={contactPermissions?.isDelete && row?.original?.ownerId === user?.user?._id ? 'error' : 'disabled'}
+              />
+            </IconButton>
+          </span>
         </HtmlTooltip>
-      )}
-      <GridDeleteIcon
-        hasDeletePermission={contactPermissions?.isDelete}
-        ownerId={params.data.ownerId}
-        userId={user?.user?._id}
-        onDelete={() => {
-          setSingleContactDelete({
-            show: true,
-            id: params.data._id,
-            contactedName: params.data.concatedName
-          });
-        }}
-        entity="contact"
-      />
-
-      {contactPermissions?.isUpdate && params.data?.isAllowedToUpdate ? (
-        <HtmlTooltip title="Entity">
-          <IconButton
-            size="small"
-            aria-label="Entity"
-            onClick={() => {
-              setContactId(params.data._id);
-              setShowEntityDialog(true);
-              if (params?.data?.entityId) {
-                let entities = [];
-                if (params?.data?.entityId) {
-                  entities.push(params?.data?.entityId);
+        <HtmlTooltip title={contactPermissions?.isUpdate && row?.original?.isAllowedToUpdate ? 'Entity' : 'You do not have permission to update entity'}  >
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Entity"
+              disabled={contactPermissions?.isUpdate && row?.original?.isAllowedToUpdate ? false : true}
+              onClick={() => {
+                setContactId(row?.original?._id);
+                setShowEntityDialog(true);
+                if (row?.original?.entityId) {
+                  let entities = [];
+                  if (row?.original?.entityId) {
+                    entities.push(row?.original?.entityId);
+                  }
+                  if (row?.original?.restentity) {
+                    let restEntities = row?.original?.restentity.map((o) => o?.optionValue);
+                    entities = [...entities, ...restEntities];
+                  }
+                  setEntities([...entities]);
+                } else if (row?.original?.restentity) {
+                  let restEntities = row?.original?.restentity.map((o) => o?.optionValue);
+                  setEntities([...restEntities]);
                 }
-                if (params?.data?.restentity) {
-                  let restEntities = params?.data?.restentity.map((o) => o?.optionValue);
-                  entities = [...entities, ...restEntities];
-                }
-                setEntities([...entities]);
-              } else if (params?.data?.restentity) {
-                let restEntities = params?.data?.restentity.map((o) => o?.optionValue);
-                setEntities([...restEntities]);
-              }
-            }}
-          >
-            <AiOutlineDeploymentUnit fontSize="15" color="primary" />
-          </IconButton>
+              }}
+            >
+              <AiOutlineDeploymentUnit
+                fontSize="15"
+                color={contactPermissions?.isUpdate && row?.original?.isAllowedToUpdate ? 'primary' : 'disabled'}
+              />
+            </IconButton>
+          </span>
         </HtmlTooltip>
-      ) : (
-        <HtmlTooltip className="cursor-stop" title="You do not have permission to update entity">
-          <IconButton aria-label="Clone" size="small">
-            <AiOutlineDeploymentUnit fontSize="15" />
-          </IconButton>
-        </HtmlTooltip>
-      )}
-    </>
-  );
+      </>
+    )
+  };
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
@@ -366,8 +330,7 @@ export default function Contact(props) {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
     }
     return deepFilter;
   };
@@ -376,72 +339,24 @@ export default function Contact(props) {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
 
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
-
     axiosInstance()
       .get(`${contactApi}${queryString}`)
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u, user);
-          finalObject['canDelete'] = u.owner?.optionValue === user?.user._id;
-          finalObject['isChecked'] = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id);
-          finalObject['owerCollaboratorInitialsOrImages'] = [];
-          if (finalObject['owner']) finalObject['owerCollaboratorInitialsOrImages'].push({ initials: finalObject['owner'] });
-          finalObject['owerCollaboratorInitialsOrImages'].forEach((f) => {
-            if (f.initials) {
-              f.initials = f.initials
-                .split(' ')
-                .map((i) => i[0])
-                .join('');
-            }
-          });
-
+          finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           return {
             ...finalObject,
-
             canDelete: u.owner?.optionValue === user?.user._id,
             relatedLead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
             relatedLeadId: u.staticData && u.staticData.lead && u.staticData.lead._id,
             relatedLeadEntity: u.staticData && u.staticData.lead && u.staticData.lead?.entity
           };
         });
-        if (appendRows) {
-          dispatch({
-            type: 'initialize',
-            data: [...dataRows, ...rows],
-            count: count,
-            selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
-          });
-        } else {
-          dispatch({
-            type: 'initialize',
-            data: rows,
-            count: count,
-            selectedRecords: rows.filter((f) => f.isChecked === true)
-          });
-        }
-
-        if (gridApi) {
-          try {
-            let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords)
-              ? JSON.parse(localStorage.getItem(localStorageSelectedRecords))
-              : [];
-            if (oldSelectedRecords.length > 0) {
-              gridApi.forEachNode(function (node) {
-                node.setSelected(oldSelectedRecords.some((o) => o === node.data._id));
-              });
-            }
-          } catch (ex) {
-            console.error('Error in getting selected records from local storage');
-          }
-        }
+        dispatch({ type: 'initialize', data: rows, count: count });
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
-        dispatch({ type: 'loading', loading: false });
       })
       .finally(() => {
         setTimeout(() => {
@@ -460,7 +375,7 @@ export default function Contact(props) {
           type: 'success',
           message: data.message
         });
-        removeLocalStorage(`${localStorageSelectedRecords}`);
+        dispatch({ type: 'selection', selectedRecords: [] });
         getContacts();
       })
       .catch((error) => {
@@ -483,7 +398,7 @@ export default function Contact(props) {
   };
 
   const handleDeleteContact = () => {
-    const selectedContacts = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((m) => {
+    const selectedContacts = selectedRecords?.map((m) => {
       return m.id;
     });
     if (selectedContacts.length > 0) {
@@ -498,7 +413,7 @@ export default function Contact(props) {
             type: 'success',
             message: data.message
           });
-          removeLocalStorage(`${localStorageSelectedRecords}`);
+          dispatch({ type: 'selection', selectedRecords: [] });
           getContacts();
         })
         .catch((error) => {
@@ -511,40 +426,15 @@ export default function Contact(props) {
     }
   };
 
-  const toggleInner = ContactTypes && (
-    <ToggleButtonGroup id="resourceTypeSelector" size="small" className=" toggle-button-layout" value={filter} exclusive onChange={handleFilter}>
-      {ContactTypes.map((k: any, index) => {
-        return (
-          <ToggleButton value={k.key} key={index}>
-            {k.key}
-          </ToggleButton>
-        );
-      })}
-    </ToggleButtonGroup>
-  );
-
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-  const handleContactSelect = (filterValues) => {
-    dispatch({ type: 'setPage', page: 0 });
-    setSelectedType(filterValues);
-  };
-  const handleOpen = () => {
-    setisOpenDialog(true);
-  };
-
-  const handleClickOpen = () => {
-    setSortOpen(true);
-  };
-
-  const handleClickClose = () => {
-    setSortOpen(false);
-  };
-
-  const handleFilterClose = () => {
-    setisOpenDialog(false);
+  const onTypeChange = (event, type) => {
+    dispatch({ type: 'pageChange', page: 0 });
+    const value = types.find((d) => d.key === type).value;
+    setSelectedType(value);
+    // history.push(`?type=${value}`);
   };
 
   return (
@@ -560,15 +450,10 @@ export default function Contact(props) {
           }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
-          recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-          ids={
-            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-              ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-              : []
-          }
+          recordsToExport={selectedRecords?.length}
+          ids={selectedRecords?.map((obj) => obj._id)}
           onExportToExcelSuccess={() => {
-            if (gridApi) gridApi.deselectAll();
-            else getContacts();
+            getContacts();
           }}
           additionalParams={getQueryString(true)}
         />
@@ -577,65 +462,16 @@ export default function Contact(props) {
       <CustomContainer>
         <div className="header-panel">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className={'d-flex align-items-center gap-1'}>
-              {isMobile && (
-                <div className="d-flex flex-wrap items-center justify-between w-full">
-                  <div>{toggleInner}</div>
-                  <div className="flex flex-wrap items-center gap-1 ml-auto">
-                    <IconButton
-                      id="demo-customized-button"
-                      aria-controls="demo-customized-menu"
-                      aria-haspopup="true"
-                      aria-expanded={open ? 'true' : undefined}
-                      className={'mobileIconButton secondary'}
-                      size="small"
-                      onClick={handleClickOpen}
-                    >
-                      <TbArrowsSort className="rotate-90" size={16} />
-                    </IconButton>
-
-                    <MobileSortDialog
-                      isOpen={sortOpen}
-                      handleClose={handleClickClose}
-                      contentPart={toggleInner}
-                      secHeading={['Sort Accounts']}
-                      columns={columns}
-                      dispatch={dispatch}
-                    />
-                    <IconButton
-                      id="demo-customized-button"
-                      aria-controls="demo-customized-menu"
-                      aria-haspopup="true"
-                      aria-expanded={open ? 'true' : undefined}
-                      size="small"
-                      onClick={handleOpen}
-                    >
-                      <MdOutlineFilterAlt size={16} />
-                    </IconButton>
-                    <MobileFilterDialog
-                      isOpen={isOpenDialog}
-                      handleClose={handleFilterClose}
-                      contentPart={null}
-                      columns={columns}
-                      dispatch={dispatch}
-                      title={routes?.[contactResource]?.title}
-                      filters={filters}
-                      resource={sidebarResource[contactResource]}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {ContactTypes && (
+            <div className={'flex justify-between align-items-center gap-1 w-full'}>
+              <div>
                 <ToggleButtonGroup
-                  id="resourceTypeSelector"
                   size="small"
-                  className="ml-8 layout-for-mobile"
-                  value={filter}
+                  className="align-items-center gap-1"
+                  value={types[selectedType - 1].key}
                   exclusive
-                  onChange={handleFilter}
+                  onChange={onTypeChange}
                 >
-                  {ContactTypes.map((k, index) => {
+                  {types.map((k, index) => {
                     return (
                       <ToggleButton value={k.key} key={index}>
                         {k.key}
@@ -643,45 +479,41 @@ export default function Contact(props) {
                     );
                   })}
                 </ToggleButtonGroup>
-              )}
-
-              <Grid className={styles.Related_Account}>
-                {accountDetails.accountId && (
-                  <Chip
-                    className="ml-3"
-                    color="primary"
-                    label={`Account: ${accountDetails.accountName}`}
-                    onDelete={() => {
-                      setAccountDetails({ accountId: null, accountName: null });
-                      // getContacts();
-                    }}
-                  />
-                )}
-              </Grid>
+                <Grid className={styles.Related_Account}>
+                  {accountDetails.accountId && (
+                    <Chip
+                      className="ml-3"
+                      color="primary"
+                      label={`Account: ${accountDetails.accountName}`}
+                      onDelete={() => {
+                        setAccountDetails({ accountId: null, accountName: null });
+                        // getContacts();
+                      }}
+                    />
+                  )}
+                </Grid>
+              </div>
             </div>
             <div className="flex flex-wrap gap-[8px]  justify-end">
               <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
 
               <div className="flex gap-[8px] flex-wrap items-center">
-                {contactPermissions?.isCreate && (
-                  <>
-                    <Button
-                      variant={'contained'}
-                      color="primary"
-                      size="small"
-                      onClick={clickCreateNew}
-                      className={`no-shadow`}
-                      startIcon={<AddOutlined />}
-                    >
-                      Add
-                    </Button>
-                  </>
-                )}
+                <Button
+                  disabled={!contactPermissions?.isCreate}
+                  variant={'contained'}
+                  color="primary"
+                  size="small"
+                  onClick={clickCreateNew}
+                  className={`no-shadow`}
+                  startIcon={<AddOutlined />}
+                >
+                  Add
+                </Button>
 
                 {(contactPermissions?.isDelete || contactPermissions?.isUpdate) && (
                   <>
                     <Button
-                      disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0}
+                      disabled={selectedRecords?.length === 0}
                       variant={'outlined'}
                       color="default"
                       size="small"
@@ -706,9 +538,9 @@ export default function Contact(props) {
                     >
                       {contactPermissions?.isDelete && (
                         <MenuItem
-                          disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0}
+                          disabled={selectedRecords?.length === 0}
                           onClick={() => {
-                            if (getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some((d) => d.canDelete === false)) {
+                            if (selectedRecords?.some((d) => d.canDelete === false)) {
                               closeActions();
                               setShowDeleteWarningConfirmBox({ show: true, isDelete: true });
                             } else {
@@ -717,15 +549,12 @@ export default function Contact(props) {
                             }
                           }}
                         >
-                          Delete
+                          {`Delete (${selectedRecords?.length})`}
                         </MenuItem>
                       )}
                       {user.user?.userType === userType.brandAdmin && (
                         <MenuItem
-                          disabled={
-                            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0 ||
-                            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some((record) => record?.isUserExist)
-                          }
+                          disabled={selectedRecords?.length === 0 || selectedRecords?.some((record) => record?.isUserExist)}
                           onClick={handleAccessToPortal}
                         >
                           Give Access to Portal
@@ -733,31 +562,27 @@ export default function Contact(props) {
                       )}
                       {contactPermissions?.isUpdate && contactResource === 'customerContact' && permissions?.productInventory && (
                         <MenuItem
-                          disabled={
-                            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0 ||
-                            [...new Set(getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((d) => d.accountNameId))].length > 1
-                          }
+                          disabled={selectedRecords?.length === 0 || [...new Set(selectedRecords?.map((d) => d.accountNameId))].length > 1}
                           onClick={() => {
                             setOpenAddPlantsDialog(true);
                             closeActions();
                           }}
                         >
-                          Assign {routes.warehouse.title} &nbsp;{' '}
-                          <Chip size="small" label={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length} />
+                          Assign {routes.warehouse.title} &nbsp; <Chip size="small" label={selectedRecords?.length} />
                         </MenuItem>
                       )}
                       {contactPermissions?.isUpdate && (
                         <MenuItem
-                          disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0}
+                          disabled={selectedRecords?.length === 0}
                           onClick={() => {
-                            if (getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some((d) => d.isUpdate === false)) {
+                            if (selectedRecords?.some((d) => d.isUpdate === false)) {
                               closeActions();
                               setShowDeleteWarningConfirmBox({ show: true, isDelete: false });
                             } else {
                               closeActions();
-                              if (getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length) {
+                              if (selectedRecords?.length) {
                                 let entities = [];
-                                getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((current) => {
+                                selectedRecords?.map((current) => {
                                   if (current?.entityId) {
                                     entities = [...entities, current?.entityId];
                                   }
@@ -772,7 +597,7 @@ export default function Contact(props) {
                             }
                           }}
                         >
-                          Assign Entity &nbsp; <Chip size="small" label={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length} />
+                          Assign Entity &nbsp; <Chip size="small" label={selectedRecords?.length} />
                         </MenuItem>
                       )}
                     </Menu>
@@ -780,79 +605,25 @@ export default function Contact(props) {
                 )}
               </div>
             </div>
-            <DisplayFiltersForMobile resource={sidebarResource[contactResource]} />
           </div>
         </div>
 
-        {Object.keys(frameWorkComponent).length > 0 &&
-          (isMobile && !isTablet ? (
-            <CustomSwipableList
-              key={selectedType}
-              allowSelection={true}
-              allowSwipe={true}
-              permissions={contactPermissions}
-              primaryField={columns?.find((d) => d.field === 'concatedName')}
-              onClick={(d) => {
-                history.push(`${contactApi}/detail/${d._id}`);
-              }}
-              dataRows={dataRows}
-              selectedRecords={getLocalStorageArrayData(`${localStorageSelectedRecords}`)}
-              dispatch={dispatch}
-              onEdit={(d) => {
-                history.push(`${contactApi}/detail/${d._id}`);
-              }}
-              extraParamsToCheckDelete={true}
-              onDelete={(d) => {
-                setSingleContactDelete({
-                  show: true,
-                  id: d._id,
-                  contactedName: d.contactedName
-                });
-              }}
-              rowCount={rowCount}
-              page={page}
-              loading={loading}
-              additionalDetails={[
-                {
-                  icon: <CiUser size={18} />,
-                  field: 'accountName'
-                }
-              ]}
-              chips={[
-                {
-                  label: 'Email : ',
-                  field: 'email'
-                }
-              ]}
-              renderExtraChip={(data) => <RenderExtraChip data={data} />}
-              owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-              onCreate={false}
-              showClone={true}
-              onClone={(data) => {
-                setShowCreateContactDialog({ open: true, isClone: true, idToClone: data._id });
-              }}
-              renderedFrom={renderedFrom}
-            />
-          ) : (
-            <CustomAgGrid
-              columns={columns}
-              dataRows={dataRows}
-              frameworkComponents={frameWorkComponent}
-              setGridApi={setGridApi}
-              dispatch={dispatch}
-              rowCount={rowCount}
-              limit={limit}
-              pageSizes={pageSizes}
-              actionWidth={170}
-              page={page}
-              loading={loading}
-              renderedFrom={renderedFrom}
-              refreshGrid={getContacts}
-              showOnlyShowFilteredRecordSwitch={true}
-              showFilters={true}
-              resource={sidebarResource[contactResource]}
-            />
-          ))}
+        {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            
+            refreshGrid={getContacts}
+            showOnlyShowFilteredRecordSwitch={true}
+            showFilters={true}
+            resource={sidebarResource[contactResource]}
+          />
+        ) : <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>}
 
         <Box component="div">
           {showDeleteWarningConfirmBox?.show ? (
@@ -866,6 +637,7 @@ export default function Contact(props) {
               onClose={() => setShowDeleteWarningConfirmBox({ show: false, isDelete: false })}
             />
           ) : null}
+
           {showDeleteConfirmBox ? (
             <ConfirmationDialog
               open={showDeleteConfirmBox}
@@ -874,6 +646,7 @@ export default function Contact(props) {
               onOk={handleDeleteContact}
             />
           ) : null}
+
           {showCreateContactDialog?.open && (
             <ManageContactDialog
               contactResource={contactResource}
@@ -883,10 +656,11 @@ export default function Contact(props) {
               onClose={() => {
                 setShowCreateContactDialog({ open: false, isClone: false, idToClone: null });
               }}
-              onSuccess={() => {}}
+              onSuccess={() => { }}
               isRedirectToDetailPage={true}
             />
           )}
+
           {showAssignEntityDialog && (
             <Dialog
               fullWidth
@@ -903,7 +677,7 @@ export default function Contact(props) {
                 }}
                 handleCloseDialog={() => setShowAssignEntityDialog(false)}
                 assignedEntity={[]}
-                ids={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((record) => record._id || record.id)}
+                ids={selectedRecords?.map((record) => record._id || record.id)}
                 isRenderedFromContact={true}
                 regionalRole={false}
                 type="entity"
@@ -928,6 +702,7 @@ export default function Contact(props) {
               onOk={handleSingleDeleteContacts}
             />
           ) : null}
+
           {openAddPlantsDialog && (
             <WarhouseList
               isCustomer={true}
@@ -955,15 +730,12 @@ export default function Contact(props) {
               assignedWarehouse={[]}
             />
           )}
+
           {showEntityDialog ? (
             <EntitySelectionsDialog
               open={showEntityDialog}
               resource={sidebarResource[contactResource]}
-              resourceIds={
-                getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-                  ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((o) => o._id)
-                  : [contactId]
-              }
+              resourceIds={selectedRecords?.length ? selectedRecords?.map((o) => o._id) : [contactId]}
               onClose={() => {
                 setShowEntityDialog(false);
                 setContactId('');
@@ -977,55 +749,3 @@ export default function Contact(props) {
     </section>
   );
 }
-
-const RenderExtraChip = ({ data }) => {
-  const [open, setOpen] = useState(false);
-
-  const chip = (text: string) => (
-    <>
-      <span
-        className={`${
-          text && text !== ''
-            ? ' line-clamp-1 block px-3 py-[3px] font-semibold transition-all text-[12px] bg-[#F2F6FF] dark:bg-[var(--dark-primary)] dark:border-[var(--common-border-color)_!important]'
-            : ''
-        } ${open ? 'py-2 rounded-[5px]' : 'rounded-full'}`}
-      >
-        {text && text !== '' ? `Entity : ${text}` : null}
-        {data?.restentity?.length > 0 ? (
-          <>
-            <Collapse in={open} unmountOnExit>
-              {data?.restentity?.map((o) => (
-                <span key={o._id} className="block line-clamp-1">
-                  {o.optionLabel}
-                </span>
-              ))}
-            </Collapse>
-          </>
-        ) : null}
-      </span>
-    </>
-  );
-
-  if (data?.entityId && data?.entity) {
-    return (
-      <div className="flex items-start gap-2">
-        <Link to={`${routes.entityDetail.path}/${data.entityId}`} target="_blank">
-          {chip(data.entity)}
-        </Link>
-        {data?.restentity?.length > 0 ? (
-          <Button
-            size="small"
-            variant="outlined"
-            className="no-shadow"
-            onClick={() => setOpen((prev) => !prev)}
-            style={{ padding: '0px 5px', background: 'var(--dark-primary)', color: 'var(--primary-text)' }}
-          >
-            {open ? 'Hide' : `+${data.restentity.length} more.`}
-          </Button>
-        ) : null}
-      </div>
-    );
-  }
-
-  return <>{chip(data?.entity)}</>;
-};

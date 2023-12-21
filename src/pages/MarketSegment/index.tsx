@@ -1,176 +1,124 @@
-import { Menu, MenuItem } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
-import IconButton from '@material-ui/core/IconButton';
-import Tooltip from '@material-ui/core/Tooltip';
-import { ExpandMore } from '@material-ui/icons';
-import AddIcon from '@material-ui/icons/Add';
-import DeleteIcon from '@material-ui/icons/Delete';
+import { Button, IconButton, Box } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { camelCase } from 'lodash';
-import queryString from 'query-string';
-import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
-import { CiUser, IoIosCreate, TbArrowsSort } from 'react-icons/all';
-import { MdOutlineFilterAlt } from 'react-icons/md';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import routes from '../../components/Helpers/Routes';
-import SearchBox from '../../components/Helpers/SearchBox';
-import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
-import MobileSortDialog from '../../components/MobileSortDialog';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { gridLoadingTimeout, marketSegment, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
-import useColumns, { getFrameworkComponents, getStaticFields, gridFilterParser } from '../../constants/useColumns';
+import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import routes from './../../components/Helpers/Routes';
+import { camelCase } from 'lodash';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import ManageMarketSegmentDialog from './ManageMarketSegmentDialog';
+import SearchBox from 'src/components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
-import CreateMarketSegment from './ManageMarketSegmentDialog';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import { Menu, MenuItem } from '@material-ui/core';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import DeleteIcon from '@material-ui/icons/Delete';
+import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+
+let searchTimeout;
 
 const MarketSegment = () => {
   const renderedFrom = camelCase(routes?.marketSegment.title);
-  const location = useLocation();
-  const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const {
-    state: { permissions }
-  }: any = useData();
-  const { getColumnData } = useColumns();
+  const { state, dispatch } = useTableReducer();
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { generateColumns } = useColumns();
 
+  const {
+    state: { user, permissions, selectedEntity }
+  }: any = useData();
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
-  const [open, setOpen] = useState({ open: false, isClone: false, idToClone: null });
+
+  const [columns, setColumns] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [columns, setColumns] = useState([]);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
-  const [sortOpen, setSortOpen] = useState(false);
-  const [isOpenDialog, setisOpenDialog] = useState(false);
-  // const [selectedCategory, setSelectedCategory] = useState([]);
-
-  //  Grid Variables - Start
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, appendRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } =
-    state;
-
-  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
-
-  const handleOpen = () => {
-    setisOpenDialog(true);
-  };
-
-  const handleClickOpen = () => {
-    setSortOpen(true);
-  };
-
-  const handleClickClose = () => {
-    setSortOpen(false);
-  };
-
-  const handleFilterClose = () => {
-    setisOpenDialog(false);
-  };
-
-  useEffect(() => {
-    const parsedParams = queryString.parse(location?.search);
-    if (parsedParams?.id) {
-      setOpen({ open: true, isClone: false, idToClone: parsedParams?.id });
-    }
-  }, [location]);
-  //  Grid Variables - End
-
-  useEffect(() => {
-    fetchMarketSegment();
-  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
 
   useEffect(() => {
     fetchGridColumns();
   }, []);
 
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get(`/field?resource=Market Segment&view=true`)
-      .then(({ data: { data } }) => {
-        let columns = [];
-        let rendererNames = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.marketSegmentDetail.path, true);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName);
-            }
-          }
-        });
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent,
-          actionsRenderer: ActionsRenderer
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
-        columns = [...columns, ...getStaticFields()];
+  useEffect(() => {
+    let millisec = Object.keys(search).length > 0 ? 600 : 5;
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+    searchTimeout = setTimeout(() => {
+      fetchData();
+    }, millisec);
+  }, [search]);
 
-        if (columnState) {
-          columns.map((item) => {
-            columnState.map((d) => {
-              if (d.colId == item.field) {
-                item.show = !d.hide;
-              }
-            });
-          });
-        }
-        setColumns([...columns]);
-      });
+  useEffect(() => {
+    fetchData();
+  }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
+
+  const fetchGridColumns = async () => {
+    let data;
+    const response = await axiosInstance().get(`/field?resource=${sidebarResource.marketSegment}`);
+    data = response?.data?.data;
+    const newColumns = generateColumns(renderedFrom, data, routes.marketSegmentDetail.path, true);
+    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
-  const ActionsRenderer = (params) => (
-    <Fragment>
-      <Tooltip
-        className={permissions?.marketSegment.isCreate ? '' : 'cursor-stop'}
-        title={permissions?.marketSegment.isCreate ? 'Clone' : 'You do not have permission to clone/create'}
-      >
-        <IconButton
-          size="small"
-          aria-label="Clone"
-          onClick={() => {
-            setOpen({ open: true, idToClone: params.data._id, isClone: true });
-          }}
-        >
-          <FileCopyIcon fontSize="small" color="primary" />
-        </IconButton>
-      </Tooltip>
-      {permissions?.marketSegment.isDelete ? (
-        <Tooltip title="Delete">
-          <IconButton
-            aria-label="Delete"
-            onClick={() => {
-              setDeleteRecord(params.data);
-              setShowDeleteConfirmBox(true);
-            }}
-          >
-            <DeleteIcon fontSize="small" color="error" />
-          </IconButton>
-        </Tooltip>
-      ) : (
-        <Tooltip className="cursor-stop" title={`You do not have permission to delete `}>
-          <IconButton aria-label="Delete">
-            <DeleteIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      )}
-    </Fragment>
-  );
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 110,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        <HtmlTooltip title={permissions?.marketSegment?.isCreate ? 'Clone' : cloneDisable}>
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Clone"
+              disabled={permissions?.marketSegment?.isCreate ? false : true}
+              onClick={() => {
+                setShowManageDialog({ open: true, isClone: true, idToClone: row.original._id });
+              }}
+            >
+              <FileCopyIcon fontSize="small" color={permissions?.marketSegment?.isCreate ? 'primary' : 'disabled'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              disabled={row?.original?.canDelete ? false : true}
+              onClick={() => {
+                setDeleteRecord(row.original);
+                setShowDeleteConfirmBox(true);
+              }}
+            >
+              <DeleteIcon color={row?.original?.canDelete ? 'error' : 'disabled'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+      </>
+    )
+  };
 
-  const getQueryString = () => {
+  const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-
+    if (isExport) {
+      deepFilter = `?`;
+    }
     const { filterByIds, deepFilters } = gridFilterParser(filters);
-
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
@@ -180,62 +128,36 @@ const MarketSegment = () => {
     if (filterByIds?.length || deepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
     }
-
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
-
     if (search) {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || [])?.map((m) => m._id))}`;
     }
     return deepFilter;
   };
 
-  const fetchMarketSegment = () => {
+  const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
 
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
-
     axiosInstance()
-      .get(`${marketSegment.marketSegmentApi}${queryString}`)
+      .get(`${routes?.marketSegment.path}${queryString}`)
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
-          let finalObject = prepareDataForGrid(u);
-          finalObject['canDelete'] = permissions?.marketSegment.isDelete;
+          let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
+          finalObject['canDelete'] = permissions?.marketSegment?.isDelete;
           finalObject['allowedToEdit'] = permissions?.marketSegment.isUpdate;
-          return {
-            ...finalObject
-          };
+          return finalObject;
         });
-
-        if (appendRows) {
-          dispatch({
-            type: 'initialize',
-            data: [...dataRows, ...rows],
-            count: count
-            // selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
-          });
-        } else {
-          dispatch({
-            type: 'initialize',
-            data: rows,
-            count: count
-            // selectedRecords: rows.filter((f) => f.isChecked === true)
-          });
-        }
-        // dispatch({ type: 'initialize', data: rows, count: count });
+        dispatch({ type: 'initialize', data: rows, count: count });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        dispatch({ type: 'loading', loading: false });
       })
       .finally(() => {
         setTimeout(() => {
@@ -244,24 +166,36 @@ const MarketSegment = () => {
       });
   };
 
+  const handleSearch = (e) => {
+    dispatch({ type: 'search', search: e.target.value });
+  };
+
   const handleDelete = () => {
+    setIsSubmitting(true);
     let ids = [];
     if (deleteRecord) {
       ids.push(deleteRecord._id);
     } else {
-      ids = selectedRecords.map((m) => m._id);
+      ids = selectedRecords?.map((d) => d._id);
     }
     axiosInstance()
-      .put(`${marketSegment.marketSegmentApi}/remove`, { ids: ids })
-      .then(() => {
-        fetchMarketSegment();
+      .put(`${routes?.marketSegment.path}/remove`, { ids: ids })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        dispatch({ type: 'selection', selectedRecords: [] });
+        fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
-        // setSelectedCategory([])
         setAnchorEl(null);
+        setIsSubmitting(false);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
+        setIsSubmitting(false);
       });
   };
 
@@ -273,225 +207,140 @@ const MarketSegment = () => {
     setAnchorEl(null);
   };
 
-  const handleSearch = (e) => {
-    dispatch({ type: 'search', search: e.target.value });
-  };
-
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: routes.marketSegment.title }]} />
+        <CustomBreadCrumbs routes={[routes.marketSegment]} />
         <ImportExportLinks
-          permissions={permissions.marketSegment}
-          module="market segment"
-          api={'market-segment'}
+          permissions={permissions?.marketSegment}
+          module={routes.marketSegment.title}
+          api={routes?.marketSegment.path}
           afterImportCompleted={() => {
-            fetchMarketSegment();
+            fetchData();
           }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
-          recordsToExport={selectedRecords.length}
-          ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+          recordsToExport={selectedRecords?.length}
+          ids={selectedRecords?.map((obj) => obj._id)}
           onExportToExcelSuccess={() => {
-            if (gridApi) gridApi.deselectAll();
-            else fetchMarketSegment();
+            fetchData();
           }}
+          additionalParams={getQueryString(true)}
         />
       </div>
       <CustomContainer>
         <div className="header-panel">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className={'d-flex align-items-center gap-1'}>
-              {isMobile && (
-                <div className="d-flex flex-wrap items-center justify-between w-full">
-                  <div></div>
-                  <div className="flex flex-wrap items-center gap-1 ml-auto">
-                    <IconButton
-                      onClick={handleClickOpen}
-                      id="demo-customized-button"
-                      aria-controls="demo-customized-menu"
-                      aria-haspopup="true"
-                      aria-expanded={'true'}
-                      className={'mobileIconButton secondary'}
-                      size="small"
-                    >
-                      <TbArrowsSort className="rotate-90" size={16} />
-                    </IconButton>
-                    <MobileSortDialog
-                      isOpen={sortOpen}
-                      handleClose={handleClickClose}
-                      contentPart={null}
-                      secHeading={['Sort Market Segment']}
-                      columns={columns}
-                      dispatch={dispatch}
-                    />
-
-                    <IconButton
-                      id="demo-customized-button"
-                      aria-controls="demo-customized-menu"
-                      aria-haspopup="true"
-                      aria-expanded={'true'}
-                      className={'mobileIconButton secondary'}
-                      size="small"
-                      onClick={handleOpen}
-                    >
-                      <MdOutlineFilterAlt size={16} />
-                    </IconButton>
-
-                    <MobileFilterDialog
-                      isOpen={isOpenDialog}
-                      handleClose={handleFilterClose}
-                      contentPart={null}
-                      columns={columns}
-                      dispatch={dispatch}
-                      title={routes?.marketSegment?.title}
-                      filters={filters}
-                      resource={sidebarResource.marketSegment}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-            <div className="flex flex-wrap gap-[8px]  justify-end">
-              <SearchBox onChange={handleSearch} className={styles.search_box_input} size="small" value={search} />
-
+            <div className={'flex justify-between align-items-center gap-1 w-full'}></div>
+            <div className="flex flex-wrap gap-[8px] justify-end">
+              <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
               <div className="flex gap-[8px] flex-wrap items-center">
-                {permissions?.marketSegment.isCreate && (
+                {permissions?.marketSegment?.isCreate && (
                   <Button
+                    variant={'contained'}
+                    color="primary"
+                    size="small"
                     className={`no-shadow`}
                     onClick={() => {
-                      setOpen({ open: true, isClone: false, idToClone: null });
+                      setShowManageDialog({ open: true, isClone: false, idToClone: null });
                     }}
-                    variant={'contained'}
-                    size="small"
-                    color="primary"
-                    startIcon={<AddIcon />}
+                    startIcon={<AddOutlined />}
                   >
                     Add
                   </Button>
                 )}
-                {permissions?.marketSegment.isDelete && (
-                  <Button
-                    className={`new-dropdown-v1`}
-                    variant={'outlined'}
-                    color="default"
-                    size="small"
-                    onClick={openActions}
-                    disabled={selectedRecords.length ? false : true}
-                    aria-controls="action-menu"
-                    endIcon={<ExpandMore />}
-                  >
-                    Actions
-                  </Button>
+                {permissions?.marketSegment?.isDelete && (
+                  <>
+                    <Button
+                      variant={'outlined'}
+                      color="default"
+                      size="small"
+                      onClick={openActions}
+                      className={`new-dropdown-v1`}
+                      aria-controls="action-menu"
+                      endIcon={<ExpandMore />}
+                      disabled={selectedRecords?.length ? false : true}
+                    >
+                      Actions
+                    </Button>
+                    <Menu
+                      anchorEl={anchorEl}
+                      keepMounted
+                      getContentAnchorEl={null}
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left'
+                      }}
+                      id="action-menu"
+                      open={Boolean(anchorEl)}
+                      onClose={closeActions}
+                    >
+                      <MenuItem
+                        disabled={
+                          !(
+                            (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length
+                          )
+                        }
+                        onClick={() => {
+                          closeActions();
+                          // eslint-disable-next-line no-lone-blocks
+                          {
+                            selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
+                          }
+                          setShowDeleteConfirmBox(true);
+                        }}
+                      >
+                        {`Delete (${selectedRecords?.length})`}
+                      </MenuItem>
+                    </Menu>
+                  </>
                 )}
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  id="action-menu"
-                  open={Boolean(anchorEl)}
-                  onClose={closeActions}
-                >
-                  <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>Delete</MenuItem>
-                </Menu>
               </div>
             </div>
-            <DisplayFiltersForMobile resource={sidebarResource.marketSegment} />
           </div>
         </div>
-
-        {isMobile && !isTablet ? (
-          <CustomSwipableList
-            allowSelection={true}
-            allowSwipe={true}
-            permissions={permissions.marketSegment}
-            primaryField={columns?.find((d) => d.field === 'name')}
-            onClick={(d) => {
-              setOpen({ open: true, isClone: false, idToClone: d.id });
-            }}
-            dataRows={dataRows}
-            selectedRecords={selectedRecords}
-            dispatch={dispatch}
-            onEdit={(d) => {
-              setOpen({ open: true, isClone: false, idToClone: d.id });
-            }}
-            extraParamsToCheckDelete={true}
-            onDelete={(d) => {
-              setDeleteRecord(d);
-              setShowDeleteConfirmBox(true);
-            }}
-            rowCount={rowCount}
-            page={page}
-            loading={loading}
-            additionalDetails={[
-              {
-                icon: <CiUser size={18} />,
-                field: 'parentMarketSegment'
-              }
-            ]}
-            chips={[
-              {
-                icon: <IoIosCreate />,
-                label: 'CreatedBy: ',
-                field: 'createdBy'
-              },
-              {
-                label: 'UpdatedBy: ',
-                field: 'updatedBy'
-              }
-            ]}
-            owerCollaboratorInitialsOrImages=""
-            onCreate={() => setOpen({ open: true, idToClone: null, isClone: null })}
-            showClone={false}
-            onClone={() => {}}
-            renderedFrom={renderedFrom}
-          />
-        ) : Object.keys(frameWorkComponent).length > 0 ? (
-          <CustomAgGrid
+        {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
             columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameWorkComponent}
-            setGridApi={setGridApi}
+            state={state}
             dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            actionWidth={100}
-            loading={loading}
             renderedFrom={renderedFrom}
-            refreshGrid={fetchMarketSegment}
+            refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={true}
+            showFilters={true}
+            resource={sidebarResource.marketSegment}
           />
-        ) : null}
-
-        {showDeleteConfirmBox && (
-          <ConfirmationDialog
-            open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${routes?.marketSegment?.title?.toLowerCase()} ${deleteRecord?.name || ''}?`}
-            onClose={() => {
-              setDeleteRecord(null);
-              setShowDeleteConfirmBox(false);
-            }}
-            onOk={handleDelete}
-          />
-        )}
-        {open?.open && (
-          <CreateMarketSegment
-            marketSegmentId={open?.idToClone}
-            onClose={() => setOpen({ open: false, isClone: false, idToClone: null })}
-            onSuccess={() => {
-              setOpen({ open: false, isClone: false, idToClone: null });
-              fetchMarketSegment();
-            }}
-            isClone={open.isClone}
-          />
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
         )}
       </CustomContainer>
+      {showDeleteConfirmBox && (
+        <ConfirmationDialog
+          open={showDeleteConfirmBox}
+          message={`Are you sure you want to delete ${routes?.marketSegment?.title.toLowerCase()} ${deleteRecord?.name || ''} ?`}
+          onClose={() => {
+            setDeleteRecord(null);
+            setShowDeleteConfirmBox(false);
+          }}
+          okBtnLoading={isSubmitting}
+          onOk={handleDelete}
+        />
+      )}
+
+      {showManageDialog.open && (
+        <ManageMarketSegmentDialog
+          isClone={showManageDialog.isClone}
+          marketSegmentId={showManageDialog.idToClone}
+          onClose={() => setShowManageDialog({ open: false, isClone: false, idToClone: null })}
+          onSuccess={() => {
+            fetchData();
+            setShowManageDialog({ open: false, isClone: false, idToClone: null });
+          }}
+        />
+      )}
     </section>
   );
 };

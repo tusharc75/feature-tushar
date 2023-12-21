@@ -1,38 +1,38 @@
 import { Box, Button, Grid, IconButton, Menu, MenuItem } from '@material-ui/core';
 import { ExpandMore } from '@material-ui/icons';
 import AddIcon from '@material-ui/icons/Add';
-import { camelCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import routes from 'src/components/Helpers/Routes';
-import { CHILD_RESOURCE, removeLocalStorage, sidebarResource } from 'src/constants/helpers';
+import { CHILD_RESOURCE, } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
-import { generateCustomTableColumns } from 'src/constants/columns';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { isMobile, isTablet } from 'react-device-detect';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import AdditionalCostDialog from './AdditionalCostDialog';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import { camelCase } from 'lodash';
 
-const AdditionalCost = ({ invoiceData, setNextStep, renderedFrom }) => {
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
+const AdditionalCost = ({ invoiceData, stepFullScreen, setNextStep }) => {
+
+  const renderedFrom = `${camelCase(routes?.invoice.title)}_Cost`;
 
   const toastConfig = useContext(CustomToastContext);
 
   const [anchorEl, setAnchorEl] = useState(null);
-  const {
-    state: { permissions }
-  }: any = useData();
-  const [rowsData, setRowsData] = useState(null);
+
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
-  const [selectedRecords, setSelectedRecords] = useState([]);
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
   const [addDialog, setAddDialog] = useState({ open: false, data: null });
+
+  const { state, dispatch } = useTableReducer();
+  const { selectedRecords } = state;
+  const { generateColumns } = useColumns();
+
 
   useEffect(() => {
     fetchGridColumns();
@@ -43,13 +43,13 @@ const AdditionalCost = ({ invoiceData, setNextStep, renderedFrom }) => {
       .get(`/field/child?resource=${CHILD_RESOURCE.invoiceCost}`)
       .then(({ data: { data } }) => {
         data = CURReplaceByCurrencySingle(data, invoiceData?.currency || 'USD');
-        const newColumns = generateCustomTableColumns(data, invoiceData?.currency || 'USD', renderedFrom);
+        const newColumns = generateColumns(renderedFrom, data, null, false, invoiceData?.currency || 'USD');
         let columns: any = [
           {
             accessor: 'index',
             Header: 'Index',
             width: 70,
-            sticky: isMobile ? 'none' : 'left',
+            sticky: 'left',
             Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
             Footer: () => {
               return <>Total</>;
@@ -91,11 +91,13 @@ const AdditionalCost = ({ invoiceData, setNextStep, renderedFrom }) => {
           )
         });
         setColumns(columns);
-        fetchCostData();
+        fetchData();
       });
   };
 
-  const fetchCostData = () => {
+  const fetchData = () => {
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
     axiosInstance()
       .get(`${routes.invoice.path}/${invoiceData._id}/additional-cost`)
       .then(({ data: { data } }) => {
@@ -105,9 +107,9 @@ const AdditionalCost = ({ invoiceData, setNextStep, renderedFrom }) => {
             return { index: index + 1, ...i };
           });
         }
-        setRowsData(rows);
-        setNextStep(true);
-        setSelectedRecords([]);
+        dispatch({ type: 'initialize', data: rows, count: rows?.length });
+        dispatch({ type: 'loading', loading: false });
+        setNextStep(true)
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -132,8 +134,7 @@ const AdditionalCost = ({ invoiceData, setNextStep, renderedFrom }) => {
     axiosInstance()
       .put(`${routes?.invoice?.path}/${invoiceData._id}/additional-cost/remove`, { ids: ids })
       .then(({ data }) => {
-        removeLocalStorage(localStorageSelectedRecords);
-        fetchCostData();
+        fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
         toastConfig.setToastConfig({
@@ -159,7 +160,7 @@ const AdditionalCost = ({ invoiceData, setNextStep, renderedFrom }) => {
             onClick={() => setAddDialog({ open: true, data: null })}
             aria-controls="add-menu"
           >
-            {'Add Manual Entry'}
+            {'Add'}
           </Button>
         </Box>
         <Box display="flex">
@@ -202,16 +203,14 @@ const AdditionalCost = ({ invoiceData, setNextStep, renderedFrom }) => {
           </Menu>
         </Box>
       </Box>
-      {columns && rowsData ? (
-        <Box p="6px" zIndex={5} width={'100%'}>
+      {columns ? (
+        <Box zIndex={5} width={'100%'}>
           <CustomReactTable
-            height={'calc(100vh - 345px)'}
+            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
             columns={columns}
-            data={rowsData}
-            setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
-            onSelect={setSelectedRecords}
-            childrenProperty="subRows"
-            uniqueKey="_id"
+            state={state}
+            dispatch={dispatch}
+            refreshGrid={fetchData}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
           />
@@ -237,7 +236,7 @@ const AdditionalCost = ({ invoiceData, setNextStep, renderedFrom }) => {
           onClose={() => setAddDialog({ open: false, data: null })}
           onSuccess={() => {
             setAddDialog({ open: false, data: null });
-            fetchCostData();
+            fetchData();
           }}
           invoiceData={invoiceData}
           costData={addDialog.data}

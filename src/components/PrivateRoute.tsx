@@ -49,6 +49,7 @@ const ProtectedRoute = ({ children, ...rest }) => {
         'currency-converter',
         'profile',
         'brand-configuration',
+        'support-ticket',
         'doa-request',
         'quote-pdf-template',
         'equiptment-rental-master',
@@ -59,7 +60,8 @@ const ProtectedRoute = ({ children, ...rest }) => {
         'resource-calendar',
         'serialized-asset-new',
         'import-export',
-        'custom-report'
+        'custom-report',
+        'user-download-request'
       ].indexOf(pathnames[0]) >= 0
     ) {
       setAccess(true);

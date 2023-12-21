@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
+import { useState, useEffect, useContext, Fragment } from 'react';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -6,7 +6,7 @@ import axiosInstance from '../../../axios/axiosInstance';
 import { Box, Checkbox, Dialog, FormControlLabel, FormGroup, IconButton } from '@material-ui/core';
 import { useData } from 'src/StateProvider/Provider';
 import { fetch_rental_product_fields } from 'src/components/RentalManagment/helper';
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
 import moment from 'moment';
 import {
@@ -22,7 +22,7 @@ import {
 } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -36,33 +36,30 @@ import InfoIcon from '@material-ui/icons/InfoOutlined';
 import EditIcon from '@material-ui/icons/Edit';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { generateCustomTableColumns } from 'src/constants/columns';
 
 const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
-
-
   const renderedFrom = `${camelCase(routes?.rentalManagementInvoice.title)}_create_invoice`;
 
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions }
+    state: { user }
   }: any = useData();
 
   const [isUpdating, setUpdating] = useState(false);
 
-  const [selectedProducts, setSelectedProducts] = useState([]);
   const [material, setMaterial] = useState([]);
   const [orginalMaterial, setOrginalMaterial] = useState([]);
-
   const [columns, setColumns] = useState(null);
-  const [rowsData, setRowsData] = useState(null);
-
   const [endDate, setEndDate] = useState(null);
   const [allFields, setAllFields] = useState([]);
   const [appliedDate, setAppliedDate] = useState(false);
   const [rowsApplied, setRowsApplied] = useState([]);
   const [isProductEdit, setIsProductEdit] = useState({ open: false, rowData: null });
   const [proRata, setProRata] = useState(true);
+
+  const { state, dispatch } = useTableReducer();
+  const { selectedRecords } = state;
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchFields();
@@ -82,14 +79,14 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     });
     setAllFields(JSON.parse(JSON.stringify(data)));
 
-    let newColumns = generateCustomTableColumns(data, rentalManagementData?.currency, renderedFrom);
+    let newColumns = generateColumns(renderedFrom, data, null, false, rentalManagementData?.currency);
 
     let coloum: any = [
       {
         accessor: 'index',
         Header: 'Index',
         width: 70,
-        sticky: isMobile ? 'none' : 'left',
+        sticky: 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
@@ -98,9 +95,10 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
       {
         accessor: 'type',
         Header: 'Type',
-        sticky: isMobile ? 'none' : 'left',
+        sticky: isMobile || isTablet ? 'none' : 'left',
+        disabled: true,
         width: 200,
-        disableFilters: true,
+        disableFilters : true,
         Cell: ({ row }) =>
           row.original['type'] ? (
             <p>
@@ -124,9 +122,10 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
       {
         accessor: 'detail',
         Header: 'Details',
+        disabled : true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
         minWidth: 300,
         width: 300,
-        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p>{row.original.detail}</p>
@@ -167,9 +166,9 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     ];
 
     //remove all fields have 'estimate'
-    newColumns = newColumns?.filter((d) => !d?.accessor?.includes('estimate'))
+    newColumns = newColumns?.filter((d) => !d?.accessor?.includes('estimate'));
 
-    const pricingMethodColumn = newColumns?.find(obj => obj.accessor === "pricingMethod");
+    const pricingMethodColumn = newColumns?.find((obj) => obj.accessor === 'pricingMethod');
     if (pricingMethodColumn) {
       pricingMethodColumn.Cell = ({ row }) => pricingMethodRenderer(row);
     }
@@ -179,8 +178,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     coloum.push({
       accessor: 'action',
       Header: 'Actions',
-      minWidth: 50,
-      width: 50,
+      minWidth: 100,
+      width: 100,
       sticky: 'right',
       disableFilters: true,
       disableSortBy: true,
@@ -204,25 +203,30 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
   const pricingMethodRenderer = (row) => {
     return row.original['pricingMethod'] ? (
-      <>  {['Per Week', 'Per Month'].includes(row.original['pricingMethod']) && proRata && row.original.isAppliedBill ? (
-        <Box display="flex" alignItems="center">
+      <>
+        {' '}
+        {['Per Week', 'Per Month'].includes(row.original['pricingMethod']) && proRata && row.original.isAppliedBill ? (
+          <Box display="flex" alignItems="center">
+            <p>{row.original['pricingMethod']}</p>
+            <Box ml={1} />
+            <HtmlTooltip title="Per Day Price is calculated">
+              <InfoIcon fontSize="small" color="primary" />
+            </HtmlTooltip>
+          </Box>
+        ) : (
           <p>{row.original['pricingMethod']}</p>
-          <Box ml={1} />
-          <HtmlTooltip title="Per Day Price is calculated">
-            <InfoIcon fontSize="small" color="primary" />
-          </HtmlTooltip>
-        </Box>
-      ) : (
-        <p>{row.original['pricingMethod']}</p>
-      )}
+        )}
       </>
     ) : (
       <NoDataCell />
     );
-  }
-
+  };
 
   const fetchData = async () => {
+
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
+
     let data: any = {};
     let invoicedProducts: any = [];
     let additionalCost: any = [];
@@ -233,9 +237,9 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     invoicedProducts = invoiceResponse?.data?.data?.material;
     additionalCost = invoiceResponse?.data?.data?.additionalCost;
 
-    const queryString = `?rentalJob=${rentalManagementData._id}`
-    const invoiceDataResponce = await axiosInstance().get(`${invoice.api}${queryString}`)
-    const invoiceData = invoiceDataResponce?.data?.data
+    const queryString = `?rentalJob=${rentalManagementData._id}`;
+    const invoiceDataResponce = await axiosInstance().get(`${invoice.api}${queryString}`);
+    const invoiceData = invoiceDataResponce?.data?.data;
 
     const responseAdditionalCostData = await axiosInstance().get(`${rentalManagement.api}/additionalcost/${rentalManagementData._id}`);
     let additionalCostData = responseAdditionalCostData?.data?.data;
@@ -379,6 +383,9 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
   };
 
   const initializeTable = (material) => {
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
+
     const rows = material?.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
@@ -400,18 +407,19 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
             : parent.type === 'package'
               ? parent?.packageDetail?.packageDescription || ''
               : parent.type === 'serializedAsset'
-                ? parent?.description || '' :
-                parent.type === 'manualEntry'
+                ? parent?.description || ''
+                : parent.type === 'manualEntry'
                   ? parent?.description
                   : '';
       parent.qtyDisplay = parent.qty;
-      parent.isEditable = ['Per Day', 'Per Week', 'Per Month'].includes(parent?.pricingMethod) || parent.type === 'serializedAsset' || parent.type === 'manualEntry'
-        ? false
-        : true;
+      parent.isEditable =
+        ['Per Day', 'Per Week', 'Per Month'].includes(parent?.pricingMethod) || parent.type === 'serializedAsset' || parent.type === 'manualEntry'
+          ? false
+          : true;
       parent.subRows = generateNestedData(material, parent);
     });
-    setRowsData(rows);
-    setSelectedProducts([]);
+    dispatch({ type: 'initialize', data: rows, count: rows?.length });
+    dispatch({ type: 'loading', loading: false });
   };
 
   const generateNestedData = (material, parent) => {
@@ -443,46 +451,51 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     return subRows;
   };
 
-
   const getParentIds = (_id, material, parentIds) => {
     const parent = material?.find((e) => e._id === _id);
     if (parent) {
       parentIds.push(parent._id);
-      getParentIds(parent.parentId, material, parentIds)
-    }
-    else {
+      getParentIds(parent.parentId, material, parentIds);
+    } else {
       return false;
     }
-  }
+  };
 
   const handleApplyDate = async () => {
     let tempValues: any = { actualEndDate: endDate };
 
-    var inUseStandByDays = []
+    var inUseStandByDays = [];
     if (user?.user?.brandPolicy?.assetDeliveredStatus) {
       const assetList: any = [];
-      selectedProducts?.forEach((e) => {
+      selectedRecords?.forEach((e) => {
         if (e.type === MATERIAL_TYPE.serializedAsset) {
-          assetList.push({ asset: e._id, startDate: moment(e.actualStartDate)?.format('MM/DD/YYYY'), endDate: moment(endDate)?.format('MM/DD/YYYY') })
+          assetList.push({
+            asset: e._id,
+            startDate: moment(e.actualStartDate)?.format('MM/DD/YYYY'),
+            endDate: moment(endDate)?.format('MM/DD/YYYY')
+          });
         }
-      })
-      const inUseStandByDaysResponce = await axiosInstance().put(`/rental-management/${rentalManagementData?._id}/progressive-billing/date-range-status-count`, assetList);
+      });
+      const inUseStandByDaysResponce = await axiosInstance().put(
+        `/rental-management/${rentalManagementData?._id}/progressive-billing/date-range-status-count`,
+        assetList
+      );
       inUseStandByDays = inUseStandByDaysResponce?.data?.data;
 
       inUseStandByDays?.forEach((e) => {
-        const asset = selectedProducts?.find((ele) => ele._id === e.asset);
+        const asset = selectedRecords?.find((ele) => ele._id === e.asset);
         const parentIds = [];
-        getParentIds(asset?.parentId, selectedProducts, parentIds)
-        parentIds.push(asset?._id)
+        getParentIds(asset?.parentId, selectedRecords, parentIds);
+        parentIds.push(asset?._id);
         e.parentIds = parentIds;
-      })
+      });
     }
 
     const invoiceResponse = await axiosInstance().get(`/rental-management/${rentalManagementData?._id}/invoice/material-end-date-qty`);
     const invoicedProducts = invoiceResponse?.data?.data?.material;
 
     let rows: any = [];
-    selectedProducts.forEach((element) => {
+    selectedRecords?.forEach((element) => {
       if (element.type === 'manualEntry') {
         element.isAppliedBill = true;
         rows.push(element);
@@ -522,9 +535,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         let calValues: any;
         let values = JSON.parse(JSON.stringify(tempValues));
 
-
         if (inUseStandByDays?.length) {
-          const daysFound = inUseStandByDays?.find((e) => e.parentIds?.includes(element._id))
+          const daysFound = inUseStandByDays?.find((e) => e.parentIds?.includes(element._id));
           if (daysFound) {
             values['inUseDays'] = daysFound[ASSET_STATUS.inUse] || 0;
             values['standByDays'] = daysFound[ASSET_STATUS.standBy] || 0;
@@ -536,7 +548,9 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           if (proRata) {
             values['pricingMethod'] = 'Per Day';
             if (priceFieldName) {
-              values[priceFieldName] = parseFloat((orginalMaterial.find((d) => d._id === element._id)[priceFieldName] / 7)?.toFixed(priceField?.decimalPlaces || 2));
+              values[priceFieldName] = parseFloat(
+                (orginalMaterial.find((d) => d._id === element._id)[priceFieldName] / 7)?.toFixed(priceField?.decimalPlaces || 2)
+              );
             }
           }
           calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
@@ -545,7 +559,9 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           if (proRata) {
             values['pricingMethod'] = 'Per Day';
             if (priceFieldName) {
-              values[priceFieldName] = parseFloat((orginalMaterial.find((d) => d._id === element._id)[priceFieldName] / 30)?.toFixed(priceField?.decimalPlaces || 2));
+              values[priceFieldName] = parseFloat(
+                (orginalMaterial.find((d) => d._id === element._id)[priceFieldName] / 30)?.toFixed(priceField?.decimalPlaces || 2)
+              );
             }
           }
           calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
@@ -684,7 +700,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                         <HtmlTooltip
                           title={
                             !Boolean(
-                              selectedProducts && selectedProducts.length && (endDate || selectedProducts.every((d) => d.type === 'manualEntry'))
+                              selectedRecords && selectedRecords?.length && (endDate || selectedRecords?.every((d) => d.type === 'manualEntry'))
                             )
                               ? 'Please select product to apply'
                               : ''
@@ -696,9 +712,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                               color="primary"
                               disabled={
                                 !Boolean(
-                                  selectedProducts &&
-                                  selectedProducts.length &&
-                                  (endDate || selectedProducts.every((d) => d.type === 'manualEntry'))
+                                  selectedRecords && selectedRecords?.length && (endDate || selectedRecords?.every((d) => d.type === 'manualEntry'))
                                 )
                               }
                               size="small"
@@ -730,22 +744,22 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                 </Grid>
               </Grid>
             </MuiPickersUtilsProvider>
-            {columns && rowsData ? (
-              <Box zIndex={5} width={'100%'} height={'calc(100vh - 200px)'} p={1}>
+            {columns ? (
+              <Box zIndex={5} p={1}>
                 <CustomReactTable
-                  height={'calc(100vh - 200px)'}
+                  height={'calc(100vh - 250px)'}
                   columns={columns}
-                  data={rowsData}
+                  state={state}
+                  dispatch={dispatch}
                   setWholeRowsCellColor={(rowData) => {
                     if (rowData?.invalidDate) return 'error';
                     if (rowData?.isAppliedBill) return 'isAppliedBill';
                     return '';
                   }}
-                  onSelect={setSelectedProducts}
-                  childrenProperty="subRows"
-                  uniqueKey="_id"
+                  refreshGrid={fetchData}
                   renderedFrom={renderedFrom}
                   isClientSideGrid={true}
+                  expander={true}
                 />
               </Box>
             ) : (

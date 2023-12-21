@@ -8,13 +8,11 @@ import { Autocomplete, ToggleButton, ToggleButtonGroup } from '@material-ui/lab'
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useReducer, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
-import { MdAccountCircle, MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
+import { isMobile } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -22,14 +20,11 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
 import SearchBox from 'src/components/Helpers/SearchBox';
-import HideWhenOffline from 'src/components/HideWhenOffline';
-import MobileFilterDialog, { DisplayFiltersForMobile } from 'src/components/MobileFilterDialog';
-import MobileSortDialog from 'src/components/MobileSortDialog';
-import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
-import { getLocalStorageArrayData, gridLoadingTimeout, prepareDataForGrid, purchaseOrder, sidebarResource } from 'src/constants/helpers';
-import useColumns, { getFrameworkComponents, getStaticFields, gridFilterParser } from 'src/constants/useColumns';
+import { gridLoadingTimeout, prepareDataForGrid, purchaseOrder, sidebarResource } from 'src/constants/helpers';
 import styles from '../Leads/Header.module.scss';
 import ManagePurchaseOrder from './ManagePurchaseOrder';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 
 const PurchaseOrder = () => {
   const PurchaseOrderType = [
@@ -44,34 +39,25 @@ const PurchaseOrder = () => {
   ];
 
   let renderedFrom = camelCase(routes.purchaseOrder?.title);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
-
+  const { state, dispatch } = useTableReducer();
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   let { type, referenceId, referenceType }: any = queryString.parse(history.location.search);
   const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
-  const [filter, setFilter] = useState(`All ${routes.purchaseOrder.title}`);
   const [showManagePurchaseOrderDialog, setShowManagePurchaseOrderDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [gridApi, setGridApi] = useState(null);
-  const [sortOpen, setSortOpen] = useState(false);
-  const [columns, setColumns] = useState([]);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
-    state;
-  const [isOpenDialog, setisOpenDialog] = useState(false);
+  const [columns, setColumns] = useState(null);
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [fromSalesOrder, setFromSalesOrder] = useState(history.location?.state?.salesOrder);
-
   const [warehouseOptions, setWarehouseOptions] = useState([]);
   const [warehouse, setWarehouse] = useState(null);
 
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchGridColumns();
@@ -95,72 +81,78 @@ const PurchaseOrder = () => {
 
   const fetchGridColumns = () => {
     axiosInstance()
-      .get('/field?resource=Purchase Order')
+      .get(`/field?resource=${sidebarResource.purchaseOrder}`)
       .then(({ data: { data } }) => {
-        let columns = [];
-        let rendererNames = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.purchaseOrderDetail.path, true);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName);
-            }
-          }
-        });
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent,
-          actionsRenderer: ActionsRenderer
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
-        columns = [...columns, ...getStaticFields()];
-        setColumns([...columns]);
+        let newColumns = generateColumns(renderedFrom, data, routes.purchaseOrderDetail.path, true);
+        setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
       });
+  };
+
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 110,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        <HtmlTooltip title={permissions?.purchaseOrder?.isCreate ? 'Clone' : cloneDisable}>
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Clone"
+              disabled={permissions?.purchaseOrder?.isCreate ? false : true}
+              onClick={() => {
+                setShowManagePurchaseOrderDialog({ open: true, isClone: true, idToClone: row.original._id });
+              }}
+            >
+              <FileCopyIcon fontSize="small" color={permissions?.purchaseOrder?.isCreate ? 'primary' : 'disabled'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              disabled={row?.original?.canDelete ? false : true}
+              onClick={() => {
+                setDeleteRecord(row.original);
+                setShowDeleteConfirmBox(true);
+              }}
+            >
+              <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+      </>
+    )
   };
 
   const fetchPurchaseOrder = () => {
     dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
     const queryString = getQueryString();
     axiosInstance()
       .get(`${purchaseOrder.api}${queryString}`)
       .then(({ data: { data, count } }) => {
         let rows = data?.map((u) => {
-          const { owner, collaborator, ...restProperties } = u;
-          let finalObject = prepareDataForGrid(u);
-          finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id);
-          let res = {
-            ...finalObject
-          };
-          return res;
+          let finalObject: any = prepareDataForGrid(u, user);
+          finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
+          finalObject['canDelete'] = permissions?.purchaseOrder?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete && !u?.deleted;
+          return finalObject;
         });
-        if (appendRows) {
-          dispatch({
-            type: 'initialize',
-            data: [...dataRows, ...rows],
-            count: count,
-            selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
-          });
-        } else {
-          dispatch({
-            type: 'initialize',
-            data: rows,
-            count: count,
-            selectedRecords: rows.filter((f) => f.isChecked === true)
-          });
-        }
-        // dispatch({ type: 'initialize', data: rows, count: count });
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
+        dispatch({ type: 'initialize', data: rows, count: count });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        dispatch({ type: 'loading', loading: false });
+      })
+      .finally(() => {
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
       });
   };
 
@@ -203,8 +195,7 @@ const PurchaseOrder = () => {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || [])?.map((m) => m._id))}`;
     }
     return deepFilter;
   };
@@ -219,6 +210,7 @@ const PurchaseOrder = () => {
     axiosInstance()
       .put(`${purchaseOrder.api}/remove`, { ids: ids })
       .then(() => {
+        dispatch({ type: 'selection', selectedRecords: [] });
         fetchPurchaseOrder();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
@@ -230,7 +222,7 @@ const PurchaseOrder = () => {
   };
 
   const handlePurchaseOrderTypeSel = (filterValues) => {
-    dispatch({ type: 'setPage', page: 0 });
+    dispatch({ type: 'pageChange', page: 0 });
     setSelectedType(filterValues);
     if (referenceId && referenceType) {
       history.push(`?type=${filterValues}&referenceType=${referenceType}&referenceId=${referenceId}`);
@@ -241,42 +233,9 @@ const PurchaseOrder = () => {
 
   const handleFilter = (event, newFilter) => {
     if (newFilter != null) {
-      setFilter(newFilter);
       handlePurchaseOrderTypeSel(PurchaseOrderType.find((d) => d.key === newFilter).value);
     }
   };
-
-  const ActionsRenderer = (params) => (
-    <>
-      {permissions?.purchaseOrder?.isCreate && (
-        <HtmlTooltip title="Clone">
-          <IconButton
-            size="small"
-            aria-label="Clone"
-            onClick={() => {
-              setShowManagePurchaseOrderDialog({ open: true, isClone: true, idToClone: params.data._id });
-            }}
-          >
-            <FileCopyIcon color="primary" />
-          </IconButton>
-        </HtmlTooltip>
-      )}
-      {permissions?.purchaseOrder?.isDelete && params?.data?.canDelete && !params?.data?.deleted && (
-        <HtmlTooltip title="Delete">
-          <IconButton
-            size="small"
-            aria-label="Delete"
-            onClick={() => {
-              setDeleteRecord(params.data);
-              setShowDeleteConfirmBox(true);
-            }}
-          >
-            <DeleteIcon color="error" />
-          </IconButton>
-        </HtmlTooltip>
-      )}
-    </>
-  );
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
@@ -289,34 +248,6 @@ const PurchaseOrder = () => {
   const closeActions = () => {
     setAnchorEl(null);
   };
-
-  const handleOpen = () => {
-    setisOpenDialog(true);
-  };
-
-  const handleClickOpen = () => {
-    setSortOpen(true);
-  };
-
-  const handleClickClose = () => {
-    setSortOpen(false);
-  };
-
-  const handleFilterClose = () => {
-    setisOpenDialog(false);
-  };
-
-  let toggleInner = PurchaseOrderType && (
-    <ToggleButtonGroup size="small" className=" toggle-button-layout" value={filter} exclusive onChange={handleFilter}>
-      {PurchaseOrderType.map((k, index) => {
-        return (
-          <ToggleButton value={k.key} key={index}>
-            {k.key}
-          </ToggleButton>
-        );
-      })}
-    </ToggleButtonGroup>
-  );
 
   const updateQueryParams = () => {
     const queryParams = new URLSearchParams(history.location.search);
@@ -343,15 +274,10 @@ const PurchaseOrder = () => {
           }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
-          recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-          ids={
-            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-              ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-              : []
-          }
+          recordsToExport={selectedRecords?.length}
+          ids={selectedRecords?.map((obj) => obj._id)}
           onExportToExcelSuccess={() => {
-            if (gridApi) gridApi.deselectAll();
-            else fetchPurchaseOrder();
+            fetchPurchaseOrder();
           }}
           additionalParams={getQueryString(true)}
         />
@@ -360,75 +286,19 @@ const PurchaseOrder = () => {
         <div className="header-panel">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
             <div className={'d-flex flex-wrap align-items-center gap-2'}>
-              {isMobile && !isTablet ? (
-                <div className="d-flex flex-wrap items-center justify-between w-full gap-2">
-                  <div>{toggleInner}</div>
-                  <div className="flex flex-wrap items-center gap-1 justify-end ml-auto">
-                    <IconButton
-                      onClick={handleClickOpen}
-                      id="demo-customized-button"
-                      aria-controls="demo-customized-menu"
-                      aria-haspopup="true"
-                      aria-expanded={'true'}
-                      className={'mobileIconButton secondary'}
-                      size="small"
-                    >
-                      <TbArrowsSort className="rotate-90" size={16} />
-                    </IconButton>
-                    <MobileSortDialog
-                      isOpen={sortOpen}
-                      handleClose={handleClickClose}
-                      contentPart={null}
-                      secHeading={['Sort Purchase Order']}
-                      columns={columns}
-                      dispatch={dispatch}
-                    />
-                    <IconButton
-                      id="demo-customized-button"
-                      aria-controls="demo-customized-menu"
-                      aria-haspopup="true"
-                      aria-expanded={'true'}
-                      className={'mobileIconButton secondary'}
-                      size="small"
-                      onClick={handleOpen}
-                    >
-                      <MdOutlineFilterAlt size={16} />
-                    </IconButton>
-                    <MobileFilterDialog
-                      isOpen={isOpenDialog}
-                      handleClose={handleFilterClose}
-                      contentPart={null}
-                      columns={columns}
-                      dispatch={dispatch}
-                      title={routes?.purchaseOrder?.title}
-                      filters={filters}
-                      resource={sidebarResource.purchaseOrder}
-                    />
-                  </div>
-                </div>
-              ) : (
-                <HideWhenOffline>
-                  <div className={`flex flex-wrap items-center gap-2 `}>
-                    {PurchaseOrderType && (
-                      <ToggleButtonGroup
-                        size="small"
-                        className="ml-2"
-                        value={PurchaseOrderType[selectedType - 1].key}
-                        exclusive
-                        onChange={handleFilter}
-                      >
-                        {PurchaseOrderType.map((k, index) => {
-                          return (
-                            <ToggleButton value={k.key} key={index}>
-                              {k.key}
-                            </ToggleButton>
-                          );
-                        })}
-                      </ToggleButtonGroup>
-                    )}
-                  </div>
-                </HideWhenOffline>
-              )}
+              <div className={`flex flex-wrap items-center gap-2 `}>
+                {PurchaseOrderType && (
+                  <ToggleButtonGroup size="small" className="ml-2" value={PurchaseOrderType[selectedType - 1].key} exclusive onChange={handleFilter}>
+                    {PurchaseOrderType.map((k, index) => {
+                      return (
+                        <ToggleButton value={k.key} key={index}>
+                          {k.key}
+                        </ToggleButton>
+                      );
+                    })}
+                  </ToggleButtonGroup>
+                )}
+              </div>
               <Autocomplete
                 style={{ minWidth: '200px', flexGrow: 1 }}
                 className="md:max-w-[250px]"
@@ -441,6 +311,7 @@ const PurchaseOrder = () => {
                     : ''
                 }
                 onChange={(e, val) => {
+                  dispatch({ type: 'selection', selectedRecords: [] });
                   setWarehouse(val && val.optionValue ? val.optionValue : '');
                 }}
                 renderInput={(params) => <TextField {...params} margin="none" size="small" name="plant" label="Plant" variant="outlined" fullWidth />}
@@ -510,113 +381,32 @@ const PurchaseOrder = () => {
                   onClose={closeActions}
                 >
                   <MenuItem
-                    disabled={
-                      permissions?.purchaseOrder?.isDelete &&
-                      selectedRecords?.filter((e) => e.canDelete && !e.deleted)?.length === selectedRecords?.length
-                        ? false
-                        : true
-                    }
+                    disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
                     onClick={() => {
                       closeActions();
                       setShowDeleteConfirmBox(true);
                     }}
                   >
-                    Delete
+                    {`Delete (${selectedRecords.length})`}
                   </MenuItem>
                 </Menu>
               </div>
             </div>
-            <DisplayFiltersForMobile resource={sidebarResource.purchaseOrder} />
           </div>
         </div>
         {columns ? (
-          Object.keys(frameWorkComponent).length > 0 ? (
-            isMobile && !isTablet ? (
-              <CustomSwipableList
-                key={selectedType}
-                allowSelection={true}
-                allowSwipe={true}
-                permissions={permissions.purchaseOrder}
-                primaryField={columns?.find((d) => d.primaryField)}
-                onClick={(data) => {
-                  history.push(`${routes.purchaseOrderDetail.path}/${data._id}`);
-                }}
-                dataRows={dataRows}
-                selectedRecords={selectedRecords}
-                dispatch={dispatch}
-                onEdit={(data) => {
-                  history.push(`${routes.purchaseOrderDetail.path}/${data._id}`);
-                }}
-                extraParamsToCheckDelete={true}
-                onDelete={(data) => {
-                  setDeleteRecord(data);
-                  setShowDeleteConfirmBox(true);
-                }}
-                rowCount={rowCount}
-                page={page}
-                loading={loading}
-                additionalDetails={[
-                  {
-                    icon: <MdAccountCircle size={18} />,
-                    field: 'supplierAccount'
-                  }
-                ]}
-                chips={[
-                  {
-                    label: 'Purchase Order Date:  ',
-                    fieldType: 'date',
-                    field: 'purchaseOrderDate'
-                  },
-                  {
-                    label: 'Plant:  ',
-                    field: 'warehouse'
-                  },
-                  {
-                    label: 'Delivery Date: ',
-                    field: 'deliveryDate',
-                    fieldType: 'date',
-                    setBackground: (data) => {
-                      return data.status === '' && new Date() > new Date(data.deliveryDate) ? { backgroundColor: '#efcccc' } : null;
-                    }
-                  },
-                  {
-                    label: 'Status: ',
-                    field: 'status'
-                  }
-                ]}
-                onCreate={false}
-                showClone={true}
-                onClone={(data) => {
-                  setShowManagePurchaseOrderDialog({ open: true, isClone: true, idToClone: data._id });
-                }}
-                renderedFrom={renderedFrom}
-              />
-            ) : (
-              <CustomAgGrid
-                columns={columns}
-                dataRows={dataRows}
-                frameworkComponents={frameWorkComponent}
-                setGridApi={setGridApi}
-                dispatch={dispatch}
-                rowCount={rowCount}
-                limit={limit}
-                pageSizes={pageSizes}
-                page={page}
-                actionWidth={150}
-                loading={loading}
-                renderedFrom={renderedFrom}
-                rowClassRules={{
-                  'red-data-row': function (params) {
-                    return params.data.deleted;
-                  }
-                }}
-                refreshGrid={fetchPurchaseOrder}
-                showOnlyShowFilteredRecordSwitch={true}
-                showFilters={true}
-                resource={sidebarResource.purchaseOrder}
-              />
-            )
-          ) : null
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            refreshGrid={fetchPurchaseOrder}
+            showOnlyShowFilteredRecordSwitch={true}
+            showFilters={true}
+            resource={sidebarResource.purchaseOrder}
+            setWholeRowsCellColor={(rowData) => (rowData.deleted ? 'error' : '')}
+          />
         ) : (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />

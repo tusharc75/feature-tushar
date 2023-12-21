@@ -1,4 +1,4 @@
-import { Button, IconButton } from '@material-ui/core';
+import { Button, IconButton, Box } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -7,16 +7,11 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import {
-  leadTimeMaster,
-  gridLoadingTimeout,
-  prepareDataForGrid,
-  sidebarResource
-} from '../../constants/helpers';
+import { leadTimeMaster, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import { camelCase } from 'lodash';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import ManageLeadTimeMaster from './ManageLeadTimeMaster';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
@@ -24,6 +19,7 @@ import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import { Menu, MenuItem } from '@material-ui/core';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 let searchTimeout;
 
@@ -32,7 +28,7 @@ const LeadTimeMaster = () => {
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const {
     state: { user, permissions, selectedEntity }
@@ -68,16 +64,8 @@ const LeadTimeMaster = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.leadTimeMaster}`);
     data = response?.data?.data;
-    let columns = [];
-    data.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.leadTimeMasterDetail.path, true);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-      }
-      return o?.fieldData;
-    });
-    columns = [...columns, ...getStaticFields(), ActionsRenderer];
-    setColumns(columns);
+    const newColumns = generateColumns(renderedFrom, data, routes.leadTimeMasterDetail.path, true);
+    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
   const ActionsRenderer = {
@@ -85,6 +73,7 @@ const LeadTimeMaster = () => {
     Header: 'Actions',
     minWidth: 100,
     width: 110,
+    maxWidth: 110,
     sticky: 'right',
     disableFilters: true,
     disableSortBy: true,
@@ -168,15 +157,15 @@ const LeadTimeMaster = () => {
           finalObject['allowedToEdit'] = permissions?.leadTimeMaster?.isUpdate;
           finalObject['canDelete'] = permissions?.leadTimeMaster?.isDelete;
           // finalObject['owerCollaboratorInitialsOrImages'] = [];
-        // if (finalObject['owner']) finalObject['owerCollaboratorInitialsOrImages'].push({ initials: finalObject['owner'] });
-        // finalObject['owerCollaboratorInitialsOrImages'].forEach((f) => {
-        //   if (f.initials) {
-        //     f.initials = f.initials
-        //       .split(' ')
-        //       .map((i) => i[0])
-        //       .join('');
-        //   }
-        // });
+          // if (finalObject['owner']) finalObject['owerCollaboratorInitialsOrImages'].push({ initials: finalObject['owner'] });
+          // finalObject['owerCollaboratorInitialsOrImages'].forEach((f) => {
+          //   if (f.initials) {
+          //     f.initials = f.initials
+          //       .split(' ')
+          //       .map((i) => i[0])
+          //       .join('');
+          //   }
+          // });
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -235,7 +224,9 @@ const LeadTimeMaster = () => {
           permissions={permissions?.leadTimeMaster}
           module={routes.leadTimeMaster.title}
           api={leadTimeMaster.api}
-          afterImportCompleted={() => {fetchData()}}
+          afterImportCompleted={() => {
+            fetchData();
+          }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}
@@ -249,24 +240,24 @@ const LeadTimeMaster = () => {
       <CustomContainer>
         <div className="header-panel">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className={'flex justify-between align-items-center gap-1 w-full'}>
-            </div>
+            <div className={'flex justify-between align-items-center gap-1 w-full'}></div>
             <div className="flex flex-wrap gap-[8px] justify-end">
               <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
               <div className="flex gap-[8px] flex-wrap items-center">
-                {permissions?.leadTimeMaster?.isCreate &&(
-                <Button
-                  variant={'contained'}
-                  color="primary"
-                  size="small"
-                  className={`no-shadow`}
-                  onClick={() => {
-                    setShowManageDialog({ open: true, isClone: false, idToClone: null });
-                  }}
-                  startIcon={<AddOutlined />}
-                >
-                  Add
-                </Button>)}
+                {permissions?.leadTimeMaster?.isCreate && (
+                  <Button
+                    variant={'contained'}
+                    color="primary"
+                    size="small"
+                    className={`no-shadow`}
+                    onClick={() => {
+                      setShowManageDialog({ open: true, isClone: false, idToClone: null });
+                    }}
+                    startIcon={<AddOutlined />}
+                  >
+                    Add
+                  </Button>
+                )}
                 {permissions?.leadTimeMaster?.isDelete && (
                   <>
                     <Button
@@ -294,11 +285,11 @@ const LeadTimeMaster = () => {
                       onClose={closeActions}
                     >
                       <MenuItem
-                      disabled={
-                        !(
-                          (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length
-                        )
-                      }
+                        disabled={
+                          !(
+                            (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length
+                          )
+                        }
                         onClick={() => {
                           closeActions();
                           // eslint-disable-next-line no-lone-blocks
@@ -321,17 +312,19 @@ const LeadTimeMaster = () => {
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => {}}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
-            isClientSideGrid={false}
             refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
             resource={sidebarResource.leadTimeMaster}
           />
-        ) : null}
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
       </CustomContainer>
       {showDeleteConfirmBox && (
         <ConfirmationDialog

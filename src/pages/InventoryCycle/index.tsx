@@ -1,152 +1,131 @@
-import React, { useState, useContext, Fragment, useEffect, useReducer } from 'react';
-import { Grid, Box, Button, Menu, MenuItem, IconButton, Tooltip } from '@material-ui/core';
-import { GiCycle } from 'react-icons/all';
+import { Button, IconButton } from '@material-ui/core';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { useContext, useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomContainer from '../../components/CustomContainer';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
+import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
-import CustomContainer from '../../components/CustomContainer';
-import styles from '../Leads/Header.module.scss';
-import { isMobile, isTablet } from 'react-device-detect';
-import SearchBox from '../../components/Helpers/SearchBox';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
-import axiosInstance from '../../axios/axiosInstance';
-import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { MdAdd } from 'react-icons/all';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { useData } from '../../StateProvider/Provider';
-import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
-import DeleteIcon from '@material-ui/icons/Delete';
 import { camelCase } from 'lodash';
-import { prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
-import { isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData, removeLocalStorage } from '../../constants/helpers';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import ManageInventoryCycle from './ManageInventoryCycle';
-import useColumns, { getStaticFields, getFrameworkComponents, gridFilterParser } from '../../constants/useColumns';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
-import { useHistory } from 'react-router-dom';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import styles from '../Leads/Header.module.scss';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import { Menu, MenuItem, Box } from '@material-ui/core';
+import { ToggleButtonGroup, ToggleButton } from '@material-ui/lab';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import DeleteIcon from '@material-ui/icons/Delete';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+
+let searchTimeout;
 
 const InventoryCycle = () => {
-  const renderedFrom = camelCase(`${routes.inventoryCycle.title}`);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
+  const renderedFrom = camelCase(routes?.inventoryCycle.title);
 
   const toastConfig = useContext(CustomToastContext);
 
-  const [anchorEl, setAnchorEl] = useState(null);
-  const { getColumnData } = useColumns();
+  const history = useHistory();
+  const { state, dispatch } = useTableReducer();
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { generateColumns } = useColumns();
+
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
-
-  const [gridApi, setGridApi] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
-  const [columns, setColumns] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, appendRows, showFilteredRecordsOnly } = state;
-
   const [deleteRecord, setDeleteRecord] = useState(null);
-  const [open, setOpen] = useState({ open: false, isClone: false });
-  const [inventoryCycleId, setInventoryCycleId] = useState(null);
 
-  const history = useHistory();
+  const [columns, setColumns] = useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
 
   useEffect(() => {
     fetchGridColumns();
   }, []);
 
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get(`/field?resource=Inventory Cycle`)
-      .then(({ data: { data } }) => {
-        let columns = [];
-        let rendererNames = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(routes.inventoryCycle.title, o?.fieldData, routes.inventoryCycleDetail.path);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName);
-            }
-          }
-        });
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent,
-          actionsRenderer: ActionsRenderer
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
-        columns = [...columns, ...getStaticFields()];
-        setColumns([...columns]);
-      });
-  };
+  useEffect(() => {
+    let millisec = Object.keys(search).length > 0 ? 600 : 5;
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+    searchTimeout = setTimeout(() => {
+      fetchData();
+    }, millisec);
+  }, [search]);
 
   useEffect(() => {
     fetchData();
-  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
+  }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
-  const handleDelete = () => {
-    let ids = [];
-    if (deleteRecord) {
-      ids.push(deleteRecord._id);
-    } else {
-      ids = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((m) => m._id);
-    }
-    axiosInstance()
-      .put(`/inventory-cycle/remove`, { ids: ids })
-      .then(() => {
-        removeLocalStorage(localStorageSelectedRecords);
-        fetchData();
-        setShowDeleteConfirmBox(false);
-        setDeleteRecord(null);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+  const fetchGridColumns = async () => {
+    let data;
+    const response = await axiosInstance().get(`/field?resource=${sidebarResource.inventoryCycle}`);
+    data = response?.data?.data;
+    const newColumns = generateColumns(renderedFrom, data, routes.inventoryCycleDetail.path, true);
+    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
-  const handleSearch = (e) => {
-    dispatch({ type: 'search', search: e.target.value });
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 100,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        {permissions?.inventoryCycle?.isCreate ? (
+          <HtmlTooltip title="Clone">
+            <IconButton
+              size="small"
+              aria-label="Clone"
+              onClick={() => {
+                setShowManageDialog({ open: true, isClone: true, idToClone: row.original._id });
+              }}
+            >
+              <FileCopyIcon fontSize="small" color="primary" />
+            </IconButton>
+          </HtmlTooltip>
+        ) : (
+          <HtmlTooltip className="cursor-stop" title="You do not have permission to clone/create">
+            <IconButton aria-label="Clone" size="small">
+              <FileCopyIcon fontSize="small" />
+            </IconButton>
+          </HtmlTooltip>
+        )}
+        {permissions?.inventoryCycle?.isDelete && (
+          <HtmlTooltip title="Delete">
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              onClick={() => {
+                setDeleteRecord(row.original);
+                setShowDeleteConfirmBox(true);
+              }}
+            >
+              <DeleteIcon color="error" />
+            </IconButton>
+          </HtmlTooltip>
+        )}
+      </>
+    )
   };
-
-  const ActionsRenderer = (params) => (
-    <Fragment>
-      <Tooltip title="Clone">
-        <IconButton
-          size="small"
-          aria-label="Clone"
-          onClick={() => {
-            setInventoryCycleId(params.data.id);
-            setOpen({ open: true, isClone: true });
-          }}
-        >
-          <FileCopyIcon fontSize="small" color="primary" />
-        </IconButton>
-      </Tooltip>
-      <Tooltip title="Delete">
-        <IconButton
-          size="small"
-          aria-label="Delete"
-          onClick={() => {
-            setDeleteRecord(params.data);
-            setShowDeleteConfirmBox(true);
-          }}
-        >
-          <DeleteIcon fontSize="small" color="error" />
-        </IconButton>
-      </Tooltip>
-    </Fragment>
-  );
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
-
-    if (selectedEntity) {
-      deepFilter = `${deepFilter}&entity=${selectedEntity}`;
+    let deepFilter = `?page=${page}&limit=${limit}`;
+    if (isExport) {
+      deepFilter = `?`;
     }
-
     const { filterByIds, deepFilters } = gridFilterParser(filters);
-
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
@@ -156,64 +135,66 @@ const InventoryCycle = () => {
     if (filterByIds?.length || deepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
     }
-
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
-
     if (search) {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
-
     if (showFilteredRecordsOnly) {
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
     }
-
     return deepFilter;
   };
 
-  const fetchData = () => {
+  const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
-    axiosInstance()
-      .get(`/inventory-cycle${queryString}`)
-      .then(({ data: { data, count } }) => {
-        let rows = data.map((u: any) => {
-          let finalObject = prepareDataForGrid(u);
-          finalObject['canDelete'] = permissions?.inventoryCycle?.isDelete;
-          finalObject['isChecked'] = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions?.inventoryCycle?.isUpdate;
-          return {
-            ...finalObject
-          };
-        });
-        if (appendRows) {
-          dispatch({
-            type: 'initialize',
-            data: [...dataRows, ...rows],
-            count: count,
-            selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
-          });
-        } else {
-          dispatch({
-            type: 'initialize',
-            data: rows,
-            count: count,
-            selectedRecords: rows.filter((f) => f.isChecked === true)
-          });
-        }
-        dispatch({ type: 'initialize', data: rows, count: count });
+    axiosInstance().get(`${routes?.inventoryCycle?.path}${queryString}`).then(({ data: { data } }) => {
+      let count = data?.count;
+      let rows = data?.data?.map((u) => {
+        let finalObject = prepareDataForGrid(u, user);
+        finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
+        finalObject['allowedToEdit'] = permissions?.inventoryCycle?.isUpdate;
+        finalObject['canDelete'] = permissions?.inventoryCycle?.isDelete;
+        return finalObject;
+      });
+      dispatch({ type: 'initialize', data: rows, count: count });
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    })
+      .finally(() => {
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
+      });
+  };
+
+  const handleSearch = (e) => {
+    dispatch({ type: 'search', search: e.target.value });
+  };
+
+  const handleDelete = () => {
+    setIsSubmitting(true);
+    let ids = [];
+    if (deleteRecord) {
+      ids.push(deleteRecord._id);
+    } else {
+      ids = selectedRecords?.map((d) => d._id);
+    }
+    axiosInstance()
+      .put(`${routes?.inventoryCycle?.path}/remove`, { ids: ids })
+      .then(() => {
+        dispatch({ type: 'selection', selectedRecords: [] });
+        fetchData();
+        setShowDeleteConfirmBox(false);
+        setDeleteRecord(null);
+        setAnchorEl(null);
+        setIsSubmitting(false);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        dispatch({ type: 'loading', loading: false });
+        setIsSubmitting(false);
       });
   };
 
@@ -231,169 +212,117 @@ const InventoryCycle = () => {
         <CustomBreadCrumbs routes={[routes.inventoryCycle]} />
         <ImportExportLinks
           permissions={permissions?.inventoryCycle}
-          module="inventoryCycles"
-          api={'/inventory-cycle'}
-          afterImportCompleted={() => {
-            fetchData();
-          }}
+          module={routes.inventoryCycle.title}
+          api={routes?.inventoryCycle?.path}
+          afterImportCompleted={() => { fetchData() }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
-          recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-          ids={
-            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-              ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-              : []
-          }
-          onExportToExcelSuccess={() => {
-            if (gridApi) gridApi.deselectAll();
-            else fetchData();
-          }}
+          recordsToExport={selectedRecords?.length}
+          ids={selectedRecords?.map((obj) => obj._id)}
+          onExportToExcelSuccess={() => { fetchData() }}
           additionalParams={getQueryString(true)}
         />
       </div>
       <CustomContainer>
         <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
-            <div></div>
-            <div className="flex flex-wrap gap-[8px]  justify-end">
-              <SearchBox onChange={handleSearch} className={styles.search_box_input} size="small" value={search} />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className={'flex justify-between align-items-center gap-1 w-full'}>
+            </div>
+            <div className="flex flex-wrap gap-[8px] justify-end">
+              <SearchBox onChange={handleSearch} className={styles.search_box_input} value={search} size="small" />
               <div className="flex gap-[8px] flex-wrap items-center">
                 <Button
+                  variant={'contained'}
+                  color="primary"
+                  size="small"
                   className={`no-shadow`}
                   onClick={() => {
-                    setInventoryCycleId(null);
-                    setOpen({ open: true, isClone: false });
+                    setShowManageDialog({ open: true, isClone: false, idToClone: null });
                   }}
-                  variant={'contained'}
-                  size="small"
-                  color="primary"
                   startIcon={<AddOutlined />}
                 >
                   Add
                 </Button>
-                <Button
-                  variant={'outlined'}
-                  color="default"
-                  size="small"
-                  onClick={openActions}
-                  disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length ? false : true}
-                  aria-controls="action-menu"
-                  className={`new-dropdown-v1`}
-                  endIcon={<ExpandMore />}
-                >
-                  Actions
-                </Button>
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  id="action-menu"
-                  open={Boolean(anchorEl)}
-                  onClose={closeActions}
-                >
-                  <MenuItem
-                    disabled={!permissions?.inventoryCycle.isDelete}
-                    onClick={() => {
-                      closeActions();
-                      setShowDeleteConfirmBox(true);
-                    }}
-                  >
-                    Delete
-                  </MenuItem>
-                </Menu>
+                {permissions?.inventoryCycle?.isDelete && (
+                  <>
+                    <Button
+                      variant={'outlined'}
+                      color="default"
+                      size="small"
+                      onClick={openActions}
+                      className={`new-dropdown-v1`}
+                      aria-controls="action-menu"
+                      endIcon={<ExpandMore />}
+                      disabled={selectedRecords?.length ? false : true}
+                    >
+                      Actions
+                    </Button>
+                    <Menu
+                      anchorEl={anchorEl}
+                      keepMounted
+                      getContentAnchorEl={null}
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left'
+                      }}
+                      id="action-menu"
+                      open={Boolean(anchorEl)}
+                      onClose={closeActions}
+                    >
+                      <MenuItem
+                        onClick={() => {
+                          closeActions();
+                          setShowDeleteConfirmBox(true);
+                        }}
+                      >
+                        {`Delete (${selectedRecords?.length})`}
+                      </MenuItem>
+                    </Menu>
+                  </>
+                )}
               </div>
             </div>
           </div>
         </div>
         {columns ? (
-          Object.keys(frameWorkComponent).length > 0 ? (
-            isMobile && !isTablet ? (
-              <CustomSwipableList
-                allowSelection={true}
-                allowSwipe={true}
-                permissions={permissions.inventoryCycle}
-                primaryField={columns?.find((d) => d.primaryField)}
-                onClick={(data) => {
-                  history.push(`${routes.inventoryCycleDetail.path}/${data._id}`);
-                }}
-                dataRows={dataRows}
-                selectedRecords={getLocalStorageArrayData(`${localStorageSelectedRecords}`)}
-                dispatch={dispatch}
-                onEdit={(data) => {
-                  history.push(`${routes.inventoryCycleDetail.path}/${data._id}`);
-                }}
-                extraParamsToCheckDelete={true}
-                onDelete={(data) => {
-                  setDeleteRecord(data);
-                  setShowDeleteConfirmBox(true);
-                }}
-                rowCount={rowCount}
-                page={page}
-                loading={loading}
-                additionalDetails={[]}
-                chips={[]}
-                onCreate={false}
-                showClone={true}
-                onClone={(data) => {
-                  setInventoryCycleId(data._id);
-                  setOpen({ open: true, isClone: true });
-                }}
-                renderedFrom={renderedFrom}
-              />
-            ) : (
-              <CustomAgGrid
-                columns={columns}
-                dataRows={dataRows}
-                frameworkComponents={frameWorkComponent}
-                setGridApi={setGridApi}
-                dispatch={dispatch}
-                rowCount={rowCount}
-                limit={limit}
-                pageSizes={pageSizes}
-                page={page}
-                actionWidth={150}
-                loading={loading}
-                renderedFrom={renderedFrom}
-                refreshGrid={fetchData}
-                showOnlyShowFilteredRecordSwitch={true}
-                showFilters={true}
-                resource={sidebarResource.inventoryCycle}
-              />
-            )
-          ) : null
-        ) : (
-          <Box p={2} height={500}>
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Box>
-        )}
-        {open?.open && (
-          <ManageInventoryCycle
-            isUpdateDisabled={false}
-            inventoryCycleId={inventoryCycleId}
-            isClone={open?.isClone}
-            onClose={() => setOpen({ open: false, isClone: false })}
-            onSuccess={() => {
-              setOpen({ open: false, isClone: false });
-              fetchData();
-            }}
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            refreshGrid={fetchData}
+            showOnlyShowFilteredRecordSwitch={true}
+            showFilters={true}
+            resource={sidebarResource.inventoryCycle}
           />
-        )}
-        {showDeleteConfirmBox && (
-          <ConfirmationDialog
-            open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete Inventory Cycle  ${deleteRecord?._id ? deleteRecord?.cycleCode : ''}?`}
-            onClose={() => {
-              setDeleteRecord(null);
-              setShowDeleteConfirmBox(false);
-            }}
-            onOk={handleDelete}
-          />
-        )}
+        ) : <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>}
       </CustomContainer>
+      {showDeleteConfirmBox && (
+        <ConfirmationDialog
+          open={showDeleteConfirmBox}
+          message={`Are you sure you want to delete ${routes?.inventoryCycle?.title} ${deleteRecord?.demandOrderNumber || ''} ?`}
+          onClose={() => {
+            setDeleteRecord(null);
+            setShowDeleteConfirmBox(false);
+          }}
+          okBtnLoading={isSubmitting}
+          onOk={handleDelete}
+        />
+      )}
+      {showManageDialog.open && (
+        <ManageInventoryCycle
+          isClone={showManageDialog.isClone}
+          inventoryCycleId={showManageDialog.idToClone}
+          onClose={() => setShowManageDialog({ open: false, isClone: false, idToClone: null })}
+          onSuccess={() => {
+            fetchData();
+            setShowManageDialog({ open: false, isClone: false, idToClone: null });
+          }}
+        />
+      )}
     </section>
   );
 };

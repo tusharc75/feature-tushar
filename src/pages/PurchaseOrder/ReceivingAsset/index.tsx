@@ -1,16 +1,15 @@
 import Box from '@material-ui/core/Box/Box';
 import { useState, useEffect, useContext } from 'react';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { Button, Chip, Dialog, Grid, IconButton, useMediaQuery, useTheme } from '@material-ui/core';
+import { Button, Grid, IconButton, useTheme } from '@material-ui/core';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { dateFormat, purchaseOrder, PURCHASE_ORDER_STATUS, prepareDataForGrid, formatAmountWithCurrency, sidebarResource, MATERIAL_TYPE } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
-import { Link } from 'react-router-dom';
 import { fetch_po_product_fields } from '../../../components/PurchaseOrder/helper';
-import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import moment from 'moment';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -27,15 +26,17 @@ import PreviewDownload from 'src/components/PreviewDownload';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import AssetQtyDialog from './AssetQtyDialog';
 import { startCase } from 'lodash';
-import { generateCustomTableColumns } from 'src/constants/columns';
+import { Cancel } from '@material-ui/icons';
 
 
 const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, renderedFrom, checkReceivedProduct, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
+  const { state, dispatch } = useTableReducer();
+  const { generateColumns } = useColumns();
+  const { selectedRecords } = state;
   const {
     state: { user, permissions }
   }: any = useData();
-  const theme = useTheme();
   const [receiveDialog, setReceiveDialog] = useState(false);
   const [rejectDialog, setRejectDialog] = useState(false);
   const [rejectProductDialog, setRejectProductDialog] = useState(null);
@@ -45,9 +46,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
 
   const [inventoryHistory, setInventoryHistory] = useState([]);
 
-  const [rowsData, setRowsData] = useState(null);
   const [columns, setColumns] = useState(null);
-  const [selectedRecords, setSelectedRecords] = useState([]);
   const [addAssetDialog, setAddAssetDialog] = useState({ open: false, product: null })
 
   useEffect(() => {
@@ -66,8 +65,9 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
     column.push({
       accessor: 'index',
       Header: 'Index',
-      width: 50,
+      width: 70,
       primaryField: true,
+      sticky: 'left',
       Cell: ({ row }) => {
         return row.original['index'] ? <p className="text-truncate">{row.original.index}</p> : <NoDataCell />;
       },
@@ -80,6 +80,8 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
       Header: 'Type',
       width: 100,
       primaryField: true,
+      disabled: true,
+      sticky: isMobile || isTablet ? 'none' : 'left',
       Cell: ({ row }) => {
         return row.original['type'] ? <p className="text-truncate">{startCase(row.original.type)}</p> : <NoDataCell />;
       }
@@ -87,8 +89,9 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
     column.push({
       accessor: 'detail',
       Header: 'Detail',
-      width: 300,
+      width: 200,
       disabled: true,
+      sticky: isMobile || isTablet ? 'none' : 'left',
       Cell: ({ row }) => (
         <div className="d-flex gap-2 align-items-center">
           <p className="text-truncate">{row.original.detail}</p>
@@ -151,7 +154,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
     fields?.forEach((e) => {
       e.isColumnEditable = false;
     });
-    const newColumns = generateCustomTableColumns(fields, purchaseOrderData?.currency, renderedFrom);
+    const newColumns = generateColumns(renderedFrom, fields, null, false, purchaseOrderData?.currency);
     column = [...column, ...newColumns]
     column.push({
       accessor: 'assetQty',
@@ -159,9 +162,9 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
       width: 150,
       Cell: ({ row }) => (row.original['assetQty'] ? <p>{row.original['assetQty']}</p> : <NoDataCell />),
       Footer: (info) => {
-        return info?.rows
-          ?.filter((f) => f.values.hasOwnProperty('assetQty') && !isNaN(f.values['assetQty']))
-          .reduce((sum, row) => row.values['assetQty'] + sum, 0);
+        let rows = info.table.getExpandedRowModel().rows;
+        return rows?.filter((f) => f.original.hasOwnProperty('assetQty') && !isNaN(f.original['assetQty']))
+          .reduce((sum, row) => row.original['assetQty'] + sum, 0);
       }
     });
     column.push({
@@ -170,9 +173,9 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
       width: 150,
       Cell: ({ row }) => (row.original['inventoryQty'] ? <p>{row.original['inventoryQty']}</p> : <NoDataCell />),
       Footer: (info) => {
-        return info?.rows
-          ?.filter((f) => f.values.hasOwnProperty('inventoryQty') && !isNaN(f.values['inventoryQty']))
-          .reduce((sum, row) => row.values['inventoryQty'] + sum, 0);
+        let rows = info.table.getExpandedRowModel().rows;
+        return rows?.filter((f) => f.original.hasOwnProperty('inventoryQty') && !isNaN(f.original['inventoryQty']))
+          .reduce((sum, row) => row.original['inventoryQty'] + sum, 0);
       }
     });
     setColumns([
@@ -216,7 +219,7 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
                         setRejectProductDialog(row.original);
                       }}
                     >
-                      <TransformIcon fontSize="small" color={'primary'} />
+                      <Cancel fontSize="small" color={'error'} />
                     </IconButton>
                   </span>
                 </HtmlTooltip>
@@ -264,6 +267,8 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
   };
 
   const fetchProduct = async () => {
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
     try {
       const result = await axiosInstance().get(`${purchaseOrder.api}/product/${purchaseOrderData._id}`);
       const assets: any = await axiosInstance().get(`${purchaseOrder.api}/${purchaseOrderData._id}/assets`);
@@ -294,7 +299,6 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
 
         res.subRows = [];
         const subRows = serializedAsset?.filter((e) => e?.product?.optionValue === res?.materialId);
-        console.log(subRows)
         if (subRows?.length) {
           let actualReceived = item.actualReceived;
           let index = 1;
@@ -348,9 +352,8 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
       }
 
       checkReceivedProduct(rows);
-
-      setRowsData(rows);
-      setSelectedRecords([]);
+      dispatch({ type: 'initialize', data: rows, count: rows?.length });
+      dispatch({ type: 'loading', loading: false });
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -421,18 +424,19 @@ const ReceivingAsset = ({ purchaseOrderData, updateStatus, stepFullScreen, rende
         </div>
       </Box>
       <Grid item xs={12} md={12} sm={12}>
-        {columns && rowsData ? (
+        {columns ? (
           <Box zIndex={5} width={'100%'}>
             <CustomReactTable
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
               columns={columns}
-              data={rowsData}
-              onSelect={setSelectedRecords}
-              childrenProperty="subRows"
-              uniqueKey="_id"
-              hideSelection={[PURCHASE_ORDER_STATUS.closed]?.includes(purchaseOrderData?.status) ? true : false}
+              state={state}
+              setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
+              dispatch={dispatch}
               renderedFrom={renderedFrom}
+              refreshGrid={fetchProduct}
               isClientSideGrid={true}
+              hideSelection={[PURCHASE_ORDER_STATUS.closed]?.includes(purchaseOrderData?.status) ? true : false}
+              expander={true}
             />
           </Box>
         ) : (

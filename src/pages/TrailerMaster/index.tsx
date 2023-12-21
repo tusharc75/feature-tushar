@@ -1,4 +1,4 @@
-import { Button, IconButton } from '@material-ui/core';
+import { Button, IconButton, Box } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -7,11 +7,11 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import {gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import { camelCase } from 'lodash';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTableNew';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import ManageTrailerMaster from './ManageTrailerMaster';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
@@ -22,6 +22,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import AppsIcon from '@material-ui/icons/Apps';
 import ViewListIcon from '@material-ui/icons/ViewList';
 import CardView from './CardView';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 let searchTimeout;
 
@@ -31,7 +32,7 @@ const TrailerMaster = () => {
 
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { getColumnData } = useColumns();
+  const { generateColumns } = useColumns();
 
   const {
     state: { user, permissions, selectedEntity }
@@ -68,16 +69,8 @@ const TrailerMaster = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.trailerMaster}`);
     data = response?.data?.data;
-    let columns = [];
-    data.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.trailerMasterDetail.path, true);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-      }
-      return o?.fieldData;
-    });
-    columns = [...columns, ...getStaticFields(), ActionsRenderer];
-    setColumns(columns);
+    const newColumns = generateColumns(renderedFrom, data, routes.trailerMasterDetail.path, true);
+    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
   const ActionsRenderer = {
@@ -161,7 +154,7 @@ const TrailerMaster = () => {
 
     axiosInstance()
       .get(`${routes?.trailerMaster.path}${queryString}`)
-      .then(({ data: { data} }) => {
+      .then(({ data: { data } }) => {
         setCardViewData(data?.data);
         let count = data?.count;
         let rows = data?.data?.map((u) => {
@@ -227,7 +220,7 @@ const TrailerMaster = () => {
           permissions={permissions?.trailerMaster}
           module={routes.trailerMaster.title}
           api={routes?.trailerMaster.path}
-          afterImportCompleted={() => {fetchData()}}
+          afterImportCompleted={() => { fetchData() }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}
@@ -241,8 +234,8 @@ const TrailerMaster = () => {
       <CustomContainer>
         <div className="header-panel">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div className={'d-flex align-items-center gap-1'}>
-            <IconButton
+            <div className={'d-flex align-items-center gap-1'}>
+              <IconButton
                 size="small"
                 aria-label="Clone"
                 onClick={() => {
@@ -305,11 +298,11 @@ const TrailerMaster = () => {
                       onClose={closeActions}
                     >
                       <MenuItem
-                      disabled={
-                        !(
-                          (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length
-                        )
-                      }
+                        disabled={
+                          !(
+                            (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length
+                          )
+                        }
                         onClick={() => {
                           closeActions();
                           // eslint-disable-next-line no-lone-blocks
@@ -328,7 +321,7 @@ const TrailerMaster = () => {
             </div>
           </div>
         </div>
-      {viewType === 1 && (
+        {viewType === 1 && (
           <CardView
             data={cardViewData}
             fields={columns}
@@ -339,22 +332,22 @@ const TrailerMaster = () => {
         )}
         {viewType === 2 && (
           <>
-           {columns ? (
-            <CustomReactTable
-              height={'calc(100vh - 200px)'}
-              columns={columns}
-              onSelect={() => {}}
-              state={state}
-              dispatch={dispatch}
-              renderedFrom={renderedFrom}
-              isClientSideGrid={false}
-              refreshGrid={fetchData}
-              showOnlyShowFilteredRecordSwitch={true}
-              showFilters={true}
-              resource={sidebarResource.trailerMaster}
-            />
-          ) : null}
-          </> 
+            {columns ? (
+              <CustomReactTable
+                height={'calc(100vh - 200px)'}
+                columns={columns}
+                state={state}
+                dispatch={dispatch}
+                renderedFrom={renderedFrom}
+                refreshGrid={fetchData}
+                showOnlyShowFilteredRecordSwitch={true}
+                showFilters={true}
+                resource={sidebarResource.trailerMaster}
+              />
+            ) : <Box p={2} height={500}>
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Box>}
+          </>
         )}
       </CustomContainer>
       {showDeleteConfirmBox && (

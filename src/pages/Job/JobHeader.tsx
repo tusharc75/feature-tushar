@@ -11,8 +11,6 @@ import { TbArrowsSort } from 'react-icons/tb';
 import { useHistory } from 'react-router-dom';
 import routes from 'src/components/Helpers/Routes';
 import SearchBox from '../../components/Helpers/SearchBox';
-import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
-import MobileSortDialog from '../../components/MobileSortDialog';
 import styles from '../Leads/Header.module.scss';
 
 function JobHeader(props) {
@@ -84,54 +82,6 @@ function JobHeader(props) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
       <div className={'d-flex align-items-center gap-1 flex-wrap'}>
-        {isMobile && (
-          <div className="d-flex flex-wrap items-center justify-between w-full">
-            <div>{toggleInner}</div>
-            <div className="flex flex-wrap items-center gap-1">
-              <IconButton
-                onClick={handleClickOpen}
-                id="demo-customized-button"
-                aria-controls="demo-customized-menu"
-                aria-haspopup="true"
-                className={'mobileIconButton secondary'}
-                size="small"
-              >
-                <TbArrowsSort className="rotate-90" size={16} />
-              </IconButton>
-
-              <MobileSortDialog
-                isOpen={open}
-                handleClose={handleClickClose}
-                contentPart={toggleInner}
-                secHeading={['Sort Job']}
-                columns={columns}
-                dispatch={dispatch}
-              />
-
-              <IconButton
-                onClick={handleOpen}
-                id="demo-customized-button"
-                aria-controls="demo-customized-menu"
-                aria-haspopup="true"
-                className={'mobileIconButton secondary'}
-                size="small"
-              >
-                <MdOutlineFilterAlt size={16} />
-              </IconButton>
-              <MobileFilterDialog
-                isOpen={isOpenDialog}
-                handleClose={handleClose}
-                contentPart={null}
-                columns={columns}
-                dispatch={dispatch}
-                title={routes?.job?.title}
-                filters={filters}
-                resource={resource}
-              />
-            </div>
-          </div>
-        )}
-
         {options && (
           <ToggleButtonGroup
             size="small"

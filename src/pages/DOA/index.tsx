@@ -1,71 +1,88 @@
-import { IconButton } from '@material-ui/core';
+import { Box, IconButton } from '@material-ui/core';
 import { camelCase, isEmpty } from 'lodash';
-import { useContext, useEffect, useReducer, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
+import { useContext, useEffect, useState } from 'react';
+import { isMobile } from 'react-device-detect';
 import { MdOutlineFilterAlt, TbArrowsSort } from 'react-icons/all';
 import { Link, useHistory } from 'react-router-dom';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
-import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import CustomContainer from '../../components/CustomContainer';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import routes from '../../components/Helpers/Routes';
-import MobileFilterDialog, { DisplayFiltersForMobile } from '../../components/MobileFilterDialog';
-import MobileSortDialog from '../../components/MobileSortDialog';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { gridLoadingTimeout, sidebarResource } from '../../constants/helpers';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const DOARequest = () => {
-  
+
   const renderedFrom = camelCase(routes?.DOARequest.title);
   const toastConfig = useContext(CustomToastContext);
-  const [gridApi, setGridApi] = useState(null);
   const history = useHistory();
   const [isOpenDialog, setisOpenDialog] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
 
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
+  const { state, dispatch } = useTableReducer();
+
 
   const columns: any = [
     {
-      field: 'name',
-      headerName: 'Name',
+      accessor: 'name',
+      Header: 'Name',
       show: true,
       disabled: true,
-      cellRenderer: 'nameRenderer'
+      Cell: ({ row }) => (<Link
+        className="link"
+        to={row?.original?.quotation && !isEmpty(row?.original?.quotation) ? `/doa-request/quotation/${row?.original?.id}` : `/doa-request/${row?.original?.id}`}
+        title={row?.original?.name}
+      >
+        {row?.original?.name}
+      </Link>)
     },
     {
-      field: 'quotedBy',
-      headerName: 'Quoted By',
+      accessor: 'quotedBy',
+      Header: 'Quoted By',
       show: true,
       disabled: true,
-      cellRenderer: 'quotedByRenderer'
+      Cell: ({ row }) => (
+        <>
+          {row?.original?.quotedBy ? (
+            <Link className="link" to={`/user/detail/${row?.original?.quoteById}`} title={row?.original?.quotedBy}>
+              {row?.original?.quotedBy}
+            </Link>
+          ) : (
+            <NoDataCell />
+          )}
+        </>
+      )
     },
     {
-      field: 'requestedBy',
-      headerName: 'Requested By',
+      accessor: 'requestedBy',
+      Header: 'Requested By',
       show: true,
-      cellRenderer: 'requestedByRendered'
+      Cell: ({ row }) => (
+        <>
+          {row?.original?.requestedBy ? (
+            <Link className="link" to={`/user/detail/${row?.original?.requestedById}`} title={row?.original?.requestedBy}>
+              {row?.original?.requestedBy}
+            </Link>
+          ) : (
+            <NoDataCell />
+          )}
+        </>
+      )
     },
     {
-      field: 'status',
-      headerName: 'Status',
-      show: true
+      accessor: 'status',
+      Header: 'Status',
+      show: true,
+      Cell: ({ row }) => (
+        <div>
+          <p>{row?.original?.status}</p>
+        </div>
+      )
     }
   ]
-
-  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
-  if (columnState) {
-    columns.map((item) => {
-      columnState.map((d) => {
-        if (d.colId == item.field) {
-          item.show = !d.hide;
-        }
-      });
-    });
-  }
 
   const handleOpen = () => {
     setisOpenDialog(true);
@@ -87,51 +104,8 @@ const DOARequest = () => {
     fetchData();
   }, []);
 
-  const NameRenderer = (params) => (
-    <Link
-      className="link"
-      to={params.data.quotation && !isEmpty(params.data.quotation) ? `/doa-request/quotation/${params.data.id}` : `/doa-request/${params.data.id}`}
-      title={params.value}
-    >
-      {params.value}
-    </Link>
-  );
-
-  const QuotedByRenderer = (params) => (
-    <>
-      {params.value ? (
-        <Link className="link" to={`/user/detail/${params.data.quoteById}`} title={params.value}>
-          {params.value}
-        </Link>
-      ) : (
-        <NoDataCell />
-      )}
-    </>
-  );
-
-  const RequestedByRenderer = (params) => (
-    <>
-      {params.value ? (
-        <Link className="link" to={`/user/detail/${params.data.requestedById}`} title={params.value}>
-          {params.value}
-        </Link>
-      ) : (
-        <NoDataCell />
-      )}
-    </>
-  );
-
-  const frameworkComponents = {
-    nameRenderer: NameRenderer,
-    requestedByRendered: RequestedByRenderer,
-    quotedByRenderer: QuotedByRenderer
-  };
-
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
     axiosInstance()
       .get(`/doa-request`)
       .then(({ data: { data } }) => {
@@ -161,109 +135,22 @@ const DOARequest = () => {
         <CustomBreadCrumbs routes={[routes.DOARequest]} />
       </div>
       <CustomContainer>
-        <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className={'d-flex align-items-center gap-1'}>
-              {isMobile && (
-                <div className="d-flex flex-wrap items-center justify-between w-full">
-                  <div></div>
-                  <div className="flex flex-wrap items-center gap-1 ml-auto">
-                    <IconButton
-                      onClick={handleClickOpen}
-                      id="demo-customized-button"
-                      aria-controls="demo-customized-menu"
-                      aria-haspopup="true"
-                      aria-expanded={'true'}
-                      className={'mobileIconButton secondary'}
-                      size="small"
-                    >
-                      <TbArrowsSort className="rotate-90" size={16} />
-                    </IconButton>
-                    <MobileSortDialog
-                      isOpen={sortOpen}
-                      handleClose={handleClickClose}
-                      contentPart={null}
-                      secHeading={['Sort DOA Requests']}
-                      columns={columns}
-                      dispatch={dispatch}
-                    />
-
-                    <IconButton
-                      id="demo-customized-button"
-                      aria-controls="demo-customized-menu"
-                      aria-haspopup="true"
-                      aria-expanded={'true'}
-                      className={'mobileIconButton secondary'}
-                      size="small"
-                      onClick={handleOpen}
-                    >
-                      <MdOutlineFilterAlt size={16} />
-                    </IconButton>
-
-                    <MobileFilterDialog
-                      isOpen={isOpenDialog}
-                      handleClose={handleFilterClose}
-                      contentPart={null}
-                      columns={columns}
-                      dispatch={dispatch}
-                      title={routes?.DOARequest?.title}
-                      filters={{}}
-                      resource={sidebarResource.DOARequest}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-            <DisplayFiltersForMobile resource={sidebarResource.DOARequest} />
-          </div>
-        </div>
-        {isMobile && !isTablet ? (
-          <CustomSwipableList
-            allowSelection={false}
-            allowSwipe={false}
-            permissions={null}
-            primaryField={columns?.find((d) => d.field === 'name')}
-            onClick={(d) => {
-              history.push(`${routes.budget.path}?id=${d._id}`);
-            }}
-            dataRows={dataRows}
-            selectedRecords={[]}
-            dispatch={dispatch}
-            onEdit={(d) => {
-              history.push(`${routes.budget.path}?id=${d._id}`);
-            }}
-            extraParamsToCheckDelete={true}
-            onDelete={(d) => { }}
-            rowCount={rowCount}
-            page={page}
-            loading={loading}
-            additionalDetails={[]}
-            chips={[]}
-            owerCollaboratorInitialsOrImages=""
-            onCreate={() => { }}
-            showClone={false}
-            onClone={() => { }}
-            renderedFrom={renderedFrom}
-          />
-        ) : (
-          <CustomAgGrid
+        {columns ? (
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
             columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameworkComponents}
-            setGridApi={setGridApi}
+            state={state}
             dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            actionWidth={150}
-            allowSelection={false}
-            allowAction={false}
-            isClientSideGrid={true}
-            loading={loading}
             renderedFrom={renderedFrom}
             refreshGrid={fetchData}
+            showOnlyShowFilteredRecordSwitch={true}
+            showFilters={true}
+            resource={sidebarResource.DOARequest}
           />
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
         )}
       </CustomContainer>
     </section>

@@ -4,26 +4,26 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { fieldTicket, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { MATERIAL_TYPE, fieldTicket, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Button, IconButton, Menu, MenuItem, Tab, Tabs, TextField } from '@material-ui/core';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import { useData } from 'src/StateProvider/Provider';
 import { BiChevronDown } from 'react-icons/bi';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { isMobile } from 'react-device-detect';
-import { flattenArray, generateCustomTableColumns } from 'src/constants/columns';
+import { isMobile, isTablet } from 'react-device-detect';
+import { flattenArray } from 'src/constants/columns';
 import { Autocomplete } from '@material-ui/lab';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import Technicians from './Technicians';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { fetch_field_ticket_material_fields } from '../helper';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
-import { calculatePrice, calculateRowsFieldNew } from 'src/components/RentalManagment/helper';
+import { calculatePrice, calculateRowsField } from 'src/components/RentalManagment/helper';
 import MaterialQtyDialog from './MaterialQtyDialog';
 import EditIcon from '@material-ui/icons/Edit';
 import HistoryIcon from '@material-ui/icons/History';
@@ -32,14 +32,15 @@ import ConsumablesQtyDialog from 'src/pages/WorkOrder/Consumables/ConsumablesQty
 import History from '../../ProductInventory/LedgerHistory';
 import QtyRequestLog from 'src/pages/WorkOrder/Consumables/QtyRequestLog';
 import { Add } from '@material-ui/icons';
-import { isEmpty } from 'lodash';
+import { camelCase, isEmpty } from 'lodash';
 
-const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom }) => {
+const Consumables = ({ allowedToEdit, services, fieldTicketData }) => {
+
+  const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Consumables`;
+  
   const toastConfig = useContext(CustomToastContext);
-  const [dataRows, setDataRows] = useState(null);
   const [columns, setColumns] = useState(null);
   const [allFields, setAllFields] = useState([]);
-  const [selectedRecords, setSelectedRecords] = useState([]);
   const [consumablesDialog, setConsumablesDialog] = useState(false);
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
@@ -54,8 +55,11 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
   const [openConsumablesQtyDialog, setOpenConsumablesQtyDialog] = useState(false);
   const [openLogDialog, setOpenLogDialog] = useState({ open: false, product: '', uniqueId: null, data: null });
   const [historyDialog, setHistoryDialog] = useState({ open: false, _id: '', product: '', productName: '' });
-
   const [isSubmitting, setSubmitting] = useState(false);
+
+  const { state, dispatch } = useTableReducer();
+  const { dataRows, selectedRecords } = state;
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     setServiceOption([{ optionLabel: 'All', optionValue: 'All' },
@@ -70,7 +74,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
       setSelectedServiceOption({ optionLabel: 'All', optionValue: 'All' });
     }
     if (renderCount > 1) {
-      setDataRows(null)
+      dispatch({ type: 'update', data: [] });
     }
     setRenderCount(renderCount + 1)
   }, [services]);
@@ -84,7 +88,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
   }, [fieldTicketData]);
 
   useEffect(() => {
-    if (columns && !dataRows && tabValue === 0) {
+    if (columns && !dataRows?.length && tabValue === 0) {
       var allowRequest = false;
       if (user?.user?.brandPolicy?.workOrderConsumableRequest) {
         if ((fieldTicketData?.warehouse?.manager && fieldTicketData?.warehouse?.manager?.includes(user?.user?._id))
@@ -108,13 +112,23 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
       });
     }
     setAllFields(JSON.parse(JSON.stringify(fields)));
-    const newColumns = generateCustomTableColumns(fields, fieldTicketData?.currency, renderedFrom);
+    const newColumns = generateColumns(renderedFrom, fields, null, false, fieldTicketData?.currency);
     let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
     if (qtyIndex > -1) {
       newColumns[qtyIndex].accessor = 'qtyDisplay';
     }
 
-    const column = [];
+    const column: any = [{
+      accessor: 'index',
+      Header: 'Index',
+      width: 70,
+      sticky: 'left',
+      cell: ({ row }) => <p className="text-truncate">{row?.original?.index}</p>,
+      Footer: () => {
+        return <>Total</>;
+      }
+    }];
+
     const {
       data: { data }
     } = await axiosInstance().put(`/field/find-field-labels`, {
@@ -132,20 +146,22 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
           accessor: e?.fieldName,
           Header: e?.fieldLabel,
           width: 200,
+          disabled: true,
+          sticky: isMobile || isTablet ? 'none' : 'left',
           primaryField: true,
-          Cell: ({ row, rows }) => (
+          cell: ({ row, table }) => (
             <div style={{ display: 'flex', alignItems: 'center' }}>
               {!allowedToEdit ? (
-                <p>{row.original[e?.fieldName]}</p>
+                <p>{row?.original[e?.fieldName]}</p>
               ) : (
                 <p
                   onClick={() => {
-                    openMaterial(row, rows)
+                    openMaterial(row, table.getRowModel().rows)
                   }}
                   className="link text-truncate"
-                  title={row.original[e?.fieldName]}
+                  title={row?.original[e?.fieldName]}
                 >
-                  {row.original[e?.fieldName]}
+                  {row?.original[e?.fieldName]}
                 </p>
               )}
               <Box ml={1}>
@@ -166,7 +182,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
           accessor: e?.fieldName,
           Header: e?.fieldLabel,
           width: 200,
-          Cell: ({ row }) => {
+          cell: ({ row }) => {
             return row.original[e?.fieldName] ? <p className="text-truncate">{row.original[e?.fieldName]}</p> : <NoDataCell />;
           }
         });
@@ -178,7 +194,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
         accessor: 'service',
         Header: 'Service',
         width: 200,
-        Cell: ({ row }) => (
+        cell: ({ row }) => (
           row?.original?.service ? (
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <p> {row.original?.service}</p>
@@ -204,14 +220,14 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
         accessor: 'requestedQty',
         Header: 'Requested Qty',
         width: 150,
-        Cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
+        cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
       },
       {
         accessor: 'consumedQty',
         Header: 'Consumed Qty',
         primaryField: true,
         width: 150,
-        Cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
+        cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
       },
       {
         accessor: 'action',
@@ -222,7 +238,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
         disableFilters: true,
         disableSortBy: true,
         canDrag: false,
-        Cell: ({ row, rows }: any) => (
+        cell: ({ row, table }: any) => (
           <>
             <HtmlTooltip title={allowedToEdit ? 'Edit' : ''}>
               <IconButton
@@ -230,7 +246,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
                 aria-label="Delete"
                 disabled={!allowedToEdit}
                 onClick={() => {
-                  openMaterial(row, rows)
+                  openMaterial(row, table.getRowModel().rows)
                 }}
               >
                 <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
@@ -284,24 +300,13 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
       }
     ];
 
-    setColumns([
-      {
-        accessor: 'index',
-        Header: 'Index',
-        width: 70,
-        sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row?.original?.index}</p>,
-        Footer: () => {
-          return <>Total</>;
-        }
-      },
-      ...column,
-      ...extracolumns
-    ]);
+    setColumns([...column, ...extracolumns]);
   };
 
   const fetchData = async () => {
-    setDataRows(null);
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
+
     let api = `${fieldTicket.api}/${fieldTicketData?._id}/material?type=product`;
     if (selectedServiceOption && selectedServiceOption?.optionValue !== 'All') {
       api = `${api}&serviceId=${selectedServiceOption?.optionValue}`;
@@ -317,7 +322,8 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
         parent.serviceId = parent?.service?.optionValue;
         parent.service = parent?.service?.optionLabel;
       });
-      setDataRows(consumables);
+      dispatch({ type: 'initialize', data: consumables, count: consumables?.length });
+      dispatch({ type: 'loading', loading: false });
     })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -326,19 +332,20 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
 
   const handleSubmit = async (rows) => {
     setSubmitting(true)
-    const tax: any = {};
+    var taxCodeData: any = null;
     if (fieldTicketData?.taxCode) {
       const {
         data: { data }
-      } = await axiosInstance().get(`${routes?.taxMaster.path}/by-zipcode?taxCode=${fieldTicketData?.taxCode?.optionValue}`);
-      tax.taxCode = fieldTicketData?.taxCode?.optionValue;
-      tax.taxPercentage = data?.length ? data[0]?.taxRate : 0;
+      } = await axiosInstance().get(`${routes?.taxMaster.path}/by-zipcode?taxCode=${fieldTicketData?.taxCode?.optionValue}&materialType=${MATERIAL_TYPE.product}`);
+      if (data?.length) {
+        taxCodeData = data[0];
+      }
     }
     const material: any = [];
     rows.forEach((d) => {
       const element: any = {};
       element.materialId = d._id;
-      element.type = 'product';
+      element.type = MATERIAL_TYPE.product;
       element.service = selectedServiceOption?.optionValue !== "All" ? selectedServiceOption?.optionValue : null;
       element.qty = d.qty ? parseFloat(d.qty) : 1;
       element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
@@ -350,9 +357,9 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
       if (calValues && calValues['estimateJobDuration']) {
         element.estimateJobDuration = calValues['estimateJobDuration'];
       }
-      if (!isEmpty(tax)) {
-        element.taxCode = tax?.taxCode;
-        element.taxPercentage = tax?.taxPercentage;
+      if (taxCodeData) {
+        element.taxCode = taxCodeData?.optionValue;
+        element.taxPercentage = taxCodeData?.taxRate || 0;
       }
       material.push(element);
     });
@@ -427,17 +434,6 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
   };
 
   const handleSaveData = async (rows: any, saveAndNext = false) => {
-    rows.forEach((element) => {
-      element.pricingCondition = element.pricingCondition?.optionValue ? element.pricingCondition?.optionValue : element.pricingCondition; // temporary fix
-      element.service = element.serviceId;
-      delete element.index;
-      delete element.productDescription;
-      delete element.productName;
-      delete element.productNumber;
-      delete element.qtyDisplay;
-      delete element.productDetail;
-      delete element.serviceId;
-    });
     setUpdating(true);
     axiosInstance()
       .put(`${fieldTicket.api}/${fieldTicketData?._id}/material`, { material: rows })
@@ -478,7 +474,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
       inputField['qty'] = inputField['qtyDisplay'];
     }
     let rows: any = [{ ...dataRow, ...updatedData }];
-    rows = await calculateRowsFieldNew(flattenArray(dataRows), inputField, allFields, updatedData);
+    rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
     handleSaveData(rows);
   };
 
@@ -503,7 +499,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
   };
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
-    setDataRows(null)
+    dispatch({ type: 'update', data: [] });
     setTabValue(newValue);
   };
 
@@ -525,7 +521,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
               if (!val) {
                 value = { optionLabel: 'All', optionValue: 'All' }
               }
-              setDataRows(null)
+              dispatch({ type: 'update', data: [] });
               setSelectedServiceOption(value)
             }}
             renderInput={(params) => <TextField {...params} label={'Select Service'} variant="outlined" />}
@@ -617,20 +613,18 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
           )}
           <Grid container spacing={2}>
             <Grid item xs={12} md={12} sm={12}>
-              {columns && dataRows ? (
+              {columns ? (
                 <CustomReactTable
                   height={'300px'}
                   columns={columns}
-                  data={dataRows}
-                  onSelect={setSelectedRecords}
-                  childrenProperty="subRows"
-                  uniqueKey="_id"
+                  state={state}
+                  dispatch={dispatch}
                   onSaveEdit={onSaveInlineEdit}
-                  renderedFrom={'fieldTicket_consumables'}
+                  renderedFrom={renderedFrom}
                   isClientSideGrid={true}
-                  hideExpander={true}
                   hideSelection={!allowedToEdit}
                   hideAction={!allowedToEdit}
+                  refreshGrid={fetchData}
                 />
               ) : (
                 <Box p={2} height={300}>
@@ -645,7 +639,8 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, renderedFrom })
         <Technicians
           allowedToEdit={allowedToEdit}
           fieldTicketData={fieldTicketData}
-          selectedService={selectedServiceOption} />
+          selectedService={selectedServiceOption}
+        />
       </TabPanel>
       {consumablesDialog && (
         <AssignProductDialog
