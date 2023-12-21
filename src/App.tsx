@@ -244,6 +244,7 @@ import CreditMemoDetail from './pages/CreditMemo/CreditMemoDetail';
 import GenerateInvoice from './pages/GenerateInvoice';
 import StandardReportView from './pages/Report/StandardReport';
 import UserDownloadRequest from './pages/UserDownloadRequest';
+import SendOutboundMessage from './pages/SendOutboundMessage';
 
 var notificationInterval: any = null;
 
@@ -1028,6 +1029,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.iotReport.path}/:resource`}>
               <IotReport />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.sendOutboundMessage.path}`}>
+              <SendOutboundMessage />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.deviceTemplates.path}`}>
               <DeviceTemplates />

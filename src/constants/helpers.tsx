@@ -352,7 +352,8 @@ export const sidebarResource = {
   chartOfAccount: 'Chart Of Account',
   flash: 'Flash',
   rentalManagementInvoice: 'Rental Management Invoice',
-  creditMemo: 'Credit Memo'
+  creditMemo: 'Credit Memo',
+  outboundMessage: 'Outbound Message'
 };
 
 export const primaryFields = {
@@ -480,6 +481,7 @@ export const RESOURCE_LABEL = {
   iotDataPoints: 'IoT Data Points',
   iotChart: 'IoT Chart',
   iotReport: 'IoT Report',
+  sendOutboundMessage: 'Send Outbound Message',
   deviceTemplates: 'Device Templates',
   workStations: 'Work Stations',
   deviceTemplateAlert: 'Device Template Alert',
