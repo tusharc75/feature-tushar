@@ -46,7 +46,9 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
     axiosInstance()
       .get(`/field?resource=${sidebarResource.fieldTicket}`)
       .then(({ data: { data } }) => {
+
         const newColumns = generateColumns(routes.fieldTicket?.title, data, routes.fieldTicketDetail.path);
+        console.log(data, newColumns)
         newColumns?.forEach((o) => {
           if (o.accessor === 'fieldTicketNumber') {
             o.cell = ({ row }) =>
