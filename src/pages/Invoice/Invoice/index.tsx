@@ -7,7 +7,7 @@ import { CustomDialogTransition, INVOICE_STATUS, invoice, sidebarResource } from
 import axiosInstance from '../../../axios/axiosInstance';
 import { isMobile, isTablet } from 'react-device-detect';
 import { fetch_invoice_product_fields } from '../../../components/Invoice/helper';
-import { startCase } from 'lodash';
+import { camelCase, startCase } from 'lodash';
 import PreviewDownload from 'src/components/PreviewDownload';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { IconButton } from '@material-ui/core';
@@ -15,14 +15,15 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import routes from 'src/components/Helpers/Routes';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
-const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, stepFullScreen, renderedFrom }) => {
+const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, stepFullScreen }) => {
+
+
+  const renderedFrom = `${camelCase(routes?.invoice.title)}_Invoice`;
 
   const toastConfig = useContext(CustomToastContext);
 
-  const [allFields, setAllFields] = useState([]);
   const [columns, setColumns] = useState(null);
   const { state, dispatch } = useTableReducer();
-  const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
 
   useEffect(() => {
@@ -41,8 +42,7 @@ const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, 
       data?.forEach((e) => {
         e.isColumnEditable = false;
       });
-      setAllFields(JSON.parse(JSON.stringify(data)));
-      const newColumns = generateColumns(renderedFrom , data, null, false, invoiceData?.currency );
+      const newColumns = generateColumns(renderedFrom, data, null, false, invoiceData?.currency);
       let qtyIndex = newColumns.findIndex((d) => d.accessor === 'qty');
       if (qtyIndex > -1) {
         newColumns[qtyIndex].accessor = 'qtyDisplay';
@@ -71,7 +71,7 @@ const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, 
         {
           accessor: 'detail',
           Header: 'Detail',
-          disabled : true,
+          disabled: true,
           minWidth: 300,
           sticky: isMobile || isTablet ? 'none' : 'left',
           width: 300,
@@ -149,11 +149,6 @@ const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, 
       parent.qtyDisplay = parent.qty;
       parent.subRows = generateNestedData(data.material, parent);
     });
-    if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
-      setNextStep(true);
-    } else {
-      setNextStep(true);
-    }
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
   };
@@ -217,14 +212,13 @@ const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, 
             <CustomReactTable
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
               columns={columns}
-              state = {state}
-              dispatch = {dispatch}
-              setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
+              state={state}
+              dispatch={dispatch}
               hideSelection={true}
               hideAction={true}
-              expander = {true}
-              refreshGrid = {fetchData}
-              renderedFrom="invoice_product_package"
+              expander={true}
+              refreshGrid={fetchData}
+              renderedFrom={renderedFrom}
               isClientSideGrid={true}
             />
           </Box>

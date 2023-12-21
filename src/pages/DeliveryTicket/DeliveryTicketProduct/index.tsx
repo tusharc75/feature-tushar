@@ -1,41 +1,23 @@
-import { useState, useEffect, useContext } from 'react';
+import { useEffect, useContext } from 'react';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
 import { Box } from '@material-ui/core';
-import CustomReactTable, { useColumns, getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import { gridLoadingTimeout, prepareDataForGrid, deliveryTicket } from '../../../constants/helpers';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
 import { findOne, objectStore } from 'src/constants/indexdbhelper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
 
-const DeliveryTicketProduct = ({ renderedFrom, deliveryTicketId }) => {
+const DeliveryTicketProduct = ({ renderedFrom, deliveryTicketId, columns }) => {
   const toastConfig = useContext(CustomToastContext);
   const { isOffline } = useContext(CustomOfflineContext);
 
   const { state, dispatch } = useTableReducer();
 
-  const [columns, setColumns] = useState(null);
   const {
     state: { user }
   }: any = useData();
-  const { generateColumns } = useColumns();
-
-  const defaultColumns = [
-    {
-      accessor: 'qty',
-      Header: 'Qty',
-      order: 1,
-      disabled: true,
-      Cell: ({ row }) => (row?.original?.qty ? <h5>{row?.original?.qty}</h5> : <NoDataCell />)
-    }
-  ];
-
-  useEffect(() => {
-    fetchGridColumns();
-  }, []);
 
   useEffect(() => {
     fetchProduct();
@@ -74,18 +56,6 @@ const DeliveryTicketProduct = ({ renderedFrom, deliveryTicketId }) => {
       toastConfig.setToastConfig(error);
       dispatch({ type: 'loading', loading: false });
     }
-  };
-
-  const fetchGridColumns = async () => {
-    var fields = [];
-    if (isOffline) {
-      fields = await findOne(objectStore.resource, 'Product');
-    } else {
-      const response = await axiosInstance().get('/field?resource=Product&view=true');
-      fields = response?.data?.data;
-    }
-    const newColumns = generateColumns(renderedFrom, fields, routes.productDetail.path);
-    setColumns([...defaultColumns, ...newColumns]);
   };
 
   return (

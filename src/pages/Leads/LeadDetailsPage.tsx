@@ -369,7 +369,7 @@ const LeadDetailsPage = () => {
                 {isMobile && !isTablet ? <Edit /> : 'Edit'}
               </Button>
             )}
-            {leadsPermissions.isDelete && allowedToDelete && (
+            {leadsPermissions.isDelete && allowedToDelete && !leadData?.staticData?.convertedToOpportunity && (
               <DeleteButton text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'} onClick={() => setShowConfirmBox(true)} />
             )}
             <ActivityButton
