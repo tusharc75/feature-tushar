@@ -93,7 +93,7 @@ const PriceTemplate = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-       <HtmlTooltip title={permissions?.priceTemplate?.isCreate ? "Clone" : cloneDisable}  >
+        <HtmlTooltip title={permissions?.priceTemplate?.isCreate ? "Clone" : cloneDisable}  >
           <span>
             <IconButton
               size="small"
@@ -273,15 +273,15 @@ const PriceTemplate = () => {
                       onClose={closeActions}
                     >
                       <MenuItem
-                      disabled={
-                        !(
-                          (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length
-                        )
-                      }
+                        disabled={
+                          !(
+                            (selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length
+                          )
+                        }
                         onClick={() => {
                           closeActions();
-                           // eslint-disable-next-line no-lone-blocks
-                           {
+                          // eslint-disable-next-line no-lone-blocks
+                          {
                             selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
                           }
                           setShowDeleteConfirmBox(true);

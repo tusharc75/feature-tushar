@@ -70,7 +70,7 @@ const DeliveryTicket = () => {
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [showManageDeliveryTicket, setShowManageDeliveryTicket] = useState(false);
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
 
   const { isOffline } = useContext(CustomOfflineContext);

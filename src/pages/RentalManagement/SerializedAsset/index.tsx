@@ -468,7 +468,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
       }
       subRows.push({
         ..._inventory,
-        index: `${parent.index}.${k + 1}`,
+        index: `${parent.index}.${subRows?.length + 1}`,
         detail: _inventory?.assetNumber ? _inventory?.assetNumber : _inventory.inventoryDetail?.assetNumber,
         description: parent?.description,
         type: 'asset',
@@ -493,7 +493,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         _id: _inventory.id,
         uniqueId: _inventory.id,
         inventory: _inventory.id,
-        index: `${parent.index}.${k + 1}`,
+        index: `${parent.index}.${subRows?.length + 1}`,
         detail: _inventory?.assetNumber,
         description: parent?.description,
         type: 'asset',
@@ -509,7 +509,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
     var assetQtySUM = 0;
     var assetAssignedQtySUM = 0;
     childProduct.forEach((_subRow, j) => {
-      _subRow.index = parent.index + '.' + (j + 1);
+      _subRow.index = parent.index + '.' + (subRows?.length + 1);
       _subRow.detail =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceName

@@ -31,7 +31,7 @@ const ConvertInventory = () => {
   const [storageLocationId, setStorageLocationId] = useState(null);
   const [warehouseOptions, setWarehouseOptions] = useState([]);
   const [storageLocationOptions, setStorageLocationOptions] = useState([]);
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
   const [inventory, setInventory] = useState({ open: false, product: [] });
 
   const {

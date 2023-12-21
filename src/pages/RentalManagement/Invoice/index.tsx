@@ -235,11 +235,11 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
     const subRows: any = [];
     const inventory_result = inventory?.filter((e) => e._id === parent._id);
 
-    inventory_result?.forEach((_inventory, k) => {
+    inventory_result?.forEach((_inventory) => {
       subRows.push({
         ..._inventory,
         _id: _inventory.inventoryDetail?._id,
-        index: `${parent.index}.${k + 1}`,
+        index: `${parent.index}.${subRows?.length + 1}`,
         detail: _inventory.inventoryDetail?.assetNumber,
         status: _inventory.inventoryDetail?.status,
         description: parent?.description || '',
@@ -251,8 +251,8 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
     });
 
     const childProduct: any = material.filter((e) => e.parentId === parent._id);
-    childProduct.forEach((_subRow, j) => {
-      _subRow.index = parent.index + '.' + (j + 1);
+    childProduct.forEach((_subRow) => {
+      _subRow.index = parent.index + '.' + (subRows?.length + 1);
       _subRow.detail =
         _subRow?.type === 'product'
           ? _subRow?.productDetail?.productName
@@ -271,6 +271,7 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
       _subRow.subRows = generateNestedData(material, inventory, _subRow);
       subRows.push(_subRow);
     });
+    
     return subRows;
   };
 

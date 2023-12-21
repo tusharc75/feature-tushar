@@ -27,7 +27,6 @@ const FieldTicket = ({ selectedFieldService, fieldRef, fieldRemoveRef }) => {
   }: any = useData();
 
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
-  const [columns, setColumns] = useState([]);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const { state, dispatch } = useTableReducer();
   const [open, setOpen] = useState({ open: false, isClone: false });
@@ -86,7 +85,6 @@ const FieldTicket = ({ selectedFieldService, fieldRef, fieldRemoveRef }) => {
       }
       var columns = generateColumns(renderedFrom, data, routes.fieldTicketDetail.path);
       columns = [...columns, ...getStaticFields()];
-      setColumns([...columns]);
       const bodyColumns: CardInterface['bodyColumns'] = createBodyColumns({
         columns,
         exclude: ['status', 'fieldServiceOrder', 'fieldTicketNumber'],
