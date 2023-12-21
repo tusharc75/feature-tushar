@@ -198,7 +198,7 @@ const Leads = () => {
         count = response?.data?.count;
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u);
-          finalObject['canDelete'] = u.ownerId === user?.user._id && permissions?.lead?.isDelete;
+          finalObject['canDelete'] = u.owner?.optionValue === user?.user._id && permissions?.lead?.isDelete;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
           let res = {
             ...finalObject,
