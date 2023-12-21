@@ -48,7 +48,6 @@ const FieldTicket = ({ serviceOrderData, setNextStep, renderedFrom, allowedToEdi
       .then(({ data: { data } }) => {
 
         const newColumns = generateColumns(routes.fieldTicket?.title, data, routes.fieldTicketDetail.path);
-        console.log(data, newColumns)
         newColumns?.forEach((o) => {
           if (o.accessor === 'fieldTicketNumber') {
             o.cell = ({ row }) =>
