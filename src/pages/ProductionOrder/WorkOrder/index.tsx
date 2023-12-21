@@ -71,7 +71,6 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
 
   useEffect(() => {
     setNextStep(false);
-    checkStepValidation();
     autoCreateWorkOrder();
   }, []);
 
@@ -81,11 +80,11 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         await fetchData();
       }, 30000);
       await axiosInstance().post(`${productionOrder.api}/${productionOrderData._id}/work-order`);
-      checkStepValidation();
       if (apiCallInterval) {
         clearInterval(apiCallInterval);
       }
       setIsAutoCreating(false)
+      checkAllWorkOrderComplete();
     } catch (error) {
       setIsAutoCreating(false)
       toastConfig.setToastConfig(error);
@@ -96,9 +95,9 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     fetchFields();
   }, [productionOrderData]);
 
-  const checkStepValidation = async () => {
-    const res = await axiosInstance().get(`${productionOrder.api}/step-validation/${productionOrderData._id}`);
-    if (!!res?.data?.data?.isStepValidated) {
+  const checkAllWorkOrderComplete = async () => {
+    const response = await axiosInstance().get(`${productionOrder.api}/${productionOrderData._id}/work-order/check-all-work-order-complete`);
+    if (!!response?.data?.data?.isCompletedAll) {
       setNextStep(true);
     }
   }
@@ -565,6 +564,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
           setCompleting(false);
           setCompleteConfirmBox(false);
           fetchData();
+          checkAllWorkOrderComplete()
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
