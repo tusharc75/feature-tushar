@@ -70,6 +70,8 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   const { generateColumns } = useColumns();
 
   useEffect(() => {
+    setNextStep(false);
+    checkStepValidation();
     autoCreateWorkOrder();
   }, []);
 
@@ -79,6 +81,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         await fetchData();
       }, 30000);
       await axiosInstance().post(`${productionOrder.api}/${productionOrderData._id}/work-order`);
+      checkStepValidation();
       if (apiCallInterval) {
         clearInterval(apiCallInterval);
       }
@@ -92,6 +95,13 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   useEffect(() => {
     fetchFields();
   }, [productionOrderData]);
+
+  const checkStepValidation = async () => {
+    const res = await axiosInstance().get(`${productionOrder.api}/step-validation/${productionOrderData._id}`);
+    if (!!res?.data?.data?.isStepValidated) {
+      setNextStep(true);
+    }
+  }
 
   const fetchFields = async () => {
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.productionOrderDetail}`);
@@ -343,7 +353,6 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     dispatch({ type: 'selection', selectedRecords: [] });
 
     const queryString = getQueryString();
-    setNextStep(false);
     const {
       data: { data, count }
     } = await axiosInstance().get(`${productionOrder.api}/${productionOrderData._id}/work-order/service${queryString}`);
@@ -380,9 +389,6 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         parent.canDelete = true;
       }
     });
-    if (rows.filter((e) => e?.workOrderStatus === WORK_ORDER_STATUS.completed)?.length === rows?.length) {
-      setNextStep(true);
-    }
     dispatch({ type: 'initialize', data: rows, count: count });
     dispatch({ type: 'loading', loading: false });
   };
