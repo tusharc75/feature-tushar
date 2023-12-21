@@ -33,9 +33,9 @@ const ChatNotification = () => {
   const isNotificationOpen = Boolean(anchorEl);
   const [notificationList, setNotificationList] = useState([]);
   const [notificationData, setNotificationData] = useState({
-    all: [],
-    unread: [],
-    history: []
+    [tabOptions[0]]: [],
+    [tabOptions[1]]: [],
+    [tabOptions[2]]: []
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -62,8 +62,8 @@ const ChatNotification = () => {
     id === selectedEntity
       ? history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
       : hasAccessToEntity(id)
-      ? handleEntityChange(id) && history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
-      : '';
+        ? handleEntityChange(id) && history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
+        : '';
 
   const getAllNotifications = async (event) => {
     setAnchorEl(event.currentTarget);
@@ -127,9 +127,9 @@ const ChatNotification = () => {
       axiosInstance()
         .put('/user/user-notification/read', {
           toggle: true,
-          notificationId: d.notificationId || d._id
+          _id: d._id
         })
-        .then(() => {})
+        .then(() => { })
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
@@ -162,7 +162,7 @@ const ChatNotification = () => {
     <>
       {isMobile ? (
         <>
-          <MenuItem onClick={anchorEl === null ? getAllNotifications : () => {}}>
+          <MenuItem onClick={anchorEl === null ? getAllNotifications : () => { }}>
             <Badge
               variant="dot"
               overlap="circular"

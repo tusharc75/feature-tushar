@@ -16,17 +16,19 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 
 const FormBuilder = () => {
+  
   const renderedFrom = 'form-builder';
   const toastConfig = useContext(CustomToastContext);
-  const { state, dispatch } = useTableReducer();
-  const { page, limit } = state;
   const [arrangeViewOpen, setArrangeViewOpen] = useState(false);
   const [resource, setResource] = useState([]);
   const [columns, setColumns] = useState([]);
+  const { state, dispatch } = useTableReducer();
 
   useEffect(() => {
     fetchGridColumns();
   }, []);
+
+  
 
   const fetchGridColumns = () => {
     const columns = [

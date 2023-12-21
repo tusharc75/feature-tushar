@@ -70,6 +70,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   const { generateColumns } = useColumns();
 
   useEffect(() => {
+    setNextStep(false);
     autoCreateWorkOrder();
   }, []);
 
@@ -83,6 +84,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         clearInterval(apiCallInterval);
       }
       setIsAutoCreating(false)
+      checkAllWorkOrderComplete();
     } catch (error) {
       setIsAutoCreating(false)
       toastConfig.setToastConfig(error);
@@ -92,6 +94,13 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   useEffect(() => {
     fetchFields();
   }, [productionOrderData]);
+
+  const checkAllWorkOrderComplete = async () => {
+    const response = await axiosInstance().get(`${productionOrder.api}/${productionOrderData._id}/work-order/check-all-work-order-complete`);
+    if (!!response?.data?.data?.isCompletedAll) {
+      setNextStep(true);
+    }
+  }
 
   const fetchFields = async () => {
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.productionOrderDetail}`);
@@ -343,7 +352,6 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     dispatch({ type: 'selection', selectedRecords: [] });
 
     const queryString = getQueryString();
-    setNextStep(false);
     const {
       data: { data, count }
     } = await axiosInstance().get(`${productionOrder.api}/${productionOrderData._id}/work-order/service${queryString}`);
@@ -380,9 +388,6 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         parent.canDelete = true;
       }
     });
-    if (rows.filter((e) => e?.workOrderStatus === WORK_ORDER_STATUS.completed)?.length === rows?.length) {
-      setNextStep(true);
-    }
     dispatch({ type: 'initialize', data: rows, count: count });
     dispatch({ type: 'loading', loading: false });
   };
@@ -559,6 +564,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
           setCompleting(false);
           setCompleteConfirmBox(false);
           fetchData();
+          checkAllWorkOrderComplete()
           toastConfig.setToastConfig({
             open: true,
             type: 'success',

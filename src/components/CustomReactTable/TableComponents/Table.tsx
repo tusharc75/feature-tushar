@@ -251,7 +251,7 @@ const TableComponent = ({
             style={{
               overflow: 'hidden'
             }}
-            className={`body relative ${footerRowFound ? 'with-footer' : ''}`}
+            className={`body relative ${isClientSideGrid && footerRowFound ? 'with-footer' : ''}`}
           >
             {virtualization ? <VirtualTable /> : <NormalTable />}
           </TableBody>

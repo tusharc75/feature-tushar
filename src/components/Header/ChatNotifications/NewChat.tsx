@@ -79,7 +79,7 @@ const NewChat = ({ setSelectedChat, userId, closeAndOpenChat }) => {
       <div className="relative mb-[26px]">
         <Search className="[color:var(--new-theme-color)] absolute top-1/2 left-[12px] [transform:translateY(-50%)]" />
         <input
-          className="w-full p-[10px_10px_10px_40px] bg-transparent [border:1px_solid_var(--common-border-color)] rounded-[5px] outline-transparent focus-within:outline-[var(--common-border-color)]"
+          className="w-full text-[var(--primary-text)] p-[10px_10px_10px_40px] bg-transparent [border:1px_solid_var(--common-border-color)] rounded-[5px] outline-transparent focus-within:outline-[var(--common-border-color)]"
           title="Search name"
           placeholder="Search name"
           type="search"

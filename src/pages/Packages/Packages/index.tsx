@@ -22,7 +22,7 @@ const PackagesTable = ({ packageId, packageData }) => {
     state: { permissions, user }
   }: any = useData();
 
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
   const [showProductConfirmBox, setShowProductConfirmBox] = useState(false);
   const [showProductAssignDialog, setShowProductAssignDialog] = useState(false);
   const [showServiceAssignDialog, setShowServiceAssignDialog] = useState(false);

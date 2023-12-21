@@ -642,9 +642,9 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
               open={Boolean(anchorEl)}
               onClose={closeActions}
             >
-              {quotationData?.type === QUOTATION_TYPE.rentalJob && products.length > 0 && (
+              {quotationData?.type === QUOTATION_TYPE.rentalJob && (
                 <MenuItem
-                  disabled={selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product)?.length <= 0}
+                  disabled={products.length ? false : true}
                   onClick={() => {
                     closeActions();
                     setAddDialog({ open: true, type: 'serializedAsset', parentId: null });
@@ -801,21 +801,12 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
           ids={[...dataRows?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.map((e: any) => e?.serializedAssetDetail?._id)]}
           isAssigning={isSubmitting}
-          // extraStaticFilter={[{ field: 'status', term: [ASSET_STATUS.new, ASSET_STATUS.available] }]}
           handleSucess={(rows) => {
             if (products?.length) {
               const dataToAddFormat = rows?.map((d) => {
                 return { ...d, _id: d?.asset, qty: 1 };
               });
               handleAdd([...dataToAddFormat]);
-            } else if (addDialog.parentId && products?.length !== 0) {
-              handleAdd([...rows?.map((d) => ({ ...d, _id: d?.id, qty: 1 }))]);
-            } else {
-              toastConfig.setToastConfig({
-                message: `Increase Product Quantity to add more assets`,
-                type: 'error',
-                open: true
-              });
             }
           }}
           selectedProducts={products}
@@ -893,18 +884,6 @@ const Productpackage = ({ quotationData, setNextStep, renderedFrom, stepFullScre
           }}
         >
           <MenuList>
-            {addchildDialog.parentType === MATERIAL_TYPE.product &&
-              addchildDialog.serializedProduct &&
-              quotationData?.type === QUOTATION_TYPE.rentalJob && (
-                <MenuItem
-                  onClick={() => {
-                    setAddDialog({ open: true, type: 'serializedAsset', parentId: addchildDialog.parentId });
-                    setAddchildDialog({ open: false, parentId: null, parentType: null, serializedProduct: false, top: null, bottom: null });
-                  }}
-                >
-                  Add Existing Assets
-                </MenuItem>
-              )}
             <MenuItem
               onClick={() => {
                 setAddDialog({ open: true, type: 'product', parentId: addchildDialog.parentId });
