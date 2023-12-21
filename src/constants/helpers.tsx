@@ -1057,7 +1057,7 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'multiSelect') {
       schema[input.fieldName] = input.required ? array().min(1, `${input.fieldLabel} is required`) : array();
     } else if (input.type === 'percent' || input.type === 'number' || input.type === 'decimal') {
-      schema[input.fieldName] = input.required ? number().required(`${input.fieldLabel} is required`).nullable() : number().nullable();
+      schema[input.fieldName] = input.required ? number().required(`${input.fieldLabel} is required`).moreThan(0, `${input.fieldLabel} must be greater than 0`).nullable() : number().nullable();
     } else if (input.type === 'email') {
       schema[input.fieldName] =
         input.required && validEmail
@@ -1069,7 +1069,7 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       input.displayUnits &&
         input.displayUnits.forEach((_unit) => {
           schema[input.fieldName + '_' + _unit.toLowerCase()] = input.required
-            ? number().required(`${input.fieldLabel} is required`).nullable()
+            ? number().required(`${input.fieldLabel} is required`).moreThan(0, `${input.fieldLabel} must be greater than 0`).nullable()
             : number().nullable();
         });
     } else if (input.type === 'currencyAmount') {
@@ -1078,12 +1078,12 @@ export const yupSchema = (fields: any[], validEmail = true) => {
           if (input.isConverter && input.displayUnits.length) {
             input.displayUnits.forEach((_unit) => {
               schema[input.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()] = input.required
-                ? number().required(`${input.fieldLabel} is required`).nullable()
+                ? number().required(`${input.fieldLabel} is required`).moreThan(0, `${input.fieldLabel} must be greater than 0`).nullable()
                 : number().nullable();
             });
           } else {
             schema[input.fieldName + '_' + _currency.toLowerCase()] = input.required
-              ? number().required(`${input.fieldLabel} is required`).nullable()
+              ? number().required(`${input.fieldLabel} is required`).moreThan(0, `${input.fieldLabel} must be greater than 0`).nullable()
               : number().nullable();
           }
         });

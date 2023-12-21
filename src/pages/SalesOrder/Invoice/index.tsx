@@ -8,21 +8,22 @@ import axiosInstance from '../../../axios/axiosInstance';
 import { isMobile, isTablet } from 'react-device-detect';
 import routes from '../../../components/Helpers/Routes';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { startCase } from 'lodash';
+import { camelCase, startCase } from 'lodash';
 import { fetch_salesOrder_product_fields } from '../../../components/SalesOrder/helper';
 import PreviewDownload from 'src/components/PreviewDownload';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { useData } from 'src/StateProvider/Provider';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
-const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, renderedFrom, stepFullScreen }) => {
+const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, stepFullScreen }) => {
+
+  const renderedFrom = `${camelCase(routes?.salesOrder.title)}_Invoice`;
 
   const { state: { permissions } }: any = useData();
 
   const [columns, setColumns] = useState(null);
 
   const { state, dispatch } = useTableReducer();
-  const { dataRows, selectedRecords } = state;
 
   const { generateColumns } = useColumns();
 
@@ -43,9 +44,8 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, renderedFrom, s
       {
         accessor: 'index',
         Header: 'Index',
-        width: 120,
+        width: 100,
         sticky: 'left',
-        disableFilters: false,
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
@@ -55,7 +55,6 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, renderedFrom, s
         accessor: 'type',
         Header: 'Type',
         width: 100,
-        disableFilters: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => {
           return row.original?.type ? (
@@ -70,9 +69,8 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, renderedFrom, s
       {
         accessor: 'detail',
         Header: 'Detail',
-        minWidth: 300,
-        disabled: true,
         width: 300,
+        sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => {
           return row.original?.detail ? (
             <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -114,7 +112,7 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, renderedFrom, s
           {
             accessor: 'leadTime',
             Header: 'Lead Time (Days)',
-            Cell: ({ row }) => (row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0),
+            Cell: ({ row }) => <div>{(row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0)}</div>,
             Footer: (info) => {
               let rows = info.table.getExpandedRowModel().rows;
               const total = rows?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
@@ -160,7 +158,6 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, renderedFrom, s
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qty = parent.qty;
-      parent.isValid = true;
       parent.subRows = generateNestedData(data.material, parent);
     });
 
@@ -170,7 +167,8 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, renderedFrom, s
 
   const generateNestedData = (material, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
-    subRows.forEach((_subRow, j) => {
+    subRows.forEach((_subRow, index) => {
+      _subRow.index = parent.index + '.' + `${index + 1}`;
       _subRow.detail = _subRow.type === MATERIAL_TYPE.product ? _subRow.productDetail?.productName
         : _subRow.type === MATERIAL_TYPE.service ? _subRow.serviceDetail?.serviceName
           : _subRow.packageDetail?.packageName
@@ -184,7 +182,6 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, renderedFrom, s
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qty = `${parent.qty * _subRow.qty} `;
-      _subRow.isValid = true;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
     return subRows;
@@ -208,7 +205,6 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, renderedFrom, s
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
               columns={columns}
               state={state}
-              setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
               dispatch={dispatch}
               renderedFrom={renderedFrom}
               isClientSideGrid={true}

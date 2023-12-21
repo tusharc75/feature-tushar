@@ -349,17 +349,15 @@ const InvoiceDetails = () => {
               <Material
                 invoiceData={invoiceData}
                 setNextStep={setNextStep}
-                renderedFrom={`${renderedFrom}_grid-1`}
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={allowedToEdit && permissions?.invoice?.isUpdate ? true : false}
-                fetchInvoiceData={fetchInvoiceData}
               />
             )}
             {currentStep === 1 && invoiceData && (
               <AdditionalCost
                 invoiceData={invoiceData}
                 setNextStep={setNextStep}
-                renderedFrom={`${renderedFrom}_grid-2`}
+                stepFullScreen={stepFullScreen}
               />
             )}
             {currentStep === 2 && invoiceData && (
@@ -369,7 +367,6 @@ const InvoiceDetails = () => {
                 handleChangeStatus={handleChangeStatus}
                 stepFullScreen={stepFullScreen}
                 statusOptions={statusOptions}
-                renderedFrom={`${renderedFrom}_grid-5`}
               />
             )}
           </ContentFullScreen>
