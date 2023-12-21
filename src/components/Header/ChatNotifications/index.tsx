@@ -33,9 +33,9 @@ const ChatNotification = () => {
   const isNotificationOpen = Boolean(anchorEl);
   const [notificationList, setNotificationList] = useState([]);
   const [notificationData, setNotificationData] = useState({
-    all: [],
-    unread: [],
-    history: []
+    [tabOptions[0]]: [],
+    [tabOptions[1]]: [],
+    [tabOptions[2]]: []
   });
 
   const [isLoading, setIsLoading] = useState(false);
