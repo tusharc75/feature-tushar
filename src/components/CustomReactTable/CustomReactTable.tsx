@@ -150,6 +150,7 @@ const CustomReactTable = ({
           dispatch({ type: 'updateColumnState', colState: selectedReportView?.columnState });
         } else {
           setColumnOrder(newColumns.map((m) => m?.id ?? m?.accessor));
+          setHiddenColumns(newColumns?.filter((e) => e?.show === false).map((m) => m?.id ?? m?.accessor));
         }
       } else {
         let gridMetaData = getDataFromLocalStorage();
