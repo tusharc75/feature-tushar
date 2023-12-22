@@ -80,7 +80,6 @@ const SendOutboundMessage = () => {
       .get(`/field?resource=${sidebarResource.outboundMessage}`)
       .then(({ data: { data } }) => {
         let newColumns = generateColumns(renderedFrom, data, null, true);
-
         setColumns([...customColumns, ...newColumns]);
       });
   };
@@ -115,14 +114,10 @@ const SendOutboundMessage = () => {
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-
-    axiosInstance()
-      .get(`/iot-out-bound-message${queryString}`)
+    axiosInstance().get(`/iot-out-bound-message${queryString}`)
       .then(({ data: { data, count } }) => {
         const rows = data?.map((d) => {
           delete d?.outboundMessageDetail?._id;
-          delete d?.outboundMessageDetail?.brand;
-          delete d?.outboundMessageDetail?.createdBy;
           return {
             _id: d?._id,
             serializedAsset: d?.serializedAsset?.optionLabel,
@@ -187,21 +182,6 @@ const SendOutboundMessage = () => {
     <section className="main-container-v1">
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[routes.sendOutboundMessage]} />
-        {/* <ImportExportLinks
-        permissions={{ isCreate: true, isUpdate: true, isRead: true }}
-        module={routes.supportTicket.title}
-        api={routes.supportTicket.path}
-        afterImportCompleted={() => {}}
-        isExportAllOrSomeFeature={true}
-        total={rowCount}
-        recordsToExport={selectedRecords?.length}
-        ids={selectedRecords?.map((obj) => obj._id)}
-        onExportToExcelSuccess={() => {
-          fetchData();
-        }}
-        additionalParams={`${getQueryString(true)}&ignoreInternalFields=${true}`}
-        onlyExport={true}
-      /> */}
       </div>
       <CustomContainer>
         <div className="header-panel">
@@ -257,7 +237,6 @@ const SendOutboundMessage = () => {
           </Box>
         )}
       </CustomContainer>
-
       {manageSendOutBoundMessageDialog && (
         <ManageSendOutboundMessage
           assetId={selectedSerializedAsset?.optionValue || null}
