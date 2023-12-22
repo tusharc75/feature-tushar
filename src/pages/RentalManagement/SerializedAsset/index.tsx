@@ -9,7 +9,7 @@ import { Delete } from '@material-ui/icons';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import AddSerializedAsset from './AddSerializedAsset';
-import { rentalManagement, sidebarResource, treeToFlatArray, ASSET_STATUS, TRANSFER_ASSET_STATUS } from '../../../constants/helpers';
+import { rentalManagement, sidebarResource, treeToFlatArray, ASSET_STATUS, TRANSFER_ASSET_STATUS, MATERIAL_TYPE } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import ManagePurchaseOrder from '../../PurchaseOrder/ManagePurchaseOrder';
@@ -349,10 +349,10 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
       rows.forEach((parent, i) => {
         parent.index = i + 1;
         parent.detail = `${parent.type === 'service'
-            ? parent?.serviceDetail?.serviceName
-            : parent.type === 'product'
-              ? parent?.productDetail?.productName
-              : parent?.packageDetail?.packageName
+          ? parent?.serviceDetail?.serviceName
+          : parent.type === 'product'
+            ? parent?.productDetail?.productName
+            : parent?.packageDetail?.packageName
           }`;
         parent.description =
           parent.type === 'service'
@@ -398,7 +398,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             ? parent.assetAssignedQty
             : parent.subRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetAssignedQty + sum, 0) +
             (parent.type === 'product' ? parent?.subRows.filter((d) => d.type === 'asset')?.length : 0);
-        parent.isValid = parent.serializedProduct
+        parent.isValid = parent.serializedProduct && !parent.subRows?.find((e) => e.type === MATERIAL_TYPE.product && !e.serializedProduct)
           ? parent.assetAssignedQty === parent.assetQty
             ? true
             : false
@@ -562,7 +562,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           ? _subRow.assetQty
           : tempSubRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetQty + sum, 0) +
           (_subRow.type === 'product' ? _subRow.assetQty : 0);
-      _subRow.isValid = _subRow.serializedProduct
+      _subRow.isValid = _subRow.serializedProduct && !_subRow.subRows?.find((e) => e.type === MATERIAL_TYPE.product && !e.serializedProduct)
         ? _subRow.assetAssignedQty === _subRow.assetQty
           ? true
           : false
@@ -987,7 +987,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                 dispatch={dispatch}
                 setWholeRowsCellColor={(rowData) => {
                   if (!rowData.isValid) return 'error';
-                
+
                   return '';
                 }}
                 refreshGrid={fetchData}
