@@ -11,6 +11,8 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { Autocomplete } from '@material-ui/lab';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import routes from 'src/components/Helpers/Routes';
+import { uniqBy } from 'lodash';
 
 const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -18,6 +20,7 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [serializedAssetOptions, setSerializedAssetOptions] = useState([]);
   const [outBoundMessageOptions, setOutBoundMessageOptions] = useState([]);
+  const [outBoundMessageTypeOptions, setOutBoundMessageTypeOptions] = useState([]);
 
   useEffect(() => {
     axiosInstance()
@@ -38,7 +41,11 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
         }
       })
       .then(({ data: { data } }) => {
-        setOutBoundMessageOptions(data?.map((d) => ({ optionLabel: `${d?.outboundMessageNumber} - ${d?.description}`, optionValue: d?._id })));
+        const aa = uniqBy(data, 'type');
+        setOutBoundMessageTypeOptions(uniqBy(data, 'type')?.map((d: any) => d?.type));
+        setOutBoundMessageOptions(
+          data?.map((d) => ({ type: d?.type, optionLabel: `${d?.outboundMessageNumber} - ${d?.description}`, optionValue: d?._id }))
+        );
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -71,7 +78,7 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
   };
   return (
     <Dialog
-      maxWidth="xs"
+      maxWidth="sm"
       fullWidth
       fullScreen={fullScreen || isMobile || isTablet}
       TransitionComponent={CustomDialogTransition}
@@ -123,7 +130,7 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
                             {...params}
                             margin="dense"
                             name="serializedAsset"
-                            label="Serialized Asset"
+                            label={routes.serializedAsset.title}
                             variant="outlined"
                             error={Boolean(errors['serializedAsset'])}
                             helperText={errors && errors['serializedAsset']}
@@ -135,7 +142,27 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
                     </Grid>
                     <Grid item md={12} lg={12} sm={12}>
                       <Autocomplete
-                        options={outBoundMessageOptions}
+                        options={outBoundMessageTypeOptions}
+                        getOptionLabel={(option: any) => option || ''}
+                        value={
+                          outBoundMessageTypeOptions?.filter((data) => values['messageType'] === data).length
+                            ? outBoundMessageTypeOptions?.find((data) => values['messageType'] === data)
+                            : null
+                        }
+                        onChange={(e, val) => {
+                          setFieldValue('messageType', val);
+                          setFieldValue('messageValue', null)
+                        }}
+                        renderInput={(params) => (
+                          <TextField {...params} margin="dense" name="messageType" label="Message Type" variant="outlined" fullWidth />
+                        )}
+                      />
+                    </Grid>
+                    <Grid item md={12} lg={12} sm={12}>
+                      <Autocomplete
+                        options={
+                          values?.messageType ? outBoundMessageOptions?.filter((o) => o?.type === values?.messageType) : outBoundMessageOptions
+                        }
                         getOptionLabel={(option: any) => option?.optionLabel || ''}
                         getOptionSelected={(option: any, val) => option?.optionValue === val}
                         value={
@@ -178,7 +205,7 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
                     submitForm();
                   }}
                 >
-                  Save
+                  Send
                 </CustomButton>
               </CustomDialogFooter>
             </Fragment>

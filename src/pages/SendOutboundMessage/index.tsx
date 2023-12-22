@@ -12,10 +12,11 @@ import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
-import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { dateTimeFormat, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import { Autocomplete } from '@material-ui/lab';
 import ManageSendOutboundMessage from './manageSendOutboundMessage';
+import moment from 'moment';
 
 let searchTimeout;
 
@@ -24,7 +25,7 @@ const SendOutboundMessage = () => {
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer();
-  const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { page, limit, search, filters, sorting } = state;
   const { generateColumns } = useColumns();
 
   const {
@@ -41,24 +42,37 @@ const SendOutboundMessage = () => {
     fetchGridColumns();
   }, []);
 
-  const serializedAssetColumn = [
+  const customColumns = [
     {
       accessor: 'serializedAsset',
-      Header: 'Serialized Asset',
+      Header: routes.serializedAsset.title,
       Cell: ({ row }) =>
         row?.original?.serializedAsset ? (
-          <h5
-            className="link text-truncate"
-            onClick={() => {
-              window.open(`${routes.serializedAssetDetail.path}/${row?.original?.serializedAssetId}`);
-            }}
-          >
-            {row?.original?.serializedAsset}
-          </h5>
+          <div>
+            <h5
+              className="link text-truncate"
+              onClick={() => {
+                window.open(`${routes.serializedAssetDetail.path}/${row?.original?.serializedAssetId}`);
+              }}
+            >
+              {row?.original?.serializedAsset}
+            </h5>
+          </div>
         ) : (
           <NoDataCell />
         )
-    }
+    },
+    {
+      accessor: 'date',
+      Header: 'Date',
+      disableFilters: true,
+      Cell: ({ row }) => (row?.original?.date ? <h5 className="text-truncate">{moment(row?.original?.date)?.format(dateTimeFormat)}</h5> : <NoDataCell />)
+    },
+    {
+      accessor: 'user',
+      Header: 'User',
+      Cell: ({ row }) => (row?.original?.user ? <h5 className="text-truncate">{row?.original?.user}</h5> : <NoDataCell />)
+    },
   ];
 
   const fetchGridColumns = () => {
@@ -67,7 +81,7 @@ const SendOutboundMessage = () => {
       .then(({ data: { data } }) => {
         let newColumns = generateColumns(renderedFrom, data, null, true);
 
-        setColumns([...serializedAssetColumn, ...newColumns]);
+        setColumns([...customColumns, ...newColumns]);
       });
   };
 
@@ -96,7 +110,7 @@ const SendOutboundMessage = () => {
     if (renderCount > 1) {
       fetchData();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly, selectedSerializedAsset]);
+  }, [page, limit, filters, sorting, selectedEntity, selectedSerializedAsset]);
 
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
@@ -113,6 +127,8 @@ const SendOutboundMessage = () => {
             _id: d?._id,
             serializedAsset: d?.serializedAsset?.optionLabel,
             serializedAssetId: d?.serializedAsset?.optionValue,
+            date: d?.date,
+            user: d?.user?.optionLabel,
             ...d?.outboundMessageDetail
           };
         });
@@ -160,9 +176,6 @@ const SendOutboundMessage = () => {
     if (search) {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
-    if (showFilteredRecordsOnly) {
-      deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
-    }
     return deepFilter;
   };
 
@@ -204,7 +217,7 @@ const SendOutboundMessage = () => {
                   setSelectedSerializedAsset(val);
                 }}
                 renderInput={(params) => (
-                  <TextField {...params} margin="dense" name={'serializedAsset'} label={'Serialized Asset'} variant="outlined" />
+                  <TextField {...params} margin="dense" name={'serializedAsset'} label={routes.serializedAsset.title} variant="outlined" />
                 )}
               />
             </div>
@@ -235,7 +248,8 @@ const SendOutboundMessage = () => {
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             refreshGrid={fetchData}
-            showOnlyShowFilteredRecordSwitch={true}
+            hideAction={true}
+            hideSelection={true}
           />
         ) : (
           <Box p={2} height={500}>
