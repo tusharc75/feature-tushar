@@ -469,7 +469,6 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
                 fetchData();
               }}
               isExportAllOrSomeFeature={true}
-              // ids={[]}
               recordsToExport={selectedRecords.length}
               ids={selectedRecords?.length ? selectedRecords?.map((obj) => obj._id) : []}
             />
