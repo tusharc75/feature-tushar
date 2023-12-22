@@ -49,7 +49,7 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
     var data = response?.data?.data;
     data = CURReplaceByCurrencySingle(data, jobData?.currency);
     setAllFields(JSON.parse(JSON.stringify(data)));
-    const newColumns = generateColumns(renderedFrom , data, null, false, jobData?.currency);
+    const newColumns = generateColumns(renderedFrom, data, null, false, jobData?.currency);
 
     let coloum: any = [
       {
@@ -57,7 +57,7 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
         Header: 'Index',
         width: 100,
         sticky: 'left',
-        disableFilters : false,
+        disableFilters: false,
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
@@ -67,7 +67,7 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
         accessor: 'detail',
         Header: 'Detail',
         minWidth: 300,
-        disable : true,
+        disable: true,
         width: 300,
         Cell: ({ row, table }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -343,10 +343,9 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
           <CustomReactTable
             height={'calc(100vh - 395px)'}
             columns={columns}
-            state = {state}
-            dispatch = {dispatch}
-            setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
-            refreshGrid = {fetchJobData}
+            state={state}
+            dispatch={dispatch}
+            refreshGrid={fetchJobData}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
             onSaveEdit={onSaveInlineEdit}

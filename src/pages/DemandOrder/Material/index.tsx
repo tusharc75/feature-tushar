@@ -460,7 +460,6 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
             <CustomReactTable
               height={'calc(100vh - 345px)'}
               columns={columns}
-              setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
               onSelect={setSelectedRecords}
               renderedFrom={renderedFrom}
               isClientSideGrid={true}
