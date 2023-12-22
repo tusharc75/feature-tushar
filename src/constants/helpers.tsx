@@ -2345,7 +2345,6 @@ export const REPORT_LIST = [
   {
     title: 'Number Of Assets by Status',
     permission: 'serializedAsset',
-    // key: 'purchaseOrderType',
     key: 'standardReport',
     type: 'numberOfAssetsByStatus'
   },
@@ -2354,6 +2353,12 @@ export const REPORT_LIST = [
     permission: 'serializedAsset',
     key: 'standardReport',
     type: 'assetUtilization'
+  },
+  {
+    title: 'Asset Stat',
+    permission: 'serializedAsset',
+    key: 'standardReport',
+    type: 'serializedAssetStat'
   },
   {
     title: 'User Session',

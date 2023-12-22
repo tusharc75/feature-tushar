@@ -4,7 +4,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import BuildIcon from '@material-ui/icons/Build';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import { Skeleton } from '@material-ui/lab';
-import { startCase } from 'lodash';
+import { round, startCase } from 'lodash';
 import moment from 'moment';
 import queryString from 'query-string';
 import React, { useContext, useEffect, useState } from 'react';
@@ -86,10 +86,14 @@ const SerializedAssetDetailsPage = () => {
         data: { data }
       } = await axiosInstance().post(`${serializedAsset.api}/inventory-stats`, { ids: [id] });
       if (data.totalUtilization) {
-        data.totalUtilization = Math.floor(moment.duration(data.totalUtilization).asHours());
-        if (data.totalUtilization) {
-          data.totalUtilization = `${data.totalUtilization} hours`;
-        }
+        data[`totalUtilizationDays`] = round(moment.duration(data.totalUtilization).asDays());
+        data[`totalUtilizationHours`] = `${round(moment.duration(data?.totalUtilization).asHours())}:${Math.floor(moment.duration(data?.totalUtilization).asMinutes() % 60)}`;
+        delete data?.totalUtilization
+      }
+      if (data.totalInUseTimeAfterLastRepair) {
+        data[`totalInUseTimeAfterLastRepairDays`] = round(moment.duration(data.totalInUseTimeAfterLastRepair).asDays());
+        data[`totalInUseTimeAfterLastRepairHours`] = `${round(moment.duration(data?.totalInUseTimeAfterLastRepair).asHours())}:${Math.floor(moment.duration(data?.totalInUseTimeAfterLastRepair).asMinutes() % 60)}`;
+        delete data?.totalInUseTimeAfterLastRepair
       }
       handleMainPoints(data);
     } catch (error) {
@@ -405,7 +409,7 @@ const SerializedAssetDetailsPage = () => {
           )}
         </Tabs>
         <TabPanel value={tabValue} index={0}>
-          {assetDetails && <DetailsPageHeader  mainPoints={mainPoints} />}
+          {assetDetails && <DetailsPageHeader mainPoints={mainPoints} />}
           <Box>
             {loading || !fields.length ? (
               <Grid container spacing={2} style={{ padding: '8px' }}>
