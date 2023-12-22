@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Grid, useTheme, Button, Box } from '@material-ui/core';
 import { camelCase } from 'lodash';
@@ -37,9 +37,9 @@ const IotReport = () => {
   const [selectedReportView, setSelectedReportView] = React.useState(null);
   const [filterQuery, setFilterQuery] = useState({});
   const [columns, setColumns] = React.useState(null);
-  const [gridApi, setGridApi] = React.useState(null);
-  const [state, dispatch] = React.useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, sorting, search, limit, filters, pageSizes } = state;
+
+  const { state, dispatch } = useTableReducer();
+  const { page, sorting, search, limit, filters, pageSizes } = state;
 
   const fetchReportObj = () => {
     for (const key in routes) {
@@ -60,28 +60,6 @@ const IotReport = () => {
       fetchResourceData();
     }
   }, [page, sorting, search, limit, filters, pageSizes, selectedEntity]);
-
-  // const handleColumns = (cols) => {
-  //   let columns = [];
-  //   let rendererNames = ['commonRenderer', 'dateTimeRenderer'];
-  //   cols?.forEach((e) => {
-  //     columns.push({
-  //       field: e.fieldName,
-  //       headerName: e.fieldLabel,
-  //       show: true,
-  //       disabled: false,
-  //       cellRenderer: e.fieldName === 'time' ? 'dateTimeRenderer' : 'commonRenderer',
-  //       filter: true,
-  //       sortable: false
-  //     });
-  //   });
-  //   let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-  //   tempFrameworkComponent = {
-  //     ...tempFrameworkComponent
-  //   };
-  //   setFrameWorkComponent({ ...tempFrameworkComponent });
-  //   setColumns([...columns]);
-  // };
 
   const handleColumns = (cols) => {
     let columns = [];
@@ -130,22 +108,6 @@ const IotReport = () => {
     setLoadingData(true);
     setColumns(null);
     let filterQuery = getFilter();
-
-    const query = getFilter(true);
-    const prevQ = prevQuery.current;
-
-    if (query === prevQ && memoData.current.data.length) {
-      dispatch({ type: 'loading', loading: true });
-      const { data, count } = memoData.current;
-      const processedData = frontendPagination(data);
-      dispatch({ type: 'initialize', data: processedData, count: count });
-      dispatch({ type: 'loading', loading: false });
-      setShowGrid(true);
-      return;
-    }
-
-    prevQuery.current = query;
-
     if (cancelTokenSource) {
       cancelTokenSource.cancel();
     }
@@ -168,18 +130,19 @@ const IotReport = () => {
           return finalObject;
         });
         dispatch({ type: 'initialize', data: processedData, count: count });
-        setShowGrid(true);
-      })
-      .catch((err) => {
-        if (!axios.isCancel(err)) {
-          toastConfig.setToastConfig(err);
-        }
-      })
-      .finally(() => {
         setLoadingData(false);
+        setShowGrid(true);
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
+      })
+      .catch((err) => {
+        if (!axios.isCancel(err)) {
+          setTimeout(() => {
+            dispatch({ type: 'loading', loading: false });
+          }, gridLoadingTimeout);
+          toastConfig.setToastConfig(err);
+        }
       });
   };
 
