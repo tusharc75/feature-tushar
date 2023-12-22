@@ -162,7 +162,7 @@ export default function Attachment() {
         ) : (
           <NoDataCell />
         );
-      }      
+      }
     },
     {
       id: 'createdBy',
@@ -809,7 +809,6 @@ export default function Attachment() {
               dispatch={dispatch}
               state={state}
               expander={true}
-              setWholeRowsCellColor={() => { }}
               renderedFrom={'attachment_render'}
               fetchChildAttachment={fetchChildAttachment}
               refreshGrid={fetchAttachments}

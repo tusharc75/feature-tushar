@@ -294,7 +294,6 @@ function Parts({ id }) {
             state={state}
             dispatch={dispatch}
             refreshGrid={fetchBOMData}
-            setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
             onSaveEdit={onSaveInlineEdit}

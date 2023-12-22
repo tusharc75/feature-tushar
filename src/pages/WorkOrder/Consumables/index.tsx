@@ -546,7 +546,6 @@ const Consumables = ({
               columns={columns}
               state={state}
               dispatch={dispatch}
-              setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
               refreshGrid={fetchData}
               onSaveEdit={onSaveInlineEdit}
               renderedFrom={renderedFrom}

@@ -174,7 +174,7 @@ const Product = () => {
                   history.push(`${routes.productDetail.path}/${row?.original._id}/bom`, { productName: row?.original.productName });
                 }}
               >
-                <RiBillLine color={permissions?.product?.isUpdate ? 'primary' : 'disabled'} />
+                <RiBillLine fontSize={'20px'} color={permissions?.product?.isUpdate ? 'primary' : 'disabled'} />
               </IconButton>
             </span>
           </HtmlTooltip>
