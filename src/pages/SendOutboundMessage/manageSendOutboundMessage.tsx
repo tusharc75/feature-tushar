@@ -21,6 +21,7 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
   const [serializedAssetOptions, setSerializedAssetOptions] = useState([]);
   const [outBoundMessageOptions, setOutBoundMessageOptions] = useState([]);
   const [outBoundMessageTypeOptions, setOutBoundMessageTypeOptions] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     axiosInstance()
@@ -53,15 +54,18 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
   }, []);
 
   const handleSubmit = (values) => {
+    setIsSubmitting(true)
     axiosInstance()
       .post(`/iot-out-bound-message`, {
         asset: values['serializedAsset'],
         message: values['messageValue']
       })
       .then(() => {
+        setIsSubmitting(false)
         onSuccess();
       })
       .catch((error) => {
+        setIsSubmitting(false)
         toastConfig.setToastConfig(error);
       });
   };
@@ -76,6 +80,7 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
     }
     return error;
   };
+
   return (
     <Dialog
       maxWidth="sm"
@@ -196,10 +201,10 @@ const ManageSendOutboundMessage = ({ assetId, onSuccess, onClose }) => {
                   Cancel
                 </Button>
                 <CustomButton
-                  loading={false}
+                  loading={isSubmitting}
+                  disabled={isSubmitting}
                   variant="contained"
                   color="primary"
-                  disabled={false}
                   onClick={(e) => {
                     e.preventDefault();
                     submitForm();
